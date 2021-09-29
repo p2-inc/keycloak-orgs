@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, ClipboardCopy, FileUpload, Form, FormGroup, InputGroup, TextArea, TextInput, Wizard } from '@patternfly/react-core';
+import { Button, Card, CardBody, ClipboardCopy, FileUpload, Form, FormGroup, InputGroup, TextArea, TextInput, Wizard } from '@patternfly/react-core';
 
 class IncrementallyEnabledStepsWizard extends React.Component {
   constructor(props) {
@@ -22,22 +22,20 @@ class IncrementallyEnabledStepsWizard extends React.Component {
 
     const steps = [
       { id: 1, name: 'First step', component: <><p>Step 1 content</p>
-        <Form>
-        <FormGroup label="Copy this" fieldId="copy-form">
+        <Card><CardBody><Form><FormGroup label="Copy this" fieldId="copy-form">
         <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied">This is NOT editable</ClipboardCopy>
-        </FormGroup>
-        <FormGroup label="Input here" fieldId="input-form">
+        </FormGroup></Form></CardBody></Card>
+        <Card><CardBody><Form><FormGroup label="Input here" fieldId="input-form">
         <InputGroup>
           <TextInput name="textarea2" id="textarea2" aria-label="textarea with button" />
           <Button id="textAreaButton2" variant="control">
             Button
           </Button>
         </InputGroup>
-        </FormGroup>
-        <FormGroup label="Upload here" fieldId="file-form">
+        </FormGroup></Form></CardBody></Card>
+        <Card><CardBody><Form><FormGroup label="Upload here" fieldId="file-form">
         <FileUpload id="simple-file" filenamePlaceholder="Drag and drop a file or upload one" browseButtonText="Upload" />
-        </FormGroup>
-        </Form>
+        </FormGroup></Form></CardBody></Card>
         </>
      },
       { id: 2, name: 'Second step', component: <p>Step 2 content</p>, canJumpTo: stepIdReached >= 2 },
