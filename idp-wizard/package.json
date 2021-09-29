@@ -79,6 +79,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@patternfly/patternfly": "^4.135.2",
     "@patternfly/react-core": "^4.128.2",
     "@patternfly/react-icons": "^4.10.11",
     "@patternfly/react-styles": "^4.10.11",
