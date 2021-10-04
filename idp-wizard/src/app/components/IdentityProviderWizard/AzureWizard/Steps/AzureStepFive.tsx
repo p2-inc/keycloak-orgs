@@ -33,7 +33,6 @@ export function AzureStepFive() {
           <br />
           Download the certificate (Base64) from Step 3 and upload it below.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep13Image} alt="Step 5.1" className="step-image" />
@@ -42,20 +41,12 @@ export function AzureStepFive() {
         <Text component={TextVariants.h2}>
           <br />
         </Text>
-        <hr />
-      </StackItem>
-      <StackItem>
-        <img src={azureStep13Image} alt="Step 5.2" className="step-image" />
       </StackItem>
       <StackItem>
         <Card>
           <CardBody>
             <Form>
-              <FormGroup
-                label="Certificate (Base64)"
-                fieldId="file-form"
-                helperText="Upload a .cer, .cert, .key, .pem file"
-              >
+              <FormGroup label="Certificate (Base64)" fieldId="file-form">
                 <FileUpload
                   id="simple-file"
                   value={value}

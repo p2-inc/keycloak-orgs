@@ -24,7 +24,6 @@ export function AzureStepSix() {
           <br />
           Copy the Login URL from Step 4 and enter it below.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep14Image} alt="Step 6.1" className="step-image" />

@@ -25,7 +25,6 @@ export function AzureStepTwo() {
           <br />
           Click the Edit icon in the top right of the first step.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep5Image} alt="Step 2.1" className="step-image" />
@@ -52,7 +51,6 @@ export function AzureStepTwo() {
           Submit the identifier and the Reply URL in the Basic SAML
           Configuration.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep6Image} alt="Step 2.2" className="step-image" />

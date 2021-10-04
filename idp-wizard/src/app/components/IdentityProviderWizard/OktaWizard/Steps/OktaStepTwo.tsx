@@ -23,7 +23,6 @@ export const OktaStepTwo: FC = () => {
           <br />
           Enter your LDAP administrator credentials
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <Card>

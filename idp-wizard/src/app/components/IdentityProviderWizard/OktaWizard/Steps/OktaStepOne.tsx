@@ -38,7 +38,6 @@ export const OktaStepOne: FC = () => {
           If you have not already, add LDAP Interface from the Okta Directory //
           Integration section.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={oktaStep2Image} alt="Step 1.2" />
@@ -48,7 +47,6 @@ export const OktaStepOne: FC = () => {
           <br />
           Note the Settings and input them below.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <Card>

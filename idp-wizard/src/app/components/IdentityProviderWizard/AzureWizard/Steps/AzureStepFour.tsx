@@ -29,7 +29,6 @@ export function AzureStepFour() {
           Application. Select "Users and groups" from the "Manage" section of
           the navigations menu.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep9Image} alt="Step 4.1" className="step-image" />
@@ -39,7 +38,6 @@ export function AzureStepFour() {
           <br />
           Select "Add user/group" from the top menu.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep10Image} alt="Step 4.2" className="step-image" />
@@ -51,7 +49,6 @@ export function AzureStepFour() {
           select the users and groups of users that you want to add to the SAML
           application, and click "Select".
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep11Image} alt="Step 4.3" className="step-image" />
@@ -62,7 +59,6 @@ export function AzureStepFour() {
           Select "Assign" to add the selected users and groups of users to your
           SAML application.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep12Image} alt="Step 4.4" className="step-image" />

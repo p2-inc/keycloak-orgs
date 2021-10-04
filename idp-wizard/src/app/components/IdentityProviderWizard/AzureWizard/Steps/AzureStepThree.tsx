@@ -20,7 +20,6 @@ export function AzureStepThree() {
           <br />
           Click the Edit icon in the top right of the second step.
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep7Image} alt="Step 2.1" />
@@ -30,7 +29,6 @@ export function AzureStepThree() {
           <br />
           Fill in the following Attribute Statements and select "Next".
         </Text>
-        <hr />
       </StackItem>
       <StackItem>
         <img src={azureStep8Image} alt="Step 2.1" className="step-image" />

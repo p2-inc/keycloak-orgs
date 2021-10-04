@@ -17,7 +17,7 @@ import {
 import image from "@app/images/okta/okta-3.png";
 
 export const OktaStepThree: FC = () => {
-  const [groupList, setGroupList] = useState<string[]>(["Group 1", ""]);
+  const [groupList, setGroupList] = useState<string[]>([""]);
 
   const handleInputChange = (value, index) => {
     const list = [...groupList];
