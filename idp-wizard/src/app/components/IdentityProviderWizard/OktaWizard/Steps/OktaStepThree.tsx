@@ -17,13 +17,12 @@ import {
   ModalVariant,
 } from "@patternfly/react-core";
 import image from "@app/images/okta/okta-3.png";
-import { ArrowRightIcon } from "@patternfly/react-icons";
+import { ArrowRightIcon, TrashIcon } from "@patternfly/react-icons";
 
 export const OktaStepThree: FC = () => {
   const [groupList, setGroupList] = useState<string[]>([""]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleModalToggle = () => {};
   const handleInputChange = (value, index) => {
     const list = [...groupList];
     list[index] = value;
@@ -31,6 +30,16 @@ export const OktaStepThree: FC = () => {
       list.push("");
     }
 
+    setGroupList(list);
+  };
+
+  const onDelete = (id) => {
+    console.log(id);
+    const list = [...groupList];
+    const index = list.indexOf(id, 0);
+    if (index > -1) {
+      list.splice(index, 1);
+    }
     setGroupList(list);
   };
 
@@ -78,6 +87,9 @@ export const OktaStepThree: FC = () => {
                           aria-label="Group"
                           onChange={(value) => handleInputChange(value, i)}
                         />
+                        <div style={{ padding: "2px", marginLeft: "5px" }}>
+                          <TrashIcon onClick={() => onDelete(x)} color="red" />
+                        </div>
                       </InputGroup>
                     );
                   })}
