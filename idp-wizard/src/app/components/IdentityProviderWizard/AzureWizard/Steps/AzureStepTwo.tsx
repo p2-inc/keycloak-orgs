@@ -33,10 +33,20 @@ export function AzureStepTwo() {
         <Card>
           <CardBody>
             <Form>
-              <FormGroup label="Copy this" fieldId="copy-form">
+              <FormGroup label="Copy this identifier" fieldId="copy-form">
                 <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied">
                   https://auth.phasetwo.io/30945803490g90rg493040
                 </ClipboardCopy>
+              </FormGroup>
+            </Form>
+          </CardBody>
+        </Card>
+      </StackItem>
+      <StackItem>
+        <Card>
+          <CardBody>
+            <Form>
+              <FormGroup label="Copy this Reply URL" fieldId="copy-form">
                 <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied">
                   https://auth.phasetwo.io/sso/saml/acs/30945803490g90rg493040
                 </ClipboardCopy>
