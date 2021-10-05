@@ -49,9 +49,9 @@ export const OktaStepOne: FC = () => {
         </Text>
       </StackItem>
       <StackItem>
-        <Card>
+        <Card className="card-shadow" d>
           <CardBody>
-            <Form className="form-container">
+            <Form>
               <FormGroup
                 label="1. LDAP Host"
                 isRequired

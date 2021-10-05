@@ -43,7 +43,7 @@ export function AzureStepFive() {
         </Text>
       </StackItem>
       <StackItem>
-        <Card>
+        <Card className="card-shadow">
           <CardBody>
             <Form>
               <FormGroup label="Certificate (Base64)" fieldId="file-form">

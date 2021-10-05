@@ -115,7 +115,7 @@ export function AzureStepThree() {
         </Text>
       </StackItem>
       <StackItem>
-        <Card style={{ width: "1000px" }}>
+        <Card style={{ width: "1000px" }} className="card-shadow">
           <CardBody>
             <Form>
               <FormGroup fieldId="copy-form">

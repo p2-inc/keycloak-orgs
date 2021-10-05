@@ -30,7 +30,7 @@ export function AzureStepTwo() {
         <img src={azureStep5Image} alt="Step 2.1" className="step-image" />
       </StackItem>
       <StackItem>
-        <Card>
+        <Card className="card-shadow">
           <CardBody>
             <Form>
               <FormGroup label="Copy this identifier" fieldId="copy-form">
@@ -43,7 +43,7 @@ export function AzureStepTwo() {
         </Card>
       </StackItem>
       <StackItem>
-        <Card>
+        <Card className="card-shadow">
           <CardBody>
             <Form>
               <FormGroup label="Copy this Reply URL" fieldId="copy-form">

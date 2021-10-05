@@ -25,9 +25,9 @@ export const OktaStepTwo: FC = () => {
         </Text>
       </StackItem>
       <StackItem>
-        <Card>
+        <Card className="card-shadow">
           <CardBody>
-            <Form className="form-container">
+            <Form>
               <FormGroup
                 label="Okta Administrator Username"
                 isRequired

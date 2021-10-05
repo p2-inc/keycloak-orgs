@@ -29,7 +29,7 @@ export function AzureStepSix() {
         <img src={azureStep14Image} alt="Step 6.1" className="step-image" />
       </StackItem>
       <StackItem>
-        <Card>
+        <Card className="card-shadow">
           <CardBody>
             <Form>
               <FormGroup label="Login URL" fieldId="copy-form">
