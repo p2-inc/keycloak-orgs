@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 // import { PageSection, Title, Image } from '@patternfly/react-core';
 import oktaStep1Image from "@app/images/okta/okta-1.png";
 import oktaStep2Image from "@app/images/okta/okta-2.png";
@@ -19,10 +19,26 @@ import { css } from "@patternfly/react-styles";
 export const OktaStepOne: FC = () => {
   const customerIdentifier = "dev-32234-234";
 
-  const ldapValue = customerIdentifier + ".ldap.okta.com";
-  const ldapBaseDN = `dc=${customerIdentifier}, dc=okta, dc-com`;
-  const ldapUserBaseDN = `ou=users, dc=${customerIdentifier}, dc=okta, dc=com`;
-  const ldapGroupBaseDN = `ou=groups, dc=${customerIdentifier}, dc=okta, dc=com`;
+  const [ldapValue, setLDAPValue] = useState(
+    customerIdentifier + ".ldap.okta.com"
+  );
+  const [ldapBaseDN, setldapBaseDN] = useState(
+    `dc=${customerIdentifier}, dc=okta, dc-com`
+  );
+  const [ldapUserBaseDN, setldapUserBaseDN] = useState(
+    `ou=users, dc=${customerIdentifier}, dc=okta, dc=com`
+  );
+  const [ldapGroupBaseDN, setldapGroupBaseDN] = useState(
+    `ou=groups, dc=${customerIdentifier}, dc=okta, dc=com`
+  );
+
+  const handleLDAPValueChange = (value: string) => {
+    setLDAPValue(value);
+    const custIdentifer = value.split(".")[0];
+    setldapBaseDN(`dc=${custIdentifer}, dc=okta, dc-com`);
+    setldapUserBaseDN(`ou=users, dc=${custIdentifer}, dc=okta, dc=com`);
+    setldapGroupBaseDN(`ou=groups, dc=${custIdentifer}, dc=okta, dc=com`);
+  };
 
   return (
     <Stack hasGutter>
@@ -49,7 +65,7 @@ export const OktaStepOne: FC = () => {
         </Text>
       </StackItem>
       <StackItem>
-        <Card className="card-shadow" d>
+        <Card className="card-shadow">
           <CardBody>
             <Form>
               <FormGroup
@@ -65,6 +81,7 @@ export const OktaStepOne: FC = () => {
                   name="simple-form-name-01"
                   aria-describedby="simple-form-name-01-helper"
                   value={ldapValue}
+                  onChange={handleLDAPValueChange}
                 />
               </FormGroup>
               <FormGroup
