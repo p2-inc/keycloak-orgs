@@ -40,7 +40,7 @@ export const OktaStepOne: FC = () => {
         </Text>
       </StackItem>
       <StackItem>
-        <img src={oktaStep2Image} alt="Step 1.2" />
+        <img src={oktaStep2Image} alt="Step 1.2" className="step-image" />
       </StackItem>
       <StackItem>
         <Text component={TextVariants.h2}>
