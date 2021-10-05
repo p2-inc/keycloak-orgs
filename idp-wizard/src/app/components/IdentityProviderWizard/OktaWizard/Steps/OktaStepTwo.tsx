@@ -66,7 +66,7 @@ export const OktaStepTwo: FC<Props> = (props) => {
               >
                 <TextInput
                   isRequired
-                  type="text"
+                  type="password"
                   id="simple-form-name-02"
                   name="simple-form-name-02"
                   value={password}
