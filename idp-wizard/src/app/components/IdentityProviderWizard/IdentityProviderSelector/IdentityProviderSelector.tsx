@@ -28,7 +28,7 @@ export const IdentityProviderSelector: FC = () => {
   const idpList: idpType[] = [
     {
       name: "Azure",
-      imageSrc: azureLogo, //imageDirectory + "azure_logo.png",
+      imageSrc: azureLogo,
       active: true,
     },
     { name: "Okta", imageSrc: oktaLogo, active: true },
@@ -99,7 +99,9 @@ export const IdentityProviderSelector: FC = () => {
                 text={idp.name}
                 image={idp.imageSrc}
                 active={idp.active}
-                onSelect={() => setProviders(idp.name, idp.imageSrc)}
+                onSelect={() =>
+                  idp.active && setProviders(idp.name, idp.imageSrc)
+                }
               />
             );
           })}

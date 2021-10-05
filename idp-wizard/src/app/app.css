@@ -117,8 +117,14 @@ html, body, #root {
   width: auto;
   height: auto;
 }
+.idp-button:hover {
+  box-shadow: 0 0 11px rgba(33,33,33,.2); 
+}
 
 .disabled {
   cursor: default;
   filter: grayscale(1.0);
+}
+.disabled:hover {
+  box-shadow: 0 0 0 ;
 }

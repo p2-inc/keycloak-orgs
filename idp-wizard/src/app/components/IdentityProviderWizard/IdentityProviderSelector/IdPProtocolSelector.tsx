@@ -1,14 +1,21 @@
 import React, { FC } from "react";
 import { IdPButton } from "./components/IdPButton";
-import samlLogo from "@app/images/saml-logo.png";
-import ldapLogo from "@app/images/ldap-logo.jpeg";
+import samlLogo from "@app/bgimages/logos/saml_logo.png";
+import openIDLogo from "@app/bgimages/logos/openid_logo.png";
+import ldapLogo from "@app/bgimages/logos/ldap_logo.png";
 import { useHistory } from "react-router-dom";
-import { ArrowLeftIcon } from "@patternfly/react-icons";
+import { ArrowLeftIcon, OpenidIcon } from "@patternfly/react-icons";
 
 interface ProtocolProps {
   selectedProtocol: string;
   selectedProtocolImage: string;
   goBack: () => void;
+}
+
+interface ProtocolType {
+  name: string;
+  imageSrc: string;
+  active: boolean | false;
 }
 
 export const IdPProtocolSelector: FC<ProtocolProps> = ({
@@ -20,6 +27,24 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
   const goToProviderSetup = () => {
     selectedProtocol && history.push(`/${selectedProtocol.toLowerCase()}`);
   };
+
+  const idpProtocolList: ProtocolType[] = [
+    {
+      name: "SAML",
+      imageSrc: samlLogo,
+      active: selectedProtocol === "Azure",
+    },
+    {
+      name: "OpenID",
+      imageSrc: openIDLogo,
+      active: selectedProtocol === "None",
+    },
+    {
+      name: "LDAP",
+      imageSrc: ldapLogo,
+      active: selectedProtocol === "Okta",
+    },
+  ];
 
   return (
     <div className="container">
@@ -47,7 +72,17 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
           demo.phasetwo.io.{" "}
         </h3>
         <div className="selection-container">
-          {selectedProtocol === "Azure" && (
+          {idpProtocolList.map((item) => {
+            return (
+              <IdPButton
+                text={item.name}
+                image={item.imageSrc}
+                active={item.active}
+                onSelect={() => goToProviderSetup()}
+              />
+            );
+          })}
+          {/* {selectedProtocol === "Azure" && (
             <IdPButton
               text="SAML"
               image={samlLogo}
@@ -62,7 +97,7 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
               active={true}
               onSelect={() => goToProviderSetup()}
             />
-          )}
+          )} */}
           {/* <IdPButton text="Okta" image={oktaImage} provider="okta" /> */}
         </div>
       </div>
