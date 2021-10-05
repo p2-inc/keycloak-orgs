@@ -3,8 +3,11 @@ html, body, #root {
 }
 
 .step-image {
-  max-width: 80%;
-  border: 1px solid lightgray
+  max-width: 70%;
+  border: 2px solid lightgray;
+  padding-left: 20x;
+  margin-left: 20px;
+  border-radius: 5px;
 }
 
 hr {
@@ -14,6 +17,7 @@ hr {
   background: #333;
   /* background-image: linear-gradient(to right, #ccc, #333, #ccc); */
 }
+
 
 .navbar-sidebar, .navbar-sidebar__backdrop {
   bottom: 0;
