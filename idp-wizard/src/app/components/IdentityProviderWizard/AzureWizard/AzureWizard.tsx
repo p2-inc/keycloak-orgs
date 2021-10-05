@@ -90,9 +90,6 @@ export const AzureWizard: FC = () => {
           <FlexItem>
             <img className="step-header-image" src={azureLogo} alt="Azure" />
           </FlexItem>
-          {/* <FlexItem align={{ default: "alignRight" }}>
-            <img className="step-header-image" src={logo} alt="PhaseTwo" />
-          </FlexItem> */}
         </Flex>
       </PageSection>
       <PageSection

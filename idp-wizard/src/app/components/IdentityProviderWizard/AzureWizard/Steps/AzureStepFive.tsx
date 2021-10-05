@@ -12,7 +12,7 @@ import {
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import azureStep13Image from "@app/images/azure/azure-13.png";
 
 export function AzureStepFive() {
@@ -32,6 +32,10 @@ export function AzureStepFive() {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    document?.getElementById("step")?.scrollIntoView();
+  });
+
   return (
     <>
       <Modal
@@ -41,7 +45,7 @@ export function AzureStepFive() {
       >
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
-      <Stack hasGutter>
+      <Stack hasGutter id="step">
         <StackItem>
           <Title headingLevel="h1">Step 5: SAML Signing Certificate</Title>
         </StackItem>

@@ -11,7 +11,7 @@ import {
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import azureStep9Image from "@app/images/azure/azure-9.png";
 import azureStep10Image from "@app/images/azure/azure-10.png";
 import azureStep11Image from "@app/images/azure/azure-11.png";
@@ -25,6 +25,10 @@ export function AzureStepFour() {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    document?.getElementById("step")?.scrollIntoView();
+  });
+
   return (
     <>
       <Modal
@@ -34,7 +38,7 @@ export function AzureStepFour() {
       >
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
-      <Stack>
+      <Stack id="step">
         <StackItem>
           <Title headingLevel="h1">Step 4: Assign People & Groups</Title>
         </StackItem>

@@ -14,7 +14,7 @@ import {
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import azureStep7Image from "@app/images/azure/azure-7.png";
 import azureStep8Image from "@app/images/azure/azure-8.png";
 import { ArrowRightIcon } from "@patternfly/react-icons";
@@ -31,6 +31,10 @@ export function AzureStepThree() {
     setModalImageSrc(imageSrc);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    document?.getElementById("step")?.scrollIntoView();
+  });
 
   const claimNames = [
     {
@@ -111,7 +115,7 @@ export function AzureStepThree() {
       >
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
-      <Stack hasGutter>
+      <Stack hasGutter id="step">
         <StackItem>
           <Title headingLevel="h1">Step 3: User Attributes & Claims</Title>
         </StackItem>

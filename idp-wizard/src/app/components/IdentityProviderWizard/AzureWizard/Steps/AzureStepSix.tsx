@@ -12,7 +12,7 @@ import {
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import azureStep14Image from "@app/images/azure/azure-14.png";
 
 export function AzureStepSix() {
@@ -22,6 +22,11 @@ export function AzureStepSix() {
     setModalImageSrc(imageSrc);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    document?.getElementById("step")?.scrollIntoView();
+  });
+
   return (
     <>
       <Modal
@@ -31,7 +36,7 @@ export function AzureStepSix() {
       >
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
-      <Stack hasGutter>
+      <Stack hasGutter id="step">
         <StackItem>
           <Title headingLevel="h1">Step 6: Provide a Login URL</Title>
         </StackItem>

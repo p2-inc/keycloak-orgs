@@ -12,7 +12,7 @@ import {
   TextVariants,
   Title,
 } from "@patternfly/react-core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import azureStep5Image from "@app/images/azure/azure-5.png";
 import azureStep6Image from "@app/images/azure/azure-6.png";
 
@@ -24,6 +24,10 @@ export function AzureStepTwo() {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    document?.getElementById("step")?.scrollIntoView();
+  });
+
   return (
     <>
       <Modal
@@ -33,7 +37,7 @@ export function AzureStepTwo() {
       >
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
-      <Stack hasGutter>
+      <Stack hasGutter id="step">
         <StackItem>
           <Title headingLevel="h1">Step 2: Basic SAML Configuration</Title>
         </StackItem>
