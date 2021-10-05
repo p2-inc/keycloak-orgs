@@ -26,7 +26,11 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
       <div className="vertical-center">
         <h1>Your Identity Provider</h1>
         <div className="selection-container">
-          <IdPButton text={selectedProtocol} image={selectedProtocolImage} />
+          <IdPButton
+            text={selectedProtocol}
+            image={selectedProtocolImage}
+            active={true}
+          />
         </div>
         <div className="link" onClick={goBack}>
           <h2>
@@ -47,6 +51,7 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
             <IdPButton
               text="SAML"
               image={samlLogo}
+              active={true}
               onSelect={() => goToProviderSetup()}
             />
           )}
@@ -54,6 +59,7 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
             <IdPButton
               text="LDAP"
               image={ldapLogo}
+              active={true}
               onSelect={() => goToProviderSetup()}
             />
           )}

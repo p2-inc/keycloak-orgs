@@ -18,12 +18,18 @@ html, body, #root {
 
 
 .selection-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto auto auto;
   justify-content: center;
   gap: 10px;
   margin-top: 70px;
 }
+
+.selection-item {
+  list-style: none;
+  flex: 0 0 33.333333%;
+}
+
 .container {
   margin: auto;
   width: 80%;
@@ -107,8 +113,12 @@ html, body, #root {
 .idp-button img {
   display: block;
   margin: 0 auto;
-  max-width:80%;
-  max-height:80%; 
+  max-height:99%; 
   width: auto;
   height: auto;
+}
+
+.disabled {
+  cursor: default;
+  filter: grayscale(1.0);
 }
