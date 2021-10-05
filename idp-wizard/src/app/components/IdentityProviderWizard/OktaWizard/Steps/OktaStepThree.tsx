@@ -15,6 +15,7 @@ import {
   Title,
 } from "@patternfly/react-core";
 import image from "@app/images/okta/okta-3.png";
+import { ArrowRightIcon } from "@patternfly/react-icons";
 
 export const OktaStepThree: FC = () => {
   const [groupList, setGroupList] = useState<string[]>([""]);
@@ -39,7 +40,7 @@ export const OktaStepThree: FC = () => {
         <StackItem>
           <Text component={TextVariants.h2} className="pf-u-font-weight-bold">
             This is an optional step. If you have groups defined in Okta, you
-            will find them in the Directory {"->"} Groups section.
+            will find them in the Directory <ArrowRightIcon /> Groups section.
           </Text>
         </StackItem>
         <StackItem>

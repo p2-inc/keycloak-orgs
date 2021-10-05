@@ -3,6 +3,7 @@ import { IdPButton } from "./components/IdPButton";
 import samlLogo from "@app/images/saml-logo.png";
 import ldapLogo from "@app/images/ldap-logo.jpeg";
 import { useHistory } from "react-router-dom";
+import { ArrowLeftIcon } from "@patternfly/react-icons";
 
 interface ProtocolProps {
   selectedProtocol: string;
@@ -28,11 +29,14 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
           <IdPButton text={selectedProtocol} image={selectedProtocolImage} />
         </div>
         <div className="link" onClick={goBack}>
-          <h2>{"<- Back to identity provider selection"}</h2>
+          <h2>
+            <ArrowLeftIcon />
+            {" Back to identity provider selection"}
+          </h2>
         </div>
         <br />
         <br />
-        <h2>Choose Your Connection Protocol</h2>
+        <h1>Choose Your Connection Protocol</h1>
 
         <h3>
           This is the protocol your Identity Provider will use to connect to
