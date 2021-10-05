@@ -13,13 +13,17 @@ import {
   Stack,
   StackItem,
   Title,
+  Modal,
+  ModalVariant,
 } from "@patternfly/react-core";
 import image from "@app/images/okta/okta-3.png";
 import { ArrowRightIcon } from "@patternfly/react-icons";
 
 export const OktaStepThree: FC = () => {
   const [groupList, setGroupList] = useState<string[]>([""]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleModalToggle = () => {};
   const handleInputChange = (value, index) => {
     const list = [...groupList];
     list[index] = value;
@@ -44,7 +48,13 @@ export const OktaStepThree: FC = () => {
           </Text>
         </StackItem>
         <StackItem>
-          <img src={image} alt="Step3" className="step-image" /> <br />
+          <img
+            src={image}
+            alt="Step3"
+            className="step-image"
+            onClick={() => setIsModalOpen(true)}
+          />
+          <br />
         </StackItem>
         <StackItem>
           <Text component={TextVariants.h2}>
@@ -77,6 +87,14 @@ export const OktaStepThree: FC = () => {
           </Card>
         </StackItem>
       </Stack>
+
+      <Modal
+        variant={ModalVariant.large}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      >
+        <img src={image} alt="Step3" />
+      </Modal>
     </>
   );
 };

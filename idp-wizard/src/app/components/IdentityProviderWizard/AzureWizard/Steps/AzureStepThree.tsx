@@ -11,8 +11,10 @@ import {
   ClipboardCopy,
   Flex,
   FlexItem,
+  Modal,
+  ModalVariant,
 } from "@patternfly/react-core";
-import React from "react";
+import React, { useState } from "react";
 import azureStep7Image from "@app/images/azure/azure-7.png";
 import azureStep8Image from "@app/images/azure/azure-8.png";
 import { ArrowRightIcon } from "@patternfly/react-icons";
@@ -23,6 +25,13 @@ interface IClaims {
 }
 
 export function AzureStepThree() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalImageSrc, setModalImageSrc] = useState("");
+  const onImageClick = (imageSrc) => {
+    setModalImageSrc(imageSrc);
+    setIsModalOpen(true);
+  };
+
   const claimNames = [
     {
       name: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
@@ -63,7 +72,6 @@ export function AzureStepThree() {
   };
 
   const renderClipboardCopy = (vals: IClaims) => {
-    console.log(vals.name, vals.value);
     return (
       <Flex style={{ padding: "5px" }}>
         <FlexItem>
@@ -95,42 +103,61 @@ export function AzureStepThree() {
   };
 
   return (
-    <Stack hasGutter>
-      <StackItem>
-        <Title headingLevel="h1">Step 3: User Attributes & Claims</Title>
-      </StackItem>
-      <StackItem>
-        <Text component={TextVariants.h2}>
-          <br />
-          Click the Edit icon in the top right of the second step.
-        </Text>
-      </StackItem>
-      <StackItem>
-        <img src={azureStep7Image} alt="Step 2.1" className="step-image" />
-      </StackItem>
-      <StackItem>
-        <Text component={TextVariants.h2}>
-          <br />
-          Fill in the following Attribute Statements and select "Next".
-        </Text>
-      </StackItem>
-      <StackItem>
-        <Card style={{ width: "1000px" }} className="card-shadow">
-          <CardBody>
-            <Form>
-              <FormGroup fieldId="copy-form">
-                {renderClipboardCopyHeader()}
-                {claimNames.map((claim) => {
-                  return renderClipboardCopy(claim);
-                })}
-              </FormGroup>
-            </Form>
-          </CardBody>
-        </Card>
-      </StackItem>
-      <StackItem>
-        <img src={azureStep8Image} alt="Step 2.1" className="step-image" />
-      </StackItem>
-    </Stack>
+    <>
+      <Modal
+        variant={ModalVariant.large}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      >
+        <img src={modalImageSrc} alt="Step Image" />
+      </Modal>
+      <Stack hasGutter>
+        <StackItem>
+          <Title headingLevel="h1">Step 3: User Attributes & Claims</Title>
+        </StackItem>
+        <StackItem>
+          <Text component={TextVariants.h2}>
+            <br />
+            Click the Edit icon in the top right of the second step.
+          </Text>
+        </StackItem>
+        <StackItem>
+          <img
+            src={azureStep7Image}
+            alt="Step 2.1"
+            className="step-image"
+            onClick={() => onImageClick(azureStep7Image)}
+          />
+        </StackItem>
+        <StackItem>
+          <Text component={TextVariants.h2}>
+            <br />
+            Fill in the following Attribute Statements and select "Next".
+          </Text>
+        </StackItem>
+        <StackItem>
+          <Card style={{ width: "1000px" }} className="card-shadow">
+            <CardBody>
+              <Form>
+                <FormGroup fieldId="copy-form">
+                  {renderClipboardCopyHeader()}
+                  {claimNames.map((claim) => {
+                    return renderClipboardCopy(claim);
+                  })}
+                </FormGroup>
+              </Form>
+            </CardBody>
+          </Card>
+        </StackItem>
+        <StackItem>
+          <img
+            src={azureStep8Image}
+            alt="Step 2.1"
+            className="step-image"
+            onClick={() => onImageClick(azureStep8Image)}
+          />
+        </StackItem>
+      </Stack>
+    </>
   );
 }
