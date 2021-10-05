@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import {
   Form,
   FormGroup,
@@ -12,7 +12,22 @@ import {
   CardBody,
 } from "@patternfly/react-core";
 
-export const OktaStepTwo: FC = () => {
+interface Props {
+  onChange: (value: boolean) => void;
+}
+
+export const OktaStepTwo: FC<Props> = (props) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const onUsernameChange = (value: string) => {
+    setUsername(value);
+    props.onChange(username.length > 0 && password.length > 0);
+  };
+
+  const onPasswordChange = (value: string) => {
+    setPassword(value);
+    props.onChange(username.length > 0 && password.length > 0);
+  };
   return (
     <Stack hasGutter>
       <StackItem>
@@ -39,6 +54,8 @@ export const OktaStepTwo: FC = () => {
                   type="text"
                   id="simple-form-name-01"
                   name="simple-form-name-01"
+                  value={username}
+                  onChange={onUsernameChange}
                 />
               </FormGroup>
               <FormGroup
@@ -52,6 +69,8 @@ export const OktaStepTwo: FC = () => {
                   type="text"
                   id="simple-form-name-02"
                   name="simple-form-name-02"
+                  value={password}
+                  onChange={onPasswordChange}
                 />
               </FormGroup>
             </Form>

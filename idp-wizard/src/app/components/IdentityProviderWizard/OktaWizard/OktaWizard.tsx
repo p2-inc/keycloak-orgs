@@ -18,6 +18,7 @@ import { OktaStepTwo } from "./Steps/OktaStepTwo";
 import { OktaStepThree } from "./Steps/OktaStepThree";
 import octaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation } from "../WizardConfirmation";
+import { SemanticClassificationFormat } from "typescript";
 
 export const OktaWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -27,6 +28,12 @@ export const OktaWizard: FC = () => {
 
   const closeWizard = () => {
     console.log("close wizard");
+  };
+
+  const [isFormValid, setIsForValid] = useState(false);
+
+  const onFormChange = (value) => {
+    setIsForValid(value);
   };
 
   const steps = [
@@ -39,9 +46,10 @@ export const OktaWizard: FC = () => {
     {
       id: 2,
       name: "LDAP Authentication",
-      component: <OktaStepTwo />,
+      component: <OktaStepTwo onChange={onFormChange} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
+      enableNext: isFormValid,
     },
     {
       id: 3,
@@ -60,6 +68,7 @@ export const OktaWizard: FC = () => {
         />
       ),
       canJumpTo: stepIdReached >= 3,
+      hideCancelButton: true,
     },
   ];
 

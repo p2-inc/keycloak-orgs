@@ -57,11 +57,10 @@ export const OktaStepThree: FC = () => {
               <Form>
                 <FormGroup label="Groups" fieldId="input-form">
                   {groupList.map((x, i) => {
-                    console.log("rendering");
                     return (
-                      <InputGroup style={{ padding: "2px" }}>
+                      <InputGroup style={{ padding: "2px" }} key={"group-" + i}>
                         <TextInput
-                          key={i}
+                          key={"text-" + i}
                           value={x}
                           name={i.toString()}
                           id={i.toString()}
