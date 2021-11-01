@@ -114,7 +114,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   return (
     <Page
       mainContainerId={pageId}
-      header={Header}
+      // header={Header}
       // sidebar={Sidebar}
 
       onPageResize={onPageResize}

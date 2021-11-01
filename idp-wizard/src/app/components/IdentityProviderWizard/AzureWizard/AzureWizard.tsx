@@ -1,11 +1,14 @@
 import React, { FC, useState } from "react";
 import {
+  Button,
   PageSection,
   PageSectionVariants,
   PageSectionTypes,
   Wizard,
   Flex,
   FlexItem,
+  WizardFooter,
+  WizardNav,
 } from "@patternfly/react-core";
 import { AzureStepOne } from "./Steps/AzureStepOne";
 import { AzureStepTwo } from "./Steps/AzureStepTwo";
@@ -14,7 +17,6 @@ import { AzureStepFour } from "./Steps/AzureStepFour";
 import { AzureStepFive } from "./Steps/AzureStepFive";
 import { AzureStepSix } from "./Steps/AzureStepSix";
 import azureLogo from "@app/images/azure/azure-logo.png";
-import logo from "@app/bgimages/logo_phase_slash.svg";
 import { WizardConfirmation } from "../WizardConfirmation";
 
 export const AzureWizard: FC = () => {
@@ -82,6 +84,16 @@ export const AzureWizard: FC = () => {
     },
   ];
 
+  const renderWizardFooter = (
+    <WizardFooter>
+      <Button>This is the footer</Button>
+    </WizardFooter>
+  );
+
+  const renderCustomerWizardHeader = () => {
+    return <WizardNav>This is a special nav</WizardNav>;
+  };
+
   const title = "Finished wizard";
   return (
     <>
@@ -98,7 +110,9 @@ export const AzureWizard: FC = () => {
         variant={PageSectionVariants.light}
       >
         <Wizard
-          navAriaLabel={`${title} steps`}
+          // navAriaLabel={`${title} steps`}
+          isNavExpandable
+          navAriaLabel={`Martin Bak Nav Label`}
           mainAriaLabel={`${title} content`}
           onClose={closeWizard}
           nextButtonText="Continue to Next Step"

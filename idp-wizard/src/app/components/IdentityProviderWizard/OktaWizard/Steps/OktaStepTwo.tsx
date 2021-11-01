@@ -3,14 +3,11 @@ import {
   Form,
   FormGroup,
   TextInput,
-  Text,
-  TextVariants,
-  Stack,
-  StackItem,
-  Title,
   Card,
   CardBody,
 } from "@patternfly/react-core";
+import { InstructionProps } from "../../InstructionComponent";
+import Step from "../../Step";
 
 interface Props {
   onChange: (value: boolean) => void;
@@ -28,18 +25,14 @@ export const OktaStepTwo: FC<Props> = (props) => {
     setPassword(value);
     props.onChange(username.length > 0 && password.length > 0);
   };
-  return (
-    <Stack hasGutter>
-      <StackItem>
-        <Title headingLevel="h1">Step 2: LDAP Authentication</Title>
-      </StackItem>
-      <StackItem>
-        <Text component={TextVariants.h2}>
-          <br />
-          Enter your LDAP administrator credentials
-        </Text>
-      </StackItem>
-      <StackItem>
+
+  const instructionList: InstructionProps[] = [
+    {
+      text: "Enter your LDAP administrator credentials",
+      component: <></>,
+    },
+    {
+      component: (
         <Card className="card-shadow">
           <CardBody>
             <Form>
@@ -76,7 +69,14 @@ export const OktaStepTwo: FC<Props> = (props) => {
             </Form>
           </CardBody>
         </Card>
-      </StackItem>
-    </Stack>
+      ),
+    },
+  ];
+
+  return (
+    <Step
+      title="Step 2: LDAP Authentication"
+      instructionList={instructionList}
+    />
   );
 };

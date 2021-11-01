@@ -1,24 +1,16 @@
 import React, { FC, useState } from "react";
 import {
-  Card,
-  CardBody,
-  CardTitle,
   PageSection,
   PageSectionVariants,
   PageSectionTypes,
-  Text,
   TextContent,
-  Stack,
-  StackItem,
   Wizard,
-  WizardStepFunctionType,
 } from "@patternfly/react-core";
 import { OktaStepOne } from "./Steps/OktaStepOne";
 import { OktaStepTwo } from "./Steps/OktaStepTwo";
 import { OktaStepThree } from "./Steps/OktaStepThree";
 import octaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation } from "../WizardConfirmation";
-import { SemanticClassificationFormat } from "typescript";
 
 export const OktaWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);

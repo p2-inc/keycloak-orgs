@@ -6,17 +6,13 @@ import {
   Form,
   FormGroup,
   TextInput,
-  Stack,
-  StackItem,
-  Title,
-  Text,
-  TextVariants,
   Card,
   CardBody,
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
-import { css } from "@patternfly/react-styles";
+import Step from "../../Step";
+import { InstructionProps } from "../../InstructionComponent";
 
 export const OktaStepOne: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +45,121 @@ export const OktaStepOne: FC = () => {
     setldapGroupBaseDN(`ou=groups, dc=${custIdentifer}, dc=okta, dc=com`);
   };
 
+  const instructionList: InstructionProps[] = [
+    {
+      text: "Directory Integrations",
+      component: (
+        <img
+          src={oktaStep1Image}
+          alt="Step 1.1"
+          className="step-image"
+          onClick={() => onImageClick(oktaStep1Image)}
+        />
+      ),
+    },
+    {
+      text: "If you have not already, add LDAP Interface from the Okta Directory Integration section.",
+      component: (
+        <img
+          src={oktaStep2Image}
+          alt="Step 1.2"
+          className="step-image"
+          onClick={() => onImageClick(oktaStep2Image)}
+        />
+      ),
+    },
+    {
+      text: "Note the Settings and input them below.",
+      component: <></>,
+    },
+    {
+      component: (
+        <Card className="card-shadow">
+          <CardBody>
+            <Form>
+              <FormGroup
+                label="1. LDAP Host"
+                isRequired
+                fieldId="simple-form-name-01"
+                className="form-label"
+              >
+                <TextInput
+                  isRequired
+                  type="text"
+                  id="simple-form-name-01"
+                  name="simple-form-name-01"
+                  aria-describedby="simple-form-name-01-helper"
+                  value={ldapValue}
+                  onChange={handleLDAPValueChange}
+                />
+              </FormGroup>
+              <FormGroup
+                label="2. LDAP SSL Port"
+                isRequired
+                fieldId="simple-form-name-02"
+                className="form-label"
+              >
+                <TextInput
+                  isRequired
+                  type="text"
+                  id="simple-form-name-02"
+                  name="simple-form-name-02"
+                  aria-describedby="simple-form-name-02-helper"
+                  value="636"
+                />
+              </FormGroup>
+              <FormGroup
+                label="3. LDAP Base DN"
+                isRequired
+                fieldId="simple-form-name-03"
+                className="form-label"
+              >
+                <TextInput
+                  isRequired
+                  type="text"
+                  id="simple-form-name-03"
+                  name="simple-form-name-03"
+                  aria-describedby="simple-form-name-03-helper"
+                  value={ldapBaseDN}
+                />
+              </FormGroup>
+              <FormGroup
+                label="4. LDAP User Base DN"
+                isRequired
+                fieldId="simple-form-name-04"
+                className="form-label"
+              >
+                <TextInput
+                  isRequired
+                  type="text"
+                  id="simple-form-name-04"
+                  name="simple-form-name-04"
+                  aria-describedby="simple-form-name-04-helper"
+                  value={ldapUserBaseDN}
+                />
+              </FormGroup>
+              <FormGroup
+                label="5. LDAP Group Base DN"
+                isRequired
+                fieldId="simple-form-name-05"
+                className="form-label"
+              >
+                <TextInput
+                  isRequired
+                  type="text"
+                  id="simple-form-name-05"
+                  name="simple-form-name-05"
+                  aria-describedby="simple-form-name-05-helper"
+                  value={ldapGroupBaseDN}
+                />
+              </FormGroup>
+            </Form>
+          </CardBody>
+        </Card>
+      ),
+    },
+  ];
+
   return (
     <>
       <Modal
@@ -58,124 +169,10 @@ export const OktaStepOne: FC = () => {
       >
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
-      <Stack hasGutter>
-        <StackItem>
-          <Title headingLevel="h1">Step 1: Enable LDAP Interface</Title>
-        </StackItem>
-        <StackItem>
-          <img
-            src={oktaStep1Image}
-            alt="Step 1.1"
-            className="step-image"
-            onClick={() => onImageClick(oktaStep1Image)}
-          />
-        </StackItem>
-        <StackItem>
-          <Text component={TextVariants.h2}>
-            <br />
-            If you have not already, add LDAP Interface from the Okta Directory
-            // Integration section.
-          </Text>
-        </StackItem>
-        <StackItem>
-          <img
-            src={oktaStep2Image}
-            alt="Step 1.2"
-            className="step-image"
-            onClick={() => onImageClick(oktaStep2Image)}
-          />
-        </StackItem>
-        <StackItem>
-          <Text component={TextVariants.h2}>
-            <br />
-            Note the Settings and input them below.
-          </Text>
-        </StackItem>
-        <StackItem>
-          <Card className="card-shadow">
-            <CardBody>
-              <Form>
-                <FormGroup
-                  label="1. LDAP Host"
-                  isRequired
-                  fieldId="simple-form-name-01"
-                  className="form-label"
-                >
-                  <TextInput
-                    isRequired
-                    type="text"
-                    id="simple-form-name-01"
-                    name="simple-form-name-01"
-                    aria-describedby="simple-form-name-01-helper"
-                    value={ldapValue}
-                    onChange={handleLDAPValueChange}
-                  />
-                </FormGroup>
-                <FormGroup
-                  label="2. LDAP SSL Port"
-                  isRequired
-                  fieldId="simple-form-name-02"
-                  className="form-label"
-                >
-                  <TextInput
-                    isRequired
-                    type="text"
-                    id="simple-form-name-02"
-                    name="simple-form-name-02"
-                    aria-describedby="simple-form-name-02-helper"
-                    value="636"
-                  />
-                </FormGroup>
-                <FormGroup
-                  label="3. LDAP Base DN"
-                  isRequired
-                  fieldId="simple-form-name-03"
-                  className="form-label"
-                >
-                  <TextInput
-                    isRequired
-                    type="text"
-                    id="simple-form-name-03"
-                    name="simple-form-name-03"
-                    aria-describedby="simple-form-name-03-helper"
-                    value={ldapBaseDN}
-                  />
-                </FormGroup>
-                <FormGroup
-                  label="4. LDAP User Base DN"
-                  isRequired
-                  fieldId="simple-form-name-04"
-                  className="form-label"
-                >
-                  <TextInput
-                    isRequired
-                    type="text"
-                    id="simple-form-name-04"
-                    name="simple-form-name-04"
-                    aria-describedby="simple-form-name-04-helper"
-                    value={ldapUserBaseDN}
-                  />
-                </FormGroup>
-                <FormGroup
-                  label="5. LDAP Group Base DN"
-                  isRequired
-                  fieldId="simple-form-name-05"
-                  className="form-label"
-                >
-                  <TextInput
-                    isRequired
-                    type="text"
-                    id="simple-form-name-05"
-                    name="simple-form-name-05"
-                    aria-describedby="simple-form-name-05-helper"
-                    value={ldapGroupBaseDN}
-                  />
-                </FormGroup>
-              </Form>
-            </CardBody>
-          </Card>
-        </StackItem>
-      </Stack>
+      <Step
+        title="Step 1: Enable LDAP Interface"
+        instructionList={instructionList}
+      />
     </>
   );
 };

@@ -5,6 +5,7 @@ import openIDLogo from "@app/bgimages/logos/openid_logo.png";
 import ldapLogo from "@app/bgimages/logos/ldap_logo.png";
 import { useHistory } from "react-router-dom";
 import { ArrowLeftIcon, OpenidIcon } from "@patternfly/react-icons";
+import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
 
 interface ProtocolProps {
   selectedProtocol: string;
@@ -47,60 +48,44 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
   ];
 
   return (
-    <div className="container">
-      <div className="vertical-center">
-        <h1>Your Identity Provider</h1>
-        <div className="selection-container">
-          <IdPButton
-            text={selectedProtocol}
-            image={selectedProtocolImage}
-            active={true}
-          />
-        </div>
-        <div className="link" onClick={goBack}>
-          <h2>
-            <ArrowLeftIcon />
-            {" Back to identity provider selection"}
-          </h2>
-        </div>
+    <Stack id="protocol-selector" className="container">
+      <StackItem>
+        <Text component={TextVariants.h2} onClick={goBack} className="link">
+          <ArrowLeftIcon />
+          {" Back to identity provider selection"}
+        </Text>
+      </StackItem>
+      <StackItem className="selection-container">
+        <IdPButton
+          text={selectedProtocol}
+          image={selectedProtocolImage}
+          active={true}
+        />
+      </StackItem>
+      <StackItem>
         <br />
-        <br />
-        <h1>Choose Your Connection Protocol</h1>
-
-        <h3>
+        <Text component={TextVariants.h1}>Choose Your Connection Protocol</Text>
+      </StackItem>
+      <StackItem>
+        <Text component={TextVariants.h3}>
           This is the protocol your Identity Provider will use to connect to
-          demo.phasetwo.io.{" "}
-        </h3>
-        <div className="selection-container">
-          {idpProtocolList.map((item) => {
-            return (
-              <IdPButton
-                text={item.name}
-                image={item.imageSrc}
-                active={item.active}
-                onSelect={() => goToProviderSetup()}
-              />
-            );
-          })}
-          {/* {selectedProtocol === "Azure" && (
+          demo.phasetwo.io. If you don't know which to choose, we recommend
+          SAML.
+        </Text>
+      </StackItem>
+      <StackItem className="selection-container">
+        {idpProtocolList.map((item, i) => {
+          return (
             <IdPButton
-              text="SAML"
-              image={samlLogo}
-              active={true}
+              key={i}
+              text={item.name}
+              image={item.imageSrc}
+              active={item.active}
               onSelect={() => goToProviderSetup()}
             />
-          )}
-          {selectedProtocol === "Okta" && (
-            <IdPButton
-              text="LDAP"
-              image={ldapLogo}
-              active={true}
-              onSelect={() => goToProviderSetup()}
-            />
-          )} */}
-          {/* <IdPButton text="Okta" image={oktaImage} provider="okta" /> */}
-        </div>
-      </div>
-    </div>
+          );
+        })}
+      </StackItem>
+    </Stack>
   );
 };

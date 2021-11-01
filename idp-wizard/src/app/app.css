@@ -3,11 +3,12 @@ html, body, #root {
 }
 
 .step-image {
-  max-width: 70%;
+  max-width: 600px;
   border: 2px solid lightgray;
   padding-left: 20x;
   margin-left: 20px;
   border-radius: 5px;
+  vertical-align: text-top;
 }
 
 .card-shadow {
@@ -22,7 +23,7 @@ html, body, #root {
   grid-template-columns: auto auto auto;
   justify-content: center;
   gap: 10px;
-  margin-top: 70px;
+  margin-top: 7px;
 }
 
 .selection-item {
@@ -37,7 +38,7 @@ html, body, #root {
   padding: 5px;
   text-align: center;
   top: 50%;
-  border: 1px solid lightgray;
+  /* border: 1px solid lightgray; */
   border-radius: 5px;
 }
 
@@ -60,6 +61,20 @@ html, body, #root {
   width: calc(100% - 100px);
   color: lightgray;
   padding: 5px;
+  vertical-align: text-top;
+}
+
+.step-instruction {
+  min-width: 40%;
+  max-width: 40%;
+}
+
+.step-no-instruction {
+  min-width: 80%;
+}
+
+.step-instruction-image {
+  max-width: 80%;
 }
 
 .step-body {
@@ -72,7 +87,8 @@ html, body, #root {
 }
 
 .step-body img {
-  border: 2px solid lightgrey
+  border: 2px solid lightgrey;
+  
 }
 
 .step-header {
