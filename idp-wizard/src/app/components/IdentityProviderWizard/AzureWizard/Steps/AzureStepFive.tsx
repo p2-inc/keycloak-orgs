@@ -11,8 +11,11 @@ import React, { useEffect, useState } from "react";
 import azureStep13Image from "@app/images/azure/azure-13.png";
 import { InstructionProps } from "../../InstructionComponent";
 import Step from "../../Step";
+import { useImageModal } from "@app/hooks/useImageModal";
 
 export function AzureStepFive() {
+  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
+    useImageModal();
   const [value, setValue] = useState();
   const [filename, setFilename] = useState();
 
@@ -20,13 +23,6 @@ export function AzureStepFive() {
     console.log("File uploaded: ", filename, value);
     setValue(value);
     setFilename(filename);
-  };
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImageSrc, setModalImageSrc] = useState("");
-  const onImageClick = (imageSrc) => {
-    setModalImageSrc(imageSrc);
-    setIsModalOpen(true);
   };
 
   useEffect(() => {
@@ -72,6 +68,7 @@ export function AzureStepFive() {
   return (
     <>
       <Modal
+        aria-label="Image"
         variant={ModalVariant.large}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -16,14 +16,11 @@ import React, { useEffect, useState } from "react";
 import azureStep14Image from "@app/images/azure/azure-14.png";
 import { InstructionProps } from "../../InstructionComponent";
 import Step from "../../Step";
+import { useImageModal } from "@app/hooks/useImageModal";
 
 export function AzureStepSix() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImageSrc, setModalImageSrc] = useState("");
-  const onImageClick = (imageSrc) => {
-    setModalImageSrc(imageSrc);
-    setIsModalOpen(true);
-  };
+  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
+    useImageModal();
 
   useEffect(() => {
     document?.getElementById("step")?.scrollIntoView();
@@ -64,6 +61,7 @@ export function AzureStepSix() {
   return (
     <>
       <Modal
+        aria-label="Image"
         variant={ModalVariant.large}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

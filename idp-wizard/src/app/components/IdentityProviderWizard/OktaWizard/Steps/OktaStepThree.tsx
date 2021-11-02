@@ -20,10 +20,13 @@ import image from "@app/images/okta/okta-3.png";
 import { ArrowRightIcon, TrashIcon } from "@patternfly/react-icons";
 import { InstructionProps } from "../../InstructionComponent";
 import Step from "../../Step";
+import { useImageModal } from "@app/hooks/useImageModal";
 
 export const OktaStepThree: FC = () => {
+  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
+    useImageModal();
+
   const [groupList, setGroupList] = useState<string[]>([""]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleInputChange = (value, index) => {
     const list = [...groupList];
@@ -55,7 +58,7 @@ export const OktaStepThree: FC = () => {
           src={image}
           alt="Step3"
           className="step-image"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => onImageClick(image)}
         />
       ),
     },
@@ -97,6 +100,7 @@ export const OktaStepThree: FC = () => {
   return (
     <>
       <Modal
+        aria-label="Image"
         variant={ModalVariant.large}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

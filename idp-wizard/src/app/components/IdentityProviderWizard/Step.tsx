@@ -15,7 +15,11 @@ function Step(props: StepProps) {
       <Flex direction={{ default: "column" }}>
         {props.instructionList.map((item, i) => {
           return (
-            <InstructionComponent text={item.text} component={item.component} />
+            <InstructionComponent
+              key={i}
+              text={item.text}
+              component={item.component}
+            />
           );
         })}
       </Flex>

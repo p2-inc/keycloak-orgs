@@ -1,9 +1,4 @@
 import {
-  Title,
-  Stack,
-  StackItem,
-  Text,
-  TextVariants,
   Form,
   Card,
   CardBody,
@@ -20,6 +15,7 @@ import azureStep8Image from "@app/images/azure/azure-8.png";
 import { ArrowRightIcon } from "@patternfly/react-icons";
 import { InstructionProps } from "../../InstructionComponent";
 import Step from "../../Step";
+import { useImageModal } from "@app/hooks/useImageModal";
 
 interface IClaims {
   name: string;
@@ -27,12 +23,8 @@ interface IClaims {
 }
 
 export function AzureStepThree() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImageSrc, setModalImageSrc] = useState("");
-  const onImageClick = (imageSrc) => {
-    setModalImageSrc(imageSrc);
-    setIsModalOpen(true);
-  };
+  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
+    useImageModal();
 
   useEffect(() => {
     document?.getElementById("step")?.scrollIntoView();
@@ -152,6 +144,7 @@ export function AzureStepThree() {
   return (
     <>
       <Modal
+        aria-label="Image"
         variant={ModalVariant.large}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

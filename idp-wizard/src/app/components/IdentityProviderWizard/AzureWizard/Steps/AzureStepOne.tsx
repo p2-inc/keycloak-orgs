@@ -3,28 +3,14 @@ import azureStep1Image from "@app/images/azure/azure-1.png";
 import azureStep2Image from "@app/images/azure/azure-2.png";
 import azureStep3Image from "@app/images/azure/azure-3.png";
 import azureStep4Image from "@app/images/azure/azure-4.png";
-import {
-  Flex,
-  Modal,
-  ModalVariant,
-  Stack,
-  StackItem,
-  Text,
-  TextVariants,
-  Title,
-} from "@patternfly/react-core";
-import InstructionComponent, {
-  InstructionProps,
-} from "../../InstructionComponent";
+import { Modal, ModalVariant } from "@patternfly/react-core";
+import { InstructionProps } from "../../InstructionComponent";
 import Step from "../../Step";
+import { useImageModal } from "@app/hooks/useImageModal";
 
 export function AzureStepOne() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImageSrc, setModalImageSrc] = useState("");
-  const onImageClick = (imageSrc) => {
-    setModalImageSrc(imageSrc);
-    setIsModalOpen(true);
-  };
+  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
+    useImageModal();
 
   const instructions: InstructionProps[] = [
     {
@@ -76,6 +62,7 @@ export function AzureStepOne() {
   return (
     <>
       <Modal
+        aria-label="Image"
         variant={ModalVariant.large}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

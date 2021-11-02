@@ -1,5 +1,4 @@
 import React, { FC, useState } from "react";
-// import { PageSection, Title, Image } from '@patternfly/react-core';
 import oktaStep1Image from "@app/images/okta/okta-1.png";
 import oktaStep2Image from "@app/images/okta/okta-2.png";
 import {
@@ -13,14 +12,11 @@ import {
 } from "@patternfly/react-core";
 import Step from "../../Step";
 import { InstructionProps } from "../../InstructionComponent";
+import { useImageModal } from "@app/hooks/useImageModal";
 
 export const OktaStepOne: FC = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImageSrc, setModalImageSrc] = useState("");
-  const onImageClick = (imageSrc) => {
-    setModalImageSrc(imageSrc);
-    setIsModalOpen(true);
-  };
+  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
+    useImageModal();
 
   const customerIdentifier = "dev-32234-234";
 
@@ -163,8 +159,9 @@ export const OktaStepOne: FC = () => {
   return (
     <>
       <Modal
+        aria-label="Image"
         variant={ModalVariant.large}
-        isOpen={isModalOpen}
+        isOpen={isModalOpen || false}
         onClose={() => setIsModalOpen(false)}
       >
         <img src={modalImageSrc} alt="Step Image" />

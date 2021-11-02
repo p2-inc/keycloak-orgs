@@ -12,14 +12,12 @@ import azureStep5Image from "@app/images/azure/azure-5.png";
 import azureStep6Image from "@app/images/azure/azure-6.png";
 import { InstructionProps } from "../../InstructionComponent";
 import Step from "../../Step";
+import { useImageModal } from "@app/hooks/useImageModal";
+import { ClipboardCopyComponent } from "../../ClipboardCopyComponent";
 
 export function AzureStepTwo() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImageSrc, setModalImageSrc] = useState("");
-  const onImageClick = (imageSrc) => {
-    setModalImageSrc(imageSrc);
-    setIsModalOpen(true);
-  };
+  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
+    useImageModal();
 
   useEffect(() => {
     document?.getElementById("step")?.scrollIntoView();
@@ -39,32 +37,18 @@ export function AzureStepTwo() {
     },
     {
       component: (
-        <Card className="card-shadow">
-          <CardBody>
-            <Form>
-              <FormGroup label="Copy this identifier" fieldId="copy-form">
-                <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied">
-                  https://auth.phasetwo.io/30945803490g90rg493040
-                </ClipboardCopy>
-              </FormGroup>
-            </Form>
-          </CardBody>
-        </Card>
+        <ClipboardCopyComponent
+          label="Copy this identifier"
+          initialValue="https://auth.phasetwo.io/30945803490g90rg493040"
+        />
       ),
     },
     {
       component: (
-        <Card className="card-shadow">
-          <CardBody>
-            <Form>
-              <FormGroup label="Copy this Reply URL" fieldId="copy-form">
-                <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied">
-                  https://auth.phasetwo.io/sso/saml/acs/30945803490g90rg493040
-                </ClipboardCopy>
-              </FormGroup>
-            </Form>
-          </CardBody>
-        </Card>
+        <ClipboardCopyComponent
+          label="Copy this Reply URL"
+          initialValue="https://auth.phasetwo.io/sso/saml/acs/30945803490g90rg493040"
+        />
       ),
     },
     {
@@ -83,6 +67,7 @@ export function AzureStepTwo() {
   return (
     <>
       <Modal
+        aria-label="Image"
         variant={ModalVariant.large}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
