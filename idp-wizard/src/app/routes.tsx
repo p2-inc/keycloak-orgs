@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Route, RouteComponentProps, Switch } from "react-router-dom";
+import { Redirect, Route, RouteComponentProps, Switch } from "react-router-dom";
 import { accessibleRouteChangeHandler } from "@app/utils/utils";
 import { Dashboard } from "@app/Dashboard/Dashboard";
 import { Support } from "@app/Support/Support";
@@ -14,6 +14,8 @@ import {
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
 import { OktaWizard } from "./components/IdentityProviderWizard/OktaWizard/OktaWizard";
 import { AzureWizard } from "./components/IdentityProviderWizard/AzureWizard/AzureWizard";
+// import keycloak from "src/keycloak";
+import { useKeycloak } from "@react-keycloak/web";
 
 let routeFocusTimer: number;
 export interface IAppRoute {
@@ -28,6 +30,7 @@ export interface IAppRoute {
   title: string;
   isAsync?: boolean;
   routes?: undefined;
+  checkSecurity: boolean;
 }
 
 export interface IAppRouteGroup {
@@ -39,11 +42,20 @@ export type AppRouteConfig = IAppRoute | IAppRouteGroup;
 
 const routes: AppRouteConfig[] = [
   {
+    component: Dashboard,
+    exact: true,
+    label: "Dashboard",
+    path: "/",
+    title: "My Dashboard",
+    checkSecurity: true,
+  },
+  {
     component: IdentityProviderSelector,
     exact: true,
     label: "Selector",
-    path: "/",
+    path: "/idp",
     title: "Select your Identity Provider",
+    checkSecurity: true,
   },
   {
     component: OktaWizard,
@@ -51,6 +63,7 @@ const routes: AppRouteConfig[] = [
     label: "Okta Wizard",
     path: "/okta",
     title: "PhaseTwo - Okta",
+    checkSecurity: true,
   },
   {
     component: AzureWizard,
@@ -58,6 +71,7 @@ const routes: AppRouteConfig[] = [
     label: "Azure Wizard",
     path: "/azure",
     title: "PhaseTwo - Azure",
+    checkSecurity: true,
   },
 ];
 
@@ -85,6 +99,8 @@ const RouteWithTitleUpdates = ({
   useA11yRouteChange(isAsync);
   useDocumentTitle(title);
 
+  const { keycloak, initialized } = useKeycloak();
+
   function routeWithTitle(routeProps: RouteComponentProps) {
     return <Component {...rest} {...routeProps} />;
   }
@@ -109,7 +125,7 @@ const AppRoutes = (): React.ReactElement => (
   <LastLocationProvider>
     <Switch>
       {flattenedRoutes.map(
-        ({ path, exact, component, title, isAsync }, idx) => (
+        ({ path, exact, component, title, isAsync, checkSecurity }, idx) => (
           <RouteWithTitleUpdates
             path={path}
             exact={exact}
@@ -117,6 +133,7 @@ const AppRoutes = (): React.ReactElement => (
             key={idx}
             title={title}
             isAsync={isAsync}
+            checkSecurity={checkSecurity}
           />
         )
       )}

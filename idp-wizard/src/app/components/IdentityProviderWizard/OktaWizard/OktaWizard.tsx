@@ -5,15 +5,24 @@ import {
   PageSectionTypes,
   TextContent,
   Wizard,
+  Flex,
+  FlexItem,
+  Button,
 } from "@patternfly/react-core";
 import { OktaStepOne } from "./Steps/OktaStepOne";
 import { OktaStepTwo } from "./Steps/OktaStepTwo";
 import { OktaStepThree } from "./Steps/OktaStepThree";
+import { useKeycloak } from "@react-keycloak/web";
 import octaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation } from "../WizardConfirmation";
+import { useHistory } from "react-router";
 
 export const OktaWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
+  const [isFormValid, setIsForValid] = useState(false);
+  const { keycloak } = useKeycloak();
+  const history = useHistory();
+
   const onNext = (newStep) => {
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
@@ -22,10 +31,13 @@ export const OktaWizard: FC = () => {
     console.log("close wizard");
   };
 
-  const [isFormValid, setIsForValid] = useState(false);
-
   const onFormChange = (value) => {
     setIsForValid(value);
+  };
+
+  const goToDashboard = () => {
+    let path = ``;
+    history.push(path);
   };
 
   const steps = [
@@ -68,9 +80,21 @@ export const OktaWizard: FC = () => {
   return (
     <>
       <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <img className="step-header-image" src={octaLogo} alt="Okta" />
-        </TextContent>
+        <Flex>
+          <FlexItem>
+            <img className="step-header-image" src={octaLogo} alt="Okta" />
+          </FlexItem>
+          <FlexItem align={{ default: "alignRight" }}>
+            <Button variant="link" isInline onClick={goToDashboard}>
+              My Dashboard
+            </Button>
+          </FlexItem>
+          <FlexItem>
+            <Button variant="link" isInline onClick={() => keycloak.logout()}>
+              Logout
+            </Button>
+          </FlexItem>
+        </Flex>
       </PageSection>
       <PageSection
         type={PageSectionTypes.wizard}

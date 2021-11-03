@@ -1,15 +1,14 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
-  Button,
   PageSection,
   PageSectionVariants,
   PageSectionTypes,
   Wizard,
   Flex,
   FlexItem,
-  WizardFooter,
-  WizardNav,
+  Button,
 } from "@patternfly/react-core";
+import { useKeycloak } from "@react-keycloak/web";
 import { AzureStepOne } from "./Steps/AzureStepOne";
 import { AzureStepTwo } from "./Steps/AzureStepTwo";
 import { AzureStepThree } from "./Steps/AzureStepThree";
@@ -18,11 +17,53 @@ import { AzureStepFive } from "./Steps/AzureStepFive";
 import { AzureStepSix } from "./Steps/AzureStepSix";
 import azureLogo from "@app/images/azure/azure-logo.png";
 import { WizardConfirmation } from "../WizardConfirmation";
+import { useHistory } from "react-router";
 
 export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
+  const [results, setResults] = useState({});
+  const { keycloak } = useKeycloak();
+  const history = useHistory();
   const onNext = (newStep) => {
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
+  };
+
+  useEffect(() => {
+    console.log("getting results");
+    fetch("https://randomuser.me/api/")
+      .then((res) => res.json())
+      .then(
+        (data) => {
+          setResults(data);
+          console.log("I made it", data);
+        }
+        //
+      );
+    console.log("Results: ", results);
+    const bearer = getBearerToken();
+    // localStorage.setItem("REACT_TOKEN", bearer.access_token);
+    console.log("bearer", bearer);
+  }, []);
+
+  const getBearerToken = () => {
+    // fetch(
+    //   "https://app.phasetwo.io/auth/realms/wizard/protocol/openid-connect/token",
+    //   {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    //     body: JSON.stringify({
+    //       client_id: "idp-wizard",
+    //       client_secret: "094e7246-8291-4a8b-bea1-d97b5eac732b",
+    //       grant_type: "client_credentials",
+    //     }),
+    //   }
+    // )
+    //   .then(function (res) {
+    //     return res.json();
+    //   })
+    //   .then(function (resJson) {
+    //     return resJson;
+    //   });
   };
 
   const closeWizard = () => {
@@ -58,20 +99,6 @@ export const AzureWizard: FC = () => {
       canJumpTo: stepIdReached >= 4,
     },
     {
-      id: 5,
-      name: "SAML Signing Certificate",
-      component: <AzureStepFive />,
-      hideCancelButton: true,
-      canJumpTo: stepIdReached >= 5,
-    },
-    {
-      id: 6,
-      name: "Provide a Login URL",
-      component: <AzureStepSix />,
-      hideCancelButton: true,
-      canJumpTo: stepIdReached >= 6,
-    },
-    {
       name: "Confirmation",
       component: (
         <WizardConfirmation
@@ -80,27 +107,34 @@ export const AzureWizard: FC = () => {
           buttonText="Test Single Sign-On"
         />
       ),
-      canJumpTo: stepIdReached >= 6,
+      canJumpTo: stepIdReached >= 4,
     },
   ];
 
-  const renderWizardFooter = (
-    <WizardFooter>
-      <Button>This is the footer</Button>
-    </WizardFooter>
-  );
-
-  const renderCustomerWizardHeader = () => {
-    return <WizardNav>This is a special nav</WizardNav>;
+  const goToDashboard = () => {
+    let path = ``;
+    history.push(path);
   };
 
   const title = "Finished wizard";
+
   return (
     <>
       <PageSection variant={PageSectionVariants.light}>
         <Flex>
           <FlexItem>
             <img className="step-header-image" src={azureLogo} alt="Azure" />
+          </FlexItem>
+
+          <FlexItem align={{ default: "alignRight" }}>
+            <Button variant="link" isInline onClick={goToDashboard}>
+              My Dashboard
+            </Button>
+          </FlexItem>
+          <FlexItem>
+            <Button variant="link" isInline onClick={() => keycloak.logout()}>
+              Logout
+            </Button>
           </FlexItem>
         </Flex>
       </PageSection>
@@ -110,9 +144,8 @@ export const AzureWizard: FC = () => {
         variant={PageSectionVariants.light}
       >
         <Wizard
-          // navAriaLabel={`${title} steps`}
+          navAriaLabel={`${title} steps`}
           isNavExpandable
-          navAriaLabel={`Martin Bak Nav Label`}
           mainAriaLabel={`${title} content`}
           onClose={closeWizard}
           nextButtonText="Continue to Next Step"

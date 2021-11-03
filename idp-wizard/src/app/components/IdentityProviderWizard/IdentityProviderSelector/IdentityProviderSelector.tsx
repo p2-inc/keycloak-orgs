@@ -1,6 +1,7 @@
 import React, { FC, useState } from "react";
 import { IdPButton } from "./components/IdPButton";
 import { IdPProtocolSelector } from "./IdPProtocolSelector";
+import { useKeycloak } from "@react-keycloak/web";
 
 import azureLogo from "@app/bgimages/logos/azure_logo.png";
 import oktaLogo from "@app/bgimages/logos/okta_logo.png";
@@ -15,8 +16,18 @@ import pingFedLogo from "@app/bgimages/logos/ping_federate_logo.png";
 import pingOneLogo from "@app/bgimages/logos/ping_one_logo.png";
 import samlLogo from "@app/bgimages/logos/saml_logo.png";
 import vmwareLogo from "@app/bgimages/logos/vmware_logo.png";
+import { useHistory } from "react-router-dom";
+import {
+  Button,
+  Flex,
+  FlexItem,
+  PageSection,
+  PageSectionVariants,
+  Stack,
+  StackItem,
+} from "@patternfly/react-core";
 
-interface idpType {
+interface IIDPType {
   name: string;
   imageSrc: string;
   active: boolean | false;
@@ -25,7 +36,10 @@ export const IdentityProviderSelector: FC = () => {
   const [provider, setProvider] = useState("");
   const [providerImage, setProviderImage] = useState("");
   const imageDirectory = "/src/app/bgimages/logos/";
-  const idpList: idpType[] = [
+  const { keycloak } = useKeycloak();
+  const history = useHistory();
+
+  const idpList: IIDPType[] = [
     {
       name: "Azure",
       imageSrc: azureLogo,
@@ -86,28 +100,53 @@ export const IdentityProviderSelector: FC = () => {
     setProviderImage(selectedProviderImage);
   };
 
+  const goToDashboard = () => {
+    let path = "";
+    history.push(path);
+  };
+
   return provider == "" ? (
-    <div className="container">
-      <div className="vertical-center">
-        <h1>Choose your Identity Provider {provider}</h1>
-        <h2>This is how users will sign in to demo.phasetwo.io</h2>
-        <div className="selection-container">
-          {idpList.map((idp: idpType) => {
-            return (
-              <IdPButton
-                key={idp.name}
-                text={idp.name}
-                image={idp.imageSrc}
-                active={idp.active}
-                onSelect={() =>
-                  idp.active && setProviders(idp.name, idp.imageSrc)
-                }
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
+    <PageSection variant={PageSectionVariants.light}>
+      <Stack hasGutter>
+        <StackItem>
+          <Flex>
+            <FlexItem align={{ default: "alignRight" }}>
+              <Button variant="link" isInline onClick={goToDashboard}>
+                My Dashboard
+              </Button>
+            </FlexItem>
+            <FlexItem>
+              <Button variant="link" isInline onClick={() => keycloak.logout()}>
+                Logout
+              </Button>
+            </FlexItem>
+          </Flex>
+        </StackItem>
+        <StackItem isFilled>
+          <div className="container">
+            <div className="vertical-center">
+              <h1>Choose your Identity Provider {provider}</h1>
+              <h2>This is how users will sign in to demo.phasetwo.io</h2>
+              <div className="selection-container">
+                {idpList.map((idp: IIDPType) => {
+                  return (
+                    <IdPButton
+                      key={idp.name}
+                      text={idp.name}
+                      image={idp.imageSrc}
+                      active={idp.active}
+                      onSelect={() =>
+                        idp.active && setProviders(idp.name, idp.imageSrc)
+                      }
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </StackItem>
+      </Stack>
+    </PageSection>
   ) : (
     <IdPProtocolSelector
       selectedProtocol={provider}

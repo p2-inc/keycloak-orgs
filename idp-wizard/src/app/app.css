@@ -98,7 +98,7 @@ html, body, #root {
 .step-header-image {
     float: left;
     margin: 5px auto;
-    max-width: 150px;
+    max-width: 75px;
     max-height:75px; 
     width: auto;
     height: auto;
