@@ -1,18 +1,11 @@
 import React, { FC, useState } from "react";
 import {
-  Button,
   Card,
   CardBody,
-  CardHeader,
   Form,
   FormGroup,
   InputGroup,
   TextInput,
-  Text,
-  TextVariants,
-  Stack,
-  StackItem,
-  Title,
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
@@ -39,7 +32,6 @@ export const OktaStepThree: FC = () => {
   };
 
   const onDelete = (id) => {
-    console.log(id);
     const list = [...groupList];
     const index = list.indexOf(id, 0);
     if (index > -1) {

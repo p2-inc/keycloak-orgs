@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   TableComposable,
   Thead,
@@ -6,55 +6,39 @@ import {
   Tr,
   Th,
   Td,
+  nowrap,
 } from "@patternfly/react-table";
+import { getEventData, IDashboardEvents } from "@app/services/DashboardData";
 
 export function ActivityLog() {
   const columns = ["Time", "User", "Event Type", "Details"];
-  const [rows, setRows] = React.useState([
-    {
-      cells: ["10/5/2021", "Garth Patil", "LOGIN_ERROR", ""],
-      isRowSelected: false,
-    },
-    {
-      cells: ["10/6/2021", "Martin Bak", "LOGIN_ERROR", ""],
-      isRowSelected: false,
-    },
-  ]);
-  const onRowClick = (event, rowIndex, row) => {
-    const updatedRows = [...rows];
-    updatedRows[rowIndex].isRowSelected = !rows[rowIndex].isRowSelected;
-    setRows(updatedRows);
-  };
+  const [activityData, setActivityData] = useState<IDashboardEvents[] | []>([]);
+
+  useEffect(() => {
+    getEventData().then((res) => setActivityData(res));
+  }, []);
 
   return (
     <TableComposable aria-label="Misc table" className="card-shadow">
       <Thead noWrap>
         <Tr>
-          <Th>{columns[0]}</Th>
-          <Th>{columns[1]}</Th>
-          <Th>{columns[2]}</Th>
-          <Th>{columns[3]}</Th>
+          <Th style={{ minWidth: "20%" }}>{columns[0]}</Th>
+          <Th style={{ minWidth: "20%" }}>{columns[1]}</Th>
+          <Th style={{ minWidth: "20%" }}>{columns[2]}</Th>
+          <Th style={{ maxWidth: "40%" }}>{columns[3]}</Th>
         </Tr>
       </Thead>
       <Tbody>
-        {rows.map((row, rowIndex) => {
+        {activityData.map((row, rowIndex) => {
           return (
-            <Tr
-              key={rowIndex}
-              onRowClick={(event) => onRowClick(event, rowIndex, row.cells)}
-              isHoverable
-              isRowSelected={row.isRowSelected}
-            >
-              {row.cells.map((cell, cellIndex) => {
-                return (
-                  <Td
-                    key={`${rowIndex}_${cellIndex}`}
-                    dataLabel={columns[cellIndex]}
-                  >
-                    {cell}
-                  </Td>
-                );
-              })}
+            <Tr key={rowIndex}>
+              <td style={{ width: "20%", whiteSpace: "nowrap" }}>
+                {new Date(row.time).toLocaleDateString()}{" "}
+                {new Date(row.time).toLocaleTimeString()}
+              </td>
+              <td style={{ width: "20%" }}>{row.user}</td>
+              <td style={{ width: "20%" }}>{row.eventType}</td>
+              <td>{JSON.stringify(row.details)}</td>
             </Tr>
           );
         })}

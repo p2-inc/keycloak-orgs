@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -8,23 +8,25 @@ import {
   Flex,
   FlexItem,
   Button,
+  ContextSelectorFooter,
 } from "@patternfly/react-core";
 import { OktaStepOne } from "./Steps/OktaStepOne";
 import { OktaStepTwo } from "./Steps/OktaStepTwo";
 import { OktaStepThree } from "./Steps/OktaStepThree";
 import { useKeycloak } from "@react-keycloak/web";
 import octaLogo from "@app/images/okta/okta-logo.png";
-import { WizardConfirmation } from "../WizardConfirmation";
+import { WizardConfirmation } from "./Steps/OktaConfirmation";
 import { useHistory } from "react-router";
 
 export const OktaWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [isFormValid, setIsForValid] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
   const onNext = (newStep) => {
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
+    setIsFormValid(false);
   };
 
   const closeWizard = () => {
@@ -32,7 +34,7 @@ export const OktaWizard: FC = () => {
   };
 
   const onFormChange = (value) => {
-    setIsForValid(value);
+    setIsFormValid(value);
   };
 
   const goToDashboard = () => {
@@ -44,7 +46,8 @@ export const OktaWizard: FC = () => {
     {
       id: 1,
       name: "Enable LDAP Inteface",
-      component: <OktaStepOne />,
+      component: <OktaStepOne onChange={onFormChange} />,
+      enableNext: isFormValid,
       hideCancelButton: true,
     },
     {

@@ -1,0 +1,10 @@
+{
+  "realm": "wizard",
+  "auth-server-url": "https://app.phasetwo.io/auth/",
+  "ssl-required": "external",
+  "resource": "idp-wizard",
+  "credentials": {
+    "secret": "094e7246-8291-4a8b-bea1-d97b5eac732b"
+  },
+  "confidential-port": 0
+}

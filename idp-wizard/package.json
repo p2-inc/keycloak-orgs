@@ -79,6 +79,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@keycloak/keycloak-admin-client": "^15.0.2",
     "@patternfly/patternfly": "^4.135.2",
     "@patternfly/react-core": "^4.128.2",
     "@patternfly/react-icons": "^4.10.11",
@@ -86,10 +87,12 @@
     "@patternfly/react-table": "^4.37.8",
     "@react-keycloak/web": "^3.4.0",
     "@storybook/builder-webpack5": "^6.2.9",
+    "axios": "^0.24.0",
     "keycloak-js": "^15.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-last-location": "^2.0.1",
+    "react-use": "^17.3.1",
     "sirv-cli": "^1.0.12"
   }
 }

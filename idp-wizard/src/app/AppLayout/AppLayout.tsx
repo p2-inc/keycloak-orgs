@@ -11,7 +11,6 @@ import {
   SkipToContent,
 } from "@patternfly/react-core";
 import { routes, IAppRoute, IAppRouteGroup } from "@app/routes";
-//import logo from "@app/bgimages/Patternfly-Logo.svg";
 import logo from "@app/bgimages/logo_phase_slash.svg";
 
 interface IAppLayout {

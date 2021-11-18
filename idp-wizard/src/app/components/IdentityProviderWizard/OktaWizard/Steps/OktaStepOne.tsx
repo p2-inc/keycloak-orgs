@@ -2,6 +2,7 @@ import React, { FC, useState } from "react";
 import oktaStep1Image from "@app/images/okta/okta-1.png";
 import oktaStep2Image from "@app/images/okta/okta-2.png";
 import {
+  Alert,
   Form,
   FormGroup,
   TextInput,
@@ -9,22 +10,43 @@ import {
   CardBody,
   Modal,
   ModalVariant,
+  Button,
 } from "@patternfly/react-core";
 import Step from "../../Step";
 import { InstructionProps } from "../../InstructionComponent";
 import { useImageModal } from "@app/hooks/useImageModal";
+import { oktaStepOneValidation } from "@app/services/OktaValidation";
+import { useSessionStorage } from "react-use";
 
-export const OktaStepOne: FC = () => {
+interface Props {
+  onChange: (value: boolean) => void;
+}
+
+export interface IOktaValues {
+  customerIdentifier: string;
+  ldapValue: string;
+  ldapBaseND: string;
+  ldapUserBaseDN: string;
+  ldapGroupBaseND: string;
+}
+
+export const OktaStepOne: FC<Props> = (props) => {
   const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
     useImageModal();
+  const [alertText, setAlertText] = useState("");
+  const [alertVariant, setAlertVariant] = useState("default");
+  const [oktaCustomerIdentifier, setOktaCustomerIdentifier] = useSessionStorage(
+    "okta_customer_identifier",
+    process.env.OKTA_DEFAULT_CUSTOMER_IDENTIFER
+  );
 
-  const customerIdentifier = "dev-32234-234";
+  const customerIdentifier = oktaCustomerIdentifier;
 
   const [ldapValue, setLDAPValue] = useState(
     customerIdentifier + ".ldap.okta.com"
   );
   const [ldapBaseDN, setldapBaseDN] = useState(
-    `dc=${customerIdentifier}, dc=okta, dc-com`
+    `dc=${customerIdentifier}, dc=okta, dc=com`
   );
   const [ldapUserBaseDN, setldapUserBaseDN] = useState(
     `ou=users, dc=${customerIdentifier}, dc=okta, dc=com`
@@ -39,6 +61,20 @@ export const OktaStepOne: FC = () => {
     setldapBaseDN(`dc=${custIdentifer}, dc=okta, dc-com`);
     setldapUserBaseDN(`ou=users, dc=${custIdentifer}, dc=okta, dc=com`);
     setldapGroupBaseDN(`ou=groups, dc=${custIdentifer}, dc=okta, dc=com`);
+    setOktaCustomerIdentifier(custIdentifer);
+  };
+
+  const validateStep = async () => {
+    await oktaStepOneValidation(`${ldapValue}:636`)
+      .then((res) => {
+        setAlertText(res.message);
+        setAlertVariant(res.status);
+        props.onChange(true);
+      })
+      .catch(() => {
+        setAlertText("Error, could not validate okta");
+        setAlertVariant("danger");
+      });
   };
 
   const instructionList: InstructionProps[] = [
@@ -72,6 +108,15 @@ export const OktaStepOne: FC = () => {
       component: (
         <Card className="card-shadow">
           <CardBody>
+            {alertText && (
+              <Alert
+                variant={alertVariant == "error" ? "danger" : "success"}
+                isInline
+                title={alertText}
+              />
+              // <div>{alertText}</div>
+            )}
+
             <Form>
               <FormGroup
                 label="1. LDAP Host"
@@ -149,6 +194,7 @@ export const OktaStepOne: FC = () => {
                   value={ldapGroupBaseDN}
                 />
               </FormGroup>
+              <Button onClick={validateStep}>Validate Input</Button>
             </Form>
           </CardBody>
         </Card>
@@ -166,6 +212,7 @@ export const OktaStepOne: FC = () => {
       >
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
+
       <Step
         title="Step 1: Enable LDAP Interface"
         instructionList={instructionList}

@@ -16,8 +16,10 @@ import { AzureStepFour } from "./Steps/AzureStepFour";
 import { AzureStepFive } from "./Steps/AzureStepFive";
 import { AzureStepSix } from "./Steps/AzureStepSix";
 import azureLogo from "@app/images/azure/azure-logo.png";
-import { WizardConfirmation } from "../WizardConfirmation";
+import { WizardConfirmation } from "../OktaWizard/Steps/OktaConfirmation";
 import { useHistory } from "react-router";
+import axios from "axios";
+import KcAdminClient from "@keycloak/keycloak-admin-client";
 
 export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -29,23 +31,60 @@ export const AzureWizard: FC = () => {
   };
 
   useEffect(() => {
-    console.log("getting results");
-    fetch("https://randomuser.me/api/")
-      .then((res) => res.json())
-      .then(
-        (data) => {
-          setResults(data);
-          console.log("I made it", data);
-        }
-        //
-      );
-    console.log("Results: ", results);
     const bearer = getBearerToken();
     // localStorage.setItem("REACT_TOKEN", bearer.access_token);
     console.log("bearer", bearer);
   }, []);
 
-  const getBearerToken = () => {
+  const getAllUsers = async () => {
+    // const settings = {
+    //   baseUrl: process.env.KEYCLOAK_URL,
+    //   realmName: process.env.REALM,
+    //   // requestConfig: {
+    //   //   /* Axios request config options https://github.com/axios/axios#request-config */
+    //   // },
+    // };
+    // const kcAdminClient = new KcAdminClient(settings);
+    // // Authorize with username / password
+    // await kcAdminClient.auth({
+    //   username: "martin@shrinedev.com",
+    //   password: "Ut@U*1w6ZzEk",
+    //   grantType: "password",
+    //   clientId: process.env.CLIENT_ID,
+    //   totp: "123456", // optional Time-based One-time Password if OTP is required in authentication flow
+    // });
+    // // List all users
+    // const users = await kcAdminClient.users.find();
+    // // This operation will now be performed in 'another-realm' if the user has access.
+    // const groups = await kcAdminClient.groups.find();
+  };
+
+  const getBearerToken = async () => {
+    //To configure the client, pass an object to override any of these  options:
+    const settings = {
+      baseUrl: process.env.KEYCLOAK_URL,
+      realmName: process.env.REALM,
+      // requestConfig: {
+      //   /* Axios request config options https://github.com/axios/axios#request-config */
+      // },
+    };
+    console.log("grabbing bearer token");
+    // const kcAdminClient = new KcAdminClient(settings);
+
+    // const credentials = {
+    //   username: "martin@shrinedev.com",
+    //   password: "Ut@U*1w6ZzEk",
+    //   grantType: "password",
+    //   clientId: process.env.CLIENT_ID,
+    // };
+    console.log("authing");
+
+    console.log("writing to local storage");
+    // localStorage.setItem("access_token", kcAdminClient.accessToken);
+    console.log("after authing");
+    //setInterval(() => kcAdminClient.auth(credentials), 58 * 1000); // 58 seconds
+    console.log("before users.find");
+
     // fetch(
     //   "https://app.phasetwo.io/auth/realms/wizard/protocol/openid-connect/token",
     //   {
