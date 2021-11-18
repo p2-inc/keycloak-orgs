@@ -35,13 +35,13 @@ export const WizardConfirmation: FC<SuccessProps> = ({
     );
 
     setError(results.status == "error");
-    setResults("Results: " + JSON.stringify(results));
+    setResults("Results: " + results.message);
   };
   return (
     <div className="container" style={{ border: 0 }}>
       <Stack hasGutter>
         <StackItem>
-          {results !== "Final Validation Running..." ? (
+          {results && results !== "Final Validation Running..." ? (
             error ? (
               <CrossIcon size="xl" color="red" />
             ) : (
