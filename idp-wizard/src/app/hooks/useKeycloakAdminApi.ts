@@ -1,4 +1,3 @@
-import { kcAdminClient } from './../services/Keycloak';
 import KcAdminClient from "@keycloak/keycloak-admin-client";
 import { GrantTypes } from "@keycloak/keycloak-admin-client/lib/utils/auth";
 

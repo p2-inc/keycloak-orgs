@@ -1,8 +1,6 @@
-import { kcAdminClient } from './Keycloak';
 import { useKeycloakAdminApi } from '../hooks/useKeycloakAdminApi';
-import { IValidationInterface } from './ValidationInterface';
 
-export const oktaStepOneValidation = async<IValidationInterface> (ldapConUrl: string) => {
+export const oktaStepOneValidation = async (ldapConUrl: string) => {
     const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
     await setKcAdminClientAccessToken();
     
@@ -169,16 +167,11 @@ export const oktaCreateFederationAndSyncUsers = async (customer_id, login_id, pa
             );
             console.log("Component Sync result", syncResult)
 
-            const returnMessage = {
+            const returnMessage = `Successfully created component (${payload.name}) with id (${component.id}).<br> Sync status: ${syncResult.status}`;
+            return { 
                 status: 'success',
-                component: {
-                    userFederationId: component.id,
-                    name: payload.name
-                },
-                syncStatus: syncResult.status
-            }
-
-            return returnMessage;
+                message: returnMessage
+            };
             
         }
         catch (error) {
