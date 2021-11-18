@@ -41,7 +41,7 @@ export const WizardConfirmation: FC<SuccessProps> = ({
     <div className="container" style={{ border: 0 }}>
       <Stack hasGutter>
         <StackItem>
-          {results ? (
+          {results !== "Final Validation Running..." ? (
             error ? (
               <CrossIcon size="xl" color="red" />
             ) : (
@@ -58,7 +58,7 @@ export const WizardConfirmation: FC<SuccessProps> = ({
           <Title headingLevel="h2">{message}</Title>
         </StackItem>
         <StackItem>
-          <Title headingLevel="h2">Results of Test: {results}</Title>
+          <Title headingLevel="h2">{results}</Title>
         </StackItem>
         <StackItem>
           <Button onClick={validateWizard}>{buttonText}</Button>
