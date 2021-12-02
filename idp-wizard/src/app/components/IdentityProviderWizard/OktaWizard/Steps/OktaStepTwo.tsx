@@ -26,7 +26,7 @@ export const OktaStepTwo: FC<Props> = (props) => {
     username: "",
     pass: "",
   });
-  const [oktaCustomerIdentifier] = useSessionStorage(
+  const oktaCustomerIdentifier = sessionStorage.getItem(
     "okta_customer_identifier"
   );
 
@@ -76,7 +76,6 @@ export const OktaStepTwo: FC<Props> = (props) => {
                 isInline
                 title={alertText}
               />
-              // <div>{alertText}</div>
             )}
             <Form>
               <FormGroup

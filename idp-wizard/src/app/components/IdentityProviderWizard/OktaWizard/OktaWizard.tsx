@@ -8,19 +8,22 @@ import {
   Flex,
   FlexItem,
   Button,
-  ContextSelectorFooter,
 } from "@patternfly/react-core";
 import { OktaStepOne } from "./Steps/OktaStepOne";
 import { OktaStepTwo } from "./Steps/OktaStepTwo";
 import { OktaStepThree } from "./Steps/OktaStepThree";
 import { useKeycloak } from "@react-keycloak/web";
 import octaLogo from "@app/images/okta/okta-logo.png";
-import { WizardConfirmation } from "./Steps/OktaConfirmation";
+import { WizardConfirmation } from "../FinalStepConfirmation";
 import { useHistory } from "react-router";
+import { useSessionStorage } from "react-use";
+import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
 
 export const OktaWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [results, setResults] = useState("");
+  const [error, setError] = useState(false);
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
@@ -40,6 +43,28 @@ export const OktaWizard: FC = () => {
   const goToDashboard = () => {
     let path = ``;
     history.push(path);
+  };
+
+  const [oktaUserInfo] = useSessionStorage("okta_user_info", {
+    username: "",
+    pass: "",
+  });
+
+  const validateOktaWizard = async () => {
+    const oktaCustomerIdentifier = sessionStorage.getItem(
+      "okta_customer_identifier"
+    );
+    console.log(oktaCustomerIdentifier?.replace('"', ``));
+
+    setResults("Final Validation Running...");
+    const results = await oktaCreateFederationAndSyncUsers(
+      oktaCustomerIdentifier?.replace('"', ``),
+      oktaUserInfo.username!,
+      oktaUserInfo.pass!
+    );
+
+    setError(results.status == "error");
+    setResults("Results: " + results.message);
   };
 
   const steps = [
@@ -72,6 +97,9 @@ export const OktaWizard: FC = () => {
           title="LDAP Configuration Complete"
           message="Your users can now sign-in with Okta."
           buttonText="Test Sign-On"
+          resultsText={results}
+          error={error}
+          validationFunction={validateOktaWizard}
         />
       ),
       canJumpTo: stepIdReached >= 3,

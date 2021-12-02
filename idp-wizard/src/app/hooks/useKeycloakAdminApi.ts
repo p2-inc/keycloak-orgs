@@ -23,9 +23,7 @@ const settings = {
         await SetAccessToken();
 
         async function SetAccessToken() {
-
           await kcAdminClient.auth(credentials);
-          sessionStorage.setItem("t", kcAdminClient.accessToken);
         }
     }
     return [kcAdminClient, setKcAdminClientAccessToken] as const;

@@ -34,14 +34,14 @@ export const AzureStepOneA: FC<Props> = (props) => {
   };
 
   const validateStep = async () => {
-    await azureStepOneAValidation(`${metadataURL}`)
+    await azureStepOneAValidation(`${metadataURL}`, false)
       .then((res) => {
         setAlertText(res.message);
         setAlertVariant(res.status);
         props.onChange(true);
       })
       .catch(() => {
-        setAlertText("Error, could not validate okta");
+        setAlertText("Error, could not create IdP in Keycloak");
         setAlertVariant("danger");
       });
   };
@@ -87,7 +87,12 @@ export const AzureStepOneA: FC<Props> = (props) => {
                   onChange={handleMetadataURLValueChange}
                 />
               </FormGroup>
-              <Button onClick={validateStep}>Validate Input</Button>
+              <Button
+                style={{ width: "300px", textAlign: "center" }}
+                onClick={validateStep}
+              >
+                Validate SAML Config
+              </Button>
             </Form>
           </CardBody>
         </Card>
@@ -106,7 +111,7 @@ export const AzureStepOneA: FC<Props> = (props) => {
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
       <Step
-        title="Step 1a: Upload Azure SAML Metadata file"
+        title="Step 3: Validate Azure SAML Metadata file"
         instructionList={instructions}
       />
     </>

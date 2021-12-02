@@ -14,15 +14,19 @@ import { AzureStepOneA } from "./Steps/AzureStepOneA";
 import { AzureStepTwo } from "./Steps/AzureStepTwo";
 import { AzureStepThree } from "./Steps/AzureStepThree";
 import { AzureStepFour } from "./Steps/AzureStepFour";
-import { AzureStepFive } from "./Steps/AzureStepFive";
-import { AzureStepSix } from "./Steps/AzureStepSix";
 import azureLogo from "@app/images/azure/azure-logo.png";
-import { WizardConfirmation } from "../OktaWizard/Steps/OktaConfirmation";
+import { WizardConfirmation } from "../FinalStepConfirmation";
 import { useHistory } from "react-router";
+
+import {
+  azureFinalValidation,
+  azureStepOneAValidation,
+} from "@app/services/AzureValidation";
 
 export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [results, setResults] = useState({});
+  const [results, setResults] = useState("");
+  const [error, setError] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const { keycloak } = useKeycloak();
   const history = useHistory();
@@ -39,6 +43,15 @@ export const AzureWizard: FC = () => {
     setIsFormValid(value);
   };
 
+  const validateAzureWizard = async () => {
+    setResults("Final Validation Running...");
+    const metadataURL = sessionStorage.getItem("azure_metadata_url");
+    const results = await azureStepOneAValidation(metadataURL!, true);
+    setError(results.status == "error");
+    setResults("Results: " + results.message);
+    console.log(results);
+  };
+
   const steps = [
     {
       id: 1,
@@ -48,18 +61,18 @@ export const AzureWizard: FC = () => {
     },
     {
       id: 2,
+      name: "Configure Attribute Statements",
+      component: <AzureStepTwo />,
+      hideCancelButton: true,
+      canJumpTo: stepIdReached >= 3,
+    },
+    {
+      id: 3,
       name: "Upload Azure SAML Metadata file",
       component: <AzureStepOneA onChange={onFormChange} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
       enableNext: isFormValid,
-    },
-    {
-      id: 3,
-      name: "Configure Attribute Statements",
-      component: <AzureStepTwo />,
-      hideCancelButton: true,
-      canJumpTo: stepIdReached >= 3,
     },
     {
       id: 4,
@@ -81,7 +94,10 @@ export const AzureWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Azure AD."
-          buttonText="Test Single Sign-On"
+          buttonText="Create SAML IdP in Keycloak"
+          resultsText={results}
+          error={error}
+          validationFunction={validateAzureWizard}
         />
       ),
       canJumpTo: stepIdReached >= 4,

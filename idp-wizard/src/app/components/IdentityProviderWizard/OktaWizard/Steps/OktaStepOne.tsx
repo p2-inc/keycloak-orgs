@@ -35,9 +35,8 @@ export const OktaStepOne: FC<Props> = (props) => {
     useImageModal();
   const [alertText, setAlertText] = useState("");
   const [alertVariant, setAlertVariant] = useState("default");
-  const [oktaCustomerIdentifier, setOktaCustomerIdentifier] = useSessionStorage(
-    "okta_customer_identifier",
-    process.env.OKTA_DEFAULT_CUSTOMER_IDENTIFER
+  const oktaCustomerIdentifier = sessionStorage.getItem(
+    "okta_customer_identifier"
   );
 
   const customerIdentifier = oktaCustomerIdentifier;
@@ -61,7 +60,7 @@ export const OktaStepOne: FC<Props> = (props) => {
     setldapBaseDN(`dc=${custIdentifer}, dc=okta, dc-com`);
     setldapUserBaseDN(`ou=users, dc=${custIdentifer}, dc=okta, dc=com`);
     setldapGroupBaseDN(`ou=groups, dc=${custIdentifer}, dc=okta, dc=com`);
-    setOktaCustomerIdentifier(custIdentifer);
+    sessionStorage.setItem("okta_customer_identifier", custIdentifer);
   };
 
   const validateStep = async () => {
@@ -114,7 +113,6 @@ export const OktaStepOne: FC<Props> = (props) => {
                 isInline
                 title={alertText}
               />
-              // <div>{alertText}</div>
             )}
 
             <Form>

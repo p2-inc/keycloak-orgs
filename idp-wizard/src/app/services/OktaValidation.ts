@@ -15,7 +15,7 @@ export const oktaStepOneValidation = async (ldapConUrl: string) => {
         startTls: ""
     }
 
-    const response = await kcAdminClient.realms.testLDAPConnection({realm: process.env.REALM || "wizard"}, connSetting)
+    const response = await kcAdminClient.realms.testLDAPConnection({realm: process.env.REALM!}, connSetting)
         .then((res) => 
         {
             console.log("result", res)
@@ -96,6 +96,8 @@ export const oktaCreateFederationAndSyncUsers = async (customer_id, login_id, pa
     const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
     await setKcAdminClientAccessToken();
 
+    console.log('validating', customer_id, login_id, password)
+
       const payload = {
         name: 'ldap',
         parentId: process.env.REALM,
@@ -103,7 +105,7 @@ export const oktaCreateFederationAndSyncUsers = async (customer_id, login_id, pa
         providerType: 'org.keycloak.storage.UserStorageProvider',
         config: {
             enabled: ["true"],
-            priority: ["2"],
+            priority: ["0"],
             fullSyncPeriod:["-1"],
             changedSyncPeriod:["-1"],
             cachePolicy:["DEFAULT"],
@@ -157,7 +159,7 @@ export const oktaCreateFederationAndSyncUsers = async (customer_id, login_id, pa
 
         console.log("Component Created:", component);
         try {
-            
+            console.log('trying to sync', component.id,  process.env.REALM)
             const syncResult = await kcAdminClient.userStorageProvider.sync(
                 {
                     id: component.id,

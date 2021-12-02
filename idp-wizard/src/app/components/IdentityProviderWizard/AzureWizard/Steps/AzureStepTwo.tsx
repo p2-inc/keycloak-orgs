@@ -16,6 +16,8 @@ import { useImageModal } from "@app/hooks/useImageModal";
 import { ClipboardCopyComponent } from "../../ClipboardCopyComponent";
 
 export function AzureStepTwo() {
+  const replyURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${process.env.AZURE_CUSTOMER_IDENTIFIER}/endpoint`;
+  const identifierURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
   const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
     useImageModal();
 
@@ -39,7 +41,7 @@ export function AzureStepTwo() {
       component: (
         <ClipboardCopyComponent
           label="Copy this identifier"
-          initialValue="https://auth.phasetwo.io/30945803490g90rg493040"
+          initialValue={identifierURL}
         />
       ),
     },
@@ -47,7 +49,7 @@ export function AzureStepTwo() {
       component: (
         <ClipboardCopyComponent
           label="Copy this Reply URL"
-          initialValue="https://auth.phasetwo.io/sso/saml/acs/30945803490g90rg493040"
+          initialValue={replyURL}
         />
       ),
     },
