@@ -18,10 +18,7 @@ import azureLogo from "@app/images/azure/azure-logo.png";
 import { WizardConfirmation } from "../FinalStepConfirmation";
 import { useHistory } from "react-router";
 
-import {
-  azureFinalValidation,
-  azureStepOneAValidation,
-} from "@app/services/AzureValidation";
+import { azureStepOneAValidation } from "@app/services/AzureValidation";
 
 export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
