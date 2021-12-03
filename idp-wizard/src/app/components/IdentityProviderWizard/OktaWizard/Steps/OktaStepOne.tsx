@@ -35,9 +35,10 @@ export const OktaStepOne: FC<Props> = (props) => {
     useImageModal();
   const [alertText, setAlertText] = useState("");
   const [alertVariant, setAlertVariant] = useState("default");
-  const oktaCustomerIdentifier = sessionStorage.getItem(
-    "okta_customer_identifier"
-  );
+  const [isValidating, setIsValidating] = useState(false);
+  const oktaCustomerIdentifier =
+    sessionStorage.getItem("okta_customer_identifier") ||
+    process.env.OKTA_DEFAULT_CUSTOMER_IDENTIFER;
 
   const customerIdentifier = oktaCustomerIdentifier;
 
@@ -64,6 +65,7 @@ export const OktaStepOne: FC<Props> = (props) => {
   };
 
   const validateStep = async () => {
+    setIsValidating(true);
     await oktaStepOneValidation(`${ldapValue}:636`)
       .then((res) => {
         setAlertText(res.message);
@@ -74,6 +76,8 @@ export const OktaStepOne: FC<Props> = (props) => {
         setAlertText("Error, could not validate okta");
         setAlertVariant("danger");
       });
+
+    setIsValidating(false);
   };
 
   const instructionList: InstructionProps[] = [
@@ -192,7 +196,13 @@ export const OktaStepOne: FC<Props> = (props) => {
                   value={ldapGroupBaseDN}
                 />
               </FormGroup>
-              <Button onClick={validateStep}>Validate Input</Button>
+              <Button
+                style={{ width: "200px" }}
+                isLoading={isValidating}
+                onClick={validateStep}
+              >
+                Validate Input
+              </Button>
             </Form>
           </CardBody>
         </Card>

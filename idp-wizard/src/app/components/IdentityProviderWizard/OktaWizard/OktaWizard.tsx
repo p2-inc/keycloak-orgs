@@ -24,6 +24,7 @@ export const OktaWizard: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [results, setResults] = useState("");
   const [error, setError] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
@@ -45,26 +46,25 @@ export const OktaWizard: FC = () => {
     history.push(path);
   };
 
-  const [oktaUserInfo] = useSessionStorage("okta_user_info", {
-    username: "",
-    pass: "",
-  });
+  const username = sessionStorage.getItem("okta_un") || "";
+  const pass = sessionStorage.getItem("okta_p") || "";
 
   const validateOktaWizard = async () => {
-    const oktaCustomerIdentifier = sessionStorage.getItem(
-      "okta_customer_identifier"
-    );
-    console.log(oktaCustomerIdentifier?.replace('"', ``));
+    setIsValidating(true);
+    const oktaCustomerIdentifier =
+      sessionStorage.getItem("okta_customer_identifier") ||
+      process.env.OKTA_DEFAULT_CUSTOMER_IDENTIFER;
 
     setResults("Final Validation Running...");
     const results = await oktaCreateFederationAndSyncUsers(
-      oktaCustomerIdentifier?.replace('"', ``),
-      oktaUserInfo.username!,
-      oktaUserInfo.pass!
+      oktaCustomerIdentifier,
+      username,
+      pass
     );
 
     setError(results.status == "error");
     setResults("Results: " + results.message);
+    setIsValidating(false);
   };
 
   const steps = [
@@ -99,6 +99,7 @@ export const OktaWizard: FC = () => {
           buttonText="Test Sign-On"
           resultsText={results}
           error={error}
+          isValidating={isValidating}
           validationFunction={validateOktaWizard}
         />
       ),

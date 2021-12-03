@@ -157,9 +157,9 @@ export const oktaCreateFederationAndSyncUsers = async (customer_id, login_id, pa
       try {
         const component = await kcAdminClient.components.create(payload);
 
-        console.log("Component Created:", component);
+        console.log("User Federation Created:", component);
         try {
-            console.log('trying to sync', component.id,  process.env.REALM)
+            console.log('Syncing Users', component.id,  process.env.REALM)
             const syncResult = await kcAdminClient.userStorageProvider.sync(
                 {
                     id: component.id,
@@ -169,7 +169,7 @@ export const oktaCreateFederationAndSyncUsers = async (customer_id, login_id, pa
             );
             console.log("Component Sync result", syncResult)
 
-            const returnMessage = `Successfully created component (${payload.name}) with id (${component.id}).<br> Sync status: ${syncResult.status}`;
+            const returnMessage = `Successfully created component (${payload.name}) with id (${component.id}). Sync status: ${syncResult.status}`;
             return { 
                 status: 'success',
                 message: returnMessage

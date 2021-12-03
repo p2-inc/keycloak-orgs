@@ -25,6 +25,7 @@ export const AzureWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const { keycloak } = useKeycloak();
   const history = useHistory();
   const onNext = (newStep) => {
@@ -41,11 +42,13 @@ export const AzureWizard: FC = () => {
   };
 
   const validateAzureWizard = async () => {
+    setIsValidating(true);
     setResults("Final Validation Running...");
     const metadataURL = sessionStorage.getItem("azure_metadata_url");
     const results = await azureStepOneAValidation(metadataURL!, true);
     setError(results.status == "error");
     setResults("Results: " + results.message);
+    setIsValidating(false);
     console.log(results);
   };
 
@@ -94,6 +97,7 @@ export const AzureWizard: FC = () => {
           buttonText="Create SAML IdP in Keycloak"
           resultsText={results}
           error={error}
+          isValidating={isValidating}
           validationFunction={validateAzureWizard}
         />
       ),

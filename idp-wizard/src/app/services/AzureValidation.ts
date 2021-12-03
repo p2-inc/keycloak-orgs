@@ -1,13 +1,9 @@
-import { kcAdminClient } from './Keycloak';
 import IdentityProviderRepresentation from '@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation';
 import { useKeycloakAdminApi } from '../hooks/useKeycloakAdminApi';
-import { useKeycloak } from '@react-keycloak/web';
 
 export const azureStepOneAValidation = async (metadataURL: string, createIdP: boolean ) => {
     const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
     await setKcAdminClientAccessToken();
-
-    console.log('meta data url', metadataURL);
 
     const response = await kcAdminClient.identityProviders.importFromUrl({fromUrl: metadataURL, providerId: 'saml', realm: process.env.REALM || "wizard"})
         .then((res) => 

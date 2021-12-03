@@ -20,30 +20,32 @@ interface Props {
 export const OktaStepTwo: FC<Props> = (props) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
   const [alertText, setAlertText] = useState("");
   const [alertVariant, setAlertVariant] = useState("default");
-  const [oktaUserInfo, setOktaUserInfo] = useSessionStorage("okta_user_info", {
-    username: "",
-    pass: "",
-  });
-  const oktaCustomerIdentifier = sessionStorage.getItem(
-    "okta_customer_identifier"
-  );
+
+  const oktaCustomerIdentifier =
+    sessionStorage.getItem("okta_customer_identifier") ||
+    process.env.OKTA_DEFAULT_CUSTOMER_IDENTIFER;
 
   const onUsernameChange = (value: string) => {
     setUsername(value);
-    setOktaUserInfo({ username: value, pass: oktaUserInfo.pass });
+    sessionStorage.setItem("okta_un", value);
+    //setOktaUserInfo({ username: value, pass: oktaUserInfo.pass });
     props.onChange(username.length > 0 && password.length > 0);
   };
 
   const onPasswordChange = (value: string) => {
     setPassword(value);
-    setOktaUserInfo({ username: oktaUserInfo.username, pass: value });
+    sessionStorage.setItem("okta_p", value);
+    // setOktaUserInfo({ username: oktaUserInfo.username, pass: value });
     props.onChange(username.length > 0 && password.length > 0);
   };
 
   const validateStep = async () => {
-    const { username, pass } = oktaUserInfo;
+    setIsValidating(true);
+    const username = sessionStorage.getItem("okta_un") || "";
+    const pass = sessionStorage.getItem("okta_p") || "";
     await oktaValidateUsernamePassword(
       `${oktaCustomerIdentifier}.ldap.okta.com`,
       username,
@@ -59,6 +61,7 @@ export const OktaStepTwo: FC<Props> = (props) => {
         setAlertText("Error, could not validate okta");
         setAlertVariant("danger");
       });
+    setIsValidating(false);
   };
 
   const instructionList: InstructionProps[] = [
@@ -89,7 +92,7 @@ export const OktaStepTwo: FC<Props> = (props) => {
                   type="text"
                   id="simple-form-name-01"
                   name="simple-form-name-01"
-                  value={oktaUserInfo.username}
+                  value={username}
                   onChange={onUsernameChange}
                 />
               </FormGroup>
@@ -104,11 +107,17 @@ export const OktaStepTwo: FC<Props> = (props) => {
                   type="password"
                   id="simple-form-name-02"
                   name="simple-form-name-02"
-                  value={oktaUserInfo.pass}
+                  value={password}
                   onChange={onPasswordChange}
                 />
               </FormGroup>
-              <Button onClick={validateStep}>Validate Input</Button>
+              <Button
+                style={{ width: "200px" }}
+                isLoading={isValidating}
+                onClick={validateStep}
+              >
+                Validate Input
+              </Button>
             </Form>
           </CardBody>
         </Card>

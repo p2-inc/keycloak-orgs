@@ -11,6 +11,7 @@ interface SuccessProps {
   buttonText: string;
   resultsText: string;
   error: boolean;
+  isValidating: boolean;
   validationFunction: () => void;
 }
 export const WizardConfirmation: FC<SuccessProps> = ({
@@ -19,6 +20,7 @@ export const WizardConfirmation: FC<SuccessProps> = ({
   buttonText,
   resultsText,
   error,
+  isValidating,
   validationFunction,
 }) => {
   return (
@@ -42,10 +44,12 @@ export const WizardConfirmation: FC<SuccessProps> = ({
           <Title headingLevel="h2">{message}</Title>
         </StackItem>
         <StackItem>
-          <Title headingLevel="h2">{resultsText}</Title>
+          <Title headingLevel="h3">{resultsText}</Title>
         </StackItem>
         <StackItem>
-          <Button onClick={validationFunction}>{buttonText}</Button>
+          <Button isLoading={isValidating} onClick={validationFunction}>
+            {buttonText}
+          </Button>
         </StackItem>
       </Stack>
     </div>

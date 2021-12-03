@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { CubesIcon } from '@patternfly/react-icons';
+import * as React from "react";
+import { CubesIcon } from "@patternfly/react-icons";
 import {
   PageSection,
   Title,
@@ -8,8 +8,8 @@ import {
   EmptyStateVariant,
   EmptyStateIcon,
   EmptyStateBody,
-  EmptyStateSecondaryActions
-} from '@patternfly/react-core';
+  EmptyStateSecondaryActions,
+} from "@patternfly/react-core";
 
 export interface ISupportProps {
   sampleProp?: string;
@@ -22,11 +22,12 @@ let Support: React.FunctionComponent<ISupportProps> = () => (
       <EmptyStateIcon icon={CubesIcon} />
       <Title headingLevel="h1" size="lg">
         Empty State (Stub Support Module)
-        </Title>
+      </Title>
       <EmptyStateBody>
-        This represents an the empty state pattern in Patternfly 4. Hopefully it&apos;s simple enough to use but flexible
-        enough to meet a variety of needs.
-        </EmptyStateBody>
+        This represents an the empty state pattern in Patternfly 4. Hopefully
+        it&apos;s simple enough to use but flexible enough to meet a variety of
+        needs.
+      </EmptyStateBody>
       <Button variant="primary">Primary Action</Button>
       <EmptyStateSecondaryActions>
         <Button variant="link">Multiple</Button>
@@ -38,6 +39,6 @@ let Support: React.FunctionComponent<ISupportProps> = () => (
       </EmptyStateSecondaryActions>
     </EmptyState>
   </PageSection>
-)
+);
 
 export { Support };

@@ -26,6 +26,7 @@ export const AzureStepOneA: FC<Props> = (props) => {
     useImageModal();
   const [alertText, setAlertText] = useState("");
   const [alertVariant, setAlertVariant] = useState("default");
+  const [isValidating, setIsValidating] = useState(false);
   const [metadataURL, setMetadataURL] = useSessionStorage("azure_metaurl", "");
 
   const handleMetadataURLValueChange = (value: string) => {
@@ -34,6 +35,7 @@ export const AzureStepOneA: FC<Props> = (props) => {
   };
 
   const validateStep = async () => {
+    setIsValidating(true);
     await azureStepOneAValidation(`${metadataURL}`, false)
       .then((res) => {
         setAlertText(res.message);
@@ -44,6 +46,7 @@ export const AzureStepOneA: FC<Props> = (props) => {
         setAlertText("Error, could not create IdP in Keycloak");
         setAlertVariant("danger");
       });
+    setIsValidating(false);
   };
 
   const instructions: InstructionProps[] = [
@@ -89,6 +92,7 @@ export const AzureStepOneA: FC<Props> = (props) => {
               </FormGroup>
               <Button
                 style={{ width: "300px", textAlign: "center" }}
+                isLoading={isValidating}
                 onClick={validateStep}
               >
                 Validate SAML Config
