@@ -16,6 +16,8 @@ import { OktaWizard } from "./components/IdentityProviderWizard/OktaWizard/OktaW
 import { AzureWizard } from "./components/IdentityProviderWizard/AzureWizard/AzureWizard";
 // import keycloak from "src/keycloak";
 import { useKeycloak } from "@react-keycloak/web";
+import Provider from "./components/IdentityProviderWizard/provider";
+import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
 
 let routeFocusTimer: number;
 export interface IAppRoute {
@@ -28,6 +30,7 @@ export interface IAppRoute {
   exact?: boolean;
   path: string;
   title: string;
+  id?: string;
   isAsync?: boolean;
   routes?: undefined;
   checkSecurity: boolean;
@@ -45,6 +48,7 @@ const routes: AppRouteConfig[] = [
     component: Dashboard,
     exact: true,
     label: "Dashboard",
+    id: "dashboard",
     path: "/",
     title: "My Dashboard",
     checkSecurity: true,
@@ -53,6 +57,7 @@ const routes: AppRouteConfig[] = [
     component: IdentityProviderSelector,
     exact: true,
     label: "Selector",
+    id: "selector",
     path: "/idp",
     title: "Select your Identity Provider",
     checkSecurity: true,
@@ -61,6 +66,7 @@ const routes: AppRouteConfig[] = [
     component: OktaWizard,
     exact: true,
     label: "Okta Wizard",
+    id: "okta",
     path: "/okta",
     title: "PhaseTwo - Okta",
     checkSecurity: true,
@@ -69,6 +75,7 @@ const routes: AppRouteConfig[] = [
     component: AzureWizard,
     exact: true,
     label: "Azure Wizard",
+    id: "azure",
     path: "/azure",
     title: "PhaseTwo - Azure",
     checkSecurity: true,
@@ -124,8 +131,18 @@ const flattenedRoutes: IAppRoute[] = routes.reduce(
 const AppRoutes = (): React.ReactElement => (
   <LastLocationProvider>
     <Switch>
+      <Route
+        path="/idp/:provider/protocol"
+        exact
+        component={IdPProtocolSelector}
+      />
+      <Route path="/idp/:provider/:protocol" exact component={Provider} />
+
       {flattenedRoutes.map(
-        ({ path, exact, component, title, isAsync, checkSecurity }, idx) => (
+        (
+          { path, exact, component, title, isAsync, checkSecurity, id },
+          idx
+        ) => (
           <RouteWithTitleUpdates
             path={path}
             exact={exact}
