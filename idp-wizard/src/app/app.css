@@ -1,4 +1,6 @@
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -16,7 +18,6 @@ html, body, #root {
   padding: 10px;
   box-shadow: 5px 10px 8px #888888;
 }
-
 
 .selection-container {
   display: grid;
@@ -80,33 +81,32 @@ html, body, #root {
 .step-body {
   text-align: left;
   padding: 10px;
-  width:100%;
+  width: 100%;
 }
-.step-body h1, h2 {
+.step-body h1,
+h2 {
   padding: 5px;
 }
 
 .step-body img {
   border: 2px solid lightgrey;
-  
 }
 
 .step-header {
   padding: 5px;
-  float: left;  
+  float: left;
 }
 .step-header-image {
-    float: left;
-    margin: 5px auto;
-    max-width: 75px;
-    max-height:75px; 
-    width: auto;
-    height: auto;
+  float: left;
+  margin: 5px auto;
+  max-width: 75px;
+  max-height: 75px;
+  width: auto;
+  height: auto;
 }
 
-
 .form-label {
-  color: #0066CC ;
+  color: #0066cc;
   text-align: left;
 }
 
@@ -120,7 +120,7 @@ html, body, #root {
   padding: 0px;
   align-items: center;
   border: 2px solid lightgray;
-  padding-top:8px;
+  padding-top: 8px;
   vertical-align: center;
   border-radius: 5px;
   cursor: pointer;
@@ -129,18 +129,20 @@ html, body, #root {
 .idp-button img {
   display: block;
   margin: 0 auto;
-  max-height:99%; 
+  max-height: 99%;
   width: auto;
   height: auto;
 }
 .idp-button:hover {
-  box-shadow: 0 0 11px rgba(33,33,33,.2); 
+  box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
 }
 
 .disabled {
-  cursor: default;
-  filter: grayscale(1.0);
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.6;
 }
+
 .disabled:hover {
-  box-shadow: 0 0 0 ;
+  box-shadow: 0 0 0;
 }

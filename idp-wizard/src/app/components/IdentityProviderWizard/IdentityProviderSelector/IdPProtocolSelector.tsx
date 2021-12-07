@@ -3,62 +3,57 @@ import { IdPButton } from "./components/IdPButton";
 import samlLogo from "@app/bgimages/logos/saml_logo.png";
 import openIDLogo from "@app/bgimages/logos/openid_logo.png";
 import ldapLogo from "@app/bgimages/logos/ldap_logo.png";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import { ArrowLeftIcon, OpenidIcon } from "@patternfly/react-icons";
 import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
-
-interface ProtocolProps {
-  selectedProtocol: string;
-  selectedProtocolImage: string;
-  goBack: () => void;
-}
+import { idpList } from "./IdentityProviderSelector";
 
 interface ProtocolType {
   name: string;
   imageSrc: string;
-  active: boolean | false;
+  active: string[];
+  id: string;
 }
 
-export const IdPProtocolSelector: FC<ProtocolProps> = ({
-  selectedProtocol,
-  selectedProtocolImage,
-  goBack,
-}) => {
+export const IdPProtocolSelector: FC = ({}) => {
+  const { provider } = useParams();
   const history = useHistory();
-  const goToProviderSetup = () => {
-    selectedProtocol && history.push(`/${selectedProtocol.toLowerCase()}`);
-  };
 
   const idpProtocolList: ProtocolType[] = [
     {
       name: "SAML",
+      id: "saml",
       imageSrc: samlLogo,
-      active: selectedProtocol === "Azure",
+      active: ["azure"],
     },
     {
       name: "OpenID",
+      id: "openid",
       imageSrc: openIDLogo,
-      active: selectedProtocol === "None",
+      active: ["openid"],
     },
     {
       name: "LDAP",
+      id: "ldap",
       imageSrc: ldapLogo,
-      active: selectedProtocol === "Okta",
+      active: ["okta"],
     },
   ];
 
   return (
     <Stack id="protocol-selector" className="container">
       <StackItem>
-        <Text component={TextVariants.h2} onClick={goBack} className="link">
-          <ArrowLeftIcon />
-          {" Back to identity provider selection"}
-        </Text>
+        <Link to="/idp">
+          <Text component={TextVariants.h2} className="link">
+            <ArrowLeftIcon />
+            {" Back to identity provider selection"}
+          </Text>
+        </Link>
       </StackItem>
       <StackItem className="selection-container">
         <IdPButton
-          text={selectedProtocol}
-          image={selectedProtocolImage}
+          text={provider}
+          image={idpList.find((i) => i.id === provider)?.imageSrc!}
           active={true}
         />
       </StackItem>
@@ -74,15 +69,16 @@ export const IdPProtocolSelector: FC<ProtocolProps> = ({
         </Text>
       </StackItem>
       <StackItem className="selection-container">
-        {idpProtocolList.map((item, i) => {
+        {idpProtocolList.map(({ name, imageSrc, active, id }, i) => {
           return (
-            <IdPButton
-              key={i}
-              text={item.name}
-              image={item.imageSrc}
-              active={item.active}
-              onSelect={() => goToProviderSetup()}
-            />
+            <Link to={`/idp/${provider}/${id}`} key={i}>
+              <IdPButton
+                key={i}
+                text={name}
+                image={imageSrc}
+                active={active.includes(provider)}
+              />
+            </Link>
           );
         })}
       </StackItem>

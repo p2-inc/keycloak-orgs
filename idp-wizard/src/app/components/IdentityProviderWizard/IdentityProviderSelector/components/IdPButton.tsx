@@ -1,4 +1,5 @@
 import React, { FC } from "react";
+import cs from "classnames";
 
 export interface ButtonProps {
   text: string;
@@ -12,14 +13,13 @@ export const IdPButton: FC<ButtonProps> = ({
   image,
   active,
   onSelect,
-}) => {
-  let extraClass = "";
-  if (!active) {
-    extraClass = "disabled";
-  }
-  return (
-    <div className={"idp-button " + extraClass} onClick={onSelect}>
-      <img src={image} alt={text} />
-    </div>
-  );
-};
+}) => (
+  <div
+    className={cs("idp-button", {
+      disabled: !active,
+    })}
+    onClick={onSelect}
+  >
+    <img src={image} alt={text} />
+  </div>
+);

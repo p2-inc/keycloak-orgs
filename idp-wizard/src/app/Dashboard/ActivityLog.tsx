@@ -38,7 +38,9 @@ export function ActivityLog() {
               </td>
               <td style={{ width: "20%" }}>{row.user}</td>
               <td style={{ width: "20%" }}>{row.eventType}</td>
-              <td>{JSON.stringify(row.details)}</td>
+              <td>
+                <pre>{JSON.stringify(row.details)}</pre>
+              </td>
             </Tr>
           );
         })}
