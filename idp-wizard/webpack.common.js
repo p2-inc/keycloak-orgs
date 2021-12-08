@@ -93,6 +93,17 @@ module.exports = (env) => {
           },
         },
         {
+          test: /\.webmanifest$/i,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[ext]",
+              },
+            },
+          ],
+        },
+        {
           test: /\.(jpg|jpeg|png|gif)$/i,
           include: [
             path.resolve(__dirname, "src"),
@@ -153,6 +164,10 @@ module.exports = (env) => {
           {
             from: "./src/app/images/favicons/*.(png|svg|ico)",
             to: "images/[name][ext]",
+          },
+          {
+            from: "./src/site.webmanifest",
+            to: "[name][ext]",
           },
         ],
       }),
