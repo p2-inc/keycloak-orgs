@@ -9,6 +9,14 @@ export const IdPProtocolSelector: FC = ({}) => {
   const { provider } = useParams();
   const history = useHistory();
 
+  const currentProvider = IdentityProviders.find((i) => i.id === provider)!;
+
+  const {
+    name: providerName,
+    imageSrc: providerLogo,
+    protocols: providerProtocols,
+  } = currentProvider;
+
   return (
     <Stack id="protocol-selector" className="container">
       <StackItem>
@@ -20,11 +28,7 @@ export const IdPProtocolSelector: FC = ({}) => {
         </Link>
       </StackItem>
       <StackItem className="selection-container">
-        <IdPButton
-          text={provider}
-          image={IdentityProviders.find((i) => i.id === provider)?.imageSrc!}
-          active={true}
-        />
+        <IdPButton text={providerName} image={providerLogo} active={true} />
       </StackItem>
       <StackItem>
         <br />
@@ -38,14 +42,14 @@ export const IdPProtocolSelector: FC = ({}) => {
         </Text>
       </StackItem>
       <StackItem className="selection-container">
-        {IdentityProtocols.map(({ name, imageSrc, active, id }, i) => {
+        {IdentityProtocols.map(({ name, imageSrc, id }, i) => {
           return (
             <Link to={`/idp/${provider}/${id}`} key={i}>
               <IdPButton
                 key={i}
                 text={name}
                 image={imageSrc}
-                active={active.includes(provider)}
+                active={providerProtocols.includes(id)}
               />
             </Link>
           );

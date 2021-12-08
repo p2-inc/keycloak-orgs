@@ -11,12 +11,30 @@ import pingFedLogo from "@app/images/provider-logos/ping_federate_logo.png";
 import pingOneLogo from "@app/images/provider-logos/ping_one_logo.png";
 import samlLogo from "@app/images/provider-logos/saml_logo.png";
 import vmwareLogo from "@app/images/provider-logos/vmware_logo.png";
+import { Protocols } from ".";
+
+export enum Providers {
+  ADFS = "adfs",
+  AUTH0 = "auth0",
+  AZURE = "azure",
+  CYBERARK = "cyberark",
+  GOOGLE_SAML = "googlesaml",
+  JUMP_CLOUD = "jumpcloud",
+  OKTA = "okta",
+  ONE_LOGIN = "onelogin",
+  OPEN_ID = "openid",
+  PING_FEDERATE = "pingfederate",
+  PING_ONE = "pingone",
+  SAML = "saml",
+  VMWARE = "vmware",
+}
 
 export interface IIDPType {
   name: string;
   id: string;
   imageSrc: string;
   active: boolean | false;
+  protocols: Protocols[];
 }
 
 export const IdentityProviders: IIDPType[] = [
@@ -24,63 +42,91 @@ export const IdentityProviders: IIDPType[] = [
     name: "Azure",
     imageSrc: azureLogo,
     active: true,
-    id: "azure",
+    id: Providers.AZURE,
+    protocols: [Protocols.SAML],
   },
-  { name: "Okta", imageSrc: oktaLogo, active: true, id: "okta" },
-  { name: "ADFS", imageSrc: adfsLogo, active: false, id: "adfs" },
+  {
+    name: "Okta",
+    imageSrc: oktaLogo,
+    active: true,
+    id: Providers.OKTA,
+    protocols: [Protocols.LDAP],
+  },
+  {
+    name: "ADFS",
+    imageSrc: adfsLogo,
+    active: false,
+    id: Providers.ADFS,
+    protocols: [],
+  },
   {
     name: "Auth0",
     imageSrc: authoLogo,
     active: false,
-    id: "auth0",
+    id: Providers.AUTH0,
+    protocols: [],
   },
   {
     name: "Cyberark",
     imageSrc: cyberarkLogo,
     active: false,
-    id: "cyberark",
+    id: Providers.CYBERARK,
+    protocols: [],
   },
   {
     name: "Google SAML",
     imageSrc: googleLogo,
     active: false,
-    id: "googlesaml",
+    id: Providers.GOOGLE_SAML,
+    protocols: [],
   },
   {
     name: "Jumpcloud",
     imageSrc: jumpcloudLogo,
     active: false,
-    id: "jumpcloud",
+    id: Providers.JUMP_CLOUD,
+    protocols: [],
   },
   {
     name: "OneLogin",
     imageSrc: oneloginLogo,
     active: false,
-    id: "onelogin",
+    id: Providers.ONE_LOGIN,
+    protocols: [],
   },
   {
     name: "OpenID",
     imageSrc: openidLogo,
     active: false,
-    id: "openid",
+    id: Providers.OPEN_ID,
+    protocols: [Protocols.OPEN_ID],
   },
   {
     name: "Ping Federate",
     imageSrc: pingFedLogo,
     active: false,
-    id: "pingfederate",
+    id: Providers.PING_FEDERATE,
+    protocols: [],
   },
   {
     name: "Ping One",
     imageSrc: pingOneLogo,
     active: false,
-    id: "pingone",
+    id: Providers.PING_ONE,
+    protocols: [],
   },
-  { name: "SAML", imageSrc: samlLogo, active: false, id: "saml" },
+  {
+    name: "SAML",
+    imageSrc: samlLogo,
+    active: false,
+    id: Providers.SAML,
+    protocols: [],
+  },
   {
     name: "VMWare",
     imageSrc: vmwareLogo,
     active: false,
-    id: "vmware",
+    id: Providers.VMWARE,
+    protocols: [],
   },
 ];
