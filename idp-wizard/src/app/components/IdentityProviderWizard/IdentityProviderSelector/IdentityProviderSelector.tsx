@@ -41,18 +41,25 @@ export const IdentityProviderSelector: FC = () => {
               <h1>Choose your Identity Provider</h1>
               <h2>This is how users will sign in to demo.phasetwo.io</h2>
               <div className="selection-container">
-                {IdentityProviders.map(({ name, imageSrc, active, id }) => {
-                  return (
-                    <Link to={active ? `/idp/${id}/protocol` : "#"} key={id}>
-                      <IdPButton
-                        key={name}
-                        text={name}
-                        image={imageSrc}
-                        active={active}
-                      />
-                    </Link>
-                  );
-                })}
+                {IdentityProviders.map(
+                  ({ name, imageSrc, active, id, protocols }) => {
+                    const linkTo = active
+                      ? `/idp/${id}/${
+                          protocols.length === 1 ? protocols[0] : "protocol"
+                        }`
+                      : "#";
+                    return (
+                      <Link to={linkTo} key={id}>
+                        <IdPButton
+                          key={name}
+                          text={name}
+                          image={imageSrc}
+                          active={active}
+                        />
+                      </Link>
+                    );
+                  }
+                )}
               </div>
             </div>
           </div>

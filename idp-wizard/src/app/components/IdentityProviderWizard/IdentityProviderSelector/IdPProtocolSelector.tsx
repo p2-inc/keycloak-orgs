@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { IdPButton } from "./components/IdPButton";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { ArrowLeftIcon, OpenidIcon } from "@patternfly/react-icons";
@@ -13,9 +13,16 @@ export const IdPProtocolSelector: FC = ({}) => {
 
   const {
     name: providerName,
+    id: providerId,
     imageSrc: providerLogo,
     protocols: providerProtocols,
   } = currentProvider;
+
+  useEffect(() => {
+    if (providerProtocols.length === 1) {
+      history.replace(`/idp/${provider}/${providerProtocols[0]}`);
+    }
+  }, []);
 
   return (
     <Stack id="protocol-selector" className="container">
@@ -42,14 +49,14 @@ export const IdPProtocolSelector: FC = ({}) => {
         </Text>
       </StackItem>
       <StackItem className="selection-container">
-        {IdentityProtocols.map(({ name, imageSrc, id }, i) => {
+        {IdentityProtocols.map(({ name, imageSrc, id: protocolId }, i) => {
           return (
-            <Link to={`/idp/${provider}/${id}`} key={i}>
+            <Link to={`/idp/${providerId}/${protocolId}`} key={i}>
               <IdPButton
                 key={i}
                 text={name}
                 image={imageSrc}
-                active={providerProtocols.includes(id)}
+                active={providerProtocols.includes(protocolId)}
               />
             </Link>
           );
