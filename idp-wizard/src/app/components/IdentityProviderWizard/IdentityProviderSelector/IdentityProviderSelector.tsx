@@ -3,19 +3,19 @@ import { IdPButton } from "./components/IdPButton";
 import { IdPProtocolSelector } from "./IdPProtocolSelector";
 import { useKeycloak } from "@react-keycloak/web";
 
-import azureLogo from "@app/bgimages/logos/azure_logo.png";
-import oktaLogo from "@app/bgimages/logos/okta_logo.png";
-import cyberarkLogo from "@app/bgimages/logos/cyberark_logo.png";
-import adfsLogo from "@app/bgimages/logos/adfs_logo.png";
-import authoLogo from "@app/bgimages/logos/auth0_logo.png";
-import googleLogo from "@app/bgimages/logos/google_saml_logo.png";
-import jumpcloudLogo from "@app/bgimages/logos/jumpcloud_logo.png";
-import oneloginLogo from "@app/bgimages/logos/onelogin_logo.png";
-import openidLogo from "@app/bgimages/logos/openid_logo.png";
-import pingFedLogo from "@app/bgimages/logos/ping_federate_logo.png";
-import pingOneLogo from "@app/bgimages/logos/ping_one_logo.png";
-import samlLogo from "@app/bgimages/logos/saml_logo.png";
-import vmwareLogo from "@app/bgimages/logos/vmware_logo.png";
+import azureLogo from "@app/images/provider-logos/azure_logo.png";
+import oktaLogo from "@app/images/provider-logos/okta_logo.png";
+import cyberarkLogo from "@app/images/provider-logos/cyberark_logo.png";
+import adfsLogo from "@app/images/provider-logos/adfs_logo.png";
+import authoLogo from "@app/images/provider-logos/auth0_logo.png";
+import googleLogo from "@app/images/provider-logos/google_saml_logo.png";
+import jumpcloudLogo from "@app/images/provider-logos/jumpcloud_logo.png";
+import oneloginLogo from "@app/images/provider-logos/onelogin_logo.png";
+import openidLogo from "@app/images/provider-logos/openid_logo.png";
+import pingFedLogo from "@app/images/provider-logos/ping_federate_logo.png";
+import pingOneLogo from "@app/images/provider-logos/ping_one_logo.png";
+import samlLogo from "@app/images/provider-logos/saml_logo.png";
+import vmwareLogo from "@app/images/provider-logos/vmware_logo.png";
 import { Link } from "react-router-dom";
 import {
   Button,

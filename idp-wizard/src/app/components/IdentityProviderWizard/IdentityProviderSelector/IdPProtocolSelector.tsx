@@ -1,8 +1,8 @@
 import React, { FC } from "react";
 import { IdPButton } from "./components/IdPButton";
-import samlLogo from "@app/bgimages/logos/saml_logo.png";
-import openIDLogo from "@app/bgimages/logos/openid_logo.png";
-import ldapLogo from "@app/bgimages/logos/ldap_logo.png";
+import samlLogo from "@app/images/provider-logos/saml_logo.png";
+import openIDLogo from "@app/images/provider-logos/openid_logo.png";
+import ldapLogo from "@app/images/provider-logos/ldap_logo.png";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { ArrowLeftIcon, OpenidIcon } from "@patternfly/react-icons";
 import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
