@@ -11,7 +11,7 @@ import {
 } from "@patternfly/react-core";
 import React from "react";
 import azureLogo from "@app/images/azure/azure-logo.png";
-import samlLogo from "@app/bgimages/logos/saml_logo.png";
+import samlLogo from "@app/images/provider-logos/saml_logo.png";
 import { IdPButton } from "@app/components/IdentityProviderWizard/IdentityProviderSelector/components/IdPButton";
 
 export function ConnectionStatus() {
