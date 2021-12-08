@@ -11,7 +11,10 @@ import {
   Stack,
   StackItem,
 } from "@patternfly/react-core";
-import { IdentityProviders } from "@app/configurations";
+import {
+  GenericIdentityProviders,
+  IdentityProviders,
+} from "@app/configurations";
 
 export const IdentityProviderSelector: FC = () => {
   const { keycloak } = useKeycloak();
@@ -42,6 +45,37 @@ export const IdentityProviderSelector: FC = () => {
               <h2>This is how users will sign in to demo.phasetwo.io</h2>
               <div className="selection-container">
                 {IdentityProviders.map(
+                  ({ name, imageSrc, active, id, protocols }) => {
+                    const linkTo = active
+                      ? `/idp/${id}/${
+                          protocols.length === 1 ? protocols[0] : "protocol"
+                        }`
+                      : "#";
+                    return (
+                      <Link to={linkTo} key={id}>
+                        <IdPButton
+                          key={name}
+                          text={name}
+                          image={imageSrc}
+                          active={active}
+                        />
+                      </Link>
+                    );
+                  }
+                )}
+              </div>
+              <h2
+                style={{
+                  maxWidth: "450px",
+                  margin: "auto",
+                  marginTop: "1.5rem",
+                }}
+              >
+                If you don't see your identity provider, select one of the
+                generic protocols below to connect with your provider.
+              </h2>
+              <div className="selection-container">
+                {GenericIdentityProviders.map(
                   ({ name, imageSrc, active, id, protocols }) => {
                     const linkTo = active
                       ? `/idp/${id}/${

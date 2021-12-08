@@ -11,6 +11,7 @@ import pingFedLogo from "@app/images/provider-logos/ping_federate_logo.png";
 import pingOneLogo from "@app/images/provider-logos/ping_one_logo.png";
 import samlLogo from "@app/images/provider-logos/saml_logo.png";
 import vmwareLogo from "@app/images/provider-logos/vmware_logo.png";
+import ldapLogo from "@app/images/provider-logos/ldap_logo.png";
 import { Protocols } from ".";
 
 export enum Providers {
@@ -20,6 +21,7 @@ export enum Providers {
   CYBERARK = "cyberark",
   GOOGLE_SAML = "googlesaml",
   JUMP_CLOUD = "jumpcloud",
+  LDAP = "ldap",
   OKTA = "okta",
   ONE_LOGIN = "onelogin",
   OPEN_ID = "openid",
@@ -94,13 +96,7 @@ export const IdentityProviders: IIDPType[] = [
     id: Providers.ONE_LOGIN,
     protocols: [],
   },
-  {
-    name: "OpenID",
-    imageSrc: openidLogo,
-    active: false,
-    id: Providers.OPEN_ID,
-    protocols: [Protocols.OPEN_ID],
-  },
+
   {
     name: "Ping Federate",
     imageSrc: pingFedLogo,
@@ -115,18 +111,36 @@ export const IdentityProviders: IIDPType[] = [
     id: Providers.PING_ONE,
     protocols: [],
   },
-  {
-    name: "SAML",
-    imageSrc: samlLogo,
-    active: false,
-    id: Providers.SAML,
-    protocols: [],
-  },
+
   {
     name: "VMWare",
     imageSrc: vmwareLogo,
     active: false,
     id: Providers.VMWARE,
     protocols: [],
+  },
+];
+
+export const GenericIdentityProviders: IIDPType[] = [
+  {
+    name: "SAML",
+    imageSrc: samlLogo,
+    active: false,
+    id: Providers.SAML,
+    protocols: [Protocols.SAML],
+  },
+  {
+    name: "OpenID",
+    imageSrc: openidLogo,
+    active: false,
+    id: Providers.OPEN_ID,
+    protocols: [Protocols.OPEN_ID],
+  },
+  {
+    name: "LDAP",
+    imageSrc: ldapLogo,
+    active: false,
+    id: Providers.LDAP,
+    protocols: [Protocols.LDAP],
   },
 ];
