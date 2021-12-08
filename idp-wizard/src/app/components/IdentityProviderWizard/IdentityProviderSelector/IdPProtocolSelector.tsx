@@ -1,44 +1,13 @@
 import React, { FC } from "react";
 import { IdPButton } from "./components/IdPButton";
-import samlLogo from "@app/images/provider-logos/saml_logo.png";
-import openIDLogo from "@app/images/provider-logos/openid_logo.png";
-import ldapLogo from "@app/images/provider-logos/ldap_logo.png";
 import { Link, useHistory, useParams } from "react-router-dom";
 import { ArrowLeftIcon, OpenidIcon } from "@patternfly/react-icons";
 import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
-import { idpList } from "./IdentityProviderSelector";
-
-interface ProtocolType {
-  name: string;
-  imageSrc: string;
-  active: string[];
-  id: string;
-}
+import { IdentityProtocols, IdentityProviders } from "@app/configurations";
 
 export const IdPProtocolSelector: FC = ({}) => {
   const { provider } = useParams();
   const history = useHistory();
-
-  const idpProtocolList: ProtocolType[] = [
-    {
-      name: "SAML",
-      id: "saml",
-      imageSrc: samlLogo,
-      active: ["azure"],
-    },
-    {
-      name: "OpenID",
-      id: "openid",
-      imageSrc: openIDLogo,
-      active: ["openid"],
-    },
-    {
-      name: "LDAP",
-      id: "ldap",
-      imageSrc: ldapLogo,
-      active: ["okta"],
-    },
-  ];
 
   return (
     <Stack id="protocol-selector" className="container">
@@ -53,7 +22,7 @@ export const IdPProtocolSelector: FC = ({}) => {
       <StackItem className="selection-container">
         <IdPButton
           text={provider}
-          image={idpList.find((i) => i.id === provider)?.imageSrc!}
+          image={IdentityProviders.find((i) => i.id === provider)?.imageSrc!}
           active={true}
         />
       </StackItem>
@@ -69,7 +38,7 @@ export const IdPProtocolSelector: FC = ({}) => {
         </Text>
       </StackItem>
       <StackItem className="selection-container">
-        {idpProtocolList.map(({ name, imageSrc, active, id }, i) => {
+        {IdentityProtocols.map(({ name, imageSrc, active, id }, i) => {
           return (
             <Link to={`/idp/${provider}/${id}`} key={i}>
               <IdPButton
