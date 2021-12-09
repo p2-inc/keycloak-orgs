@@ -28,7 +28,8 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.jsx",
-    "**/*.js"
+    "**/*.js",
+    "src/app/components/IdentityProviderWizard/Wizards/Google/index.tsxx"
   ],
   "exclude": ["node_modules"]
 }

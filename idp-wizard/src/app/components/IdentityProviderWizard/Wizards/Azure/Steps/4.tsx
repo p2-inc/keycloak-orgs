@@ -4,8 +4,8 @@ import azureStep9Image from "@app/images/azure/azure-9.png";
 import azureStep10Image from "@app/images/azure/azure-10.png";
 import azureStep11Image from "@app/images/azure/azure-11.png";
 import azureStep12Image from "@app/images/azure/azure-12.png";
-import Step from "../../Step";
-import { InstructionProps } from "../../InstructionComponent";
+import Step from "../../../Step";
+import { InstructionProps } from "../../../InstructionComponent";
 import { useImageModal } from "@app/hooks/useImageModal";
 
 export function AzureStepFour() {

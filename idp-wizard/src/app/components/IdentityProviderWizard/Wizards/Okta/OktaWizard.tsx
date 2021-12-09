@@ -13,11 +13,12 @@ import { OktaStepOne } from "./Steps/OktaStepOne";
 import { OktaStepTwo } from "./Steps/OktaStepTwo";
 import { OktaStepThree } from "./Steps/OktaStepThree";
 import { useKeycloak } from "@react-keycloak/web";
-import octaLogo from "@app/images/okta/okta-logo.png";
-import { WizardConfirmation } from "../FinalStepConfirmation";
+import oktaLogo from "@app/images/okta/okta-logo.png";
+import { WizardConfirmation } from "../../FinalStepConfirmation";
 import { useHistory } from "react-router";
 import { useSessionStorage } from "react-use";
 import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
+import { Header } from "../components";
 
 export const OktaWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -111,23 +112,7 @@ export const OktaWizard: FC = () => {
   const title = "Finished wizard";
   return (
     <>
-      <PageSection variant={PageSectionVariants.light}>
-        <Flex>
-          <FlexItem>
-            <img className="step-header-image" src={octaLogo} alt="Okta" />
-          </FlexItem>
-          <FlexItem align={{ default: "alignRight" }}>
-            <Button variant="link" isInline onClick={goToDashboard}>
-              My Dashboard
-            </Button>
-          </FlexItem>
-          <FlexItem>
-            <Button variant="link" isInline onClick={() => keycloak.logout()}>
-              Logout
-            </Button>
-          </FlexItem>
-        </Flex>
-      </PageSection>
+      <Header logo={oktaLogo} />
       <PageSection
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}

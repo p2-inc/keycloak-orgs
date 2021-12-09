@@ -11,8 +11,8 @@ import {
   ModalVariant,
   TextInput,
 } from "@patternfly/react-core";
-import { InstructionProps } from "../../InstructionComponent";
-import Step from "../../Step";
+import { InstructionProps } from "../../../InstructionComponent";
+import Step from "../../../Step";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { azureStepOneAValidation } from "@app/services/AzureValidation";
 import { useSessionStorage } from "react-use";

@@ -9,16 +9,17 @@ import {
   Button,
 } from "@patternfly/react-core";
 import { useKeycloak } from "@react-keycloak/web";
-import { AzureStepOne } from "./Steps/AzureStepOne";
-import { AzureStepOneA } from "./Steps/AzureStepOneA";
-import { AzureStepTwo } from "./Steps/AzureStepTwo";
-import { AzureStepThree } from "./Steps/AzureStepThree";
-import { AzureStepFour } from "./Steps/AzureStepFour";
+import { AzureStepOne } from "./Steps/1";
+import { AzureStepOneA } from "./Steps/1a";
+import { AzureStepTwo } from "./Steps/2";
+import { AzureStepThree } from "./Steps/3";
+import { AzureStepFour } from "./Steps/4";
 import azureLogo from "@app/images/azure/azure-logo.png";
-import { WizardConfirmation } from "../FinalStepConfirmation";
+import { WizardConfirmation } from "../../FinalStepConfirmation";
 import { useHistory } from "react-router";
 
 import { azureStepOneAValidation } from "@app/services/AzureValidation";
+import { Header } from "../components";
 
 export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -114,24 +115,7 @@ export const AzureWizard: FC = () => {
 
   return (
     <>
-      <PageSection variant={PageSectionVariants.light}>
-        <Flex>
-          <FlexItem>
-            <img className="step-header-image" src={azureLogo} alt="Azure" />
-          </FlexItem>
-
-          <FlexItem align={{ default: "alignRight" }}>
-            <Button variant="link" isInline onClick={goToDashboard}>
-              My Dashboard
-            </Button>
-          </FlexItem>
-          <FlexItem>
-            <Button variant="link" isInline onClick={() => keycloak.logout()}>
-              Logout
-            </Button>
-          </FlexItem>
-        </Flex>
-      </PageSection>
+      <Header logo={azureLogo} />
       <PageSection
         marginHeight={10}
         type={PageSectionTypes.wizard}
