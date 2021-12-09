@@ -19,6 +19,7 @@ module.exports = (env) => {
                 experimentalWatchApi: true,
               },
             },
+            "astroturf/loader",
           ],
         },
         {

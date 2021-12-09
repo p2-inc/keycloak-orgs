@@ -124,17 +124,18 @@ h2 {
   vertical-align: center;
   border-radius: 5px;
   cursor: pointer;
-}
 
-.idp-button img {
-  display: block;
-  margin: 0 auto;
-  max-height: 99%;
-  width: auto;
-  height: auto;
-}
-.idp-button:hover {
-  box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+  img {
+    display: block;
+    margin: 0 auto;
+    max-height: 99%;
+    width: auto;
+    height: auto;
+  }
+
+  &:hover {
+    box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+  }
 }
 
 .disabled {
