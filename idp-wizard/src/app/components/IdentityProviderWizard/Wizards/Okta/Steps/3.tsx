@@ -12,7 +12,7 @@ import {
 import image from "@app/images/okta/okta-3.png";
 import { ArrowRightIcon, TrashIcon } from "@patternfly/react-icons";
 import { InstructionProps } from "../../../InstructionComponent";
-import Step from "../../../Step";
+import { Step } from "../../components";
 import { useImageModal } from "@app/hooks/useImageModal";
 
 export const OktaStepThree: FC = () => {

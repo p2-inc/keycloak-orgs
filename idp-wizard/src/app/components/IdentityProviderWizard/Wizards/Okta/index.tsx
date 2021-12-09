@@ -3,20 +3,13 @@ import {
   PageSection,
   PageSectionVariants,
   PageSectionTypes,
-  TextContent,
   Wizard,
-  Flex,
-  FlexItem,
-  Button,
 } from "@patternfly/react-core";
-import { OktaStepOne } from "./Steps/OktaStepOne";
-import { OktaStepTwo } from "./Steps/OktaStepTwo";
-import { OktaStepThree } from "./Steps/OktaStepThree";
-import { useKeycloak } from "@react-keycloak/web";
+import { OktaStepOne } from "./Steps/1";
+import { OktaStepTwo } from "./Steps/2";
+import { OktaStepThree } from "./Steps/3";
 import oktaLogo from "@app/images/okta/okta-logo.png";
-import { WizardConfirmation } from "../../FinalStepConfirmation";
-import { useHistory } from "react-router";
-import { useSessionStorage } from "react-use";
+import { WizardConfirmation } from "../components";
 import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
 import { Header } from "../components";
 
@@ -26,8 +19,6 @@ export const OktaWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const { keycloak } = useKeycloak();
-  const history = useHistory();
 
   const onNext = (newStep) => {
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -40,11 +31,6 @@ export const OktaWizard: FC = () => {
 
   const onFormChange = (value) => {
     setIsFormValid(value);
-  };
-
-  const goToDashboard = () => {
-    let path = ``;
-    history.push(path);
   };
 
   const username = sessionStorage.getItem("okta_un") || "";
@@ -109,7 +95,7 @@ export const OktaWizard: FC = () => {
     },
   ];
 
-  const title = "Finished wizard";
+  const title = "Okta wizard";
   return (
     <>
       <Header logo={oktaLogo} />

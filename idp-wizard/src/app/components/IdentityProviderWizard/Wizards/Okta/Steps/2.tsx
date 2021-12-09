@@ -9,7 +9,7 @@ import {
   Alert,
 } from "@patternfly/react-core";
 import { InstructionProps } from "../../../InstructionComponent";
-import Step from "../../../Step";
+import { Step } from "../../components";
 import { oktaValidateUsernamePassword } from "@app/services/OktaValidation";
 import { useSessionStorage } from "react-use";
 

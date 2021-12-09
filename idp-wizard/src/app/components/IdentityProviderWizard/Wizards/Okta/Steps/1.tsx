@@ -12,7 +12,7 @@ import {
   ModalVariant,
   Button,
 } from "@patternfly/react-core";
-import Step from "../../../Step";
+import { Step } from "../../components";
 import { InstructionProps } from "../../../InstructionComponent";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { oktaStepOneValidation } from "@app/services/OktaValidation";

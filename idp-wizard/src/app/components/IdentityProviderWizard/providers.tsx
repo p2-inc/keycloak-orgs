@@ -3,7 +3,7 @@ import { RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
 import { AzureWizard } from "./Wizards/Azure";
-import { OktaWizard } from "./Wizards/Okta/OktaWizard";
+import { OktaWizard } from "./Wizards/Okta";
 import { GoogleWizard } from "./Wizards/Google";
 
 const Provider = () => {

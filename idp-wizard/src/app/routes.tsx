@@ -12,7 +12,7 @@ import {
   useLastLocation,
 } from "react-router-last-location";
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
-import { OktaWizard } from "./components/IdentityProviderWizard/Wizards/Okta/OktaWizard";
+import { OktaWizard } from "./components/IdentityProviderWizard/Wizards/Okta";
 import { AzureWizard } from "./components/IdentityProviderWizard/Wizards/Azure";
 // import keycloak from "src/keycloak";
 import { useKeycloak } from "@react-keycloak/web";

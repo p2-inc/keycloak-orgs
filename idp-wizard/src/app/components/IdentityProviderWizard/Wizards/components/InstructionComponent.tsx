@@ -11,7 +11,7 @@ export interface InstructionProps {
   text?: string;
   component: JSX.Element;
 }
-function InstructionComponent(props: InstructionProps) {
+export function InstructionComponent(props: InstructionProps) {
   return (
     <Flex>
       {props.text && (
@@ -30,5 +30,3 @@ function InstructionComponent(props: InstructionProps) {
     </Flex>
   );
 }
-
-export default InstructionComponent;

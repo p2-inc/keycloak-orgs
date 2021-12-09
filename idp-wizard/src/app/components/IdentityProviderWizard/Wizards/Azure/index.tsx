@@ -15,7 +15,7 @@ import { AzureStepTwo } from "./Steps/2";
 import { AzureStepThree } from "./Steps/3";
 import { AzureStepFour } from "./Steps/4";
 import azureLogo from "@app/images/azure/azure-logo.png";
-import { WizardConfirmation } from "../../FinalStepConfirmation";
+import { WizardConfirmation } from "../components";
 import { useHistory } from "react-router";
 
 import { azureStepOneAValidation } from "@app/services/AzureValidation";
@@ -27,7 +27,6 @@ export const AzureWizard: FC = () => {
   const [error, setError] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const { keycloak } = useKeycloak();
   const history = useHistory();
   const onNext = (newStep) => {
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -106,12 +105,7 @@ export const AzureWizard: FC = () => {
     },
   ];
 
-  const goToDashboard = () => {
-    let path = ``;
-    history.push(path);
-  };
-
-  const title = "Finished wizard";
+  const title = "Azure wizard";
 
   return (
     <>

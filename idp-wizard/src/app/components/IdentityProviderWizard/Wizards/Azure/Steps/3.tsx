@@ -14,7 +14,7 @@ import azureStep7Image from "@app/images/azure/azure-7.png";
 import azureStep8Image from "@app/images/azure/azure-8.png";
 import { ArrowRightIcon } from "@patternfly/react-icons";
 import { InstructionProps } from "../../../InstructionComponent";
-import Step from "../../../Step";
+import { Step } from "../../components";
 import { useImageModal } from "@app/hooks/useImageModal";
 
 interface IClaims {

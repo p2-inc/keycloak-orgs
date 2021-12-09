@@ -10,7 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import azureStep13Image from "@app/images/azure/azure-13.png";
 import { InstructionProps } from "../../../InstructionComponent";
-import Step from "../../../Step";
+import { Step } from "../../components";
 import { useImageModal } from "@app/hooks/useImageModal";
 
 export function AzureStepFive() {

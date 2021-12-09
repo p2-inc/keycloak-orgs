@@ -4,12 +4,9 @@ import {
   PageSectionVariants,
   PageSectionTypes,
   Wizard,
-  Flex,
-  FlexItem,
   Button,
 } from "@patternfly/react-core";
 import GoogleLogo from "@app/images/provider-logos/google_saml_logo.png";
-import { useKeycloak } from "@react-keycloak/web";
 import { Header } from "../components";
 
 // Items to confirm in patternfly
@@ -18,7 +15,19 @@ import { Header } from "../components";
 // - Wizard steps
 
 export const GoogleWizard: FC = () => {
-  const { keycloak } = useKeycloak();
+  const title = "Google wizard";
+
+  const steps = [
+    { name: "First step", component: <p>Step 1 content</p> },
+    { name: "Second step", component: <p>Step 2 content</p> },
+    { name: "Third step", component: <p>Step 3 content</p> },
+    { name: "Fourth step", component: <p>Step 4 content</p> },
+    {
+      name: "Review",
+      component: <p>Review step content</p>,
+      nextButtonText: "Finish",
+    },
+  ];
 
   return (
     <>
@@ -28,17 +37,17 @@ export const GoogleWizard: FC = () => {
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
       >
-        {/* <Wizard
+        <Wizard
           navAriaLabel={`${title} steps`}
           isNavExpandable
           mainAriaLabel={`${title} content`}
-          onClose={closeWizard}
-          nextButtonText="Continue to Next Step"
+          // onClose={closeWizard}
+          nextButtonText="Next"
           steps={steps}
           height="100%"
           width="100%"
-          onNext={onNext}
-        /> */}
+          // onNext={onNext}
+        />
       </PageSection>
     </>
   );

@@ -1,12 +1,12 @@
 import { Flex, Stack, StackItem, Title } from "@patternfly/react-core";
 import React from "react";
-import InstructionComponent, { InstructionProps } from "./InstructionComponent";
+import { InstructionComponent, InstructionProps } from ".";
 
 interface StepProps {
   title: String;
   instructionList: InstructionProps[];
 }
-function Step(props: StepProps) {
+export function Step(props: StepProps) {
   return (
     <Stack hasGutter id="step">
       <StackItem>
@@ -26,5 +26,3 @@ function Step(props: StepProps) {
     </Stack>
   );
 }
-
-export default Step;

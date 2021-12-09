@@ -5,7 +5,7 @@ import azureStep3Image from "@app/images/azure/azure-3.png";
 import azureStep4Image from "@app/images/azure/azure-4.png";
 import { Modal, ModalVariant } from "@patternfly/react-core";
 import { InstructionProps } from "../../../InstructionComponent";
-import Step from "../../../Step";
+import { Step } from "../../components";
 import { useImageModal } from "@app/hooks/useImageModal";
 
 export function AzureStepOne() {

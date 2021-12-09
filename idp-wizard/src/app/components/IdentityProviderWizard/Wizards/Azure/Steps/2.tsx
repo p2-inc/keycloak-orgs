@@ -11,9 +11,9 @@ import React, { useEffect, useState } from "react";
 import azureStep5Image from "@app/images/azure/azure-5.png";
 import azureStep6Image from "@app/images/azure/azure-6.png";
 import { InstructionProps } from "../../../InstructionComponent";
-import Step from "../../../Step";
+import { Step } from "../../components";
 import { useImageModal } from "@app/hooks/useImageModal";
-import { ClipboardCopyComponent } from "../../../ClipboardCopyComponent";
+import { ClipboardCopyComponent } from "../../components/ClipboardCopyComponent";
 
 export function AzureStepTwo() {
   const replyURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${process.env.AZURE_CUSTOMER_IDENTIFIER}/endpoint`;

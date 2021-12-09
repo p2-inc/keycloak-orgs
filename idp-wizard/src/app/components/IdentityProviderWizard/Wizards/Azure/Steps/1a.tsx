@@ -12,7 +12,7 @@ import {
   TextInput,
 } from "@patternfly/react-core";
 import { InstructionProps } from "../../../InstructionComponent";
-import Step from "../../../Step";
+import { Step } from "../../components";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { azureStepOneAValidation } from "@app/services/AzureValidation";
 import { useSessionStorage } from "react-use";
