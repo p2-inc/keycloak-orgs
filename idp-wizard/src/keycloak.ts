@@ -5,16 +5,17 @@ import Keycloak from 'keycloak-js';
 const keycloak = Keycloak({
   "realm": process.env.REALM || "wizard",
   "url": process.env.KEYCLOAK_URL || "https://app.phasetwo.io/auth/",
-  "clientId": process.env.CLIENT_ID || "idp-wizard",
-  // "realm": "wizard",
-  // "auth-server-url": "https://app.phasetwo.io/auth/",
-  // "ssl-required": "external",
-  // "resource": "idp-wizard",
-  // "credentials": {
-  //   "secret": "094e7246-8291-4a8b-bea1-d97b5eac732b"
-  // },
-  // "confidential-port": 0
+  "clientId": process.env.CLIENT_ID || "idp-wizard"
 });
+
+keycloak.onTokenExpired = () => {
+  console.log('token expired');
+  keycloak.updateToken(30).then(() => {
+    console.log('successfully get a new token');
+  }).catch(() => {
+    console.log('error getting a new token');
+  });
+}
 
 export default keycloak;
 
