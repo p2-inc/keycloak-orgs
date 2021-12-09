@@ -8,6 +8,7 @@ import {
 } from "@patternfly/react-core";
 import GoogleLogo from "@app/images/provider-logos/google_saml_logo.png";
 import { Header } from "../components";
+import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./steps";
 
 // Items to confirm in patternfly
 // - Forms
@@ -18,12 +19,26 @@ export const GoogleWizard: FC = () => {
   const title = "Google wizard";
 
   const steps = [
-    { name: "First step", component: <p>Step 1 content</p> },
-    { name: "Second step", component: <p>Step 2 content</p> },
-    { name: "Third step", component: <p>Step 3 content</p> },
-    { name: "Fourth step", component: <p>Step 4 content</p> },
+    { name: "Add Custom SAML Application", component: <Step1 /> },
     {
-      name: "Review",
+      name: "Enter Details for your Custom App",
+      component: <Step2 />,
+    },
+    { name: "Upload Google IdP Information", component: <Step3 /> },
+    {
+      name: "Enter Service Provider Details",
+      component: <Step4 />,
+    },
+    {
+      name: "Configure Attribute Mapping",
+      component: <Step5 />,
+    },
+    {
+      name: "Configure User Access",
+      component: <Step6 />,
+    },
+    {
+      name: "Confirmation",
       component: <p>Review step content</p>,
       nextButtonText: "Finish",
     },
