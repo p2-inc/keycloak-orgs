@@ -1,31 +1,27 @@
-import {
-  Flex,
-  FlexItem,
-  StackItem,
-  Text,
-  TextVariants,
-} from "@patternfly/react-core";
 import React from "react";
+import { Flex, FlexItem, Text, TextVariants } from "@patternfly/react-core";
+import cs from "classnames";
 
 export interface InstructionProps {
   text?: string;
   component: JSX.Element;
 }
-export function InstructionComponent(props: InstructionProps) {
+export function InstructionComponent({ text, component }: InstructionProps) {
   return (
     <Flex>
-      {props.text && (
+      {text && (
         <FlexItem className="step-instruction">
-          <Text component={TextVariants.h2}>{props.text}</Text>
+          <Text component={TextVariants.h2}>{text}</Text>
         </FlexItem>
       )}
 
       <FlexItem
-        className={
-          props.text ? "step-instruction-image" : "step-no-instruction"
-        }
+        className={cs({
+          "step-instruction-image": text,
+          "step-no-instruction": !text,
+        })}
       >
-        {props.component}
+        {component}
       </FlexItem>
     </Flex>
   );

@@ -13,8 +13,7 @@ import React, { useEffect, useState } from "react";
 import azureStep7Image from "@app/images/azure/azure-7.png";
 import azureStep8Image from "@app/images/azure/azure-8.png";
 import { ArrowRightIcon } from "@patternfly/react-icons";
-import { InstructionProps } from "../../../InstructionComponent";
-import { Step } from "../../components";
+import { InstructionProps, Step } from "@wizardComponents";
 import { useImageModal } from "@app/hooks/useImageModal";
 
 interface IClaims {

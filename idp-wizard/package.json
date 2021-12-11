@@ -1,9 +1,9 @@
 {
-  "name": "patternfly-seed",
+  "name": "idp-wizard",
   "version": "0.0.2",
-  "description": "An open source build scaffolding utility for web apps.",
-  "repository": "https://github.com/patternfly/patternfly-react-seed.git",
-  "homepage": "https://patternfly-react-seed.surge.sh",
+  "description": "Frontend for PhaseTwo Identity Provider Application",
+  "repository": "https://github.com/p2-inc/idp-wizard",
+  "homepage": "http://app.phasetwo.io/",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -24,6 +24,25 @@
     "clean": "rimraf dist",
     "storybook": "start-storybook -p 6006",
     "build:storybook": "build-storybook"
+  },
+  "dependencies": {
+    "@keycloak/keycloak-admin-client": "^15.0.2",
+    "@patternfly/patternfly": "^4.135.2",
+    "@patternfly/react-core": "^4.128.2",
+    "@patternfly/react-icons": "^4.10.11",
+    "@patternfly/react-styles": "^4.10.11",
+    "@patternfly/react-table": "^4.37.8",
+    "@react-keycloak/web": "^3.4.0",
+    "@storybook/builder-webpack5": "^6.2.9",
+    "axios": "^0.24.0",
+    "classnames": "^2.3.1",
+    "keycloak-js": "^15.0.2",
+    "lodash": "^4.17.21",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-last-location": "^2.0.1",
+    "react-use": "^17.3.1",
+    "sirv-cli": "^1.0.12"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^6.2.9",
@@ -79,24 +98,5 @@
     "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2",
     "webpack-merge": "^5.8.0"
-  },
-  "dependencies": {
-    "@keycloak/keycloak-admin-client": "^15.0.2",
-    "@patternfly/patternfly": "^4.135.2",
-    "@patternfly/react-core": "^4.128.2",
-    "@patternfly/react-icons": "^4.10.11",
-    "@patternfly/react-styles": "^4.10.11",
-    "@patternfly/react-table": "^4.37.8",
-    "@react-keycloak/web": "^3.4.0",
-    "@storybook/builder-webpack5": "^6.2.9",
-    "axios": "^0.24.0",
-    "classnames": "^2.3.1",
-    "keycloak-js": "^15.0.2",
-    "lodash": "^4.17.21",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-router-last-location": "^2.0.1",
-    "react-use": "^17.3.1",
-    "sirv-cli": "^1.0.12"
   }
 }

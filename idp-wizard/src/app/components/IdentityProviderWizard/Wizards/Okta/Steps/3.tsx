@@ -11,8 +11,7 @@ import {
 } from "@patternfly/react-core";
 import image from "@app/images/okta/okta-3.png";
 import { ArrowRightIcon, TrashIcon } from "@patternfly/react-icons";
-import { InstructionProps } from "../../../InstructionComponent";
-import { Step } from "../../components";
+import { InstructionProps, Step } from "@wizardComponents";
 import { useImageModal } from "@app/hooks/useImageModal";
 
 export const OktaStepThree: FC = () => {

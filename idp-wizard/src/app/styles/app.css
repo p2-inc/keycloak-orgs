@@ -7,8 +7,6 @@ body,
 .step-image {
   max-width: 600px;
   border: 2px solid lightgray;
-  padding-left: 20x;
-  margin-left: 20px;
   border-radius: 5px;
   vertical-align: text-top;
 }
@@ -68,6 +66,7 @@ body,
 .step-instruction {
   min-width: 40%;
   max-width: 40%;
+  margin-bottom: 1rem;
 }
 
 .step-no-instruction {

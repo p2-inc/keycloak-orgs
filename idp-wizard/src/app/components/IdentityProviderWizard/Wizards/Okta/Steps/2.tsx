@@ -8,8 +8,7 @@ import {
   Button,
   Alert,
 } from "@patternfly/react-core";
-import { InstructionProps } from "../../../InstructionComponent";
-import { Step } from "../../components";
+import { InstructionProps, Step } from "@wizardComponents";
 import { oktaValidateUsernamePassword } from "@app/services/OktaValidation";
 import { useSessionStorage } from "react-use";
 

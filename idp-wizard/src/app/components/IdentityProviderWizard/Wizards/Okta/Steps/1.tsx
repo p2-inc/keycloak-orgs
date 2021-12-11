@@ -12,8 +12,7 @@ import {
   ModalVariant,
   Button,
 } from "@patternfly/react-core";
-import { Step } from "../../components";
-import { InstructionProps } from "../../../InstructionComponent";
+import { InstructionProps, Step } from "@wizardComponents";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { oktaStepOneValidation } from "@app/services/OktaValidation";
 import { useSessionStorage } from "react-use";

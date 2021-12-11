@@ -14,13 +14,7 @@ export function Step(props: StepProps) {
       </StackItem>
       <Flex direction={{ default: "column" }}>
         {props.instructionList.map((item, i) => {
-          return (
-            <InstructionComponent
-              key={i}
-              text={item.text}
-              component={item.component}
-            />
-          );
+          return <InstructionComponent key={i} {...item} />;
         })}
       </Flex>
     </Stack>
