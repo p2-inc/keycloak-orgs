@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -6,13 +6,9 @@ import {
   Wizard,
 } from "@patternfly/react-core";
 import * as Steps from "./Steps";
-
 import azureLogo from "@app/images/azure/azure-logo.png";
-import { WizardConfirmation } from "../components";
-import { useHistory } from "react-router";
-
+import { WizardConfirmation, Header } from "@wizardComponents";
 import { azureStepOneAValidation } from "@app/services/AzureValidation";
-import { Header } from "../components";
 
 export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -20,7 +16,6 @@ export const AzureWizard: FC = () => {
   const [error, setError] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const history = useHistory();
   const onNext = (newStep) => {
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
     setIsFormValid(false);
