@@ -4,16 +4,9 @@ import {
   PageSectionVariants,
   PageSectionTypes,
   Wizard,
-  Flex,
-  FlexItem,
-  Button,
 } from "@patternfly/react-core";
-import { useKeycloak } from "@react-keycloak/web";
-import { AzureStepOne } from "./Steps/1";
-import { AzureStepOneA } from "./Steps/1a";
-import { AzureStepTwo } from "./Steps/2";
-import { AzureStepThree } from "./Steps/3";
-import { AzureStepFour } from "./Steps/4";
+import * as Steps from "./Steps";
+
 import azureLogo from "@app/images/azure/azure-logo.png";
 import { WizardConfirmation } from "../components";
 import { useHistory } from "react-router";
@@ -56,20 +49,20 @@ export const AzureWizard: FC = () => {
     {
       id: 1,
       name: "Create Enterprise Application",
-      component: <AzureStepOne />,
+      component: <Steps.AzureStepOne />,
       hideCancelButton: true,
     },
     {
       id: 2,
       name: "Configure Attribute Statements",
-      component: <AzureStepTwo />,
+      component: <Steps.AzureStepTwo />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
     },
     {
       id: 3,
       name: "Upload Azure SAML Metadata file",
-      component: <AzureStepOneA onChange={onFormChange} />,
+      component: <Steps.AzureStepOneA onChange={onFormChange} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
       enableNext: isFormValid,
@@ -77,14 +70,14 @@ export const AzureWizard: FC = () => {
     {
       id: 4,
       name: "User Attributes & Claims",
-      component: <AzureStepThree />,
+      component: <Steps.AzureStepThree />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 4,
     },
     {
       id: 5,
       name: "Assign People & Groups",
-      component: <AzureStepFour />,
+      component: <Steps.AzureStepFour />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 5,
     },
