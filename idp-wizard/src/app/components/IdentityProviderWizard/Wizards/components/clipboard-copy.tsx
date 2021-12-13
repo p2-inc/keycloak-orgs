@@ -1,3 +1,4 @@
+import React, { ReactElement } from "react";
 import {
   Card,
   CardBody,
@@ -5,20 +6,25 @@ import {
   Form,
   FormGroup,
 } from "@patternfly/react-core";
-import React from "react";
+import cs from "classnames";
 
 interface ClipboardCopyProps {
-  label: string;
+  label: string | ReactElement;
   initialValue: string;
+  classes?: string;
 }
-export function ClipboardCopyComponent(props: ClipboardCopyProps) {
+export function ClipboardCopyComponent({
+  label,
+  initialValue,
+  classes = "",
+}: ClipboardCopyProps) {
   return (
-    <Card className="card-shadow">
+    <Card className={cs("pf-u-box-shadow-sm", classes)}>
       <CardBody>
         <Form>
-          <FormGroup label={props.label} fieldId="copy-form">
+          <FormGroup label={label} fieldId="copy-form">
             <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied">
-              {props.initialValue}
+              {initialValue}
             </ClipboardCopy>
           </FormGroup>
         </Form>
