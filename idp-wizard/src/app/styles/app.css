@@ -1,3 +1,5 @@
+@import "@patternfly/patternfly/patternfly-addons.css";
+
 html,
 body,
 #root {
@@ -12,12 +14,6 @@ body,
   &:hover {
     cursor: "pointer";
   }
-}
-
-.card-shadow {
-  border: 1px solid lightgray;
-  padding: 10px;
-  box-shadow: 5px 10px 8px #888888;
 }
 
 .selection-container {

@@ -1,9 +1,10 @@
 @import "@patternfly/patternfly/patternfly.min.css";
-@import "@patternfly/patternfly/patternfly-addons.css";
 
+/* Imported in app.css now */
+/* @import "@patternfly/patternfly/patternfly-addons.css"; */
 
 /* @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap'); */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap");
 
 .keycloak__pageheader_brand {
   height: 35px;
@@ -23,10 +24,14 @@ label.pf-c-form__label {
 }
 
 .pf-c-select__toggle:before {
-  border-top: var(--pf-c-select__toggle--before--BorderTopWidth) solid var(--pf-c-select__toggle--before--BorderTopColor);
-  border-right: var(--pf-c-select__toggle--before--BorderRightWidth) solid var(--pf-c-select__toggle--before--BorderRightColor);
-  border-bottom: var(--pf-c-select__toggle--before--BorderBottomWidth) solid var(--pf-c-select__toggle--before--BorderBottomColor);
-  border-left: var(--pf-c-select__toggle--before--BorderLeftWidth) solid var(--pf-c-select__toggle--before--BorderLeftColor);
+  border-top: var(--pf-c-select__toggle--before--BorderTopWidth) solid
+    var(--pf-c-select__toggle--before--BorderTopColor);
+  border-right: var(--pf-c-select__toggle--before--BorderRightWidth) solid
+    var(--pf-c-select__toggle--before--BorderRightColor);
+  border-bottom: var(--pf-c-select__toggle--before--BorderBottomWidth) solid
+    var(--pf-c-select__toggle--before--BorderBottomColor);
+  border-left: var(--pf-c-select__toggle--before--BorderLeftWidth) solid
+    var(--pf-c-select__toggle--before--BorderLeftColor);
 }
 
 .keycloak__form_actions {
@@ -45,13 +50,12 @@ label.pf-c-form__label {
 Root Style Overrides
 */
 :root {
-  --pf-global--FontFamily--sans-serif: 'Open Sans';
+  --pf-global--FontFamily--sans-serif: "Open Sans";
   --pf-global--link--Color: rgb(63, 161, 227);
   --pf-global--primary-color--100: rgb(63, 161, 227);
   --pf-global--link--Color--dark: rgb(63, 161, 227);
   --pf-global--BorderColor--light-50: #e8e8e8;
 }
-
 
 /*
 Page Overrides
@@ -64,7 +68,6 @@ Page Overrides
 .pf-c-avatar {
   box-shadow: 0 0 3px 1px #cacaca;
 }
-
 
 .pf-c-content {
   --pf-c-content--h1--FontWeight: 500;
@@ -104,7 +107,10 @@ Form Control Overrides
   outline: none;
   border-bottom: 1px rgb(119, 119, 119) solid;
 }
-.pf-c-form-control[type="text"], .pf-c-form-control[type="email"], .pf-c-form-control[type="password"], .pf-c-form-control[type="number"] {
+.pf-c-form-control[type="text"],
+.pf-c-form-control[type="email"],
+.pf-c-form-control[type="password"],
+.pf-c-form-control[type="number"] {
   border: none;
   border-bottom: 1px lightgray solid;
 }
@@ -119,7 +125,7 @@ button[aria-label="Actions"]:hover {
   opacity: 0.8;
 }
 .pf-c-button.pf-m-primary {
-  transform: scale(0.87)
+  transform: scale(0.87);
 }
 .pf-c-button.pf-m-primary {
   transition: all 50ms linear;
@@ -130,10 +136,10 @@ button[aria-label="Actions"]:hover {
   transition: all 50ms linear;
 }
 
-
 body * {
   /* font-family: 'Noto Sans JP', sans-serif !important; */
-  font-family: -apple-system,BlinkMacSystemFont,Segoe,UI,Roboto,Helvetica Neue,Ubuntu,sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe, UI, Roboto,
+    Helvetica Neue, Ubuntu, sans-serif;
 }
 
 /*
@@ -178,7 +184,7 @@ body * {
 #page-sidebar {
   /* background-color: #f7f7f7; */
   /* background-color: #f3f5f6; */
-  background-color: #F2F6F8;
+  background-color: #f2f6f8;
   color: #3d3d3d;
   border-right: 1px #efefef solid;
   box-shadow: none;
@@ -197,7 +203,6 @@ body * {
 #page-sidebar .keycloak__realm_selector_dropdown__toggle::before {
   content: none;
 }
-
 
 #kc-main-content-page-container {
   padding: 30px;
@@ -288,7 +293,7 @@ Tabs Overrides
   padding-left: var(--pf-c-page__main-section--PaddingLow);
   padding-right: var(--pf-c-page__main-section--PaddingRight);
 }
-.pf-c-tabs__item > button{
+.pf-c-tabs__item > button {
   background-color: transparent;
 }
 .pf-c-tabs__item.pf-m-current {
@@ -298,13 +303,13 @@ Tabs Overrides
   color: rgb(63, 161, 227);
 }
 .pf-c-tabs__item:hover * {
-  color: #1a1f36
+  color: #1a1f36;
 }
 .pf-c-tabs__item.pf-m-current:hover * {
   color: rgb(63, 161, 227);
 }
 .pf-c-tabs__item.pf-m-current::after {
-  content: '';
+  content: "";
   width: calc(100% - 20px);
   height: 2px;
   position: absolute;
@@ -317,7 +322,6 @@ Tabs Overrides
 .pf-c-tabs__item-text {
   font-size: 14px;
 }
-
 
 .pf-c-toolbar__content {
   padding: 0;
@@ -401,7 +405,7 @@ Tabs Overrides
 }
 
 a:hover {
-  text-decoration: none;;
+  text-decoration: none;
 }
 
 .pf-c-backdrop {
@@ -436,7 +440,7 @@ a:hover {
   --pf-c-switch__input--focus__toggle--OutlineWidth: 0;
 }
 
-.pf-c-table__check>input:checked {
+.pf-c-table__check > input:checked {
   box-shadow: 0 0 8px 3px #93cdde73;
 }
 
@@ -478,7 +482,6 @@ Large Button Style Overrides
   transition: transform 50ms linear;
   cursor: pointer;
 }
-
 
 /**
 Table Row Hovering
@@ -536,7 +539,6 @@ Layout Modifictions
   z-index: 3000;
 }
 
-
 .page-sidebar.collapsed {
   width: 0;
   transition: width 100ms linear;
@@ -554,7 +556,8 @@ Layout Modifictions
   flex: 1;
 }
 
-.pf-c-page__drawer, .pf-c-page__main {
+.pf-c-page__drawer,
+.pf-c-page__main {
   overflow-y: unset;
   overflow-x: unset;
 }
@@ -582,7 +585,7 @@ Layout Modifictions
   transform: translateY(-50%);
   left: 8%;
   z-index: 8888;
-  
+
   display: flex;
   justify-content: center;
   align-items: center;
