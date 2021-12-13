@@ -6,9 +6,12 @@ body,
 
 .step-image {
   max-width: 600px;
-  border: 2px solid lightgray;
+  box-shadow: 0px 0px 4px 1px lightgrey;
   border-radius: 5px;
   vertical-align: text-top;
+  &:hover {
+    cursor: "pointer";
+  }
 }
 
 .card-shadow {
@@ -99,9 +102,9 @@ body,
 .step-header-image {
   float: left;
   margin: 5px auto;
-  max-width: 75px;
+  max-width: 150px;
   max-height: 75px;
-  width: auto;
+  width: 100%;
   height: auto;
 }
 

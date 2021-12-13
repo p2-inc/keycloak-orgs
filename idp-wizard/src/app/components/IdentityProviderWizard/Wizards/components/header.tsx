@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties, FC } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -9,14 +9,24 @@ import {
 import { Link } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
 
-export const Header = ({ logo }) => {
+interface Props {
+  logo: string;
+  logoStyles?: CSSProperties;
+}
+
+export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
   const { keycloak } = useKeycloak();
 
   return (
     <PageSection variant={PageSectionVariants.light}>
-      <Flex>
+      <Flex alignItems={{ default: "alignItemsCenter" }}>
         <FlexItem>
-          <img className="step-header-image" src={logo} alt="Azure" />
+          <img
+            className="step-header-image"
+            src={logo}
+            alt="Logo"
+            style={logoStyles}
+          />
         </FlexItem>
 
         <FlexItem align={{ default: "alignRight" }}>

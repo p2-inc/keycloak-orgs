@@ -89,7 +89,7 @@ module.exports = (env) => {
             input.indexOf("background-filter") === -1 &&
             input.indexOf("pficon") === -1,
           use: {
-            loader: "raw-loader",
+            loader: "svg-url-loader",
             options: {},
           },
         },
