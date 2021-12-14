@@ -12,6 +12,8 @@ import {
   Modal,
   ModalVariant,
   FileUploadFieldProps,
+  FormAlert,
+  Alert,
 } from "@patternfly/react-core";
 
 interface Step3Props {
@@ -24,6 +26,8 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
 
   const [metadataFileValue, setMetadataFileValue] = useState();
   const [metadataFileName, setMetadataFileName] = useState();
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadValid, setUploadValid] = useState<boolean | null>(null);
 
   const handleFileInputChange: FileUploadFieldProps["onChange"] = async (
     value,
@@ -33,8 +37,18 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
     console.log(value, filename, event);
     setMetadataFileName(filename);
     setMetadataFileValue(value);
+    setIsUploading(true);
+    setUploadValid(null);
 
     const uploadStatus = await uploadMetadataFile(value);
+
+    if (uploadStatus) {
+      setUploadValid(true);
+    } else {
+      setUploadValid(false);
+    }
+
+    setIsUploading(false);
 
     console.log(uploadStatus);
     // allow for next step is success
@@ -60,6 +74,26 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
           <CardTitle>Upload metadata file</CardTitle>
           <CardBody>
             <Form>
+              {uploadValid && (
+                <FormAlert>
+                  <Alert
+                    variant="success"
+                    title="Config uploaded successfully. Please continue."
+                    aria-live="polite"
+                    isInline
+                  />
+                </FormAlert>
+              )}
+              {uploadValid === false && (
+                <FormAlert>
+                  <Alert
+                    variant="danger"
+                    title="Config not uploaded successfully. Please check the file and try again."
+                    aria-live="polite"
+                    isInline
+                  />
+                </FormAlert>
+              )}
               <FormGroup
                 label="Metadata File"
                 isRequired
@@ -76,6 +110,7 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
                   dropzoneProps={{
                     accept: "text/xml",
                   }}
+                  isLoading={isUploading}
                 />
               </FormGroup>
             </Form>
