@@ -12,12 +12,13 @@ import {
   useLastLocation,
 } from "react-router-last-location";
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
-import { OktaWizard } from "./components/IdentityProviderWizard/OktaWizard/OktaWizard";
-import { AzureWizard } from "./components/IdentityProviderWizard/AzureWizard/AzureWizard";
+import { OktaWizard } from "./components/IdentityProviderWizard/Wizards/Okta";
+import { AzureWizard } from "./components/IdentityProviderWizard/Wizards/Azure";
 // import keycloak from "src/keycloak";
 import { useKeycloak } from "@react-keycloak/web";
-import Provider from "./components/IdentityProviderWizard/provider";
+import Provider from "./components/IdentityProviderWizard/providers";
 import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
+import { Protocols, Providers } from "./configurations";
 
 let routeFocusTimer: number;
 export interface IAppRoute {
@@ -42,6 +43,11 @@ export interface IAppRouteGroup {
 }
 
 export type AppRouteConfig = IAppRoute | IAppRouteGroup;
+
+export interface RouterParams {
+  provider: Providers;
+  protocol: Protocols;
+}
 
 const routes: AppRouteConfig[] = [
   {

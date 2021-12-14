@@ -12,7 +12,7 @@ const settings = {
 export const useKeycloakAdminApi = () => {
   const kcAdminClient = new KcAdminClient(settings);
   const setKcAdminClientAccessToken = async () => {
-    kcAdminClient.setAccessToken(keycloak.token)
-  }
+    kcAdminClient.setAccessToken(keycloak.token);
+  };
   return [kcAdminClient, setKcAdminClientAccessToken] as const;
 };

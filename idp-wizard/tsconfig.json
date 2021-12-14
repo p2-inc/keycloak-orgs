@@ -19,16 +19,14 @@
     "strict": true,
     "paths": {
       "@app/*": ["src/app/*"],
-      "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"]
+      "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"],
+      "@wizardComponents": [
+        "src/app/components/IdentityProviderWizard/Wizards/components"
+      ]
     },
     "importHelpers": true,
     "skipLibCheck": true
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.jsx",
-    "**/*.js"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js"],
   "exclude": ["node_modules"]
 }

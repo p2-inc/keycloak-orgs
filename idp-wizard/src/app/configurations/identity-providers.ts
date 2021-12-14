@@ -55,6 +55,13 @@ export const IdentityProviders: IIDPType[] = [
     protocols: [Protocols.LDAP],
   },
   {
+    name: "Google SAML",
+    imageSrc: googleLogo,
+    active: true,
+    id: Providers.GOOGLE_SAML,
+    protocols: [Protocols.SAML],
+  },
+  {
     name: "ADFS",
     imageSrc: adfsLogo,
     active: false,
@@ -73,13 +80,6 @@ export const IdentityProviders: IIDPType[] = [
     imageSrc: cyberarkLogo,
     active: false,
     id: Providers.CYBERARK,
-    protocols: [],
-  },
-  {
-    name: "Google SAML",
-    imageSrc: googleLogo,
-    active: false,
-    id: Providers.GOOGLE_SAML,
     protocols: [],
   },
   {
