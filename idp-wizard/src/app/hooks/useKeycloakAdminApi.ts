@@ -17,6 +17,7 @@ const credentials = {
 
 export const useKeycloakAdminApi = () => {
   const kcAdminClient = new KcAdminClient(settings);
+
   //TODO: Do not create a new token for each request.
   const setKcAdminClientAccessToken = async () => {
     await SetAccessToken();
