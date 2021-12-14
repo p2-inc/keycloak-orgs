@@ -8,6 +8,7 @@ const keycloak = Keycloak({
   "clientId": process.env.CLIENT_ID || "idp-wizard"
 });
 
+/*
 keycloak.onTokenExpired = () => {
   console.log('token expired');
   keycloak.updateToken(30).then(() => {
@@ -16,6 +17,7 @@ keycloak.onTokenExpired = () => {
     console.log('error getting a new token');
   });
 }
+*/
 
 export default keycloak;
 
