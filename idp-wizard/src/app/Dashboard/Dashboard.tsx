@@ -29,7 +29,7 @@ const Dashboard: React.FunctionComponent = () => {
           <Flex>
             <FlexItem>
               <Title headingLevel="h1" size="3xl">
-                My Dashboard
+                Dashboard
               </Title>
             </FlexItem>
             <FlexItem align={{ default: "alignRight" }}>

@@ -32,7 +32,7 @@ export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
         <FlexItem align={{ default: "alignRight" }}>
           <Link to="/">
             <Button variant="link" isInline>
-              My Dashboard
+              Dashboard
             </Button>
           </Link>
         </FlexItem>
