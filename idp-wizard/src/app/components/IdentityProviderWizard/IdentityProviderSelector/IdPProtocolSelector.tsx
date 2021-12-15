@@ -39,7 +39,7 @@ export const IdPProtocolSelector: FC = ({}) => {
       </StackItem>
       <StackItem>
         <br />
-        <Text component={TextVariants.h1}>Choose Your Connection Protocol</Text>
+        <Text component={TextVariants.h1}>Select Your Connection Protocol</Text>
       </StackItem>
       <StackItem>
         <Text component={TextVariants.h3}>

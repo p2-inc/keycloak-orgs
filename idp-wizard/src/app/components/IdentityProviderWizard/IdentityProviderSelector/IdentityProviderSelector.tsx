@@ -41,7 +41,7 @@ export const IdentityProviderSelector: FC = () => {
         <StackItem isFilled>
           <div className="container">
             <div className="vertical-center">
-              <h1>Choose your Identity Provider</h1>
+              <h1>Select your Identity Provider</h1>
               <h2>This is how users will sign in to demo.phasetwo.io</h2>
               <div className="selection-container">
                 {IdentityProviders.sort((a, b) =>
