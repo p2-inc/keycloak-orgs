@@ -34,7 +34,6 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
     filename,
     event
   ) => {
-    console.log(value, filename, event);
     setMetadataFileName(filename);
     setMetadataFileValue(value);
     setIsUploading(true);
@@ -49,10 +48,6 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
     }
 
     setIsUploading(false);
-
-    console.log(uploadStatus);
-    // allow for next step is success
-    // show error for a failure
   };
 
   const instructions: InstructionProps[] = [

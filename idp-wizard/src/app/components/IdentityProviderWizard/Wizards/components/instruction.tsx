@@ -8,21 +8,21 @@ export interface InstructionProps {
 }
 export function InstructionComponent({ text, component }: InstructionProps) {
   return (
-    <Flex>
+    <div>
       {text && (
-        <FlexItem className="step-instruction">
+        <div className="pf-u-mb-md">
           <Text component={TextVariants.h2}>{text}</Text>
-        </FlexItem>
+        </div>
       )}
 
-      <FlexItem
+      <div
         className={cs({
           "step-instruction-image": text,
           "step-no-instruction": !text,
         })}
       >
         {component}
-      </FlexItem>
-    </Flex>
+      </div>
+    </div>
   );
 }

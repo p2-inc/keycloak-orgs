@@ -11,6 +11,7 @@ body,
   box-shadow: 0px 0px 4px 1px lightgrey;
   border-radius: 5px;
   vertical-align: text-top;
+  width: 100%;
   &:hover {
     cursor: "pointer";
   }
@@ -69,11 +70,11 @@ body,
 }
 
 .step-no-instruction {
-  min-width: 80%;
+  flex: 1;
+  max-width: 960px;
 }
 
 .step-instruction-image {
-  max-width: 80%;
 }
 
 .step-body {

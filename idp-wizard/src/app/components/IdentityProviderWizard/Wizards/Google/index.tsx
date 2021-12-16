@@ -15,9 +15,9 @@ import { customAlphabet } from "nanoid";
 import { alphanumeric } from "nanoid-dictionary";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useHistory } from "react-router";
+import { useKeycloak } from "@react-keycloak/web";
 
 const nanoId = customAlphabet(alphanumeric, 6);
-
 interface ConfigData {
   validateSignature: "false" | "true";
   loginHint: "false" | "true";
@@ -36,6 +36,7 @@ export const GoogleWizard: FC = () => {
   const title = "Google wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const { keycloak } = useKeycloak();
   const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
   const [alias, setAlias] = useState(`google-saml-${nanoId()}`);
   const generateAcsUrl = () =>
@@ -48,17 +49,11 @@ export const GoogleWizard: FC = () => {
   const [error, setError] = useState(false);
   const history = useHistory();
 
-  useEffect(() => {
-    const unlisten = history.listen((listener, action) => {
-      console.log(listener);
-      if (action === "POP") {
-        if (confirm("Please confirm you wish to exit the wizard.")) {
-          history.push("/");
-        }
-      }
-    });
-    return () => unlisten();
-  }, []);
+  const Axios = axios.create({
+    headers: {
+      authorization: `bearer ${keycloak.token}`,
+    },
+  });
 
   const onNext = (newStep) => {
     if (stepIdReached === 8) {
@@ -71,21 +66,13 @@ export const GoogleWizard: FC = () => {
     history.push("/");
   };
 
-  // TODO: leverage a service file with API calls
   const uploadMetadataFile = async (file: File) => {
     const fd = new FormData();
     fd.append("providerId", "saml");
     fd.append("file", file);
 
-    await setKcAdminClientAccessToken();
-
     try {
-      const resp = await axios.post(identifierURL, fd, {
-        headers: {
-          authorization: `bearer ${kcAdminClient.accessToken}`,
-        },
-      });
-      console.log("[Config Resp]", resp);
+      const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
         setConfigData(resp.data);
@@ -103,9 +90,6 @@ export const GoogleWizard: FC = () => {
     setResults("Creating SAML IdP...");
     setError(false);
 
-    // For some reason you need a fresh token each time?
-    await setKcAdminClientAccessToken();
-
     const payload: IdentityProviderRepresentation = {
       alias: alias,
       displayName: "Google SAML Single Sign-on",
@@ -122,7 +106,6 @@ export const GoogleWizard: FC = () => {
       setResults("Google IdP created successfully.");
       setStepIdReached(8);
     } catch (e) {
-      console.log(e);
       setResults("Error creating IdP for Google SAML.");
       setError(true);
     } finally {
@@ -142,14 +125,14 @@ export const GoogleWizard: FC = () => {
       name: "Enter Details for your Custom App",
       component: <Step2 />,
       hideCancelButton: true,
-      canJumpTo: stepIdReached >= 2,
+      // canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
       name: "Upload Google IdP Information",
       component: <Step3 uploadMetadataFile={uploadMetadataFile} />,
       hideCancelButton: true,
-      canJumpTo: stepIdReached >= 3,
+      // canJumpTo: stepIdReached >= 3,
       enableNext: configData !== null,
     },
     {
@@ -157,21 +140,21 @@ export const GoogleWizard: FC = () => {
       name: "Enter Service Provider Details",
       component: <Step4 acsUrl={acsUrl} entityId={entityId} />,
       hideCancelButton: true,
-      canJumpTo: stepIdReached >= 4,
+      // canJumpTo: stepIdReached >= 4,
     },
     {
       id: 5,
       name: "Configure Attribute Mapping",
       component: <Step5 />,
       hideCancelButton: true,
-      canJumpTo: stepIdReached >= 5,
+      // canJumpTo: stepIdReached >= 5,
     },
     {
       id: 6,
       name: "Configure User Access",
       component: <Step6 />,
       hideCancelButton: true,
-      canJumpTo: stepIdReached >= 6,
+      // canJumpTo: stepIdReached >= 6,
     },
     {
       id: 7,
@@ -190,7 +173,7 @@ export const GoogleWizard: FC = () => {
       nextButtonText: "Finish",
       hideCancelButton: true,
       enableNext: stepIdReached === 8,
-      canJumpTo: stepIdReached >= 7,
+      // canJumpTo: stepIdReached >= 7,
     },
   ];
 
@@ -198,7 +181,6 @@ export const GoogleWizard: FC = () => {
     <>
       <Header logo={GoogleLogo} />
       <PageSection
-        marginHeight={10}
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
       >
