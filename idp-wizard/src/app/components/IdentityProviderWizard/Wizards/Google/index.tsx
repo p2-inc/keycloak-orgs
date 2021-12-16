@@ -125,14 +125,14 @@ export const GoogleWizard: FC = () => {
       name: "Enter Details for your Custom App",
       component: <Step2 />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 2,
+      canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
       name: "Upload Google IdP Information",
       component: <Step3 uploadMetadataFile={uploadMetadataFile} />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 3,
+      canJumpTo: stepIdReached >= 3,
       enableNext: configData !== null,
     },
     {
@@ -140,21 +140,21 @@ export const GoogleWizard: FC = () => {
       name: "Enter Service Provider Details",
       component: <Step4 acsUrl={acsUrl} entityId={entityId} />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 4,
+      canJumpTo: stepIdReached >= 4,
     },
     {
       id: 5,
       name: "Configure Attribute Mapping",
       component: <Step5 />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 5,
+      canJumpTo: stepIdReached >= 5,
     },
     {
       id: 6,
       name: "Configure User Access",
       component: <Step6 />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 6,
+      canJumpTo: stepIdReached >= 6,
     },
     {
       id: 7,
@@ -173,7 +173,7 @@ export const GoogleWizard: FC = () => {
       nextButtonText: "Finish",
       hideCancelButton: true,
       enableNext: stepIdReached === 8,
-      // canJumpTo: stepIdReached >= 7,
+      canJumpTo: stepIdReached >= 7,
     },
   ];
 
