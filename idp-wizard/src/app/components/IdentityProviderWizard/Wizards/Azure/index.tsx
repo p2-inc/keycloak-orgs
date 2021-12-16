@@ -13,7 +13,7 @@ import { azureStepOneAValidation } from "@app/services/AzureValidation";
 export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const onNext = (newStep) => {

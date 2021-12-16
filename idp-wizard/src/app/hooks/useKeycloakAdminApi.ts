@@ -1,5 +1,5 @@
 import KcAdminClient from "@keycloak/keycloak-admin-client";
-import keycloak from "../../keycloak";
+import { useKeycloak } from "@react-keycloak/web";
 
 const settings = {
   baseUrl: process.env.KEYCLOAK_URL,
@@ -10,9 +10,12 @@ const settings = {
 };
 
 export const useKeycloakAdminApi = () => {
+  const { keycloak } = useKeycloak();
   const kcAdminClient = new KcAdminClient(settings);
+
   const setKcAdminClientAccessToken = async () => {
-    kcAdminClient.setAccessToken(keycloak.token);
+    kcAdminClient.setAccessToken(keycloak.token!);
   };
+
   return [kcAdminClient, setKcAdminClientAccessToken] as const;
 };

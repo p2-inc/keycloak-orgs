@@ -6,7 +6,7 @@ import {
   Wizard,
   Button,
 } from "@patternfly/react-core";
-import GoogleLogo from "./google_cloud_logo.svg";
+import GoogleLogo from "./assets/google_cloud_logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
@@ -15,9 +15,9 @@ import { customAlphabet } from "nanoid";
 import { alphanumeric } from "nanoid-dictionary";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useHistory } from "react-router";
+import { useKeycloak } from "@react-keycloak/web";
 
 const nanoId = customAlphabet(alphanumeric, 6);
-
 interface ConfigData {
   validateSignature: "false" | "true";
   loginHint: "false" | "true";
@@ -36,6 +36,7 @@ export const GoogleWizard: FC = () => {
   const title = "Google wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const { keycloak } = useKeycloak();
   const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
   const [alias, setAlias] = useState(`google-saml-${nanoId()}`);
   const generateAcsUrl = () =>
@@ -45,8 +46,14 @@ export const GoogleWizard: FC = () => {
   const [acsUrl, setAcsUrl] = useState(generateAcsUrl());
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const history = useHistory();
+
+  const Axios = axios.create({
+    headers: {
+      authorization: `bearer ${keycloak.token}`,
+    },
+  });
 
   const onNext = (newStep) => {
     if (stepIdReached === 8) {
@@ -59,21 +66,13 @@ export const GoogleWizard: FC = () => {
     history.push("/");
   };
 
-  // TODO: leverage a service file with API calls
   const uploadMetadataFile = async (file: File) => {
     const fd = new FormData();
     fd.append("providerId", "saml");
     fd.append("file", file);
 
-    await setKcAdminClientAccessToken();
-
     try {
-      const resp = await axios.post(identifierURL, fd, {
-        headers: {
-          authorization: `bearer ${kcAdminClient.accessToken}`,
-        },
-      });
-      console.log("[Config Resp]", resp);
+      const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
         setConfigData(resp.data);
@@ -81,17 +80,14 @@ export const GoogleWizard: FC = () => {
       }
     } catch (err) {
       console.log(err);
-      return false;
     }
+
+    return false;
   };
 
   const createGoogleIdp = async () => {
     setIsValidating(true);
     setResults("Creating SAML IdP...");
-    setError(false);
-
-    // For some reason you need a fresh token each time?
-    await setKcAdminClientAccessToken();
 
     const payload: IdentityProviderRepresentation = {
       alias: alias,
@@ -108,8 +104,8 @@ export const GoogleWizard: FC = () => {
       });
       setResults("Google IdP created successfully.");
       setStepIdReached(8);
+      setError(false);
     } catch (e) {
-      console.log(e);
       setResults("Error creating IdP for Google SAML.");
       setError(true);
     } finally {
@@ -185,7 +181,6 @@ export const GoogleWizard: FC = () => {
     <>
       <Header logo={GoogleLogo} />
       <PageSection
-        marginHeight={10}
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
       >

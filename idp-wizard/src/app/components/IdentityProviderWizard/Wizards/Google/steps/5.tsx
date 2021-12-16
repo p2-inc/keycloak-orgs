@@ -4,6 +4,7 @@ import {
   InstructionProps,
   Step,
   ClipboardCopyComponent,
+  DoubleItemClipboardCopy,
 } from "@wizardComponents";
 import * as Images from "@app/images/google";
 import { Modal, ModalVariant } from "@patternfly/react-core";
@@ -32,28 +33,27 @@ export const Step5: FC<Props> = () => {
 
   const instructions: InstructionProps[] = [
     {
-      text: (
+      component: (
         <>
-          <div>
+          <div className="pf-u-mb-md">
             Provide the following Attribute Mappings and select "Finish"
           </div>
-          <ClipboardCopyComponent
-            label={<CenterLabel fromLabel="Primary email" toLabel="email" />}
-            initialValue={"email"}
-            classes="pf-u-mb-md pf-u-mt-md"
+          <DoubleItemClipboardCopy
+            leftValue="Primary email"
+            rightValue="email"
           />
-          <ClipboardCopyComponent
-            label={<CenterLabel fromLabel="First name" toLabel="firstName" />}
-            initialValue={"firstName"}
-            classes="pf-u-mb-md"
+          <DoubleItemClipboardCopy
+            leftValue="First name"
+            rightValue="firstName"
           />
-          <ClipboardCopyComponent
-            label={<CenterLabel fromLabel="Last name" toLabel="lastName" />}
-            initialValue={"lastName"}
-            classes="pf-u-mb-md"
+          <DoubleItemClipboardCopy
+            leftValue="Last name"
+            rightValue="lastName"
           />
         </>
       ),
+    },
+    {
       component: (
         <img
           src={Images.GoogleSaml5}
