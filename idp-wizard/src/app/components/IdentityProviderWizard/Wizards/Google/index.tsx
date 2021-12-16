@@ -46,7 +46,7 @@ export const GoogleWizard: FC = () => {
   const [acsUrl, setAcsUrl] = useState(generateAcsUrl());
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const history = useHistory();
 
   const Axios = axios.create({
@@ -88,7 +88,6 @@ export const GoogleWizard: FC = () => {
   const createGoogleIdp = async () => {
     setIsValidating(true);
     setResults("Creating SAML IdP...");
-    setError(false);
 
     const payload: IdentityProviderRepresentation = {
       alias: alias,
@@ -105,6 +104,7 @@ export const GoogleWizard: FC = () => {
       });
       setResults("Google IdP created successfully.");
       setStepIdReached(8);
+      setError(false);
     } catch (e) {
       setResults("Error creating IdP for Google SAML.");
       setError(true);

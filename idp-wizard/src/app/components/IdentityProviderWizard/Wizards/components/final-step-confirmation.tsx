@@ -10,10 +10,16 @@ interface SuccessProps {
   message: string;
   buttonText: string;
   resultsText: string;
-  error: boolean;
+  error: boolean | null;
   isValidating: boolean;
   validationFunction: () => void;
 }
+
+// States should be
+// On component => no submission yet. Tell user to finalize by creating instance in Keycloak
+// On component, submitted with success => redirect to dashboard
+// On component, submitted with error => show an error occurred and to review configuration
+
 export const WizardConfirmation: FC<SuccessProps> = ({
   title,
   message,
@@ -27,24 +33,17 @@ export const WizardConfirmation: FC<SuccessProps> = ({
     <div className="container" style={{ border: 0 }}>
       <Stack hasGutter>
         <StackItem>
-          {resultsText && resultsText !== "Final Validation Running..." ? (
-            error ? (
-              <ExclamationCircleIcon size="xl" color="red" />
-            ) : (
-              <CheckCircleIcon size="xl" color="green" />
-            )
-          ) : (
-            ""
-          )}
-        </StackItem>
-        <StackItem>
+          {error === true && <ExclamationCircleIcon size="xl" color="red" />}
+          {error === false && <CheckCircleIcon size="xl" color="green" />}
           <Title headingLevel="h1">{title}</Title>
         </StackItem>
         <StackItem>
           <Title headingLevel="h2">{message}</Title>
         </StackItem>
         <StackItem>
-          <Title headingLevel="h3">{resultsText}</Title>
+          <Title headingLevel="h3" style={{ color: error ? "red" : "inherit" }}>
+            {resultsText}
+          </Title>
         </StackItem>
         <StackItem>
           <Button isLoading={isValidating} onClick={validationFunction}>
