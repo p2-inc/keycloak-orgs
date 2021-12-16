@@ -56,7 +56,7 @@ const routes: AppRouteConfig[] = [
     label: "Dashboard",
     id: "dashboard",
     path: "/",
-    title: "My Dashboard",
+    title: "Dashboard",
     checkSecurity: true,
   },
   {
