@@ -6,7 +6,7 @@ import {
   Wizard,
   Button,
 } from "@patternfly/react-core";
-import GoogleLogo from "./google_cloud_logo.svg";
+import GoogleLogo from "./assets/google_cloud_logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
@@ -48,6 +48,18 @@ export const GoogleWizard: FC = () => {
   const [error, setError] = useState(false);
   const history = useHistory();
 
+  useEffect(() => {
+    const unlisten = history.listen((listener, action) => {
+      console.log(listener);
+      if (action === "POP") {
+        if (confirm("Please confirm you wish to exit the wizard.")) {
+          history.push("/");
+        }
+      }
+    });
+    return () => unlisten();
+  }, []);
+
   const onNext = (newStep) => {
     if (stepIdReached === 8) {
       history.push("/");
@@ -81,8 +93,9 @@ export const GoogleWizard: FC = () => {
       }
     } catch (err) {
       console.log(err);
-      return false;
     }
+
+    return false;
   };
 
   const createGoogleIdp = async () => {
