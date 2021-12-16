@@ -41,17 +41,14 @@ export const Step5: FC<Props> = () => {
           <DoubleItemClipboardCopy
             leftValue="Primary email"
             rightValue="email"
-            classes="pf-u-mb-md"
           />
           <DoubleItemClipboardCopy
             leftValue="First name"
             rightValue="firstName"
-            classes="pf-u-mb-md"
           />
           <DoubleItemClipboardCopy
             leftValue="Last name"
             rightValue="lastName"
-            classes="pf-u-mb-md"
           />
         </>
       ),

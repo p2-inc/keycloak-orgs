@@ -21,7 +21,7 @@ export const DoubleItemClipboardCopy: React.FC<Props> = ({
   classes,
 }) => {
   return (
-    <Card className={cs("pf-u-box-shadow-sm", classes)} isCompact>
+    <Card className={cs("pf-u-box-shadow-sm pf-u-mb-md", classes)} isCompact>
       <CardBody>
         <Flex style={{ padding: "5px", flexWrap: "nowrap" }}>
           <FlexItem style={{ flex: 1 }}>

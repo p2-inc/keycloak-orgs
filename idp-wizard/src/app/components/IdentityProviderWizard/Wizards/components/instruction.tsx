@@ -8,9 +8,9 @@ export interface InstructionProps {
 }
 export function InstructionComponent({ text, component }: InstructionProps) {
   return (
-    <div>
+    <div className="p2-step-instruction">
       {text && (
-        <div className="pf-u-mb-md">
+        <div className="pf-u-mb-md" style={{ maxWidth: 960 }}>
           <Text component={TextVariants.h2}>{text}</Text>
         </div>
       )}

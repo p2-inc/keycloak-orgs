@@ -37,7 +37,6 @@ body,
   padding: 5px;
   text-align: center;
   top: 50%;
-  /* border: 1px solid lightgray; */
   border-radius: 5px;
 
   h1 {
@@ -63,6 +62,10 @@ body,
   vertical-align: text-top;
 }
 
+.p2-step-instruction {
+  max-width: 960px;
+}
+
 .step-instruction {
   min-width: 40%;
   max-width: 40%;
@@ -71,7 +74,6 @@ body,
 
 .step-no-instruction {
   flex: 1;
-  max-width: 960px;
 }
 
 .step-instruction-image {
