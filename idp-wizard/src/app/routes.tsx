@@ -52,7 +52,7 @@ const routes: AppRouteConfig[] = [
     label: "Dashboard",
     id: "dashboard",
     path: "/",
-    title: "My Dashboard | PhaseTwo",
+    title: "Dashboard | PhaseTwo",
     checkSecurity: true,
   },
   {
