@@ -35,7 +35,7 @@ interface ConfigData {
 export const GoogleWizard: FC = () => {
   const title = "Google wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const [kcAdminClient] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
   const [alias, setAlias] = useState(`google-saml-${nanoId()}`);
@@ -47,6 +47,7 @@ export const GoogleWizard: FC = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
   const [error, setError] = useState(null);
+  const [disableButton, setDisableButton] = useState(false);
   const history = useHistory();
 
   const Axios = axios.create({
@@ -105,6 +106,7 @@ export const GoogleWizard: FC = () => {
       setResults("Google IdP created successfully.");
       setStepIdReached(8);
       setError(false);
+      setDisableButton(true);
     } catch (e) {
       setResults("Error creating IdP for Google SAML.");
       setError(true);
@@ -164,6 +166,7 @@ export const GoogleWizard: FC = () => {
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Google Cloud SAML."
           buttonText="Create SAML IdP in Keycloak"
+          disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
