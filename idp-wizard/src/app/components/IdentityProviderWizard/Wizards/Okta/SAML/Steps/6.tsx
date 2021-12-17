@@ -27,9 +27,7 @@ export const Step6: FC<Props> = ({ validateMetadata }) => {
   const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
     useImageModal();
 
-  const [metadataUrl, setMetadataUrl] = useState(
-    "https://patzer.okta.com/app/exka5alge98cO50PX696/sso/saml/metadata"
-  );
+  const [metadataUrl, setMetadataUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<null | {
     status: API_STATUS;
