@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Redirect, Route, RouteComponentProps, Switch } from "react-router-dom";
+import React from "react";
+import { Route, RouteComponentProps, Switch } from "react-router-dom";
 import { accessibleRouteChangeHandler } from "@app/utils/utils";
 import { Dashboard } from "@app/Dashboard/Dashboard";
 import { Support } from "@app/Support/Support";
@@ -12,10 +12,6 @@ import {
   useLastLocation,
 } from "react-router-last-location";
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
-import { OktaWizard } from "./components/IdentityProviderWizard/Wizards/Okta";
-import { AzureWizard } from "./components/IdentityProviderWizard/Wizards/Azure";
-// import keycloak from "src/keycloak";
-import { useKeycloak } from "@react-keycloak/web";
 import Provider from "./components/IdentityProviderWizard/providers";
 import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
 import { Protocols, Providers } from "./configurations";
@@ -56,7 +52,7 @@ const routes: AppRouteConfig[] = [
     label: "Dashboard",
     id: "dashboard",
     path: "/",
-    title: "My Dashboard",
+    title: "My Dashboard | PhaseTwo",
     checkSecurity: true,
   },
   {
@@ -65,25 +61,7 @@ const routes: AppRouteConfig[] = [
     label: "Selector",
     id: "selector",
     path: "/idp",
-    title: "Select your Identity Provider",
-    checkSecurity: true,
-  },
-  {
-    component: OktaWizard,
-    exact: true,
-    label: "Okta Wizard",
-    id: "okta",
-    path: "/okta",
-    title: "PhaseTwo - Okta",
-    checkSecurity: true,
-  },
-  {
-    component: AzureWizard,
-    exact: true,
-    label: "Azure Wizard",
-    id: "azure",
-    path: "/azure",
-    title: "PhaseTwo - Azure",
+    title: "Select your Identity Provider | PhaseTwo",
     checkSecurity: true,
   },
 ];
@@ -111,8 +89,6 @@ const RouteWithTitleUpdates = ({
 }: IAppRoute) => {
   useA11yRouteChange(isAsync);
   useDocumentTitle(title);
-
-  const { keycloak, initialized } = useKeycloak();
 
   function routeWithTitle(routeProps: RouteComponentProps) {
     return <Component {...rest} {...routeProps} />;

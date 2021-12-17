@@ -30,7 +30,6 @@ export enum Providers {
   SAML = "saml",
   VMWARE = "vmware",
 }
-
 export interface IIDPType {
   name: string;
   id: string;

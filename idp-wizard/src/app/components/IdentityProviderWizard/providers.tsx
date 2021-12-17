@@ -1,17 +1,22 @@
-import { Providers } from "@app/configurations";
+import { IdentityProviders, Providers } from "@app/configurations";
 import { RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
 import { AzureWizard } from "./Wizards/Azure";
-import { OktaWizard } from "./Wizards/Okta";
+import { OktaWizardLDAP } from "./Wizards/Okta";
 import { GoogleWizard } from "./Wizards/Google";
+import { useTitle } from "react-use";
 
 const Provider = () => {
   const { provider } = useParams<RouterParams>();
 
+  useTitle(
+    `${IdentityProviders.find((ip) => ip.id === provider)?.name} | PhaseTwo`
+  );
+
   switch (provider) {
     case Providers.OKTA:
-      return <OktaWizard />;
+      return <OktaWizardLDAP />;
     case Providers.AZURE:
       return <AzureWizard />;
     case Providers.GOOGLE_SAML:
