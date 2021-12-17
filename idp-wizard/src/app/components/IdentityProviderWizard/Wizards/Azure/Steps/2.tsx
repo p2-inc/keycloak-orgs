@@ -1,12 +1,4 @@
-import {
-  Card,
-  CardBody,
-  ClipboardCopy,
-  Form,
-  FormGroup,
-  Modal,
-  ModalVariant,
-} from "@patternfly/react-core";
+import { Modal, ModalVariant } from "@patternfly/react-core";
 import React, { useEffect, useState } from "react";
 import azureStep5Image from "@app/images/azure/azure-5.png";
 import azureStep6Image from "@app/images/azure/azure-6.png";

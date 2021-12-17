@@ -1,10 +1,10 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC } from "react";
 import { InstructionProps, Step } from "@wizardComponents";
 import * as Images from "@app/images/google";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { Modal, ModalVariant } from "@patternfly/react-core";
 
-export const Step2 = () => {
+export const Step2: FC = () => {
   const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
     useImageModal();
 

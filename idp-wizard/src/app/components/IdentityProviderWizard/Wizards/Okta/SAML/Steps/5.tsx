@@ -1,33 +1,39 @@
 import React, { FC } from "react";
-import { InstructionProps, Step } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import {
+  DoubleItemClipboardCopy,
+  InstructionProps,
+  Step,
+} from "@wizardComponents";
+import * as Images from "@app/images/okta/saml";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { Modal, ModalVariant } from "@patternfly/react-core";
 
-export const Step1: FC = () => {
+interface Props {}
+
+export const Step5: FC<Props> = () => {
   const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
     useImageModal();
 
   const instructions: InstructionProps[] = [
     {
-      text: 'On your Google Admin dashboard, select "Apps" from the sidebar menu, and then select "Web and Mobile Apps" from the following list.',
+      text: 'In the "Assignments" section, choose people and groups that will have access to the application. In the "Assign" menu, you can select the type to add.',
       component: (
         <img
-          src={Images.GoogleSaml1A}
-          alt="Step 1.1"
+          src={Images.OktaSaml7}
+          alt="Step 5.1"
           className="step-image"
-          onClick={() => onImageClick(Images.GoogleSaml1A)}
+          onClick={() => onImageClick(Images.OktaSaml7)}
         />
       ),
     },
     {
-      text: 'On this page, select "Add App" and then "Add custom SAML app".',
+      text: "In the subsequent pop up, you can select people or groups to assign to the application.",
       component: (
         <img
-          src={Images.GoogleSaml1B}
-          alt="Step 1.2"
+          src={Images.OktaSaml7A}
+          alt="Step 5.2"
           className="step-image"
-          onClick={() => onImageClick(Images.GoogleSaml1B)}
+          onClick={() => onImageClick(Images.OktaSaml7A)}
         />
       ),
     },
@@ -44,7 +50,7 @@ export const Step1: FC = () => {
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
       <Step
-        title="Step 1: Create Enterprise Application"
+        title="Step 4: Complete Feedback Section"
         instructionList={instructions}
       />
     </>

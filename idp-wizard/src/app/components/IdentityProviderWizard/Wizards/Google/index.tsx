@@ -1,10 +1,9 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
   PageSectionTypes,
   Wizard,
-  Button,
 } from "@patternfly/react-core";
 import GoogleLogo from "./assets/google_cloud_logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
@@ -39,14 +38,13 @@ export const GoogleWizard: FC = () => {
   const { keycloak } = useKeycloak();
   const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
   const [alias, setAlias] = useState(`google-saml-${nanoId()}`);
-  const generateAcsUrl = () =>
-    `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
+  const acsUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
   const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
   const [configData, setConfigData] = useState<ConfigData | null>(null);
-  const [acsUrl, setAcsUrl] = useState(generateAcsUrl());
+
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
   const history = useHistory();
 
@@ -97,13 +95,12 @@ export const GoogleWizard: FC = () => {
       config: configData!,
     };
 
-    let resp;
     try {
-      resp = await kcAdminClient.identityProviders.create({
+      await kcAdminClient.identityProviders.create({
         ...payload,
         realm: process.env.REALM!,
       });
-      setResults("Google IdP created successfully.");
+      setResults("Google IdP created successfully. Click finish.");
       setStepIdReached(8);
       setError(false);
       setDisableButton(true);

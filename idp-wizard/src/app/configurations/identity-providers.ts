@@ -51,7 +51,7 @@ export const IdentityProviders: IIDPType[] = [
     imageSrc: oktaLogo,
     active: true,
     id: Providers.OKTA,
-    protocols: [Protocols.LDAP],
+    protocols: [Protocols.LDAP, Protocols.SAML],
   },
   {
     name: "Google SAML",
