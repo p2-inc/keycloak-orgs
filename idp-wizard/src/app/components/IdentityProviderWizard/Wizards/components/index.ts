@@ -1,5 +1,5 @@
 export * from "./header";
-export * from "./Step";
+export * from "./step";
 export * from "./clipboard-copy";
 export * from "./final-step-confirmation";
 export * from "./instruction";
