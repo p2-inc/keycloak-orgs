@@ -9,7 +9,7 @@ import {
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import azureStep7Image from "@app/images/azure/azure-7.png";
 import azureStep8Image from "@app/images/azure/azure-8.png";
 import { ArrowRightIcon } from "@patternfly/react-icons";

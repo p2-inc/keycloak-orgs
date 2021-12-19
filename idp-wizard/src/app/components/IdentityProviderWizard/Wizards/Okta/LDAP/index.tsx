@@ -1,19 +1,16 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import { OktaStepOne } from "./Steps/1";
-import { OktaStepTwo } from "./Steps/2";
-import { OktaStepThree } from "./Steps/3";
+import { OktaStepOne, OktaStepTwo, OktaStepThree } from "./Steps";
 import oktaLogo from "@app/images/okta/okta-logo.png";
-import { WizardConfirmation } from "../components";
+import { WizardConfirmation, Header } from "@wizardComponents";
 import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
-import { Header } from "../components";
 
-export const OktaWizard: FC = () => {
+export const OktaWizardLDAP: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [isFormValid, setIsFormValid] = useState(false);
   const [results, setResults] = useState("");

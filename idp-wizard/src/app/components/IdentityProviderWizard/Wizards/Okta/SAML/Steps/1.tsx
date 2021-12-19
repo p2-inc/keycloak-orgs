@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { InstructionProps, Step } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import * as Images from "@app/images/okta/saml";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { Modal, ModalVariant } from "@patternfly/react-core";
 
@@ -10,24 +10,35 @@ export const Step1: FC = () => {
 
   const instructions: InstructionProps[] = [
     {
-      text: 'On your Google Admin dashboard, select "Apps" from the sidebar menu, and then select "Web and Mobile Apps" from the following list.',
+      text: 'In your Okta Administration dashboard, select "Applications" from the menu. On this page, select the "Create App Integration" button.',
       component: (
         <img
-          src={Images.GoogleSaml1A}
+          src={Images.OktaSaml1}
           alt="Step 1.1"
           className="step-image"
-          onClick={() => onImageClick(Images.GoogleSaml1A)}
+          onClick={() => onImageClick(Images.OktaSaml1)}
         />
       ),
     },
     {
-      text: 'On this page, select "Add App" and then "Add custom SAML app".',
+      text: 'Select "SAML 2.0" for the "Sign-in method" and click "Next"',
       component: (
         <img
-          src={Images.GoogleSaml1B}
+          src={Images.OktaSaml2}
           alt="Step 1.2"
           className="step-image"
-          onClick={() => onImageClick(Images.GoogleSaml1B)}
+          onClick={() => onImageClick(Images.OktaSaml2)}
+        />
+      ),
+    },
+    {
+      text: 'Enter an "App name" and click "Next".',
+      component: (
+        <img
+          src={Images.OktaSaml3}
+          alt="Step 1.3"
+          className="step-image"
+          onClick={() => onImageClick(Images.OktaSaml3)}
         />
       ),
     },

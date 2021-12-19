@@ -10,24 +10,13 @@ export const Step1: FC = () => {
 
   const instructions: InstructionProps[] = [
     {
-      text: 'On your Google Admin dashboard, select "Apps" from the sidebar menu, and then select "Web and Mobile Apps" from the following list.',
+      text: "Text",
       component: (
         <img
           src={Images.GoogleSaml1A}
           alt="Step 1.1"
           className="step-image"
           onClick={() => onImageClick(Images.GoogleSaml1A)}
-        />
-      ),
-    },
-    {
-      text: 'On this page, select "Add App" and then "Add custom SAML app".',
-      component: (
-        <img
-          src={Images.GoogleSaml1B}
-          alt="Step 1.2"
-          className="step-image"
-          onClick={() => onImageClick(Images.GoogleSaml1B)}
         />
       ),
     },

@@ -10,7 +10,6 @@ import {
 } from "@patternfly/react-core";
 import { InstructionProps, Step } from "@wizardComponents";
 import { oktaValidateUsernamePassword } from "@app/services/OktaValidation";
-import { useSessionStorage } from "react-use";
 
 interface Props {
   onChange: (value: boolean) => void;

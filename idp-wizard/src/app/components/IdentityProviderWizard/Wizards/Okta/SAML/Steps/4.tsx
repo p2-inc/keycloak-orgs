@@ -1,22 +1,28 @@
 import React, { FC } from "react";
-import { InstructionProps, Step } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import {
+  DoubleItemClipboardCopy,
+  InstructionProps,
+  Step,
+} from "@wizardComponents";
+import * as Images from "@app/images/okta/saml";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { Modal, ModalVariant } from "@patternfly/react-core";
 
-export const Step2: FC = () => {
+interface Props {}
+
+export const Step4: FC<Props> = () => {
   const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
     useImageModal();
 
   const instructions: InstructionProps[] = [
     {
-      text: 'Enter an App name and icon (if applicable) for your application, then select "Continue".',
+      text: 'Okta requires customer feedback. Select the option "I’m an Okta customer adding an internal app", click "Finish" and then leave the additional form blank.',
       component: (
         <img
-          src={Images.GoogleSaml2}
-          alt="Step 2.1"
+          src={Images.OktaSaml6}
+          alt="Step 4.1"
           className="step-image"
-          onClick={() => onImageClick(Images.GoogleSaml2)}
+          onClick={() => onImageClick(Images.OktaSaml6)}
         />
       ),
     },
@@ -33,7 +39,7 @@ export const Step2: FC = () => {
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
       <Step
-        title="Step 2: Enter Details for your Custom App"
+        title="Step 4: Complete Feedback Section"
         instructionList={instructions}
       />
     </>

@@ -1,10 +1,6 @@
 import { useImageModal } from "@app/hooks/useImageModal";
 import React, { FC } from "react";
-import {
-  InstructionProps,
-  Step,
-  ClipboardCopyComponent,
-} from "@wizardComponents";
+import { InstructionProps, Step } from "@wizardComponents";
 import * as Images from "@app/images/google";
 import { Modal, ModalVariant } from "@patternfly/react-core";
 

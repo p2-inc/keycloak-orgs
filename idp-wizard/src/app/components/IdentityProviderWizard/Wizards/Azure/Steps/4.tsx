@@ -1,5 +1,5 @@
 import { Modal, ModalVariant } from "@patternfly/react-core";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import azureStep9Image from "@app/images/azure/azure-9.png";
 import azureStep10Image from "@app/images/azure/azure-10.png";
 import azureStep11Image from "@app/images/azure/azure-11.png";

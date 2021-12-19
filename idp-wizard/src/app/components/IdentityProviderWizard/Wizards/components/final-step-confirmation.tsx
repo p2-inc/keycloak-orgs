@@ -12,6 +12,7 @@ interface SuccessProps {
   resultsText: string;
   error: boolean | null;
   isValidating: boolean;
+  disableButton: boolean;
   validationFunction: () => void;
 }
 
@@ -28,6 +29,7 @@ export const WizardConfirmation: FC<SuccessProps> = ({
   error,
   isValidating,
   validationFunction,
+  disableButton = false,
 }) => {
   return (
     <div className="container" style={{ border: 0 }}>
@@ -46,7 +48,11 @@ export const WizardConfirmation: FC<SuccessProps> = ({
           </Title>
         </StackItem>
         <StackItem>
-          <Button isLoading={isValidating} onClick={validationFunction}>
+          <Button
+            isLoading={isValidating}
+            onClick={validationFunction}
+            isDisabled={disableButton}
+          >
             {buttonText}
           </Button>
         </StackItem>

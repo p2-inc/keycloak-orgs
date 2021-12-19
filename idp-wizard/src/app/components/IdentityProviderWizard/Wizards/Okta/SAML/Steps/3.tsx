@@ -1,49 +1,49 @@
-import { useImageModal } from "@app/hooks/useImageModal";
 import React, { FC } from "react";
 import {
+  DoubleItemClipboardCopy,
   InstructionProps,
   Step,
-  DoubleItemClipboardCopy,
 } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import * as Images from "@app/images/okta/saml";
+import { useImageModal } from "@app/hooks/useImageModal";
 import { Modal, ModalVariant } from "@patternfly/react-core";
-import { LongArrowAltUpIcon } from "@patternfly/react-icons";
 
-interface Props {}
-
-export const Step5: FC<Props> = () => {
+export const Step3: FC = () => {
   const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
     useImageModal();
 
   const instructions: InstructionProps[] = [
     {
+      text: 'In the "Parameters" section, provide the following attribute mappings and select "Save". Note you may need to click "Add Another" to configure each of the mappings.',
       component: (
         <>
           <div className="pf-u-mb-md">
             Provide the following Attribute Mappings and select "Finish"
           </div>
+          <DoubleItemClipboardCopy leftValue="email" rightValue="user.email" />
           <DoubleItemClipboardCopy
-            leftValue="Primary email"
-            rightValue="email"
+            leftValue="firstName"
+            rightValue="user.firstName"
           />
           <DoubleItemClipboardCopy
-            leftValue="First name"
-            rightValue="firstName"
+            leftValue="lastName"
+            rightValue="user.lastName"
           />
-          <DoubleItemClipboardCopy
-            leftValue="Last name"
-            rightValue="lastName"
-          />
+          <DoubleItemClipboardCopy leftValue="id" rightValue="user.login" />
+          <div>
+            Note that if "user.login" is not present in your Okta account, try
+            "user.id" or do not add this mapping.
+          </div>
         </>
       ),
     },
     {
       component: (
         <img
-          src={Images.GoogleSaml5}
-          alt="Step 5.1"
+          src={Images.OktaSaml5}
+          alt="Step 3.2"
           className="step-image"
-          onClick={() => onImageClick(Images.GoogleSaml5)}
+          onClick={() => onImageClick(Images.OktaSaml5)}
         />
       ),
     },
@@ -60,7 +60,7 @@ export const Step5: FC<Props> = () => {
         <img src={modalImageSrc} alt="Step Image" />
       </Modal>
       <Step
-        title="Step 5: Configure Attribute Mapping"
+        title="Step 3: Configure Attribute Mapping"
         instructionList={instructions}
       />
     </>
