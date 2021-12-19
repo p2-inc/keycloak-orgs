@@ -43,7 +43,7 @@ export const AzureStepOneA: FC<Props> = (props) => {
       })
       .catch(() => {
         setAlertText("Error, could not create IdP in Keycloak");
-        setAlertVariant("danger");
+        setAlertVariant("error");
       });
     setIsValidating(false);
   };
