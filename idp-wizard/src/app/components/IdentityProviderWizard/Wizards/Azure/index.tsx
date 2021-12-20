@@ -34,7 +34,7 @@ export const AzureWizard: FC = () => {
     setResults("Final Validation Running...");
     const metadataURL = sessionStorage.getItem("azure_metadata_url");
     const results = await azureStepOneAValidation(metadataURL!, true);
-    setError(results.status == "error");
+    setError(results.status);
     setResults("Results: " + results.message);
     setIsValidating(false);
     console.log(results);

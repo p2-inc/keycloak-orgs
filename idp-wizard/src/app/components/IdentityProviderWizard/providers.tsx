@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { AzureWizard } from "./Wizards/Azure";
 import { OktaWizard } from "./Wizards/Okta";
 import { GoogleWizard } from "./Wizards/Google";
+import { Auth0Wizard } from "./Wizards/Auth0";
 
 const Provider = () => {
   const { provider } = useParams<RouterParams>();
@@ -16,6 +17,8 @@ const Provider = () => {
       return <AzureWizard />;
     case Providers.GOOGLE_SAML:
       return <GoogleWizard />;
+    case Providers.AUTH0:
+      return <Auth0Wizard />;
 
     default:
       return <div>No provider found</div>;

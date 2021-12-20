@@ -14,6 +14,7 @@ import {
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
 import { OktaWizard } from "./components/IdentityProviderWizard/Wizards/Okta";
 import { AzureWizard } from "./components/IdentityProviderWizard/Wizards/Azure";
+import { Auth0Wizard } from "./components/IdentityProviderWizard/Wizards/Auth0";
 // import keycloak from "src/keycloak";
 import { useKeycloak } from "@react-keycloak/web";
 import Provider from "./components/IdentityProviderWizard/providers";
@@ -84,6 +85,15 @@ const routes: AppRouteConfig[] = [
     id: "azure",
     path: "/azure",
     title: "PhaseTwo - Azure",
+    checkSecurity: true,
+  },
+  {
+    component: Auth0Wizard,
+    exact: true,
+    label: "Auth0 Wizard",
+    id: "auth0",
+    path: "/auth0",
+    title: "PhaseTwo - Auth0",
     checkSecurity: true,
   },
 ];
