@@ -13,7 +13,7 @@ import { azureStepOneAValidation } from "@app/services/AzureValidation";
 export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const onNext = (newStep) => {
@@ -34,7 +34,7 @@ export const AzureWizard: FC = () => {
     setResults("Final Validation Running...");
     const metadataURL = sessionStorage.getItem("azure_metadata_url");
     const results = await azureStepOneAValidation(metadataURL!, true);
-    setError(results.status);
+    setError(results.status == "error");
     setResults("Results: " + results.message);
     setIsValidating(false);
     console.log(results);

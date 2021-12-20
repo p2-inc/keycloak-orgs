@@ -46,7 +46,7 @@ export const GoogleWizard: FC = () => {
   const [acsUrl, setAcsUrl] = useState(generateAcsUrl());
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
   const history = useHistory();
 
   const Axios = axios.create({

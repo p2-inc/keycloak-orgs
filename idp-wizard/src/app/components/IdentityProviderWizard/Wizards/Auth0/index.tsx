@@ -89,7 +89,7 @@ export const Auth0Wizard: FC = () => {
   ];
 
   const goToDashboard = () => {
-    let path = ``;
+    let path = `/`;
     history.push(path);
   };
 
