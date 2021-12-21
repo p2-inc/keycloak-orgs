@@ -15,6 +15,7 @@ import { InstructionProps, Step } from "@wizardComponents";
 import { useImageModal } from "@app/hooks/useImageModal";
 import { azureStepOneAValidation } from "@app/services/AzureValidation";
 import { useSessionStorage } from "react-use";
+import { StepImage } from "../../components/zoom-image";
 
 interface Props {
   onChange: (value: boolean) => void;
