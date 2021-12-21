@@ -52,14 +52,14 @@ export const AzureWizard: FC = () => {
       name: "Configure Attribute Statements",
       component: <Steps.AzureStepTwo />,
       hideCancelButton: true,
-      canJumpTo: stepIdReached >= 3,
+      canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
       name: "Upload Azure SAML Metadata file",
       component: <Steps.AzureStepOneA onChange={onFormChange} />,
       hideCancelButton: true,
-      canJumpTo: stepIdReached >= 2,
+      canJumpTo: stepIdReached >= 3,
       enableNext: isFormValid,
     },
     {
