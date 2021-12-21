@@ -11,13 +11,9 @@ import {
 } from "@patternfly/react-core";
 import image from "@app/images/okta/okta-3.png";
 import { ArrowRightIcon, TrashIcon } from "@patternfly/react-icons";
-import { InstructionProps, Step } from "@wizardComponents";
-import { useImageModal } from "@app/hooks/useImageModal";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 
 export const OktaStepThree: FC = () => {
-  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
-    useImageModal();
-
   const [groupList, setGroupList] = useState<string[]>([""]);
 
   const handleInputChange = (value, index) => {
@@ -44,14 +40,7 @@ export const OktaStepThree: FC = () => {
       text: `This is an optional step. If you have groups defined in Okta, you will find them in the Directory ${(
         <ArrowRightIcon />
       )} Groups section.`,
-      component: (
-        <img
-          src={image}
-          alt="Step3"
-          className="step-image"
-          onClick={() => onImageClick(image)}
-        />
-      ),
+      component: <StepImage src={image} alt="Step3" />,
     },
     {
       text: "If you want to limit groups that can access the demo.phasetwo.io app, enter those groups below.",
@@ -89,16 +78,6 @@ export const OktaStepThree: FC = () => {
   ];
 
   return (
-    <>
-      <Modal
-        aria-label="Image"
-        variant={ModalVariant.large}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      >
-        <img src={image} alt="Step3" />
-      </Modal>
-      <Step title="Step 3: Group Mapping" instructionList={instructionList} />
-    </>
+    <Step title="Step 3: Group Mapping" instructionList={instructionList} />
   );
 };

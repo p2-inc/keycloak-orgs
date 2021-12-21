@@ -5,13 +5,8 @@ import {
   Step,
 } from "@wizardComponents";
 import * as Images from "@app/images/okta/saml";
-import { useImageModal } from "@app/hooks/useImageModal";
-import { Modal, ModalVariant } from "@patternfly/react-core";
 
 export const Step3: FC = () => {
-  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
-    useImageModal();
-
   const instructions: InstructionProps[] = [
     {
       text: 'In the "Parameters" section, provide the following attribute mappings and select "Save". Note you may need to click "Add Another" to configure each of the mappings.',
@@ -39,30 +34,20 @@ export const Step3: FC = () => {
     },
     {
       component: (
-        <img
+        <StepImage
+          src={image}
+          alt="Step3"
           src={Images.OktaSaml5}
           alt="Step 3.2"
-          className="step-image"
-          onClick={() => onImageClick(Images.OktaSaml5)}
         />
       ),
     },
   ];
 
   return (
-    <>
-      <Modal
-        aria-label="Image"
-        variant={ModalVariant.large}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      >
-        <img src={modalImageSrc} alt="Step Image" />
-      </Modal>
-      <Step
-        title="Step 3: Configure Attribute Mapping"
-        instructionList={instructions}
-      />
-    </>
+    <Step
+      title="Step 3: Configure Attribute Mapping"
+      instructionList={instructions}
+    />
   );
 };
