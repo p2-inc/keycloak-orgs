@@ -13,7 +13,13 @@ body,
   vertical-align: text-top;
   width: 100%;
   &:hover {
-    cursor: "pointer";
+    cursor: zoom-in;
+  }
+}
+.step-image-large {
+  width: 100%;
+  &:hover {
+    cursor: zoom-out;
   }
 }
 
