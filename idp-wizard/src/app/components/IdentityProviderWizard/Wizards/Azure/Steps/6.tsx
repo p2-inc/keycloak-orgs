@@ -1,41 +1,19 @@
 import {
   Card,
   CardBody,
-  Title,
   Form,
   FormGroup,
-  Stack,
-  StackItem,
-  Text,
   TextInput,
-  TextVariants,
-  Modal,
-  ModalVariant,
 } from "@patternfly/react-core";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import azureStep14Image from "@app/images/azure/azure-14.png";
-import { InstructionProps, Step } from "@wizardComponents";
-import { useImageModal } from "@app/hooks/useImageModal";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 
 export function AzureStepSix() {
-  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
-    useImageModal();
-
-  useEffect(() => {
-    document?.getElementById("step")?.scrollIntoView();
-  });
-
   const instructionList: InstructionProps[] = [
     {
       text: "Copy the Login URL from Step 4 and enter it below.",
-      component: (
-        <img
-          src={azureStep14Image}
-          alt="Step 6.1"
-          className="step-image"
-          onClick={() => onImageClick(azureStep14Image)}
-        />
-      ),
+      component: <StepImage src={azureStep14Image} alt="Step 6.1" />,
     },
     {
       component: (
@@ -58,19 +36,9 @@ export function AzureStepSix() {
   ];
 
   return (
-    <>
-      <Modal
-        aria-label="Image"
-        variant={ModalVariant.large}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      >
-        <img src={modalImageSrc} alt="Step Image" />
-      </Modal>
-      <Step
-        title="Step 6: Provide a Login URL"
-        instructionList={instructionList}
-      />
-    </>
+    <Step
+      title="Step 6: Provide a Login URL"
+      instructionList={instructionList}
+    />
   );
 }

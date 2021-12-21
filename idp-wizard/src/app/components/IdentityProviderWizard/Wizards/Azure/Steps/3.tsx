@@ -6,15 +6,12 @@ import {
   ClipboardCopy,
   Flex,
   FlexItem,
-  Modal,
-  ModalVariant,
 } from "@patternfly/react-core";
-import React, { useEffect } from "react";
+import React from "react";
 import azureStep7Image from "@app/images/azure/azure-7.png";
 import azureStep8Image from "@app/images/azure/azure-8.png";
 import { ArrowRightIcon } from "@patternfly/react-icons";
-import { InstructionProps, Step } from "@wizardComponents";
-import { useImageModal } from "@app/hooks/useImageModal";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 
 interface IClaims {
   name: string;
@@ -22,13 +19,6 @@ interface IClaims {
 }
 
 export function AzureStepThree() {
-  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
-    useImageModal();
-
-  useEffect(() => {
-    document?.getElementById("step")?.scrollIntoView();
-  });
-
   const claimNames = [
     {
       name: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
@@ -102,14 +92,7 @@ export function AzureStepThree() {
   const instructionList: InstructionProps[] = [
     {
       text: "Click the Edit icon in the top right of the second step.",
-      component: (
-        <img
-          src={azureStep7Image}
-          alt="Step 2.1"
-          className="step-image"
-          onClick={() => onImageClick(azureStep7Image)}
-        />
-      ),
+      component: <StepImage src={azureStep7Image} alt="Step 2.1" />,
     },
     {
       component: (
@@ -129,31 +112,14 @@ export function AzureStepThree() {
     },
     {
       text: 'Fill in the following Attribute Statements and select "Next".',
-      component: (
-        <img
-          src={azureStep8Image}
-          alt="Step 2.1"
-          className="step-image"
-          onClick={() => onImageClick(azureStep8Image)}
-        />
-      ),
+      component: <StepImage src={azureStep8Image} alt="Step 2.1" />,
     },
   ];
 
   return (
-    <>
-      <Modal
-        aria-label="Image"
-        variant={ModalVariant.large}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      >
-        <img src={modalImageSrc} alt="Step Image" />
-      </Modal>
-      <Step
-        title="Step 3: User Attributes & Claims"
-        instructionList={instructionList}
-      />
-    </>
+    <Step
+      title="Step 3: User Attributes & Claims"
+      instructionList={instructionList}
+    />
   );
 }

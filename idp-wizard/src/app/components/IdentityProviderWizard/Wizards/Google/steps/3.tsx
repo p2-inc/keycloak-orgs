@@ -1,7 +1,6 @@
 import React, { FC, useState } from "react";
-import { InstructionProps, Step } from "@wizardComponents";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/google";
-import { useImageModal } from "@app/hooks/useImageModal";
 import {
   Card,
   CardBody,
@@ -21,9 +20,6 @@ interface Step3Props {
 }
 
 export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
-  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
-    useImageModal();
-
   const [metadataFileValue, setMetadataFileValue] = useState();
   const [metadataFileName, setMetadataFileName] = useState();
   const [isUploading, setIsUploading] = useState(false);
@@ -53,17 +49,9 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
   const instructions: InstructionProps[] = [
     {
       text: 'Download the metadata file, and click "Continue".',
-      component: (
-        <img
-          src={Images.GoogleSaml3}
-          alt="Step 3.1"
-          className="step-image"
-          onClick={() => onImageClick(Images.GoogleSaml3)}
-        />
-      ),
+      component: <StepImage src={Images.GoogleSaml3} alt="Step 3.1" />,
     },
     {
-      // text: "Upload metadata file.",
       component: (
         <Card isFlat>
           <CardTitle>Upload metadata file</CardTitle>
@@ -116,19 +104,9 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
   ];
 
   return (
-    <>
-      <Modal
-        aria-label="Image"
-        variant={ModalVariant.large}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      >
-        <img src={modalImageSrc} alt="Step Image" />
-      </Modal>
-      <Step
-        title="Step 3: Upload Google IdP Information"
-        instructionList={instructions}
-      />
-    </>
+    <Step
+      title="Step 3: Upload Google IdP Information"
+      instructionList={instructions}
+    />
   );
 };

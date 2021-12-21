@@ -8,14 +8,10 @@ import {
   TextInput,
   Card,
   CardBody,
-  Modal,
-  ModalVariant,
   Button,
 } from "@patternfly/react-core";
-import { InstructionProps, Step } from "@wizardComponents";
-import { useImageModal } from "@app/hooks/useImageModal";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { oktaStepOneValidation } from "@app/services/OktaValidation";
-import { useSessionStorage } from "react-use";
 
 interface Props {
   onChange: (value: boolean) => void;
@@ -30,8 +26,6 @@ export interface IOktaValues {
 }
 
 export const OktaStepOne: FC<Props> = (props) => {
-  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
-    useImageModal();
   const [alertText, setAlertText] = useState("");
   const [alertVariant, setAlertVariant] = useState("default");
   const [isValidating, setIsValidating] = useState(false);
@@ -82,25 +76,11 @@ export const OktaStepOne: FC<Props> = (props) => {
   const instructionList: InstructionProps[] = [
     {
       text: "Directory Integrations",
-      component: (
-        <img
-          src={oktaStep1Image}
-          alt="Step 1.1"
-          className="step-image"
-          onClick={() => onImageClick(oktaStep1Image)}
-        />
-      ),
+      component: <StepImage src={oktaStep1Image} alt="Step 1.1" />,
     },
     {
       text: "If you have not already, add LDAP Interface from the Okta Directory Integration section.",
-      component: (
-        <img
-          src={oktaStep2Image}
-          alt="Step 1.2"
-          className="step-image"
-          onClick={() => onImageClick(oktaStep2Image)}
-        />
-      ),
+      component: <StepImage src={oktaStep2Image} alt="Step 1.2" />,
     },
     {
       text: "Note the Settings and input them below.",
@@ -210,20 +190,9 @@ export const OktaStepOne: FC<Props> = (props) => {
   ];
 
   return (
-    <>
-      <Modal
-        aria-label="Image"
-        variant={ModalVariant.large}
-        isOpen={isModalOpen || false}
-        onClose={() => setIsModalOpen(false)}
-      >
-        <img src={modalImageSrc} alt="Step Image" />
-      </Modal>
-
-      <Step
-        title="Step 1: Enable LDAP Interface"
-        instructionList={instructionList}
-      />
-    </>
+    <Step
+      title="Step 1: Enable LDAP Interface"
+      instructionList={instructionList}
+    />
   );
 };
