@@ -3,6 +3,7 @@ import {
   DoubleItemClipboardCopy,
   InstructionProps,
   Step,
+  StepImage,
 } from "@wizardComponents";
 import * as Images from "@app/images/okta/saml";
 
@@ -33,14 +34,7 @@ export const Step3: FC = () => {
       ),
     },
     {
-      component: (
-        <StepImage
-          src={image}
-          alt="Step3"
-          src={Images.OktaSaml5}
-          alt="Step 3.2"
-        />
-      ),
+      component: <StepImage src={Images.OktaSaml5} alt="Step 3.2" />,
     },
   ];
 
