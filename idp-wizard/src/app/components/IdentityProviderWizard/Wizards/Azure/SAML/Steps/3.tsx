@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "@patternfly/react-core";
 import { InstructionProps, Step } from "@wizardComponents";
-import { StepImage } from "../../components/zoom-image";
+import { StepImage } from "../../../components/zoom-image";
 import { API_STATUS } from "@app/configurations/api-status";
 import * as Images from "@app/images/azure/saml";
 
