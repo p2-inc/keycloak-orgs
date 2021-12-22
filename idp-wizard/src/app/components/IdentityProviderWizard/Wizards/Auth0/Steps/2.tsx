@@ -9,7 +9,7 @@ import {
   ModalVariant,
   TextInput,
 } from "@patternfly/react-core";
-import React, { useEffect, useState, FC } from "react";
+import React, { useState, FC } from "react";
 import Auth0Step3Image from "@app/images/auth0/auth0-3.png";
 import { InstructionProps, Step } from "@wizardComponents";
 import { useImageModal } from "@app/hooks/useImageModal";
@@ -45,14 +45,12 @@ export const Auth0StepTwo: FC<Props> = (props) => {
     //Store the data to session storage
   };
 
-  useEffect(() => {
-    document?.getElementById("step")?.scrollIntoView();
-  });
+  
 
   const validateStep = async () => {
     setIsValidating(true);
     //console.log("testing auth0 validation")
-    await auth0StepTwoValidation(`${domain}`, false)
+    await auth0StepTwoValidation(domain, false)
       .then((res) => {
         setAlertText(res.message);
         setAlertVariant(res.status);
@@ -140,7 +138,7 @@ export const Auth0StepTwo: FC<Props> = (props) => {
                 />
               </FormGroup>
               <Button
-                style={{ width: "300px", textAlign: "center" }}
+                style={{ textAlign: "center" }}
                 isLoading={isValidating}
                 onClick={validateStep}
               >

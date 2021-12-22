@@ -1,23 +1,11 @@
 import {
-  Form,
-  Card,
-  CardBody,
-  FormGroup,
-  ClipboardCopy,
-  Flex,
-  FlexItem,
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Auth0Step4Image from "@app/images/auth0/auth0-4.png";
 import { InstructionProps, Step, ClipboardCopyComponent } from "@wizardComponents";
 import { useImageModal } from "@app/hooks/useImageModal";
-
-interface IClaims {
-  name: string;
-  value: string;
-}
 
 export function Auth0StepThree() {
 
@@ -25,9 +13,7 @@ export function Auth0StepThree() {
   const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
     useImageModal();
 
-  useEffect(() => {
-    document?.getElementById("step")?.scrollIntoView();
-  });
+ 
 
     const instructionList: InstructionProps[] = [
     {
