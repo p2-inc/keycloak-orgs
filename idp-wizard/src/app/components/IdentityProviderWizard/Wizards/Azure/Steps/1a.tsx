@@ -7,22 +7,18 @@ import {
   CardBody,
   Form,
   FormGroup,
-  Modal,
-  ModalVariant,
   TextInput,
 } from "@patternfly/react-core";
 import { InstructionProps, Step } from "@wizardComponents";
-import { useImageModal } from "@app/hooks/useImageModal";
 import { azureStepOneAValidation } from "@app/services/AzureValidation";
 import { useSessionStorage } from "react-use";
+import { StepImage } from "../../components/zoom-image";
 
 interface Props {
   onChange: (value: boolean) => void;
 }
 
 export const AzureStepOneA: FC<Props> = (props) => {
-  const [isModalOpen, modalImageSrc, { onImageClick }, setIsModalOpen] =
-    useImageModal();
   const [alertText, setAlertText] = useState("");
   const [alertVariant, setAlertVariant] = useState("default");
   const [isValidating, setIsValidating] = useState(false);
@@ -51,14 +47,7 @@ export const AzureStepOneA: FC<Props> = (props) => {
   const instructions: InstructionProps[] = [
     {
       text: "Copy the App Federation Metadata URL.",
-      component: (
-        <img
-          src={azureStep1aImage}
-          alt="Step 1a"
-          className="step-image"
-          onClick={() => onImageClick(azureStep1aImage)}
-        />
-      ),
+      component: <StepImage src={azureStep1aImage} alt="Step 1a" />,
     },
     {
       component: (
@@ -104,19 +93,9 @@ export const AzureStepOneA: FC<Props> = (props) => {
   ];
 
   return (
-    <>
-      <Modal
-        aria-label="Image"
-        variant={ModalVariant.large}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      >
-        <img src={modalImageSrc} alt="Step Image" />
-      </Modal>
-      <Step
-        title="Step 3: Validate Azure SAML Metadata file"
-        instructionList={instructions}
-      />
-    </>
+    <Step
+      title="Step 3: Validate Azure SAML Metadata file"
+      instructionList={instructions}
+    />
   );
 };

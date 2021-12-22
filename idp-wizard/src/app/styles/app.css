@@ -13,7 +13,13 @@ body,
   vertical-align: text-top;
   width: 100%;
   &:hover {
-    cursor: "pointer";
+    cursor: zoom-in;
+  }
+}
+.step-image-large {
+  width: 100%;
+  &:hover {
+    cursor: zoom-out;
   }
 }
 
@@ -102,7 +108,7 @@ body,
   float: left;
   margin: 5px auto;
   max-width: 150px;
-  max-height: 75px;
+  max-height: 30px;
   width: 100%;
   height: auto;
 }
