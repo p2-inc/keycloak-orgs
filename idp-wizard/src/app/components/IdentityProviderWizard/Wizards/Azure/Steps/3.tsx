@@ -1,125 +1,93 @@
+import React, { FC, useState } from "react";
 import {
-  Form,
+  ActionGroup,
+  Alert,
+  Button,
   Card,
   CardBody,
+  Form,
   FormGroup,
-  ClipboardCopy,
-  Flex,
-  FlexItem,
+  TextInput,
 } from "@patternfly/react-core";
-import React from "react";
-import azureStep7Image from "@app/images/azure/azure-7.png";
-import azureStep8Image from "@app/images/azure/azure-8.png";
-import { ArrowRightIcon } from "@patternfly/react-icons";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
+import { InstructionProps, Step } from "@wizardComponents";
+import { StepImage } from "../../components/zoom-image";
+import { API_STATUS } from "@app/configurations/api-status";
+import * as Images from "@app/images/azure/saml";
 
-interface IClaims {
-  name: string;
-  value: string;
+interface Props {
+  validateMetadata: ({ metadataUrl }: { metadataUrl: string }) => Promise<{
+    status: API_STATUS;
+    message: string;
+  }>;
 }
 
-export function AzureStepThree() {
-  const claimNames = [
-    {
-      name: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-      value: "user.mail",
-    },
-    {
-      name: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
-      value: "user.givenname",
-    },
-    {
-      name: "http://schemas.microsoft.com/identity/claims/name",
-      value: "user.userprincipalname",
-    },
-    {
-      name: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
-      value: "user.surname",
-    },
-  ];
+export const AzureStepThree: FC<Props> = ({ validateMetadata }) => {
+  const [metadataUrl, setMetadataUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<null | {
+    status: API_STATUS;
+    message: string;
+  }>(null);
 
-  const renderClipboardCopyHeader = () => {
-    return (
-      <Flex style={{ padding: "5px" }}>
-        <FlexItem
-          style={{ width: "550px", fontSize: "16px", fontWeight: "bold" }}
-        >
-          Claim Name
-        </FlexItem>
-        <FlexItem>
-          <ArrowRightIcon />
-        </FlexItem>
-        <FlexItem
-          style={{ width: "250px", fontSize: "16px", fontWeight: "bold" }}
-        >
-          Value
-        </FlexItem>
-      </Flex>
-    );
+  const submitMetadata = async () => {
+    setIsLoading(true);
+    const validateResult = await validateMetadata({ metadataUrl });
+    setResult(validateResult);
+    setIsLoading(false);
   };
 
-  const renderClipboardCopy = (vals: IClaims) => {
-    return (
-      <Flex style={{ padding: "5px" }}>
-        <FlexItem>
-          <ClipboardCopy
-            isReadOnly
-            hoverTip="Copy"
-            clickTip="Copied"
-            className="clipboard-copy"
-            style={{ width: "550px", fontSize: "8px" }}
-          >
-            {vals.name}
-          </ClipboardCopy>
-        </FlexItem>
-        <FlexItem>
-          <ArrowRightIcon />
-        </FlexItem>
-        <FlexItem>
-          <ClipboardCopy
-            isReadOnly
-            hoverTip="Copy"
-            clickTip="Copied"
-            style={{ width: "250px", fontSize: "8px" }}
-          >
-            {vals.value}
-          </ClipboardCopy>
-        </FlexItem>
-      </Flex>
-    );
-  };
-
-  const instructionList: InstructionProps[] = [
+  const instructions: InstructionProps[] = [
     {
-      text: "Click the Edit icon in the top right of the second step.",
-      component: <StepImage src={azureStep7Image} alt="Step 2.1" />,
+      text: "Copy the App Federation Metadata URL.",
+      component: <StepImage src={Images.AzureSaml1a} alt="Step 1a" />,
     },
     {
       component: (
-        <Card style={{ width: "1000px" }} className="card-shadow">
+        <Card className="card-shadow">
           <CardBody>
+            {result && (
+              <Alert
+                variant={
+                  result.status === API_STATUS.ERROR ? "danger" : "default"
+                }
+                title={result.message}
+                aria-live="polite"
+                isInline
+              />
+            )}
+
             <Form>
-              <FormGroup fieldId="copy-form">
-                {renderClipboardCopyHeader()}
-                {claimNames.map((claim) => {
-                  return renderClipboardCopy(claim);
-                })}
+              <FormGroup label="Metadata URL" isRequired fieldId="metadata-url">
+                <TextInput
+                  isRequired
+                  type="text"
+                  id="metadata-text"
+                  name="Metadata URL"
+                  aria-describedby="App Federation Metadata URL"
+                  value={metadataUrl}
+                  onChange={setMetadataUrl}
+                />
               </FormGroup>
+              <ActionGroup>
+                <Button
+                  variant="primary"
+                  isLoading={isLoading}
+                  onClick={submitMetadata}
+                >
+                  Validate SAML Config
+                </Button>
+              </ActionGroup>
             </Form>
           </CardBody>
         </Card>
       ),
     },
-    {
-      text: 'Fill in the following Attribute Statements and select "Next".',
-      component: <StepImage src={azureStep8Image} alt="Step 2.1" />,
-    },
   ];
 
   return (
     <Step
-      title="Step 3: User Attributes & Claims"
-      instructionList={instructionList}
+      title="Step 3: Validate Azure SAML Metadata file"
+      instructionList={instructions}
     />
   );
-}
+};

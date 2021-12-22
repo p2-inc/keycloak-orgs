@@ -1,58 +1,31 @@
-import {
-  Card,
-  CardBody,
-  FileUpload,
-  Form,
-  FormGroup,
-} from "@patternfly/react-core";
-import React, { useEffect, useState } from "react";
-import azureStep13Image from "@app/images/azure/azure-13.png";
+import React from "react";
+import * as Images from "@app/images/azure/saml";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 
 export function AzureStepFive() {
-  const [value, setValue] = useState();
-  const [filename, setFilename] = useState();
-
-  const handleFileChange = (value, filename, event) => {
-    console.log("File uploaded: ", filename, value);
-    setValue(value);
-    setFilename(filename);
-  };
-
-  useEffect(() => {
-    document?.getElementById("step")?.scrollIntoView();
-  });
-
   const instructionList: InstructionProps[] = [
     {
-      text: "Download the certificate (Base64) from Step 3 and upload it below.",
-      component: <StepImage src={azureStep13Image} alt="Step 5.1" />,
+      text: 'In order for your users and gorups of users to be synced to demo.phasetwo.io you will need to assign them to your Azure AD SAML Application. Select "Users and groups" from the "Manage" section of the navigations menu.',
+      component: <StepImage src={Images.AzureSaml9} alt="Step 4.1" />,
     },
     {
-      component: (
-        <Card className="card-shadow">
-          <CardBody>
-            <Form>
-              <FormGroup label="Certificate (Base64)" fieldId="file-form">
-                <FileUpload
-                  id="simple-file"
-                  value={value}
-                  filename={filename}
-                  filenamePlaceholder="Drag or choose a file .cer, .cert, .key, .pem to upload."
-                  browseButtonText="Upload"
-                  onChange={handleFileChange}
-                  // onReadStarted={handleFileReadStarted}
-                  // onReadFinished={handleFileReadFinished}
-                />
-              </FormGroup>
-            </Form>
-          </CardBody>
-        </Card>
-      ),
+      text: 'Select "Add user/group" from the top menu.',
+      component: <StepImage src={Images.AzureSaml10} alt="Step 4.2" />,
+    },
+    {
+      text: 'Select "None selected" under the "Users and Groups". In the menu, select the users and groups of users that you want to add to the SAML application, and click "Select".',
+      component: <StepImage src={Images.AzureSaml11} alt="Step 4.3" />,
+    },
+    {
+      text: 'Select "Assign" to add the selected users and groups of users to your SAML application.',
+      component: <StepImage src={Images.AzureSaml12} alt="Step 4.4" />,
     },
   ];
 
   return (
-    <Step title="SAML Signing Certificate" instructionList={instructionList} />
+    <Step
+      title="Step 5: Assign People & Groups"
+      instructionList={instructionList}
+    />
   );
 }

@@ -1,21 +1,18 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
   PageSectionTypes,
   Wizard,
-  Button,
 } from "@patternfly/react-core";
 import OktaLogo from "@app/images/okta/okta-logo.png";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import axios from "axios";
 import { customAlphabet } from "nanoid";
 import { alphanumeric } from "nanoid-dictionary";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useHistory } from "react-router";
-import { useKeycloak } from "@react-keycloak/web";
 import { API_STATUS } from "@app/configurations/api-status";
 
 const nanoId = customAlphabet(alphanumeric, 6);
@@ -28,10 +25,8 @@ export const OktaWizardSaml: FC = () => {
   const audienceUri = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
 
   const [metadata, setMetadata] = useState();
-
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
-  const { keycloak } = useKeycloak();
   const history = useHistory();
 
   // Complete
@@ -39,12 +34,6 @@ export const OktaWizardSaml: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -125,35 +114,35 @@ export const OktaWizardSaml: FC = () => {
       name: "Enter Service Provider Details",
       component: <Step2 ssoUrl={ssoUrl} audienceUri={audienceUri} />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 2,
+      canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
       name: "Configure Attribute Mapping",
       component: <Step3 />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 3,
+      canJumpTo: stepIdReached >= 3,
     },
     {
       id: 4,
       name: "Complete Feedback Section",
       component: <Step4 />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 4,
+      canJumpTo: stepIdReached >= 4,
     },
     {
       id: 5,
       name: "Assign People and Groups",
       component: <Step5 />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 5,
+      canJumpTo: stepIdReached >= 5,
     },
     {
       id: 6,
       name: "Upload Okta IdP Information",
       component: <Step6 validateMetadata={validateMetadata} />,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 6,
+      canJumpTo: stepIdReached >= 6,
     },
     {
       id: 7,

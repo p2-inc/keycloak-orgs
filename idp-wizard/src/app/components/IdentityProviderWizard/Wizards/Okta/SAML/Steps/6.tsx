@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   CardBody,
+  Form,
   FormAlert,
   FormGroup,
   TextInput,
@@ -57,23 +58,22 @@ export const Step6: FC<Props> = ({ validateMetadata }) => {
                 />
               </FormAlert>
             )}
-            <FormGroup
-              label="Identity Provider Metadata"
-              isRequired
-              fieldId="ipm-01"
-              className="pf-u-mb-md"
-            >
-              <TextInput
+            <Form>
+              <FormGroup
+                label="Identity Provider Metadata"
                 isRequired
-                type="text"
-                id="ipm-01"
-                name="ipm-01"
-                placeholder="Paste Metadata URL"
-                value={metadataUrl}
-                onChange={setMetadataUrl}
-              />
-            </FormGroup>
-            <ActionGroup>
+                fieldId="ipm-01"
+              >
+                <TextInput
+                  isRequired
+                  type="text"
+                  id="ipm-01"
+                  name="ipm-01"
+                  placeholder="Paste Metadata URL"
+                  value={metadataUrl}
+                  onChange={setMetadataUrl}
+                />
+              </FormGroup>
               <Button
                 variant="primary"
                 onClick={submitMetadata}
@@ -81,7 +81,7 @@ export const Step6: FC<Props> = ({ validateMetadata }) => {
               >
                 Submit
               </Button>
-            </ActionGroup>
+            </Form>
           </CardBody>
         </Card>
       ),
