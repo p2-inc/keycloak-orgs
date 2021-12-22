@@ -7,6 +7,7 @@ import { OktaWizardLDAP } from "./Wizards/Okta";
 import { GoogleWizard } from "./Wizards/Google";
 import { useTitle } from "react-use";
 import { OktaWizardSaml } from "./Wizards/Okta/SAML";
+import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
 
 const Provider = () => {
   const { provider, protocol } = useParams<RouterParams>();
@@ -25,6 +26,12 @@ const Provider = () => {
       return <AzureWizard />;
     case Providers.GOOGLE_SAML:
       return <GoogleWizard />;
+    case Providers.SAML:
+      return <GenericSAML />;
+    case Providers.OPEN_ID:
+      return <GenericOIDC />;
+    case Providers.LDAP:
+      return <GenericLDAP />;
 
     default:
       return <div>No provider found</div>;
