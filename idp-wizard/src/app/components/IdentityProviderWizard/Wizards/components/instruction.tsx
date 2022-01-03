@@ -4,7 +4,7 @@ import cs from "classnames";
 
 export interface InstructionProps {
   text?: string | ReactElement;
-  component: JSX.Element;
+  component: JSX.Element | ReactElement[];
 }
 export function InstructionComponent({ text, component }: InstructionProps) {
   return (

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import azureStep5Image from "@app/images/azure/azure-5.png";
-import azureStep6Image from "@app/images/azure/azure-6.png";
+import React from "react";
+import * as Images from "@app/images/azure/saml";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { ClipboardCopyComponent } from "@wizardComponents";
 
@@ -11,7 +10,7 @@ export function AzureStepTwo() {
   const instructionList: InstructionProps[] = [
     {
       text: "Click the Edit icon in the top right of the first step.",
-      component: <StepImage src={azureStep5Image} alt="Step 2.1" />,
+      component: <StepImage src={Images.AzureSaml5} alt="Step 2.1" />,
     },
     {
       component: (
@@ -31,7 +30,7 @@ export function AzureStepTwo() {
     },
     {
       text: "Submit the identifier and the Reply URL in the Basic SAML Configuration.",
-      component: <StepImage src={azureStep6Image} alt="Step 2.2" />,
+      component: <StepImage src={Images.AzureSaml6} alt="Step 2.2" />,
     },
   ];
 

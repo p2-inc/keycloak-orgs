@@ -3,10 +3,9 @@ import { RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
 import { AzureWizard } from "./Wizards/Azure";
-import { OktaWizardLDAP } from "./Wizards/Okta";
+import { OktaWizardLDAP, OktaWizardSaml } from "./Wizards/Okta";
 import { GoogleWizard } from "./Wizards/Google";
 import { useTitle } from "react-use";
-import { OktaWizardSaml } from "./Wizards/Okta/SAML";
 import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
 
 const Provider = () => {
