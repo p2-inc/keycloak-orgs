@@ -5,35 +5,25 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import OktaLogo from "@app/images/okta/okta-logo.png";
-import { Header, WizardConfirmation } from "@wizardComponents";
-import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
+import * as Steps from "./Steps";
+import azureLogo from "@app/images/azure/azure-logo.png";
+import { WizardConfirmation, Header } from "@wizardComponents";
+import { useHistory } from "react-router-dom";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { customAlphabet } from "nanoid";
-import { alphanumeric } from "nanoid-dictionary";
-import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { useHistory } from "react-router";
 import { API_STATUS } from "@app/configurations/api-status";
+import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 
-const nanoId = customAlphabet(alphanumeric, 6);
-
-export const OktaWizardSaml: FC = () => {
-  const title = "Okta wizard";
-
-  const alias = `okta-saml-${nanoId()}`;
-  const ssoUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
-  const audienceUri = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
-
-  const [metadata, setMetadata] = useState();
+export const AzureWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
-  const history = useHistory();
-
-  // Complete
-  const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
+  const history = useHistory();
+  const [kcAdminClient] = useKeycloakAdminApi();
+  const [metadata, setMetadata] = useState();
+  const [metadataUrl, setMetadataUrl] = useState("");
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -48,6 +38,7 @@ export const OktaWizardSaml: FC = () => {
 
   const validateMetadata = async ({ metadataUrl }: { metadataUrl: string }) => {
     // make call to submit the URL and verify it
+    setMetadataUrl(metadataUrl);
 
     try {
       const resp = await kcAdminClient.identityProviders.importFromUrl({
@@ -57,29 +48,31 @@ export const OktaWizardSaml: FC = () => {
       });
 
       setMetadata(resp);
+      setIsFormValid(true);
 
       return {
         status: API_STATUS.SUCCESS,
         message:
-          "Configuration successfully validated with Okta. Continue to next step.",
+          "Configuration successfully validated with Azure. Continue to next step.",
       };
     } catch (e) {
       return {
         status: API_STATUS.ERROR,
         message:
-          "Configuration validation failed with Okta. Check URL and try again.",
+          "Configuration validation failed with Azure. Check URL and try again.",
       };
     }
   };
 
-  const createOktaSamlIdp = async () => {
+  const createAzureSamlIdP = async () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
+    setDisableButton(false);
     setResults("Creating Okta SAML IdP...");
 
     const payload: IdentityProviderRepresentation = {
-      alias: alias,
-      displayName: `Okta SAML Single Sign-on ${alias}`,
+      alias: "azure-saml",
+      displayName: `Azure SAML Single Sign-on`,
       providerId: "saml",
       config: metadata!,
     };
@@ -90,12 +83,14 @@ export const OktaWizardSaml: FC = () => {
         realm: process.env.REALM!,
       });
 
-      setResults("Okta SAML IdP created successfully. Click finish.");
-      setStepIdReached(8);
+      setResults("Azure SAML IdP created successfully. Click finish.");
+      setStepIdReached(7);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults("Error creating Okta SAML IdP.");
+      setResults(
+        "Error creating Azure SAML IdP. Please confirm there is no Azure SAML configured already."
+      );
       setError(true);
     } finally {
       setIsValidating(false);
@@ -105,70 +100,65 @@ export const OktaWizardSaml: FC = () => {
   const steps = [
     {
       id: 1,
-      name: "Add a SAML Application",
-      component: <Step1 />,
+      name: "Create Enterprise Application",
+      component: <Steps.AzureStepOne />,
       hideCancelButton: true,
     },
     {
       id: 2,
-      name: "Enter Service Provider Details",
-      component: <Step2 ssoUrl={ssoUrl} audienceUri={audienceUri} />,
+      name: "Configure Attribute Statements",
+      component: <Steps.AzureStepTwo />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
-      name: "Configure Attribute Mapping",
-      component: <Step3 />,
+      name: "Upload Azure SAML Metadata file",
+      component: <Steps.AzureStepThree validateMetadata={validateMetadata} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
+      enableNext: isFormValid,
     },
     {
       id: 4,
-      name: "Complete Feedback Section",
-      component: <Step4 />,
+      name: "User Attributes & Claims",
+      component: <Steps.AzureStepFour />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 4,
     },
     {
       id: 5,
-      name: "Assign People and Groups",
-      component: <Step5 />,
+      name: "Assign People & Groups",
+      component: <Steps.AzureStepFive />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 5,
     },
     {
-      id: 6,
-      name: "Upload Okta IdP Information",
-      component: <Step6 validateMetadata={validateMetadata} />,
-      hideCancelButton: true,
-      canJumpTo: stepIdReached >= 6,
-    },
-    {
-      id: 7,
       name: "Confirmation",
       component: (
         <WizardConfirmation
           title="SSO Configuration Complete"
-          message="Your users can now sign-in with Okta SAML."
-          buttonText="Create Okta SAML IdP in Keycloak"
-          disableButton={disableButton}
+          message="Your users can now sign-in with Azure AD."
+          buttonText="Create SAML IdP in Keycloak"
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={createOktaSamlIdp}
+          validationFunction={createAzureSamlIdP}
+          disableButton={disableButton}
         />
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 8,
-      canJumpTo: stepIdReached >= 7,
+      canJumpTo: stepIdReached >= 6,
+      enableNext: stepIdReached === 7,
     },
   ];
 
+  const title = "Azure wizard";
+
   return (
     <>
-      <Header logo={OktaLogo} />
+      <Header logo={azureLogo} />
       <PageSection
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
