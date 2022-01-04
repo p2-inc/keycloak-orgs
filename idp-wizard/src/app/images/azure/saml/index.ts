@@ -2,7 +2,7 @@ import AzureSaml1 from "./azure-1.png";
 import AzureSaml1a from "./azure-1a.png";
 import AzureSaml2 from "./azure-2.png";
 import AzureSaml3 from "./azure-3.png";
-import AzureSaml3 from "./azure-3a.png";
+import AzureSaml3a from "./azure-3a.png";
 import AzureSaml4 from "./azure-4.png";
 import AzureSaml5 from "./azure-5.png";
 import AzureSaml6 from "./azure-6.png";
