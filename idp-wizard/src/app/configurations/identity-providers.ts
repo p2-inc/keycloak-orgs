@@ -124,7 +124,7 @@ export const GenericIdentityProviders: IIDPType[] = [
   {
     name: "SAML",
     imageSrc: samlLogo,
-    active: false,
+    active: true,
     id: Providers.SAML,
     protocols: [Protocols.SAML],
   },

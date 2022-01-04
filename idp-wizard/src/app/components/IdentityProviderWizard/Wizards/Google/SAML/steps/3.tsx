@@ -20,8 +20,8 @@ interface Step3Props {
 }
 
 export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
-  const [metadataFileValue, setMetadataFileValue] = useState();
-  const [metadataFileName, setMetadataFileName] = useState();
+  const [metadataFileValue, setMetadataFileValue] = useState("");
+  const [metadataFileName, setMetadataFileName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadValid, setUploadValid] = useState<boolean | null>(null);
 
@@ -32,8 +32,11 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
   ) => {
     setMetadataFileName(filename);
     setMetadataFileValue(value);
-    setIsUploading(true);
     setUploadValid(null);
+
+    if (!value) return;
+
+    setIsUploading(true);
 
     const uploadStatus = await uploadMetadataFile(value);
 

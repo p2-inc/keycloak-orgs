@@ -1,4 +1,9 @@
-import { IdentityProviders, Protocols, Providers } from "@app/configurations";
+import {
+  GenericIdentityProviders,
+  IdentityProviders,
+  Protocols,
+  Providers,
+} from "@app/configurations";
 import { RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
@@ -11,9 +16,9 @@ import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
 const Provider = () => {
   const { provider, protocol } = useParams<RouterParams>();
 
-  useTitle(
-    `${IdentityProviders.find((ip) => ip.id === provider)?.name} | PhaseTwo`
-  );
+  const providers = [...IdentityProviders, ...GenericIdentityProviders];
+
+  useTitle(`${providers.find((ip) => ip.id === provider)?.name} | PhaseTwo`);
 
   switch (provider) {
     case Providers.OKTA:
