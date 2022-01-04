@@ -70,6 +70,14 @@ body,
 
 .p2-step-instruction {
   max-width: 960px;
+
+  &.columns {
+    @media screen and (min-width: 1280px) {
+      display: grid;
+      grid-gap: 10px;
+      grid-template-columns: 1fr minmax(200px, 600px);
+    }
+  }
 }
 
 .step-instruction {
