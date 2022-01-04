@@ -15,21 +15,9 @@ import { alphanumeric } from "nanoid-dictionary";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
+import { METADATA_CONFIG } from "@app/configurations/api-status";
 
 const nanoId = customAlphabet(alphanumeric, 6);
-interface ConfigData {
-  validateSignature: "false" | "true";
-  loginHint: "false" | "true";
-  signingCertificate: string;
-  enabledFromMetadata: "false" | "true";
-  postBindingLogout: "false" | "true";
-  postBindingResponse: "false" | "true";
-  nameIDPolicyFormat: string;
-  postBindingAuthnRequest: "false" | "true";
-  singleSignOnServiceUrl: string;
-  wantAuthnRequestsSigned: "false" | "true";
-  addExtensionsElementWithKeyInfo: "false" | "true";
-}
 
 export const GoogleWizard: FC = () => {
   const title = "Google wizard";
@@ -40,7 +28,7 @@ export const GoogleWizard: FC = () => {
   const [alias, setAlias] = useState(`google-saml-${nanoId()}`);
   const acsUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
   const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
-  const [configData, setConfigData] = useState<ConfigData | null>(null);
+  const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
 
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
