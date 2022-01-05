@@ -12,6 +12,7 @@ import { OktaWizardLDAP, OktaWizardSaml } from "./Wizards/Okta";
 import { GoogleWizard } from "./Wizards/Google";
 import { useTitle } from "react-use";
 import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
+import { Auth0Wizard } from "./Wizards/Auth0";
 
 const Provider = () => {
   const { provider, protocol } = useParams<RouterParams>();
@@ -36,6 +37,8 @@ const Provider = () => {
       return <GenericOIDC />;
     case Providers.LDAP:
       return <GenericLDAP />;
+    case Providers.AUTH0:
+      return <Auth0Wizard />;
 
     default:
       return <div>No provider found</div>;
