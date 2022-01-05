@@ -1,20 +1,25 @@
-import { IdentityProviders, Protocols, Providers } from "@app/configurations";
+import {
+  GenericIdentityProviders,
+  IdentityProviders,
+  Protocols,
+  Providers,
+} from "@app/configurations";
 import { RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
 import { AzureWizard } from "./Wizards/Azure";
-import { OktaWizardLDAP } from "./Wizards/Okta";
+import { OktaWizardLDAP, OktaWizardSaml } from "./Wizards/Okta";
 import { GoogleWizard } from "./Wizards/Google";
 import { Auth0Wizard } from "./Wizards/Auth0";
 import { useTitle } from "react-use";
-import { OktaWizardSaml } from "./Wizards/Okta/SAML";
+import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
 
 const Provider = () => {
   const { provider, protocol } = useParams<RouterParams>();
 
-  useTitle(
-    `${IdentityProviders.find((ip) => ip.id === provider)?.name} | PhaseTwo`
-  );
+  const providers = [...IdentityProviders, ...GenericIdentityProviders];
+
+  useTitle(`${providers.find((ip) => ip.id === provider)?.name} | PhaseTwo`);
 
   switch (provider) {
     case Providers.OKTA:
@@ -28,6 +33,12 @@ const Provider = () => {
       return <GoogleWizard />;
     case Providers.AUTH0:
       return <Auth0Wizard />;
+    case Providers.SAML:
+      return <GenericSAML />;
+    case Providers.OPEN_ID:
+      return <GenericOIDC />;
+    case Providers.LDAP:
+      return <GenericLDAP />;
 
     default:
       return <div>No provider found</div>;

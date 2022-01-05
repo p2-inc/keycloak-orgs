@@ -13,7 +13,7 @@ import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 
-export const TemplateWizardProtocol: FC = () => {
+export const GenericOIDC: FC = () => {
   const title = "Okta wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
