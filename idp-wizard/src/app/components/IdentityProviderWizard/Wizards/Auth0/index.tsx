@@ -9,13 +9,12 @@ import {
   Button,
 } from "@patternfly/react-core";
 import { useKeycloak } from "@react-keycloak/web";
-import { Auth0StepOne } from "./Steps/1";
-import { Auth0StepTwo } from "./Steps/2";
-import { Auth0StepThree } from "./Steps/3";
+
+import * as Steps from "./OIDC/Steps";
 import authoLogo from "@app/images/provider-logos/auth0_logo.png";
 import { WizardConfirmation } from "@wizardComponents";
 import { useHistory } from "react-router";
-import { auth0StepTwoValidation } from "@app/services/Auth0Validation";
+import { createIdPInKeycloak } from "@app/services/Auth0Validation";
 
 export const Auth0Wizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -23,6 +22,8 @@ export const Auth0Wizard: FC = () => {
   const [error, setError] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+  const [validationResults, setValidationResults] = useState("");
+  const [kcAdminClient, setKcAdminClient] = useState();
   const { keycloak } = useKeycloak();
   const history = useHistory();
   const onNext = (newStep) => {
@@ -34,15 +35,16 @@ export const Auth0Wizard: FC = () => {
     console.log("close wizard");
   };
 
-  const onFormChange = (value) => {
-    setIsFormValid(value);
+  const handleFormSubmission = (validationResults, isValid, kcAdmin) => {
+    setValidationResults(validationResults);
+    setIsFormValid(isValid);
+    setKcAdminClient(kcAdmin);
   };
 
-  const validateAuth0Wizard = async () => {
+  const createIdP = async () => {
     setIsValidating(true);
     setResults("Final Validation Running...");
-    const domain = sessionStorage.getItem("auth0_domain");
-    const results = await auth0StepTwoValidation(domain!, true);
+    const results = await createIdPInKeycloak(validationResults, kcAdminClient);
     setError(results.status == "error");
     setResults("Results: " + results.message);
     setIsValidating(false);
@@ -52,13 +54,13 @@ export const Auth0Wizard: FC = () => {
     {
       id: 1,
       name: "Create An Application",
-      component: <Auth0StepOne />,
+      component: <Steps.Auth0StepOne />,
       hideCancelButton: true,
     },
     {
       id: 2,
       name: "Provide Domain And Credentials",
-      component: <Auth0StepTwo  onChange={onFormChange} />,
+      component: <Steps.Auth0StepTwo onFormSubmission={handleFormSubmission} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 1,
       enableNext: isFormValid,
@@ -66,10 +68,10 @@ export const Auth0Wizard: FC = () => {
     {
       id: 3,
       name: "Configure Redirect URI",
-      component: <Auth0StepThree/>,
+      component: <Steps.Auth0StepThree />,
       hideCancelButton: true,
-      canJumpTo: stepIdReached >= 2,
-      
+      canJumpTo: stepIdReached >= 3,
+
     },
     {
       name: "Confirmation",
@@ -81,10 +83,10 @@ export const Auth0Wizard: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={validateAuth0Wizard}
-        />
+          validationFunction={createIdP}
+          disableButton={false} />
       ),
-      canJumpTo: stepIdReached >= 3,
+      canJumpTo: stepIdReached >= 4,
     },
   ];
 
