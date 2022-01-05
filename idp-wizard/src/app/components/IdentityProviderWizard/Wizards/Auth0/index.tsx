@@ -83,8 +83,7 @@ export const Auth0Wizard: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={createIdP}
-          disableButton={false} />
+          validationFunction={createIdP}/>
       ),
       canJumpTo: stepIdReached >= 4,
     },

@@ -13,7 +13,6 @@ import { GoogleWizard } from "./Wizards/Google";
 import { Auth0Wizard } from "./Wizards/Auth0";
 import { useTitle } from "react-use";
 import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
-import { Auth0Wizard } from "./Wizards/Auth0";
 
 const Provider = () => {
   const { provider, protocol } = useParams<RouterParams>();
