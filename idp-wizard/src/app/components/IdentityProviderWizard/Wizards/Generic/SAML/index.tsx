@@ -93,7 +93,7 @@ export const GenericSAML: FC = () => {
     return {
       status: API_STATUS.ERROR,
       message:
-        "Configuration validation failed with SAML. Check URL and try again.",
+        "Configuration validation failed with SAML. Check file and try again.",
     };
   };
 
@@ -107,7 +107,33 @@ export const GenericSAML: FC = () => {
     ssoUrl: METADATA_CONFIG["singleSignOnServiceUrl"];
     entityId: string;
   }) => {
-    return true;
+    const fd = new FormData();
+    fd.append("providerId", "saml");
+    fd.append("file", file);
+    fd.append("ssoUrl", ssoUrl);
+    fd.append("entityId", entityId);
+
+    try {
+      const resp = await Axios.post(identifierURL, fd);
+
+      if (resp.status === 200) {
+        setMetadata(resp.data);
+        setIsFormValid(true);
+        return {
+          status: API_STATUS.SUCCESS,
+          message:
+            "Configuration successfully validated with SAML. Continue to next step.",
+        };
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
+    return {
+      status: API_STATUS.ERROR,
+      message:
+        "Configuration validation failed with SAML. Check configurations and try again.",
+    };
   };
 
   const validateMetadataUrl = async ({

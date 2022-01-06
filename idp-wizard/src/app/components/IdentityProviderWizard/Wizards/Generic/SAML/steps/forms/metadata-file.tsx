@@ -4,10 +4,10 @@ import {
   ActionGroup,
   Alert,
   Button,
+  FileUpload,
   Form,
   FormAlert,
   FormGroup,
-  TextInput,
 } from "@patternfly/react-core";
 import * as Yup from "yup";
 import {
@@ -16,48 +16,46 @@ import {
   API_STATUS,
 } from "@app/configurations/api-status";
 
-const MetadataUrlSchema = Yup.object().shape({
-  metadataUrl: Yup.string()
-    .url("Metadata Url should be a valid Url.")
-    .required("Metadata Url is a required field."),
+const metadataFileSchema = Yup.object().shape({
+  metadataFile: Yup.mixed().required("Metadata File is required."),
 });
 
 type Props = {
   handleFormSubmit: ({
-    metadataUrl,
+    metadataFile,
   }: {
-    metadataUrl: string;
+    metadataFile: File;
   }) => API_RETURN_PROMISE;
   formActive?: boolean;
 };
 
-export const MetadataUrlForm: FC<Props> = ({
+export const MetadataFile: FC<Props> = ({
   handleFormSubmit,
   formActive = true,
 }) => {
   const [submissionResp, setSubmissionResp] = useState<API_RETURN | null>();
   const {
     handleSubmit,
-    handleChange,
     values,
     errors,
     touched,
     isSubmitting,
     setSubmitting,
+    setFieldValue,
   } = useFormik({
     initialValues: {
-      metadataUrl: "",
+      metadataFile: "",
     },
     onSubmit: async (values) => {
       const resp = await handleFormSubmit(values);
       setSubmissionResp(resp);
       setSubmitting(false);
     },
-    validationSchema: MetadataUrlSchema,
+    validationSchema: metadataFileSchema,
   });
 
   const hasError =
-    errors.metadataUrl && touched.metadataUrl ? "error" : "default";
+    errors.metadataFile && touched.metadataFile ? "error" : "default";
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -76,19 +74,24 @@ export const MetadataUrlForm: FC<Props> = ({
         </FormAlert>
       )}
       <FormGroup
-        label="Metadata Url"
+        label="Metadata File"
         isRequired
-        fieldId="metadataUrl"
+        fieldId="metadataFile"
+        className="form-label"
         validated={hasError}
-        helperTextInvalid={errors.metadataUrl}
+        helperTextInvalid={errors.metadataFile}
       >
-        <TextInput
-          isRequired
-          id="metadataUrl"
-          name="metadataUrl"
-          value={values.metadataUrl}
-          onChange={(val, e) => handleChange(e)}
-          validated={hasError}
+        <FileUpload
+          id="metadataFile"
+          value={values.metadataFile}
+          filename={values.metadataFile?.name}
+          filenamePlaceholder="Drop or choose metadata file .xml to upload."
+          browseButtonText="Select"
+          onChange={(val) => setFieldValue("metadataFile", val)}
+          dropzoneProps={{
+            accept: "text/xml",
+          }}
+          isLoading={isSubmitting}
         />
       </FormGroup>
       <ActionGroup style={{ marginTop: 0 }}>
@@ -97,7 +100,7 @@ export const MetadataUrlForm: FC<Props> = ({
           isDisabled={isSubmitting || !formActive}
           isLoading={isSubmitting}
         >
-          Validate URL
+          Validate Metadata File
         </Button>
       </ActionGroup>
     </Form>
