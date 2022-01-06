@@ -24,6 +24,7 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import { isString } from "lodash";
+import { MetadataUrlForm } from "./forms";
 
 interface Props {
   validateMetadataUrl: ({
@@ -44,15 +45,22 @@ interface Props {
   metadata: METADATA_CONFIG | undefined;
 }
 
+const forms = {
+  METADATA_URL: true,
+  METADATA_FILE: true,
+  CONFIG: true,
+};
+
 export const Step2: FC<Props> = ({
   uploadMetadataFile,
   validateMetadataUrl,
   uploadCertifcateMetadataInfo,
   metadata,
 }) => {
-  const [metadataUrl, setMetadataUrl] = useState("");
   const [ssoUrl, setSsoUrl] = useState("");
   const [entityId, setEntityId] = useState("");
+
+  const [formsActive, setFormsActive] = useState(forms);
 
   const [errors, setErrors] = useState({});
   const [results, setResults] = useState({});
@@ -86,26 +94,20 @@ export const Step2: FC<Props> = ({
     setResults({});
   };
 
-  const handleMetadatUrlValidation = async () => {
-    resetForms();
-
-    if (isString(metadataUrl) && metadataUrl.length > 0) {
-      setIsValidating("METADATA_URL");
-      let resp: API_RETURN;
-      resp = await validateMetadataUrl({ metadataUrl });
-      if (resp.status === API_STATUS.SUCCESS) {
-        setResults({
-          "form-metadata-url": resp.message,
-          "form2-validate": true,
-        });
-      }
-      if (resp.status === API_STATUS.ERROR) {
-        setErrors({
-          "form-metadata-url": resp.message,
-        });
-      }
-      setIsValidating(false);
+  const handleMetadatUrlValidation = async ({
+    metadataUrl,
+  }: {
+    metadataUrl: string;
+  }) => {
+    const resp = await validateMetadataUrl({ metadataUrl });
+    if (resp.status === API_STATUS.SUCCESS) {
+      setFormsActive({
+        ...formsActive,
+        METADATA_FILE: false,
+        CONFIG: false,
+      });
     }
+    return resp;
   };
 
   const handleFileInputChange: FileUploadFieldProps["onChange"] = async (
@@ -167,8 +169,6 @@ export const Step2: FC<Props> = ({
     }
   };
 
-  console.log(errors, results);
-
   const isValidResult = (key: string) =>
     errors[key] ? "error" : results[key] ? "success" : "default";
 
@@ -195,35 +195,10 @@ export const Step2: FC<Props> = ({
               If your identity provider provides a SAML metadata URL, input it
               here.
             </div>
-            <Form>
-              <FormGroup
-                label="Metadata Url"
-                isRequired
-                fieldId="form-metadata-url"
-                validated={validatedMetadataUrl}
-                helperTextInvalid={errors["form-metadata-url"]}
-              >
-                <TextInput
-                  isRequired
-                  id="form-metadata-url"
-                  name="form-metadata-url"
-                  value={metadataUrl}
-                  onChange={setMetadataUrl}
-                  validated={validatedMetadataUrl}
-                />
-              </FormGroup>
-              <ActionGroup style={{ marginTop: 0 }}>
-                <Button
-                  onClick={handleMetadatUrlValidation}
-                  isDisabled={
-                    isValidating === "METADATA_URL" || metadataUrl === ""
-                  }
-                  isLoading={isValidating === "METADATA_URL"}
-                >
-                  Validate URL
-                </Button>
-              </ActionGroup>
-            </Form>
+            <MetadataUrlForm
+              handleFormSubmit={handleMetadatUrlValidation}
+              formActive={formsActive.METADATA_URL}
+            />
           </CardBody>
         </Card>
       ),
