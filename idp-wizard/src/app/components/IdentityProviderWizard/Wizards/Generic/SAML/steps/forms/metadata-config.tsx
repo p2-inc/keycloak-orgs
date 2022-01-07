@@ -99,6 +99,7 @@ export const MetadataConfig: FC<Props> = ({
           value={values.ssoUrl}
           onChange={(val, e) => handleChange(e)}
           validated={hasError("ssoUrl")}
+          isDisabled={!formActive}
         />
       </FormGroup>
       <FormGroup
@@ -115,6 +116,7 @@ export const MetadataConfig: FC<Props> = ({
           value={values.entityId}
           onChange={(val, e) => handleChange(e)}
           validated={hasError("entityId")}
+          isDisabled={!formActive}
         />
       </FormGroup>
       <FormGroup
@@ -133,6 +135,7 @@ export const MetadataConfig: FC<Props> = ({
           browseButtonText="Select"
           onChange={(val) => setFieldValue("metadataFile", val)}
           isLoading={isSubmitting}
+          isDisabled={!formActive}
         />
       </FormGroup>
       <ActionGroup style={{ marginTop: 0 }}>

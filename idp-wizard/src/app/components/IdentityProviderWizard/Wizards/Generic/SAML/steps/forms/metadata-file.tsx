@@ -92,6 +92,7 @@ export const MetadataFile: FC<Props> = ({
             accept: "text/xml",
           }}
           isLoading={isSubmitting}
+          isDisabled={!formActive}
         />
       </FormGroup>
       <ActionGroup style={{ marginTop: 0 }}>

@@ -89,6 +89,7 @@ export const MetadataUrlForm: FC<Props> = ({
           value={values.metadataUrl}
           onChange={(val, e) => handleChange(e)}
           validated={hasError}
+          isDisabled={!formActive}
         />
       </FormGroup>
       <ActionGroup style={{ marginTop: 0 }}>
