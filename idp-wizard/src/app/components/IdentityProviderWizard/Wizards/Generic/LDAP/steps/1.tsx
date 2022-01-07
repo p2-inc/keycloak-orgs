@@ -1,6 +1,5 @@
 import React, { FC, useState } from "react";
 import { CustomSelect, InstructionProps, Step } from "@wizardComponents";
-import { SelectOptionObject } from "@patternfly/react-core";
 import { omit, pick } from "lodash";
 
 interface Props {

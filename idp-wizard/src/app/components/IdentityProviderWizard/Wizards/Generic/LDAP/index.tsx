@@ -7,7 +7,12 @@ import {
 } from "@patternfly/react-core";
 import LdapLogo from "@app/images/provider-logos/ldap_logo.png";
 import { Header, WizardConfirmation } from "@wizardComponents";
-import { Step1, Step2, Step3 } from "./steps";
+import {
+  LDAP_SERVER_CONFIG_TEST_CONNECTION,
+  Step1,
+  Step2,
+  Step3,
+} from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useHistory } from "react-router";
@@ -26,7 +31,16 @@ export const GenericLDAP: FC = () => {
   const [error, setError] = useState(null);
   const [disableButton, setDisableButton] = useState(false);
 
-  const [config, setConfig] = useState({});
+  const [config, setConfig] = useState<
+    | {
+        usernameLDAPAttribute: string[];
+        userObjectClasses: string[];
+        uuidLDAPAttribute: string[];
+        rdnLDAPAttribute: string[];
+        vendor: string[];
+      }
+    | {}
+  >({});
 
   // const payload = {
   //   name: "ldap",
@@ -110,7 +124,28 @@ export const GenericLDAP: FC = () => {
     setConfig({ ...updateConfig });
   };
 
+  const handleServerConfigValidation = async (
+    serverConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION
+  ) => {
+    const resp = await kcAdminClient.realms.testLDAPConnection(
+      { realm: process.env.REALM! },
+      serverConfig
+    );
+
+    console.log("[handleServerConfigValidation]", resp);
+
+    return resp;
+  };
+
   console.log(config);
+
+  const isConfigValid =
+    config.usernameLDAPAttribute &&
+    config.userObjectClasses &&
+    config.uuidLDAPAttribute &&
+    config.rdnLDAPAttribute &&
+    config.vendor &&
+    config.region;
 
   const steps = [
     {
@@ -120,12 +155,14 @@ export const GenericLDAP: FC = () => {
         <Step1 handleConfigUpdate={handleConfigUpdate} config={config} />
       ),
       hideCancelButton: true,
-      // enableNext: isConfigValid, // TODO Implement this
+      // enableNext: !!isConfigValid,
     },
     {
       id: 2,
       name: "Collect LDAP Configuration Information",
-      component: <Step2 />,
+      component: (
+        <Step2 handleServerConfigValidation={handleServerConfigValidation} />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
     },
