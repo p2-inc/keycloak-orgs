@@ -5,9 +5,9 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import GoogleLogo from "@app/images/provider-logos/google_saml_logo.png";
+import LdapLogo from "@app/images/provider-logos/ldap_logo.png";
 import { Header, WizardConfirmation } from "@wizardComponents";
-import { Step1 } from "./steps";
+import { Step1, Step2, Step3 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useHistory } from "react-router";
@@ -25,6 +25,64 @@ export const GenericLDAP: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState(null);
   const [disableButton, setDisableButton] = useState(false);
+
+  const [config, setConfig] = useState({});
+
+  // const payload = {
+  //   name: "ldap",
+  //   parentId: process.env.REALM,
+  //   providerId: "ldap",
+  //   providerType: "org.keycloak.storage.UserStorageProvider",
+  //   config: {
+  //     enabled: ["true"],
+  //     priority: ["0"],
+  //     fullSyncPeriod: ["-1"],
+  //     changedSyncPeriod: ["-1"],
+  //     cachePolicy: ["DEFAULT"],
+  //     evictionDay: [],
+  //     evictionHour: [],
+  //     evictionMinute: [],
+  //     maxLifespan: [],
+  //     batchSizeForSync: ["1000"],
+  //     editMode: ["READ_ONLY"],
+  //     importEnabled: ["true"],
+  //     syncRegistrations: ["false"],
+  //     vendor: ["other"],
+  //     usePasswordModifyExtendedOp: [],
+  //     usernameLDAPAttribute: ["uid"], // set from step 1
+  //     rdnLDAPAttribute: ["uid"], // set from step 1
+  //     uuidLDAPAttribute: ["entryUUID"],
+  //     userObjectClasses: ["inetOrgPerson, organizationalPerson"],
+  //     connectionUrl: [`ldaps://${customer_id}.ldap.okta.com`],
+  //     usersDn: [`ou=users, dc=${customer_id}, dc=okta, dc=com`],
+  //     authType: ["simple"],
+  //     startTls: [],
+  //     bindDn: [`uid=${login_id}, dc=${customer_id}, dc=okta, dc=com`],
+  //     bindCredential: [`${password}`],
+  //     customUserSearchFilter: [],
+  //     searchScope: ["1"],
+  //     validatePasswordPolicy: ["false"],
+  //     trustEmail: ["false"],
+  //     useTruststoreSpi: ["ldapsOnly"],
+  //     connectionPooling: ["true"],
+  //     connectionPoolingAuthentication: [],
+  //     connectionPoolingDebug: [],
+  //     connectionPoolingInitSize: [],
+  //     connectionPoolingMaxSize: [],
+  //     connectionPoolingPrefSize: [],
+  //     connectionPoolingProtocol: [],
+  //     connectionPoolingTimeout: [],
+  //     connectionTimeout: [],
+  //     readTimeout: [],
+  //     pagination: ["true"],
+  //     allowKerberosAuthentication: ["false"],
+  //     serverPrincipal: [],
+  //     keyTab: [],
+  //     kerberosRealm: [],
+  //     debug: ["false"],
+  //     useKerberosForPasswordAuthentication: ["false"],
+  //   },
+  // };
 
   const Axios = axios.create({
     headers: {
@@ -48,21 +106,44 @@ export const GenericLDAP: FC = () => {
     console.log("validated!");
   };
 
+  const handleConfigUpdate = (updateConfig: Object) => {
+    setConfig({ ...updateConfig });
+  };
+
+  console.log(config);
+
   const steps = [
     {
       id: 1,
-      name: "Step1 Title",
-      component: <Step1 />,
+      name: "Tell Us About Your Server",
+      component: (
+        <Step1 handleConfigUpdate={handleConfigUpdate} config={config} />
+      ),
       hideCancelButton: true,
+      // enableNext: isConfigValid, // TODO Implement this
     },
     {
       id: 2,
+      name: "Collect LDAP Configuration Information",
+      component: <Step2 />,
+      hideCancelButton: true,
+      canJumpTo: stepIdReached >= 2,
+    },
+    {
+      id: 3,
+      name: "LDAP Authentication",
+      component: <Step3 />,
+      hideCancelButton: true,
+      canJumpTo: stepIdReached >= 3,
+    },
+    {
+      id: 4,
       name: "Confirmation",
       component: (
         <WizardConfirmation
           title="SSO Configuration Complete"
-          message="Your users can now sign-in with {{Provider}}."
-          buttonText="Create {{Provider}} IdP in Keycloak"
+          message="Your users can now sign-in with LDAP."
+          buttonText="Create LDAP IdP in Keycloak"
           disableButton={disableButton}
           resultsText={results}
           error={error}
@@ -72,14 +153,14 @@ export const GenericLDAP: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 3,
-      canJumpTo: stepIdReached >= 2,
+      enableNext: stepIdReached === 5,
+      canJumpTo: stepIdReached >= 4,
     },
   ];
 
   return (
     <>
-      <Header logo={GoogleLogo} />
+      <Header logo={LdapLogo} />
       <PageSection
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
