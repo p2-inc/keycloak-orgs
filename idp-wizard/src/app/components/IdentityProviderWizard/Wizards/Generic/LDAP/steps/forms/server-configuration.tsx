@@ -19,9 +19,7 @@ import {
 } from "@app/configurations/api-status";
 
 const ServerConfigSchema = Yup.object().shape({
-  host: Yup.string()
-    .url("LDAP host should be a valid Url.")
-    .required("LDAP host is a required field."),
+  host: Yup.string().required("LDAP host is a required field."),
   sslPort: Yup.string().required("LDAP SSL Port is required."),
   baseDn: Yup.string().required("LDAP Base DN is required."),
   userBaseDn: Yup.string().required("LDAP User Base DN is required."),
@@ -77,7 +75,6 @@ export const LdapServerConfig: FC<Props> = ({
       groupFilter: "",
     },
     onSubmit: async (values) => {
-      console.log("[onSubmit]", values);
       const resp = await handleFormSubmit(values);
       setSubmissionResp(resp);
       setSubmitting(false);
@@ -106,7 +103,6 @@ export const LdapServerConfig: FC<Props> = ({
       )}
       <FormGroup
         label="LDAP Host"
-        helperText="Must use SSL."
         isRequired
         fieldId="host"
         validated={hasError("host")}

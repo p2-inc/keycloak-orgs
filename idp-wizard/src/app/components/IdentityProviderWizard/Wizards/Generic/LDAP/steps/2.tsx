@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
+import { InstructionProps, Step } from "@wizardComponents";
 import { LdapServerConfig, ServerConfig } from "./forms";
 import { Card, CardBody } from "@patternfly/react-core";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
@@ -17,7 +17,8 @@ export type LDAP_SERVER_CONFIG_TEST_CONNECTION = {
 
 type Props = {
   handleServerConfigValidation: (
-    serverConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION
+    ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION,
+    serverConfig: ServerConfig
   ) => API_RETURN_PROMISE;
 };
 
@@ -31,7 +32,7 @@ export const Step2: FC<Props> = ({ handleServerConfigValidation }) => {
     userFilter,
     groupFilter,
   }: ServerConfig) => {
-    const serverConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION = {
+    const ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION = {
       action: "testConnection",
       connectionUrl: `ldaps://${host}:${sslPort}`,
       authType: "simple",
@@ -42,9 +43,15 @@ export const Step2: FC<Props> = ({ handleServerConfigValidation }) => {
       startTls: "",
     };
 
-    const validationResult = await handleServerConfigValidation(serverConfig);
-
-    console.log("[validationResult]", validationResult);
+    return await handleServerConfigValidation(ldapServerConfig, {
+      host,
+      sslPort,
+      baseDn,
+      userBaseDn,
+      groupBaseDn,
+      userFilter,
+      groupFilter,
+    });
   };
 
   const instructions: InstructionProps[] = [

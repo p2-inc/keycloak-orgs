@@ -17,6 +17,8 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
+import { API_STATUS } from "@app/configurations/api-status";
+import { AdminCrednetialsConfig, ServerConfig } from "./steps/forms";
 
 export const GenericLDAP: FC = () => {
   const title = "Okta wizard";
@@ -28,75 +30,20 @@ export const GenericLDAP: FC = () => {
   // Complete
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
-  const [config, setConfig] = useState<
-    | {
-        usernameLDAPAttribute: string[];
-        userObjectClasses: string[];
-        uuidLDAPAttribute: string[];
-        rdnLDAPAttribute: string[];
-        vendor: string[];
-      }
-    | {}
-  >({});
-
-  // const payload = {
-  //   name: "ldap",
-  //   parentId: process.env.REALM,
-  //   providerId: "ldap",
-  //   providerType: "org.keycloak.storage.UserStorageProvider",
-  //   config: {
-  //     enabled: ["true"],
-  //     priority: ["0"],
-  //     fullSyncPeriod: ["-1"],
-  //     changedSyncPeriod: ["-1"],
-  //     cachePolicy: ["DEFAULT"],
-  //     evictionDay: [],
-  //     evictionHour: [],
-  //     evictionMinute: [],
-  //     maxLifespan: [],
-  //     batchSizeForSync: ["1000"],
-  //     editMode: ["READ_ONLY"],
-  //     importEnabled: ["true"],
-  //     syncRegistrations: ["false"],
-  //     vendor: ["other"],
-  //     usePasswordModifyExtendedOp: [],
-  //     usernameLDAPAttribute: ["uid"], // set from step 1
-  //     rdnLDAPAttribute: ["uid"], // set from step 1
-  //     uuidLDAPAttribute: ["entryUUID"],
-  //     userObjectClasses: ["inetOrgPerson, organizationalPerson"],
-  //     connectionUrl: [`ldaps://${customer_id}.ldap.okta.com`],
-  //     usersDn: [`ou=users, dc=${customer_id}, dc=okta, dc=com`],
-  //     authType: ["simple"],
-  //     startTls: [],
-  //     bindDn: [`uid=${login_id}, dc=${customer_id}, dc=okta, dc=com`],
-  //     bindCredential: [`${password}`],
-  //     customUserSearchFilter: [],
-  //     searchScope: ["1"],
-  //     validatePasswordPolicy: ["false"],
-  //     trustEmail: ["false"],
-  //     useTruststoreSpi: ["ldapsOnly"],
-  //     connectionPooling: ["true"],
-  //     connectionPoolingAuthentication: [],
-  //     connectionPoolingDebug: [],
-  //     connectionPoolingInitSize: [],
-  //     connectionPoolingMaxSize: [],
-  //     connectionPoolingPrefSize: [],
-  //     connectionPoolingProtocol: [],
-  //     connectionPoolingTimeout: [],
-  //     connectionTimeout: [],
-  //     readTimeout: [],
-  //     pagination: ["true"],
-  //     allowKerberosAuthentication: ["false"],
-  //     serverPrincipal: [],
-  //     keyTab: [],
-  //     kerberosRealm: [],
-  //     debug: ["false"],
-  //     useKerberosForPasswordAuthentication: ["false"],
-  //   },
-  // };
+  const [config, setConfig] = useState<{
+    usernameLDAPAttribute: string[];
+    userObjectClasses: string[];
+    uuidLDAPAttribute: string[];
+    rdnLDAPAttribute: string[];
+    vendor: string[];
+  }>({});
+  const [serverConfig, setServerConfig] = useState<ServerConfig>({});
+  const [serverConfigValid, setServerConfigValid] = useState(false);
+  const [adminCreds, setAdminCreds] = useState<AdminCrednetialsConfig>({});
+  const [adminCredsValid, setAdminCredsValid] = useState(false);
 
   const Axios = axios.create({
     headers: {
@@ -115,29 +62,183 @@ export const GenericLDAP: FC = () => {
     history.push("/");
   };
 
-  const validateFn = () => {
-    // On final validation set stepIdReached to steps.length+1
-    console.log("validated!");
+  const validateFn = async () => {
+    setIsValidating(true);
+    setDisableButton(false);
+    setResults("Creating LDAP IdP...");
+
+    const { host, sslPort, baseDn } = serverConfig;
+
+    const payload = {
+      name: "ldap",
+      parentId: process.env.REALM,
+      providerId: "ldap",
+      providerType: "org.keycloak.storage.UserStorageProvider",
+      config: {
+        enabled: ["true"],
+        priority: ["0"],
+        fullSyncPeriod: ["-1"],
+        changedSyncPeriod: ["-1"],
+        cachePolicy: ["DEFAULT"],
+        evictionDay: [],
+        evictionHour: [],
+        evictionMinute: [],
+        maxLifespan: [],
+        batchSizeForSync: ["1000"],
+        editMode: ["READ_ONLY"],
+        importEnabled: ["true"],
+        syncRegistrations: ["false"],
+        vendor: config.vendor,
+        usePasswordModifyExtendedOp: [],
+        usernameLDAPAttribute: config.usernameLDAPAttribute,
+        rdnLDAPAttribute: config.rdnLDAPAttribute,
+        uuidLDAPAttribute: config.uuidLDAPAttribute,
+        userObjectClasses: config.userObjectClasses,
+        connectionUrl: [`ldaps://${host}:${sslPort}`],
+        usersDn: [serverConfig.userBaseDn],
+        authType: ["simple"],
+        startTls: [],
+        bindDn: [`uid=${adminCreds.adminUsername}, ${baseDn}`],
+        bindCredential: [adminCreds.adminPassword],
+        customUserSearchFilter: [
+          serverConfig.userFilter,
+          serverConfig.groupFilter,
+        ],
+        searchScope: ["1"],
+        validatePasswordPolicy: ["false"],
+        trustEmail: ["false"],
+        useTruststoreSpi: ["ldapsOnly"],
+        connectionPooling: ["true"],
+        connectionPoolingAuthentication: [],
+        connectionPoolingDebug: [],
+        connectionPoolingInitSize: [],
+        connectionPoolingMaxSize: [],
+        connectionPoolingPrefSize: [],
+        connectionPoolingProtocol: [],
+        connectionPoolingTimeout: [],
+        connectionTimeout: [],
+        readTimeout: [],
+        pagination: ["true"],
+        allowKerberosAuthentication: ["false"],
+        serverPrincipal: [],
+        keyTab: [],
+        kerberosRealm: [],
+        debug: ["false"],
+        useKerberosForPasswordAuthentication: ["false"],
+      },
+    };
+
+    let createResp;
+    try {
+      createResp = await kcAdminClient.components.create(payload);
+    } catch (e) {
+      setResults("Failure to create LDAP IdP. Check values and try again.");
+      setError(true);
+      setIsValidating(false);
+      return {
+        status: API_STATUS.ERROR,
+        message: "Failure to create LDAP IdP. Check values and try again.",
+      };
+    }
+
+    try {
+      await kcAdminClient.userStorageProvider.sync({
+        id: createResp.id,
+        action: "triggerChangedUsersSync",
+        realm: process.env.REALM,
+      });
+    } catch (e) {
+      setResults(
+        "LDAP IdP created but failed to sync contacts with LDAP instance. Try sync again at a later time."
+      );
+      setError(true);
+      setIsValidating(false);
+      setDisableButton(true);
+      return {
+        status: API_STATUS.ERROR,
+        message: "Failure to sync contacts with LDAP instance.",
+      };
+    }
+
+    setResults(
+      "LDAP IdP created and contacts synced. Click finish to complete."
+    );
+    setStepIdReached(5);
+    setError(false);
+    setDisableButton(true);
+    setIsValidating(false);
+
+    return {
+      status: API_STATUS.SUCCESS,
+      message:
+        "LDAP IdP created and contacts synced. Click finish to complete.",
+    };
   };
 
-  const handleConfigUpdate = (updateConfig: Object) => {
+  const handleConfigUpdate = (updateConfig: Object) =>
     setConfig({ ...updateConfig });
-  };
 
   const handleServerConfigValidation = async (
-    serverConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION
+    ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION,
+    serverConfig: ServerConfig
   ) => {
-    const resp = await kcAdminClient.realms.testLDAPConnection(
-      { realm: process.env.REALM! },
-      serverConfig
-    );
-
-    console.log("[handleServerConfigValidation]", resp);
-
-    return resp;
+    setServerConfigValid(false);
+    try {
+      await kcAdminClient.realms.testLDAPConnection(
+        { realm: process.env.REALM! },
+        ldapServerConfig
+      );
+      setServerConfig(serverConfig);
+      setServerConfigValid(true);
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "LDAP connection test is successful. Continue to the next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message: "LDAP connection test failed. Check values and try again.",
+      };
+    }
   };
 
-  console.log(config);
+  const handleAdminCredentialValidation = async ({
+    adminUsername,
+    adminPassword,
+  }: AdminCrednetialsConfig) => {
+    const { host, sslPort, baseDn } = serverConfig;
+    const credentialConfig = {
+      action: "testAuthentication",
+      connectionUrl: `ldaps://${host}:${sslPort}`,
+      authType: "simple",
+      bindDn: `uid=${adminUsername}, ${baseDn}`,
+      bindCredential: `${adminPassword}`,
+      useTruststoreSpi: "ldapsOnly",
+      connectionTimeout: "",
+      startTls: "",
+    };
+    setAdminCredsValid(false);
+    try {
+      await kcAdminClient.realms.testLDAPConnection(
+        { realm: process.env.REALM! },
+        credentialConfig
+      );
+      setAdminCreds({ adminUsername, adminPassword });
+      setAdminCredsValid(true);
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "Admin credential validation is successful. Continue to the next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message:
+          "Admin credential validation failed. Check values and try again.",
+      };
+    }
+  };
 
   const isConfigValid =
     config.usernameLDAPAttribute &&
@@ -155,7 +256,7 @@ export const GenericLDAP: FC = () => {
         <Step1 handleConfigUpdate={handleConfigUpdate} config={config} />
       ),
       hideCancelButton: true,
-      // enableNext: !!isConfigValid,
+      enableNext: !!isConfigValid,
     },
     {
       id: 2,
@@ -165,13 +266,17 @@ export const GenericLDAP: FC = () => {
       ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
+      enableNext: serverConfigValid,
     },
     {
       id: 3,
       name: "LDAP Authentication",
-      component: <Step3 />,
+      component: (
+        <Step3 handleAdminConfigValidation={handleAdminCredentialValidation} />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
+      enableNext: adminCredsValid,
     },
     {
       id: 4,

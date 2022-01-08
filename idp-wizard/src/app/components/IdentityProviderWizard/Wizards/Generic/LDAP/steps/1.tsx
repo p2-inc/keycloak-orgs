@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { CustomSelect, InstructionProps, Step } from "@wizardComponents";
 import { omit, pick } from "lodash";
 

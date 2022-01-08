@@ -1,12 +1,26 @@
 import React, { FC } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import { InstructionProps, Step } from "@wizardComponents";
+import { Card, CardBody } from "@patternfly/react-core";
+import { AdminCredentials, AdminCrednetialsConfig } from "./forms";
+import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
-export const Step3: FC = () => {
+type Props = {
+  handleAdminConfigValidation: (
+    adminCredentials: AdminCrednetialsConfig
+  ) => API_RETURN_PROMISE;
+};
+
+export const Step3: FC<Props> = ({ handleAdminConfigValidation }) => {
   const instructions: InstructionProps[] = [
     {
-      text: "Text",
-      component: <StepImage src={Images.GoogleSaml1A} alt="Step 1.1" />,
+      text: "Enter your LDAP administrator credentials",
+      component: (
+        <Card>
+          <CardBody>
+            <AdminCredentials handleFormSubmit={handleAdminConfigValidation} />
+          </CardBody>
+        </Card>
+      ),
     },
   ];
 
