@@ -9,18 +9,17 @@ import OktaLogo from "@app/images/okta/okta-logo.png";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { customAlphabet } from "nanoid";
-import { alphanumeric } from "nanoid-dictionary";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useHistory } from "react-router";
 import { API_STATUS } from "@app/configurations/api-status";
+import { generateId } from "@app/utils/generate-id";
 
-const nanoId = customAlphabet(alphanumeric, 6);
+const nanoId = generateId();
 
 export const OktaWizardSaml: FC = () => {
   const title = "Okta wizard";
 
-  const alias = `okta-saml-${nanoId()}`;
+  const alias = `okta-saml-${nanoId}`;
   const ssoUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
   const audienceUri = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
 

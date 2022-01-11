@@ -1,18 +1,31 @@
 import React, { FC } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import {
+  ClipboardCopyComponent,
+  InstructionProps,
+  Step,
+} from "@wizardComponents";
 
-export const Step1: FC = () => {
+type Props = {
+  redirectUri: string;
+};
+
+export const Step1: FC<Props> = ({ redirectUri }) => {
   const instructions: InstructionProps[] = [
     {
-      text: "Text",
-      component: <StepImage src={Images.GoogleSaml1A} alt="Step 1.1" />,
+      text: "In your identity provider, create an OpenID Connect (OIDC) Application. If you are given the option, choose to create a “confidential” or “web” application. You may need the following information in order to create and configure your application. Don’t worry if you are not asked for these, as not all providers require everything.",
+      component: (
+        <ClipboardCopyComponent
+          label="Login Redirect URI"
+          helperText="Copy the login redirect URI"
+          initialValue={redirectUri}
+        />
+      ),
     },
   ];
 
   return (
     <Step
-      title="Step 1: Create Enterprise Application"
+      title="Step 1: Create an OpenID Connect Application"
       instructionList={instructions}
     />
   );

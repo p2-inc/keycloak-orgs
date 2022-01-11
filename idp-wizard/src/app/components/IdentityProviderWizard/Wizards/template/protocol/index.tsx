@@ -54,6 +54,7 @@ export const TemplateWizardProtocol: FC = () => {
       name: "Step1 Title",
       component: <Step1 />,
       hideCancelButton: true,
+      enableNext: true,
     },
     {
       id: 2,

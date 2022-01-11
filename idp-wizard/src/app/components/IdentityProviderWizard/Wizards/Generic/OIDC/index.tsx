@@ -5,13 +5,16 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import GoogleLogo from "@app/images/provider-logos/google_saml_logo.png";
+import OpenIdLogo from "@app/images/provider-logos/openid_logo.png";
 import { Header, WizardConfirmation } from "@wizardComponents";
-import { Step1 } from "./steps";
+import { Step1, Step2, Step3 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
+import { generateId } from "@app/utils/generate-id";
+
+const nanoId = generateId();
 
 export const GenericOIDC: FC = () => {
   const title = "Okta wizard";
@@ -19,6 +22,8 @@ export const GenericOIDC: FC = () => {
   const [kcAdminClient] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
+
+  const redirectUri = `https://${process.env.KEYCLOAK_URL}/auth/realms/${process.env.REALM}/broker/${nanoId}/endpoint`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -51,12 +56,25 @@ export const GenericOIDC: FC = () => {
   const steps = [
     {
       id: 1,
-      name: "Step1 Title",
-      component: <Step1 />,
+      name: "Create an OpenID Connect Application",
+      component: <Step1 redirectUri={redirectUri} />,
       hideCancelButton: true,
+      enableNext: true,
     },
     {
       id: 2,
+      name: "Configure Application Configuration",
+      component: <Step2 />,
+      hideCancelButton: true,
+    },
+    {
+      id: 3,
+      name: "Provide the Client Credentials",
+      component: <Step3 />,
+      hideCancelButton: true,
+    },
+    {
+      id: 4,
       name: "Confirmation",
       component: (
         <WizardConfirmation
@@ -72,14 +90,14 @@ export const GenericOIDC: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 3,
-      canJumpTo: stepIdReached >= 2,
+      enableNext: stepIdReached === 4,
+      canJumpTo: stepIdReached >= 3,
     },
   ];
 
   return (
     <>
-      <Header logo={GoogleLogo} />
+      <Header logo={OpenIdLogo} />
       <PageSection
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
