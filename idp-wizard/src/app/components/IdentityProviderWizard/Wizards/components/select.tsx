@@ -12,15 +12,19 @@ type Props = {
   options: SelectOptionProps[];
   handleSelect: (SelectOptionObject) => void;
   placeholder?: String;
+  selections?: SelectOptionObject;
 };
 
 export const CustomSelect: FC<Props> = ({
   options,
   handleSelect: handleSelectProp,
   placeholder = "",
+  selections: selectionsProp,
 }) => {
   const [selectOpen, setSelectOpen] = useState(false);
-  const [selected, setSelected] = useState<SelectOptionObject | null>();
+  const [selected, setSelected] = useState<SelectOptionObject | null>(
+    selectionsProp
+  );
 
   const clearSelection = () => {
     setSelectOpen(false);

@@ -18,7 +18,7 @@ import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { API_STATUS } from "@app/configurations/api-status";
-import { AdminCrednetialsConfig, ServerConfig } from "./steps/forms";
+import { BindConfig, ServerConfig } from "./steps/forms";
 
 export const GenericLDAP: FC = () => {
   const title = "Okta wizard";
@@ -42,8 +42,8 @@ export const GenericLDAP: FC = () => {
   }>({});
   const [serverConfig, setServerConfig] = useState<ServerConfig>({});
   const [serverConfigValid, setServerConfigValid] = useState(false);
-  const [adminCreds, setAdminCreds] = useState<AdminCrednetialsConfig>({});
-  const [adminCredsValid, setAdminCredsValid] = useState(false);
+  const [bindCreds, setBindCreds] = useState<BindConfig>({});
+  const [bindCredsValid, setBindCredsValid] = useState(false);
 
   const Axios = axios.create({
     headers: {
@@ -98,8 +98,8 @@ export const GenericLDAP: FC = () => {
         usersDn: [serverConfig.userBaseDn],
         authType: ["simple"],
         startTls: [],
-        bindDn: [`uid=${adminCreds.adminUsername}, ${baseDn}`],
-        bindCredential: [adminCreds.adminPassword],
+        bindDn: [bindCreds.bindDn],
+        bindCredential: [bindCreds.bindPassword],
         customUserSearchFilter: [
           serverConfig.userFilter,
           serverConfig.groupFilter,
@@ -204,28 +204,28 @@ export const GenericLDAP: FC = () => {
   };
 
   const handleAdminCredentialValidation = async ({
-    adminUsername,
-    adminPassword,
-  }: AdminCrednetialsConfig) => {
+    bindDn,
+    bindPassword,
+  }: BindConfig) => {
     const { host, sslPort, baseDn } = serverConfig;
     const credentialConfig = {
       action: "testAuthentication",
       connectionUrl: `ldaps://${host}:${sslPort}`,
       authType: "simple",
-      bindDn: `uid=${adminUsername}, ${baseDn}`,
-      bindCredential: `${adminPassword}`,
+      bindDn,
+      bindCredential: bindPassword,
       useTruststoreSpi: "ldapsOnly",
       connectionTimeout: "",
       startTls: "",
     };
-    setAdminCredsValid(false);
+    setBindCredsValid(false);
     try {
       await kcAdminClient.realms.testLDAPConnection(
         { realm: process.env.REALM! },
         credentialConfig
       );
-      setAdminCreds({ adminUsername, adminPassword });
-      setAdminCredsValid(true);
+      setBindCreds({ bindDn, bindPassword });
+      setBindCredsValid(true);
       return {
         status: API_STATUS.SUCCESS,
         message:
@@ -262,7 +262,10 @@ export const GenericLDAP: FC = () => {
       id: 2,
       name: "Collect LDAP Configuration Information",
       component: (
-        <Step2 handleServerConfigValidation={handleServerConfigValidation} />
+        <Step2
+          handleServerConfigValidation={handleServerConfigValidation}
+          config={serverConfig}
+        />
       ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
@@ -272,11 +275,14 @@ export const GenericLDAP: FC = () => {
       id: 3,
       name: "LDAP Authentication",
       component: (
-        <Step3 handleAdminConfigValidation={handleAdminCredentialValidation} />
+        <Step3
+          handleAdminConfigValidation={handleAdminCredentialValidation}
+          config={bindCreds}
+        />
       ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
-      enableNext: adminCredsValid,
+      enableNext: bindCredsValid,
     },
     {
       id: 4,

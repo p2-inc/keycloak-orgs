@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 import { CustomSelect, InstructionProps, Step } from "@wizardComponents";
-import { omit, pick } from "lodash";
+import { first, omit, pick } from "lodash";
+import { config } from "webpack";
 
 interface Props {
   handleConfigUpdate: (Object) => void;
@@ -11,6 +12,7 @@ export const Step1: FC<Props> = ({
   handleConfigUpdate,
   config: configProp,
 }) => {
+  console.log(configProp);
   var vendorToUUID = {
     "Redhat Directory Server": "nsuniqueid",
     Tivoli: "uniqueidentifier",
@@ -77,6 +79,7 @@ export const Step1: FC<Props> = ({
         <CustomSelect
           options={serverVendors}
           handleSelect={handleServerVendorSelect}
+          selections={configProp.vendor}
         />
       ),
     },
@@ -86,6 +89,7 @@ export const Step1: FC<Props> = ({
         <CustomSelect
           options={serverLocation}
           handleSelect={handleServerLocationSelect}
+          selections={configProp.region}
         />
       ),
     },

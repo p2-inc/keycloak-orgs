@@ -16,28 +16,26 @@ import {
   API_STATUS,
 } from "@app/configurations/api-status";
 
-const AdminCredentialsSchema = Yup.object().shape({
-  adminUsername: Yup.string().required("Admin username is a required field."),
-  adminPassword: Yup.string().required("Admin password is a required field."),
+const BindSchema = Yup.object().shape({
+  bindDn: Yup.string().required("Bind DN is a required field."),
+  bindPassword: Yup.string().required("Bind password is a required field."),
 });
 
-export type AdminCrednetialsConfig = {
-  adminUsername: string;
-  adminPassword: string;
+export type BindConfig = {
+  bindDn: string;
+  bindPassword: string;
 };
 
 type Props = {
   handleFormSubmit: ({
-    adminUsername,
-    adminPassword,
-  }: AdminCrednetialsConfig) => API_RETURN_PROMISE;
+    bindDn,
+    bindPassword,
+  }: BindConfig) => API_RETURN_PROMISE;
+  config: BindConfig;
   formActive?: boolean;
 };
 
-export const AdminCredentials: FC<Props> = ({
-  handleFormSubmit,
-  formActive = true,
-}) => {
+export const Bind: FC<Props> = ({ handleFormSubmit, formActive = true, config }) => {
   const [submissionResp, setSubmissionResp] = useState<API_RETURN | null>();
   const {
     handleSubmit,
@@ -49,15 +47,15 @@ export const AdminCredentials: FC<Props> = ({
     setSubmitting,
   } = useFormik({
     initialValues: {
-      adminUsername: "",
-      adminPassword: "",
+      bindDn: config.bindDn || "",
+      bindPassword: config.bindPassword || "",
     },
     onSubmit: async (values) => {
       const resp = await handleFormSubmit(values);
       setSubmissionResp(resp);
       setSubmitting(false);
     },
-    validationSchema: AdminCredentialsSchema,
+    validationSchema: BindSchema,
   });
 
   const hasError = (key: string) =>
@@ -81,38 +79,39 @@ export const AdminCredentials: FC<Props> = ({
       )}
 
       <FormGroup
-        label="Admin Username"
+        label="Bind DN"
         isRequired
-        fieldId="adminUsername"
-        validated={hasError("adminUsername")}
-        helperTextInvalid={errors.adminUsername}
+        fieldId="bindDn"
+        validated={hasError("bindDn")}
+        helperTextInvalid={errors.bindDn}
       >
         <TextInput
           isRequired
-          id="adminUsername"
-          name="adminUsername"
-          value={values.adminUsername}
+          id="bindDn"
+          name="bindDn"
+          value={values.bindDn}
           onChange={(val, e) => handleChange(e)}
-          validated={hasError("adminUsername")}
+          validated={hasError("bindDn")}
           isDisabled={!formActive}
         />
       </FormGroup>
 
       <FormGroup
-        label="Admin Password"
+        label="Bind Password"
         isRequired
-        fieldId="adminPassword"
-        validated={hasError("adminPassword")}
-        helperTextInvalid={errors.adminPassword}
+        fieldId="bindPassword"
+        validated={hasError("bindPassword")}
+        helperTextInvalid={errors.bindPassword}
       >
         <TextInput
           isRequired
-          id="adminPassword"
-          name="adminPassword"
-          value={values.adminPassword}
+          id="bindPassword"
+          name="bindPassword"
+          value={values.bindPassword}
           onChange={(val, e) => handleChange(e)}
-          validated={hasError("adminPassword")}
+          validated={hasError("bindPassword")}
           isDisabled={!formActive}
+          type="password"
         />
       </FormGroup>
 

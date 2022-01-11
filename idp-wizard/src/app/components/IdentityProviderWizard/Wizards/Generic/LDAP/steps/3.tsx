@@ -1,23 +1,27 @@
 import React, { FC } from "react";
 import { InstructionProps, Step } from "@wizardComponents";
 import { Card, CardBody } from "@patternfly/react-core";
-import { AdminCredentials, AdminCrednetialsConfig } from "./forms";
+import { BindConfig, Bind } from "./forms";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
 type Props = {
   handleAdminConfigValidation: (
-    adminCredentials: AdminCrednetialsConfig
+    bindCredentials: BindConfig
   ) => API_RETURN_PROMISE;
+  config: BindConfig;
 };
 
-export const Step3: FC<Props> = ({ handleAdminConfigValidation }) => {
+export const Step3: FC<Props> = ({ handleAdminConfigValidation, config }) => {
   const instructions: InstructionProps[] = [
     {
       text: "Enter your LDAP administrator credentials",
       component: (
         <Card>
           <CardBody>
-            <AdminCredentials handleFormSubmit={handleAdminConfigValidation} />
+            <Bind
+              handleFormSubmit={handleAdminConfigValidation}
+              config={config}
+            />
           </CardBody>
         </Card>
       ),

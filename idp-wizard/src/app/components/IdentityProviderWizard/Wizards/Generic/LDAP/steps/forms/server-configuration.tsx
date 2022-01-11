@@ -49,10 +49,12 @@ type Props = {
     groupFilter,
   }: ServerConfig) => API_RETURN_PROMISE;
   formActive?: boolean;
+  config: ServerConfig;
 };
 
 export const LdapServerConfig: FC<Props> = ({
   handleFormSubmit,
+  config,
   formActive = true,
 }) => {
   const [submissionResp, setSubmissionResp] = useState<API_RETURN | null>();
@@ -66,13 +68,13 @@ export const LdapServerConfig: FC<Props> = ({
     setSubmitting,
   } = useFormik({
     initialValues: {
-      host: "",
-      sslPort: "",
-      baseDn: "",
-      userBaseDn: "",
-      groupBaseDn: "",
-      userFilter: "",
-      groupFilter: "",
+      host: config.host || "",
+      sslPort: config.sslPort || "",
+      baseDn: config.baseDn || "",
+      userBaseDn: config.userBaseDn || "",
+      groupBaseDn: config.groupBaseDn || "",
+      userFilter: config.userFilter || "",
+      groupFilter: config.groupFilter || "",
     },
     onSubmit: async (values) => {
       const resp = await handleFormSubmit(values);
@@ -236,7 +238,7 @@ export const LdapServerConfig: FC<Props> = ({
           isDisabled={isSubmitting || !formActive}
           isLoading={isSubmitting}
         >
-          Validate URL
+          Validate Config
         </Button>
       </ActionGroup>
     </Form>

@@ -20,9 +20,10 @@ type Props = {
     ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION,
     serverConfig: ServerConfig
   ) => API_RETURN_PROMISE;
+  config: ServerConfig;
 };
 
-export const Step2: FC<Props> = ({ handleServerConfigValidation }) => {
+export const Step2: FC<Props> = ({ handleServerConfigValidation, config }) => {
   const handleConfigValidation = async ({
     host,
     sslPort,
@@ -60,7 +61,10 @@ export const Step2: FC<Props> = ({ handleServerConfigValidation }) => {
       component: (
         <Card>
           <CardBody>
-            <LdapServerConfig handleFormSubmit={handleConfigValidation} />
+            <LdapServerConfig
+              handleFormSubmit={handleConfigValidation}
+              config={config}
+            />
           </CardBody>
         </Card>
       ),
