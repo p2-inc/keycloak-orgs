@@ -36,6 +36,7 @@
     "@storybook/builder-webpack5": "^6.2.9",
     "axios": "^0.24.0",
     "classnames": "^2.3.1",
+    "formik": "^2.2.9",
     "keycloak-js": "^15.0.2",
     "lodash": "^4.17.21",
     "nanoid": "^3.1.30",
@@ -44,7 +45,8 @@
     "react-dom": "^17.0.2",
     "react-router-last-location": "^2.0.1",
     "react-use": "^17.3.1",
-    "sirv-cli": "^1.0.12"
+    "sirv-cli": "^1.0.12",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^6.2.9",

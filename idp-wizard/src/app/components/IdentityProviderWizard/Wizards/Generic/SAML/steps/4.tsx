@@ -17,7 +17,7 @@ export const Step4: FC = () => {
 
   return (
     <Step
-      title="Step 4: Create Enterprise Application"
+      title="Step 4: Configure User Access"
       instructionList={instructions}
     />
   );
