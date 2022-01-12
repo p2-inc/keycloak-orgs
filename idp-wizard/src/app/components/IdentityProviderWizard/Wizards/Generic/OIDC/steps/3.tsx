@@ -1,8 +1,17 @@
 import React, { FC } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import { InstructionProps, Step } from "@wizardComponents";
+import { API_RETURN_PROMISE } from "@app/configurations/api-status";
+import { ClientCredentials, ClientCreds } from "./forms/client-credentials";
 
-export const Step3: FC = () => {
+type Props = {
+  validateCredentials: (credentials: ClientCreds) => API_RETURN_PROMISE;
+  credentials: ClientCreds;
+};
+
+export const Step3: FC<Props> = ({
+  validateCredentials,
+  credentials = { clientId: "", clientSecret: "" },
+}) => {
   const instructions: InstructionProps[] = [
     {
       component: (
@@ -14,7 +23,12 @@ export const Step3: FC = () => {
       ),
     },
     {
-      component: <div>Form</div>,
+      component: (
+        <ClientCredentials
+          handleFormSubmit={validateCredentials}
+          credentials={credentials}
+        />
+      ),
     },
   ];
 
