@@ -12,7 +12,7 @@ import { useKeycloak } from "@react-keycloak/web";
 
 import * as Steps from "./OIDC/Steps";
 import authoLogo from "@app/images/provider-logos/auth0_logo.png";
-import { WizardConfirmation } from "@wizardComponents";
+import { WizardConfirmation, Header } from "@wizardComponents";
 import { useHistory } from "react-router";
 import { createIdPInKeycloak } from "@app/services/Auth0Validation";
 
@@ -83,7 +83,8 @@ export const Auth0Wizard: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={createIdP}/>
+          validationFunction={createIdP} 
+          disableButton={false}/>
       ),
       canJumpTo: stepIdReached >= 4,
     },
@@ -98,24 +99,7 @@ export const Auth0Wizard: FC = () => {
 
   return (
     <>
-      <PageSection variant={PageSectionVariants.light}>
-        <Flex>
-          <FlexItem>
-            <img className="step-header-image" src={authoLogo} alt="Auth0" />
-          </FlexItem>
-
-          <FlexItem align={{ default: "alignRight" }}>
-            <Button variant="link" isInline onClick={goToDashboard}>
-              My Dashboard
-            </Button>
-          </FlexItem>
-          <FlexItem>
-            <Button variant="link" isInline onClick={() => keycloak.logout()}>
-              Logout
-            </Button>
-          </FlexItem>
-        </Flex>
-      </PageSection>
+    <Header logo={authoLogo} />      
       <PageSection
         marginHeight={10}
         type={PageSectionTypes.wizard}

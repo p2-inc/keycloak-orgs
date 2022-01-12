@@ -10,15 +10,7 @@ export const auth0StepTwoValidation = async (domain: string, clientID?: string, 
     console.log(trustedDomain)
     const response = await kcAdminClient.identityProviders.importFromUrl({ fromUrl: trustedDomain, providerId: 'oidc', realm: process.env.REALM || "wizard" })
         .then((res) => {
-            // console.log("success result", res)
-            sessionStorage.setItem('auth0_domain', trustedDomain)
-            if (clientID) {
-                sessionStorage.setItem('auth0_clientID', clientID)
-            }
-            if (clientSecret) {
-                sessionStorage.setItem('auth0_clientSecret', clientSecret)
-            }
-            // return createIdPInKeycloak(res, kcAdminClient);
+           
             return {
                 idpTemplate: res,
                 kcAdmin: kcAdminClient,

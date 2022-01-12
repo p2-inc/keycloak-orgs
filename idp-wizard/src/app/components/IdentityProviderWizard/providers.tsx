@@ -39,8 +39,6 @@ const Provider = () => {
       return <GenericOIDC />;
     case Providers.LDAP:
       return <GenericLDAP />;
-    case Providers.AUTH0:
-      return <Auth0Wizard />;
 
     default:
       return <div>No provider found</div>;
