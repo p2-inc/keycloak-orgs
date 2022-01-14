@@ -10,43 +10,47 @@ import {
 import React, { useState, FC } from "react";
 import Auth0Step3Image from "@app/images/auth0/auth0-3.png";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import { auth0StepTwoValidation } from "@app/services/Auth0Validation";
-import KcAdminClient from "@keycloak/keycloak-admin-client";
+import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
 interface Props {
-  onFormSubmission: (validationResults: any, isValid: boolean, kcAdmin: any) => void;
+  onFormSubmission: ({
+    domain,
+    clientId,
+    clientSecret,
+  }: {
+    domain: string;
+    clientId: string;
+    clientSecret: string;
+  }) => API_RETURN_PROMISE;
+  values: {
+    domain: string;
+    clientId: string;
+    clientSecret: string;
+  };
 }
 
-export const Auth0StepTwo: FC<Props> = ( { onFormSubmission}) => {
+export const Auth0StepTwo: FC<Props> = ({ onFormSubmission, values }) => {
   const [alertText, setAlertText] = useState("");
   const [alertVariant, setAlertVariant] = useState("default");
   const [isValidating, setIsValidating] = useState(false);
-  const [domain, setDomain] = useState("");
-  const [clientId, setClientID] = useState("");
-  const [clientSecret, setClientSecret] = useState(""); 
+
+  const [domain, setDomain] = useState(values.domain || "");
+  const [clientId, setClientID] = useState(values.clientId || "");
+  const [clientSecret, setClientSecret] = useState(values.clientSecret || "");
 
   const validateStep = async () => {
     setIsValidating(true);
-    //console.log("testing auth0 validation")
-    await auth0StepTwoValidation(domain)
-      .then((res) => {
-        setAlertText(res.message);
-        setAlertVariant(res.status);
-        onFormSubmission(res.idpTemplate, true, res.kcAdmin)
-      })
-      .catch(() => {
-        setAlertVariant("error");
-        setAlertText("Error, could not create IdP in Keycloak");
-      });
+
+    const resp = await onFormSubmission({ domain, clientId, clientSecret });
+
+    setAlertVariant(resp.status);
+    setAlertText(resp.message);
+
     setIsValidating(false);
   };
 
-  const handleDomainChange = (value) => setDomain(value);
-  const handleClientIdChange = (value) => setClientID(value);
-  const handleClientSecretChange = (value) => setClientSecret(value);
-
   const instructions: InstructionProps[] = [
-    {      
+    {
       component: <StepImage src={Auth0Step3Image} alt="Step 2.1" />,
     },
     {
@@ -55,7 +59,7 @@ export const Auth0StepTwo: FC<Props> = ( { onFormSubmission}) => {
           <CardBody>
             {alertText && (
               <Alert
-                variant={alertVariant == "error" ? "danger" : "success"}
+                variant={alertVariant === "ERROR" ? "danger" : "success"}
                 isInline
                 title={alertText}
               />
@@ -74,8 +78,8 @@ export const Auth0StepTwo: FC<Props> = ( { onFormSubmission}) => {
                   id="domain-text"
                   name="Domain"
                   aria-describedby="Domain"
-                  value = {domain}
-                  onChange={handleDomainChange}
+                  value={domain}
+                  onChange={setDomain}
                 />
               </FormGroup>
               <FormGroup
@@ -91,7 +95,7 @@ export const Auth0StepTwo: FC<Props> = ( { onFormSubmission}) => {
                   name="Client ID"
                   aria-describedby="Client ID"
                   value={clientId}
-                  onChange={handleClientIdChange}
+                  onChange={setClientID}
                 />
               </FormGroup>
               <FormGroup
@@ -102,12 +106,12 @@ export const Auth0StepTwo: FC<Props> = ( { onFormSubmission}) => {
               >
                 <TextInput
                   isRequired
-                  type="text"
                   id="client-secret-text"
                   name="Client Secret"
                   aria-describedby="Client Secret"
                   value={clientSecret}
-                  onChange={handleClientSecretChange}
+                  onChange={setClientSecret}
+                  type="password"
                 />
               </FormGroup>
               <Button
@@ -124,10 +128,10 @@ export const Auth0StepTwo: FC<Props> = ( { onFormSubmission}) => {
     },
   ];
 
-  return (    
+  return (
     <Step
       title="Step 2: Provide Domain And Credentials"
       instructionList={instructions}
     />
   );
-}
+};
