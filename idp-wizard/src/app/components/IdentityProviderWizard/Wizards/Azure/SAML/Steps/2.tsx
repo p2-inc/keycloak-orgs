@@ -29,7 +29,7 @@ export function AzureStepTwo() {
       ),
     },
     {
-      text: "Submit the identifier and the Reply URL in the Basic SAML Configuration.",
+      text: "Submit the identifier and the Reply URL in the Basic SAML Configuration. Click the 'Save' button when you have pasted both values.",
       component: <StepImage src={Images.AzureSaml6} alt="Step 2.2" />,
     },
   ];

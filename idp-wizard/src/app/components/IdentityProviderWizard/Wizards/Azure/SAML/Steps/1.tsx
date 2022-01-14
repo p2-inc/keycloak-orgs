@@ -13,12 +13,16 @@ export function AzureStepOne() {
       component: <StepImage src={Images.AzureSaml2} alt="Step 1.2" />,
     },
     {
-      text: 'Select "Create your own application", then enter an App name that describers demo.phasetwo.io. Under "What are you looking to do with your application?", select "Integrate any other application you dont find in the gallery (Non-gallery)", then select "Create".',
-      component: <StepImage src={Images.AzureSaml3} alt="Step 1.3" />,
+      text: 'Select "Create your own application", which will open a dialog that will allow you to enter a name.',
+      component: <StepImage src={Images.AzureSaml3a} alt="Step 1.3" />,
+    },
+    {
+      text: 'Enter an App name that describers demo.phasetwo.io. Under "What are you looking to do with your application?", select "Integrate any other application you dont find in the gallery (Non-gallery)", then select "Create".',
+      component: <StepImage src={Images.AzureSaml3} alt="Step 1.4" />,
     },
     {
       text: 'Next, select "Single Sign On" from the "Manage" section in the left sidebar navigation menu, and then "SAML".',
-      component: <StepImage src={Images.AzureSaml4} alt="Step 1.4" />,
+      component: <StepImage src={Images.AzureSaml4} alt="Step 1.5" />,
     },
   ];
 
