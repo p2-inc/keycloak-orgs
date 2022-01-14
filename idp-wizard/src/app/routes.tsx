@@ -65,15 +65,6 @@ const routes: AppRouteConfig[] = [
     title: "Select your Identity Provider | PhaseTwo",
     checkSecurity: true,
   },
-  {
-    component: Auth0Wizard,
-    exact: true,
-    label: "Auth0 Wizard",
-    id: "auth0",
-    path: "/auth0",
-    title: "PhaseTwo - Auth0",
-    checkSecurity: true,
-  },
 ];
 
 // a custom hook for sending focus to the primary content container
