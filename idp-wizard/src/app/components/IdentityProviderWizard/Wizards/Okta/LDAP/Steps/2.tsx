@@ -110,7 +110,6 @@ export const OktaStepTwo: FC<Props> = (props) => {
                 />
               </FormGroup>
               <Button
-                style={{ width: "200px" }}
                 isLoading={isValidating}
                 onClick={validateStep}
               >
