@@ -14,7 +14,7 @@ export const OktaWizardLDAP: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [isFormValid, setIsFormValid] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
 
   const onNext = (newStep) => {

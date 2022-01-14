@@ -12,6 +12,7 @@ import {
   useLastLocation,
 } from "react-router-last-location";
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
+import { Auth0Wizard } from "./components/IdentityProviderWizard/Wizards/Auth0";
 import Provider from "./components/IdentityProviderWizard/providers";
 import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
 import { Protocols, Providers } from "./configurations";
