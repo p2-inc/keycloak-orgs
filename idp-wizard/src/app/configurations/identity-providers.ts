@@ -138,7 +138,7 @@ export const GenericIdentityProviders: IIDPType[] = [
   {
     name: "LDAP",
     imageSrc: ldapLogo,
-    active: false,
+    active: true,
     id: Providers.LDAP,
     protocols: [Protocols.LDAP],
   },

@@ -95,7 +95,7 @@ export const OktaStepTwo: FC<Props> = (props) => {
                 />
               </FormGroup>
               <FormGroup
-                label="2. Okta Administrator Password"
+                label="Okta Administrator Password"
                 isRequired
                 fieldId="simple-form-name-02"
                 className="form-label"

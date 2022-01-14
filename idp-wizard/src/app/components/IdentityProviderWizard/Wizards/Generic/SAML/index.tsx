@@ -19,6 +19,7 @@ import {
   API_STATUS,
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
+import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 
 const nanoId = customAlphabet(alphanumeric, 6);
 
@@ -44,7 +45,7 @@ export const GenericSAML: FC = () => {
   // Complete
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
   const Axios = axios.create({
@@ -64,9 +65,37 @@ export const GenericSAML: FC = () => {
     history.push("/");
   };
 
-  const validateFn = () => {
+  const validateFn = async () => {
     // On final validation set stepIdReached to steps.length+1
-    console.log("validated!");
+    setIsValidating(true);
+    setDisableButton(false);
+    setResults("Creating SAML IdP...");
+
+    const payload: IdentityProviderRepresentation = {
+      alias: "generic-saml",
+      displayName: `SAML Single Sign-on`,
+      providerId: "saml",
+      config: metadata!,
+    };
+
+    try {
+      await kcAdminClient.identityProviders.create({
+        ...payload,
+        realm: process.env.REALM!,
+      });
+
+      setResults("SAML IdP created successfully. Click finish.");
+      setStepIdReached(6);
+      setError(false);
+      setDisableButton(true);
+    } catch (e) {
+      setResults(
+        "Error creating SAML IdP. Please confirm there is no SAML configured already."
+      );
+      setError(true);
+    } finally {
+      setIsValidating(false);
+    }
   };
 
   const uploadMetadataFile = async (file: File) => {
@@ -93,7 +122,7 @@ export const GenericSAML: FC = () => {
     return {
       status: API_STATUS.ERROR,
       message:
-        "Configuration validation failed with SAML. Check URL and try again.",
+        "Configuration validation failed with SAML. Check file and try again.",
     };
   };
 
@@ -107,7 +136,33 @@ export const GenericSAML: FC = () => {
     ssoUrl: METADATA_CONFIG["singleSignOnServiceUrl"];
     entityId: string;
   }) => {
-    return true;
+    const fd = new FormData();
+    fd.append("providerId", "saml");
+    fd.append("file", file);
+    fd.append("ssoUrl", ssoUrl);
+    fd.append("entityId", entityId);
+
+    try {
+      const resp = await Axios.post(identifierURL, fd);
+
+      if (resp.status === 200) {
+        setMetadata(resp.data);
+        setIsFormValid(true);
+        return {
+          status: API_STATUS.SUCCESS,
+          message:
+            "Configuration successfully validated with SAML. Continue to next step.",
+        };
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
+    return {
+      status: API_STATUS.ERROR,
+      message:
+        "Configuration validation failed with SAML. Check configurations and try again.",
+    };
   };
 
   const validateMetadataUrl = async ({
@@ -190,8 +245,8 @@ export const GenericSAML: FC = () => {
       component: (
         <WizardConfirmation
           title="SSO Configuration Complete"
-          message="Your users can now sign-in with {{Provider}}."
-          buttonText="Create {{Provider}} IdP in Keycloak"
+          message="Your users can now sign-in with SAML."
+          buttonText="Create SAML IdP in Keycloak"
           disableButton={disableButton}
           resultsText={results}
           error={error}
