@@ -160,7 +160,7 @@ export const GenericSAML: FC = () => {
     return {
       status: API_STATUS.ERROR,
       message:
-        "Configuration validation failed with SAML. Check configurations and try again.",
+        "Configuration validation failed with SAML. Check file and try again.",
     };
   };
 

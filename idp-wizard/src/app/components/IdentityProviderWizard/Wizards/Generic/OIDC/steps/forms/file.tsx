@@ -43,7 +43,7 @@ export const ConfigurationFile: FC<Props> = ({
       configurationFile: "",
     },
     onSubmit: async (values) => {
-      const resp = await handleFormSubmit(values);
+      const resp = await handleFormSubmit({ file: values.configurationFile });
       setSubmissionResp(resp);
       setSubmitting(false);
     },
@@ -81,12 +81,9 @@ export const ConfigurationFile: FC<Props> = ({
           id="configurationFile"
           value={values.configurationFile}
           filename={values.configurationFile?.name}
-          filenamePlaceholder="Drop or choose configuration file .xml to upload."
+          filenamePlaceholder="Drop or choose configuration file .json to upload."
           browseButtonText="Select"
           onChange={(val) => setFieldValue("configurationFile", val)}
-          dropzoneProps={{
-            accept: "text/xml",
-          }}
           isLoading={isSubmitting}
           isDisabled={!formActive}
         />

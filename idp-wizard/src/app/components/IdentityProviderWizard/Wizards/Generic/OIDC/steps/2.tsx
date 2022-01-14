@@ -8,21 +8,23 @@ interface Props {
   validateUrl: ({ url }: { url: string }) => API_RETURN_PROMISE;
   validateFile: ({ file }: { file: File }) => API_RETURN_PROMISE;
   validateConfig: (config: OidcConfig) => API_RETURN_PROMISE;
+  url: string;
+  formsActive: {
+    URL: boolean;
+    FILE: boolean;
+    CONFIG: boolean;
+  };
+  metadata: OidcConfig;
 }
-
-const forms = {
-  URL: true,
-  FILE: true,
-  CONFIG: true,
-};
 
 export const Step2: FC<Props> = ({
   validateUrl,
   validateFile,
   validateConfig,
+  url,
+  formsActive,
+  metadata,
 }) => {
-  const [formsActive, setFormsActive] = useState(forms);
-
   const instructions: InstructionProps[] = [
     {
       component: (
@@ -56,6 +58,7 @@ export const Step2: FC<Props> = ({
             <OpenIdUrl
               handleFormSubmit={validateUrl}
               formActive={formsActive.URL}
+              url={url}
             />
           </CardBody>
         </Card>
@@ -90,6 +93,7 @@ export const Step2: FC<Props> = ({
             <Config
               handleFormSubmit={validateConfig}
               formActive={formsActive.CONFIG}
+              metadata={metadata}
             />
           </CardBody>
         </Card>

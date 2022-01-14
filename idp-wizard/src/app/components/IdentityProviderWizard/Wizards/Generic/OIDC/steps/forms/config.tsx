@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { useFormik } from "formik";
 import {
   ActionGroup,
@@ -50,9 +50,14 @@ const configSchema = Yup.object().shape({
 type Props = {
   handleFormSubmit: (config: OidcConfig) => API_RETURN_PROMISE;
   formActive?: boolean;
+  metadata: OidcConfig;
 };
 
-export const Config: FC<Props> = ({ handleFormSubmit, formActive = true }) => {
+export const Config: FC<Props> = ({
+  handleFormSubmit,
+  formActive = true,
+  metadata,
+}) => {
   const [submissionResp, setSubmissionResp] = useState<API_RETURN | null>();
   const {
     handleSubmit,
@@ -62,17 +67,9 @@ export const Config: FC<Props> = ({ handleFormSubmit, formActive = true }) => {
     touched,
     isSubmitting,
     setSubmitting,
-    setFieldValue,
+    setValues,
   } = useFormik({
-    initialValues: {
-      authorizationUrl: "",
-      tokenUrl: "",
-      userInfoUrl: "",
-      validateSignature: false,
-      jwksUrl: "",
-      issuer: "",
-      logoutUrl: "",
-    },
+    initialValues: metadata,
     onSubmit: async (values) => {
       const resp = await handleFormSubmit(values);
       setSubmissionResp(resp);
@@ -80,6 +77,16 @@ export const Config: FC<Props> = ({ handleFormSubmit, formActive = true }) => {
     },
     validationSchema: configSchema,
   });
+
+  useEffect(() => {
+    if (metadata !== {}) {
+      setValues({
+        ...metadata,
+        validateSignature: metadata.validateSignature === "true",
+        useJwksUrl: metadata.useJwksUrl === "true",
+      });
+    }
+  }, [metadata]);
 
   const hasError = (key: string) =>
     errors[key] && touched[key] ? "error" : "default";
