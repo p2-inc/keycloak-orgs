@@ -13,8 +13,9 @@ import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { generateId } from "@app/utils/generate-id";
-import { OidcConfig } from "./steps/forms";
+import { OidcConfig, ClientCreds } from "./steps/forms";
 import { API_STATUS } from "@app/configurations/api-status";
+import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 
 const nanoId = generateId();
 
@@ -38,14 +39,14 @@ export const GenericOIDC: FC = () => {
   // Complete
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
 
   // Form Values
   const [formsActive, setFormsActive] = useState(forms);
   const [isFormValid, setIsFormValid] = useState(false);
   const [url, setUrl] = useState("");
-  const [metadata, setMetadata] = useState<OidcConfig | {}>({
+  const [metadata, setMetadata] = useState<OidcConfig>({
     authorizationUrl: "",
     tokenUrl: "",
     userInfoUrl: "",
@@ -54,6 +55,12 @@ export const GenericOIDC: FC = () => {
     issuer: "",
     logoutUrl: "",
   });
+  const [credentials, setCredentials] = useState<ClientCreds>({
+    clientId: "",
+    clientSecret: "",
+  });
+  const [credentailsValid, setCredentailsValid] = useState(false);
+  const [credentialValidationResp, setCredentialValidationResp] = useState({});
 
   const Axios = axios.create({
     headers: {
@@ -171,9 +178,63 @@ export const GenericOIDC: FC = () => {
     }
   };
 
-  const validateFn = () => {
-    // On final validation set stepIdReached to steps.length+1
-    console.log("validated!");
+  const validateCredentials = async ({
+    clientId,
+    clientSecret,
+  }: ClientCreds) => {
+    setCredentials({ clientId, clientSecret });
+    const resp = await Axios.post(
+      metadata.tokenUrl,
+      `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
+    );
+
+    kcAdminClient.identityProviders.makeRequest;
+
+    if (resp.status === 200) {
+      setCredentialValidationResp(resp.data);
+      setCredentailsValid(true);
+
+      return {
+        status: API_STATUS.SUCCESS,
+        message: "Credentials successfully validated. Continue to next step.",
+      };
+    }
+
+    return {
+      status: API_STATUS.ERROR,
+      message: "Credentials validation failed. Check values and try again.",
+    };
+  };
+
+  const validateFn = async () => {
+    setIsValidating(true);
+    setResults("Creating OIDC IdP...");
+
+    const payload: IdentityProviderRepresentation = {
+      alias,
+      displayName: `OIDC Single Sign-on`,
+      providerId: "oidc",
+      config: credentialValidationResp,
+    };
+
+    try {
+      await kcAdminClient.identityProviders.create({
+        ...payload,
+        realm: process.env.REALM!,
+      });
+
+      setResults("Okta SAML IdP created successfully. Click finish.");
+      setStepIdReached(4);
+      setError(false);
+      setDisableButton(true);
+    } catch (e) {
+      setResults("Error creating Okta SAML IdP.");
+      setError(true);
+    } finally {
+      setIsValidating(false);
+    }
+
+    setIsValidating(false);
   };
 
   const steps = [
@@ -204,8 +265,14 @@ export const GenericOIDC: FC = () => {
     {
       id: 3,
       name: "Provide the Client Credentials",
-      component: <Step3 />,
+      component: (
+        <Step3
+          validateCredentials={validateCredentials}
+          credentials={credentials}
+        />
+      ),
       hideCancelButton: true,
+      enableNext: credentailsValid,
     },
     {
       id: 4,

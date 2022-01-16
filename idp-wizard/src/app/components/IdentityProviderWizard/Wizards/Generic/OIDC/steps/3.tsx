@@ -1,10 +1,13 @@
 import React, { FC } from "react";
 import { InstructionProps, Step } from "@wizardComponents";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
-import { ClientCredentials, ClientCreds } from "./forms/client-credentials";
+import { ClientCredentials, ClientCreds } from "./forms";
 
 type Props = {
-  validateCredentials: (credentials: ClientCreds) => API_RETURN_PROMISE;
+  validateCredentials: ({
+    clientId,
+    clientSecret,
+  }: ClientCreds) => API_RETURN_PROMISE;
   credentials: ClientCreds;
 };
 
