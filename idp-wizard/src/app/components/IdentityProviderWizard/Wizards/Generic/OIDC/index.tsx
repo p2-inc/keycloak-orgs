@@ -214,7 +214,7 @@ export const GenericOIDC: FC = () => {
       alias,
       displayName: `OIDC Single Sign-on`,
       providerId: "oidc",
-      config: credentialValidationResp,
+      config: { ...credentialValidationResp, ...credentials },
     };
 
     try {
