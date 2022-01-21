@@ -1,3 +1,4 @@
+import awsLogo from "@app/images/provider-logos/aws.jpg";
 import azureLogo from "@app/images/provider-logos/azure_logo.png";
 import oktaLogo from "@app/images/provider-logos/okta_logo.png";
 import cyberarkLogo from "@app/images/provider-logos/cyberark_logo.png";
@@ -15,6 +16,7 @@ import ldapLogo from "@app/images/provider-logos/ldap_logo.png";
 import { Protocols } from ".";
 
 export enum Providers {
+  AWS = "aws",
   ADFS = "adfs",
   AUTH0 = "auth0",
   AZURE = "azure",
@@ -39,6 +41,13 @@ export interface IIDPType {
 }
 
 export const IdentityProviders: IIDPType[] = [
+  {
+    name: "AWS",
+    imageSrc: awsLogo,
+    active: true,
+    id: Providers.AWS,
+    protocols: [Protocols.SAML],
+  },
   {
     name: "Azure",
     imageSrc: azureLogo,
