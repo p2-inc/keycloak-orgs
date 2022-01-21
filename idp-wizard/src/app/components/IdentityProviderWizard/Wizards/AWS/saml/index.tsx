@@ -12,13 +12,21 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
+import { generateId } from "@app/utils/generate-id";
+
+const nanoId = generateId();
 
 export const AWSSamlWizard: FC = () => {
+  const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+
   const title = "Okta wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
+
+  const samlAudience = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
+  const acsURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -66,7 +74,7 @@ export const AWSSamlWizard: FC = () => {
     {
       id: 3,
       name: "Enter Service Provider Details",
-      component: <Step3 />,
+      component: <Step3 urls={{ samlAudience, acsURL }} />,
       hideCancelButton: true,
       enableNext: true,
     },

@@ -1,12 +1,39 @@
 import React, { FC } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import {
+  ClipboardCopyComponent,
+  InstructionProps,
+  Step,
+  StepImage,
+} from "@wizardComponents";
+import * as Images from "@app/images/aws";
 
-export const Step3: FC = () => {
+type Props = {
+  urls: {
+    samlAudience: string;
+    acsURL: string;
+  };
+};
+
+export const Step3: FC<Props> = ({ urls: { samlAudience, acsURL } }) => {
   const instructions: InstructionProps[] = [
     {
-      text: "Text",
-      component: <StepImage src={Images.GoogleSaml1A} alt="Step 1.1" />,
+      text: "Copy the following values.",
+      component: (
+        <>
+          <ClipboardCopyComponent
+            label="Copy this SAML audience"
+            initialValue={samlAudience}
+          />
+          <ClipboardCopyComponent
+            label="Copy this ACS URL"
+            initialValue={acsURL}
+          />
+        </>
+      ),
+    },
+    {
+      text: 'Submit the "SAML audience" and the "ACS URL". Click "Save changes".',
+      component: <StepImage src={Images.AWS_SSO_SAML_4} alt="Step 3.1" />,
     },
   ];
 
