@@ -5,7 +5,7 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import OpenIdLogo from "@app/images/provider-logos/openid_logo.png";
+import OpenIdLogo from "@app/images/oidc/openid-logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
@@ -26,7 +26,7 @@ const forms = {
 };
 
 export const GenericOIDC: FC = () => {
-  const title = "Okta wizard";
+  const title = "OIDC wizard";
   const [alias, setAlias] = useState(`generic-oidc-${nanoId}`);
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
@@ -223,12 +223,12 @@ export const GenericOIDC: FC = () => {
         realm: process.env.REALM!,
       });
 
-      setResults("Okta SAML IdP created successfully. Click finish.");
+      setResults("OIDC IdP created successfully. Click finish.");
       setStepIdReached(4);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults("Error creating Okta SAML IdP.");
+      setResults("Error creating OIDC IdP.");
       setError(true);
     } finally {
       setIsValidating(false);
