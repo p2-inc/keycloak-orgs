@@ -115,9 +115,9 @@ export const IdentityProviders: IIDPType[] = [
   {
     name: "Ping One",
     imageSrc: pingOneLogo,
-    active: false,
+    active: true,
     id: Providers.PING_ONE,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
 
   {
