@@ -160,6 +160,7 @@ export const AWSSamlWizard: FC = () => {
       ),
       hideCancelButton: true,
       enableNext: isFormValid,
+      canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
@@ -167,6 +168,7 @@ export const AWSSamlWizard: FC = () => {
       component: <Step3 urls={{ samlAudience, acsURL }} />,
       hideCancelButton: true,
       enableNext: true,
+      canJumpTo: stepIdReached >= 3,
     },
     {
       id: 4,
@@ -174,6 +176,7 @@ export const AWSSamlWizard: FC = () => {
       component: <Step4 />,
       hideCancelButton: true,
       enableNext: true,
+      canJumpTo: stepIdReached >= 4,
     },
     {
       id: 5,
@@ -181,6 +184,7 @@ export const AWSSamlWizard: FC = () => {
       component: <Step5 />,
       hideCancelButton: true,
       enableNext: true,
+      canJumpTo: stepIdReached >= 5,
     },
     {
       id: 6,

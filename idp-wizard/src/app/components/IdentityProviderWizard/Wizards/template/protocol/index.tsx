@@ -85,6 +85,7 @@ export const TemplateWizardProtocol: FC = () => {
       component: <Step1 />,
       hideCancelButton: true,
       enableNext: true,
+      canJumpTo: stepIdReached >= 1,
     },
     {
       id: 2,
