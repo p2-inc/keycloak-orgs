@@ -43,7 +43,7 @@ export const TemplateWizardProtocol: FC = () => {
     history.push("/");
   };
 
-  const validateFn = () => {
+  const validateFn = async () => {
     // On final validation set stepIdReached to steps.length+1
     console.log("validated!");
 
