@@ -68,7 +68,7 @@ export const AzureWizard: FC = () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating Okta SAML IdP...");
+    setResults("Creating Azure SAML IdP...");
 
     const payload: IdentityProviderRepresentation = {
       alias: "azure-saml",

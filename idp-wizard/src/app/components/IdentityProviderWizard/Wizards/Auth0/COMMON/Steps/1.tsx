@@ -1,6 +1,6 @@
 import React from "react";
-import Auth0Step1Image from "@app/images/auth0/auth0-1.png";
-import Auth0Step2Image from "@app/images/auth0/auth0-2.png";
+import Auth0Step1Image from "@app/images/auth0/COMMON/auth0-1.png";
+import Auth0Step2Image from "@app/images/auth0/COMMON/auth0-2.png";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 
 

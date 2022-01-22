@@ -1,6 +1,10 @@
 import React, { FC, useState } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import Auth0Step4Image from "@app/images/auth0/SAML/auth0-4SAML.png";
+import {
+  InstructionProps,
+  Step,
+  StepImage,
+} from "@wizardComponents";
 import {
   Card,
   CardBody,
@@ -17,7 +21,7 @@ interface Step3Props {
   uploadMetadataFile: (file: File) => Promise<boolean>;
 }
 
-export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
+export const Auth0StepThree: FC<Step3Props> = ({ uploadMetadataFile }) => {
   const [metadataFileValue, setMetadataFileValue] = useState("");
   const [metadataFileName, setMetadataFileName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -46,12 +50,11 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
 
     setIsUploading(false);
   };
-
   const instructions: InstructionProps[] = [
     {
-      text: 'Download the metadata file, and click "Continue".',
-      component: <StepImage src={Images.GoogleSaml3} alt="Step 3.1" />,
-    },
+      text: "In the “Usage” section of the popup, click “Download” next to the “Identity Provider Metadata”.",
+      component: <StepImage src={Auth0Step4Image} alt="Step 3.1" />,
+    },,
     {
       component: (
         <Card isFlat>
@@ -102,11 +105,12 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
         </Card>
       ),
     },
+    
   ];
 
   return (
     <Step
-      title="Step 3: Upload Google IdP Information"
+      title="Step 3: Upload Auth0 IdP Information"
       instructionList={instructions}
     />
   );
