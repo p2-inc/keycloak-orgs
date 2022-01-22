@@ -7,26 +7,6 @@ import {
 } from "@wizardComponents";
 import * as Images from "@app/images/aws";
 
-const codeString = `{
-  "identityProviderAlias": "<idp_alias>",
-  "config": {
-    "syncMode": "INHERIT",
-    "attributes": "[]",
-    "attribute.friendly.name": "email",
-    "user.attribute": "email"
-  },
-  "name": "email",
-  "identityProviderMapper": "saml-user-attribute-idp-mapper"
-}`;
-
-const realmS = "<realm>";
-const idpAliasS = "<idp_alias>";
-const codeEndpoint = (
-  <code>
-    auth/admin/realms/{realmS}/identity-provider/instances/{idpAliasS}/mappers
-  </code>
-);
-
 export const Step4: FC = () => {
   const instructions: InstructionProps[] = [
     {
@@ -63,27 +43,6 @@ export const Step4: FC = () => {
     },
     {
       component: <StepImage src={Images.AWS_SSO_SAML_5} alt="Step 4.1" />,
-    },
-    {
-      component: (
-        <div>
-          Note: each of these mappings (email, firstName, lastName) will have to
-          be made in Keycloak after the creation of the IdP. They are made by
-          calling the{" "}
-          <code>
-            auth/admin/realms/{realmS}/identity-provider/instances/{idpAliasS}
-            /mappers
-          </code>{" "}
-          endpoint with the following payload:
-        </div>
-      ),
-    },
-    {
-      component: (
-        <pre>
-          <code>{codeString}</code>
-        </pre>
-      ),
     },
   ];
 

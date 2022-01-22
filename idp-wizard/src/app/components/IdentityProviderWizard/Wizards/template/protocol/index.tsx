@@ -23,7 +23,7 @@ export const TemplateWizardProtocol: FC = () => {
   // Complete
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
   const Axios = axios.create({
@@ -46,6 +46,36 @@ export const TemplateWizardProtocol: FC = () => {
   const validateFn = () => {
     // On final validation set stepIdReached to steps.length+1
     console.log("validated!");
+
+    // setIsValidating(true);
+    // setDisableButton(false);
+    // setResults("Creating SAML IdP...");
+
+    // const payload: IdentityProviderRepresentation = {
+    //   alias: "generic-saml",
+    //   displayName: `SAML Single Sign-on`,
+    //   providerId: "saml",
+    //   config: metadata!,
+    // };
+
+    // try {
+    //   await kcAdminClient.identityProviders.create({
+    //     ...payload,
+    //     realm: process.env.REALM!,
+    //   });
+
+    //   setResults("SAML IdP created successfully. Click finish.");
+    //   setStepIdReached(6);
+    //   setError(false);
+    //   setDisableButton(true);
+    // } catch (e) {
+    //   setResults(
+    //     "Error creating SAML IdP. Please confirm there is no SAML configured already."
+    //   );
+    //   setError(true);
+    // } finally {
+    //   setIsValidating(false);
+    // }
   };
 
   const steps = [
