@@ -7,7 +7,7 @@ import {
 } from "@patternfly/react-core";
 
 import * as Steps from "./Steps";
-import * as commonSteps from "../COMMON/Steps";
+import * as commonSteps from "../shared/Steps";
 import authoLogo from "@app/images/auth0/auth0-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useHistory } from "react-router";

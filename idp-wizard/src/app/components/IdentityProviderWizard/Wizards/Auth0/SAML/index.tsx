@@ -8,7 +8,7 @@ import {
 
 import axios from "axios";
 import * as Steps from "./Steps";
-import * as commonSteps from "../COMMON/Steps";
+import * as SharedSteps from "../shared/Steps";
 import authoLogo from "@app/images/auth0/auth0-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useHistory } from "react-router";
@@ -23,7 +23,7 @@ const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.RE
 const nanoId = customAlphabet(alphanumeric, 6);
 
 export const Auth0WizardSAML: FC = () => {
-  const { keycloak } = useKeycloak(); 
+  const { keycloak } = useKeycloak();
   const [alias, setAlias] = useState(`auth0-saml-${nanoId()}`);
   const loginRedirectURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
 
@@ -70,7 +70,7 @@ export const Auth0WizardSAML: FC = () => {
     }
 
     return false;
-  };  
+  };
 
   const createIdP = async () => {
     setIsValidating(true);
@@ -107,22 +107,22 @@ export const Auth0WizardSAML: FC = () => {
     {
       id: 1,
       name: "Create An Application",
-      component: <commonSteps.Auth0StepOne />,
+      component: <SharedSteps.Auth0StepOne />,
       hideCancelButton: true,
     },
     {
       id: 2,
       name: "Select SAML Addon",
-      component: (
-        <Steps.Auth0StepTwo />
-      ),
+      component: <Steps.Auth0StepTwo />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
       name: "Upload Auth0 IdP Information",
-      component: <Steps.Auth0StepThree uploadMetadataFile={uploadMetadataFile} />,
+      component: (
+        <Steps.Auth0StepThree uploadMetadataFile={uploadMetadataFile} />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
       //enableNext: configData !== null,
