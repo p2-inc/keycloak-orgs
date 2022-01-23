@@ -100,9 +100,9 @@ export const IdentityProviders: IIDPType[] = [
   {
     name: "OneLogin",
     imageSrc: oneloginLogo,
-    active: false,
+    active: true,
     id: Providers.ONE_LOGIN,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
 
   {

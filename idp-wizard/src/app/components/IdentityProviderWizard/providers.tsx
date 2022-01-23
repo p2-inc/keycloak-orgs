@@ -14,6 +14,7 @@ import { Auth0Wizard } from "./Wizards/Auth0";
 import { useTitle } from "react-use";
 import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
 import { AWSSamlWizard } from "./Wizards/AWS";
+import { OneLoginWizard } from "./Wizards/OneLogin";
 
 const Provider = () => {
   const { provider, protocol } = useParams<RouterParams>();
@@ -42,6 +43,8 @@ const Provider = () => {
       return <GenericLDAP />;
     case Providers.AWS:
       return <AWSSamlWizard />;
+    case Providers.ONE_LOGIN:
+      return <OneLoginWizard />;
 
     default:
       return <div>No provider found</div>;
