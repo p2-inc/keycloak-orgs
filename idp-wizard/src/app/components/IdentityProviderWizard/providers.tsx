@@ -13,6 +13,7 @@ import { GoogleWizard } from "./Wizards/Google";
 import { Auth0Wizard } from "./Wizards/Auth0";
 import { useTitle } from "react-use";
 import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
+import { AWSSamlWizard } from "./Wizards/AWS";
 
 const Provider = () => {
   const { provider, protocol } = useParams<RouterParams>();
@@ -39,6 +40,8 @@ const Provider = () => {
       return <GenericOIDC />;
     case Providers.LDAP:
       return <GenericLDAP />;
+    case Providers.AWS:
+      return <AWSSamlWizard />;
 
     default:
       return <div>No provider found</div>;
