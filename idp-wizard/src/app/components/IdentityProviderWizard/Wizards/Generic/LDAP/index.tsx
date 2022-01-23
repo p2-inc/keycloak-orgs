@@ -14,7 +14,6 @@ import {
   Step3,
 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { API_STATUS } from "@app/configurations/api-status";
@@ -44,12 +43,6 @@ export const GenericLDAP: FC = () => {
   const [serverConfigValid, setServerConfigValid] = useState(false);
   const [bindCreds, setBindCreds] = useState<BindConfig>({});
   const [bindCredsValid, setBindCredsValid] = useState(false);
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {

@@ -131,7 +131,7 @@ export const GenericIdentityProviders: IIDPType[] = [
   {
     name: "OpenID",
     imageSrc: openidLogo,
-    active: false,
+    active: true,
     id: Providers.OPEN_ID,
     protocols: [Protocols.OPEN_ID],
   },
