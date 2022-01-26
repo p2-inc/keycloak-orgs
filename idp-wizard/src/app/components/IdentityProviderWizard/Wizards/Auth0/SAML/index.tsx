@@ -5,6 +5,10 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
+import {
+  API_STATUS,
+  METADATA_CONFIG,
+} from "@app/configurations/api-status";
 
 import axios from "axios";
 import * as Steps from "./Steps";
@@ -16,7 +20,6 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { customAlphabet } from "nanoid";
 import { alphanumeric } from "nanoid-dictionary";
 import { useKeycloak } from "@react-keycloak/web";
-import { METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
 
@@ -31,6 +34,7 @@ export const Auth0WizardSAML: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
   const [isValidating, setIsValidating] = useState(false);
@@ -52,7 +56,7 @@ export const Auth0WizardSAML: FC = () => {
 
   const closeWizard = () => {
     history.push("/");
-  };
+  };/*
   const uploadMetadataFile = async (file: File) => {
     const fd = new FormData();
     fd.append("providerId", "saml");
@@ -71,7 +75,34 @@ export const Auth0WizardSAML: FC = () => {
 
     return false;
   };
+*/
+  const uploadMetadataFile = async (file: File) => {
+    const fd = new FormData();
+    fd.append("providerId", "saml");
+    fd.append("file", file);
 
+    try {
+      const resp = await Axios.post(identifierURL, fd);
+
+      if (resp.status === 200) {
+        setConfigData(resp.data);
+        setIsFormValid(true);
+        return {
+          status: API_STATUS.SUCCESS,
+          message:
+            "Configuration successfully validated with SAML. Continue to next step.",
+        };
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
+    return {
+      status: API_STATUS.ERROR,
+      message:
+        "Configuration validation failed with SAML. Check file and try again.",
+    };
+  };
   const createIdP = async () => {
     setIsValidating(true);
     setResults("Creating Auth0 SAML IdP...");
@@ -125,7 +156,7 @@ export const Auth0WizardSAML: FC = () => {
       ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
-      enableNext: configData !== null,
+      enableNext: isFormValid,
     },
     {
       id: 4,
