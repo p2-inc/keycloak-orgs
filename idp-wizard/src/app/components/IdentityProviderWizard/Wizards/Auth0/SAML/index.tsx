@@ -90,7 +90,7 @@ export const Auth0WizardSAML: FC = () => {
       });
 
       setResults("Auth0 SAML IdP created successfully. Click finish.");
-      setStepIdReached(5);
+      setStepIdReached(6);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -125,7 +125,7 @@ export const Auth0WizardSAML: FC = () => {
       ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
-      //enableNext: configData !== null,
+      enableNext: configData !== null,
     },
     {
       id: 4,
@@ -151,8 +151,8 @@ export const Auth0WizardSAML: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 5,
-      canJumpTo: stepIdReached >= 4,
+      enableNext: stepIdReached === 6,
+      canJumpTo: stepIdReached >= 5,
     },
   ];
 
