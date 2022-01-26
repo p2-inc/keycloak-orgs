@@ -12,21 +12,20 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
-import { customAlphabet } from "nanoid";
-import { alphanumeric } from "nanoid-dictionary";
 import {
   API_RETURN,
   API_STATUS,
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { generateId } from "@app/utils/generate-id";
 
-const nanoId = customAlphabet(alphanumeric, 6);
+const nanoId = generateId();
 
 export const GenericSAML: FC = () => {
   const title = "Generic SAML wizard";
 
-  const alias = `generic-saml-${nanoId()}`;
+  const alias = `generic-saml-${nanoId}`;
   const ssoUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
   const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
   const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
@@ -161,7 +160,7 @@ export const GenericSAML: FC = () => {
     return {
       status: API_STATUS.ERROR,
       message:
-        "Configuration validation failed with SAML. Check configurations and try again.",
+        "Configuration validation failed with SAML. Check file and try again.",
     };
   };
 

@@ -1,3 +1,4 @@
+import awsLogo from "@app/images/provider-logos/aws.jpg";
 import azureLogo from "@app/images/provider-logos/azure_logo.png";
 import oktaLogo from "@app/images/provider-logos/okta_logo.png";
 import cyberarkLogo from "@app/images/provider-logos/cyberark_logo.png";
@@ -15,6 +16,7 @@ import ldapLogo from "@app/images/provider-logos/ldap_logo.png";
 import { Protocols } from ".";
 
 export enum Providers {
+  AWS = "aws",
   ADFS = "adfs",
   AUTH0 = "auth0",
   AZURE = "azure",
@@ -39,6 +41,13 @@ export interface IIDPType {
 }
 
 export const IdentityProviders: IIDPType[] = [
+  {
+    name: "AWS",
+    imageSrc: awsLogo,
+    active: true,
+    id: Providers.AWS,
+    protocols: [Protocols.SAML],
+  },
   {
     name: "Azure",
     imageSrc: azureLogo,
@@ -84,16 +93,16 @@ export const IdentityProviders: IIDPType[] = [
   {
     name: "Jumpcloud",
     imageSrc: jumpcloudLogo,
-    active: false,
+    active: true,
     id: Providers.JUMP_CLOUD,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
   {
     name: "OneLogin",
     imageSrc: oneloginLogo,
-    active: false,
+    active: true,
     id: Providers.ONE_LOGIN,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
 
   {
@@ -106,9 +115,9 @@ export const IdentityProviders: IIDPType[] = [
   {
     name: "Ping One",
     imageSrc: pingOneLogo,
-    active: false,
+    active: true,
     id: Providers.PING_ONE,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
 
   {
@@ -131,7 +140,7 @@ export const GenericIdentityProviders: IIDPType[] = [
   {
     name: "OpenID",
     imageSrc: openidLogo,
-    active: false,
+    active: true,
     id: Providers.OPEN_ID,
     protocols: [Protocols.OPEN_ID],
   },

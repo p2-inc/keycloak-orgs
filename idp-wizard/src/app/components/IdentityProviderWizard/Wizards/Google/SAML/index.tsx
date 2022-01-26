@@ -10,14 +10,13 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
-import { customAlphabet } from "nanoid";
-import { alphanumeric } from "nanoid-dictionary";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { METADATA_CONFIG } from "@app/configurations/api-status";
+import { generateId } from "@app/utils/generate-id";
 
-const nanoId = customAlphabet(alphanumeric, 6);
+const nanoId = generateId();
 
 export const GoogleWizard: FC = () => {
   const title = "Google wizard";
@@ -25,7 +24,7 @@ export const GoogleWizard: FC = () => {
   const [kcAdminClient] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
-  const [alias, setAlias] = useState(`google-saml-${nanoId()}`);
+  const [alias, setAlias] = useState(`google-saml-${nanoId}`);
   const acsUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
   const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
   const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);

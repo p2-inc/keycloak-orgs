@@ -13,11 +13,10 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useHistory } from "react-router";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS } from "@app/configurations/api-status";
-import { customAlphabet } from "nanoid";
-import { alphanumeric } from "nanoid-dictionary";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { generateId } from "@app/utils/generate-id";
 
-const nanoId = customAlphabet(alphanumeric, 6);
+const nanoId = generateId();
 
 export const Auth0WizardOIDC: FC = () => {
   const [alias, setAlias] = useState(`auth0-oidc-${nanoId()}`);
@@ -65,7 +64,7 @@ export const Auth0WizardOIDC: FC = () => {
       resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: trustedDomain,
         providerId: "oidc",
-        realm: process.env.REALM || "wizard",
+        realm: process.env.REALM,
       });
 
       setIsFormValid(true);

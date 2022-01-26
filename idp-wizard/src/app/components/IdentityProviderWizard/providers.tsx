@@ -7,12 +7,23 @@ import {
 import { RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
-import { AzureWizard } from "./Wizards/Azure";
-import { OktaWizardLDAP, OktaWizardSaml } from "./Wizards/Okta";
-import { GoogleWizard } from "./Wizards/Google";
-import { Auth0WizardOIDC, Auth0WizardSAML } from "./Wizards/Auth0/";
 import { useTitle } from "react-use";
-import { GenericLDAP, GenericOIDC, GenericSAML } from "./Wizards/Generic";
+
+import {
+  Auth0WizardOIDC, 
+  Auth0WizardSAML,
+  AWSSamlWizard,
+  AzureWizard,
+  GenericLDAP,
+  GenericOIDC,
+  GenericSAML,
+  GoogleWizard,
+  JumpCloudWizard,
+  OktaWizardLDAP,
+  OktaWizardSaml,
+  OneLoginWizard,
+  PingOneWizard,
+} from "./Wizards";
 
 const Provider = () => {
   const { provider, protocol } = useParams<RouterParams>();
@@ -38,6 +49,14 @@ const Provider = () => {
       return <GenericOIDC />;
     case Providers.LDAP:
       return <GenericLDAP />;
+    case Providers.AWS:
+      return <AWSSamlWizard />;
+    case Providers.ONE_LOGIN:
+      return <OneLoginWizard />;
+    case Providers.PING_ONE:
+      return <PingOneWizard />;
+    case Providers.JUMP_CLOUD:
+      return <JumpCloudWizard />;
 
     default:
       return <div>No provider found</div>;

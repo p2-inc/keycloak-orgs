@@ -170,6 +170,14 @@ module.exports = (env) => {
             from: "./src/site.webmanifest",
             to: "[name][ext]",
           },
+          {
+            from: "./src/silent-check-sso.html",
+            to: "[name][ext]",
+          },
+          {
+            from: "./src/keycloak.json",
+            to: "[name][ext]",
+          },
         ],
       }),
     ],
