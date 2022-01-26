@@ -7,12 +7,6 @@ import {
 } from "@wizardComponents";
 import * as Images from "@app/images/onelogin";
 
-// Mapping (click to copy) box
-// UUID -> id
-// Email Address -> email
-// Given name -> firstName
-// Family name -> lastName
-
 export const Step3: FC = () => {
   const instructions: InstructionProps[] = [
     {

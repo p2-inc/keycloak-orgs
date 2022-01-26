@@ -5,23 +5,26 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import { PINGONE_LOGO } from "@app/images/pingone";
+import { OneLoginLogo } from "@app/images/onelogin";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { generateId } from "@app/utils/generate-id";
-import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
+import {
+  API_RETURN,
+  API_STATUS,
+  METADATA_CONFIG,
+} from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import axios from "axios";
 
 const nanoId = generateId();
 
-export const PingOneWizard: FC = () => {
+export const OneLoginWizard: FC = () => {
   const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
 
-  const title = "PingOne wizard";
+  const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
@@ -29,8 +32,8 @@ export const PingOneWizard: FC = () => {
 
   const acsUrl = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
   const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
-  const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
 
+  const [issuerUrl, setIssuerUrl] = useState("");
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
 
@@ -39,12 +42,6 @@ export const PingOneWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -58,46 +55,45 @@ export const PingOneWizard: FC = () => {
   };
 
   const handleFormSubmit = async ({
-    metadataFile: file,
+    url,
   }: {
-    metadataFile: File;
-  }) => {
-    const fd = new FormData();
-    fd.append("providerId", "saml");
-    fd.append("file", file);
+    url: string;
+  }): Promise<API_RETURN> => {
+    // make call to submit the URL and verify it
+    setIssuerUrl(url);
 
     try {
-      const resp = await Axios.post(identifierURL, fd);
+      const resp = await kcAdminClient.identityProviders.importFromUrl({
+        fromUrl: url,
+        providerId: "saml",
+        realm: process.env.REALM,
+      });
 
-      if (resp.status === 200) {
-        setMetadata(resp.data);
-        setIsFormValid(true);
+      setMetadata(resp);
+      setIsFormValid(true);
 
-        return {
-          status: API_STATUS.SUCCESS,
-          message:
-            "Configuration successfully validated with PingOne Saml. Continue to next step.",
-        };
-      }
-    } catch (err) {
-      console.log(err);
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "Configuration successfully validated with OneLogin IdP. Continue to next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message:
+          "Configuration validation failed with OneLogin IdP. Check URL and try again.",
+      };
     }
-
-    return {
-      status: API_STATUS.ERROR,
-      message:
-        "Configuration validation failed with PingOne Saml. Check file and try again.",
-    };
   };
 
   const validateFn = async () => {
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating PingOne IdP...");
+    setResults("Creating OneLogin IdP...");
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `PingOne Single Sign-on`,
+      displayName: `OneLogin Single Sign-on`,
       providerId: "saml",
       config: metadata!,
     };
@@ -108,13 +104,13 @@ export const PingOneWizard: FC = () => {
         realm: process.env.REALM!,
       });
 
-      setResults("PingOne IdP created successfully. Click finish.");
+      setResults("OneLogin IdP created successfully. Click finish.");
       setStepIdReached(6);
       setError(false);
       setDisableButton(true);
     } catch (e) {
       setResults(
-        "Error creating PingOne IdP. Please confirm there is no PingOne IdP configured already."
+        "Error creating OneLogin IdP. Please confirm there is no OneLogin IdP configured already."
       );
       setError(true);
     } finally {
@@ -149,8 +145,8 @@ export const PingOneWizard: FC = () => {
     },
     {
       id: 4,
-      name: "Upload PingOne IdP Information",
-      component: <Step4 handleFormSubmit={handleFormSubmit} />,
+      name: "Upload OneLogin IdP Information",
+      component: <Step4 url={issuerUrl} handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       enableNext: isFormValid,
       canJumpTo: stepIdReached >= 4,
@@ -161,8 +157,8 @@ export const PingOneWizard: FC = () => {
       component: (
         <WizardConfirmation
           title="SSO Configuration Complete"
-          message="Your users can now sign-in with PingOne."
-          buttonText="Create PingOne IdP in Keycloak"
+          message="Your users can now sign-in with OneLogin."
+          buttonText="Create OneLogin IdP in Keycloak"
           disableButton={disableButton}
           resultsText={results}
           error={error}
@@ -179,7 +175,7 @@ export const PingOneWizard: FC = () => {
 
   return (
     <>
-      <Header logo={PINGONE_LOGO} />
+      <Header logo={OneLoginLogo} />
       <PageSection
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
