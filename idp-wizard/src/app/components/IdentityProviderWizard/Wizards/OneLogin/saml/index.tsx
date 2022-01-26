@@ -121,7 +121,7 @@ export const OneLoginWizard: FC = () => {
   const steps = [
     {
       id: 1,
-      name: "Step 1: Add a SAML Application",
+      name: "Add a SAML Application",
       component: <Step1 />,
       hideCancelButton: true,
       enableNext: true,
@@ -129,7 +129,7 @@ export const OneLoginWizard: FC = () => {
     },
     {
       id: 2,
-      name: "Step 2: Enter Service Provider Details",
+      name: "Enter Service Provider Details",
       component: <Step2 acsUrl={acsUrl} entityId={entityId} />,
       hideCancelButton: true,
       enableNext: true,
@@ -137,7 +137,7 @@ export const OneLoginWizard: FC = () => {
     },
     {
       id: 3,
-      name: "Step 3: Configure Attribute Mapping",
+      name: "Configure Attribute Mapping",
       component: <Step3 />,
       hideCancelButton: true,
       enableNext: true,
@@ -145,7 +145,7 @@ export const OneLoginWizard: FC = () => {
     },
     {
       id: 4,
-      name: "Step 4: Upload OneLogin IdP Information",
+      name: "Upload OneLogin IdP Information",
       component: <Step4 url={issuerUrl} handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       enableNext: isFormValid,

@@ -93,9 +93,9 @@ export const IdentityProviders: IIDPType[] = [
   {
     name: "Jumpcloud",
     imageSrc: jumpcloudLogo,
-    active: false,
+    active: true,
     id: Providers.JUMP_CLOUD,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
   {
     name: "OneLogin",

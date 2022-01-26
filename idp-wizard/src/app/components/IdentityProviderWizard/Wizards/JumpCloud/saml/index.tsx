@@ -5,9 +5,9 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import { PINGONE_LOGO } from "@app/images/pingone";
+import { JumpCloudLogo } from "@app/images/jumpcloud";
 import { Header, WizardConfirmation } from "@wizardComponents";
-import { Step1, Step2, Step3, Step4 } from "./steps";
+import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
@@ -18,10 +18,10 @@ import axios from "axios";
 
 const nanoId = generateId();
 
-export const PingOneWizard: FC = () => {
+export const JumpCloudWizard: FC = () => {
   const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
 
-  const title = "PingOne wizard";
+  const title = "JumpCloud wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
@@ -76,7 +76,7 @@ export const PingOneWizard: FC = () => {
         return {
           status: API_STATUS.SUCCESS,
           message:
-            "Configuration successfully validated with PingOne Saml. Continue to next step.",
+            "Configuration successfully validated with JumpCloud IdP. Continue to next step.",
         };
       }
     } catch (err) {
@@ -86,18 +86,18 @@ export const PingOneWizard: FC = () => {
     return {
       status: API_STATUS.ERROR,
       message:
-        "Configuration validation failed with PingOne Saml. Check file and try again.",
+        "Configuration validation failed with JumpCloud IdP. Check file and try again.",
     };
   };
 
   const validateFn = async () => {
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating PingOne IdP...");
+    setResults("Creating JumpCloud IdP...");
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `PingOne Single Sign-on`,
+      displayName: `JumpCloud Single Sign-on`,
       providerId: "saml",
       config: metadata!,
     };
@@ -108,13 +108,28 @@ export const PingOneWizard: FC = () => {
         realm: process.env.REALM!,
       });
 
-      setResults("PingOne IdP created successfully. Click finish.");
+      await Axios.post(
+        `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/instances/${alias}/mappers`,
+        {
+          identityProviderAlias: alias,
+          config: {
+            syncMode: "INHERIT",
+            attributes: "[]",
+            "attribute.friendly.name": "email",
+            "user.attribute": "email",
+          },
+          name: "email",
+          identityProviderMapper: "saml-user-attribute-idp-mapper",
+        }
+      );
+
+      setResults("JumpCloud IdP created successfully. Click finish.");
       setStepIdReached(6);
       setError(false);
       setDisableButton(true);
     } catch (e) {
       setResults(
-        "Error creating PingOne IdP. Please confirm there is no PingOne IdP configured already."
+        "Error creating JumpCloud IdP. Please confirm there is no JumpCloud IdP configured already."
       );
       setError(true);
     } finally {
@@ -125,7 +140,7 @@ export const PingOneWizard: FC = () => {
   const steps = [
     {
       id: 1,
-      name: "Add a SAML Application",
+      name: "Add a new SSO Application",
       component: <Step1 />,
       hideCancelButton: true,
       enableNext: true,
@@ -149,20 +164,28 @@ export const PingOneWizard: FC = () => {
     },
     {
       id: 4,
-      name: "Upload PingOne IdP Information",
-      component: <Step4 handleFormSubmit={handleFormSubmit} />,
+      name: "Assign Groups",
+      component: <Step4 />,
       hideCancelButton: true,
-      enableNext: isFormValid,
-      canJumpTo: stepIdReached >= 4,
+      enableNext: true,
+      canJumpTo: stepIdReached >= 3,
     },
     {
       id: 5,
+      name: "Upload JumpCloud IdP Information",
+      component: <Step5 handleFormSubmit={handleFormSubmit} />,
+      hideCancelButton: true,
+      enableNext: isFormValid,
+      canJumpTo: stepIdReached >= 5,
+    },
+    {
+      id: 6,
       name: "Confirmation",
       component: (
         <WizardConfirmation
           title="SSO Configuration Complete"
-          message="Your users can now sign-in with PingOne."
-          buttonText="Create PingOne IdP in Keycloak"
+          message="Your users can now sign-in with JumpCloud."
+          buttonText="Create JumpCloud IdP in Keycloak"
           disableButton={disableButton}
           resultsText={results}
           error={error}
@@ -172,14 +195,14 @@ export const PingOneWizard: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 6,
-      canJumpTo: stepIdReached >= 5,
+      enableNext: stepIdReached === 7,
+      canJumpTo: stepIdReached >= 6,
     },
   ];
 
   return (
     <>
-      <Header logo={PINGONE_LOGO} />
+      <Header logo={JumpCloudLogo} />
       <PageSection
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
