@@ -46,13 +46,15 @@ export interface RouterParams {
   protocol: Protocols;
 }
 
+export const BASE_PATH = "/auth/realms/:account/wizard";
+
 const routes: AppRouteConfig[] = [
   {
     component: Dashboard,
     exact: true,
     label: "Dashboard",
     id: "dashboard",
-    path: "/",
+    path: `${BASE_PATH}/`,
     title: "Dashboard | PhaseTwo",
     checkSecurity: true,
   },
@@ -61,7 +63,7 @@ const routes: AppRouteConfig[] = [
     exact: true,
     label: "Selector",
     id: "selector",
-    path: "/idp",
+    path: `${BASE_PATH}/idp`,
     title: "Select your Identity Provider | PhaseTwo",
     checkSecurity: true,
   },
@@ -115,11 +117,15 @@ const AppRoutes = (): React.ReactElement => (
   <LastLocationProvider>
     <Switch>
       <Route
-        path="/idp/:provider/protocol"
+        path={`${BASE_PATH}/idp/:provider/protocol`}
         exact
         component={IdPProtocolSelector}
       />
-      <Route path="/idp/:provider/:protocol" exact component={Provider} />
+      <Route
+        path={`${BASE_PATH}/idp/:provider/:protocol`}
+        exact
+        component={Provider}
+      />
 
       {flattenedRoutes.map(
         (
