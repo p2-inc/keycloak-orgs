@@ -10,9 +10,8 @@ import {
   Title,
 } from "@patternfly/react-core";
 import React from "react";
-import azureLogo from "@app/images/azure/azure-logo.png";
-import samlLogo from "@app/images/provider-logos/saml_logo.png";
-import { IdPButton } from "@app/components/IdentityProviderWizard/IdentityProviderSelector/components/IdPButton";
+import azureLogo from "@app/images/provider-logos/azure_logo.svg";
+import samlLogo from "@app/images/provider-logos/saml_logo.svg";
 
 export function ConnectionStatus() {
   const externalIdentityProvider = () => {
@@ -30,6 +29,7 @@ export function ConnectionStatus() {
       </div>
     );
   };
+
   return (
     <Card className="card-shadow">
       <CardTitle>

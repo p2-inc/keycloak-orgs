@@ -5,7 +5,7 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import LdapLogo from "@app/images/provider-logos/ldap_logo.png";
+import LdapLogo from "@app/images/provider-logos/ldap_logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import {
   LDAP_SERVER_CONFIG_TEST_CONNECTION,

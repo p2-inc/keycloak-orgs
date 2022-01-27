@@ -1,18 +1,18 @@
 import awsLogo from "@app/images/provider-logos/aws.jpg";
-import azureLogo from "@app/images/provider-logos/azure_logo.png";
+import azureLogo from "@app/images/provider-logos/azure_logo.svg";
 import oktaLogo from "@app/images/provider-logos/okta_logo.png";
-import cyberarkLogo from "@app/images/provider-logos/cyberark_logo.png";
-import adfsLogo from "@app/images/provider-logos/adfs_logo.png";
+import cyberarkLogo from "@app/images/provider-logos/cyberark_logo.svg";
+import adfsLogo from "@app/images/provider-logos/active-directory.svg";
 import authoLogo from "@app/images/provider-logos/auth0_logo.png";
-import googleLogo from "@app/images/provider-logos/google_saml_logo.png";
-import jumpcloudLogo from "@app/images/provider-logos/jumpcloud_logo.png";
+import googleLogo from "@app/images/provider-logos/google_logo.svg";
+import jumpcloudLogo from "@app/images/provider-logos/jumpcloud_logo.svg";
 import oneloginLogo from "@app/images/provider-logos/onelogin_logo.png";
 import openidLogo from "@app/images/provider-logos/openid_logo.png";
 import pingFedLogo from "@app/images/provider-logos/ping_federate_logo.png";
-import pingOneLogo from "@app/images/provider-logos/ping_one_logo.png";
-import samlLogo from "@app/images/provider-logos/saml_logo.png";
-import vmwareLogo from "@app/images/provider-logos/vmware_logo.png";
-import ldapLogo from "@app/images/provider-logos/ldap_logo.png";
+import pingOneLogo from "@app/images/provider-logos/ping_one_logo.svg";
+import samlLogo from "@app/images/provider-logos/saml_logo.svg";
+import vmwareLogo from "@app/images/provider-logos/vmware_logo.svg";
+import ldapLogo from "@app/images/provider-logos/ldap_logo.svg";
 import { Protocols } from ".";
 
 export enum Providers {

@@ -129,10 +129,10 @@ body,
   width: 200px;
   height: 75px;
   padding: 0px;
+  display: flex;
   align-items: center;
   border: 2px solid lightgray;
   padding-top: 8px;
-  vertical-align: center;
   border-radius: 5px;
   cursor: pointer;
 
@@ -140,6 +140,7 @@ body,
     display: block;
     margin: 0 auto;
     max-height: 99%;
+    max-width: 80%;
     width: auto;
     height: auto;
   }
