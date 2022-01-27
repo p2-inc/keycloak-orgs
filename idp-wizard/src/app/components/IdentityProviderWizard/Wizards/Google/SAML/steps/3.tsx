@@ -8,8 +8,6 @@ import {
   FileUpload,
   Form,
   FormGroup,
-  Modal,
-  ModalVariant,
   FileUploadFieldProps,
   FormAlert,
   Alert,

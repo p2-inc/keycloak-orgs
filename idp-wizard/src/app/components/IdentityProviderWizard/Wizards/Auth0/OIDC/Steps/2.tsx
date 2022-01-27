@@ -8,7 +8,7 @@ import {
   TextInput,
 } from "@patternfly/react-core";
 import React, { useState, FC } from "react";
-import Auth0Step3Image from "@app/images/auth0/auth0-3.png";
+import Auth0Step3Image from "@app/images/auth0/OIDC/auth0-3.png";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 

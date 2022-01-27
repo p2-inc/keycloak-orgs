@@ -6,7 +6,7 @@ import {
   Wizard,
 } from "@patternfly/react-core";
 import * as Steps from "./Steps";
-import azureLogo from "@app/images/azure/azure-logo.png";
+import azureLogo from "@app/images/provider-logos/azure_logo.svg";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useHistory } from "react-router-dom";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
@@ -68,7 +68,7 @@ export const AzureWizard: FC = () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating Okta SAML IdP...");
+    setResults("Creating Azure SAML IdP...");
 
     const payload: IdentityProviderRepresentation = {
       alias: "azure-saml",

@@ -6,8 +6,9 @@ import {
   Wizard,
 } from "@patternfly/react-core";
 
-import * as Steps from "./OIDC/Steps";
-import authoLogo from "@app/images/provider-logos/auth0_logo.png";
+import * as Steps from "./Steps";
+import * as commonSteps from "../shared/Steps";
+import authoLogo from "@app/images/auth0/auth0-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useHistory } from "react-router";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
@@ -17,8 +18,8 @@ import { generateId } from "@app/utils/generate-id";
 
 const nanoId = generateId();
 
-export const Auth0Wizard: FC = () => {
-  const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+export const Auth0WizardOIDC: FC = () => {
+  const [alias, setAlias] = useState(`auth0-oidc-${nanoId()}`);
   const loginRedirectURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -98,12 +99,12 @@ export const Auth0Wizard: FC = () => {
         realm: process.env.REALM!,
       });
 
-      setResults("Okta SAML IdP created successfully. Click finish.");
+      setResults("Auth0 OIDC IdP created successfully. Click finish.");
       setStepIdReached(5);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults("Error creating Okta SAML IdP.");
+      setResults("Error creating Auth0 OIDC IdP.");
       setError(true);
     } finally {
       setIsValidating(false);
@@ -116,7 +117,7 @@ export const Auth0Wizard: FC = () => {
     {
       id: 1,
       name: "Create An Application",
-      component: <Steps.Auth0StepOne />,
+      component: <commonSteps.Auth0StepOne />,
       hideCancelButton: true,
     },
     {
@@ -167,7 +168,6 @@ export const Auth0Wizard: FC = () => {
     <>
       <Header logo={authoLogo} />
       <PageSection
-        marginHeight={10}
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}
       >
