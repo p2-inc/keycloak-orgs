@@ -1,8 +1,8 @@
 import keyBy from "lodash";
 
-import samlLogo from "@app/images/provider-logos/saml_logo.png";
+import samlLogo from "@app/images/provider-logos/saml_logo.svg";
 import openIDLogo from "@app/images/provider-logos/openid_logo.png";
-import ldapLogo from "@app/images/provider-logos/ldap_logo.png";
+import ldapLogo from "@app/images/provider-logos/ldap_logo.svg";
 
 export enum Protocols {
   SAML = "saml",

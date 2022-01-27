@@ -5,7 +5,7 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import SamlLogo from "@app/images/provider-logos/saml_logo.png";
+import SamlLogo from "@app/images/provider-logos/saml_logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
