@@ -1,5 +1,5 @@
 import React from "react";
-import Auth0Step4Image from "@app/images/auth0/auth0-4.png";
+import Auth0Step4Image from "@app/images/auth0/OIDC/auth0-4.png";
 import {
   InstructionProps,
   Step,

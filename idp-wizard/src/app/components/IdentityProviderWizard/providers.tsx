@@ -10,7 +10,8 @@ import { useParams } from "react-router";
 import { useTitle } from "react-use";
 
 import {
-  Auth0Wizard,
+  Auth0WizardOIDC, 
+  Auth0WizardSAML,
   AWSSamlWizard,
   AzureWizard,
   GenericLDAP,
@@ -35,14 +36,13 @@ const Provider = () => {
     case Providers.OKTA:
       if (protocol === Protocols.LDAP) return <OktaWizardLDAP />;
       if (protocol === Protocols.SAML) return <OktaWizardSaml />;
-    case Providers.OKTA:
-      return <OktaWizardLDAP />;
     case Providers.AZURE:
       return <AzureWizard />;
     case Providers.GOOGLE_SAML:
       return <GoogleWizard />;
-    case Providers.AUTH0:
-      return <Auth0Wizard />;
+    case Providers.AUTH0:      
+      if (protocol === Protocols.OPEN_ID) return <Auth0WizardOIDC />;
+      if (protocol === Protocols.SAML) return <Auth0WizardSAML />;
     case Providers.SAML:
       return <GenericSAML />;
     case Providers.OPEN_ID:

@@ -81,7 +81,7 @@ export const IdentityProviders: IIDPType[] = [
     imageSrc: authoLogo,
     active: true,
     id: Providers.AUTH0,
-    protocols: [Protocols.OPEN_ID],
+    protocols: [Protocols.OPEN_ID,  Protocols.SAML],
   },
   {
     name: "Cyberark",
