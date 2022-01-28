@@ -17,7 +17,6 @@ import { generatePath, Link } from "react-router-dom";
 import { BASE_PATH, RouterParams } from "@app/routes";
 
 const Dashboard: React.FunctionComponent = () => {
-  const history = useHistory();
   const { keycloak } = useKeycloak();
   let { realm } = useParams<RouterParams>();
 
