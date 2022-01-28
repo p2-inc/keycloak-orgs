@@ -46,7 +46,7 @@ const Dashboard: React.FunctionComponent = () => {
             </FlexItem>
           </Flex>
         </StackItem>
-        <StackItem isFilled>
+        <StackItem>
           <Flex>
             <FlexItem flex={{ default: "flex_2" }}>
               <DashboardSummary />
