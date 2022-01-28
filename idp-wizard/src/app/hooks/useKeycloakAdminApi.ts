@@ -2,9 +2,29 @@ import KcAdminClient from "@keycloak/keycloak-admin-client";
 import keycloak from "src/keycloak";
 
 export const useKeycloakAdminApi = () => {
+  const getServerUrl = () => {
+    if (typeof keycloak.authServerUrl !== 'undefined') {
+      var u = keycloak.authServerUrl
+      if (u.charAt(u.length - 1) == '/') {
+	u = u.substring(0, u.length-1);
+      }
+      return u;
+    } else {
+      return undefined
+    }
+  };
+
+  const getRealm = () => {
+    if (typeof keycloak.realm !== 'undefined') {
+      return keycloak.realm;
+    } else {
+      return undefined
+    }
+  };
+  
   const settings = {
-    baseUrl: keycloak.authServerUrl,
-    realmName: keycloak.realm,
+    baseUrl: getServerUrl(),
+    realmName: getRealm(),
     // requestConfig: {
     //   /* Axios request config options https://github.com/axios/axios#request-config */
     // },
@@ -19,25 +39,5 @@ export const useKeycloakAdminApi = () => {
   // Should be able to initiate off the bat and still provide as a callback
   setKcAdminClientAccessToken();
 
-  const getServerUrl = () => {
-    if (typeof keycloak.authServerUrl !== 'undefined') {
-      if (keycloak.authServerUrl.charAt(keycloak.authServerUrl.length - 1) == '/') {
-	return keycloak.authServerUrl.substring(keycloak.authServerUrl.length, keycloak.authServerUrl.length-1);
-      } else {
-	return keycloak.authServerUrl;
-      }
-    } else {
-      return undefined
-    }
-  };
-
-  const getRealm = () => {
-    if (typeof keycloak.realm !== 'undefined') {
-      return keycloak.realm;
-    } else {
-      return undefined
-    }
-  };
-  
   return [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] as const;
 };

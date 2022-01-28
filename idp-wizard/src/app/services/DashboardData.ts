@@ -56,7 +56,6 @@ export const getSummaryData = async <IDashboardSummaryData>() => {
   await setKcAdminClientAccessToken();
   const allUsers = await kcAdminClient.users.find();
 
-  console.log("keycloak.realm", getRealm());
   const logins = await kcAdminClient.realms.findEvents({
     realm: getRealm(),
     type: "LOGIN",
