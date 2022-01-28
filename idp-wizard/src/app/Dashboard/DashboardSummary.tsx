@@ -6,6 +6,7 @@ import {
   Card,
   CardBody,
   CardTitle,
+  Spinner,
   TextContent,
   TextList,
   TextListItem,
@@ -13,9 +14,11 @@ import {
   TextListVariants,
   Title,
 } from "@patternfly/react-core";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 
 export const DashboardSummary: FC = () => {
+  const isMounted = useRef(false);
+  const [loading, setLoading] = useState(true);
   const [summaryData, setSummaryData] = useState<IDashboardSummaryData>({
     loginsToday: 0,
     loginsThisWeek: 0,
@@ -26,15 +29,27 @@ export const DashboardSummary: FC = () => {
   });
 
   useEffect(() => {
-    getSummaryData().then((res) => setSummaryData(res));
+    isMounted.current = true;
+    getSummaryData().then((res) => {
+      if (isMounted.current) {
+        setSummaryData(res);
+        setLoading(false);
+      }
+    });
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   return (
     <Card className="card-shadow">
       <CardTitle>
-        <Title headingLevel="h2" size="xl">
-          Summary
-        </Title>
+        <div className="pf-u-display-flex pf-u-justify-content-flex-start pf-u-align-items-center">
+          <Title headingLevel="h2" size="xl">
+            Summary
+          </Title>
+          {loading && <Spinner isSVG size="lg" className="pf-u-ml-md" />}
+        </div>
       </CardTitle>
       <CardBody>
         <TextContent>

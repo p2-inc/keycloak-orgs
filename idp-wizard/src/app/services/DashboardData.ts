@@ -11,6 +11,7 @@ export interface IDashboardSummaryData {
 }
 
 export interface IDashboardEvents {
+  id?: string;
   time?: number;
   user?: string;
   eventType?: EventType;
@@ -21,10 +22,10 @@ export const getEventData = async <IDashboardEvents>() => {
   const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
 
-  //Get events
   const events = await kcAdminClient.realms.findEvents({
     realm: process.env.REALM || "wizard",
   });
+
   const eventsToShow = events.filter(
     (event) =>
       event.details?.grant_type != "client_credentials" &&
@@ -32,14 +33,18 @@ export const getEventData = async <IDashboardEvents>() => {
       event.type !== "CODE_TO_TOKEN"
   );
 
-  const allUsers = await kcAdminClient.users.find();
+  const allUsers = await kcAdminClient.users.find({
+    realm: process.env.REALM || "wizard",
+  });
 
-  return eventsToShow.map((event) => {
+  return eventsToShow.map(({ time, userId, type, details }) => {
+    const user = allUsers.find((user) => user.id == userId);
     return {
-      time: event.time,
-      user: allUsers.find((user) => user.id == event.userId)?.username,
-      eventType: event.type,
-      details: event.details,
+      id: user?.id,
+      time: time,
+      user: user?.username,
+      eventType: type,
+      details: details,
     };
   });
 };
