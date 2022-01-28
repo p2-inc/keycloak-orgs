@@ -1,10 +1,14 @@
 import React from "react";
-import { Route, RouteComponentProps, Switch } from "react-router-dom";
+import {
+  generatePath,
+  Route,
+  RouteComponentProps,
+  Switch,
+  useHistory,
+  useParams,
+} from "react-router-dom";
 import { accessibleRouteChangeHandler } from "@app/utils/utils";
 import { Dashboard } from "@app/Dashboard/Dashboard";
-import { Support } from "@app/Support/Support";
-import { GeneralSettings } from "@app/Settings/General/GeneralSettings";
-import { ProfileSettings } from "@app/Settings/Profile/ProfileSettings";
 import { NotFound } from "@app/NotFound/NotFound";
 import { useDocumentTitle } from "@app/utils/useDocumentTitle";
 import {
@@ -12,7 +16,6 @@ import {
   useLastLocation,
 } from "react-router-last-location";
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
-import { Auth0Wizard } from "./components/IdentityProviderWizard/Wizards/Auth0/OIDC";
 import Provider from "./components/IdentityProviderWizard/providers";
 import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
 import { Protocols, Providers } from "./configurations";
@@ -44,9 +47,22 @@ export type AppRouteConfig = IAppRoute | IAppRouteGroup;
 export interface RouterParams {
   provider: Providers;
   protocol: Protocols;
+  realm: string;
 }
 
-export const BASE_PATH = "/auth/realms/:account/wizard";
+export const BASE_PATH = "/auth/realms/:realm/wizard";
+
+export function useNavigateToBasePath() {
+  const history = useHistory();
+  const { realm } = useParams<RouterParams>();
+  const pth = generatePath(`${BASE_PATH}/`, {
+    realm,
+  });
+
+  const navigateToBasePath = () => history.push(pth);
+
+  return navigateToBasePath;
+}
 
 const routes: AppRouteConfig[] = [
   {

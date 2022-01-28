@@ -14,17 +14,13 @@ import { ConnectionStatus } from "./ConnectionStatus";
 import { ActivityLog } from "./ActivityLog";
 import { useHistory, useParams } from "react-router";
 import { generatePath, Link } from "react-router-dom";
-import { BASE_PATH } from "@app/routes";
+import { BASE_PATH, RouterParams } from "@app/routes";
 
 const Dashboard: React.FunctionComponent = () => {
   const history = useHistory();
   const { keycloak } = useKeycloak();
-  let { account } = useParams();
+  let { realm } = useParams<RouterParams>();
 
-  const goToIDPSelector = () => {
-    let path = `idp`;
-    history.push(path);
-  };
   return (
     <PageSection>
       <Stack hasGutter>
@@ -38,7 +34,7 @@ const Dashboard: React.FunctionComponent = () => {
             <FlexItem align={{ default: "alignRight" }}>
               <Link
                 to={generatePath(`${BASE_PATH}/idp`, {
-                  account,
+                  realm,
                 })}
               >
                 IDP Selector

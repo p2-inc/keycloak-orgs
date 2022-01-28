@@ -15,11 +15,13 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { generateId } from "@app/utils/generate-id";
+import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = generateId();
 
 export const Auth0WizardOIDC: FC = () => {
-  const [alias, setAlias] = useState(`auth0-oidc-${nanoId()}`);
+  const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+  const navigateToBasePath = useNavigateToBasePath();
   const loginRedirectURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -38,14 +40,12 @@ export const Auth0WizardOIDC: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
-  const closeWizard = () => {
-    history.push("/");
-  };
+  const closeWizard = () => navigateToBasePath();
 
   const handleFormSubmission = async ({
     domain,

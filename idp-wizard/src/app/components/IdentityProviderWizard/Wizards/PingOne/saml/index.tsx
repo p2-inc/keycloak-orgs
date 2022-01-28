@@ -15,11 +15,13 @@ import { generateId } from "@app/utils/generate-id";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import axios from "axios";
+import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = generateId();
 
 export const PingOneWizard: FC = () => {
   const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+  const navigateToBasePath = useNavigateToBasePath();
 
   const title = "PingOne wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -48,13 +50,13 @@ export const PingOneWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
   const closeWizard = () => {
-    history.push("/");
+    navigateToBasePath();
   };
 
   const handleFormSubmit = async ({

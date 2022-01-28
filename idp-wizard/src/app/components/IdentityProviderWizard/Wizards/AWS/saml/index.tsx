@@ -19,11 +19,13 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = generateId();
 
 export const AWSSamlWizard: FC = () => {
   const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+  const navigateToBasePath = useNavigateToBasePath();
 
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -52,14 +54,12 @@ export const AWSSamlWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
-  const closeWizard = () => {
-    history.push("/");
-  };
+  const closeWizard = () => navigateToBasePath();
 
   const handleFormSubmit = async ({
     url,

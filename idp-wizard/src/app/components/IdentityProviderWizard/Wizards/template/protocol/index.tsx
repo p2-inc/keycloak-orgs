@@ -12,9 +12,11 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
+import { useNavigateToBasePath } from "@app/routes";
 
 export const TemplateWizardProtocol: FC = () => {
   const title = "Okta wizard";
+  const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
@@ -34,13 +36,13 @@ export const TemplateWizardProtocol: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
   const closeWizard = () => {
-    history.push("/");
+    navigateToBasePath();
   };
 
   const validateFn = async () => {

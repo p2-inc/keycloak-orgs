@@ -1,12 +1,13 @@
 import React, { FC, useEffect } from "react";
 import { IdPButton } from "./components/IdPButton";
-import { Link, useHistory, useParams } from "react-router-dom";
-import { ArrowLeftIcon, OpenidIcon } from "@patternfly/react-icons";
+import { generatePath, Link, useHistory, useParams } from "react-router-dom";
+import { ArrowLeftIcon } from "@patternfly/react-icons";
 import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
 import { IdentityProtocols, IdentityProviders } from "@app/configurations";
+import { BASE_PATH, RouterParams } from "@app/routes";
 
 export const IdPProtocolSelector: FC = ({}) => {
-  const { provider } = useParams();
+  const { provider, realm } = useParams<RouterParams>();
   const history = useHistory();
 
   const currentProvider = IdentityProviders.find((i) => i.id === provider)!;
@@ -20,14 +21,19 @@ export const IdPProtocolSelector: FC = ({}) => {
 
   useEffect(() => {
     if (providerProtocols.length === 1) {
-      history.replace(`/idp/${provider}/${providerProtocols[0]}`);
+      const pth = generatePath(`${BASE_PATH}/idp/:provider/:protocol`, {
+        realm,
+        provider,
+        protocol: providerProtocols[0],
+      });
+      history.replace(pth);
     }
   }, []);
 
   return (
     <Stack id="protocol-selector" className="container">
       <StackItem>
-        <Link to="/idp">
+        <Link to={generatePath(`${BASE_PATH}/idp`, { realm })}>
           <Text component={TextVariants.h2} className="link">
             <ArrowLeftIcon />
             {" Back to identity provider selection"}
@@ -50,8 +56,13 @@ export const IdPProtocolSelector: FC = ({}) => {
       </StackItem>
       <StackItem className="selection-container">
         {IdentityProtocols.map(({ name, imageSrc, id: protocolId }, i) => {
+          const pth = generatePath(`${BASE_PATH}/idp/:providerId/:protocolId`, {
+            realm,
+            providerId,
+            protocolId,
+          });
           return (
-            <Link to={`/idp/${providerId}/${protocolId}`} key={i}>
+            <Link to={pth} key={i}>
               <IdPButton
                 key={i}
                 text={name}

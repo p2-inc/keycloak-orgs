@@ -16,6 +16,7 @@ import { generateId } from "@app/utils/generate-id";
 import { OidcConfig, ClientCreds } from "./steps/forms";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = generateId();
 
@@ -27,6 +28,7 @@ const forms = {
 
 export const GenericOIDC: FC = () => {
   const title = "OIDC wizard";
+  const navigateToBasePath = useNavigateToBasePath();
   const [alias, setAlias] = useState(`generic-oidc-${nanoId}`);
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
@@ -70,13 +72,13 @@ export const GenericOIDC: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
   const closeWizard = () => {
-    history.push("/");
+    navigateToBasePath();
   };
 
   const validateUrl = async ({ url }: { url: string }) => {
