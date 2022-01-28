@@ -27,12 +27,12 @@ export const OneLoginWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
-  const acsUrl = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
-  const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
+  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
 
   const [issuerUrl, setIssuerUrl] = useState("");
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -67,7 +67,7 @@ export const OneLoginWizard: FC = () => {
       const resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: url,
         providerId: "saml",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
 
       setMetadata(resp);
@@ -102,7 +102,7 @@ export const OneLoginWizard: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       setResults("OneLogin IdP created successfully. Click finish.");

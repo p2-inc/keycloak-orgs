@@ -23,12 +23,12 @@ export const GoogleWizard: FC = () => {
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
-  const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
+  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const [alias, setAlias] = useState(`google-saml-${nanoId}`);
-  const acsUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
-  const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
+  const acsUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
 
   const [isValidating, setIsValidating] = useState(false);
@@ -87,7 +87,7 @@ export const GoogleWizard: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
       setResults("Google IdP created successfully. Click finish.");
       setStepIdReached(8);

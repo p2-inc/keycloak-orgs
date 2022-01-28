@@ -18,7 +18,7 @@ export const TemplateWizardProtocol: FC = () => {
   const title = "Okta wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
 

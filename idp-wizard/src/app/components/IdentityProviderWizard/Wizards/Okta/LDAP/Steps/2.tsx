@@ -24,7 +24,7 @@ export const OktaStepTwo: FC<Props> = (props) => {
 
   const oktaCustomerIdentifier =
     sessionStorage.getItem("okta_customer_identifier") ||
-    process.env.OKTA_DEFAULT_CUSTOMER_IDENTIFER;
+    "dev-11111111";
 
   const onUsernameChange = (value: string) => {
     setUsername(value);

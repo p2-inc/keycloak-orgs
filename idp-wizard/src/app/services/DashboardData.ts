@@ -19,11 +19,12 @@ export interface IDashboardEvents {
 }
 
 export const getEventData = async <IDashboardEvents>() => {
-  const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  
   await setKcAdminClientAccessToken();
 
   const events = await kcAdminClient.realms.findEvents({
-    realm: process.env.REALM || "wizard",
+    realm: getRealm()
   });
 
   const eventsToShow = events.filter(
@@ -34,7 +35,7 @@ export const getEventData = async <IDashboardEvents>() => {
   );
 
   const allUsers = await kcAdminClient.users.find({
-    realm: process.env.REALM || "wizard",
+    realm: getRealm()
   });
 
   return eventsToShow.map(({ time, userId, type, details }) => {
@@ -50,13 +51,14 @@ export const getEventData = async <IDashboardEvents>() => {
 };
 
 export const getSummaryData = async <IDashboardSummaryData>() => {
-  const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
 
   await setKcAdminClientAccessToken();
   const allUsers = await kcAdminClient.users.find();
 
+  console.log("keycloak.realm", getRealm());
   const logins = await kcAdminClient.realms.findEvents({
-    realm: process.env.REALM!,
+    realm: getRealm(),
     type: "LOGIN",
   });
   const loginsThisWeek = logins.filter(
@@ -72,7 +74,7 @@ export const getSummaryData = async <IDashboardSummaryData>() => {
         new Date().toLocaleDateString()
   );
   const failedLogins = await kcAdminClient.realms.findEvents({
-    realm: process.env.REALM!,
+    realm: getRealm(),
     type: "LOGIN_ERROR",
   });
   const lockedOutUsers = allUsers.filter((user) => !user.enabled);

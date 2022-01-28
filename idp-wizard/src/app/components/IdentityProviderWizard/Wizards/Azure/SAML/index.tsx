@@ -13,6 +13,9 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
+import { generateId } from "@app/utils/generate-id";
+
+const nanoId = generateId();
 
 export const AzureWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
@@ -23,9 +26,13 @@ export const AzureWizard: FC = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
   const history = useHistory();
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const [metadata, setMetadata] = useState();
   const [metadataUrl, setMetadataUrl] = useState("");
+  const [alias, setAlias] = useState(`azure-saml-${nanoId}`);
+
+  const acsUrl = `${getServerUrl()}/realms/${getRealm}/broker/${alias}/endpoint`;
+  const entityId = `${getServerUrl}/realms/${getRealm()}`;
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -46,7 +53,7 @@ export const AzureWizard: FC = () => {
       const resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: metadataUrl,
         providerId: "saml",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
 
       setMetadata(resp);
@@ -82,7 +89,7 @@ export const AzureWizard: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       setResults("Azure SAML IdP created successfully. Click finish.");
@@ -109,7 +116,7 @@ export const AzureWizard: FC = () => {
     {
       id: 2,
       name: "Configure Attribute Statements",
-      component: <Steps.AzureStepTwo />,
+      component: <Steps.AzureStepTwo acsUrl={acsUrl} entityId={entityId} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
     },

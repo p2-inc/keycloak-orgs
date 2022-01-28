@@ -19,15 +19,16 @@ import { alphanumeric } from "nanoid-dictionary";
 import { useKeycloak } from "@react-keycloak/web";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
 
 const nanoId = customAlphabet(alphanumeric, 6);
 
 export const Auth0WizardSAML: FC = () => {
   const { keycloak } = useKeycloak();
   const navigateToBasePath = useNavigateToBasePath();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const [alias, setAlias] = useState(`auth0-saml-${nanoId()}`);
-  const loginRedirectURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
+  const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -38,7 +39,6 @@ export const Auth0WizardSAML: FC = () => {
   const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const history = useHistory();
-  const [kcAdminClient] = useKeycloakAdminApi();
 
   const Axios = axios.create({
     headers: {
@@ -96,7 +96,7 @@ export const Auth0WizardSAML: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       setResults("Auth0 SAML IdP created successfully. Click finish.");

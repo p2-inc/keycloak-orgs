@@ -29,12 +29,12 @@ export const AWSSamlWizard: FC = () => {
 
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
-  const samlAudience = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
-  const acsURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
+  const samlAudience = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const acsURL = `${getServerUrl()}/realms/${getRealm()}`;
 
   const [providerUrl, setProviderUrl] = useState("");
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -73,7 +73,7 @@ export const AWSSamlWizard: FC = () => {
       const resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: url,
         providerId: "saml",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
 
       setMetadata(resp);
@@ -109,14 +109,14 @@ export const AWSSamlWizard: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       // For AWS SSO, additional mapping call is required after creation
 
       // Have to use Axios post bc built in keycloak-js makes the request wrong
       await Axios.post(
-        `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/instances/${alias}/mappers`,
+        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
         {
           identityProviderAlias: alias,
           config: {
