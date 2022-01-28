@@ -15,11 +15,13 @@ import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { METADATA_CONFIG } from "@app/configurations/api-status";
 import { generateId } from "@app/utils/generate-id";
+import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = generateId();
 
 export const GoogleWizard: FC = () => {
   const title = "Google wizard";
+  const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
@@ -43,13 +45,13 @@ export const GoogleWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === 8) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
   const closeWizard = () => {
-    history.push("/");
+    navigateToBasePath();
   };
 
   const uploadMetadataFile = async (file: File) => {

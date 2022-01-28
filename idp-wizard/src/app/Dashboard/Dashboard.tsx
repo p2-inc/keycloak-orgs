@@ -12,16 +12,14 @@ import { useKeycloak } from "@react-keycloak/web";
 import { DashboardSummary } from "./DashboardSummary";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { ActivityLog } from "./ActivityLog";
-import { useHistory } from "react-router";
+import { useHistory, useParams } from "react-router";
+import { generatePath, Link } from "react-router-dom";
+import { BASE_PATH, RouterParams } from "@app/routes";
 
 const Dashboard: React.FunctionComponent = () => {
-  const history = useHistory();
   const { keycloak } = useKeycloak();
+  let { realm } = useParams<RouterParams>();
 
-  const goToIDPSelector = () => {
-    let path = `idp`;
-    history.push(path);
-  };
   return (
     <PageSection>
       <Stack hasGutter>
@@ -33,9 +31,13 @@ const Dashboard: React.FunctionComponent = () => {
               </Title>
             </FlexItem>
             <FlexItem align={{ default: "alignRight" }}>
-              <Button variant="link" isInline onClick={goToIDPSelector}>
+              <Link
+                to={generatePath(`${BASE_PATH}/idp`, {
+                  realm,
+                })}
+              >
                 IDP Selector
-              </Button>
+              </Link>
             </FlexItem>
             <FlexItem>
               <Button variant="link" isInline onClick={() => keycloak.logout()}>

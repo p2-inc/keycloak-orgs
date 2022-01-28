@@ -5,10 +5,7 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import {
-  API_STATUS,
-  METADATA_CONFIG,
-} from "@app/configurations/api-status";
+import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 
 import axios from "axios";
 import * as Steps from "./Steps";
@@ -21,12 +18,14 @@ import { customAlphabet } from "nanoid";
 import { alphanumeric } from "nanoid-dictionary";
 import { useKeycloak } from "@react-keycloak/web";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { useNavigateToBasePath } from "@app/routes";
 const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
 
 const nanoId = customAlphabet(alphanumeric, 6);
 
 export const Auth0WizardSAML: FC = () => {
   const { keycloak } = useKeycloak();
+  const navigateToBasePath = useNavigateToBasePath();
   const [alias, setAlias] = useState(`auth0-saml-${nanoId()}`);
   const loginRedirectURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
 
@@ -49,33 +48,13 @@ export const Auth0WizardSAML: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
-  const closeWizard = () => {
-    history.push("/");
-  };/*
-  const uploadMetadataFile = async (file: File) => {
-    const fd = new FormData();
-    fd.append("providerId", "saml");
-    fd.append("file", file);
+  const closeWizard = () => navigateToBasePath();
 
-    try {
-      const resp = await Axios.post(identifierURL, fd);
-
-      if (resp.status === 200) {
-        setConfigData(resp.data);
-        return true;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-
-    return false;
-  };
-*/
   const uploadMetadataFile = async (file: File) => {
     const fd = new FormData();
     fd.append("providerId", "saml");

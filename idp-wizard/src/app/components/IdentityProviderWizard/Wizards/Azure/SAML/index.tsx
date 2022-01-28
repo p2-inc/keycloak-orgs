@@ -12,8 +12,10 @@ import { useHistory } from "react-router-dom";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { useNavigateToBasePath } from "@app/routes";
 
 export const AzureWizard: FC = () => {
+  const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
@@ -27,13 +29,13 @@ export const AzureWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
   const closeWizard = () => {
-    history.push("/");
+    navigateToBasePath();
   };
 
   const validateMetadata = async ({ metadataUrl }: { metadataUrl: string }) => {

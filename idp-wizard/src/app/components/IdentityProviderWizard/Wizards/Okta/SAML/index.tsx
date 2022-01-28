@@ -13,11 +13,13 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useHistory } from "react-router";
 import { API_STATUS } from "@app/configurations/api-status";
 import { generateId } from "@app/utils/generate-id";
+import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = generateId();
 
 export const OktaWizardSaml: FC = () => {
   const title = "Okta wizard";
+  const navigateToBasePath = useNavigateToBasePath();
 
   const alias = `okta-saml-${nanoId}`;
   const ssoUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
@@ -36,13 +38,13 @@ export const OktaWizardSaml: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
   const closeWizard = () => {
-    history.push("/");
+    navigateToBasePath();
   };
 
   const validateMetadata = async ({ metadataUrl }: { metadataUrl: string }) => {

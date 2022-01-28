@@ -19,11 +19,13 @@ import {
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { generateId } from "@app/utils/generate-id";
+import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = generateId();
 
 export const GenericSAML: FC = () => {
   const title = "Generic SAML wizard";
+  const navigateToBasePath = useNavigateToBasePath();
 
   const alias = `generic-saml-${nanoId}`;
   const ssoUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
@@ -55,13 +57,13 @@ export const GenericSAML: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
-      history.push("/");
+      navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
   };
 
   const closeWizard = () => {
-    history.push("/");
+    navigateToBasePath();
   };
 
   const validateFn = async () => {

@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { IdPButton } from "./components/IdPButton";
 import { useKeycloak } from "@react-keycloak/web";
-import { Link } from "react-router-dom";
+import { generatePath, Link, useParams } from "react-router-dom";
 import {
   Button,
   Flex,
@@ -15,9 +15,11 @@ import {
   GenericIdentityProviders,
   IdentityProviders,
 } from "@app/configurations";
+import { BASE_PATH, RouterParams } from "@app/routes";
 
 export const IdentityProviderSelector: FC = () => {
   const { keycloak } = useKeycloak();
+  let { realm } = useParams<RouterParams>();
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -25,7 +27,7 @@ export const IdentityProviderSelector: FC = () => {
         <StackItem>
           <Flex>
             <FlexItem align={{ default: "alignRight" }}>
-              <Link to="/">
+              <Link to={generatePath(BASE_PATH, { realm })}>
                 <Button variant="link" isInline>
                   Dashboard
                 </Button>
@@ -49,11 +51,17 @@ export const IdentityProviderSelector: FC = () => {
                     a.active === b.active ? 0 : a.active ? -1 : 1
                   )
                   .map(({ name, imageSrc, active, id, protocols }) => {
-                    const linkTo = active
-                      ? `/idp/${id}/${
-                          protocols.length === 1 ? protocols[0] : "protocol"
-                        }`
-                      : "#";
+                    const genLink = generatePath(
+                      `${BASE_PATH}/idp/:id/:protocol`,
+                      {
+                        realm,
+                        id,
+                        protocol:
+                          protocols.length === 1 ? protocols[0] : "protocol",
+                      }
+                    );
+
+                    const linkTo = active ? genLink : "#";
                     return (
                       <Link to={linkTo} key={id}>
                         <IdPButton
