@@ -31,12 +31,12 @@ export const GenericOIDC: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const [alias, setAlias] = useState(`generic-oidc-${nanoId}`);
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
-  const redirectUri = `${process.env.KEYCLOAK_URL}/auth/realms/${process.env.REALM}/broker/${nanoId}/endpoint`;
-  const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
+  const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${nanoId}/endpoint`;
+  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -88,7 +88,7 @@ export const GenericOIDC: FC = () => {
       resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: url,
         providerId: "oidc",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
 
       setIsFormValid(true);
@@ -222,7 +222,7 @@ export const GenericOIDC: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       setResults("OIDC IdP created successfully. Click finish.");

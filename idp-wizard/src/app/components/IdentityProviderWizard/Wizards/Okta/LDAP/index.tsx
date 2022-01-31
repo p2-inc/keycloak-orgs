@@ -37,7 +37,7 @@ export const OktaWizardLDAP: FC = () => {
     setIsValidating(true);
     const oktaCustomerIdentifier =
       sessionStorage.getItem("okta_customer_identifier") ||
-      process.env.OKTA_DEFAULT_CUSTOMER_IDENTIFER;
+      "dev-11111111";
 
     setResults("Final Validation Running...");
     const results = await oktaCreateFederationAndSyncUsers(

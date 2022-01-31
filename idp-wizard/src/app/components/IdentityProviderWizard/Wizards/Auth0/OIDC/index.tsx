@@ -22,7 +22,8 @@ const nanoId = generateId();
 export const Auth0WizardOIDC: FC = () => {
   const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
   const navigateToBasePath = useNavigateToBasePath();
-  const loginRedirectURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -36,7 +37,6 @@ export const Auth0WizardOIDC: FC = () => {
   >({});
   const [config, setConfig] = useState({});
   const history = useHistory();
-  const [kcAdminClient] = useKeycloakAdminApi();
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -64,7 +64,7 @@ export const Auth0WizardOIDC: FC = () => {
       resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: trustedDomain,
         providerId: "oidc",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
 
       setIsFormValid(true);
@@ -96,7 +96,7 @@ export const Auth0WizardOIDC: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       setResults("Auth0 OIDC IdP created successfully. Click finish.");

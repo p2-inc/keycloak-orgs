@@ -24,7 +24,7 @@ export const GenericLDAP: FC = () => {
   const title = "Okta wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
@@ -66,7 +66,7 @@ export const GenericLDAP: FC = () => {
 
     const payload = {
       name: "ldap",
-      parentId: process.env.REALM,
+      parentId: getRealm(),
       providerId: "ldap",
       providerType: "org.keycloak.storage.UserStorageProvider",
       config: {
@@ -140,7 +140,7 @@ export const GenericLDAP: FC = () => {
       await kcAdminClient.userStorageProvider.sync({
         id: createResp.id,
         action: "triggerChangedUsersSync",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
     } catch (e) {
       setResults(
@@ -180,7 +180,7 @@ export const GenericLDAP: FC = () => {
     setServerConfigValid(false);
     try {
       await kcAdminClient.realms.testLDAPConnection(
-        { realm: process.env.REALM! },
+        { realm: getRealm()! },
         ldapServerConfig
       );
       setServerConfig(serverConfig);
@@ -216,7 +216,7 @@ export const GenericLDAP: FC = () => {
     setBindCredsValid(false);
     try {
       await kcAdminClient.realms.testLDAPConnection(
-        { realm: process.env.REALM! },
+        { realm: getRealm()! },
         credentialConfig
       );
       setBindCreds({ bindDn, bindPassword });

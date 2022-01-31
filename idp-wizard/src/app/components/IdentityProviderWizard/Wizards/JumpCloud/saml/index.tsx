@@ -24,13 +24,13 @@ export const JumpCloudWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "JumpCloud wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
-  const acsUrl = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
-  const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
-  const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
+  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
+  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
@@ -106,11 +106,11 @@ export const JumpCloudWizard: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       await Axios.post(
-        `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/instances/${alias}/mappers`,
+        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
         {
           identityProviderAlias: alias,
           config: {

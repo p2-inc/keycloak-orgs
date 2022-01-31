@@ -31,7 +31,7 @@ export const OktaStepOne: FC<Props> = (props) => {
   const [isValidating, setIsValidating] = useState(false);
   const oktaCustomerIdentifier =
     sessionStorage.getItem("okta_customer_identifier") ||
-    process.env.OKTA_DEFAULT_CUSTOMER_IDENTIFER;
+    "dev-11111111";
 
   const customerIdentifier = oktaCustomerIdentifier;
 

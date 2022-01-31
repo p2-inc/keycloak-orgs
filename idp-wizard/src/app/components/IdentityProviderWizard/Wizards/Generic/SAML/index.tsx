@@ -27,16 +27,16 @@ export const GenericSAML: FC = () => {
   const title = "Generic SAML wizard";
   const navigateToBasePath = useNavigateToBasePath();
 
-  const alias = `generic-saml-${nanoId}`;
-  const ssoUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
-  const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
-  const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
-  const samlMetadata = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/protocol/saml/descriptor`;
-
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
+
+  const alias = `generic-saml-${nanoId}`;
+  const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
+  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
+  const samlMetadata = `${getServerUrl()}/realms/${getRealm()}/protocol/saml/descriptor`;
 
   // Metadata
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -82,7 +82,7 @@ export const GenericSAML: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       setResults("SAML IdP created successfully. Click finish.");
@@ -178,7 +178,7 @@ export const GenericSAML: FC = () => {
       const resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: metadataUrl,
         providerId: "saml",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
 
       setMetadata(resp);

@@ -21,14 +21,14 @@ export const OktaWizardSaml: FC = () => {
   const title = "Okta wizard";
   const navigateToBasePath = useNavigateToBasePath();
 
-  const alias = `okta-saml-${nanoId}`;
-  const ssoUrl = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/broker/${alias}/endpoint`;
-  const audienceUri = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
-
   const [metadata, setMetadata] = useState();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const history = useHistory();
+
+  const alias = `okta-saml-${nanoId}`;
+  const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const audienceUri = `${getServerUrl()}/realms/${getRealm()}`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -54,7 +54,7 @@ export const OktaWizardSaml: FC = () => {
       const resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: metadataUrl,
         providerId: "saml",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
 
       setMetadata(resp);
@@ -88,7 +88,7 @@ export const OktaWizardSaml: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       setResults("Okta SAML IdP created successfully. Click finish.");

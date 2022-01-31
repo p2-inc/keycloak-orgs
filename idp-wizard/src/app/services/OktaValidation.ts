@@ -1,7 +1,7 @@
 import { useKeycloakAdminApi } from "../hooks/useKeycloakAdminApi";
 
 export const oktaStepOneValidation = async (ldapConUrl: string) => {
-  const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getRealm] = useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
 
   const connSetting = {
@@ -16,7 +16,7 @@ export const oktaStepOneValidation = async (ldapConUrl: string) => {
   };
 
   const response = await kcAdminClient.realms
-    .testLDAPConnection({ realm: process.env.REALM! }, connSetting)
+    .testLDAPConnection({ realm: getRealm()! }, connSetting)
     .then((res) => {
       console.log("result", res);
       return {
@@ -41,7 +41,7 @@ export const oktaValidateUsernamePassword = async (
   password: string,
   baseDN: string
 ) => {
-  const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
 
   const connSetting = {
@@ -56,7 +56,7 @@ export const oktaValidateUsernamePassword = async (
   };
 
   const testConnection = await kcAdminClient.realms
-    .testLDAPConnection({ realm: process.env.REALM || "wizard" }, connSetting)
+    .testLDAPConnection({ realm: getRealm()! }, connSetting)
     .then((res) => {
       console.log("result", res);
       return {
@@ -75,7 +75,7 @@ export const oktaValidateUsernamePassword = async (
 };
 
 export const oktaTestConnection = async (ldapConUrl: string) => {
-  const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
   const connSetting = {
     action: "testConnection",
@@ -89,7 +89,7 @@ export const oktaTestConnection = async (ldapConUrl: string) => {
   };
 
   const testConnection = await kcAdminClient.realms
-    .testLDAPConnection({ realm: process.env.REALM || "wizard" }, connSetting)
+    .testLDAPConnection({ realm: getRealm()! }, connSetting)
     .then((res) => console.log("result", res))
     .catch((err) => console.log("error", err));
   return testConnection;
@@ -100,14 +100,14 @@ export const oktaCreateFederationAndSyncUsers = async (
   login_id,
   password
 ) => {
-  const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
 
   console.log("validating", customer_id, login_id, password);
 
   const payload = {
     name: "ldap",
-    parentId: process.env.REALM,
+    parentId: getRealm(),
     providerId: "ldap",
     providerType: "org.keycloak.storage.UserStorageProvider",
     config: {
@@ -166,11 +166,11 @@ export const oktaCreateFederationAndSyncUsers = async (
 
     console.log("User Federation Created:", component);
     try {
-      console.log("Syncing Users", component.id, process.env.REALM);
+      console.log("Syncing Users", component.id, getRealm());
       const syncResult = await kcAdminClient.userStorageProvider.sync({
         id: component.id,
         action: "triggerChangedUsersSync",
-        realm: process.env.REALM,
+        realm: getRealm(),
       });
       console.log("Component Sync result", syncResult);
 

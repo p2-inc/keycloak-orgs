@@ -1,12 +1,14 @@
-import React from "react";
+import React, { FC, useState } from "react";
 import * as Images from "@app/images/azure/saml";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { ClipboardCopyComponent } from "@wizardComponents";
 
-export function AzureStepTwo() {
-  const replyURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${process.env.AZURE_CUSTOMER_IDENTIFIER}/endpoint`;
-  const identifierURL = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
+interface Props {
+  acsUrl: string,
+  entityId: string
+}
 
+export const AzureStepTwo: FC<Props> = ({ acsUrl, entityId }) => {
   const instructionList: InstructionProps[] = [
     {
       text: "Click the Edit icon in the top right of the first step.",
@@ -16,7 +18,7 @@ export function AzureStepTwo() {
       component: (
         <ClipboardCopyComponent
           label="Copy this identifier"
-          initialValue={identifierURL}
+          initialValue={entityId}
         />
       ),
     },
@@ -24,7 +26,7 @@ export function AzureStepTwo() {
       component: (
         <ClipboardCopyComponent
           label="Copy this Reply URL"
-          initialValue={replyURL}
+          initialValue={acsUrl}
         />
       ),
     },

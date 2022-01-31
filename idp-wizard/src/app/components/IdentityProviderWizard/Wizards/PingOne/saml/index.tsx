@@ -20,18 +20,18 @@ import { useNavigateToBasePath } from "@app/routes";
 const nanoId = generateId();
 
 export const PingOneWizard: FC = () => {
-  const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+  const [alias, setAlias] = useState(`pingone-saml-${nanoId}`);
   const navigateToBasePath = useNavigateToBasePath();
 
   const title = "PingOne wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const history = useHistory();
 
-  const acsUrl = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}/broker/${alias}/endpoint`;
-  const entityId = `${process.env.KEYCLOAK_URL}/realms/${process.env.REALM}`;
-  const identifierURL = `${process.env.KEYCLOAK_URL}/admin/realms/${process.env.REALM}/identity-provider/import-config`;
+  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
+  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
@@ -107,7 +107,7 @@ export const PingOneWizard: FC = () => {
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
-        realm: process.env.REALM!,
+        realm: getRealm()!,
       });
 
       setResults("PingOne IdP created successfully. Click finish.");
