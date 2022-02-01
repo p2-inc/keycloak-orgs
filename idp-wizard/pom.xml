@@ -12,6 +12,14 @@
     <keycloak.version>16.1.0</keycloak.version>
   </properties>
 
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/p2-inc/repo</url>
+    </repository>
+  </distributionManagement>
+
   <build>
     <plugins>
       <plugin>
