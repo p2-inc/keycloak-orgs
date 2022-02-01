@@ -12,7 +12,7 @@ import { useKeycloak } from "@react-keycloak/web";
 import { DashboardSummary } from "./DashboardSummary";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { ActivityLog } from "./ActivityLog";
-import { useHistory, useParams } from "react-router";
+import { useParams } from "react-router";
 import { generatePath, Link } from "react-router-dom";
 import { BASE_PATH, RouterParams } from "@app/routes";
 

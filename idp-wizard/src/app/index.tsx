@@ -18,7 +18,7 @@ const App: React.FunctionComponent = () => (
     }}
     LoadingComponent={<Loading />}
   >
-    <Router basename="/auth/realms/:wizard/wizard">
+    <Router>
       <AppLayout>
         <AppRoutes />
       </AppLayout>
