@@ -5,16 +5,9 @@ import {
   HelperText,
   HelperTextItem,
   Spinner,
-  TextContent,
-  TextList,
-  TextListItem,
-  TextListItemVariants,
-  TextListVariants,
   Title,
 } from "@patternfly/react-core";
 import React, { useEffect, useState } from "react";
-import azureLogo from "@app/images/provider-logos/azure_logo.svg";
-import samlLogo from "@app/images/provider-logos/saml_logo.svg";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import {
   TableComposable,
