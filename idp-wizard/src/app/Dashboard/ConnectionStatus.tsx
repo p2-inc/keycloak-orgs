@@ -44,7 +44,7 @@ export const ConnectionStatus = () => {
 
     await setKcAdminClientAccessToken();
 
-    const idps = await kcAdminClient.identityProviders.find();
+    const idps = await kcAdminClient.identityProviders.find({ realm });
 
     setIdps(
       idps.map((i) => ({
