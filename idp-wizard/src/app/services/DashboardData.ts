@@ -19,12 +19,14 @@ export interface IDashboardEvents {
 }
 
 export const getEventData = async <IDashboardEvents>() => {
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
-  
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
+  const realm = getRealm()!;
+
   await setKcAdminClientAccessToken();
 
   const events = await kcAdminClient.realms.findEvents({
-    realm: getRealm()
+    realm,
   });
 
   const eventsToShow = events.filter(
@@ -35,7 +37,7 @@ export const getEventData = async <IDashboardEvents>() => {
   );
 
   const allUsers = await kcAdminClient.users.find({
-    realm: getRealm()
+    realm,
   });
 
   return eventsToShow.map(({ time, userId, type, details }) => {
@@ -51,13 +53,15 @@ export const getEventData = async <IDashboardEvents>() => {
 };
 
 export const getSummaryData = async <IDashboardSummaryData>() => {
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
+  const realm = getRealm()!;
 
   await setKcAdminClientAccessToken();
   const allUsers = await kcAdminClient.users.find();
 
   const logins = await kcAdminClient.realms.findEvents({
-    realm: getRealm(),
+    realm,
     type: "LOGIN",
   });
   const loginsThisWeek = logins.filter(
@@ -73,7 +77,7 @@ export const getSummaryData = async <IDashboardSummaryData>() => {
         new Date().toLocaleDateString()
   );
   const failedLogins = await kcAdminClient.realms.findEvents({
-    realm: getRealm(),
+    realm,
     type: "LOGIN_ERROR",
   });
   const lockedOutUsers = allUsers.filter((user) => !user.enabled);
@@ -88,6 +92,7 @@ export const getSummaryData = async <IDashboardSummaryData>() => {
     usersLockedOut: lockedOutUsers.length,
   };
 };
+
 export const getKeycloakUsers = async () => {
   const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
