@@ -8,7 +8,6 @@ import {
 import * as Steps from "./Steps";
 import azureLogo from "@app/images/provider-logos/azure_logo.svg";
 import { WizardConfirmation, Header } from "@wizardComponents";
-import { useHistory } from "react-router-dom";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/web";
@@ -27,7 +26,6 @@ export const AzureWizard: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
-  const history = useHistory();
   const { keycloak } = useKeycloak();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();

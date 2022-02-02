@@ -5,13 +5,12 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import GoogleLogo from "../assets/google_cloud_logo.svg";
+import GoogleLogo from "@app/images/provider-logos/google-workspace-logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { METADATA_CONFIG } from "@app/configurations/api-status";
 import { generateId } from "@app/utils/generate-id";
@@ -23,7 +22,8 @@ export const GoogleWizard: FC = () => {
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const [alias, setAlias] = useState(`google-saml-${nanoId}`);
@@ -35,7 +35,6 @@ export const GoogleWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
-  const history = useHistory();
 
   const Axios = axios.create({
     headers: {

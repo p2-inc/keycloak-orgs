@@ -10,7 +10,6 @@ import * as Steps from "./Steps";
 import * as commonSteps from "../shared/Steps";
 import authoLogo from "@app/images/auth0/auth0-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
-import { useHistory } from "react-router";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
@@ -22,7 +21,8 @@ const nanoId = generateId();
 export const Auth0WizardOIDC: FC = () => {
   const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
   const navigateToBasePath = useNavigateToBasePath();
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -36,7 +36,6 @@ export const Auth0WizardOIDC: FC = () => {
     Record<string, any> | undefined
   >({});
   const [config, setConfig] = useState({});
-  const history = useHistory();
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {

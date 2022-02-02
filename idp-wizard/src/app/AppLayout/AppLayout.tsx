@@ -1,5 +1,5 @@
 import * as React from "react";
-import { NavLink, useLocation, useHistory } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   Nav,
   NavList,
@@ -10,7 +10,7 @@ import {
   PageSidebar,
   SkipToContent,
 } from "@patternfly/react-core";
-import { routes, IAppRoute, IAppRouteGroup } from "@app/routes";
+import { routes, useNavigateToBasePath } from "@app/routes";
 import logo from "@app/images/phasetwo-logos/logo_phase_slash.svg";
 
 interface IAppLayout {
@@ -21,6 +21,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [isNavOpen, setIsNavOpen] = React.useState(true);
   const [isMobileView, setIsMobileView] = React.useState(true);
   const [isNavOpenMobile, setIsNavOpenMobile] = React.useState(false);
+  const navigateToBasePath = useNavigateToBasePath();
+
   const onNavToggleMobile = () => {
     setIsNavOpenMobile(!isNavOpenMobile);
   };
@@ -32,11 +34,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   };
 
   function LogoImg() {
-    const history = useHistory();
-    function handleClick() {
-      history.push("/");
-    }
-    return <img src={logo} onClick={handleClick} alt="PhaseTwo" />;
+    return (
+      <img src={logo} onClick={() => navigateToBasePath()} alt="PhaseTwo" />
+    );
   }
 
   const Header = (
@@ -49,7 +49,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const location = useLocation();
 
-  const renderNavItem = (route: IAppRoute, index: number) => (
+  const renderNavItem = (route, index: number) => (
     <NavItem key={`${route.label}-${index}`} id={`${route.label}-${index}`}>
       <NavLink
         exact={route.exact}
@@ -61,7 +61,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </NavItem>
   );
 
-  const renderNavGroup = (group: IAppRouteGroup, groupIndex: number) => (
+  const renderNavGroup = (group, groupIndex: number) => (
     <NavExpandable
       key={`${group.label}-${groupIndex}`}
       id={`${group.label}-${groupIndex}`}

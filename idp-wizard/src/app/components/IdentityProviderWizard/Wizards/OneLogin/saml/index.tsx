@@ -9,7 +9,6 @@ import { OneLoginLogo } from "@app/images/onelogin";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { generateId } from "@app/utils/generate-id";
 import {
@@ -27,9 +26,9 @@ export const OneLoginWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
-  const history = useHistory();
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;

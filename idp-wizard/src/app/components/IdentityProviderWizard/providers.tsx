@@ -10,7 +10,7 @@ import { useParams } from "react-router";
 import { useTitle } from "react-use";
 
 import {
-  Auth0WizardOIDC, 
+  Auth0WizardOIDC,
   Auth0WizardSAML,
   AWSSamlWizard,
   AzureWizard,
@@ -26,7 +26,9 @@ import {
 } from "./Wizards";
 
 const Provider = () => {
-  const { provider, protocol } = useParams<RouterParams>();
+  const { provider, protocol } = useParams<
+    keyof RouterParams
+  >() as RouterParams;
 
   const providers = [...IdentityProviders, ...GenericIdentityProviders];
 
@@ -40,7 +42,7 @@ const Provider = () => {
       return <AzureWizard />;
     case Providers.GOOGLE_SAML:
       return <GoogleWizard />;
-    case Providers.AUTH0:      
+    case Providers.AUTH0:
       if (protocol === Protocols.OPEN_ID) return <Auth0WizardOIDC />;
       if (protocol === Protocols.SAML) return <Auth0WizardSAML />;
     case Providers.SAML:

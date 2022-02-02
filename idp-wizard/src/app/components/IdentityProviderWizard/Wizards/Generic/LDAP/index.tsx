@@ -14,7 +14,6 @@ import {
   Step3,
 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { API_STATUS } from "@app/configurations/api-status";
 import { BindConfig, ServerConfig } from "./steps/forms";
@@ -24,9 +23,9 @@ export const GenericLDAP: FC = () => {
   const title = "Okta wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
-  const history = useHistory();
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);

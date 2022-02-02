@@ -4,7 +4,7 @@ import oktaLogo from "@app/images/provider-logos/okta_logo.png";
 import cyberarkLogo from "@app/images/provider-logos/cyberark_logo.svg";
 import adfsLogo from "@app/images/provider-logos/active-directory.svg";
 import authoLogo from "@app/images/provider-logos/auth0_logo.png";
-import googleLogo from "@app/images/provider-logos/google_logo.svg";
+import googleLogo from "@app/images/provider-logos/google-workspace-logo.svg";
 import jumpcloudLogo from "@app/images/provider-logos/jumpcloud_logo.svg";
 import oneloginLogo from "@app/images/provider-logos/onelogin_logo.png";
 import openidLogo from "@app/images/provider-logos/openid_logo.png";
@@ -81,7 +81,7 @@ export const IdentityProviders: IIDPType[] = [
     imageSrc: authoLogo,
     active: true,
     id: Providers.AUTH0,
-    protocols: [Protocols.OPEN_ID,  Protocols.SAML],
+    protocols: [Protocols.OPEN_ID, Protocols.SAML],
   },
   {
     name: "Cyberark",

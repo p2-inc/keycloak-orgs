@@ -10,7 +10,6 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { useHistory } from "react-router";
 import { API_STATUS } from "@app/configurations/api-status";
 import { generateId } from "@app/utils/generate-id";
 import { useNavigateToBasePath } from "@app/routes";
@@ -23,8 +22,8 @@ export const OktaWizardSaml: FC = () => {
 
   const [metadata, setMetadata] = useState();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
-  const history = useHistory();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
 
   const alias = `okta-saml-${nanoId}`;
   const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;

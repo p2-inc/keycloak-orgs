@@ -10,7 +10,6 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
-import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { generateId } from "@app/utils/generate-id";
 import { OidcConfig, ClientCreds } from "./steps/forms";
@@ -31,9 +30,9 @@ export const GenericOIDC: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const [alias, setAlias] = useState(`generic-oidc-${nanoId}`);
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
-  const history = useHistory();
 
   const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${nanoId}/endpoint`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;

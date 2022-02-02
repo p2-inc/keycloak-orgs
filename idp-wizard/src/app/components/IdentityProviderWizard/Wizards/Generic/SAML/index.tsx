@@ -10,7 +10,6 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
-import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import {
   API_RETURN,
@@ -28,9 +27,9 @@ export const GenericSAML: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
 
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
-  const history = useHistory();
 
   const alias = `generic-saml-${nanoId}`;
   const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;

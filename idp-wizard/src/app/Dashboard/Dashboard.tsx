@@ -14,11 +14,13 @@ import { ConnectionStatus } from "./ConnectionStatus";
 import { ActivityLog } from "./ActivityLog";
 import { useParams } from "react-router";
 import { generatePath, Link } from "react-router-dom";
-import { BASE_PATH, RouterParams } from "@app/routes";
+import { BASE_PATH } from "@app/routes";
+import { useTitle } from "react-use";
 
 const Dashboard: React.FunctionComponent = () => {
   const { keycloak } = useKeycloak();
-  let { realm } = useParams<RouterParams>();
+  let { realm } = useParams();
+  useTitle("Dashboard | PhaseTwo");
 
   return (
     <PageSection>
