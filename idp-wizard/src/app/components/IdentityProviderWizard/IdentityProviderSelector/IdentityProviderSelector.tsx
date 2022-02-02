@@ -15,12 +15,12 @@ import {
   GenericIdentityProviders,
   IdentityProviders,
 } from "@app/configurations";
-import { BASE_PATH, RouterParams } from "@app/routes";
+import { BASE_PATH } from "@app/routes";
 import { useTitle } from "react-use";
 
 export const IdentityProviderSelector: FC = () => {
   const { keycloak } = useKeycloak();
-  let { realm } = useParams<RouterParams>();
+  let { realm } = useParams();
   useTitle("Select your Identity Provider | PhaseTwo");
 
   return (

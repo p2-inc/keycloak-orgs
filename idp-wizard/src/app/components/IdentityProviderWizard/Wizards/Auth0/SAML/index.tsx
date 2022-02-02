@@ -12,7 +12,6 @@ import * as Steps from "./Steps";
 import * as SharedSteps from "../shared/Steps";
 import authoLogo from "@app/images/auth0/auth0-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
-import { useHistory } from "react-router";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { customAlphabet } from "nanoid";
 import { alphanumeric } from "nanoid-dictionary";
@@ -25,7 +24,8 @@ const nanoId = customAlphabet(alphanumeric, 6);
 export const Auth0WizardSAML: FC = () => {
   const { keycloak } = useKeycloak();
   const navigateToBasePath = useNavigateToBasePath();
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const [alias, setAlias] = useState(`auth0-saml-${nanoId()}`);
   const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
@@ -38,7 +38,6 @@ export const Auth0WizardSAML: FC = () => {
 
   const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
   const [isValidating, setIsValidating] = useState(false);
-  const history = useHistory();
 
   const Axios = axios.create({
     headers: {

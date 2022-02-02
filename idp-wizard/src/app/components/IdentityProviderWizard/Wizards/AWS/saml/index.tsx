@@ -10,7 +10,6 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
-import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { generateId } from "@app/utils/generate-id";
 import {
@@ -29,9 +28,9 @@ export const AWSSamlWizard: FC = () => {
 
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
-  const history = useHistory();
 
   const samlAudience = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const acsURL = `${getServerUrl()}/realms/${getRealm()}`;
@@ -102,7 +101,8 @@ export const AWSSamlWizard: FC = () => {
     // Set defaults that may not have come through with the metadata
     metadata!.syncMode = "IMPORT";
     metadata!.allowCreate = "true";
-    metadata!.nameIDPolicyFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
+    metadata!.nameIDPolicyFormat =
+      "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
     metadata!.principalType = "SUBJECT";
 
     const payload: IdentityProviderRepresentation = {

@@ -8,7 +8,7 @@ import {
 } from "@patternfly/react-core";
 import { generatePath, Link, useParams } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
-import { BASE_PATH, RouterParams } from "@app/routes";
+import { BASE_PATH } from "@app/routes";
 
 interface Props {
   logo: string;
@@ -17,7 +17,7 @@ interface Props {
 
 export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
   const { keycloak } = useKeycloak();
-  const { realm } = useParams<RouterParams>();
+  const { realm } = useParams();
 
   return (
     <PageSection variant={PageSectionVariants.light}>

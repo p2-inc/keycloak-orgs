@@ -10,7 +10,6 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
-import { useHistory } from "react-router";
 import { useKeycloak } from "@react-keycloak/web";
 import { useNavigateToBasePath } from "@app/routes";
 
@@ -18,9 +17,9 @@ export const TemplateWizardProtocol: FC = () => {
   const title = "Okta wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   const { keycloak } = useKeycloak();
-  const history = useHistory();
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);

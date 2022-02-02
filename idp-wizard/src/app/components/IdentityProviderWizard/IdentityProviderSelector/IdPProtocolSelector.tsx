@@ -1,14 +1,14 @@
 import React, { FC, useEffect } from "react";
 import { IdPButton } from "./components/IdPButton";
-import { generatePath, Link, useHistory, useParams } from "react-router-dom";
+import { generatePath, Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftIcon } from "@patternfly/react-icons";
 import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
 import { IdentityProtocols, IdentityProviders } from "@app/configurations";
 import { BASE_PATH, RouterParams } from "@app/routes";
 
 export const IdPProtocolSelector: FC = ({}) => {
-  const { provider, realm } = useParams<RouterParams>();
-  const history = useHistory();
+  const { provider, realm } = useParams<keyof RouterParams>() as RouterParams;
+  let navigate = useNavigate();
 
   const currentProvider = IdentityProviders.find((i) => i.id === provider)!;
 
@@ -26,7 +26,7 @@ export const IdPProtocolSelector: FC = ({}) => {
         provider,
         protocol: providerProtocols[0],
       });
-      history.replace(pth);
+      navigate(pth);
     }
   }, []);
 
