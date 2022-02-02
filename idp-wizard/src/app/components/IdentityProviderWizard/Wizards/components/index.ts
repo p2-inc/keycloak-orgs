@@ -6,3 +6,4 @@ export * from "./instruction";
 export * from "./double-item-clipboard-copy";
 export * from "./zoom-image";
 export * from "./select";
+export * from "./forms";

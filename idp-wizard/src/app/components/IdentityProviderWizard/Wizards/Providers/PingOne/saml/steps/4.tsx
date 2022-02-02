@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/pingone";
-import { MetadataFile } from "./forms";
+import { MetadataFile } from "@app/components/IdentityProviderWizard/Wizards/components";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
 type Props = {
