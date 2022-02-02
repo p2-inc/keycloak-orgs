@@ -41,7 +41,12 @@ export const IdPProtocolSelector: FC = ({}) => {
         </Link>
       </StackItem>
       <StackItem className="selection-container">
-        <IdPButton text={providerName} image={providerLogo} active={true} />
+        <IdPButton
+          text={providerName}
+          image={providerLogo}
+          active={true}
+          noHover
+        />
       </StackItem>
       <StackItem>
         <br />
@@ -50,12 +55,14 @@ export const IdPProtocolSelector: FC = ({}) => {
       <StackItem>
         <Text component={TextVariants.h3}>
           This is the protocol your Identity Provider will use to connect to
-          demo.phasetwo.io. If you don't know which to choose, we recommend
-          SAML.
+          <code className="pf-u-ml-xs">{window.location.hostname}</code>. If you
+          don't know which to choose, we recommend SAML.
         </Text>
       </StackItem>
       <StackItem className="selection-container">
-        {IdentityProtocols.map(({ name, imageSrc, id: protocolId }, i) => {
+        {IdentityProtocols.filter(({ id: protocolId }) =>
+          providerProtocols.includes(protocolId)
+        ).map(({ name, imageSrc, id: protocolId }, i) => {
           const pth = generatePath(`${BASE_PATH}/idp/:providerId/:protocolId`, {
             realm,
             providerId,
