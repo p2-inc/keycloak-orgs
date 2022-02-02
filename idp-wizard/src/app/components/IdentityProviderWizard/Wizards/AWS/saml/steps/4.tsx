@@ -24,19 +24,19 @@ export const Step4: FC = () => {
         <div>
           <DoubleItemClipboardCopy
             leftValue="Subject"
-            rightValue="${user.subject}"
+            rightValue="${user:subject}"
           />
           <DoubleItemClipboardCopy
             leftValue="firstName"
-            rightValue="${user.givenName}"
+            rightValue="${user:givenName}"
           />
           <DoubleItemClipboardCopy
             leftValue="lastName"
-            rightValue="${user.familyName}"
+            rightValue="${user:familyName}"
           />
           <DoubleItemClipboardCopy
             leftValue="email"
-            rightValue="${user.email}"
+            rightValue="${user:email}"
           />
         </div>
       ),

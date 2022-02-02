@@ -24,7 +24,7 @@ import { useNavigateToBasePath } from "@app/routes";
 const nanoId = generateId();
 
 export const AWSSamlWizard: FC = () => {
-  const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+  const [alias, setAlias] = useState(`awssso-saml-${nanoId}`);
   const navigateToBasePath = useNavigateToBasePath();
 
   const title = "AWS wizard";
@@ -99,6 +99,12 @@ export const AWSSamlWizard: FC = () => {
     setDisableButton(false);
     setResults("Creating AWS SSO SAML IdP...");
 
+    // Set defaults that may not have come through with the metadata
+    metadata!.syncMode = "IMPORT";
+    metadata!.allowCreate = "true";
+    metadata!.nameIDPolicyFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
+    metadata!.principalType = "SUBJECT";
+
     const payload: IdentityProviderRepresentation = {
       alias: alias,
       displayName: "AWS SSO Saml",
@@ -113,7 +119,7 @@ export const AWSSamlWizard: FC = () => {
       });
 
       // For AWS SSO, additional mapping call is required after creation
-
+      // TODO we should abstract this out into a class that executes API methods
       // Have to use Axios post bc built in keycloak-js makes the request wrong
       await Axios.post(
         `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
@@ -126,6 +132,34 @@ export const AWSSamlWizard: FC = () => {
             "user.attribute": "email",
           },
           name: "email",
+          identityProviderMapper: "saml-user-attribute-idp-mapper",
+        }
+      );
+      await Axios.post(
+        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
+        {
+          identityProviderAlias: alias,
+          config: {
+            syncMode: "INHERIT",
+            attributes: "[]",
+            "attribute.friendly.name": "firstName",
+            "user.attribute": "firstName",
+          },
+          name: "firstName",
+          identityProviderMapper: "saml-user-attribute-idp-mapper",
+        }
+      );
+      await Axios.post(
+        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
+        {
+          identityProviderAlias: alias,
+          config: {
+            syncMode: "INHERIT",
+            attributes: "[]",
+            "attribute.friendly.name": "lastName",
+            "user.attribute": "lastName",
+          },
+          name: "lastName",
           identityProviderMapper: "saml-user-attribute-idp-mapper",
         }
       );

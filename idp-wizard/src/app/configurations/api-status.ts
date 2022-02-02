@@ -25,4 +25,7 @@ export interface METADATA_CONFIG {
   singleSignOnServiceUrl: string;
   wantAuthnRequestsSigned: "false" | "true";
   addExtensionsElementWithKeyInfo: "false" | "true";
+  syncMode: string;
+  allowCreate: "false" | "true";
+  principalType: string;
 }
