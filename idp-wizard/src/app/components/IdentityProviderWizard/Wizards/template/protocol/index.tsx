@@ -5,7 +5,7 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import GoogleLogo from "@app/images/provider-logos/google_logo.svg";
+import GoogleLogo from "@app/images/provider-logos/google-workspace-logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
