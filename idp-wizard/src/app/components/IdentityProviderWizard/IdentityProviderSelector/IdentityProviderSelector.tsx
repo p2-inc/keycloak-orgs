@@ -89,13 +89,16 @@ export const IdentityProviderSelector: FC = () => {
               <div className="selection-container">
                 {GenericIdentityProviders.map(
                   ({ name, imageSrc, active, id, protocols }) => {
-                    const linkTo = active
-                      ? `/idp/${id}/${
-                          protocols.length === 1 ? protocols[0] : "protocol"
-                        }`
-                      : "#";
+                    const pth = generatePath(
+                      `${BASE_PATH}/idp/:providerId/:protocolId`,
+                      {
+                        realm,
+                        providerId: id,
+                        protocolId: protocols[0],
+                      }
+                    );
                     return (
-                      <Link to={linkTo} key={id}>
+                      <Link to={pth} key={id}>
                         <IdPButton
                           key={name}
                           text={name}
