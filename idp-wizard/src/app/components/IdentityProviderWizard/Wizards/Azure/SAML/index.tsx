@@ -33,8 +33,8 @@ export const AzureWizard: FC = () => {
   const [metadataUrl, setMetadataUrl] = useState("");
   const [alias, setAlias] = useState(`azure-saml-${nanoId}`);
 
-  const acsUrl = `${getServerUrl()}/realms/${getRealm}/broker/${alias}/endpoint`;
-  const entityId = `${getServerUrl}/realms/${getRealm()}`;
+  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
 
   const Axios = axios.create({
     headers: {
