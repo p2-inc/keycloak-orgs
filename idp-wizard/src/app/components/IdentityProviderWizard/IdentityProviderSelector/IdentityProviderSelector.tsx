@@ -16,10 +16,12 @@ import {
   IdentityProviders,
 } from "@app/configurations";
 import { BASE_PATH, RouterParams } from "@app/routes";
+import { useTitle } from "react-use";
 
 export const IdentityProviderSelector: FC = () => {
   const { keycloak } = useKeycloak();
   let { realm } = useParams<RouterParams>();
+  useTitle("Select your Identity Provider | PhaseTwo");
 
   return (
     <PageSection variant={PageSectionVariants.light}>

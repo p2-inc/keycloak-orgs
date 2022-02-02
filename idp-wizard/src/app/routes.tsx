@@ -7,14 +7,9 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom";
-import { accessibleRouteChangeHandler } from "@app/utils/utils";
 import { Dashboard } from "@app/Dashboard/Dashboard";
 import { NotFound } from "@app/NotFound/NotFound";
-import { useDocumentTitle } from "@app/utils/useDocumentTitle";
-import {
-  LastLocationProvider,
-  useLastLocation,
-} from "react-router-last-location";
+import { LastLocationProvider } from "react-router-last-location";
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
 import Provider from "./components/IdentityProviderWizard/providers";
 import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
@@ -50,13 +45,15 @@ export interface RouterParams {
   realm: string;
 }
 
+export const routes = [];
+
 export const BASE_PATH = "/auth/realms/:realm/wizard";
 
-export function useNavigateToBasePath() {
+export function useNavigateToBasePath(realm?: string) {
   const history = useHistory();
-  const { realm } = useParams<RouterParams>();
+  const { realm: realmParam } = useParams<RouterParams>();
   const pth = generatePath(`${BASE_PATH}/`, {
-    realm,
+    realm: realmParam || realm,
   });
 
   const navigateToBasePath = () => history.push(pth);
@@ -64,104 +61,27 @@ export function useNavigateToBasePath() {
   return navigateToBasePath;
 }
 
-const routes: AppRouteConfig[] = [
-  {
-    component: Dashboard,
-    exact: true,
-    label: "Dashboard",
-    id: "dashboard",
-    path: `${BASE_PATH}/`,
-    title: "Dashboard | PhaseTwo",
-    checkSecurity: true,
-  },
-  {
-    component: IdentityProviderSelector,
-    exact: true,
-    label: "Selector",
-    id: "selector",
-    path: `${BASE_PATH}/idp`,
-    title: "Select your Identity Provider | PhaseTwo",
-    checkSecurity: true,
-  },
-];
-
-// a custom hook for sending focus to the primary content container
-// after a view has loaded so that subsequent press of tab key
-// sends focus directly to relevant content
-const useA11yRouteChange = (isAsync: boolean) => {
-  const lastNavigation = useLastLocation();
-  React.useEffect(() => {
-    if (!isAsync && lastNavigation !== null) {
-      routeFocusTimer = accessibleRouteChangeHandler();
-    }
-    return () => {
-      window.clearTimeout(routeFocusTimer);
-    };
-  }, [isAsync, lastNavigation]);
-};
-
-const RouteWithTitleUpdates = ({
-  component: Component,
-  isAsync = false,
-  title,
-  ...rest
-}: IAppRoute) => {
-  useA11yRouteChange(isAsync);
-  useDocumentTitle(title);
-
-  function routeWithTitle(routeProps: RouteComponentProps) {
-    return <Component {...rest} {...routeProps} />;
-  }
-
-  return <Route render={routeWithTitle} {...rest} />;
-};
-
-const PageNotFound = ({ title }: { title: string }) => {
-  useDocumentTitle(title);
-  return <Route component={NotFound} />;
-};
-
-const flattenedRoutes: IAppRoute[] = routes.reduce(
-  (flattened, route) => [
-    ...flattened,
-    ...(route.routes ? route.routes : [route]),
-  ],
-  [] as IAppRoute[]
-);
-
 const AppRoutes = (): React.ReactElement => (
   <LastLocationProvider>
     <Switch>
-      <Route
-        path={`${BASE_PATH}/idp/:provider/protocol`}
-        exact
-        component={IdPProtocolSelector}
-      />
-      <Route
-        path={`${BASE_PATH}/idp/:provider/:protocol`}
-        exact
-        component={Provider}
-      />
+      <Route path={`${BASE_PATH}/`} exact>
+        <Dashboard />
+      </Route>
+      <Route path={`${BASE_PATH}/idp`} exact>
+        <IdentityProviderSelector />
+      </Route>
+      <Route path={`${BASE_PATH}/idp/:provider/protocol`} exact>
+        <IdPProtocolSelector />
+      </Route>
+      <Route path={`${BASE_PATH}/idp/:provider/:protocol`} exact>
+        <Provider />
+      </Route>
 
-      {flattenedRoutes.map(
-        (
-          { path, exact, component, title, isAsync, checkSecurity, id },
-          idx
-        ) => (
-          <RouteWithTitleUpdates
-            path={path}
-            exact={exact}
-            component={component}
-            key={idx}
-            title={title}
-            isAsync={isAsync}
-            checkSecurity={checkSecurity}
-          />
-        )
-      )}
-      <PageNotFound title="404 Page Not Found" />
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   </LastLocationProvider>
 );
 
-export { AppRoutes, routes };
+export { AppRoutes };
