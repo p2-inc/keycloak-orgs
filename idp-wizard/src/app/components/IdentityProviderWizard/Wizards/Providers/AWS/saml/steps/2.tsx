@@ -1,7 +1,8 @@
 import React, { FC } from "react";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/aws";
-import { UrlForm } from "./forms";
+import { UrlForm } from "@app/components/IdentityProviderWizard/Wizards/components";
+
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
 type Props = {
@@ -16,7 +17,13 @@ export const Step2: FC<Props> = ({ url, handleFormSubmit }) => {
       component: <StepImage src={Images.AWS_SSO_SAML_3} alt="Step 2.1" />,
     },
     {
-      component: <UrlForm url={url} handleFormSubmit={handleFormSubmit} />,
+      component: (
+        <UrlForm
+          url={url}
+          urlLabel="Provider Url"
+          handleFormSubmit={handleFormSubmit}
+        />
+      ),
     },
   ];
 

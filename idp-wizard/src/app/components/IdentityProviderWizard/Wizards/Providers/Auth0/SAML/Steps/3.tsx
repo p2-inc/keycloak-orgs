@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import Auth0Step4Image from "@app/images/auth0/SAML/auth0-4SAML.png";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
