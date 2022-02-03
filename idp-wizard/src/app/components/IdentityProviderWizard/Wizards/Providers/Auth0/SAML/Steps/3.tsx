@@ -1,7 +1,6 @@
 import React, { FC } from "react";
 import Auth0Step4Image from "@app/images/auth0/SAML/auth0-4SAML.png";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import { Card, CardBody, CardTitle } from "@patternfly/react-core";
+import { FileCard, InstructionProps, Step, StepImage } from "@wizardComponents";
 import { API_RETURN } from "@app/configurations/api-status";
 import { MetadataFile } from "@app/components/IdentityProviderWizard/Wizards/components";
 
@@ -26,15 +25,12 @@ export const Auth0StepThree: FC<Step3Props> = ({ uploadMetadataFile }) => {
     },
     {
       component: (
-        <Card isFlat>
-          <CardTitle>Upload metadata file</CardTitle>
-          <CardBody>
-            <MetadataFile
-              handleFormSubmit={handleMetadataFileValidation}
-              formActive={true}
-            />
-          </CardBody>
-        </Card>
+        <FileCard>
+          <MetadataFile
+            handleFormSubmit={handleMetadataFileValidation}
+            formActive={true}
+          />
+        </FileCard>
       ),
     },
   ];

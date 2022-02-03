@@ -12,6 +12,7 @@ import {
   FormAlert,
   Alert,
 } from "@patternfly/react-core";
+import { MetadataFile } from "@app/components/IdentityProviderWizard/Wizards/components";
 
 interface Step3Props {
   uploadMetadataFile: (file: File) => Promise<boolean>;

@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
+import { FileCard, InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/pingone";
 import { MetadataFile } from "@app/components/IdentityProviderWizard/Wizards/components";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
@@ -19,7 +19,11 @@ export const Step4: FC<Props> = ({ handleFormSubmit }) => {
       component: <StepImage src={Images.PINGONE_SAML_7} alt="Step 4.1" />,
     },
     {
-      component: <MetadataFile handleFormSubmit={handleFormSubmit} />,
+      component: (
+        <FileCard>
+          <MetadataFile handleFormSubmit={handleFormSubmit} />
+        </FileCard>
+      ),
     },
   ];
 
