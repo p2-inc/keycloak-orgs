@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/onelogin";
-import { UrlForm } from "./forms";
+import { UrlForm } from "@app/components/IdentityProviderWizard/Wizards/components";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
 type Props = {
@@ -16,7 +16,13 @@ export const Step4: FC<Props> = ({ url, handleFormSubmit }) => {
       component: <StepImage src={Images.OneLogin_SAML_6A} alt="Step 4.1" />,
     },
     {
-      component: <UrlForm url={url} handleFormSubmit={handleFormSubmit} />,
+      component: (
+        <UrlForm
+          url={url}
+          urlLabel="Issuer Url"
+          handleFormSubmit={handleFormSubmit}
+        />
+      ),
     },
   ];
 
