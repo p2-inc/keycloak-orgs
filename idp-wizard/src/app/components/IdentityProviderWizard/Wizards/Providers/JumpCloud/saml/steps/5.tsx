@@ -1,7 +1,12 @@
 import React, { FC } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
+import {
+  FileCard,
+  InstructionProps,
+  Step,
+  StepImage,
+  MetadataFile,
+} from "@wizardComponents";
 import * as Images from "@app/images/jumpcloud";
-import { MetadataFile } from "./forms";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
 type Props = {
@@ -19,7 +24,11 @@ export const Step5: FC<Props> = ({ handleFormSubmit }) => {
       component: <StepImage src={Images.JumpCloud_SAML_10} alt="Step 5.1" />,
     },
     {
-      component: <MetadataFile handleFormSubmit={handleFormSubmit} />,
+      component: (
+        <FileCard>
+          <MetadataFile handleFormSubmit={handleFormSubmit} />
+        </FileCard>
+      ),
     },
   ];
 

@@ -12,7 +12,7 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useKeycloak } from "@react-keycloak/web";
-import { METADATA_CONFIG } from "@app/configurations/api-status";
+import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import { generateId } from "@app/utils/generate-id";
 import { useNavigateToBasePath } from "@app/routes";
 
@@ -21,15 +21,19 @@ const nanoId = generateId();
 export const GoogleWizard: FC = () => {
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
+
+  const [alias, setAlias] = useState(`google-saml-${nanoId}`);
   const [stepIdReached, setStepIdReached] = useState(1);
+  const { keycloak } = useKeycloak();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
-  const { keycloak } = useKeycloak();
+
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
-  const [alias, setAlias] = useState(`google-saml-${nanoId}`);
   const acsUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
-  const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
+
+  const [metadata, setMetadata] = useState<METADATA_CONFIG | null>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
@@ -53,7 +57,11 @@ export const GoogleWizard: FC = () => {
     navigateToBasePath();
   };
 
-  const uploadMetadataFile = async (file: File) => {
+  const handleFormSubmit = async ({
+    metadataFile: file,
+  }: {
+    metadataFile: File;
+  }) => {
     const fd = new FormData();
     fd.append("providerId", "saml");
     fd.append("file", file);
@@ -62,14 +70,24 @@ export const GoogleWizard: FC = () => {
       const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
-        setConfigData(resp.data);
-        return true;
+        setMetadata(resp.data);
+        setIsFormValid(true);
+
+        return {
+          status: API_STATUS.SUCCESS,
+          message:
+            "Configuration successfully validated with Google Workspace Saml. Continue to next step.",
+        };
       }
     } catch (err) {
       console.log(err);
     }
 
-    return false;
+    return {
+      status: API_STATUS.ERROR,
+      message:
+        "Configuration validation failed with Google Workspace Saml. Check file and try again.",
+    };
   };
 
   const createGoogleIdp = async () => {
@@ -80,7 +98,7 @@ export const GoogleWizard: FC = () => {
       alias: alias,
       displayName: "Google SAML Single Sign-on",
       providerId: "saml",
-      config: configData!,
+      config: metadata!,
     };
 
     try {
@@ -117,10 +135,10 @@ export const GoogleWizard: FC = () => {
     {
       id: 3,
       name: "Upload Google IdP Information",
-      component: <Step3 uploadMetadataFile={uploadMetadataFile} />,
+      component: <Step3 handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
-      enableNext: configData !== null,
+      enableNext: isFormValid,
     },
     {
       id: 4,

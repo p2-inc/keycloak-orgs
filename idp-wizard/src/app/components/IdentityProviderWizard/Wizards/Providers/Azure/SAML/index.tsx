@@ -11,10 +11,11 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/web";
-import { API_STATUS } from "@app/configurations/api-status";
+import { API_RETURN, API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { generateId } from "@app/utils/generate-id";
+import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 
 const nanoId = generateId();
 
@@ -81,6 +82,38 @@ export const AzureWizard: FC = () => {
     }
   };
 
+  const handleFormSubmit = async ({
+    url,
+  }: {
+    url: string;
+  }): Promise<API_RETURN> => {
+    // make call to submit the URL and verify it
+    setMetadataUrl(metadataUrl);
+
+    try {
+      const resp = await kcAdminClient.identityProviders.importFromUrl({
+        fromUrl: url,
+        providerId: "saml",
+        realm: getRealm(),
+      });
+
+      setMetadata(resp);
+      setIsFormValid(true);
+
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "Configuration successfully validated with OneLogin IdP. Continue to next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message:
+          "Configuration validation failed with OneLogin IdP. Check URL and try again.",
+      };
+    }
+  };
+
   const createAzureSamlIdP = async () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
@@ -94,59 +127,34 @@ export const AzureWizard: FC = () => {
       config: metadata!,
     };
 
-    // For Azure SAML SSO, additional mapping call is required after creation
-    // TODO we should abstract this out into a class that executes API methods
-    // Have to use Axios post bc built in keycloak-js makes the request wrong
-    await Axios.post(
-      `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-      {
-        identityProviderAlias: alias,
-        config: {
-          syncMode: "INHERIT",
-          attributes: "[]",
-          "attribute.name":
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-          "user.attribute": "email",
-        },
-        name: "email",
-        identityProviderMapper: "saml-user-attribute-idp-mapper",
-      }
-    );
-    await Axios.post(
-      `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-      {
-        identityProviderAlias: alias,
-        config: {
-          syncMode: "INHERIT",
-          attributes: "[]",
-          "attribute.name":
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
-          "user.attribute": "firstName",
-        },
-        name: "firstName",
-        identityProviderMapper: "saml-user-attribute-idp-mapper",
-      }
-    );
-    await Axios.post(
-      `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-      {
-        identityProviderAlias: alias,
-        config: {
-          syncMode: "INHERIT",
-          attributes: "[]",
-          "attribute.name":
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
-          "user.attribute": "lastName",
-        },
-        name: "lastName",
-        identityProviderMapper: "saml-user-attribute-idp-mapper",
-      }
-    );
-
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
         realm: getRealm()!,
+      });
+
+      // Map attributes
+      await SamlUserAttributeMapper({
+        alias,
+        keys: {
+          serverUrl: getServerUrl()!,
+          realm: getRealm()!,
+          token: keycloak.token!,
+        },
+        attributes: [
+          {
+            attributeName: "emailaddress",
+            userAttribute: "email",
+          },
+          {
+            attributeName: "givenname",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName: "surname",
+            userAttribute: "lastName",
+          },
+        ],
       });
 
       setResults("Azure SAML IdP created successfully. Click finish.");
@@ -180,7 +188,12 @@ export const AzureWizard: FC = () => {
     {
       id: 3,
       name: "Upload Azure SAML Metadata file",
-      component: <Steps.AzureStepThree validateMetadata={validateMetadata} />,
+      component: (
+        <Steps.AzureStepThree
+          handleFormSubmit={handleFormSubmit}
+          url={metadataUrl}
+        />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
       enableNext: isFormValid,

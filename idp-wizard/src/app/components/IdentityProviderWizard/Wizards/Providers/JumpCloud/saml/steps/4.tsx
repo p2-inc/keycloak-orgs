@@ -1,10 +1,5 @@
 import React, { FC } from "react";
-import {
-  InstructionProps,
-  Step,
-  StepImage,
-  DoubleItemClipboardCopy,
-} from "@wizardComponents";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/jumpcloud";
 
 export const Step4: FC = () => {
