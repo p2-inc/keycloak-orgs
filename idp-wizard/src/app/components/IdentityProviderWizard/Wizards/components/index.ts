@@ -7,4 +7,5 @@ export * from "./header";
 export * from "./instruction";
 export * from "./select";
 export * from "./step";
+export * from "./url-card";
 export * from "./zoom-image";

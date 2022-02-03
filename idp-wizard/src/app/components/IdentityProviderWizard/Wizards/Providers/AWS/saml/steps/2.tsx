@@ -2,8 +2,8 @@ import React, { FC } from "react";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/aws";
 import { UrlForm } from "@app/components/IdentityProviderWizard/Wizards/components";
-
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
+import { UrlCard } from "@app/components/IdentityProviderWizard/Wizards/components";
 
 type Props = {
   url: string;
@@ -18,11 +18,13 @@ export const Step2: FC<Props> = ({ url, handleFormSubmit }) => {
     },
     {
       component: (
-        <UrlForm
-          url={url}
-          urlLabel="Provider Url"
-          handleFormSubmit={handleFormSubmit}
-        />
+        <UrlCard>
+          <UrlForm
+            url={url}
+            urlLabel="Provider Url"
+            handleFormSubmit={handleFormSubmit}
+          />
+        </UrlCard>
       ),
     },
   ];

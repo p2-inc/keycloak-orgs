@@ -3,6 +3,7 @@ import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/onelogin";
 import { UrlForm } from "@app/components/IdentityProviderWizard/Wizards/components";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
+import { UrlCard } from "@app/components/IdentityProviderWizard/Wizards/components";
 
 type Props = {
   url: string;
@@ -17,11 +18,13 @@ export const Step4: FC<Props> = ({ url, handleFormSubmit }) => {
     },
     {
       component: (
-        <UrlForm
-          url={url}
-          urlLabel="Issuer Url"
-          handleFormSubmit={handleFormSubmit}
-        />
+        <UrlCard>
+          <UrlForm
+            url={url}
+            urlLabel="Issuer Url"
+            handleFormSubmit={handleFormSubmit}
+          />
+        </UrlCard>
       ),
     },
   ];
