@@ -57,25 +57,6 @@ export const GoogleWizard: FC = () => {
     navigateToBasePath();
   };
 
-  const uploadMetadataFile = async (file: File) => {
-    const fd = new FormData();
-    fd.append("providerId", "saml");
-    fd.append("file", file);
-
-    try {
-      const resp = await Axios.post(identifierURL, fd);
-
-      if (resp.status === 200) {
-        setMetadata(resp.data);
-        return true;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-
-    return false;
-  };
-
   const handleFormSubmit = async ({
     metadataFile: file,
   }: {
@@ -154,15 +135,10 @@ export const GoogleWizard: FC = () => {
     {
       id: 3,
       name: "Upload Google IdP Information",
-      component: (
-        <Step3
-          uploadMetadataFile={uploadMetadataFile}
-          handleFormSubmit={handleFormSubmit}
-        />
-      ),
+      component: <Step3 handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
-      enableNext: metadata !== null,
+      enableNext: isFormValid,
     },
     {
       id: 4,
