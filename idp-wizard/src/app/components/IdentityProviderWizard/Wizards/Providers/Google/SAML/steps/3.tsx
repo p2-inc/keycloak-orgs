@@ -1,53 +1,23 @@
-import React, { FC, useState } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import * as Images from "@app/images/google";
+import React, { FC } from "react";
 import {
-  Card,
-  CardBody,
-  CardTitle,
-  FileUpload,
-  Form,
-  FormGroup,
-  FileUploadFieldProps,
-  FormAlert,
-  Alert,
-} from "@patternfly/react-core";
-import { MetadataFile } from "@app/components/IdentityProviderWizard/Wizards/components";
+  FileCard,
+  InstructionProps,
+  Step,
+  StepImage,
+  MetadataFile,
+} from "@wizardComponents";
+import * as Images from "@app/images/google";
+import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
 interface Step3Props {
-  uploadMetadataFile: (file: File) => Promise<boolean>;
+  handleFormSubmit: ({
+    metadataFile,
+  }: {
+    metadataFile: File;
+  }) => API_RETURN_PROMISE;
 }
 
-export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
-  const [metadataFileValue, setMetadataFileValue] = useState("");
-  const [metadataFileName, setMetadataFileName] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadValid, setUploadValid] = useState<boolean | null>(null);
-
-  const handleFileInputChange: FileUploadFieldProps["onChange"] = async (
-    value,
-    filename,
-    event
-  ) => {
-    setMetadataFileName(filename);
-    setMetadataFileValue(value);
-    setUploadValid(null);
-
-    if (!value) return;
-
-    setIsUploading(true);
-
-    const uploadStatus = await uploadMetadataFile(value);
-
-    if (uploadStatus) {
-      setUploadValid(true);
-    } else {
-      setUploadValid(false);
-    }
-
-    setIsUploading(false);
-  };
-
+export const Step3: FC<Step3Props> = ({ handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
       text: 'Download the metadata file, and click "Continue".',
@@ -55,52 +25,9 @@ export const Step3: FC<Step3Props> = ({ uploadMetadataFile }) => {
     },
     {
       component: (
-        <Card isFlat>
-          <CardTitle>Upload metadata file</CardTitle>
-          <CardBody>
-            <Form>
-              {uploadValid && (
-                <FormAlert>
-                  <Alert
-                    variant="success"
-                    title="Config uploaded successfully. Please continue."
-                    aria-live="polite"
-                    isInline
-                  />
-                </FormAlert>
-              )}
-              {uploadValid === false && (
-                <FormAlert>
-                  <Alert
-                    variant="danger"
-                    title="Config not uploaded successfully. Please check the file and try again."
-                    aria-live="polite"
-                    isInline
-                  />
-                </FormAlert>
-              )}
-              <FormGroup
-                label="Metadata File"
-                isRequired
-                fieldId="metadata-file"
-                className="form-label"
-              >
-                <FileUpload
-                  id="metadata-file"
-                  value={metadataFileValue}
-                  filename={metadataFileName}
-                  filenamePlaceholder="Drop or choose metadata file .xml to upload."
-                  browseButtonText="Select"
-                  onChange={handleFileInputChange}
-                  dropzoneProps={{
-                    accept: "text/xml",
-                  }}
-                  isLoading={isUploading}
-                />
-              </FormGroup>
-            </Form>
-          </CardBody>
-        </Card>
+        <FileCard>
+          <MetadataFile handleFormSubmit={handleFormSubmit} />
+        </FileCard>
       ),
     },
   ];
