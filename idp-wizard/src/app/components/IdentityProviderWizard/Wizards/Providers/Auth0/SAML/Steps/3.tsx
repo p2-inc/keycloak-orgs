@@ -1,8 +1,13 @@
 import React, { FC } from "react";
 import Auth0Step4Image from "@app/images/auth0/SAML/auth0-4SAML.png";
-import { FileCard, InstructionProps, Step, StepImage } from "@wizardComponents";
+import {
+  FileCard,
+  InstructionProps,
+  Step,
+  StepImage,
+  MetadataFile,
+} from "@wizardComponents";
 import { API_RETURN } from "@app/configurations/api-status";
-import { MetadataFile } from "@app/components/IdentityProviderWizard/Wizards/components";
 
 interface Step3Props {
   uploadMetadataFile: (file: File) => Promise<API_RETURN>;

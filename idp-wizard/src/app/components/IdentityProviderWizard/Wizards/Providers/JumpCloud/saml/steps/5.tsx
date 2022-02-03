@@ -1,7 +1,12 @@
 import React, { FC } from "react";
-import { FileCard, InstructionProps, Step, StepImage } from "@wizardComponents";
+import {
+  FileCard,
+  InstructionProps,
+  Step,
+  StepImage,
+  MetadataFile,
+} from "@wizardComponents";
 import * as Images from "@app/images/jumpcloud";
-import { MetadataFile } from "@app/components/IdentityProviderWizard/Wizards/components";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
 type Props = {
