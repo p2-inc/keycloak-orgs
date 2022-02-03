@@ -15,7 +15,7 @@ import { API_RETURN, API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { generateId } from "@app/utils/generate-id";
-import { SamlUserAttributeMapper } from "../../../services";
+import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 
 const nanoId = generateId();
 
