@@ -11,7 +11,7 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/web";
-import { API_STATUS } from "@app/configurations/api-status";
+import { API_RETURN, API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { generateId } from "@app/utils/generate-id";
@@ -77,6 +77,38 @@ export const AzureWizard: FC = () => {
         status: API_STATUS.ERROR,
         message:
           "Configuration validation failed with Azure. Check URL and try again.",
+      };
+    }
+  };
+
+  const handleFormSubmit = async ({
+    url,
+  }: {
+    url: string;
+  }): Promise<API_RETURN> => {
+    // make call to submit the URL and verify it
+    setMetadataUrl(metadataUrl);
+
+    try {
+      const resp = await kcAdminClient.identityProviders.importFromUrl({
+        fromUrl: url,
+        providerId: "saml",
+        realm: getRealm(),
+      });
+
+      setMetadata(resp);
+      setIsFormValid(true);
+
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "Configuration successfully validated with OneLogin IdP. Continue to next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message:
+          "Configuration validation failed with OneLogin IdP. Check URL and try again.",
       };
     }
   };
@@ -180,7 +212,12 @@ export const AzureWizard: FC = () => {
     {
       id: 3,
       name: "Upload Azure SAML Metadata file",
-      component: <Steps.AzureStepThree validateMetadata={validateMetadata} />,
+      component: (
+        <Steps.AzureStepThree
+          handleFormSubmit={handleFormSubmit}
+          url={metadataUrl}
+        />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
       enableNext: isFormValid,

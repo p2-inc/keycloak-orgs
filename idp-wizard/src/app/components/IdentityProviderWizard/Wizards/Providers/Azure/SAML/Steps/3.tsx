@@ -1,40 +1,20 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import {
-  ActionGroup,
-  Alert,
-  Button,
-  Card,
-  CardBody,
-  Form,
-  FormGroup,
-  TextInput,
-} from "@patternfly/react-core";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import { API_STATUS } from "@app/configurations/api-status";
+  FileCard,
+  InstructionProps,
+  Step,
+  StepImage,
+  UrlForm,
+} from "@wizardComponents";
+import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 import * as Images from "@app/images/azure/saml";
 
 interface Props {
-  validateMetadata: ({ metadataUrl }: { metadataUrl: string }) => Promise<{
-    status: API_STATUS;
-    message: string;
-  }>;
+  url: string;
+  handleFormSubmit: ({ url }: { url: string }) => API_RETURN_PROMISE;
 }
 
-export const AzureStepThree: FC<Props> = ({ validateMetadata }) => {
-  const [metadataUrl, setMetadataUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<null | {
-    status: API_STATUS;
-    message: string;
-  }>(null);
-
-  const submitMetadata = async () => {
-    setIsLoading(true);
-    const validateResult = await validateMetadata({ metadataUrl });
-    setResult(validateResult);
-    setIsLoading(false);
-  };
-
+export const AzureStepThree: FC<Props> = ({ url, handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
       text: "Copy the App Federation Metadata URL.",
@@ -42,50 +22,16 @@ export const AzureStepThree: FC<Props> = ({ validateMetadata }) => {
     },
     {
       component: (
-        <Card className="card-shadow">
-          <CardBody>
-            {result && (
-              <Alert
-                variant={
-                  result.status === API_STATUS.ERROR ? "danger" : "default"
-                }
-                title={result.message}
-                aria-live="polite"
-                isInline
-              />
-            )}
-
-            <Form>
-              <FormGroup label="Metadata URL" isRequired fieldId="metadata-url">
-                <TextInput
-                  isRequired
-                  type="text"
-                  id="metadata-text"
-                  name="Metadata URL"
-                  aria-describedby="App Federation Metadata URL"
-                  value={metadataUrl}
-                  onChange={setMetadataUrl}
-                />
-              </FormGroup>
-              <ActionGroup>
-                <Button
-                  variant="primary"
-                  isLoading={isLoading}
-                  onClick={submitMetadata}
-                >
-                  Validate SAML Config
-                </Button>
-              </ActionGroup>
-            </Form>
-          </CardBody>
-        </Card>
+        <FileCard>
+          <UrlForm handleFormSubmit={handleFormSubmit} url={url} />
+        </FileCard>
       ),
     },
   ];
 
   return (
     <Step
-      title="Step 3: Validate Azure SAML Metadata file"
+      title="Step 3: Validate Azure SAML Metadata Url"
       instructionList={instructions}
     />
   );

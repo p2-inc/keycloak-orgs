@@ -76,7 +76,7 @@ export const GoogleWizard: FC = () => {
         return {
           status: API_STATUS.SUCCESS,
           message:
-            "Configuration successfully validated with PingOne Saml. Continue to next step.",
+            "Configuration successfully validated with Google Workspace Saml. Continue to next step.",
         };
       }
     } catch (err) {
@@ -86,7 +86,7 @@ export const GoogleWizard: FC = () => {
     return {
       status: API_STATUS.ERROR,
       message:
-        "Configuration validation failed with PingOne Saml. Check file and try again.",
+        "Configuration validation failed with Google Workspace Saml. Check file and try again.",
     };
   };
 
