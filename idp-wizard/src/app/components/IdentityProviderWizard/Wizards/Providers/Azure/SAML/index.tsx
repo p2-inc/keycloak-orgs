@@ -145,17 +145,14 @@ export const AzureWizard: FC = () => {
           {
             attributeName: "emailaddress",
             userAttribute: "email",
-            name: "email",
           },
           {
             attributeName: "givenname",
             userAttribute: "firstName",
-            name: "firstName",
           },
           {
             attributeName: "surname",
             userAttribute: "lastName",
-            name: "lastName",
           },
         ],
       });

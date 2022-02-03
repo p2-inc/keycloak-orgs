@@ -3,7 +3,6 @@ import axios from "axios";
 type AttributesConfig = {
   attributeName: string;
   userAttribute: string;
-  name: string;
 };
 
 type Props = {
@@ -30,7 +29,6 @@ export const SamlUserAttributeMapper = async ({
   const mapAttribute = async ({
     attributeName,
     userAttribute,
-    name,
   }: AttributesConfig) => {
     return await Axios.post(
       `${serverUrl}/admin/realms/${realm}/identity-provider/instances/${alias}/mappers`,
@@ -42,7 +40,7 @@ export const SamlUserAttributeMapper = async ({
           "attribute.name": `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/${attributeName}`,
           "user.attribute": userAttribute,
         },
-        name: name,
+        name: userAttribute,
         identityProviderMapper: "saml-user-attribute-idp-mapper",
       }
     );
