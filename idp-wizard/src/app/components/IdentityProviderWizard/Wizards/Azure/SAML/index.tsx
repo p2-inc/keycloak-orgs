@@ -11,10 +11,13 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/web";
-import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { generateId } from "@app/utils/generate-id";
+import {
+  API_STATUS,
+  METADATA_CONFIG,
+} from "@app/configurations/api-status";
 
 const nanoId = generateId();
 
@@ -29,7 +32,7 @@ export const AzureWizard: FC = () => {
   const { keycloak } = useKeycloak();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
-  const [metadata, setMetadata] = useState();
+  const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
   const [alias, setAlias] = useState(`azure-saml-${nanoId}`);
 
@@ -87,67 +90,73 @@ export const AzureWizard: FC = () => {
     setDisableButton(false);
     setResults("Creating Azure SAML IdP...");
 
+    metadata!.syncMode = "IMPORT";
+    metadata!.allowCreate = "true";
+    metadata!.nameIDPolicyFormat =
+      "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
+    metadata!.principalType = "SUBJECT";
+
     const payload: IdentityProviderRepresentation = {
-      alias: "azure-saml",
+      alias: alias,
       displayName: `Azure SAML Single Sign-on`,
       providerId: "saml",
       config: metadata!,
     };
-
-    // For Azure SAML SSO, additional mapping call is required after creation
-    // TODO we should abstract this out into a class that executes API methods
-    // Have to use Axios post bc built in keycloak-js makes the request wrong
-    await Axios.post(
-      `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-      {
-        identityProviderAlias: alias,
-        config: {
-          syncMode: "INHERIT",
-          attributes: "[]",
-          "attribute.name":
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-          "user.attribute": "email",
-        },
-        name: "email",
-        identityProviderMapper: "saml-user-attribute-idp-mapper",
-      }
-    );
-    await Axios.post(
-      `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-      {
-        identityProviderAlias: alias,
-        config: {
-          syncMode: "INHERIT",
-          attributes: "[]",
-          "attribute.name":
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
-          "user.attribute": "firstName",
-        },
-        name: "firstName",
-        identityProviderMapper: "saml-user-attribute-idp-mapper",
-      }
-    );
-    await Axios.post(
-      `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-      {
-        identityProviderAlias: alias,
-        config: {
-          syncMode: "INHERIT",
-          attributes: "[]",
-          "attribute.name":
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
-          "user.attribute": "lastName",
-        },
-        name: "lastName",
-        identityProviderMapper: "saml-user-attribute-idp-mapper",
-      }
-    );
 
     try {
       await kcAdminClient.identityProviders.create({
         ...payload,
         realm: getRealm()!,
       });
+
+        // For Azure SAML SSO, additional mapping call is required after creation
+        // TODO we should abstract this out into a class that executes API methods
+        // Have to use Axios post bc built in keycloak-js makes the request wrong
+      await Axios.post(
+        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
+        {
+          identityProviderAlias: alias,
+          config: {
+            syncMode: "INHERIT",
+            attributes: "[]",
+            "attribute.name":
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            "user.attribute": "email",
+          },
+          name: "email",
+          identityProviderMapper: "saml-user-attribute-idp-mapper",
+        }
+      );
+      await Axios.post(
+        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
+        {
+          identityProviderAlias: alias,
+          config: {
+            syncMode: "INHERIT",
+            attributes: "[]",
+            "attribute.name":
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+            "user.attribute": "firstName",
+          },
+          name: "firstName",
+          identityProviderMapper: "saml-user-attribute-idp-mapper",
+        }
+      );
+      await Axios.post(
+        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
+        {
+          identityProviderAlias: alias,
+          config: {
+            syncMode: "INHERIT",
+            attributes: "[]",
+            "attribute.name":
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+            "user.attribute": "lastName",
+          },
+          name: "lastName",
+          identityProviderMapper: "saml-user-attribute-idp-mapper",
+        }
+      );
 
       setResults("Azure SAML IdP created successfully. Click finish.");
       setStepIdReached(7);
