@@ -5,7 +5,6 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-
 import * as Steps from "./Steps";
 import * as commonSteps from "../shared/Steps";
 import authoLogo from "@app/images/auth0/auth0-logo.png";
@@ -13,13 +12,16 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { generateId } from "@app/utils/generate-id";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { Protocols, Providers } from "@app/configurations";
+import { getAlias } from "@wizardServices";
 
 export const Auth0WizardOIDC: FC = () => {
-  const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+  const alias = getAlias({
+    provider: Providers.AUTH0,
+    protocol: Protocols.OPEN_ID,
+    preface: "auth0-oidc",
+  });
   const navigateToBasePath = useNavigateToBasePath();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();

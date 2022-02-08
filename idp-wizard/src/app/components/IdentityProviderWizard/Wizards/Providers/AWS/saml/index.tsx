@@ -11,7 +11,6 @@ import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import axios from "axios";
 import { useKeycloak } from "@react-keycloak/web";
-import { generateId } from "@app/utils/generate-id";
 import {
   API_RETURN,
   API_STATUS,
@@ -19,11 +18,15 @@ import {
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { getAlias } from "@wizardServices";
+import { Protocols, Providers } from "@app/configurations";
 
 export const AWSSamlWizard: FC = () => {
-  const [alias, setAlias] = useState(`awssso-saml-${nanoId}`);
+  const alias = getAlias({
+    provider: Providers.AWS,
+    protocol: Protocols.SAML,
+    preface: "awssso-saml",
+  });
   const navigateToBasePath = useNavigateToBasePath();
 
   const title = "AWS wizard";
