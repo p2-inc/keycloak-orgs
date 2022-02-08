@@ -1,8 +1,9 @@
-import axios from "axios";
+import { Axios } from "./axios";
 
 type AttributesConfig = {
   attributeName: string;
   userAttribute: string;
+  friendlyName: string;
 };
 
 type Props = {
@@ -11,21 +12,14 @@ type Props = {
   keys: {
     serverUrl: string;
     realm: string;
-    token: string;
   };
 };
 
 export const SamlUserAttributeMapper = async ({
   alias,
   attributes,
-  keys: { serverUrl, realm, token },
+  keys: { serverUrl, realm },
 }: Props) => {
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${token}`,
-    },
-  });
-
   const mapAttribute = async ({
     attributeName,
     friendlyName,
@@ -39,7 +33,7 @@ export const SamlUserAttributeMapper = async ({
           syncMode: "INHERIT",
           attributes: "[]",
           "attribute.name": attributeName,
-	  "attribute.friendly.name": friendlyName,
+          "attribute.friendly.name": friendlyName,
           "user.attribute": userAttribute,
         },
         name: userAttribute,

@@ -6,8 +6,7 @@ import {
   Wizard,
 } from "@patternfly/react-core";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
-
-import axios from "axios";
+import { Axios } from "@wizardServices";
 import * as Steps from "./Steps";
 import * as SharedSteps from "../shared/Steps";
 import authoLogo from "@app/images/auth0/auth0-logo.png";
@@ -15,14 +14,12 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { customAlphabet } from "nanoid";
 import { alphanumeric } from "nanoid-dictionary";
-import { useKeycloak } from "@react-keycloak/web";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = customAlphabet(alphanumeric, 6);
 
 export const Auth0WizardSAML: FC = () => {
-  const { keycloak } = useKeycloak();
   const navigateToBasePath = useNavigateToBasePath();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
@@ -38,12 +35,6 @@ export const Auth0WizardSAML: FC = () => {
 
   const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
   const [isValidating, setIsValidating] = useState(false);
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
