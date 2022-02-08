@@ -3,7 +3,7 @@
   <groupId>io.phasetwo</groupId>
   <artifactId>idp-wizard</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0</version>
+  <version>1.0.0-SNAPSHOT</version>
 
   <properties>
     <java.version>1.8</java.version>
@@ -17,10 +17,15 @@
 
   <distributionManagement>
     <repository>
-      <id>github</id>
-      <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/p2-inc/idp-wizard</url>
+      <id>github-release</id>
+      <name>GitHub Packages Releases</name>
+      <url>https://maven.pkg.github.com/p2-inc/idp-wizard/releases</url>
     </repository>
+    <snapshotRepository>
+      <id>github-snapshot</id>
+      <name>GitHub Packages Snapshots</name>
+      <url>https://maven.pkg.github.com/p2-inc/idp-wizard/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <build>
