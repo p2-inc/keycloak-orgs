@@ -9,14 +9,17 @@
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo</main.java.package>
-    <keycloak.version>16.1.0</keycloak.version>
+    <keycloak.version>16.1.1</keycloak.version>
+    <guava.version>30.1-jre</guava.version>
+    <lombok.version>1.18.12</lombok.version>
+    <auto-service.version>1.0-rc7</auto-service.version>
   </properties>
 
   <distributionManagement>
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/p2-inc/phasetwo-keycloak</url>
+      <url>https://maven.pkg.github.com/p2-inc/idp-wizard</url>
     </repository>
   </distributionManagement>
 
@@ -26,9 +29,23 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <debug>true</debug>
           <source>${java.version}</source>
           <target>${java.version}</target>
+	  <compilerArgument>-Xlint:unchecked</compilerArgument>
+	  <compilerArgument>-Xlint:deprecation</compilerArgument>
+          <useIncrementalCompilation>false</useIncrementalCompilation>
+	  <annotationProcessorPaths>
+            <path>
+	      <groupId>com.google.auto.service</groupId>
+	      <artifactId>auto-service</artifactId>
+	      <version>${auto-service.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>
@@ -37,12 +54,9 @@
 	<version>3.2.0</version>
         <configuration>
           <archive>
-            <!-- This is required since we need to add the jboss module references
-                 to the resulting jar -->
             <manifestEntries>
-              <!-- Adding explicit dependencies to avoid class-loading issues at runtime -->
               <Dependencies>
-              <![CDATA[org.keycloak.keycloak-common,org.keycloak.keycloak-core,org.keycloak.keycloak-server-spi,org.keycloak.keycloak-server-spi-private,org.keycloak.keycloak-services]]></Dependencies>
+              <![CDATA[org.keycloak.keycloak-common,org.keycloak.keycloak-core,org.keycloak.keycloak-server-spi,org.keycloak.keycloak-server-spi-private,org.keycloak.keycloak-services,com.google.guava]]></Dependencies>
             </manifestEntries>
           </archive>
         </configuration>
@@ -118,14 +132,46 @@
   </build>
   
   <dependencies>
-    <!--
+    <!-- annotation processing helpers for logging and services -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
     </dependency>
-    -->
+    <dependency>
+      <groupId>com.google.auto.service</groupId>
+      <artifactId>auto-service</artifactId>
+      <version>${auto-service.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- keycloak deps -->
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-server-spi</artifactId>
+      <version>${keycloak.version}</version>      
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-server-spi-private</artifactId>
+      <version>${keycloak.version}</version>      
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-services</artifactId>
+      <version>${keycloak.version}</version>      
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
 </project>
