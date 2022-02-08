@@ -27,6 +27,6 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Build and publish to GitHub Packages Apache Maven
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml --file pom.xml
+      run: mvn -B deploy -s $GITHUB_WORKSPACE/settings.xml --file pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
