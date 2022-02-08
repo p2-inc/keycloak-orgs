@@ -17,15 +17,10 @@
 
   <distributionManagement>
     <repository>
-      <id>github-release</id>
+      <id>github</id>
       <name>GitHub Packages Releases</name>
-      <url>https://maven.pkg.github.com/p2-inc/idp-wizard/releases</url>
+      <url>https://maven.pkg.github.com/p2-inc/idp-wizard</url>
     </repository>
-    <snapshotRepository>
-      <id>github-snapshot</id>
-      <name>GitHub Packages Snapshots</name>
-      <url>https://maven.pkg.github.com/p2-inc/idp-wizard/snapshots</url>
-    </snapshotRepository>
   </distributionManagement>
 
   <build>
