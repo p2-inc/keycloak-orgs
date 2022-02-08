@@ -9,13 +9,14 @@ import * as Steps from "./Steps";
 import azureLogo from "@app/images/provider-logos/azure_logo.svg";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import axios from "axios";
-import { useKeycloak } from "@react-keycloak/web";
-
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { generateId } from "@app/utils/generate-id";
-import { API_RETURN, API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
+import {
+  API_RETURN,
+  API_STATUS,
+  METADATA_CONFIG,
+} from "@app/configurations/api-status";
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 
 const nanoId = generateId();
@@ -28,7 +29,6 @@ export const AzureWizard: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
-  const { keycloak } = useKeycloak();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -37,12 +37,6 @@ export const AzureWizard: FC = () => {
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -146,22 +140,24 @@ export const AzureWizard: FC = () => {
         keys: {
           serverUrl: getServerUrl()!,
           realm: getRealm()!,
-          token: keycloak.token!,
         },
         attributes: [
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-	    friendlyName: "",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            friendlyName: "",
             userAttribute: "email",
           },
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
-	    friendlyName: "",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+            friendlyName: "",
             userAttribute: "firstName",
           },
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
-	    friendlyName: "",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+            friendlyName: "",
             userAttribute: "lastName",
           },
         ],

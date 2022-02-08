@@ -22,6 +22,9 @@
       "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"],
       "@wizardComponents": [
         "src/app/components/IdentityProviderWizard/Wizards/components"
+      ],
+      "@wizardServices": [
+        "src/app/components/IdentityProviderWizard/Wizards/services"
       ]
     },
     "importHelpers": true,

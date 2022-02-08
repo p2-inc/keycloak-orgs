@@ -9,8 +9,7 @@ import OpenIdLogo from "@app/images/oidc/openid-logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import axios from "axios";
-import { useKeycloak } from "@react-keycloak/web";
+import { Axios } from "@wizardServices";
 import { generateId } from "@app/utils/generate-id";
 import { OidcConfig, ClientCreds } from "./steps/forms";
 import { API_STATUS } from "@app/configurations/api-status";
@@ -32,7 +31,6 @@ export const GenericOIDC: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
-  const { keycloak } = useKeycloak();
 
   const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${nanoId}/endpoint`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
@@ -62,12 +60,6 @@ export const GenericOIDC: FC = () => {
   });
   const [credentailsValid, setCredentailsValid] = useState(false);
   const [credentialValidationResp, setCredentialValidationResp] = useState({});
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {

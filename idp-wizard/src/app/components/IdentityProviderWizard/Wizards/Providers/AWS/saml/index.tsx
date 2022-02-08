@@ -9,8 +9,7 @@ import { AWS_LOGO } from "@app/images/aws";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import axios from "axios";
-import { useKeycloak } from "@react-keycloak/web";
+import { Axios } from "@wizardServices";
 import { generateId } from "@app/utils/generate-id";
 import {
   API_RETURN,
@@ -30,7 +29,6 @@ export const AWSSamlWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
-  const { keycloak } = useKeycloak();
 
   const samlAudience = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const acsURL = `${getServerUrl()}/realms/${getRealm()}`;
@@ -44,12 +42,6 @@ export const AWSSamlWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {

@@ -9,8 +9,6 @@ import GoogleLogo from "@app/images/provider-logos/google-workspace-logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import axios from "axios";
-import { useKeycloak } from "@react-keycloak/web";
 import { useNavigateToBasePath } from "@app/routes";
 
 export const TemplateWizardProtocol: FC = () => {
@@ -19,19 +17,12 @@ export const TemplateWizardProtocol: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
-  const { keycloak } = useKeycloak();
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {

@@ -25,9 +25,6 @@ export const useKeycloakAdminApi = () => {
   const settings = {
     baseUrl: getServerUrl(),
     realmName: getRealm(),
-    // requestConfig: {
-    //   /* Axios request config options https://github.com/axios/axios#request-config */
-    // },
   };
 
   const kcAdminClient = new KcAdminClient(settings);
