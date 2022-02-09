@@ -52,34 +52,6 @@ export const AzureWizard: FC = () => {
     navigateToBasePath();
   };
 
-  const validateMetadata = async ({ metadataUrl }: { metadataUrl: string }) => {
-    // make call to submit the URL and verify it
-    setMetadataUrl(metadataUrl);
-
-    try {
-      const resp = await kcAdminClient.identityProviders.importFromUrl({
-        fromUrl: metadataUrl,
-        providerId: "saml",
-        realm: getRealm(),
-      });
-
-      setMetadata(resp);
-      setIsFormValid(true);
-
-      return {
-        status: API_STATUS.SUCCESS,
-        message:
-          "Configuration successfully validated with Azure. Continue to next step.",
-      };
-    } catch (e) {
-      return {
-        status: API_STATUS.ERROR,
-        message:
-          "Configuration validation failed with Azure. Check URL and try again.",
-      };
-    }
-  };
-
   const handleFormSubmit = async ({
     url,
   }: {
@@ -95,7 +67,14 @@ export const AzureWizard: FC = () => {
         realm: getRealm(),
       });
 
-      setMetadata(resp);
+      setMetadata({
+        syncMode: "IMPORT",
+        allowCreate: "true",
+        nameIDPolicyFormat:
+          "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+        principalType: "SUBJECT",
+        ...resp,
+      });
       setIsFormValid(true);
 
       return {
@@ -117,12 +96,6 @@ export const AzureWizard: FC = () => {
     setIsValidating(true);
     setDisableButton(false);
     setResults("Creating Azure SAML IdP...");
-
-    metadata!.syncMode = "IMPORT";
-    metadata!.allowCreate = "true";
-    metadata!.nameIDPolicyFormat =
-      "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
-    metadata!.principalType = "SUBJECT";
 
     const payload: IdentityProviderRepresentation = {
       alias: alias,
