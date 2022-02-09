@@ -9,11 +9,10 @@ import { JumpCloudLogo } from "@app/images/jumpcloud";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { useKeycloak } from "@react-keycloak/web";
 import { generateId } from "@app/utils/generate-id";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import axios from "axios";
+import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
 
 const nanoId = generateId();
@@ -25,7 +24,6 @@ export const JumpCloudWizard: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
-  const { keycloak } = useKeycloak();
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
@@ -39,12 +37,6 @@ export const JumpCloudWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
-
-  const Axios = axios.create({
-    headers: {
-      authorization: `bearer ${keycloak.token}`,
-    },
-  });
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
