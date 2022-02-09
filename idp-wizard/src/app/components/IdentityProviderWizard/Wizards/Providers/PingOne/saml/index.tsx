@@ -14,11 +14,15 @@ import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { getAlias } from "@wizardServices";
+import { Providers, Protocols } from "@app/configurations";
 
 export const PingOneWizard: FC = () => {
-  const [alias, setAlias] = useState(`pingone-saml-${nanoId}`);
+  const alias = getAlias({
+    provider: Providers.AWS,
+    protocol: Protocols.SAML,
+    preface: "pingone-saml",
+  });
   const navigateToBasePath = useNavigateToBasePath();
 
   const title = "PingOne wizard";

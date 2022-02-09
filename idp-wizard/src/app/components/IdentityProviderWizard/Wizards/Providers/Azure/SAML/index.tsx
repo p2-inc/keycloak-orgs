@@ -11,17 +11,21 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-import { generateId } from "@app/utils/generate-id";
 import {
   API_RETURN,
   API_STATUS,
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
-
-const nanoId = generateId();
+import { Protocols, Providers } from "@app/configurations";
+import { getAlias } from "@wizardServices";
 
 export const AzureWizard: FC = () => {
+  const alias = getAlias({
+    provider: Providers.AWS,
+    protocol: Protocols.SAML,
+    preface: "azure-saml",
+  });
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -33,7 +37,6 @@ export const AzureWizard: FC = () => {
     useKeycloakAdminApi();
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
-  const [alias, setAlias] = useState(`azure-saml-${nanoId}`);
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;

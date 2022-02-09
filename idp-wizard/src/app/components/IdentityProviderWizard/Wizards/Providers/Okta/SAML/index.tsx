@@ -11,10 +11,9 @@ import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { API_STATUS } from "@app/configurations/api-status";
-import { generateId } from "@app/utils/generate-id";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { getAlias } from "@wizardServices";
+import { Providers, Protocols } from "@app/configurations";
 
 export const OktaWizardSaml: FC = () => {
   const title = "Okta wizard";
@@ -25,7 +24,11 @@ export const OktaWizardSaml: FC = () => {
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
 
-  const alias = `okta-saml-${nanoId}`;
+  const alias = getAlias({
+    provider: Providers.AWS,
+    protocol: Protocols.SAML,
+    preface: "okta-saml",
+  });
   const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
   const audienceUri = `${getServerUrl()}/realms/${getRealm()}`;
 

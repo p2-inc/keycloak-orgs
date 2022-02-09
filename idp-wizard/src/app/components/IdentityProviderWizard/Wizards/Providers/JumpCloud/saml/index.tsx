@@ -9,16 +9,19 @@ import { JumpCloudLogo } from "@app/images/jumpcloud";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { generateId } from "@app/utils/generate-id";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { getAlias } from "@wizardServices";
+import { Providers, Protocols } from "@app/configurations";
 
 export const JumpCloudWizard: FC = () => {
-  const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+  const alias = getAlias({
+    provider: Providers.AWS,
+    protocol: Protocols.SAML,
+    preface: "auth0-oidc",
+  });
   const navigateToBasePath = useNavigateToBasePath();
   const title = "JumpCloud wizard";
   const [stepIdReached, setStepIdReached] = useState(1);

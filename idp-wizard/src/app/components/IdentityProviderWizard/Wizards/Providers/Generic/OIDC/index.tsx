@@ -10,13 +10,13 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { Axios } from "@wizardServices";
-import { generateId } from "@app/utils/generate-id";
 import { OidcConfig, ClientCreds } from "./steps/forms";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { getAlias } from "@wizardServices";
+import { Protocols, Providers } from "@app/configurations";
+import { last } from "lodash";
 
 const forms = {
   URL: true,
@@ -27,12 +27,18 @@ const forms = {
 export const GenericOIDC: FC = () => {
   const title = "OIDC wizard";
   const navigateToBasePath = useNavigateToBasePath();
-  const [alias, setAlias] = useState(`generic-oidc-${nanoId}`);
+  const alias = getAlias({
+    provider: Providers.AWS,
+    protocol: Protocols.SAML,
+    preface: "generic-oidc",
+  });
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
 
-  const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${nanoId}/endpoint`;
+  const aliasId = last(alias.split("-"));
+  console.log(alias, aliasId);
+  const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${aliasId}/endpoint`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
 
   // Complete

@@ -12,18 +12,20 @@ import * as SharedSteps from "../shared/Steps";
 import authoLogo from "@app/images/auth0/auth0-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { customAlphabet } from "nanoid";
-import { alphanumeric } from "nanoid-dictionary";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = customAlphabet(alphanumeric, 6);
+import { getAlias } from "@wizardServices";
+import { Protocols, Providers } from "@app/configurations";
 
 export const Auth0WizardSAML: FC = () => {
+  const alias = getAlias({
+    provider: Providers.AWS,
+    protocol: Protocols.SAML,
+    preface: "auth0-saml",
+  });
   const navigateToBasePath = useNavigateToBasePath();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
-  const [alias, setAlias] = useState(`auth0-saml-${nanoId()}`);
   const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
 
