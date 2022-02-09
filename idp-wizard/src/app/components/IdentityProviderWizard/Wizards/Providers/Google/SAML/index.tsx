@@ -12,16 +12,19 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { Axios } from "@wizardServices";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
-import { generateId } from "@app/utils/generate-id";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { getAlias } from "@wizardServices";
+import { Protocols, Providers } from "@app/configurations";
 
 export const GoogleWizard: FC = () => {
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
 
-  const [alias, setAlias] = useState(`google-saml-${nanoId}`);
+  const alias = getAlias({
+    provider: Providers.GOOGLE_SAML,
+    protocol: Protocols.SAML,
+    preface: "google-saml",
+  });
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();

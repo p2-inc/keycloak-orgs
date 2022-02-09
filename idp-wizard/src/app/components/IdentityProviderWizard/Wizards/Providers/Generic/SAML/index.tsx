@@ -16,10 +16,9 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { generateId } from "@app/utils/generate-id";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { getAlias } from "@wizardServices";
+import { Providers, Protocols } from "@app/configurations";
 
 export const GenericSAML: FC = () => {
   const title = "Generic SAML wizard";
@@ -29,7 +28,11 @@ export const GenericSAML: FC = () => {
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
 
-  const alias = `generic-saml-${nanoId}`;
+  const alias = getAlias({
+    provider: Providers.SAML,
+    protocol: Protocols.SAML,
+    preface: "generic-saml",
+  });
   const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;

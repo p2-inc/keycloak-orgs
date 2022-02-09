@@ -10,7 +10,6 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { useKeycloak } from "@react-keycloak/web";
-import { generateId } from "@app/utils/generate-id";
 import {
   API_RETURN,
   API_STATUS,
@@ -18,11 +17,15 @@ import {
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-
-const nanoId = generateId();
+import { getAlias } from "@wizardServices";
+import { Providers, Protocols } from "@app/configurations";
 
 export const OneLoginWizard: FC = () => {
-  const [alias, setAlias] = useState(`auth0-oidc-${nanoId}`);
+  const alias = getAlias({
+    provider: Providers.AUTH0,
+    protocol: Protocols.OPEN_ID,
+    preface: "auth0-oidc",
+  });
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
