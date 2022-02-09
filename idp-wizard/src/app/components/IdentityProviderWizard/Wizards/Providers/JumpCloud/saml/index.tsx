@@ -18,8 +18,8 @@ import { Providers, Protocols } from "@app/configurations";
 
 export const JumpCloudWizard: FC = () => {
   const alias = getAlias({
-    provider: Providers.AWS,
-    protocol: Protocols.SAML,
+    provider: Providers.JUMP_CLOUD,
+    protocol: Protocols.OPEN_ID,
     preface: "auth0-oidc",
   });
   const navigateToBasePath = useNavigateToBasePath();

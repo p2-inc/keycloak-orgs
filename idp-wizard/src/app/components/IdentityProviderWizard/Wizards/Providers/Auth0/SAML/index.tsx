@@ -19,7 +19,7 @@ import { Protocols, Providers } from "@app/configurations";
 
 export const Auth0WizardSAML: FC = () => {
   const alias = getAlias({
-    provider: Providers.AWS,
+    provider: Providers.AUTH0,
     protocol: Protocols.SAML,
     preface: "auth0-saml",
   });

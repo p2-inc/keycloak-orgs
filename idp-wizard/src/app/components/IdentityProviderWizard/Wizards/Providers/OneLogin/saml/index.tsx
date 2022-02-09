@@ -22,8 +22,8 @@ import { Providers, Protocols } from "@app/configurations";
 
 export const OneLoginWizard: FC = () => {
   const alias = getAlias({
-    provider: Providers.AWS,
-    protocol: Protocols.SAML,
+    provider: Providers.AUTH0,
+    protocol: Protocols.OPEN_ID,
     preface: "auth0-oidc",
   });
   const navigateToBasePath = useNavigateToBasePath();

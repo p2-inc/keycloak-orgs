@@ -21,7 +21,7 @@ export const GoogleWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
 
   const alias = getAlias({
-    provider: Providers.AWS,
+    provider: Providers.GOOGLE_SAML,
     protocol: Protocols.SAML,
     preface: "google-saml",
   });

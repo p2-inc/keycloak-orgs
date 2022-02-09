@@ -22,7 +22,7 @@ import { getAlias } from "@wizardServices";
 
 export const AzureWizard: FC = () => {
   const alias = getAlias({
-    provider: Providers.AWS,
+    provider: Providers.AZURE,
     protocol: Protocols.SAML,
     preface: "azure-saml",
   });

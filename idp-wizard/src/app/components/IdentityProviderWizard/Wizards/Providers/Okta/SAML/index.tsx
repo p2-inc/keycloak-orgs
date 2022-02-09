@@ -25,7 +25,7 @@ export const OktaWizardSaml: FC = () => {
     useKeycloakAdminApi();
 
   const alias = getAlias({
-    provider: Providers.AWS,
+    provider: Providers.OKTA,
     protocol: Protocols.SAML,
     preface: "okta-saml",
   });

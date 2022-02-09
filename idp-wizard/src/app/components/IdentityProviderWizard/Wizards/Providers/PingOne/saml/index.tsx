@@ -19,7 +19,7 @@ import { Providers, Protocols } from "@app/configurations";
 
 export const PingOneWizard: FC = () => {
   const alias = getAlias({
-    provider: Providers.AWS,
+    provider: Providers.PING_ONE,
     protocol: Protocols.SAML,
     preface: "pingone-saml",
   });

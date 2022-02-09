@@ -29,7 +29,7 @@ export const GenericSAML: FC = () => {
     useKeycloakAdminApi();
 
   const alias = getAlias({
-    provider: Providers.AWS,
+    provider: Providers.SAML,
     protocol: Protocols.SAML,
     preface: "generic-saml",
   });

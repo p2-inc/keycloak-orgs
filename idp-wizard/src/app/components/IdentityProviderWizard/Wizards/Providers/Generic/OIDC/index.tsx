@@ -28,8 +28,8 @@ export const GenericOIDC: FC = () => {
   const title = "OIDC wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const alias = getAlias({
-    provider: Providers.AWS,
-    protocol: Protocols.SAML,
+    provider: Providers.OPEN_ID,
+    protocol: Protocols.OPEN_ID,
     preface: "generic-oidc",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
