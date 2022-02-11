@@ -9,19 +9,42 @@ import {
   PageHeader,
   PageSidebar,
   SkipToContent,
+  AlertGroup,
+  AlertActionCloseButton,
+  Alert,
 } from "@patternfly/react-core";
 import { routes, useNavigateToBasePath } from "@app/routes";
 import logo from "@app/images/phasetwo-logos/logo_phase_slash.svg";
+import { useRoleAccess } from "@app/hooks";
 
 interface IAppLayout {
   children: React.ReactNode;
 }
+
+const AlertAccessWarning = (onClose) => (
+  <Alert
+    variant="warning"
+    title={"Access denied."}
+    // actionClose={
+    //   <AlertActionCloseButton
+    //     title={"Access denied"}
+    //     variantLabel={`access denied alert`}
+    //     onClose={() => onClose()}
+    //   />
+    // }
+  >
+    <p>Please speak to your admin for access to this content.</p>
+  </Alert>
+);
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [isNavOpen, setIsNavOpen] = React.useState(true);
   const [isMobileView, setIsMobileView] = React.useState(true);
   const [isNavOpenMobile, setIsNavOpenMobile] = React.useState(false);
   const navigateToBasePath = useNavigateToBasePath();
+
+  const [hasAccess] = useRoleAccess();
+  console.log("[HasAccess]", hasAccess);
 
   const onNavToggleMobile = () => {
     setIsNavOpenMobile(!isNavOpenMobile);
@@ -121,6 +144,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       isManagedSidebar={false}
       style={{ backgroundColor: "white" }}
     >
+      <AlertGroup isToast isLiveRegion>
+        {hasAccess === false && <AlertAccessWarning />}
+      </AlertGroup>
       {children}
     </Page>
   );
