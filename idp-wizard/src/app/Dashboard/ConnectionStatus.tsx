@@ -30,11 +30,11 @@ export const ConnectionStatus = () => {
   const [idps, setIdps] = useState<idpEntry[] | []>([]);
   const [loading, setLoading] = useState(true);
 
-  const getConnectionStatus = async () => {
-    const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-      useKeycloakAdminApi();
-    const realm = getRealm()!;
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
+  const realm = getRealm()!;
 
+  const getConnectionStatus = async () => {
     await setKcAdminClientAccessToken();
 
     const idps = await kcAdminClient.identityProviders.find({ realm });
