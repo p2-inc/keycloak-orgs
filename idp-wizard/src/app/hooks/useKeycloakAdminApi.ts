@@ -1,7 +1,6 @@
 import KcAdminClient from "@keycloak/keycloak-admin-client";
 import { useParams } from "react-router-dom";
 import keycloak from "src/keycloak";
-import { useParams } from "react-router-dom";
 
 export const useKeycloakAdminApi = () => {
   const { realm: pathRealm } = useParams();
