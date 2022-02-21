@@ -1,7 +1,10 @@
 import KcAdminClient from "@keycloak/keycloak-admin-client";
 import keycloak from "src/keycloak";
+import { useParams } from "react-router-dom";
 
 export const useKeycloakAdminApi = () => {
+  let { realm } = useParams();
+  
   const getServerUrl = () => {
     if (typeof keycloak.authServerUrl !== "undefined") {
       var u = keycloak.authServerUrl;
@@ -15,6 +18,11 @@ export const useKeycloakAdminApi = () => {
   };
 
   const getRealm = () => {
+    console.log("getRealm", realm);
+    return realm;
+  };
+
+  const getAuthRealm = () => {
     if (typeof keycloak.realm !== "undefined") {
       return keycloak.realm;
     } else {
@@ -41,5 +49,6 @@ export const useKeycloakAdminApi = () => {
     setKcAdminClientAccessToken,
     getServerUrl,
     getRealm,
+    getAuthRealm,
   ] as const;
 };
