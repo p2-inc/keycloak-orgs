@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import {
   TableComposable,
   Thead,
@@ -8,18 +8,17 @@ import {
   Td,
   ExpandableRowContent,
 } from "@patternfly/react-table";
-import { getEventData, IDashboardEvents } from "@app/services/DashboardData";
-import { Flex, FlexItem, Spinner } from "@patternfly/react-core";
+import { IDashboardEvents, useEventData } from "@app/services/DashboardData";
+import { Spinner } from "@patternfly/react-core";
 
 export function ActivityLog() {
   const columns = ["Time", "User", "Event Type", "Details"];
-  const [activityData, setActivityData] = useState<IDashboardEvents[] | []>([]);
-  const isMounted = useRef(false);
-  const [loading, setLoading] = useState(true);
+  const { activityData, loading } = useEventData();
 
   const [expandedRepoNames, setExpandedRepoNames] = React.useState<string[]>(
     []
   );
+
   const setRepoExpanded = (entry: IDashboardEvents, isExpanding = true) =>
     setExpandedRepoNames((prevExpanded) => {
       const otherExpandedRepoNames = prevExpanded.filter(
@@ -31,19 +30,6 @@ export function ActivityLog() {
     });
   const isRepoExpanded = (entry: IDashboardEvents) =>
     expandedRepoNames.includes(`${entry.id}_${entry.time}`);
-
-  useEffect(() => {
-    isMounted.current = true;
-    getEventData().then((res) => {
-      if (isMounted.current) {
-        setActivityData(res);
-        setLoading(false);
-      }
-    });
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
 
   return (
     <TableComposable
@@ -59,7 +45,7 @@ export function ActivityLog() {
           <Th>{columns[2]}</Th>
         </Tr>
       </Thead>
-      {loading ? (
+      {loading && activityData.length === 0 ? (
         <Tbody>
           <Tr>
             <Td colSpan={4} textCenter>

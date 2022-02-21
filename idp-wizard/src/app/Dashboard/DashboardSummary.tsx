@@ -1,7 +1,4 @@
-import {
-  getSummaryData,
-  IDashboardSummaryData,
-} from "@app/services/DashboardData";
+import { useSummaryData } from "@app/services/DashboardData";
 import {
   Card,
   CardBody,
@@ -14,32 +11,18 @@ import {
   TextListVariants,
   Title,
 } from "@patternfly/react-core";
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC } from "react";
 
 export const DashboardSummary: FC = () => {
-  const isMounted = useRef(false);
-  const [loading, setLoading] = useState(true);
-  const [summaryData, setSummaryData] = useState<IDashboardSummaryData>({
-    loginsToday: 0,
-    loginsThisWeek: 0,
-    users: 0,
-    groups: 0,
-    failedLogins: 0,
-    usersLockedOut: 0,
-  });
-
-  useEffect(() => {
-    isMounted.current = true;
-    getSummaryData().then((res) => {
-      if (isMounted.current) {
-        setSummaryData(res);
-        setLoading(false);
-      }
-    });
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  const {
+    loginsToday,
+    loginsThisWeek,
+    users,
+    groups,
+    failedLogins,
+    usersLockedOut,
+    loading,
+  } = useSummaryData();
 
   return (
     <Card className="card-shadow">
@@ -58,37 +41,37 @@ export const DashboardSummary: FC = () => {
               Logins Today:
             </TextListItem>
             <TextListItem component={TextListItemVariants.dd}>
-              {summaryData.loginsToday}
+              {loginsToday}
             </TextListItem>
             <TextListItem component={TextListItemVariants.dt}>
               Logins This Week:
             </TextListItem>
             <TextListItem component={TextListItemVariants.dd}>
-              {summaryData.loginsThisWeek}
+              {loginsThisWeek}
             </TextListItem>
             <TextListItem component={TextListItemVariants.dt}>
               Users:
             </TextListItem>
             <TextListItem component={TextListItemVariants.dd}>
-              {summaryData.users}
+              {users}
             </TextListItem>
             <TextListItem component={TextListItemVariants.dt}>
               Groups:
             </TextListItem>
             <TextListItem component={TextListItemVariants.dd}>
-              {summaryData.groups}
+              {groups}
             </TextListItem>
             <TextListItem component={TextListItemVariants.dt}>
               Failed Logins:
             </TextListItem>
             <TextListItem component={TextListItemVariants.dd}>
-              {summaryData.failedLogins}
+              {failedLogins}
             </TextListItem>
             <TextListItem component={TextListItemVariants.dt}>
               Users Locked Out:
             </TextListItem>
             <TextListItem component={TextListItemVariants.dd}>
-              {summaryData.usersLockedOut}
+              {usersLockedOut}
             </TextListItem>
           </TextList>
         </TextContent>
