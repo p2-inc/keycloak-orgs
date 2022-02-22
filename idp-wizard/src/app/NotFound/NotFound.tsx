@@ -13,7 +13,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 
 const NotFound: React.FunctionComponent = () => {
-  useTitle("404 Page Not Found");
+  useTitle("404 Page Not Found | PhaseTwo.io");
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
   const navigateToBasePath = useNavigateToBasePath(getRealm());

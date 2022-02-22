@@ -25,10 +25,12 @@ import org.keycloak.theme.Theme;
 @JBossLog
 public class WizardResourceProvider implements RealmResourceProvider {
 
-  private KeycloakSession session;
-
-  public WizardResourceProvider(KeycloakSession session) {
+  private final KeycloakSession session;
+  private final String authRealmOverride;
+  
+  public WizardResourceProvider(KeycloakSession session, String authRealmOverride) {
     this.session = session;
+    this.authRealmOverride = authRealmOverride;
   }
 
   @Override
@@ -97,7 +99,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
     UriInfo uriInfo = session.getContext().getUri();
     Map json =
         ImmutableMap.of(
-            "realm", realm.getName(),
+            "realm", authRealmOverride,
             "auth-server-url", getBaseUrl(uriInfo),
             "resource", "idp-wizard");
     return Response.ok(json).build();

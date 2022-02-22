@@ -1,4 +1,8 @@
+import EventRepresentation from "@keycloak/keycloak-admin-client/lib/defs/eventRepresentation";
 import EventType from "@keycloak/keycloak-admin-client/lib/defs/eventTypes";
+import GroupRepresentation from "@keycloak/keycloak-admin-client/lib/defs/groupRepresentation";
+import UserRepresentation from "@keycloak/keycloak-admin-client/lib/defs/userRepresentation";
+import { useEffect, useState } from "react";
 import { useKeycloakAdminApi } from "../hooks/useKeycloakAdminApi";
 
 export interface IDashboardSummaryData {
@@ -18,52 +22,113 @@ export interface IDashboardEvents {
   details?: {};
 }
 
-export const getEventData = async <IDashboardEvents>() => {
+export interface DashboardActivity {
+  activityData: IDashboardEvents[];
+  loading: boolean;
+}
+
+export const useEventData = <DashboardActivity>() => {
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
   const realm = getRealm()!;
 
-  await setKcAdminClientAccessToken();
+  const [events, setEvents] = useState<EventRepresentation[]>([]);
+  const [users, setUsers] = useState<UserRepresentation[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const events = await kcAdminClient.realms.findEvents({
-    realm,
-  });
+  useEffect(() => {
+    setKcAdminClientAccessToken();
 
-  const eventsToShow = events.filter(
-    (event) =>
-      event.details?.grant_type != "client_credentials" &&
-      event.type !== "CODE_TO_TOKEN_ERROR" &&
-      event.type !== "CODE_TO_TOKEN"
-  );
-
-  const allUsers = await kcAdminClient.users.find({
-    realm,
-  });
-
-  return eventsToShow.map(({ time, userId, type, details }) => {
-    const user = allUsers.find((user) => user.id == userId);
-    return {
-      id: user?.id,
-      time: time,
-      user: user?.username,
-      eventType: type,
-      details: details,
+    const fetchEvents = async () => {
+      const events = await kcAdminClient.realms.findEvents({
+        realm,
+      });
+      setEvents(events);
     };
-  });
+    fetchEvents();
+
+    const fetchUsers = async () => {
+      const allUsers = await kcAdminClient.users.find({
+        realm,
+      });
+      setUsers(allUsers);
+    };
+    fetchUsers();
+
+    setLoading(false);
+  }, []);
+
+  const eventsToShow = events
+    .filter(
+      (event) =>
+        event.details?.grant_type != "client_credentials" &&
+        event.type !== "CODE_TO_TOKEN_ERROR" &&
+        event.type !== "CODE_TO_TOKEN"
+    )
+    .map(({ time, userId, type, details }) => {
+      const user = users.find((user) => user.id == userId);
+      return {
+        id: user?.id,
+        time: time,
+        user: user?.username,
+        eventType: type,
+        details: details,
+      };
+    });
+
+  return {
+    activityData: eventsToShow,
+    loading,
+  };
 };
 
-export const getSummaryData = async <IDashboardSummaryData>() => {
+export const useSummaryData = <IDashboardSummaryData>() => {
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
   const realm = getRealm()!;
+  const [loading, setLoading] = useState(true);
 
-  await setKcAdminClientAccessToken();
-  const allUsers = await kcAdminClient.users.find();
+  const [allUsers, setAllUsers] = useState<UserRepresentation[]>([]);
+  const [logins, setLogins] = useState<EventRepresentation[]>([]);
+  const [failedLogins, setFailedLogins] = useState<EventRepresentation[]>([]);
+  const [groups, setGroups] = useState<GroupRepresentation[]>([]);
 
-  const logins = await kcAdminClient.realms.findEvents({
-    realm,
-    type: "LOGIN",
-  });
+  useEffect(() => {
+    setKcAdminClientAccessToken();
+
+    const fetchUsers = async () => {
+      const resp = await kcAdminClient.users.find();
+      setAllUsers(resp);
+    };
+    fetchUsers();
+
+    const findLoginEvents = async () => {
+      const logins = await kcAdminClient.realms.findEvents({
+        realm,
+        type: "LOGIN",
+      });
+      setLogins(logins);
+    };
+    findLoginEvents();
+
+    const findLoginErrorEvents = async () => {
+      const failedLogins = await kcAdminClient.realms.findEvents({
+        realm,
+        type: "LOGIN_ERROR",
+      });
+      setFailedLogins(failedLogins);
+    };
+    findLoginErrorEvents();
+
+    const findGroups = async () => {
+      const kcGroups = await kcAdminClient.groups.find();
+      setGroups(kcGroups);
+    };
+    findGroups();
+
+    setLoading(false);
+  }, []);
+
   const loginsThisWeek = logins.filter(
     (event) =>
       event.details?.grant_type != "client_credentials" &&
@@ -76,12 +141,7 @@ export const getSummaryData = async <IDashboardSummaryData>() => {
       new Date(event.time || "").toLocaleDateString() ==
         new Date().toLocaleDateString()
   );
-  const failedLogins = await kcAdminClient.realms.findEvents({
-    realm,
-    type: "LOGIN_ERROR",
-  });
   const lockedOutUsers = allUsers.filter((user) => !user.enabled);
-  const groups = await kcAdminClient.groups.find();
 
   return {
     loginsToday: loginsToday.length,
@@ -90,6 +150,7 @@ export const getSummaryData = async <IDashboardSummaryData>() => {
     groups: groups.length,
     failedLogins: failedLogins.length,
     usersLockedOut: lockedOutUsers.length,
+    loading,
   };
 };
 

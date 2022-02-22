@@ -6,11 +6,17 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
+import java.util.Optional;
+import org.keycloak.models.RealmModel;
+import lombok.extern.jbosslog.JBossLog;
 
+@JBossLog
 @AutoService(RealmResourceProviderFactory.class)
 public class WizardResourceProviderFactory implements RealmResourceProviderFactory {
 
   public static final String ID = "wizard";
+
+  public static final String AUTH_REALM_OVERRIDE_CONFIG_KEY = "_providerConfig.wizard.auth-realm-override";
 
   @Override
   public String getId() {
@@ -19,7 +25,11 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
 
   @Override
   public RealmResourceProvider create(KeycloakSession session) {
-    return new WizardResourceProvider(session);
+    // get override config
+    RealmModel realm = session.getContext().getRealm();
+    String override = Optional.of(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY)).orElse(realm.getName());
+    log.infof("Using override realm %s", override);
+    return new WizardResourceProvider(session, override);
   }
 
   @Override
