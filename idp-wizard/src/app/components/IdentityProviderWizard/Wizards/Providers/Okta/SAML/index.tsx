@@ -13,7 +13,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { API_STATUS } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
-import { Providers, Protocols } from "@app/configurations";
+import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const OktaWizardSaml: FC = () => {
   const title = "Okta wizard";
@@ -59,7 +59,10 @@ export const OktaWizardSaml: FC = () => {
         realm: getRealm(),
       });
 
-      setMetadata(resp);
+      setMetadata({
+        ...SamlIDPDefaults,
+        ...resp,
+      });
 
       return {
         status: API_STATUS.SUCCESS,

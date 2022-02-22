@@ -17,7 +17,7 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
-import { Protocols, Providers } from "@app/configurations";
+import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { getAlias } from "@wizardServices";
 
 export const AzureWizard: FC = () => {
@@ -68,11 +68,7 @@ export const AzureWizard: FC = () => {
       });
 
       setMetadata({
-        syncMode: "IMPORT",
-        allowCreate: "true",
-        nameIDPolicyFormat:
-          "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
-        principalType: "SUBJECT",
+        ...SamlIDPDefaults,
         ...resp,
       });
       setIsFormValid(true);

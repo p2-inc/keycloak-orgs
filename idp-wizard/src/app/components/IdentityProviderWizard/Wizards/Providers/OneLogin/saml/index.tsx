@@ -18,7 +18,7 @@ import {
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
-import { Providers, Protocols } from "@app/configurations";
+import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const OneLoginWizard: FC = () => {
   const alias = getAlias({
@@ -72,7 +72,10 @@ export const OneLoginWizard: FC = () => {
         realm: getRealm(),
       });
 
-      setMetadata(resp);
+      setMetadata({
+        ...SamlIDPDefaults,
+        ...resp,
+      });
       setIsFormValid(true);
 
       return {
