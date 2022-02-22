@@ -1,11 +1,13 @@
 import React from "react";
 import * as Images from "@app/images/azure/saml";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
+import { useHostname } from "@app/hooks/useHostname";
 
 export function AzureStepFive() {
+  const hostname = useHostname();
   const instructionList: InstructionProps[] = [
     {
-      text: 'In order for your users and gorups of users to be synced to demo.phasetwo.io you will need to assign them to your Azure AD SAML Application. Select "Users and groups" from the "Manage" section of the navigations menu.',
+      text: `In order for your users and gorups of users to be synced to ${hostname} you will need to assign them to your Azure AD SAML Application. Select "Users and groups" from the "Manage" section of the navigations menu.`,
       component: <StepImage src={Images.AzureSaml9} alt="Step 4.1" />,
     },
     {

@@ -1,8 +1,11 @@
 import React from "react";
 import * as Images from "@app/images/azure/saml";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
+import { useHostname } from "@app/hooks/useHostname";
 
 export function AzureStepOne() {
+  const hostname = useHostname();
+
   const instructions: InstructionProps[] = [
     {
       text: 'Select "Enterprise applications" from your Azure AD dashboard.',
@@ -17,7 +20,7 @@ export function AzureStepOne() {
       component: <StepImage src={Images.AzureSaml3a} alt="Step 1.3" />,
     },
     {
-      text: 'Enter an App name that describers demo.phasetwo.io. Under "What are you looking to do with your application?", select "Integrate any other application you dont find in the gallery (Non-gallery)", then select "Create".',
+      text: `Enter an App name that describers ${hostname}. Under "What are you looking to do with your application?", select "Integrate any other application you dont find in the gallery (Non-gallery)", then select "Create".`,
       component: <StepImage src={Images.AzureSaml3} alt="Step 1.4" />,
     },
     {

@@ -4,7 +4,7 @@ import { generatePath, Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftIcon } from "@patternfly/react-icons";
 import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
 import { IdentityProtocols, IdentityProviders } from "@app/configurations";
-import { BASE_PATH, RouterParams } from "@app/routes";
+import { BASE_PATH, PATHS, RouterParams } from "@app/routes";
 
 export const IdPProtocolSelector: FC = ({}) => {
   const { provider, realm } = useParams<keyof RouterParams>() as RouterParams;
@@ -21,7 +21,7 @@ export const IdPProtocolSelector: FC = ({}) => {
 
   useEffect(() => {
     if (providerProtocols.length === 1) {
-      const pth = generatePath(`${BASE_PATH}/idp/:provider/:protocol`, {
+      const pth = generatePath(PATHS.idpProvider, {
         realm,
         provider,
         protocol: providerProtocols[0],
@@ -33,7 +33,7 @@ export const IdPProtocolSelector: FC = ({}) => {
   return (
     <Stack id="protocol-selector" className="container">
       <StackItem>
-        <Link to={generatePath(`${BASE_PATH}/idp`, { realm })}>
+        <Link to={generatePath(PATHS.idpSelector, { realm })}>
           <Text component={TextVariants.h2} className="link">
             <ArrowLeftIcon />
             {" Back to identity provider selection"}
@@ -63,10 +63,10 @@ export const IdPProtocolSelector: FC = ({}) => {
         {IdentityProtocols.filter(({ id: protocolId }) =>
           providerProtocols.includes(protocolId)
         ).map(({ name, imageSrc, id: protocolId }, i) => {
-          const pth = generatePath(`${BASE_PATH}/idp/:providerId/:protocolId`, {
+          const pth = generatePath(PATHS.idpProvider, {
             realm,
-            providerId,
-            protocolId,
+            provider: providerId,
+            protocol: protocolId,
           });
           return (
             <Link to={pth} key={i}>

@@ -12,9 +12,11 @@ import {
 import image from "@app/images/okta/okta-3.png";
 import { ArrowRightIcon, TrashIcon } from "@patternfly/react-icons";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
+import { useHostname } from "@app/hooks/useHostname";
 
 export const OktaStepThree: FC = () => {
   const [groupList, setGroupList] = useState<string[]>([""]);
+  const hostname = useHostname();
 
   const handleInputChange = (value, index) => {
     const list = [...groupList];
@@ -43,7 +45,7 @@ export const OktaStepThree: FC = () => {
       component: <StepImage src={image} alt="Step3" />,
     },
     {
-      text: "If you want to limit groups that can access the demo.phasetwo.io app, enter those groups below.",
+      text: `If you want to limit groups that can access the ${hostname} app, enter those groups below.`,
       component: <></>,
     },
     {

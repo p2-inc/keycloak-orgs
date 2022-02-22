@@ -15,12 +15,16 @@ import {
   GenericIdentityProviders,
   IdentityProviders,
 } from "@app/configurations";
-import { BASE_PATH } from "@app/routes";
+import { BASE_PATH, PATHS } from "@app/routes";
 import { useTitle } from "react-use";
+import { useHostname } from "@app/hooks/useHostname";
 
 export const IdentityProviderSelector: FC = () => {
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
+
+  const hostname = useHostname();
+
   useTitle("Select your Identity Provider | PhaseTwo");
 
   return (
@@ -29,7 +33,7 @@ export const IdentityProviderSelector: FC = () => {
         <StackItem>
           <Flex>
             <FlexItem align={{ default: "alignRight" }}>
-              <Link to={generatePath(BASE_PATH, { realm })}>
+              <Link to={generatePath(PATHS.dashboard, { realm })}>
                 <Button variant="link" isInline>
                   Dashboard
                 </Button>
@@ -46,35 +50,34 @@ export const IdentityProviderSelector: FC = () => {
           <div className="container">
             <div className="vertical-center">
               <h1>Select your Identity Provider</h1>
-              <h2>This is how users will sign in to demo.phasetwo.io</h2>
+              <h2>This is how users will sign in to {hostname}</h2>
               <div className="selection-container">
                 {IdentityProviders.filter((idp) => idp.active)
                   .sort((a, b) =>
                     a.active === b.active ? 0 : a.active ? -1 : 1
                   )
-                  .map(({ name, imageSrc, active, id, protocols }) => {
-                    const genLink = generatePath(
-                      `${BASE_PATH}/idp/:id/:protocol`,
-                      {
+                  .map(
+                    ({ name, imageSrc, active, id: provider, protocols }) => {
+                      const genLink = generatePath(PATHS.idpProvider, {
                         realm,
-                        id,
+                        provider,
                         protocol:
                           protocols.length === 1 ? protocols[0] : "protocol",
-                      }
-                    );
+                      });
 
-                    const linkTo = active ? genLink : "#";
-                    return (
-                      <Link to={linkTo} key={id}>
-                        <IdPButton
-                          key={name}
-                          text={name}
-                          image={imageSrc}
-                          active={active}
-                        />
-                      </Link>
-                    );
-                  })}
+                      const linkTo = active ? genLink : "#";
+                      return (
+                        <Link to={linkTo} key={provider}>
+                          <IdPButton
+                            key={name}
+                            text={name}
+                            image={imageSrc}
+                            active={active}
+                          />
+                        </Link>
+                      );
+                    }
+                  )}
               </div>
               <h2
                 style={{
@@ -89,14 +92,11 @@ export const IdentityProviderSelector: FC = () => {
               <div className="selection-container">
                 {GenericIdentityProviders.map(
                   ({ name, imageSrc, active, id, protocols }) => {
-                    const pth = generatePath(
-                      `${BASE_PATH}/idp/:providerId/:protocolId`,
-                      {
-                        realm,
-                        providerId: id,
-                        protocolId: protocols[0],
-                      }
-                    );
+                    const pth = generatePath(PATHS.idpProvider, {
+                      realm,
+                      provider: id,
+                      protocol: protocols[0],
+                    });
                     return (
                       <Link to={pth} key={id}>
                         <IdPButton
