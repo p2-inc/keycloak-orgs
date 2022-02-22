@@ -18,8 +18,8 @@ export const useKeycloakAdminApi = () => {
   };
 
   const getRealm = () => {
-    console.log("getRealm", realm);
-    return realm;
+    // console.log("getRealm", pathRealm);
+    return pathRealm;
   };
 
   const getAuthRealm = () => {

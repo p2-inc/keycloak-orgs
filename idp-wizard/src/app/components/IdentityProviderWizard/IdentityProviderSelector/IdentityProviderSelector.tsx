@@ -17,10 +17,14 @@ import {
 } from "@app/configurations";
 import { BASE_PATH } from "@app/routes";
 import { useTitle } from "react-use";
+import { useHostname } from "@app/hooks/useHostname";
 
 export const IdentityProviderSelector: FC = () => {
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
+
+  const hostname = useHostname();
+
   useTitle("Select your Identity Provider | PhaseTwo");
 
   return (
@@ -46,7 +50,7 @@ export const IdentityProviderSelector: FC = () => {
           <div className="container">
             <div className="vertical-center">
               <h1>Select your Identity Provider</h1>
-              <h2>This is how users will sign in to demo.phasetwo.io</h2>
+              <h2>This is how users will sign in to {hostname}</h2>
               <div className="selection-container">
                 {IdentityProviders.filter((idp) => idp.active)
                   .sort((a, b) =>
