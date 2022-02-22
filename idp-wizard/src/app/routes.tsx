@@ -1,6 +1,7 @@
 import React from "react";
 import {
   generatePath,
+  Params,
   Route,
   Routes,
   useNavigate,
@@ -23,6 +24,20 @@ export const routes = [];
 
 export const BASE_PATH = "/auth/realms/:realm/wizard";
 
+export enum ROUTE_PATHS {
+  DASHBOARD = "dashboard",
+  IDP_SELECTOR = "idpSelector",
+  IDP_PROTOCOL_SELECTOR = "idpProtocolSelector",
+  IDP_PROVIDER = "idpProvider",
+}
+
+export const PATHS = {
+  idpSelector: BASE_PATH,
+  idpProtocolSelector: `${BASE_PATH}/idp/:provider/protocol`,
+  idpProvider: `${BASE_PATH}/idp/:provider/:protocol`,
+  dashboard: `${BASE_PATH}/dashboard`,
+};
+
 export function useNavigateToBasePath(realm?: string) {
   let navigate = useNavigate();
 
@@ -39,11 +54,13 @@ export function useNavigateToBasePath(realm?: string) {
 const AppRoutes = (): React.ReactElement => (
   <Routes>
     <Route path={BASE_PATH}>
-      <Route index element={<Dashboard />} />
+      <Route index element={<IdentityProviderSelector />} />
       <Route path="idp/*">
-        <Route index element={<IdentityProviderSelector />} />
         <Route path=":provider/protocol" element={<IdPProtocolSelector />} />
         <Route path=":provider/:protocol" element={<Provider />} />
+      </Route>
+      <Route path="dashboard">
+        <Route index element={<Dashboard />} />
       </Route>
     </Route>
 
