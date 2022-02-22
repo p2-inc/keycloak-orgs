@@ -14,7 +14,7 @@ import { ConnectionStatus } from "./ConnectionStatus";
 import { ActivityLog } from "./ActivityLog";
 import { useParams } from "react-router";
 import { generatePath, Link } from "react-router-dom";
-import { BASE_PATH } from "@app/routes";
+import { BASE_PATH, PATHS } from "@app/routes";
 import { useTitle } from "react-use";
 
 const Dashboard: React.FunctionComponent = () => {
@@ -34,7 +34,7 @@ const Dashboard: React.FunctionComponent = () => {
             </FlexItem>
             <FlexItem align={{ default: "alignRight" }}>
               <Link
-                to={generatePath(`${BASE_PATH}/idp`, {
+                to={generatePath(PATHS.idpSelector, {
                   realm,
                 })}
               >
