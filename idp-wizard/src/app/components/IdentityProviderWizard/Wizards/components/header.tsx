@@ -39,6 +39,13 @@ export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
           </Link>
         </FlexItem>
         <FlexItem>
+          <Link to={generatePath(PATHS.idpSelector, { realm })}>
+            <Button variant="link" isInline>
+              IDP Selector
+            </Button>
+          </Link>
+        </FlexItem>
+        <FlexItem>
           <Button variant="link" isInline onClick={() => keycloak.logout()}>
             Logout
           </Button>
