@@ -83,13 +83,13 @@ export const AzureWizard: FC = () => {
       return {
         status: API_STATUS.SUCCESS,
         message:
-          "Configuration successfully validated with OneLogin IdP. Continue to next step.",
+          "Configuration successfully validated with Azure SAML IdP. Continue to next step.",
       };
     } catch (e) {
       return {
         status: API_STATUS.ERROR,
         message:
-          "Configuration validation failed with OneLogin IdP. Check URL and try again.",
+          "Configuration validation failed with Azure SAML IdP. Check URL and try again.",
       };
     }
   };
