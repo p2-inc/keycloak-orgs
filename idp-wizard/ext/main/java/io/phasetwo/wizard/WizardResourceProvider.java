@@ -27,7 +27,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
 
   private final KeycloakSession session;
   private final String authRealmOverride;
-  
+
   public WizardResourceProvider(KeycloakSession session, String authRealmOverride) {
     this.session = session;
     this.authRealmOverride = authRealmOverride;
@@ -99,9 +99,12 @@ public class WizardResourceProvider implements RealmResourceProvider {
     UriInfo uriInfo = session.getContext().getUri();
     Map json =
         ImmutableMap.of(
-            "realm", authRealmOverride,
-            "auth-server-url", getBaseUrl(uriInfo),
-            "resource", "idp-wizard");
+            "realm",
+            authRealmOverride,
+            "auth-server-url",
+            getBaseUrl(uriInfo),
+            "resource",
+            "idp-wizard");
     return Response.ok(json).build();
   }
 

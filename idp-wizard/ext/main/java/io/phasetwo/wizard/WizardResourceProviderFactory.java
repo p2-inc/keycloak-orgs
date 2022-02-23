@@ -1,14 +1,18 @@
 package io.phasetwo.wizard;
 
 import com.google.auto.service.AutoService;
+import com.google.common.collect.ImmutableSet;
+import java.util.Optional;
+import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config.Scope;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.provider.ProviderEvent;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
-import java.util.Optional;
-import org.keycloak.models.RealmModel;
-import lombok.extern.jbosslog.JBossLog;
 
 @JBossLog
 @AutoService(RealmResourceProviderFactory.class)
@@ -16,7 +20,8 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
 
   public static final String ID = "wizard";
 
-  public static final String AUTH_REALM_OVERRIDE_CONFIG_KEY = "_providerConfig.wizard.auth-realm-override";
+  public static final String AUTH_REALM_OVERRIDE_CONFIG_KEY =
+      "_providerConfig.wizard.auth-realm-override";
 
   @Override
   public String getId() {
@@ -27,7 +32,8 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   public RealmResourceProvider create(KeycloakSession session) {
     // get override config
     RealmModel realm = session.getContext().getRealm();
-    String override = Optional.of(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY)).orElse(realm.getName());
+    String override =
+        Optional.of(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY)).orElse(realm.getName());
     log.infof("Using override realm %s", override);
     return new WizardResourceProvider(session, override);
   }
@@ -36,7 +42,59 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   public void init(Scope config) {}
 
   @Override
-  public void postInit(KeycloakSessionFactory factory) {}
+  public void postInit(KeycloakSessionFactory factory) {
+    KeycloakModelUtils.runJobInTransaction(factory, this::initClients);
+    factory.register(
+        (ProviderEvent event) -> {
+          if (event instanceof RealmModel.RealmPostCreateEvent) {
+            log.info("RealmPostCreateEvent");
+            realmPostCreate((RealmModel.RealmPostCreateEvent) event);
+          }
+        });
+  }
+
+  private void initClients(KeycloakSession session) {
+    log.info("Creating master realm idp-wizard client.");
+    RealmModel masterRealm = session.realms().getRealmByName("master");
+    ClientModel idpWizard = session.clients().getClientByClientId(masterRealm, "idp-wizard");
+    if (idpWizard == null) {
+      log.info("No idp-wizard client for master realm. Creating...");
+      idpWizard = session.clients().addClient(masterRealm, "idp-wizard");
+      setDefaults(idpWizard);
+      idpWizard.setRedirectUris(ImmutableSet.of("/*"));
+      idpWizard.setWebOrigins(ImmutableSet.of("/*"));
+    }
+
+    for (RealmModel realm : session.realms().getRealms()) {
+      log.infof("Creating %s realm idp-wizard client.", realm.getName());
+      createClient(realm, session);
+    }
+  }
+
+  private void realmPostCreate(RealmModel.RealmPostCreateEvent event) {
+    RealmModel realm = event.getCreatedRealm();
+    KeycloakSession session = event.getKeycloakSession();
+    createClient(realm, session);
+  }
+
+  private void createClient(RealmModel realm, KeycloakSession session) {
+    ClientModel idpWizard = session.clients().getClientByClientId(realm, "idp-wizard");
+    if (idpWizard == null) {
+      log.infof("No idp-wizard client for %s realm. Creating...", realm.getName());
+      String path = String.format("/realms/%s/wizard/", realm.getName());
+      idpWizard = session.clients().addClient(realm, "idp-wizard");
+      setDefaults(idpWizard);
+      idpWizard.setBaseUrl(path);
+      idpWizard.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
+      idpWizard.setWebOrigins(ImmutableSet.of("/*"));
+    }
+  }
+
+  private void setDefaults(ClientModel idpWizard) {
+    idpWizard.setProtocol("openid-connect");
+    idpWizard.setPublicClient(true);
+    idpWizard.setRootUrl("${authBaseUrl}");
+  }
 
   @Override
   public void close() {}
