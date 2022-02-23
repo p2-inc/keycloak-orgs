@@ -16,13 +16,19 @@ import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const OktaWizardSaml: FC = () => {
+  const idpCommonName = "Okta SAML IdP";
   const title = "Okta wizard";
   const navigateToBasePath = useNavigateToBasePath();
 
   const [metadata, setMetadata] = useState();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
 
   const alias = getAlias({
     provider: Providers.OKTA,
@@ -31,6 +37,7 @@ export const OktaWizardSaml: FC = () => {
   });
   const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
   const audienceUri = `${getServerUrl()}/realms/${getRealm()}`;
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -81,7 +88,7 @@ export const OktaWizardSaml: FC = () => {
   const createOktaSamlIdp = async () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
-    setResults("Creating Okta SAML IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias: alias,
@@ -96,12 +103,12 @@ export const OktaWizardSaml: FC = () => {
         realm: getRealm()!,
       });
 
-      setResults("Okta SAML IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(8);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults("Error creating Okta SAML IdP.");
+      setResults(`Error creating ${idpCommonName}.`);
       setError(true);
     } finally {
       setIsValidating(false);
@@ -157,12 +164,14 @@ export const OktaWizardSaml: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Okta SAML."
-          buttonText="Create Okta SAML IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createOktaSamlIdp}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

@@ -8,7 +8,7 @@ import {
 } from "@patternfly/react-core";
 import { generatePath, Link, useParams } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
-import { BASE_PATH, PATHS } from "@app/routes";
+import { PATHS } from "@app/routes";
 
 interface Props {
   logo: string;
@@ -32,6 +32,13 @@ export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
         </FlexItem>
 
         <FlexItem align={{ default: "alignRight" }}>
+          <Link to={generatePath(PATHS.idpSelector, { realm })}>
+            <Button variant="link" isInline>
+              IDP Selector
+            </Button>
+          </Link>
+        </FlexItem>
+        <FlexItem>
           <Link to={generatePath(PATHS.dashboard, { realm })}>
             <Button variant="link" isInline>
               Dashboard

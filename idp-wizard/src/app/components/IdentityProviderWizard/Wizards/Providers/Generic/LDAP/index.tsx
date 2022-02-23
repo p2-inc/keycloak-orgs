@@ -20,7 +20,7 @@ import { BindConfig, ServerConfig } from "./steps/forms";
 import { useNavigateToBasePath } from "@app/routes";
 
 export const GenericLDAP: FC = () => {
-  const title = "Okta wizard";
+  const title = "LDAP Wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =

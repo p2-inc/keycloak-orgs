@@ -18,14 +18,20 @@ import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 
 export const Auth0WizardSAML: FC = () => {
+  const idpCommonName = "Auth0 SAML IdP";
   const alias = getAlias({
     provider: Providers.AUTH0,
     protocol: Protocols.SAML,
     preface: "auth0-saml",
   });
   const navigateToBasePath = useNavigateToBasePath();
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
   const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
 
@@ -34,6 +40,7 @@ export const Auth0WizardSAML: FC = () => {
   const [error, setError] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
   const [isValidating, setIsValidating] = useState(false);
@@ -79,7 +86,7 @@ export const Auth0WizardSAML: FC = () => {
   };
   const createIdP = async () => {
     setIsValidating(true);
-    setResults("Creating Auth0 SAML IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias,
@@ -94,12 +101,12 @@ export const Auth0WizardSAML: FC = () => {
         realm: getRealm()!,
       });
 
-      setResults("Auth0 SAML IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(6);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults("Error creating Auth0 SAML IdP.");
+      setResults(`Error creating ${idpCommonName}.`);
       setError(true);
     } finally {
       setIsValidating(false);
@@ -146,12 +153,14 @@ export const Auth0WizardSAML: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Auth0."
-          buttonText="Create Auth0 SAML IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createIdP}
           disableButton={disableButton}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",
