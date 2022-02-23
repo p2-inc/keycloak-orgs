@@ -17,6 +17,7 @@ import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 
 export const GoogleWizard: FC = () => {
+  const idpCommonName = "Google SAML IdP";
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
 
@@ -26,12 +27,18 @@ export const GoogleWizard: FC = () => {
     preface: "google-saml",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
 
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const acsUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
@@ -73,8 +80,7 @@ export const GoogleWizard: FC = () => {
 
         return {
           status: API_STATUS.SUCCESS,
-          message:
-            "Configuration successfully validated with Google Workspace Saml. Continue to next step.",
+          message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
         };
       }
     } catch (err) {
@@ -83,8 +89,7 @@ export const GoogleWizard: FC = () => {
 
     return {
       status: API_STATUS.ERROR,
-      message:
-        "Configuration validation failed with Google Workspace Saml. Check file and try again.",
+      message: `Configuration validation failed with ${idpCommonName}. Check file and try again.`,
     };
   };
 
@@ -104,12 +109,12 @@ export const GoogleWizard: FC = () => {
         ...payload,
         realm: getRealm()!,
       });
-      setResults("Google IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(8);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults("Error creating IdP for Google SAML.");
+      setResults(`Error creating IdP for ${idpCommonName}.`);
       setError(true);
     } finally {
       setIsValidating(false);
@@ -166,12 +171,14 @@ export const GoogleWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Google Cloud SAML."
-          buttonText="Create SAML IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createGoogleIdp}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

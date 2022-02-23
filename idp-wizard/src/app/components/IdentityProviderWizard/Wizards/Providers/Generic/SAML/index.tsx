@@ -21,12 +21,18 @@ import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const GenericSAML: FC = () => {
+  const idpCommonName = "Saml IdP";
   const title = "Generic SAML wizard";
   const navigateToBasePath = useNavigateToBasePath();
 
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
 
   const alias = getAlias({
     provider: Providers.SAML,
@@ -37,6 +43,7 @@ export const GenericSAML: FC = () => {
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const samlMetadata = `${getServerUrl()}/realms/${getRealm()}/protocol/saml/descriptor`;
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   // Metadata
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -64,7 +71,7 @@ export const GenericSAML: FC = () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating SAML IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias: "generic-saml",
@@ -79,13 +86,13 @@ export const GenericSAML: FC = () => {
         realm: getRealm()!,
       });
 
-      setResults("SAML IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(6);
       setError(false);
       setDisableButton(true);
     } catch (e) {
       setResults(
-        "Error creating SAML IdP. Please confirm there is no SAML configured already."
+        `Error creating ${idpCommonName}. Please confirm there is no SAML configured already.`
       );
       setError(true);
     } finally {
@@ -250,12 +257,14 @@ export const GenericSAML: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with SAML."
-          buttonText="Create SAML IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={validateFn}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

@@ -21,6 +21,7 @@ import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 
 export const AWSSamlWizard: FC = () => {
+  const idpCommonName = "AWS SSO IdP";
   const alias = getAlias({
     provider: Providers.AWS,
     protocol: Protocols.SAML,
@@ -30,8 +31,13 @@ export const AWSSamlWizard: FC = () => {
 
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
 
   const samlAudience = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const acsURL = `${getServerUrl()}/realms/${getRealm()}`;
@@ -39,6 +45,7 @@ export const AWSSamlWizard: FC = () => {
   const [providerUrl, setProviderUrl] = useState("");
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -186,7 +193,7 @@ export const AWSSamlWizard: FC = () => {
     },
     {
       id: 2,
-      name: "Upload AWS SSO IdP Information",
+      name: `Upload ${idpCommonName} Information`,
       component: (
         <Step2 url={providerUrl} handleFormSubmit={handleFormSubmit} />
       ),
@@ -225,12 +232,14 @@ export const AWSSamlWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with AWS SSO."
-          buttonText="Create AWS SSO IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={validateFn}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

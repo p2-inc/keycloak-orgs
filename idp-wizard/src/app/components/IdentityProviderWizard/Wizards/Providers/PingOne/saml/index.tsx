@@ -17,6 +17,7 @@ import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const PingOneWizard: FC = () => {
+  const idpCommonName = "PingOne IdP";
   const alias = getAlias({
     provider: Providers.PING_ONE,
     protocol: Protocols.SAML,
@@ -26,12 +27,18 @@ export const PingOneWizard: FC = () => {
 
   const title = "PingOne wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
@@ -92,7 +99,7 @@ export const PingOneWizard: FC = () => {
   const validateFn = async () => {
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating PingOne IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias,
@@ -107,13 +114,13 @@ export const PingOneWizard: FC = () => {
         realm: getRealm()!,
       });
 
-      setResults("PingOne IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(6);
       setError(false);
       setDisableButton(true);
     } catch (e) {
       setResults(
-        "Error creating PingOne IdP. Please confirm there is no PingOne IdP configured already."
+        `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`
       );
       setError(true);
     } finally {
@@ -148,7 +155,7 @@ export const PingOneWizard: FC = () => {
     },
     {
       id: 4,
-      name: "Upload PingOne IdP Information",
+      name: `Upload ${idpCommonName} Information`,
       component: <Step4 handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       enableNext: isFormValid,
@@ -161,12 +168,14 @@ export const PingOneWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with PingOne."
-          buttonText="Create PingOne IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={validateFn}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

@@ -9,7 +9,6 @@ import { OneLoginLogo } from "@app/images/onelogin";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { useKeycloak } from "@react-keycloak/web";
 import {
   API_RETURN,
   API_STATUS,
@@ -21,6 +20,7 @@ import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const OneLoginWizard: FC = () => {
+  const idpCommonName = "OneLogin IdP";
   const alias = getAlias({
     provider: Providers.AUTH0,
     protocol: Protocols.OPEN_ID,
@@ -29,12 +29,17 @@ export const OneLoginWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
-  const { keycloak } = useKeycloak();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [issuerUrl, setIssuerUrl] = useState("");
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -80,14 +85,12 @@ export const OneLoginWizard: FC = () => {
 
       return {
         status: API_STATUS.SUCCESS,
-        message:
-          "Configuration successfully validated with OneLogin IdP. Continue to next step.",
+        message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
       };
     } catch (e) {
       return {
         status: API_STATUS.ERROR,
-        message:
-          "Configuration validation failed with OneLogin IdP. Check URL and try again.",
+        message: `Configuration validation failed with ${idpCommonName}. Check URL and try again.`,
       };
     }
   };
@@ -95,7 +98,7 @@ export const OneLoginWizard: FC = () => {
   const validateFn = async () => {
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating OneLogin IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias,
@@ -110,13 +113,13 @@ export const OneLoginWizard: FC = () => {
         realm: getRealm()!,
       });
 
-      setResults("OneLogin IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(6);
       setError(false);
       setDisableButton(true);
     } catch (e) {
       setResults(
-        "Error creating OneLogin IdP. Please confirm there is no OneLogin IdP configured already."
+        `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`
       );
       setError(true);
     } finally {
@@ -151,7 +154,7 @@ export const OneLoginWizard: FC = () => {
     },
     {
       id: 4,
-      name: "Upload OneLogin IdP Information",
+      name: `Upload ${idpCommonName} Information`,
       component: <Step4 url={issuerUrl} handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       enableNext: isFormValid,
@@ -164,12 +167,14 @@ export const OneLoginWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with OneLogin."
-          buttonText="Create OneLogin IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={validateFn}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

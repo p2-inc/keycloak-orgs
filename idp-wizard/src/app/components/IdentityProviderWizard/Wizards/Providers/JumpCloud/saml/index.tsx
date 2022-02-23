@@ -17,6 +17,7 @@ import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const JumpCloudWizard: FC = () => {
+  const idpCommonName = "JumpCloud IdP";
   const alias = getAlias({
     provider: Providers.JUMP_CLOUD,
     protocol: Protocols.OPEN_ID,
@@ -25,12 +26,18 @@ export const JumpCloudWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "JumpCloud wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
@@ -70,8 +77,7 @@ export const JumpCloudWizard: FC = () => {
 
         return {
           status: API_STATUS.SUCCESS,
-          message:
-            "Configuration successfully validated with JumpCloud IdP. Continue to next step.",
+          message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
         };
       }
     } catch (err) {
@@ -80,15 +86,14 @@ export const JumpCloudWizard: FC = () => {
 
     return {
       status: API_STATUS.ERROR,
-      message:
-        "Configuration validation failed with JumpCloud IdP. Check file and try again.",
+      message: `Configuration validation failed with ${idpCommonName}. Check file and try again.`,
     };
   };
 
   const validateFn = async () => {
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating JumpCloud IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias,
@@ -118,13 +123,13 @@ export const JumpCloudWizard: FC = () => {
         }
       );
 
-      setResults("JumpCloud IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(6);
       setError(false);
       setDisableButton(true);
     } catch (e) {
       setResults(
-        "Error creating JumpCloud IdP. Please confirm there is no JumpCloud IdP configured already."
+        `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`
       );
       setError(true);
     } finally {
@@ -167,7 +172,7 @@ export const JumpCloudWizard: FC = () => {
     },
     {
       id: 5,
-      name: "Upload JumpCloud IdP Information",
+      name: `Upload ${idpCommonName} Information`,
       component: <Step5 handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       enableNext: isFormValid,
@@ -180,12 +185,14 @@ export const JumpCloudWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with JumpCloud."
-          buttonText="Create JumpCloud IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={validateFn}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

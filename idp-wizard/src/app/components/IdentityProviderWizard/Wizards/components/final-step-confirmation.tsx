@@ -14,6 +14,8 @@ interface SuccessProps {
   isValidating: boolean;
   disableButton: boolean;
   validationFunction: () => void;
+  adminLink?: string;
+  adminButtonText?: string;
 }
 
 // States should be
@@ -30,6 +32,8 @@ export const WizardConfirmation: FC<SuccessProps> = ({
   isValidating,
   validationFunction,
   disableButton = false,
+  adminLink,
+  adminButtonText,
 }) => {
   return (
     <div className="container" style={{ border: 0 }}>
@@ -56,6 +60,13 @@ export const WizardConfirmation: FC<SuccessProps> = ({
             {buttonText}
           </Button>
         </StackItem>
+        {disableButton && adminLink && (
+          <StackItem>
+            <Button component="a" href={adminLink}>
+              {adminButtonText}
+            </Button>
+          </StackItem>
+        )}
       </Stack>
     </div>
   );

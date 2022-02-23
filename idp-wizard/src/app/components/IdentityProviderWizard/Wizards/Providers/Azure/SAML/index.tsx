@@ -21,6 +21,7 @@ import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { getAlias } from "@wizardServices";
 
 export const AzureWizard: FC = () => {
+  const idpCommonName = "Azure SAML IdP";
   const alias = getAlias({
     provider: Providers.AZURE,
     protocol: Protocols.SAML,
@@ -33,10 +34,16 @@ export const AzureWizard: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
@@ -91,7 +98,7 @@ export const AzureWizard: FC = () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating Azure SAML IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias: alias,
@@ -135,13 +142,13 @@ export const AzureWizard: FC = () => {
         ],
       });
 
-      setResults("Azure SAML IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(7);
       setError(false);
       setDisableButton(true);
     } catch (e) {
       setResults(
-        "Error creating Azure SAML IdP. Please confirm there is no Azure SAML configured already."
+        `Error creating ${idpCommonName}. Please confirm there is no Azure SAML configured already.`
       );
       setError(true);
     } finally {
@@ -196,12 +203,14 @@ export const AzureWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Azure AD."
-          buttonText="Create SAML IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createAzureSamlIdP}
           disableButton={disableButton}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

@@ -17,20 +17,27 @@ import { Protocols, Providers } from "@app/configurations";
 import { getAlias } from "@wizardServices";
 
 export const Auth0WizardOIDC: FC = () => {
+  const idpCommonName = "Auth0 OIDC IdP";
   const alias = getAlias({
     provider: Providers.AUTH0,
     protocol: Protocols.OPEN_ID,
     preface: "auth0-oidc",
   });
   const navigateToBasePath = useNavigateToBasePath();
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
   const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
   const [error, setError] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/oidc/${alias}`;
 
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -85,7 +92,7 @@ export const Auth0WizardOIDC: FC = () => {
 
   const createIdP = async () => {
     setIsValidating(true);
-    setResults("Creating Auth0 OIDC IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias,
@@ -100,12 +107,12 @@ export const Auth0WizardOIDC: FC = () => {
         realm: getRealm()!,
       });
 
-      setResults("Auth0 OIDC IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(5);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults("Error creating Auth0 OIDC IdP.");
+      setResults(`Error creating ${idpCommonName}.`);
       setError(true);
     } finally {
       setIsValidating(false);
@@ -148,12 +155,14 @@ export const Auth0WizardOIDC: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Auth0."
-          buttonText="Create Auth0 OIDC IdP in Keycloak"
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createIdP}
           disableButton={disableButton}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",

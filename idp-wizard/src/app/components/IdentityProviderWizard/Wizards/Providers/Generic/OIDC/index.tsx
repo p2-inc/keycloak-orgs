@@ -25,6 +25,7 @@ const forms = {
 };
 
 export const GenericOIDC: FC = () => {
+  const idpCommonName = "OIDC IdP";
   const title = "OIDC wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const alias = getAlias({
@@ -33,13 +34,18 @@ export const GenericOIDC: FC = () => {
     preface: "generic-oidc",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const [
+    kcAdminClient,
+    setKcAdminClientAccessToken,
+    getServerUrl,
+    getRealm,
+    getAuthRealm,
+  ] = useKeycloakAdminApi();
 
   const aliasId = last(alias.split("-"));
-  console.log(alias, aliasId);
   const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${aliasId}/endpoint`;
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
+  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/oidc/${alias}`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -207,7 +213,7 @@ export const GenericOIDC: FC = () => {
 
   const validateFn = async () => {
     setIsValidating(true);
-    setResults("Creating OIDC IdP...");
+    setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
       alias,
@@ -222,12 +228,12 @@ export const GenericOIDC: FC = () => {
         realm: getRealm()!,
       });
 
-      setResults("OIDC IdP created successfully. Click finish.");
+      setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(4);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults("Error creating OIDC IdP.");
+      setResults(`Error creating ${idpCommonName}.`);
       setError(true);
     } finally {
       setIsValidating(false);
@@ -279,13 +285,15 @@ export const GenericOIDC: FC = () => {
       component: (
         <WizardConfirmation
           title="SSO Configuration Complete"
-          message="Your users can now sign-in with {{Provider}}."
-          buttonText="Create {{Provider}} IdP in Keycloak"
+          message="Your users can now sign-in with OIDC."
+          buttonText={`Create ${idpCommonName} in Keycloak`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={validateFn}
+          adminLink={adminLink}
+          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
       ),
       nextButtonText: "Finish",
