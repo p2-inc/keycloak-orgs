@@ -20,12 +20,12 @@ export interface METADATA_CONFIG {
   enabledFromMetadata: "false" | "true";
   postBindingLogout: "false" | "true";
   postBindingResponse: "false" | "true";
-  nameIDPolicyFormat: string;
+  nameIDPolicyFormat?: string;
   postBindingAuthnRequest: "false" | "true";
   singleSignOnServiceUrl: string;
   wantAuthnRequestsSigned: "false" | "true";
   addExtensionsElementWithKeyInfo: "false" | "true";
-  syncMode: string;
-  allowCreate: "false" | "true";
-  principalType: string;
+  syncMode?: string;
+  allowCreate?: "false" | "true";
+  principalType?: string;
 }

@@ -15,7 +15,7 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
-import { Protocols, Providers } from "@app/configurations";
+import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 
 export const Auth0WizardSAML: FC = () => {
   const alias = getAlias({
@@ -56,7 +56,10 @@ export const Auth0WizardSAML: FC = () => {
       const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
-        setConfigData(resp.data);
+        setConfigData({
+          ...SamlIDPDefaults,
+          ...resp.data,
+        });
         setIsFormValid(true);
         return {
           status: API_STATUS.SUCCESS,

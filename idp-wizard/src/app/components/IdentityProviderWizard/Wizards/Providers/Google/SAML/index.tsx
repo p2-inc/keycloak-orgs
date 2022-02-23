@@ -14,7 +14,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
-import { Protocols, Providers } from "@app/configurations";
+import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 
 export const GoogleWizard: FC = () => {
   const title = "Google wizard";
@@ -65,7 +65,10 @@ export const GoogleWizard: FC = () => {
       const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
-        setMetadata(resp.data);
+        setMetadata({
+          ...SamlIDPDefaults,
+          ...resp.data,
+        });
         setIsFormValid(true);
 
         return {

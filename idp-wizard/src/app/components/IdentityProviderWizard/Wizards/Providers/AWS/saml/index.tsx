@@ -18,7 +18,7 @@ import {
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
-import { Protocols, Providers } from "@app/configurations";
+import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 
 export const AWSSamlWizard: FC = () => {
   const alias = getAlias({
@@ -70,7 +70,10 @@ export const AWSSamlWizard: FC = () => {
         realm: getRealm(),
       });
 
-      setMetadata(resp);
+      setMetadata({
+        ...SamlIDPDefaults,
+        ...resp,
+      });
       setIsFormValid(true);
 
       return {

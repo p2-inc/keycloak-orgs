@@ -17,10 +17,7 @@ export const useKeycloakAdminApi = () => {
     }
   };
 
-  const getRealm = () => {
-    // console.log("getRealm", pathRealm);
-    return pathRealm;
-  };
+  const getRealm = () => pathRealm;
 
   const getAuthRealm = () => {
     if (typeof keycloak.realm !== "undefined") {

@@ -18,7 +18,7 @@ import {
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
-import { Providers, Protocols } from "@app/configurations";
+import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const GenericSAML: FC = () => {
   const title = "Generic SAML wizard";
@@ -102,7 +102,10 @@ export const GenericSAML: FC = () => {
       const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
-        setMetadata(resp.data);
+        setMetadata({
+          ...SamlIDPDefaults,
+          ...resp.data,
+        });
         setIsFormValid(true);
         return {
           status: API_STATUS.SUCCESS,
@@ -141,7 +144,10 @@ export const GenericSAML: FC = () => {
       const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
-        setMetadata(resp.data);
+        setMetadata({
+          ...SamlIDPDefaults,
+          ...resp.data,
+        });
         setIsFormValid(true);
         return {
           status: API_STATUS.SUCCESS,
@@ -175,7 +181,10 @@ export const GenericSAML: FC = () => {
         realm: getRealm(),
       });
 
-      setMetadata(resp);
+      setMetadata({
+        ...SamlIDPDefaults,
+        ...resp,
+      });
       setIsFormValid(true);
 
       return {

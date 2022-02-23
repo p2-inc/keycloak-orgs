@@ -14,7 +14,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
-import { Providers, Protocols } from "@app/configurations";
+import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 
 export const JumpCloudWizard: FC = () => {
   const alias = getAlias({
@@ -65,7 +65,7 @@ export const JumpCloudWizard: FC = () => {
       const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
-        setMetadata(resp.data);
+        setMetadata({ ...SamlIDPDefaults, ...resp.data });
         setIsFormValid(true);
 
         return {
