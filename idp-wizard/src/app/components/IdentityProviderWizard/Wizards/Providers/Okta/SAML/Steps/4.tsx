@@ -1,10 +1,5 @@
 import React, { FC } from "react";
-import {
-  DoubleItemClipboardCopy,
-  InstructionProps,
-  Step,
-  StepImage,
-} from "@wizardComponents";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/okta/saml";
 
 interface Props {}

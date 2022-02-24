@@ -10,7 +10,7 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { API_STATUS } from "@app/configurations/api-status";
+import { API_RETURN, API_STATUS } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
@@ -21,6 +21,7 @@ export const OktaWizardSaml: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
 
   const [metadata, setMetadata] = useState();
+  const [isFormValid, setIsFormValid] = useState(false);
   const [stepIdReached, setStepIdReached] = useState(1);
   const [
     kcAdminClient,
@@ -38,6 +39,7 @@ export const OktaWizardSaml: FC = () => {
   const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
   const audienceUri = `${getServerUrl()}/realms/${getRealm()}`;
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
+  const [metadataUrl, setMetadataUrl] = useState("");
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -56,12 +58,17 @@ export const OktaWizardSaml: FC = () => {
     navigateToBasePath();
   };
 
-  const validateMetadata = async ({ metadataUrl }: { metadataUrl: string }) => {
+  const handleFormSubmit = async ({
+    url,
+  }: {
+    url: string;
+  }): Promise<API_RETURN> => {
     // make call to submit the URL and verify it
+    setMetadataUrl(url);
 
     try {
       const resp = await kcAdminClient.identityProviders.importFromUrl({
-        fromUrl: metadataUrl,
+        fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
       });
@@ -70,17 +77,17 @@ export const OktaWizardSaml: FC = () => {
         ...SamlIDPDefaults,
         ...resp,
       });
+      setIsFormValid(true);
 
       return {
         status: API_STATUS.SUCCESS,
-        message:
-          "Configuration successfully validated with Okta. Continue to next step.",
+        message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
       };
     } catch (e) {
+      setIsFormValid(false);
       return {
         status: API_STATUS.ERROR,
-        message:
-          "Configuration validation failed with Okta. Check URL and try again.",
+        message: `Configuration validation failed with ${idpCommonName}. Check URL and try again.`,
       };
     }
   };
@@ -153,7 +160,10 @@ export const OktaWizardSaml: FC = () => {
     {
       id: 6,
       name: "Upload Okta IdP Information",
-      component: <Step6 validateMetadata={validateMetadata} />,
+      component: (
+        <Step6 handleFormSubmit={handleFormSubmit} url={metadataUrl} />
+      ),
+      enableNext: isFormValid,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 6,
     },
