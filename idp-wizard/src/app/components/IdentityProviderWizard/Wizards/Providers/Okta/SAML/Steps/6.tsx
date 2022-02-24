@@ -1,89 +1,38 @@
-import React, { FC, useState } from "react";
-import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import * as Images from "@app/images/okta/saml";
+import React, { FC } from "react";
 import {
-  ActionGroup,
-  Alert,
-  Button,
-  Card,
-  CardBody,
-  Form,
-  FormAlert,
-  FormGroup,
-  TextInput,
-} from "@patternfly/react-core";
-import { API_STATUS } from "@app/configurations/api-status";
+  InstructionProps,
+  Step,
+  StepImage,
+  UrlCard,
+  UrlForm,
+} from "@wizardComponents";
+import * as Images from "@app/images/okta/saml";
 
-interface Props {
-  validateMetadata: ({ metadataUrl }: { metadataUrl: string }) => Promise<{
-    status: API_STATUS;
-    message: string;
-  }>;
-}
+import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
-export const Step6: FC<Props> = ({ validateMetadata }) => {
-  const [metadataUrl, setMetadataUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<null | {
-    status: API_STATUS;
-    message: string;
-  }>(null);
+type Props = {
+  url: string;
+  handleFormSubmit: ({ url }: { url: string }) => API_RETURN_PROMISE;
+};
 
-  const submitMetadata = async () => {
-    setIsLoading(true);
-    const validateResult = await validateMetadata({ metadataUrl });
-    setResult(validateResult);
-    setIsLoading(false);
-  };
-
+export const Step6: FC<Props> = ({ url, handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
       text: 'In the "Sign On" section, right click and click to copy the "Identity Provider metadata" link and paste below.',
       component: <StepImage src={Images.OktaSaml8} alt="Step 6.1" />,
     },
     {
-      text: "Enter and validate the Identity Provider metadata.",
+      component: <div>Enter and validate the Identity Provider metadata.</div>,
+    },
+    {
       component: (
-        <Card>
-          <CardBody>
-            {result && (
-              <FormAlert className="pf-u-mb-md">
-                <Alert
-                  variant={
-                    result.status === API_STATUS.ERROR ? "danger" : "default"
-                  }
-                  title={result.message}
-                  aria-live="polite"
-                  isInline
-                />
-              </FormAlert>
-            )}
-            <Form>
-              <FormGroup
-                label="Identity Provider Metadata"
-                isRequired
-                fieldId="ipm-01"
-              >
-                <TextInput
-                  isRequired
-                  type="text"
-                  id="ipm-01"
-                  name="ipm-01"
-                  placeholder="Paste Metadata URL"
-                  value={metadataUrl}
-                  onChange={setMetadataUrl}
-                />
-              </FormGroup>
-              <Button
-                variant="primary"
-                onClick={submitMetadata}
-                isLoading={isLoading}
-              >
-                Submit
-              </Button>
-            </Form>
-          </CardBody>
-        </Card>
+        <UrlCard>
+          <UrlForm
+            url={url}
+            urlLabel="Provider Url"
+            handleFormSubmit={handleFormSubmit}
+          />
+        </UrlCard>
       ),
     },
   ];

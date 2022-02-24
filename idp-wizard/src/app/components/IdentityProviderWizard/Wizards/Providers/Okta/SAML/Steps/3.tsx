@@ -10,12 +10,25 @@ import * as Images from "@app/images/okta/saml";
 export const Step3: FC = () => {
   const instructions: InstructionProps[] = [
     {
-      text: 'In the "Parameters" section, provide the following attribute mappings and select "Save". Note you may need to click "Add Another" to configure each of the mappings.',
+      component: (
+        <div>
+          In the "Parameters" section, provide the following attribute mappings
+          and select "Save". Note you may need to click "Add Another" to
+          configure each of the mappings.
+        </div>
+      ),
+    },
+    {
+      component: (
+        <div>
+          Note that if "user.login" is not present in your Okta account, try
+          "user.id" or do not add this mapping.
+        </div>
+      ),
+    },
+    {
       component: (
         <>
-          <div className="pf-u-mb-md">
-            Provide the following Attribute Mappings and select "Finish"
-          </div>
           <DoubleItemClipboardCopy leftValue="email" rightValue="user.email" />
           <DoubleItemClipboardCopy
             leftValue="firstName"
