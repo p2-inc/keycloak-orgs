@@ -1,19 +1,21 @@
 import React, { FC, useState } from "react";
-import { InstructionProps, Step } from "@wizardComponents";
+import {
+  InstructionProps,
+  MetadataFile,
+  Step,
+  UrlForm,
+} from "@wizardComponents";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
 import {
   API_RETURN,
   API_STATUS,
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
-import { MetadataUrlForm, MetadataFile, MetadataConfig } from "./forms";
+import { MetadataConfig } from "./forms";
 
 interface Props {
-  validateMetadataUrl: ({
-    metadataUrl,
-  }: {
-    metadataUrl: string;
-  }) => Promise<API_RETURN>;
+  validateMetadataUrl: ({ url }: { url: string }) => Promise<API_RETURN>;
+  url: string;
   uploadMetadataFile: (file: File) => Promise<API_RETURN>;
   uploadCertifcateMetadataInfo: ({
     file,
@@ -37,16 +39,12 @@ export const Step2: FC<Props> = ({
   uploadMetadataFile,
   validateMetadataUrl,
   uploadCertifcateMetadataInfo,
-  metadata,
+  url,
 }) => {
   const [formsActive, setFormsActive] = useState(forms);
 
-  const handleMetadatUrlValidation = async ({
-    metadataUrl,
-  }: {
-    metadataUrl: string;
-  }) => {
-    const resp = await validateMetadataUrl({ metadataUrl });
+  const handleMetadatUrlValidation = async ({ url }: { url: string }) => {
+    const resp = await validateMetadataUrl({ url });
     if (resp.status === API_STATUS.SUCCESS) {
       setFormsActive({
         ...formsActive,
@@ -117,9 +115,10 @@ export const Step2: FC<Props> = ({
               If your identity provider provides a SAML metadata URL, input it
               here.
             </div>
-            <MetadataUrlForm
+            <UrlForm
               handleFormSubmit={handleMetadatUrlValidation}
               formActive={formsActive.METADATA_URL}
+              url={url}
             />
           </CardBody>
         </Card>

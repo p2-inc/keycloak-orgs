@@ -116,10 +116,10 @@ export const GenericOIDC: FC = () => {
     }
   };
 
-  const validateFile = async ({ file }: { file: File }) => {
+  const validateFile = async ({ metadataFile }: { metadataFile: File }) => {
     const fd = new FormData();
     fd.append("providerId", "oidc");
-    fd.append("file", file);
+    fd.append("file", metadataFile);
 
     try {
       const resp = await Axios.post(identifierURL, fd);

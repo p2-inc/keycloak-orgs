@@ -131,7 +131,6 @@ export const GenericSAML: FC = () => {
     };
   };
 
-  // TODO:: finish this one
   const uploadCertifcateMetadataInfo = async ({
     file,
     ssoUrl,
@@ -174,16 +173,16 @@ export const GenericSAML: FC = () => {
   };
 
   const validateMetadataUrl = async ({
-    metadataUrl,
+    url,
   }: {
-    metadataUrl: string;
+    url: string;
   }): Promise<API_RETURN> => {
     // make call to submit the URL and verify it
-    setMetadataUrl(metadataUrl);
+    setMetadataUrl(url);
 
     try {
       const resp = await kcAdminClient.identityProviders.importFromUrl({
-        fromUrl: metadataUrl,
+        fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
       });
@@ -227,6 +226,7 @@ export const GenericSAML: FC = () => {
       component: (
         <Step2
           validateMetadataUrl={validateMetadataUrl}
+          url={metadataUrl}
           metadata={metadata}
           uploadMetadataFile={uploadMetadataFile}
           uploadCertifcateMetadataInfo={uploadCertifcateMetadataInfo}

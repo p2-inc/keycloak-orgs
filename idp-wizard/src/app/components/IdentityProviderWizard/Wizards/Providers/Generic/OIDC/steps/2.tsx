@@ -1,12 +1,21 @@
 import React, { FC, useState } from "react";
-import { InstructionProps, Step } from "@wizardComponents";
+import {
+  InstructionProps,
+  MetadataFile,
+  Step,
+  UrlForm,
+} from "@wizardComponents";
 import { Config, ConfigurationFile, OidcConfig, OpenIdUrl } from "./forms";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
 
 interface Props {
   validateUrl: ({ url }: { url: string }) => API_RETURN_PROMISE;
-  validateFile: ({ file }: { file: File }) => API_RETURN_PROMISE;
+  validateFile: ({
+    metadataFile,
+  }: {
+    metadataFile: File;
+  }) => API_RETURN_PROMISE;
   validateConfig: (config: OidcConfig) => API_RETURN_PROMISE;
   url: string;
   formsActive: {
@@ -55,7 +64,8 @@ export const Step2: FC<Props> = ({
               If your identity provider provides a OIDC configuration URL, input
               it here.
             </div>
-            <OpenIdUrl
+            <UrlForm
+              urlLabel="OpenID Endpoint Configuration URL"
               handleFormSubmit={validateUrl}
               formActive={formsActive.URL}
               url={url}
@@ -73,7 +83,7 @@ export const Step2: FC<Props> = ({
               If your identity provider provides a OIDC configuration File,
               upload it here.
             </div>
-            <ConfigurationFile
+            <MetadataFile
               handleFormSubmit={validateFile}
               formActive={formsActive.FILE}
             />
