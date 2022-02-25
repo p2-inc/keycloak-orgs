@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -15,6 +15,7 @@ import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
+import { usePrompt } from "@app/hooks";
 
 export const GoogleWizard: FC = () => {
   const idpCommonName = "Google SAML IdP";
@@ -48,8 +49,15 @@ export const GoogleWizard: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
+  const finishStep = 8;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
+
   const onNext = (newStep) => {
-    if (stepIdReached === 8) {
+    if (stepIdReached === finishStep) {
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -110,7 +118,7 @@ export const GoogleWizard: FC = () => {
         realm: getRealm()!,
       });
       setResults(`${idpCommonName} created successfully. Click finish.`);
-      setStepIdReached(8);
+      setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -183,7 +191,7 @@ export const GoogleWizard: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 8,
+      enableNext: stepIdReached === finishStep,
       canJumpTo: stepIdReached >= 7,
     },
   ];

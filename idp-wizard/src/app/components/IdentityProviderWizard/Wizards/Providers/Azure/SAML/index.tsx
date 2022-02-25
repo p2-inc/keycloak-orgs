@@ -19,6 +19,7 @@ import {
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { getAlias } from "@wizardServices";
+import { usePrompt } from "@app/hooks";
 
 export const AzureWizard: FC = () => {
   const idpCommonName = "Azure SAML IdP";
@@ -48,8 +49,15 @@ export const AzureWizard: FC = () => {
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
 
+  const finishStep = 7;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
+
   const onNext = (newStep) => {
-    if (stepIdReached === steps.length + 1) {
+    if (stepIdReached === finishStep) {
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -141,7 +149,7 @@ export const AzureWizard: FC = () => {
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
-      setStepIdReached(7);
+      setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -214,7 +222,7 @@ export const AzureWizard: FC = () => {
       nextButtonText: "Finish",
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 6,
-      enableNext: stepIdReached === 7,
+      enableNext: stepIdReached === finishStep,
     },
   ];
 

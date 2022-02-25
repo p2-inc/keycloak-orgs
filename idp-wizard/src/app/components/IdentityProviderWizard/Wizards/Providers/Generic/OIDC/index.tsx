@@ -17,6 +17,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers } from "@app/configurations";
 import { last } from "lodash";
+import { usePrompt } from "@app/hooks";
 
 const forms = {
   URL: true,
@@ -73,8 +74,15 @@ export const GenericOIDC: FC = () => {
   const [credentailsValid, setCredentailsValid] = useState(false);
   const [credentialValidationResp, setCredentialValidationResp] = useState({});
 
+  const finishStep = 5;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
+
   const onNext = (newStep) => {
-    if (stepIdReached === steps.length + 1) {
+    if (stepIdReached === finishStep) {
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -229,7 +237,7 @@ export const GenericOIDC: FC = () => {
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
-      setStepIdReached(4);
+      setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -298,8 +306,8 @@ export const GenericOIDC: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 4,
-      canJumpTo: stepIdReached >= 3,
+      enableNext: stepIdReached === finishStep,
+      canJumpTo: stepIdReached >= 4,
     },
   ];
 

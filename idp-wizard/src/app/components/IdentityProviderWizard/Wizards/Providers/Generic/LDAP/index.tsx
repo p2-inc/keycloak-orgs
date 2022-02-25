@@ -18,6 +18,7 @@ import { useKeycloak } from "@react-keycloak/web";
 import { API_STATUS } from "@app/configurations/api-status";
 import { BindConfig, ServerConfig } from "./steps/forms";
 import { useNavigateToBasePath } from "@app/routes";
+import { usePrompt } from "@app/hooks";
 
 export const GenericLDAP: FC = () => {
   const title = "LDAP Wizard";
@@ -25,7 +26,6 @@ export const GenericLDAP: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
-  const { keycloak } = useKeycloak();
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -44,6 +44,13 @@ export const GenericLDAP: FC = () => {
   const [serverConfigValid, setServerConfigValid] = useState(false);
   const [bindCreds, setBindCreds] = useState<BindConfig>({});
   const [bindCredsValid, setBindCredsValid] = useState(false);
+
+  const finishStep = 5;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -157,7 +164,7 @@ export const GenericLDAP: FC = () => {
     setResults(
       "LDAP IdP created and contacts synced. Click finish to complete."
     );
-    setStepIdReached(5);
+    setStepIdReached(finishStep);
     setError(false);
     setDisableButton(true);
     setIsValidating(false);
@@ -295,7 +302,7 @@ export const GenericLDAP: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 5,
+      enableNext: stepIdReached === finishStep,
       canJumpTo: stepIdReached >= 4,
     },
   ];

@@ -45,11 +45,6 @@ export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
             </Button>
           </Link>
         </FlexItem>
-        <FlexItem>
-          <Button variant="link" isInline onClick={() => keycloak.logout()}>
-            Logout
-          </Button>
-        </FlexItem>
       </Flex>
     </PageSection>
   );

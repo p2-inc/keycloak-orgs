@@ -14,6 +14,7 @@ import { API_STATUS } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
+import { usePrompt } from "@app/hooks";
 
 export const OktaWizardSaml: FC = () => {
   const idpCommonName = "Okta SAML IdP";
@@ -45,8 +46,15 @@ export const OktaWizardSaml: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
+  const finishStep = 8;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
+
   const onNext = (newStep) => {
-    if (stepIdReached === steps.length + 1) {
+    if (stepIdReached === finishStep) {
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -104,7 +112,7 @@ export const OktaWizardSaml: FC = () => {
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
-      setStepIdReached(8);
+      setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -176,7 +184,7 @@ export const OktaWizardSaml: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 8,
+      enableNext: stepIdReached === finishStep,
       canJumpTo: stepIdReached >= 7,
     },
   ];

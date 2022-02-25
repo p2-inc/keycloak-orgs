@@ -16,6 +16,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
+import { usePrompt } from "@app/hooks";
 
 export const Auth0WizardSAML: FC = () => {
   const idpCommonName = "Auth0 SAML IdP";
@@ -45,8 +46,15 @@ export const Auth0WizardSAML: FC = () => {
   const [configData, setConfigData] = useState<METADATA_CONFIG | null>(null);
   const [isValidating, setIsValidating] = useState(false);
 
+  const finishStep = 6;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
+
   const onNext = (newStep) => {
-    if (stepIdReached === steps.length + 1) {
+    if (stepIdReached === finishStep) {
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -102,7 +110,7 @@ export const Auth0WizardSAML: FC = () => {
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
-      setStepIdReached(6);
+      setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -165,7 +173,7 @@ export const Auth0WizardSAML: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 6,
+      enableNext: stepIdReached === finishStep,
       canJumpTo: stepIdReached >= 5,
     },
   ];

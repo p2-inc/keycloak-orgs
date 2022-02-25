@@ -15,6 +15,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useNavigateToBasePath } from "@app/routes";
 import { Protocols, Providers } from "@app/configurations";
 import { getAlias } from "@wizardServices";
+import { usePrompt } from "@app/hooks";
 
 export const Auth0WizardOIDC: FC = () => {
   const idpCommonName = "Auth0 OIDC IdP";
@@ -46,8 +47,15 @@ export const Auth0WizardOIDC: FC = () => {
   >({});
   const [config, setConfig] = useState({});
 
+  const finishStep = 5;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
+
   const onNext = (newStep) => {
-    if (stepIdReached === steps.length + 1) {
+    if (stepIdReached === finishStep) {
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -108,7 +116,7 @@ export const Auth0WizardOIDC: FC = () => {
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
-      setStepIdReached(5);
+      setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -167,7 +175,7 @@ export const Auth0WizardOIDC: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 5,
+      enableNext: stepIdReached === finishStep,
       canJumpTo: stepIdReached >= 4,
     },
   ];

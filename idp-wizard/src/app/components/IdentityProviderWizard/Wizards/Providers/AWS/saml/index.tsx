@@ -19,6 +19,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
+import { usePrompt } from "@app/hooks";
 
 export const AWSSamlWizard: FC = () => {
   const idpCommonName = "AWS SSO IdP";
@@ -53,8 +54,15 @@ export const AWSSamlWizard: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
+  const finishStep = 7;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
+
   const onNext = (newStep) => {
-    if (stepIdReached === steps.length + 1) {
+    if (stepIdReached === finishStep) {
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -170,7 +178,7 @@ export const AWSSamlWizard: FC = () => {
       );
 
       setResults("AWS SAML IdP created successfully. Click finish.");
-      setStepIdReached(7);
+      setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -244,7 +252,7 @@ export const AWSSamlWizard: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 7,
+      enableNext: stepIdReached === finishStep,
       canJumpTo: stepIdReached >= 6,
     },
   ];
