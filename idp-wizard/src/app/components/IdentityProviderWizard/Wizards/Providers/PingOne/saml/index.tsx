@@ -15,6 +15,7 @@ import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
+import { usePrompt } from "@app/hooks";
 
 export const PingOneWizard: FC = () => {
   const idpCommonName = "PingOne IdP";
@@ -48,6 +49,13 @@ export const PingOneWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
+
+  const finishStep = 6;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -115,7 +123,7 @@ export const PingOneWizard: FC = () => {
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
-      setStepIdReached(6);
+      setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
@@ -180,7 +188,7 @@ export const PingOneWizard: FC = () => {
       ),
       nextButtonText: "Finish",
       hideCancelButton: true,
-      enableNext: stepIdReached === 6,
+      enableNext: stepIdReached === finishStep,
       canJumpTo: stepIdReached >= 5,
     },
   ];
