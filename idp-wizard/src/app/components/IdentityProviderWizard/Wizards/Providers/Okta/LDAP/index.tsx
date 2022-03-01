@@ -74,6 +74,7 @@ export const OktaWizardLDAP: FC = () => {
       canJumpTo: stepIdReached >= 3,
     },
     {
+      id: 4,
       name: "Confirmation",
       component: (
         <WizardConfirmation
@@ -86,7 +87,8 @@ export const OktaWizardLDAP: FC = () => {
           validationFunction={validateOktaWizard}
         />
       ),
-      canJumpTo: stepIdReached >= 3,
+      canJumpTo: stepIdReached >= 4,
+      enableNext: stepIdReached === 5,
       hideCancelButton: true,
     },
   ];

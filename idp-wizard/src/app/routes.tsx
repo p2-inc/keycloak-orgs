@@ -1,7 +1,6 @@
 import React from "react";
 import {
   generatePath,
-  Params,
   Route,
   Routes,
   useNavigate,
