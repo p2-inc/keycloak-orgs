@@ -28,7 +28,7 @@ export function useRoleAccess() {
       roleAccess.push(keycloak.hasResourceRole(role, "realm-management"))
     );
 
-    setHasAccess(roleAccess.includes(false));
+    setHasAccess(!roleAccess.includes(false));
   }, [keycloak?.token]);
 
   useEffect(() => {
