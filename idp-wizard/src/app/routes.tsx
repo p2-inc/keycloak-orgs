@@ -12,6 +12,7 @@ import { IdentityProviderSelector } from "./components/IdentityProviderWizard/Id
 import Provider from "./components/IdentityProviderWizard/providers";
 import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
 import { Protocols, Providers } from "./configurations";
+import { AccessDenied } from "./AccessDenied/AccessDenied";
 
 export interface RouterParams {
   provider: Providers;
@@ -61,6 +62,7 @@ const AppRoutes = (): React.ReactElement => (
       <Route path="dashboard">
         <Route index element={<Dashboard />} />
       </Route>
+      <Route path="access-denied" element={AccessDenied} />
     </Route>
 
     <Route path="*" element={<NotFound />} />
