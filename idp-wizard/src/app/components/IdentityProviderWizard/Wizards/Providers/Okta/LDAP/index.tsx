@@ -5,25 +5,34 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import { OktaStepOne, OktaStepTwo, OktaStepThree } from "./Steps";
+import { OktaStepOne, OktaStepTwo, OktaStepThree } from "./steps";
 import oktaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
+import { useNavigateToBasePath } from "@app/routes";
 
 export const OktaWizardLDAP: FC = () => {
+  const idpCommonName = "Okta IdP";
+  const title = "Okta LDAP Wizard";
+  const navigateToBasePath = useNavigateToBasePath();
+
   const [stepIdReached, setStepIdReached] = useState(1);
   const [isFormValid, setIsFormValid] = useState(false);
   const [results, setResults] = useState("");
   const [error, setError] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
 
+  const finalStep = 5;
+
   const onNext = (newStep) => {
+    if (stepIdReached === finalStep) {
+      navigateToBasePath();
+    }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
-    setIsFormValid(false);
   };
 
   const closeWizard = () => {
-    console.log("close wizard");
+    navigateToBasePath();
   };
 
   const onFormChange = (value) => {
@@ -55,7 +64,7 @@ export const OktaWizardLDAP: FC = () => {
       id: 1,
       name: "Enable LDAP Inteface",
       component: <OktaStepOne onChange={onFormChange} />,
-      enableNext: isFormValid,
+      // enableNext: isFormValid,
       hideCancelButton: true,
     },
     {
@@ -64,7 +73,7 @@ export const OktaWizardLDAP: FC = () => {
       component: <OktaStepTwo onChange={onFormChange} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
-      enableNext: isFormValid,
+      // enableNext: isFormValid,
     },
     {
       id: 3,
@@ -93,7 +102,6 @@ export const OktaWizardLDAP: FC = () => {
     },
   ];
 
-  const title = "Okta wizard";
   return (
     <>
       <Header logo={oktaLogo} />

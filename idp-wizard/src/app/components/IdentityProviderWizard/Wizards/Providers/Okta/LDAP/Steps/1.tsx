@@ -12,6 +12,7 @@ import {
 } from "@patternfly/react-core";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { oktaStepOneValidation } from "@app/services/OktaValidation";
+import { LdapServerConfig, ServerConfig } from "./forms";
 
 interface Props {
   onChange: (value: boolean) => void;
@@ -25,13 +26,23 @@ export interface IOktaValues {
   ldapGroupBaseND: string;
 }
 
+export type LDAP_SERVER_CONFIG_TEST_CONNECTION = {
+  action: string;
+  connectionUrl: string;
+  authType: string;
+  bindDn: string;
+  bindCredential: string;
+  useTruststoreSpi: string;
+  connectionTimeout: string;
+  startTls: string;
+};
+
 export const OktaStepOne: FC<Props> = (props) => {
   const [alertText, setAlertText] = useState("");
   const [alertVariant, setAlertVariant] = useState("default");
   const [isValidating, setIsValidating] = useState(false);
   const oktaCustomerIdentifier =
-    sessionStorage.getItem("okta_customer_identifier") ||
-    "dev-11111111";
+    sessionStorage.getItem("okta_customer_identifier") || "dev-11111111";
 
   const customerIdentifier = oktaCustomerIdentifier;
 
@@ -73,6 +84,37 @@ export const OktaStepOne: FC<Props> = (props) => {
     setIsValidating(false);
   };
 
+  const handleConfigValidation = async ({
+    host,
+    sslPort,
+    baseDn,
+    userBaseDn,
+    groupBaseDn,
+    userFilter,
+    groupFilter,
+  }: ServerConfig) => {
+    const ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION = {
+      action: "testConnection",
+      connectionUrl: `ldaps://${host}:${sslPort}`,
+      authType: "simple",
+      bindDn: "",
+      bindCredential: "",
+      useTruststoreSpi: "ldapsOnly",
+      connectionTimeout: "",
+      startTls: "",
+    };
+
+    // return await handleServerConfigValidation(ldapServerConfig, {
+    //   host,
+    //   sslPort,
+    //   baseDn,
+    //   userBaseDn,
+    //   groupBaseDn,
+    //   userFilter,
+    //   groupFilter,
+    // });
+  };
+
   const instructionList: InstructionProps[] = [
     {
       text: "Directory Integrations",
@@ -83,13 +125,18 @@ export const OktaStepOne: FC<Props> = (props) => {
       component: <StepImage src={oktaStep2Image} alt="Step 1.2" />,
     },
     {
-      text: "Note the Settings and input them below.",
+      text: "Note the settings and input them below.",
       component: <></>,
     },
     {
       component: (
         <Card className="card-shadow">
           <CardBody>
+            <LdapServerConfig
+              handleFormSubmit={handleConfigValidation}
+              config={{}}
+            />
+
             {alertText && (
               <Alert
                 variant={alertVariant == "error" ? "danger" : "success"}
