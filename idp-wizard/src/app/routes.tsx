@@ -36,6 +36,7 @@ export const PATHS = {
   idpProtocolSelector: `${BASE_PATH}/idp/:provider/protocol`,
   idpProvider: `${BASE_PATH}/idp/:provider/:protocol`,
   dashboard: `${BASE_PATH}/dashboard`,
+  accessDenied: `${BASE_PATH}/access-denied`,
 };
 
 export function useNavigateToBasePath(realm?: string) {
@@ -62,7 +63,7 @@ const AppRoutes = (): React.ReactElement => (
       <Route path="dashboard">
         <Route index element={<Dashboard />} />
       </Route>
-      <Route path="access-denied" element={AccessDenied} />
+      <Route path="access-denied" element={<AccessDenied />} />
     </Route>
 
     <Route path="*" element={<NotFound />} />

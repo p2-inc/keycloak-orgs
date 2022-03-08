@@ -1,7 +1,7 @@
-import { generateBaseRealmPath } from "@app/routes";
+import { PATHS } from "@app/routes";
 import { useKeycloak } from "@react-keycloak/web";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { generatePath, useNavigate, useParams } from "react-router-dom";
 
 const requiredResourceRoles = [
   "manage-identity-providers",
@@ -15,8 +15,8 @@ const requiredResourceRoles = [
 
 export function useRoleAccess() {
   const { keycloak } = useKeycloak();
+  let { realm } = useParams();
   let navigate = useNavigate();
-  const accessDenied = `${generateBaseRealmPath()}access-denied`;
   // Starts as null to make true/false explicit states
   const [hasAccess, setHasAccess] = useState<null | boolean>(null);
 
@@ -28,15 +28,18 @@ export function useRoleAccess() {
       roleAccess.push(keycloak.hasResourceRole(role, "realm-management"))
     );
 
-    if (roleAccess.includes(false)) {
-      setHasAccess(false);
-
-      // Or choose to navigate away
-      // navigate(accessDenied);
-    } else {
-      setHasAccess(true);
-    }
+    setHasAccess(roleAccess.includes(false));
   }, [keycloak?.token]);
+
+  useEffect(() => {
+    if (hasAccess === false && realm) {
+      navigate(
+        generatePath(PATHS.accessDenied, {
+          realm,
+        })
+      );
+    }
+  }, [hasAccess, realm]);
 
   return [hasAccess];
 }
