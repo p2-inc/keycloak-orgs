@@ -18,10 +18,12 @@ import {
 import { BASE_PATH, PATHS } from "@app/routes";
 import { useTitle } from "react-use";
 import { useHostname } from "@app/hooks/useHostname";
+import { useRoleAccess } from "@app/hooks";
 
 export const IdentityProviderSelector: FC = () => {
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
+  const [hasAccess] = useRoleAccess();
 
   const hostname = useHostname();
 

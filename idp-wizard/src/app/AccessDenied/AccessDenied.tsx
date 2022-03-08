@@ -9,14 +9,14 @@ import {
   EmptyStateBody,
 } from "@patternfly/react-core";
 import { useTitle } from "react-use";
-import { useNavigateToBasePath } from "@app/routes";
-import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
+import { useNavigate } from "react-router-dom";
 
 const AccessDenied: React.FunctionComponent = () => {
   useTitle("Access Denied | PhaseTwo.io");
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
-  const navigateToBasePath = useNavigateToBasePath(getRealm());
+  let navigate = useNavigate();
+
+  // TODO: fix this to navigate to a defined path
+  const navigateToBasePath = () => navigate("/");
 
   return (
     <PageSection>
@@ -29,9 +29,7 @@ const AccessDenied: React.FunctionComponent = () => {
           Sorry, but you lack the necessary permissions to access this content.
           Please contact your administrator to request access.
         </EmptyStateBody>
-        <Button onClick={() => navigateToBasePath()}>
-          Return to Dashboard
-        </Button>
+        <Button onClick={navigateToBasePath}>Return to Dashboard</Button>
       </EmptyState>
     </PageSection>
   );
