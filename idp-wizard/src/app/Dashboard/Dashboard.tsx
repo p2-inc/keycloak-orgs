@@ -14,12 +14,16 @@ import { ConnectionStatus } from "./ConnectionStatus";
 import { ActivityLog } from "./ActivityLog";
 import { useParams } from "react-router";
 import { generatePath, Link } from "react-router-dom";
-import { BASE_PATH, PATHS } from "@app/routes";
+import { PATHS } from "@app/routes";
 import { useTitle } from "react-use";
+import { useRoleAccess } from "@app/hooks";
 
 const Dashboard: React.FunctionComponent = () => {
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
+
+  const [hasAccess] = useRoleAccess();
+
   useTitle("Dashboard | PhaseTwo");
 
   return (

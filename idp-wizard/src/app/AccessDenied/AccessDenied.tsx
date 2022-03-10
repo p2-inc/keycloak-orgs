@@ -3,34 +3,29 @@ import { ExclamationTriangleIcon } from "@patternfly/react-icons";
 import {
   PageSection,
   Title,
-  Button,
   EmptyState,
   EmptyStateIcon,
   EmptyStateBody,
 } from "@patternfly/react-core";
 import { useTitle } from "react-use";
-import { useNavigateToBasePath } from "@app/routes";
 
-const NotFound: React.FunctionComponent = () => {
-  useTitle("404 Page Not Found | PhaseTwo.io");
-  const navigateToBasePath = useNavigateToBasePath();
+const AccessDenied: React.FunctionComponent = () => {
+  useTitle("Access Denied | PhaseTwo.io");
 
   return (
     <PageSection>
       <EmptyState variant="full">
         <EmptyStateIcon icon={ExclamationTriangleIcon} />
         <Title headingLevel="h1" size="lg">
-          404 Page not found
+          Access Denied
         </Title>
         <EmptyStateBody>
-          We didn&apos;t find a page that matches the address you navigated to.
+          Sorry, but you lack the necessary permissions to access this content.
+          Please contact your administrator to request access.
         </EmptyStateBody>
-        <Button onClick={() => navigateToBasePath()}>
-          Return to Dashboard
-        </Button>
       </EmptyState>
     </PageSection>
   );
 };
 
-export { NotFound };
+export { AccessDenied };
