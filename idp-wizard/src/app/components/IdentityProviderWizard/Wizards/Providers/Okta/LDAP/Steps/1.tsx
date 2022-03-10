@@ -1,29 +1,17 @@
 import React, { FC, useState } from "react";
 import oktaStep1Image from "@app/images/okta/okta-1.png";
 import oktaStep2Image from "@app/images/okta/okta-2.png";
-import {
-  Alert,
-  Form,
-  FormGroup,
-  TextInput,
-  Card,
-  CardBody,
-  Button,
-} from "@patternfly/react-core";
+import { Card, CardBody } from "@patternfly/react-core";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
-import { oktaStepOneValidation } from "@app/services/OktaValidation";
 import { LdapServerConfig, ServerConfig } from "./forms";
+import { API_RETURN_PROMISE } from "@app/configurations";
 
 interface Props {
-  onChange: (value: boolean) => void;
-}
-
-export interface IOktaValues {
-  customerIdentifier: string;
-  ldapValue: string;
-  ldapBaseND: string;
-  ldapUserBaseDN: string;
-  ldapGroupBaseND: string;
+  handleServerConfigValidation: (
+    ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION,
+    serverConfig: ServerConfig
+  ) => API_RETURN_PROMISE;
+  config: ServerConfig;
 }
 
 export type LDAP_SERVER_CONFIG_TEST_CONNECTION = {
@@ -37,65 +25,14 @@ export type LDAP_SERVER_CONFIG_TEST_CONNECTION = {
   startTls: string;
 };
 
-export const OktaStepOne: FC<Props> = (props) => {
-  const [alertText, setAlertText] = useState("");
-  const [alertVariant, setAlertVariant] = useState("default");
-  const [isValidating, setIsValidating] = useState(false);
-  const oktaCustomerIdentifier =
-    sessionStorage.getItem("okta_customer_identifier") || "dev-11111111";
-
-  const customerIdentifier = oktaCustomerIdentifier;
-
-  const [ldapValue, setLDAPValue] = useState(
-    customerIdentifier + ".ldap.okta.com"
-  );
-  const [ldapBaseDN, setldapBaseDN] = useState(
-    `dc=${customerIdentifier}, dc=okta, dc=com`
-  );
-  const [ldapUserBaseDN, setldapUserBaseDN] = useState(
-    `ou=users, dc=${customerIdentifier}, dc=okta, dc=com`
-  );
-  const [ldapGroupBaseDN, setldapGroupBaseDN] = useState(
-    `ou=groups, dc=${customerIdentifier}, dc=okta, dc=com`
-  );
-
-  const handleLDAPValueChange = (value: string) => {
-    setLDAPValue(value);
-    const custIdentifer = value.split(".")[0];
-    setldapBaseDN(`dc=${custIdentifer}, dc=okta, dc-com`);
-    setldapUserBaseDN(`ou=users, dc=${custIdentifer}, dc=okta, dc=com`);
-    setldapGroupBaseDN(`ou=groups, dc=${custIdentifer}, dc=okta, dc=com`);
-    sessionStorage.setItem("okta_customer_identifier", custIdentifer);
-  };
-
-  const validateStep = async () => {
-    setIsValidating(true);
-    await oktaStepOneValidation(`${ldapValue}:636`)
-      .then((res) => {
-        setAlertText(res.message);
-        setAlertVariant(res.status);
-        props.onChange(true);
-      })
-      .catch(() => {
-        setAlertText("Error, could not validate okta");
-        setAlertVariant("danger");
-      });
-
-    setIsValidating(false);
-  };
-
-  const handleConfigValidation = async ({
-    host,
-    sslPort,
-    baseDn,
-    userBaseDn,
-    groupBaseDn,
-    userFilter,
-    groupFilter,
-  }: ServerConfig) => {
+export const OktaStepOne: FC<Props> = ({
+  handleServerConfigValidation,
+  config,
+}) => {
+  const handleConfigValidation = async (serverConfig: ServerConfig) => {
     const ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION = {
       action: "testConnection",
-      connectionUrl: `ldaps://${host}:${sslPort}`,
+      connectionUrl: `ldaps://${serverConfig.host}:${serverConfig.sslPort}`,
       authType: "simple",
       bindDn: "",
       bindCredential: "",
@@ -104,15 +41,7 @@ export const OktaStepOne: FC<Props> = (props) => {
       startTls: "",
     };
 
-    // return await handleServerConfigValidation(ldapServerConfig, {
-    //   host,
-    //   sslPort,
-    //   baseDn,
-    //   userBaseDn,
-    //   groupBaseDn,
-    //   userFilter,
-    //   groupFilter,
-    // });
+    return await handleServerConfigValidation(ldapServerConfig, serverConfig);
   };
 
   const instructionList: InstructionProps[] = [
@@ -134,102 +63,8 @@ export const OktaStepOne: FC<Props> = (props) => {
           <CardBody>
             <LdapServerConfig
               handleFormSubmit={handleConfigValidation}
-              config={{}}
+              config={config}
             />
-
-            {alertText && (
-              <Alert
-                variant={alertVariant == "error" ? "danger" : "success"}
-                isInline
-                title={alertText}
-              />
-            )}
-
-            <Form>
-              <FormGroup
-                label="1. LDAP Host"
-                isRequired
-                fieldId="simple-form-name-01"
-                className="form-label"
-              >
-                <TextInput
-                  isRequired
-                  type="text"
-                  id="simple-form-name-01"
-                  name="simple-form-name-01"
-                  aria-describedby="simple-form-name-01-helper"
-                  value={ldapValue}
-                  onChange={handleLDAPValueChange}
-                />
-              </FormGroup>
-              <FormGroup
-                label="2. LDAP SSL Port"
-                isRequired
-                fieldId="simple-form-name-02"
-                className="form-label"
-              >
-                <TextInput
-                  isRequired
-                  type="text"
-                  id="simple-form-name-02"
-                  name="simple-form-name-02"
-                  aria-describedby="simple-form-name-02-helper"
-                  value="636"
-                />
-              </FormGroup>
-              <FormGroup
-                label="3. LDAP Base DN"
-                isRequired
-                fieldId="simple-form-name-03"
-                className="form-label"
-              >
-                <TextInput
-                  isRequired
-                  type="text"
-                  id="simple-form-name-03"
-                  name="simple-form-name-03"
-                  aria-describedby="simple-form-name-03-helper"
-                  value={ldapBaseDN}
-                />
-              </FormGroup>
-              <FormGroup
-                label="4. LDAP User Base DN"
-                isRequired
-                fieldId="simple-form-name-04"
-                className="form-label"
-              >
-                <TextInput
-                  isRequired
-                  type="text"
-                  id="simple-form-name-04"
-                  name="simple-form-name-04"
-                  aria-describedby="simple-form-name-04-helper"
-                  value={ldapUserBaseDN}
-                />
-              </FormGroup>
-              <FormGroup
-                label="5. LDAP Group Base DN"
-                isRequired
-                fieldId="simple-form-name-05"
-                className="form-label"
-              >
-                <TextInput
-                  isRequired
-                  type="text"
-                  id="simple-form-name-05"
-                  name="simple-form-name-05"
-                  aria-describedby="simple-form-name-05-helper"
-                  value={ldapGroupBaseDN}
-                />
-              </FormGroup>
-              <Button
-                style={{ width: "200px" }}
-                isLoading={isValidating}
-                onClick={validateStep}
-              >
-                Validate Input
-              </Button>
-            </Form>
           </CardBody>
         </Card>
       ),

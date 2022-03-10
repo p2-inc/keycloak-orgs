@@ -5,22 +5,38 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import { OktaStepOne, OktaStepTwo, OktaStepThree } from "./steps";
+import {
+  OktaStepOne,
+  OktaStepTwo,
+  OktaStepThree,
+  LDAP_SERVER_CONFIG_TEST_CONNECTION,
+} from "./steps";
 import oktaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
 import { useNavigateToBasePath } from "@app/routes";
+import { BindConfig, ServerConfig } from "./steps/forms";
+import { useKeycloakAdminApi } from "@app/hooks";
+import { API_STATUS } from "@app/configurations";
 
 export const OktaWizardLDAP: FC = () => {
   const idpCommonName = "Okta IdP";
   const title = "Okta LDAP Wizard";
   const navigateToBasePath = useNavigateToBasePath();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [isFormValid, setIsFormValid] = useState(false);
   const [results, setResults] = useState("");
   const [error, setError] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+
+  const [serverConfig, setServerConfig] = useState<ServerConfig>({});
+  const [serverConfigValid, setServerConfigValid] = useState(false);
+
+  const [bindCreds, setBindCreds] = useState<BindConfig>({});
+  const [bindCredsValid, setBindCredsValid] = useState(false);
 
   const finalStep = 5;
 
@@ -33,10 +49,6 @@ export const OktaWizardLDAP: FC = () => {
 
   const closeWizard = () => {
     navigateToBasePath();
-  };
-
-  const onFormChange = (value) => {
-    setIsFormValid(value);
   };
 
   const username = sessionStorage.getItem("okta_un") || "";
@@ -59,21 +71,93 @@ export const OktaWizardLDAP: FC = () => {
     setIsValidating(false);
   };
 
+  const handleServerConfigValidation = async (
+    ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION,
+    serverConfig: ServerConfig
+  ) => {
+    setServerConfigValid(false);
+    try {
+      await kcAdminClient.realms.testLDAPConnection(
+        { realm: getRealm()! },
+        ldapServerConfig
+      );
+      setServerConfig(serverConfig);
+      setServerConfigValid(true);
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "LDAP connection test is successful. Continue to the next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message: "LDAP connection test failed. Check values and try again.",
+      };
+    }
+  };
+
+  const handleAdminCredentialValidation = async ({
+    bindDn,
+    bindPassword,
+  }: BindConfig) => {
+    const { host, sslPort, baseDn } = serverConfig;
+    const credentialConfig = {
+      action: "testAuthentication",
+      connectionUrl: `ldaps://${host}:${sslPort}`,
+      authType: "simple",
+      bindDn: `uid=${bindDn}, ${baseDn}`,
+      bindCredential: bindPassword,
+      useTruststoreSpi: "ldapsOnly",
+      connectionTimeout: "",
+      startTls: "",
+    };
+    setBindCredsValid(false);
+    try {
+      await kcAdminClient.realms.testLDAPConnection(
+        { realm: getRealm()! },
+        credentialConfig
+      );
+      setBindCreds({ bindDn, bindPassword });
+      setBindCredsValid(true);
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "Admin credential validation is successful. Continue to the next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message:
+          "Admin credential validation failed. Check values and try again.",
+      };
+    }
+  };
+
   const steps = [
     {
       id: 1,
-      name: "Enable LDAP Inteface",
-      component: <OktaStepOne onChange={onFormChange} />,
-      // enableNext: isFormValid,
+      name: "Enable LDAP Interface",
+      component: (
+        <OktaStepOne
+          handleServerConfigValidation={handleServerConfigValidation}
+          config={serverConfig}
+        />
+      ),
+      enableNext: serverConfigValid,
       hideCancelButton: true,
     },
     {
       id: 2,
       name: "LDAP Authentication",
-      component: <OktaStepTwo onChange={onFormChange} />,
+      component: (
+        <OktaStepTwo
+          handleAdminConfigValidation={handleAdminCredentialValidation}
+          config={bindCreds}
+        />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
-      // enableNext: isFormValid,
+      enableNext: bindCredsValid,
     },
     {
       id: 3,

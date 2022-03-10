@@ -39,14 +39,16 @@ export const OktaStepThree: FC = () => {
 
   const instructionList: InstructionProps[] = [
     {
-      text: `This is an optional step. If you have groups defined in Okta, you will find them in the Directory ${(
-        <ArrowRightIcon />
-      )} Groups section.`,
+      text: `This is an optional step. If you have groups defined in Okta, you will find them in the Directory > Groups section.`,
       component: <StepImage src={image} alt="Step3" />,
     },
     {
-      text: `If you want to limit groups that can access the ${hostname} app, enter those groups below.`,
-      component: <></>,
+      component: (
+        <div>
+          If you want to limit groups that can access the {hostname} app, enter
+          those groups below.
+        </div>
+      ),
     },
     {
       component: (
@@ -66,7 +68,7 @@ export const OktaStepThree: FC = () => {
                         onChange={(value) => handleInputChange(value, i)}
                       />
                       <div style={{ padding: "2px", marginLeft: "5px" }}>
-                        <TrashIcon onClick={() => onDelete(x)} color="red" />
+                        <TrashIcon onClick={() => onDelete(x)} />
                       </div>
                     </InputGroup>
                   );

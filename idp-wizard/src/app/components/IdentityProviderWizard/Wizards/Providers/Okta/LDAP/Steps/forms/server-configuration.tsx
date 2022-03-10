@@ -121,6 +121,7 @@ export const LdapServerConfig: FC<Props> = ({
           onChange={(val, e) => handleChange(e)}
           validated={hasError("host")}
           isDisabled={!formActive}
+          placeholder="dev-11111111.ldap.okta.com"
         />
       </FormGroup>
 
@@ -139,6 +140,7 @@ export const LdapServerConfig: FC<Props> = ({
           onChange={(val, e) => handleChange(e)}
           validated={hasError("sslPort")}
           isDisabled={!formActive}
+          placeholder="636"
         />
       </FormGroup>
 
@@ -157,6 +159,7 @@ export const LdapServerConfig: FC<Props> = ({
           onChange={(val, e) => handleChange(e)}
           validated={hasError("baseDn")}
           isDisabled={!formActive}
+          placeholder="dc=dev-11111111, dc=okta, dc=com"
         />
       </FormGroup>
 
@@ -175,6 +178,7 @@ export const LdapServerConfig: FC<Props> = ({
           onChange={(val, e) => handleChange(e)}
           validated={hasError("userBaseDn")}
           isDisabled={!formActive}
+          placeholder="ou=users, dc=dev-11111111, dc=okta, dc=com"
         />
       </FormGroup>
 
@@ -193,6 +197,7 @@ export const LdapServerConfig: FC<Props> = ({
           onChange={(val, e) => handleChange(e)}
           validated={hasError("groupBaseDn")}
           isDisabled={!formActive}
+          placeholder="ou=groups, dc=dev-11111111, dc=okta, dc=com"
         />
       </FormGroup>
 

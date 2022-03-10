@@ -14,7 +14,6 @@ import {
   Step3,
 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { useKeycloak } from "@react-keycloak/web";
 import { API_STATUS } from "@app/configurations/api-status";
 import { BindConfig, ServerConfig } from "./steps/forms";
 import { useNavigateToBasePath } from "@app/routes";

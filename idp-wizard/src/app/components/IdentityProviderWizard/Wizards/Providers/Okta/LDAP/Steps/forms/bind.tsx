@@ -17,8 +17,10 @@ import {
 } from "@app/configurations/api-status";
 
 const BindSchema = Yup.object().shape({
-  bindDn: Yup.string().required("Bind DN is a required field."),
-  bindPassword: Yup.string().required("Bind password is a required field."),
+  bindDn: Yup.string().required("Okta Admin Username is a required field."),
+  bindPassword: Yup.string().required(
+    "Okta Admin Password is a required field."
+  ),
 });
 
 export type BindConfig = {
@@ -35,7 +37,11 @@ type Props = {
   formActive?: boolean;
 };
 
-export const Bind: FC<Props> = ({ handleFormSubmit, formActive = true, config }) => {
+export const Bind: FC<Props> = ({
+  handleFormSubmit,
+  formActive = true,
+  config,
+}) => {
   const [submissionResp, setSubmissionResp] = useState<API_RETURN | null>();
   const {
     handleSubmit,
@@ -79,7 +85,7 @@ export const Bind: FC<Props> = ({ handleFormSubmit, formActive = true, config })
       )}
 
       <FormGroup
-        label="Bind DN"
+        label="Okta Admin Username"
         isRequired
         fieldId="bindDn"
         validated={hasError("bindDn")}
@@ -97,7 +103,7 @@ export const Bind: FC<Props> = ({ handleFormSubmit, formActive = true, config })
       </FormGroup>
 
       <FormGroup
-        label="Bind Password"
+        label="Okta Admin Password"
         isRequired
         fieldId="bindPassword"
         validated={hasError("bindPassword")}

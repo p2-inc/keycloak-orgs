@@ -1,7 +1,8 @@
 import { useKeycloakAdminApi } from "../hooks/useKeycloakAdminApi";
 
 export const oktaStepOneValidation = async (ldapConUrl: string) => {
-  const [kcAdminClient, setKcAdminClientAccessToken, getRealm] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getRealm] =
+    useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
 
   const connSetting = {
@@ -41,7 +42,8 @@ export const oktaValidateUsernamePassword = async (
   password: string,
   baseDN: string
 ) => {
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
 
   const connSetting = {
@@ -74,33 +76,13 @@ export const oktaValidateUsernamePassword = async (
   return testConnection;
 };
 
-export const oktaTestConnection = async (ldapConUrl: string) => {
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
-  await setKcAdminClientAccessToken();
-  const connSetting = {
-    action: "testConnection",
-    connectionUrl: `ldaps://${ldapConUrl}`,
-    authType: "simple",
-    bindDn: "",
-    bindCredential: "",
-    useTruststoreSpi: "ldapsOnly",
-    connectionTimeout: "",
-    startTls: "",
-  };
-
-  const testConnection = await kcAdminClient.realms
-    .testLDAPConnection({ realm: getRealm()! }, connSetting)
-    .then((res) => console.log("result", res))
-    .catch((err) => console.log("error", err));
-  return testConnection;
-};
-
 export const oktaCreateFederationAndSyncUsers = async (
   customer_id,
   login_id,
   password
 ) => {
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm ] = useKeycloakAdminApi();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
 
   console.log("validating", customer_id, login_id, password);
