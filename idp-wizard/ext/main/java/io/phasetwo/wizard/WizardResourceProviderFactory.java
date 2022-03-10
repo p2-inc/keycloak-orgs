@@ -33,7 +33,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     // get override config
     RealmModel realm = session.getContext().getRealm();
     String override =
-        Optional.of(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY)).orElse(realm.getName());
+        Optional.ofNullable(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY)).orElse(realm.getName());
     log.infof("Using override realm %s", override);
     return new WizardResourceProvider(session, override);
   }
@@ -54,19 +54,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private void initClients(KeycloakSession session) {
-    log.info("Creating master realm idp-wizard client.");
-    RealmModel masterRealm = session.realms().getRealmByName("master");
-    ClientModel idpWizard = session.clients().getClientByClientId(masterRealm, "idp-wizard");
-    if (idpWizard == null) {
-      log.info("No idp-wizard client for master realm. Creating...");
-      idpWizard = session.clients().addClient(masterRealm, "idp-wizard");
-      setDefaults(idpWizard);
-      idpWizard.setRedirectUris(ImmutableSet.of("/*"));
-      idpWizard.setWebOrigins(ImmutableSet.of("/*"));
-    }
-
     for (RealmModel realm : session.realms().getRealms()) {
-      log.infof("Creating %s realm idp-wizard client.", realm.getName());
       createClient(realm, session);
     }
   }
@@ -78,16 +66,32 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private void createClient(RealmModel realm, KeycloakSession session) {
+    log.infof("Creating %s realm idp-wizard client.", realm.getName());
     ClientModel idpWizard = session.clients().getClientByClientId(realm, "idp-wizard");
     if (idpWizard == null) {
       log.infof("No idp-wizard client for %s realm. Creating...", realm.getName());
-      String path = String.format("/realms/%s/wizard/", realm.getName());
-      idpWizard = session.clients().addClient(realm, "idp-wizard");
-      setDefaults(idpWizard);
-      idpWizard.setBaseUrl(path);
-      idpWizard.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
-      idpWizard.setWebOrigins(ImmutableSet.of("/*"));
+      if ("master".equals(realm.getName())) {
+        createClientForMaster(realm, session);
+      } else {
+        createClientForRealm(realm, session);
+      }
     }
+  }
+
+  private void createClientForRealm(RealmModel realm, KeycloakSession session) {
+    String path = String.format("/realms/%s/wizard/", realm.getName());
+    ClientModel idpWizard = session.clients().addClient(realm, "idp-wizard");
+    setDefaults(idpWizard);
+    idpWizard.setBaseUrl(path);
+    idpWizard.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
+    idpWizard.setWebOrigins(ImmutableSet.of("/*"));
+  }
+
+  private void createClientForMaster(RealmModel realm, KeycloakSession session) {
+    ClientModel idpWizard = session.clients().addClient(realm, "idp-wizard");
+    setDefaults(idpWizard);
+    idpWizard.setRedirectUris(ImmutableSet.of("/*"));
+    idpWizard.setWebOrigins(ImmutableSet.of("/*"));
   }
 
   private void setDefaults(ClientModel idpWizard) {
