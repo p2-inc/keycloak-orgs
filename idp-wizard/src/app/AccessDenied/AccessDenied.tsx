@@ -3,20 +3,14 @@ import { ExclamationTriangleIcon } from "@patternfly/react-icons";
 import {
   PageSection,
   Title,
-  Button,
   EmptyState,
   EmptyStateIcon,
   EmptyStateBody,
 } from "@patternfly/react-core";
 import { useTitle } from "react-use";
-import { useNavigate } from "react-router-dom";
 
 const AccessDenied: React.FunctionComponent = () => {
   useTitle("Access Denied | PhaseTwo.io");
-  let navigate = useNavigate();
-
-  // TODO: fix this to navigate to a defined path
-  const navigateToBasePath = () => navigate("/");
 
   return (
     <PageSection>
@@ -29,7 +23,6 @@ const AccessDenied: React.FunctionComponent = () => {
           Sorry, but you lack the necessary permissions to access this content.
           Please contact your administrator to request access.
         </EmptyStateBody>
-        <Button onClick={navigateToBasePath}>Return to Dashboard</Button>
       </EmptyState>
     </PageSection>
   );
