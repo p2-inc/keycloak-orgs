@@ -16,21 +16,24 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
 import { useNavigateToBasePath } from "@app/routes";
 import { BindConfig, ServerConfig } from "./steps/forms";
-import { useKeycloakAdminApi } from "@app/hooks";
+import { useKeycloakAdminApi, usePrompt } from "@app/hooks";
 import { API_STATUS } from "@app/configurations";
+import { GroupConfig } from "./steps/forms/groups";
 
 export const OktaWizardLDAP: FC = () => {
-  const idpCommonName = "Okta IdP";
+  const idpCommonName = "Okta LDAP IdP";
   const title = "Okta LDAP Wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
 
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [isFormValid, setIsFormValid] = useState(false);
-  const [results, setResults] = useState("");
-  const [error, setError] = useState(false);
+
+  // Complete
   const [isValidating, setIsValidating] = useState(false);
+  const [results, setResults] = useState("");
+  const [error, setError] = useState<null | boolean>(null);
+  const [disableButton, setDisableButton] = useState(false);
 
   const [serverConfig, setServerConfig] = useState<ServerConfig>({});
   const [serverConfigValid, setServerConfigValid] = useState(false);
@@ -38,10 +41,17 @@ export const OktaWizardLDAP: FC = () => {
   const [bindCreds, setBindCreds] = useState<BindConfig>({});
   const [bindCredsValid, setBindCredsValid] = useState(false);
 
-  const finalStep = 5;
+  const [groups, setGroups] = useState("");
+
+  const finishStep = 5;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
 
   const onNext = (newStep) => {
-    if (stepIdReached === finalStep) {
+    if (stepIdReached === finishStep) {
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -49,26 +59,6 @@ export const OktaWizardLDAP: FC = () => {
 
   const closeWizard = () => {
     navigateToBasePath();
-  };
-
-  const username = sessionStorage.getItem("okta_un") || "";
-  const pass = sessionStorage.getItem("okta_p") || "";
-
-  const validateOktaWizard = async () => {
-    setIsValidating(true);
-    const oktaCustomerIdentifier =
-      sessionStorage.getItem("okta_customer_identifier") || "dev-11111111";
-
-    setResults("Final Validation Running...");
-    const results = await oktaCreateFederationAndSyncUsers(
-      oktaCustomerIdentifier,
-      username,
-      pass
-    );
-
-    setError(results.status == "error");
-    setResults("Results: " + results.message);
-    setIsValidating(false);
   };
 
   const handleServerConfigValidation = async (
@@ -133,6 +123,123 @@ export const OktaWizardLDAP: FC = () => {
     }
   };
 
+  const handleGroupSave = ({ groupFilter }: GroupConfig) => {
+    setGroups(groupFilter!);
+    return { status: API_STATUS.SUCCESS, message: "Group filter saved." };
+  };
+
+  const validateFn = async () => {
+    setIsValidating(true);
+    setDisableButton(false);
+    setResults("Creating LDAP IdP...");
+
+    const { host, sslPort, baseDn } = serverConfig;
+
+    const payload = {
+      name: "ldap",
+      parentId: getRealm(),
+      providerId: "ldap",
+      providerType: "org.keycloak.storage.UserStorageProvider",
+      config: {
+        enabled: ["true"],
+        priority: ["0"],
+        fullSyncPeriod: ["-1"],
+        changedSyncPeriod: ["-1"],
+        cachePolicy: ["DEFAULT"],
+        evictionDay: [],
+        evictionHour: [],
+        evictionMinute: [],
+        maxLifespan: [],
+        batchSizeForSync: ["1000"],
+        editMode: ["READ_ONLY"],
+        importEnabled: ["true"],
+        syncRegistrations: ["false"],
+        vendor: ["other"],
+        usePasswordModifyExtendedOp: [],
+        usernameLDAPAttribute: ["uid"],
+        rdnLDAPAttribute: ["uid"],
+        uuidLDAPAttribute: ["entryUUID"],
+        userObjectClasses: ["inetOrgPerson, organizationalPerson"],
+        connectionUrl: [`ldaps://${host}:${sslPort}`],
+        usersDn: [serverConfig.userBaseDn],
+        authType: ["simple"],
+        startTls: [],
+        bindDn: [`uid=${bindCreds.bindDn}, ${baseDn}`],
+        bindCredential: [bindCreds.bindPassword],
+        // TODO: what is the correct format for this?
+        // customUserSearchFilter: [groups],
+        searchScope: ["1"],
+        validatePasswordPolicy: ["false"],
+        trustEmail: ["false"],
+        useTruststoreSpi: ["ldapsOnly"],
+        connectionPooling: ["true"],
+        connectionPoolingAuthentication: [],
+        connectionPoolingDebug: [],
+        connectionPoolingInitSize: [],
+        connectionPoolingMaxSize: [],
+        connectionPoolingPrefSize: [],
+        connectionPoolingProtocol: [],
+        connectionPoolingTimeout: [],
+        connectionTimeout: [],
+        readTimeout: [],
+        pagination: ["true"],
+        allowKerberosAuthentication: ["false"],
+        serverPrincipal: [],
+        keyTab: [],
+        kerberosRealm: [],
+        debug: ["false"],
+        useKerberosForPasswordAuthentication: ["false"],
+      },
+    };
+
+    let createResp;
+    try {
+      createResp = await kcAdminClient.components.create(payload);
+    } catch (e) {
+      setResults(
+        `Failure to create ${idpCommonName}. Check values and try again.`
+      );
+      setError(true);
+      setIsValidating(false);
+      return {
+        status: API_STATUS.ERROR,
+        message: `Failure to create ${idpCommonName}. Check values and try again.`,
+      };
+    }
+
+    try {
+      await kcAdminClient.userStorageProvider.sync({
+        id: createResp.id,
+        action: "triggerChangedUsersSync",
+        realm: getRealm(),
+      });
+    } catch (e) {
+      setResults(
+        `${idpCommonName} created but failed to sync contacts with LDAP instance. Try sync again at a later time.`
+      );
+      setError(true);
+      setIsValidating(false);
+      setDisableButton(true);
+      return {
+        status: API_STATUS.ERROR,
+        message: "Failure to sync contacts with LDAP instance.",
+      };
+    }
+
+    setResults(
+      `${idpCommonName} created and contacts synced. Click finish to complete.`
+    );
+    setStepIdReached(finishStep);
+    setError(false);
+    setDisableButton(true);
+    setIsValidating(false);
+
+    return {
+      status: API_STATUS.SUCCESS,
+      message: `${idpCommonName} created and contacts synced. Click finish to complete.`,
+    };
+  };
+
   const steps = [
     {
       id: 1,
@@ -162,7 +269,12 @@ export const OktaWizardLDAP: FC = () => {
     {
       id: 3,
       name: "Group Mapping",
-      component: <OktaStepThree />,
+      component: (
+        <OktaStepThree
+          handleGroupSave={handleGroupSave}
+          config={{ groupFilter: groups }}
+        />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
     },
@@ -171,17 +283,18 @@ export const OktaWizardLDAP: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="LDAP Configuration Complete"
+          title="OKTA LDAP Configuration Complete"
           message="Your users can now sign-in with Okta."
-          buttonText="Test Sign-On"
+          buttonText="Create OKTA LDAP IdP"
+          disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={validateOktaWizard}
+          validationFunction={validateFn}
         />
       ),
       canJumpTo: stepIdReached >= 4,
-      enableNext: stepIdReached === 5,
+      enableNext: stepIdReached === finishStep,
       hideCancelButton: true,
     },
   ];
