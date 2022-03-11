@@ -5,10 +5,12 @@ import { ArrowLeftIcon } from "@patternfly/react-icons";
 import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
 import { IdentityProtocols, IdentityProviders } from "@app/configurations";
 import { BASE_PATH, PATHS, RouterParams } from "@app/routes";
+import { useRoleAccess } from "@app/hooks";
 
 export const IdPProtocolSelector: FC = ({}) => {
   const { provider, realm } = useParams<keyof RouterParams>() as RouterParams;
   let navigate = useNavigate();
+  const [hasAccess] = useRoleAccess();
 
   const currentProvider = IdentityProviders.find((i) => i.id === provider)!;
 

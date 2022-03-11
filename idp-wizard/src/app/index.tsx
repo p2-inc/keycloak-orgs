@@ -8,22 +8,24 @@ import { AppLayout } from "@app/AppLayout/AppLayout";
 import { AppRoutes } from "@app/routes";
 import "@app/styles/app.css";
 
-const App: React.FunctionComponent = () => (
-  <ReactKeycloakProvider
-    authClient={keycloak}
-    initOptions={{
-      onLoad: "login-required",
-      silentCheckSsoRedirectUri:
-        window.location.origin + "/silent-check-sso.html",
-    }}
-    LoadingComponent={<Loading />}
-  >
-    <Router>
-      <AppLayout>
-        <AppRoutes />
-      </AppLayout>
-    </Router>
-  </ReactKeycloakProvider>
-);
+const App: React.FunctionComponent = () => {
+  return (
+    <ReactKeycloakProvider
+      authClient={keycloak}
+      initOptions={{
+        onLoad: "login-required",
+        silentCheckSsoRedirectUri:
+          window.location.origin + "/silent-check-sso.html",
+      }}
+      LoadingComponent={<Loading />}
+    >
+      <Router>
+        <AppLayout>
+          <AppRoutes />
+        </AppLayout>
+      </Router>
+    </ReactKeycloakProvider>
+  );
+};
 
 export default App;
