@@ -54,8 +54,12 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private void initClients(KeycloakSession session) {
-    for (RealmModel realm : session.realms().getRealms()) {
-      createClient(realm, session);
+    try {
+      for (RealmModel realm : session.realms().getRealms()) {
+        createClient(realm, session);
+      }
+    } catch (Exception e) {
+      log.warn("Error initializing idp-wizard clients. Ignoring. You may have to create them manually.", e);
     }
   }
 
