@@ -94,7 +94,7 @@ There are JPA entities that represent the underlying tables that are available i
 
 ### Resources
 
-A group of custom REST resources are made available for administrator and customer use and UI. Current documentation on the available resource methods is in the (openapi.yaml) specification file, and you can find browsable documentation on the [Phase Two API](https://phasetwo.io/api/) site.
+A group of custom REST resources are made available for administrator and customer use and UI. Current documentation on the available resource methods is in this [openapi.yaml](https://github.com/p2-inc/phasetwo-docs/blob/master/openapi.yaml) specification file, and you can find browsable documentation on the [Phase Two API](https://phasetwo.io/api/) site.
 - Organizations - CRUD Organizations
 - Memberships - CRUD and check User-Organization membership
 - Roles - CRUD Organization Roles and grant/revoke Roles to Users
