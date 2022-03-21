@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { Dispatch, FC, SetStateAction, useState } from "react";
 import {
   Card,
   CardBody,
@@ -10,11 +10,19 @@ import {
   ModalVariant,
 } from "@patternfly/react-core";
 import image from "@app/images/okta/okta-3.png";
-import { ArrowRightIcon, TrashIcon } from "@patternfly/react-icons";
+import { TrashIcon } from "@patternfly/react-icons";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { useHostname } from "@app/hooks/useHostname";
+import { LdapGroupFilter } from "./forms/groups";
+import { API_RETURN } from "@app/configurations";
+import { GroupConfig } from "./forms";
 
-export const OktaStepThree: FC = () => {
+interface Props {
+  handleGroupSave: ({ groupFilter }: GroupConfig) => API_RETURN;
+  config: GroupConfig;
+}
+
+export const OktaStepThree: FC<Props> = ({ handleGroupSave, config }) => {
   const [groupList, setGroupList] = useState<string[]>([""]);
   const hostname = useHostname();
 
@@ -39,40 +47,17 @@ export const OktaStepThree: FC = () => {
 
   const instructionList: InstructionProps[] = [
     {
-      text: `This is an optional step. If you have groups defined in Okta, you will find them in the Directory ${(
-        <ArrowRightIcon />
-      )} Groups section.`,
+      text: `This is an optional step. If you have groups defined in Okta, you will find them in the Directory > Groups section.`,
       component: <StepImage src={image} alt="Step3" />,
-    },
-    {
-      text: `If you want to limit groups that can access the ${hostname} app, enter those groups below.`,
-      component: <></>,
     },
     {
       component: (
         <Card className="card-shadow">
           <CardBody>
-            <Form>
-              <FormGroup label="Groups" fieldId="input-form">
-                {groupList.map((x, i) => {
-                  return (
-                    <InputGroup style={{ padding: "2px" }} key={"group-" + i}>
-                      <TextInput
-                        key={"text-" + i}
-                        value={x}
-                        name={i.toString()}
-                        id={i.toString()}
-                        aria-label="Group"
-                        onChange={(value) => handleInputChange(value, i)}
-                      />
-                      <div style={{ padding: "2px", marginLeft: "5px" }}>
-                        <TrashIcon onClick={() => onDelete(x)} color="red" />
-                      </div>
-                    </InputGroup>
-                  );
-                })}
-              </FormGroup>
-            </Form>
+            <LdapGroupFilter
+              handleFormSubmit={handleGroupSave}
+              config={config}
+            />
           </CardBody>
         </Card>
       ),

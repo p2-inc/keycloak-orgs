@@ -5,71 +5,276 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import { OktaStepOne, OktaStepTwo, OktaStepThree } from "./Steps";
+import {
+  OktaStepOne,
+  OktaStepTwo,
+  OktaStepThree,
+  LDAP_SERVER_CONFIG_TEST_CONNECTION,
+} from "./steps";
 import oktaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
+import { useNavigateToBasePath } from "@app/routes";
+import { BindConfig, ServerConfig } from "./steps/forms";
+import { useKeycloakAdminApi, usePrompt } from "@app/hooks";
+import { API_STATUS } from "@app/configurations";
+import { GroupConfig } from "./steps/forms/groups";
 
 export const OktaWizardLDAP: FC = () => {
+  const idpCommonName = "Okta LDAP IdP";
+  const title = "Okta LDAP Wizard";
+  const navigateToBasePath = useNavigateToBasePath();
+  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+    useKeycloakAdminApi();
+
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [isFormValid, setIsFormValid] = useState(false);
-  const [results, setResults] = useState("");
-  const [error, setError] = useState(false);
+
+  // Complete
   const [isValidating, setIsValidating] = useState(false);
+  const [results, setResults] = useState("");
+  const [error, setError] = useState<null | boolean>(null);
+  const [disableButton, setDisableButton] = useState(false);
+
+  const [serverConfig, setServerConfig] = useState<ServerConfig>({});
+  const [serverConfigValid, setServerConfigValid] = useState(false);
+
+  const [bindCreds, setBindCreds] = useState<BindConfig>({});
+  const [bindCredsValid, setBindCredsValid] = useState(false);
+
+  const [groups, setGroups] = useState("");
+
+  const finishStep = 5;
+
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
 
   const onNext = (newStep) => {
+    if (stepIdReached === finishStep) {
+      navigateToBasePath();
+    }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
-    setIsFormValid(false);
   };
 
   const closeWizard = () => {
-    console.log("close wizard");
+    navigateToBasePath();
   };
 
-  const onFormChange = (value) => {
-    setIsFormValid(value);
+  const handleServerConfigValidation = async (
+    ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION,
+    serverConfig: ServerConfig
+  ) => {
+    setServerConfigValid(false);
+    try {
+      await kcAdminClient.realms.testLDAPConnection(
+        { realm: getRealm()! },
+        ldapServerConfig
+      );
+      setServerConfig(serverConfig);
+      setServerConfigValid(true);
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "LDAP connection test is successful. Continue to the next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message: "LDAP connection test failed. Check values and try again.",
+      };
+    }
   };
 
-  const username = sessionStorage.getItem("okta_un") || "";
-  const pass = sessionStorage.getItem("okta_p") || "";
+  const handleAdminCredentialValidation = async ({
+    bindDn,
+    bindPassword,
+  }: BindConfig) => {
+    const { host, sslPort, baseDn } = serverConfig;
+    const credentialConfig = {
+      action: "testAuthentication",
+      connectionUrl: `ldaps://${host}:${sslPort}`,
+      authType: "simple",
+      bindDn: `uid=${bindDn}, ${baseDn}`,
+      bindCredential: bindPassword,
+      useTruststoreSpi: "ldapsOnly",
+      connectionTimeout: "",
+      startTls: "",
+    };
+    setBindCredsValid(false);
+    try {
+      await kcAdminClient.realms.testLDAPConnection(
+        { realm: getRealm()! },
+        credentialConfig
+      );
+      setBindCreds({ bindDn, bindPassword });
+      setBindCredsValid(true);
+      return {
+        status: API_STATUS.SUCCESS,
+        message:
+          "Admin credential validation is successful. Continue to the next step.",
+      };
+    } catch (e) {
+      return {
+        status: API_STATUS.ERROR,
+        message:
+          "Admin credential validation failed. Check values and try again.",
+      };
+    }
+  };
 
-  const validateOktaWizard = async () => {
+  const handleGroupSave = ({ groupFilter }: GroupConfig) => {
+    setGroups(groupFilter!);
+    return { status: API_STATUS.SUCCESS, message: "Group filter saved." };
+  };
+
+  const validateFn = async () => {
     setIsValidating(true);
-    const oktaCustomerIdentifier =
-      sessionStorage.getItem("okta_customer_identifier") || "dev-11111111";
+    setDisableButton(false);
+    setResults("Creating LDAP IdP...");
 
-    setResults("Final Validation Running...");
-    const results = await oktaCreateFederationAndSyncUsers(
-      oktaCustomerIdentifier,
-      username,
-      pass
+    const { host, sslPort, baseDn } = serverConfig;
+
+    const payload = {
+      name: "ldap",
+      parentId: getRealm(),
+      providerId: "ldap",
+      providerType: "org.keycloak.storage.UserStorageProvider",
+      config: {
+        enabled: ["true"],
+        priority: ["0"],
+        fullSyncPeriod: ["-1"],
+        changedSyncPeriod: ["-1"],
+        cachePolicy: ["DEFAULT"],
+        evictionDay: [],
+        evictionHour: [],
+        evictionMinute: [],
+        maxLifespan: [],
+        batchSizeForSync: ["1000"],
+        editMode: ["READ_ONLY"],
+        importEnabled: ["true"],
+        syncRegistrations: ["false"],
+        vendor: ["other"],
+        usePasswordModifyExtendedOp: [],
+        usernameLDAPAttribute: ["uid"],
+        rdnLDAPAttribute: ["uid"],
+        uuidLDAPAttribute: ["entryUUID"],
+        userObjectClasses: ["inetOrgPerson, organizationalPerson"],
+        connectionUrl: [`ldaps://${host}:${sslPort}`],
+        usersDn: [serverConfig.userBaseDn],
+        authType: ["simple"],
+        startTls: [],
+        bindDn: [`uid=${bindCreds.bindDn}, ${baseDn}`],
+        bindCredential: [bindCreds.bindPassword],
+        // TODO: what is the correct format for this?
+        // customUserSearchFilter: [groups],
+        searchScope: ["1"],
+        validatePasswordPolicy: ["false"],
+        trustEmail: ["false"],
+        useTruststoreSpi: ["ldapsOnly"],
+        connectionPooling: ["true"],
+        connectionPoolingAuthentication: [],
+        connectionPoolingDebug: [],
+        connectionPoolingInitSize: [],
+        connectionPoolingMaxSize: [],
+        connectionPoolingPrefSize: [],
+        connectionPoolingProtocol: [],
+        connectionPoolingTimeout: [],
+        connectionTimeout: [],
+        readTimeout: [],
+        pagination: ["true"],
+        allowKerberosAuthentication: ["false"],
+        serverPrincipal: [],
+        keyTab: [],
+        kerberosRealm: [],
+        debug: ["false"],
+        useKerberosForPasswordAuthentication: ["false"],
+      },
+    };
+
+    let createResp;
+    try {
+      createResp = await kcAdminClient.components.create(payload);
+    } catch (e) {
+      setResults(
+        `Failure to create ${idpCommonName}. Check values and try again.`
+      );
+      setError(true);
+      setIsValidating(false);
+      return {
+        status: API_STATUS.ERROR,
+        message: `Failure to create ${idpCommonName}. Check values and try again.`,
+      };
+    }
+
+    try {
+      await kcAdminClient.userStorageProvider.sync({
+        id: createResp.id,
+        action: "triggerChangedUsersSync",
+        realm: getRealm(),
+      });
+    } catch (e) {
+      setResults(
+        `${idpCommonName} created but failed to sync contacts with LDAP instance. Try sync again at a later time.`
+      );
+      setError(true);
+      setIsValidating(false);
+      setDisableButton(true);
+      return {
+        status: API_STATUS.ERROR,
+        message: "Failure to sync contacts with LDAP instance.",
+      };
+    }
+
+    setResults(
+      `${idpCommonName} created and contacts synced. Click finish to complete.`
     );
-
-    setError(results.status == "error");
-    setResults("Results: " + results.message);
+    setStepIdReached(finishStep);
+    setError(false);
+    setDisableButton(true);
     setIsValidating(false);
+
+    return {
+      status: API_STATUS.SUCCESS,
+      message: `${idpCommonName} created and contacts synced. Click finish to complete.`,
+    };
   };
 
   const steps = [
     {
       id: 1,
-      name: "Enable LDAP Inteface",
-      component: <OktaStepOne onChange={onFormChange} />,
-      enableNext: isFormValid,
+      name: "Enable LDAP Interface",
+      component: (
+        <OktaStepOne
+          handleServerConfigValidation={handleServerConfigValidation}
+          config={serverConfig}
+        />
+      ),
+      enableNext: serverConfigValid,
       hideCancelButton: true,
     },
     {
       id: 2,
       name: "LDAP Authentication",
-      component: <OktaStepTwo onChange={onFormChange} />,
+      component: (
+        <OktaStepTwo
+          handleAdminConfigValidation={handleAdminCredentialValidation}
+          config={bindCreds}
+        />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
-      enableNext: isFormValid,
+      enableNext: bindCredsValid,
     },
     {
       id: 3,
       name: "Group Mapping",
-      component: <OktaStepThree />,
+      component: (
+        <OktaStepThree
+          handleGroupSave={handleGroupSave}
+          config={{ groupFilter: groups }}
+        />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
     },
@@ -78,22 +283,22 @@ export const OktaWizardLDAP: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="LDAP Configuration Complete"
+          title="OKTA LDAP Configuration Complete"
           message="Your users can now sign-in with Okta."
-          buttonText="Test Sign-On"
+          buttonText="Create OKTA LDAP IdP"
+          disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={validateOktaWizard}
+          validationFunction={validateFn}
         />
       ),
       canJumpTo: stepIdReached >= 4,
-      enableNext: stepIdReached === 5,
+      enableNext: stepIdReached === finishStep,
       hideCancelButton: true,
     },
   ];
 
-  const title = "Okta wizard";
   return (
     <>
       <Header logo={oktaLogo} />

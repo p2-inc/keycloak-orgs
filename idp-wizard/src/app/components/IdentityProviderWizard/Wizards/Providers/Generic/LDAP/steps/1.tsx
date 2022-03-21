@@ -1,7 +1,6 @@
 import React, { FC } from "react";
 import { CustomSelect, InstructionProps, Step } from "@wizardComponents";
-import { first, omit, pick } from "lodash";
-import { config } from "webpack";
+import { omit, pick } from "lodash";
 
 interface Props {
   handleConfigUpdate: (Object) => void;
@@ -12,7 +11,6 @@ export const Step1: FC<Props> = ({
   handleConfigUpdate,
   config: configProp,
 }) => {
-  console.log(configProp);
   var vendorToUUID = {
     "Redhat Directory Server": "nsuniqueid",
     Tivoli: "uniqueidentifier",
