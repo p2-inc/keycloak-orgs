@@ -20,7 +20,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
 
 ## Overview
 
-If you search for "multi-tenant Keycloak", you'll find several opinionated approaches, each promising, and each with their own tradeoffs. This project represents one such approach. It was built initially for a multi-tenant, public cloud, SaaS application. It has now been, in the form of the [Phase Two](https://phasetwo.io) cloud offering, by several other companies for the same purpose.
+If you search for "multi-tenant Keycloak", you'll find several opinionated approaches, each promising, and each with their own tradeoffs. This project represents one such approach. It was built initially for a multi-tenant, public cloud, SaaS application. It has now been, in the form of the [Phase Two](https://phasetwo.io) cloud offering, adopted by several other companies for the same purpose.
 
 Other approaches that we tried and decided against were:
 - One Realm for each tenant
@@ -31,7 +31,7 @@ But each of these approaches had tradeoffs of scale or frailty we found undesira
 ### Definitions
 
 - **Organizations** are "tenants" or "customers" as commonly used. A Realm can have multiple Organizations.
-- **Memberships** are the relationship of Users to Organizations. Users may be members with multiple Organizations.
+- **Memberships** are the relationship of Users to Organizations. Users may be members of multiple Organizations.
 - **Roles** are mechanisms of role-based security specific to an Organization, much like Keycloak Realm Roles and Client Roles. In addition to a set of standard roles related to Organization data visibilty and management, administrators can create Roles unique to an organization. Users who are Members of Organizations can be granted that Organization's Roles.
 - **Invitations** allow Users and non-Users to be invited to join an Organization. Invitations can be created by administrators or Organization members with permission.
 
@@ -51,7 +51,7 @@ Although it has been developed and working since Keycloak 9.0.0, the extensions 
 
 ### Data
 
-We've adopted the same model that Keycloak uses for making the organization data available to the application. There is a custom SPI that makes the [OrganizationProvider](tbd) available. The methods provided are:
+We've adopted a similar model that Keycloak uses for making the Organization data available to the application. There is a custom SPI that makes the [OrganizationProvider](src/main/java/io/phasetwo/service/model/OrganizationProvider.java) available. The methods provided are:
 ```java
   OrganizationModel createOrganization(
       RealmModel realm, String name, String domain, UserModel createdBy);
@@ -78,19 +78,19 @@ We've adopted the same model that Keycloak uses for making the organization data
 #### Models
 
 The OrganizationProvider returns model delegates that wrap the underlying entities and provide conveninces for working with the data. They are available in the `io.phasetwo.service.model` package.
-- [OrganizationModel](tbd)
-- [OrganizationRoleModel](tbd)
-- [InvitationModel](tbd)
+- [OrganizationModel](src/main/java/io/phasetwo/service/model/OrganizationModel.java)
+- [OrganizationRoleModel](src/main/java/io/phasetwo/service/model/OrganizationRoleModel.java)
+- [InvitationModel](src/main/java/io/phasetwo/service/model/InvitationModel.java)
 
 #### Entities
 
-There are JPA entities that represent the underlying tables that are available in the `io.phasetwo.service.model.jpa.entity` package. The providers and models are implemented using the entities in the `io.phasetwo.service.model.jpa` package.
-- [OrganizationEntity](tbd)
-- [OrganizationAttributeEntity](tbd)
-- [OrganizationMemberEntity](tbd)
-- [OrganizationRoleEntity](tbd)
-- [UserOrganizationRoleMappingEntity](tbd)
-- [InvitationEntity](tbd)
+There are JPA entities that represent the underlying tables that are available in the `io.phasetwo.service.model.jpa.entity` package. The providers and models are implemented using these entities in the `io.phasetwo.service.model.jpa` package.
+- [OrganizationEntity](src/main/java/io/phasetwo/service/model/jpa/entity/OrganizationEntity.java)
+- [OrganizationAttributeEntity](src/main/java/io/phasetwo/service/model/jpa/entity/OrganizationAttributeEntity.java)
+- [OrganizationMemberEntity](src/main/java/io/phasetwo/service/model/jpa/entity/OrganizationMemberEntity.java)
+- [OrganizationRoleEntity](src/main/java/io/phasetwo/service/model/jpa/entity/OrganizationRoleEntity.java)
+- [UserOrganizationRoleMappingEntity](src/main/java/io/phasetwo/service/model/jpa/entity/UserOrganizationRoleMapping.java)
+- [InvitationEntity](src/main/java/io/phasetwo/service/model/jpa/entity/InvitationEntity.java)
 
 ### Resources
 
@@ -105,9 +105,7 @@ A group of custom REST resources are made available for administrator and custom
 There is currently a single OIDC mapper that adds Organization membership and roles to the token. The format of the addition to the token is
 ```
    organizations: [
-     foo: [
-       "admin"
-          ],
+     foo: [ "admin", "viewer" ],
      bar: []
    ]
 ```
