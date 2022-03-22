@@ -13,7 +13,6 @@ import {
 } from "./steps";
 import oktaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
-import { oktaCreateFederationAndSyncUsers } from "@app/services/OktaValidation";
 import { useNavigateToBasePath } from "@app/routes";
 import { BindConfig, ServerConfig } from "./steps/forms";
 import { useKeycloakAdminApi, usePrompt } from "@app/hooks";
