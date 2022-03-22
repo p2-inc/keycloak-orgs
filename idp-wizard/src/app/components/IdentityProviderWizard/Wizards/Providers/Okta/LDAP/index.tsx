@@ -10,14 +10,15 @@ import {
   OktaStepTwo,
   OktaStepThree,
   LDAP_SERVER_CONFIG_TEST_CONNECTION,
+  BindConfig,
+  ServerConfig,
+  GroupConfig,
 } from "./steps";
 import oktaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useNavigateToBasePath } from "@app/routes";
-import { BindConfig, ServerConfig } from "./steps/forms";
 import { useKeycloakAdminApi, usePrompt } from "@app/hooks";
 import { API_STATUS } from "@app/configurations";
-import { GroupConfig } from "./steps/forms/groups";
 
 export const OktaWizardLDAP: FC = () => {
   const idpCommonName = "Okta LDAP IdP";
