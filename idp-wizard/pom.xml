@@ -11,8 +11,8 @@
     <main.java.package>io.phasetwo</main.java.package>
     <keycloak.version>16.1.1</keycloak.version>
     <guava.version>30.1-jre</guava.version>
-    <lombok.version>1.18.12</lombok.version>
-    <auto-service.version>1.0-rc7</auto-service.version>
+    <lombok.version>1.18.22</lombok.version>
+    <auto-service.version>1.0.1</auto-service.version>
   </properties>
 
   <distributionManagement>
