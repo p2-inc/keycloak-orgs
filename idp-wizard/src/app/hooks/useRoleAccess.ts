@@ -22,11 +22,13 @@ export function useRoleAccess() {
 
   useEffect(() => {
     // token was authenticated or refreshed
-
+    // if the keycloak realm is the master realm, then look at the <path-realm>-realm resource-roles rather than "realm-management"
+    const resource = keycloak.realm === "master" ? `${realm}-realm` : "realm-management";
+    console.log("using resource", resource);
     let roleAccess: boolean[] = [];
-    requiredResourceRoles.map((role) =>
-      roleAccess.push(keycloak.hasResourceRole(role, "realm-management"))
-    );
+    requiredResourceRoles.map((role) => {
+      return roleAccess.push(keycloak.hasResourceRole(role, resource))
+    });
 
     setHasAccess(!roleAccess.includes(false));
   }, [keycloak?.token]);

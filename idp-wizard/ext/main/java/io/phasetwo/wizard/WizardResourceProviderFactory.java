@@ -75,27 +75,30 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     if (idpWizard == null) {
       log.infof("No idp-wizard client for %s realm. Creating...", realm.getName());
       if ("master".equals(realm.getName())) {
-        createClientForMaster(realm, session);
+        idpWizard = createClientForMaster(realm, session);
       } else {
-        createClientForRealm(realm, session);
+        idpWizard = createClientForRealm(realm, session);
       }
     }
+    setClientScopeDefaults(realm, session, idpWizard);
   }
 
-  private void createClientForRealm(RealmModel realm, KeycloakSession session) {
+  private ClientModel createClientForRealm(RealmModel realm, KeycloakSession session) {
     String path = String.format("/realms/%s/wizard/", realm.getName());
     ClientModel idpWizard = session.clients().addClient(realm, "idp-wizard");
     setDefaults(idpWizard);
     idpWizard.setBaseUrl(path);
     idpWizard.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
     idpWizard.setWebOrigins(ImmutableSet.of("/*"));
+    return idpWizard;
   }
 
-  private void createClientForMaster(RealmModel realm, KeycloakSession session) {
+  private ClientModel createClientForMaster(RealmModel realm, KeycloakSession session) {
     ClientModel idpWizard = session.clients().addClient(realm, "idp-wizard");
     setDefaults(idpWizard);
     idpWizard.setRedirectUris(ImmutableSet.of("/*"));
     idpWizard.setWebOrigins(ImmutableSet.of("/*"));
+    return idpWizard;
   }
 
   private void setDefaults(ClientModel idpWizard) {
@@ -104,6 +107,18 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     idpWizard.setRootUrl("${authBaseUrl}");
   }
 
+  private void setClientScopeDefaults(RealmModel realm, KeycloakSession session, ClientModel idpWizard) {
+    idpWizard.setFullScopeAllowed(true);
+    session.clientScopes().getClientScopesStream(realm).filter(c -> (c.getRealm().equals(realm) && c.getName().equals("roles"))).forEach(c -> {
+        log.infof("Found 'roles' client scope. Adding as default...");
+        try {
+          idpWizard.addClientScope(c, true);
+        } catch (Exception e) {
+          log.warn("'roles' client scope already exists. skipping...");
+        }
+      });
+  }
+                 
   @Override
   public void close() {}
 }
