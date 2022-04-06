@@ -1,30 +1,20 @@
 import * as React from "react";
-import { ReactKeycloakProvider } from "@react-keycloak/web";
-import keycloak from "../keycloak";
-import Loading from "@app/utils/Loading";
 import "@patternfly/react-core/dist/styles/base.css";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AppLayout } from "@app/AppLayout/AppLayout";
 import { AppRoutes } from "@app/routes";
 import "@app/styles/app.css";
+import { useGetFeatureFlagsQuery } from "./services";
 
 const App: React.FunctionComponent = () => {
+  const { data, error, isLoading } = useGetFeatureFlagsQuery();
+
   return (
-    <ReactKeycloakProvider
-      authClient={keycloak}
-      initOptions={{
-        onLoad: "login-required",
-        silentCheckSsoRedirectUri:
-          window.location.origin + "/silent-check-sso.html",
-      }}
-      LoadingComponent={<Loading />}
-    >
-      <Router>
-        <AppLayout>
-          <AppRoutes />
-        </AppLayout>
-      </Router>
-    </ReactKeycloakProvider>
+    <Router>
+      <AppLayout>
+        <AppRoutes />
+      </AppLayout>
+    </Router>
   );
 };
 
