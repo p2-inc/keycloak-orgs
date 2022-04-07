@@ -33,7 +33,7 @@ export const UrlForm: FC<Props> = ({
   handleFormSubmit,
   formActive = true,
   url,
-  urlLabel = "Url",
+  urlLabel = "URL",
 }) => {
   const [submissionResp, setSubmissionResp] = useState<API_RETURN | null>();
   const {

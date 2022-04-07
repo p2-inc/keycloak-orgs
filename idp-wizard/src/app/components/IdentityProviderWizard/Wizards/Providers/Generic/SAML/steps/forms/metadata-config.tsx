@@ -19,8 +19,8 @@ import {
 
 const metadataConfigSchema = Yup.object().shape({
   ssoUrl: Yup.string()
-    .url("SSO Url should be a valid Url.")
-    .required("SSO Url is a required field."),
+    .url("SSO URL should be a valid URL.")
+    .required("SSO URL is a required field."),
   entityId: Yup.string().required("Entity Id is required."),
   metadataFile: Yup.mixed().required("Certifcate File is required."),
 });
@@ -86,7 +86,7 @@ export const MetadataConfig: FC<Props> = ({
         </FormAlert>
       )}
       <FormGroup
-        label="SSO Url"
+        label="SSO URL"
         isRequired
         fieldId="ssoUrl"
         validated={hasError("ssoUrl")}

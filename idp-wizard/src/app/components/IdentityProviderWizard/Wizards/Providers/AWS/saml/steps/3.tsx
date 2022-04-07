@@ -21,18 +21,18 @@ export const Step3: FC<Props> = ({ urls: { samlAudience, acsURL } }) => {
       component: (
         <>
           <ClipboardCopyComponent
-            label="Copy this SAML audience"
-            initialValue={samlAudience}
-          />
-          <ClipboardCopyComponent
             label="Copy this ACS URL"
             initialValue={acsURL}
+          />
+          <ClipboardCopyComponent
+            label="Copy this SAML audience"
+            initialValue={samlAudience}
           />
         </>
       ),
     },
     {
-      text: 'Submit the "SAML audience" and the "ACS URL". Click "Save changes".',
+      text: 'Select the link "If you don\'t have a metadata file, you can manually type your metadata values.". Submit the "ACS URL" and the "SAML audience" values into the fields. Click "Save changes".',
       component: <StepImage src={Images.AWS_SSO_SAML_4} alt="Step 3.1" />,
     },
   ];

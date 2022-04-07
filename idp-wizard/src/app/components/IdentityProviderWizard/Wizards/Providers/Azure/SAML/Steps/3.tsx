@@ -31,7 +31,7 @@ export const AzureStepThree: FC<Props> = ({ url, handleFormSubmit }) => {
 
   return (
     <Step
-      title="Step 3: Validate Azure SAML Metadata Url"
+      title="Step 3: Validate Azure SAML Metadata URL"
       instructionList={instructions}
     />
   );

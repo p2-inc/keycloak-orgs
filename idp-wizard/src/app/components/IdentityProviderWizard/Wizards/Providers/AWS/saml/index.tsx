@@ -40,8 +40,8 @@ export const AWSSamlWizard: FC = () => {
     getAuthRealm,
   ] = useKeycloakAdminApi();
 
-  const samlAudience = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const acsURL = `${getServerUrl()}/realms/${getRealm()}`;
+  const acsURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const samlAudience = `${getServerUrl()}/realms/${getRealm()}`;
 
   const [providerUrl, setProviderUrl] = useState("");
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();

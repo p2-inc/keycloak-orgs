@@ -108,6 +108,19 @@ public class WizardResourceProvider implements RealmResourceProvider {
     return Response.ok(json).build();
   }
 
+  @GET
+  @Path("/config.json")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WizardConfig configJson() {
+    /*
+    groupMapping: true/false. whether group mapping steps should be displayed in the wizards and the group mappers should be created when calling the api
+apiMode: cloud/onprem. which APIs to use
+enableLdap: true/false. allow LDAP wizards (this is related to apiMode, but might change in the future, so adding it separately)
+enableDashboard: true/false. whether or not to show the dashboard and link
+    */
+    return WizardConfig.createFromAttributes(session);
+  }
+
   private static String getBaseUrl(UriInfo uriInfo) {
     String u = uriInfo.getBaseUri().toString();
     if (u != null && u.endsWith("/")) u = u.substring(0, u.length() - 1);
