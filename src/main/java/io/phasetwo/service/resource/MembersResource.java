@@ -1,0 +1,121 @@
+package io.phasetwo.service.resource;
+
+import static io.phasetwo.service.resource.Converters.*;
+import static io.phasetwo.service.resource.OrganizationResourceType.*;
+import static org.keycloak.models.utils.ModelToRepresentation.*;
+
+import io.phasetwo.service.model.OrganizationModel;
+import java.net.URI;
+import java.util.stream.Stream;
+import javax.validation.constraints.*;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.models.Constants;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.services.resources.admin.AdminRoot;
+
+@JBossLog
+public class MembersResource extends OrganizationAdminResource {
+
+  private final OrganizationModel organization;
+
+  public MembersResource(RealmModel realm, OrganizationModel organization) {
+    super(realm);
+    this.organization = organization;
+  }
+
+  @GET
+  @Path("")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Stream<UserRepresentation> getMembers(
+      @QueryParam("first") Integer firstResult, @QueryParam("max") Integer maxResults) {
+    log.infof("Get members for %s %s", realm.getName(), organization.getId());
+    firstResult = firstResult != null ? firstResult : 0;
+    maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
+    return organization
+        .getMembersStream()
+        .skip(firstResult)
+        .limit(maxResults)
+        .map(m -> toRepresentation(session, realm, m));
+  }
+
+  @DELETE
+  @Path("{userId}")
+  public Response removeMember(@PathParam("userId") String userId) {
+    canManage();
+
+    log.infof("Remove member %s from %s %s", userId, realm.getName(), organization.getId());
+    UserModel member = session.users().getUserById(realm, userId);
+    if (member != null && organization.hasMembership(member)) {
+      organization.revokeMembership(member);
+      adminEvent
+          .resource(ORGANIZATION_MEMBERSHIP.name())
+          .operation(OperationType.DELETE)
+          .resourcePath(session.getContext().getUri())
+          .representation(userId)
+          .success();
+      return Response.noContent().build();
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  @GET
+  @Path("{userId}")
+  public Response getMember(@PathParam("userId") String userId) {
+    log.infof("Check membership %s for %s %s", userId, realm.getName(), organization.getId());
+    UserModel member = session.users().getUserById(realm, userId);
+    if (member != null && organization.hasMembership(member)) {
+      return Response.noContent().build();
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  @PUT
+  @Path("{userId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response addMember(@PathParam("userId") String userId) {
+    log.infof("Add %s as member for %s %s", userId, realm.getName(), organization.getId());
+    canManage();
+
+    UserModel member = session.users().getUserById(realm, userId);
+    if (member != null) {
+      if (!organization.hasMembership(member)) {
+        organization.grantMembership(member);
+        adminEvent
+            .resource(ORGANIZATION_MEMBERSHIP.name())
+            .operation(OperationType.CREATE)
+            .resourcePath(session.getContext().getUri())
+            .representation(userId)
+            .success();
+      }
+      // /auth/realms/:realm/orgs/:orgId/members/:userId"
+      URI location =
+          AdminRoot.realmsUrl(session.getContext().getUri())
+              .path(realm.getName())
+              .path("orgs")
+              .path(organization.getId())
+              .path("members")
+              .path(userId)
+              .build();
+      return Response.created(location).build();
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  private void canManage() {
+    if (!auth.hasManageOrgs() && !auth.hasOrgManageMembers(organization)) {
+      throw new NotAuthorizedException(
+          String.format(
+              "User %s doesn't have permission to manage members in org %s",
+              auth.getUser().getId(), organization.getName()));
+    }
+  }
+}

@@ -1,0 +1,115 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="garth (generated)" id="1587680343686-1">
+        <createTable tableName="USER_ORGANIZATION_ROLE_MAPPING">
+            <column name="ROLE_ID" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="USER_ORGANIZATION_ROLE_MAPPINGPK"/>
+            </column>
+            <column name="ID" type="VARCHAR(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="USER_ORGANIZATION_ROLE_MAPPINGPK"/>
+            </column>
+            <column name="CREATED_AT" type="TIMESTAMP"/>
+            <column name="USER_ID" type="VARCHAR(255)"/>
+            <column name="ORGANIZATION_ID" type="VARCHAR(36)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-2">
+        <addColumn tableName="ORGANIZATION">
+            <column name="CREATED_BY_USER_ID" type="VARCHAR(255 BYTE)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-3">
+        <addColumn tableName="ORGANIZATION">
+            <column name="DISPLAY_NAME" type="VARCHAR(255 BYTE)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-4">
+        <addColumn tableName="ORGANIZATION">
+            <column name="URL" type="VARCHAR(255 BYTE)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-5">
+        <addUniqueConstraint columnNames="ORGANIZATION_ID, NAME" constraintName="UK_19A0TR48O23ALOR84GB8E3GC2" tableName="ORGANIZATION_ATTRIBUTE"/>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-6">
+        <addUniqueConstraint columnNames="TEAM_ID, USER_ID" constraintName="UK_4J97PTANUCPFF6O5H5PYMSONY" tableName="TEAM_MEMBER"/>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-7">
+        <addUniqueConstraint columnNames="TEAM_ID, NAME" constraintName="UK_AU3GVA7EGXXE5C7V5N6VL9WBE" tableName="TEAM_ATTRIBUTE"/>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-8">
+        <addUniqueConstraint columnNames="ORGANIZATION_ID, USER_ID, ROLE_ID" constraintName="UK_S5FNFVSRU9I4QPH9GB8V4FXFM" tableName="USER_ORGANIZATION_ROLE_MAPPING"/>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-9">
+        <addUniqueConstraint columnNames="ORGANIZATION_ID, USER_ID" constraintName="UK_SKS0GAK7WC152SFNO502TD78E" tableName="ORGANIZATION_MEMBER"/>
+    </changeSet>
+    <changeSet author="garth (generated)" id="1587680343686-10">
+        <addForeignKeyConstraint baseColumnNames="ORGANIZATION_ID" baseTableName="USER_ORGANIZATION_ROLE_MAPPING" constraintName="FK_HGF6S4UUNYWDKP4244YTNGBAD" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="ORGANIZATION" validate="true"/>
+    </changeSet>
+
+    <!-- updated by garth. h2 has a problem in that it requires the "constraint" to be deleted,
+	 which deletes the index. so we have to remove the constraint with an h2 precondition, and
+	 remove the index with a not-h2 precondition -->
+
+    <!--
+    <changeSet author="garth" id="1587680343686-001">
+      <preConditions onFail="MARK_RAN">
+	<dbms type="h2"/>
+      </preConditions>
+      <dropUniqueConstraint constraintName="FK_519ERDJTQIVQ189PM1OUANAIX" tableName="ORGANIZATION_ATTRIBUTE"/>
+    </changeSet>
+    <changeSet author="garth" id="1587680343686-11">
+      <preConditions onFail="MARK_RAN">
+	<not>
+	  <dbms type="h2"/>
+	</not>
+      </preConditions>
+      <dropForeignKeyConstraint constraintName="FK_519erdjtqivq189pm1ouanaix" baseTableName="ORGANIZATION_ATTRIBUTE"/>
+    </changeSet>
+    
+    <changeSet author="garth" id="1587680343686-002">
+      <preConditions onFail="MARK_RAN">
+	<dbms type="h2"/>
+      </preConditions>
+      <dropUniqueConstraint constraintName="FK_6NTJB7DS3M2CXGM08DRXBCAC8" tableName="TEAM_MEMBER"/>
+    </changeSet>
+    <changeSet author="garth" id="1587680343686-12">
+      <preConditions onFail="MARK_RAN">
+	<not>
+	  <dbms type="h2"/>
+	</not>
+      </preConditions>
+      <dropForeignKeyConstraint constraintName="FK_6ntjb7ds3m2cxgm08drxbcac8" baseTableName="TEAM_MEMBER"/>
+    </changeSet>
+
+    <changeSet author="garth" id="1587680343686-003">
+      <preConditions onFail="MARK_RAN">
+	<dbms type="h2"/>
+      </preConditions>
+      <dropUniqueConstraint constraintName="FK_90AVVLR99DU3T58YEFYI4C3JO" tableName="TEAM_ATTRIBUTE"/>
+    </changeSet>
+    <changeSet author="garth" id="1587680343686-13">
+      <preConditions onFail="MARK_RAN">
+	<not>
+	  <dbms type="h2"/>
+	</not>
+      </preConditions>
+      <dropForeignKeyConstraint constraintName="FK_90avvlr99du3t58yefyi4c3jo" baseTableName="TEAM_ATTRIBUTE"/>
+    </changeSet>
+
+    <changeSet author="garth" id="1587680343686-004">
+      <preConditions onFail="MARK_RAN">
+	<dbms type="h2"/>
+      </preConditions>
+      <dropUniqueConstraint constraintName="FK_CI1R3V25SLRARTNLJ0BD6WL0J" tableName="ORGANIZATION_MEMBER"/>
+    </changeSet>
+    <changeSet author="garth" id="1587680343686-14">
+      <preConditions onFail="MARK_RAN">
+	<not>
+	  <dbms type="h2"/>
+	</not>
+      </preConditions>
+      <dropForeignKeyConstraint constraintName="FK_ci1r3v25slrartnlj0bd6wl0j" baseTableName="ORGANIZATION_MEMBER"/>
+    </changeSet>
+    -->
+</databaseChangeLog>

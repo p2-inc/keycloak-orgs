@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet author="garth" id="org-role-add-column-description">
+    <addColumn tableName="ORGANIZATION_ROLE">
+      <column name="DESCRIPTION" type="VARCHAR(1024)"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="garth" id="org-add-domain-table">
+    <dropColumn tableName="ORGANIZATION">
+      <column name="DOMAIN"/>
+    </dropColumn>
+    <createTable tableName="ORGANIZATION_DOMAIN">
+      <column name="ORGANIZATION_ID" type="VARCHAR(36)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="DOMAIN" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="VERIFIED" type="BOOLEAN" defaultValueBoolean="false"/>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="ORGANIZATION_ID" baseTableName="ORGANIZATION_DOMAIN" constraintName="FK_NYM2P7J4BST7GFC1DV8OAT264" referencedColumnNames="ID" referencedTableName="ORGANIZATION"/>
+  </changeSet>
+
+  
+</databaseChangeLog>

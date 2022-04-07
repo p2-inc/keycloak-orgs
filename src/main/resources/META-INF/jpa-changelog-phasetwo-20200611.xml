@@ -1,0 +1,13 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+  <changeSet author="garth" id="20200611-0">
+    <addColumn tableName="TEAM">
+      <column name="PARENT_ID" type="VARCHAR(36)"/>
+    </addColumn>
+  </changeSet>
+  <changeSet author="garth" id="20200611-1">
+    <addColumn tableName="TEAM">
+      <column name="VISIBLE" type="BOOLEAN" defaultValueBoolean="false"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

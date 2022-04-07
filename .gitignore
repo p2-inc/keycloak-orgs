@@ -1,0 +1,17 @@
+data/
+target/
+*~
+*.DS_Store
+.idea
+.settings
+.project
+bin/
+*iml
+.node
+tmp/*
+dependency-reduced-pom.xml
+.classpath
+.factorypath
+.vscode
+.swagger*
+src/main/resources/META-INF/jpa-changelog-phasetwo-full.xml

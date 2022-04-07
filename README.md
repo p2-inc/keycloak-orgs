@@ -54,7 +54,7 @@ Although it has been developed and working since Keycloak 9.0.0, the extensions 
 We've adopted a similar model that Keycloak uses for making the Organization data available to the application. There is a custom SPI that makes the [OrganizationProvider](src/main/java/io/phasetwo/service/model/OrganizationProvider.java) available. The methods provided are:
 ```java
   OrganizationModel createOrganization(
-      RealmModel realm, String name, String domain, UserModel createdBy);
+      RealmModel realm, String name, UserModel createdBy);
 
   OrganizationModel getOrganizationById(RealmModel realm, String id);
 
@@ -77,7 +77,7 @@ We've adopted a similar model that Keycloak uses for making the Organization dat
 
 #### Models
 
-The OrganizationProvider returns model delegates that wrap the underlying entities and provide conveninces for working with the data. They are available in the `io.phasetwo.service.model` package.
+The OrganizationProvider returns model delegates that wrap the underlying entities and provide conveniences for working with the data. They are available in the `io.phasetwo.service.model` package.
 - [OrganizationModel](src/main/java/io/phasetwo/service/model/OrganizationModel.java)
 - [OrganizationRoleModel](src/main/java/io/phasetwo/service/model/OrganizationRoleModel.java)
 - [InvitationModel](src/main/java/io/phasetwo/service/model/InvitationModel.java)
@@ -109,12 +109,13 @@ There is currently a single OIDC mapper that adds Organization membership and ro
      bar: []
    ]
 ```
+tbd screenshot of adding/configuring mapper in admin UI
 
 ### Authentication
 
 #### Invitations
 
-An custom Authenticator and Required Action must be installed and configured correctly in the browser authentication flow in order to properly process invitations. Assuming you are using the standard Keycloak browser flow, you must add the "Invitation" authenticator as a "REQUIRED" execution following the "Username Password Form" as a child of the "FORMS" group. This authenticator checks to see if the authenticated user has outstanding Invitations to Organizations, and then adds the Required Action that they must complete to accept or reject their Invitations following a successful authentication.
+A custom Authenticator and Required Action must be installed and configured correctly in the browser authentication flow in order to properly process invitations. Assuming you are using the standard Keycloak browser flow, you must add the "Invitation" authenticator as a "REQUIRED" execution following the "Username Password Form" as a child of the forms group. This authenticator checks to see if the authenticated user has outstanding Invitations to Organizations, and then adds the Required Action that they must complete to accept or reject their Invitations following a successful authentication.
 
 ![Install Invitation Authenticator in Browser Flow](docs/assets/install-invitation-authenticator.png)
 

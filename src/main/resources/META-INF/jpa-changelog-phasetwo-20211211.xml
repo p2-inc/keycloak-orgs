@@ -1,0 +1,21 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+  
+  <changeSet author="garth" id="org-add-column-domain-0">
+    <addColumn tableName="ORGANIZATION">
+      <column name="DOMAIN" type="VARCHAR(255 BYTE)" defaultValue="domain.app">
+	<constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="garth" id="org-add-column-domain-0a">
+    <sql>UPDATE ORGANIZATION SET DOMAIN=NAME</sql>
+  </changeSet>
+  
+  <changeSet author="garth" id="org-add-column-domain-1">
+    <addUniqueConstraint columnNames="DOMAIN" constraintName="UK_th5m1423trnagf9dsloja05rm" tableName="ORGANIZATION"/>
+  </changeSet>
+  
+</databaseChangeLog>
+    
