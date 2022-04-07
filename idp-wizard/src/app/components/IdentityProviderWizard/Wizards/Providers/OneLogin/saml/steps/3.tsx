@@ -20,16 +20,10 @@ export const Step3: FC = () => {
     {
       component: (
         <>
-          <DoubleItemClipboardCopy leftValue="UUID" rightValue="id" />
+          <DoubleItemClipboardCopy rightValue="UUID" leftValue="id" />
           <DoubleItemClipboardCopy rightValue="Email" leftValue="email" />
-          <DoubleItemClipboardCopy
-            rightValue="First name"
-            leftValue="firstName"
-          />
-          <DoubleItemClipboardCopy
-            rightValue="Last name"
-            leftValue="lastName"
-          />
+          <DoubleItemClipboardCopy rightValue="First name" leftValue="firstName" />
+          <DoubleItemClipboardCopy rightValue="Last name" leftValue="lastName" />
         </>
       ),
     },

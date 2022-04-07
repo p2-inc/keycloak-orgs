@@ -25,7 +25,7 @@ export const Step4: FC<Props> = ({ url, handleFormSubmit }) => {
         <UrlCard>
           <UrlForm
             url={url}
-            urlLabel="Issuer Url"
+            urlLabel="Issuer URL"
             handleFormSubmit={handleFormSubmit}
           />
         </UrlCard>

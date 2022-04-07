@@ -11,6 +11,7 @@ import { Step1, Step2, Step3, Step4 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
@@ -120,6 +121,32 @@ export const PingOneWizard: FC = () => {
       await kcAdminClient.identityProviders.create({
         ...payload,
         realm: getRealm()!,
+      });
+
+      // Map attributes
+      await SamlUserAttributeMapper({
+        alias,
+        keys: {
+          serverUrl: getServerUrl()!,
+          realm: getRealm()!,
+        },
+        attributes: [
+          {
+            attributeName: "firstName",
+            friendlyName: "",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName: "lastName",
+            friendlyName: "",
+            userAttribute: "lastName",
+          },
+          {
+            attributeName: "email",
+            friendlyName: "",
+            userAttribute: "email",
+          },
+        ],
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
