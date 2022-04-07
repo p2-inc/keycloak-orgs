@@ -38,6 +38,10 @@ export const useKeycloakAdminApi = () => {
     await kcAdminClient.setAccessToken(keycloak.token!);
   };
 
+  setInterval(async () => {
+    setKcAdminClientAccessToken();
+  }, 30 * 1000); // 30 seconds
+
   // Should be able to initiate off the bat and still provide as a callback
   setKcAdminClientAccessToken();
 
