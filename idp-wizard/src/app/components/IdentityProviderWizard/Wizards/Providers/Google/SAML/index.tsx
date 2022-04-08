@@ -12,6 +12,7 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { Axios } from "@wizardServices";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
+import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
@@ -37,7 +38,7 @@ export const GoogleWizard: FC = () => {
   ] = useKeycloakAdminApi();
 
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
-  const acsUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
@@ -117,6 +118,33 @@ export const GoogleWizard: FC = () => {
         ...payload,
         realm: getRealm()!,
       });
+
+      // Map attributes
+      await SamlUserAttributeMapper({
+        alias,
+        keys: {
+          serverUrl: getServerUrl()!,
+          realm: getRealm()!,
+        },
+        attributes: [
+          {
+            attributeName: "firstName",
+            friendlyName: "",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName: "lastName",
+            friendlyName: "",
+            userAttribute: "lastName",
+          },
+          {
+            attributeName: "email",
+            friendlyName: "",
+            userAttribute: "email",
+          },
+        ],
+      });
+
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);

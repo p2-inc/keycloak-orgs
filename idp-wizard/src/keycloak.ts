@@ -3,16 +3,11 @@ import Keycloak from 'keycloak-js';
 // Setup Keycloak instance as needed
 const keycloak = Keycloak('./keycloak.json');
 
-/*
-keycloak.onTokenExpired = () => {
-  console.log('token expired');
-  keycloak.updateToken(30).then(() => {
-    console.log('successfully get a new token');
-  }).catch(() => {
-    console.log('error getting a new token');
-  });
-}
-*/
+setInterval(async () => {
+  if (keycloak.isTokenExpired(10)) {
+    keycloak.updateToken(10);
+  }
+}, 60 * 1000); // 60 seconds
 
 export default keycloak;
 

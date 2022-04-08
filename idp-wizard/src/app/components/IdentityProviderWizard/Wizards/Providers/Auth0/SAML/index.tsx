@@ -13,6 +13,7 @@ import authoLogo from "@app/images/auth0/auth0-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
@@ -107,6 +108,37 @@ export const Auth0WizardSAML: FC = () => {
       await kcAdminClient.identityProviders.create({
         ...payload,
         realm: getRealm()!,
+      });
+
+      // Map attributes
+      await SamlUserAttributeMapper({
+        alias,
+        keys: {
+          serverUrl: getServerUrl()!,
+          realm: getRealm()!,
+        },
+        attributes: [
+          {
+            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+            friendlyName: "",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+            friendlyName: "",
+            userAttribute: "lastName",
+          },
+          {
+            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            friendlyName: "",
+            userAttribute: "email",
+          },
+          {
+            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            friendlyName: "",
+            userAttribute: "username",
+          },
+        ],
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

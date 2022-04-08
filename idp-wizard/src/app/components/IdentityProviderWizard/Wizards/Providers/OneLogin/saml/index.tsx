@@ -15,6 +15,7 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
@@ -119,6 +120,32 @@ export const OneLoginWizard: FC = () => {
       await kcAdminClient.identityProviders.create({
         ...payload,
         realm: getRealm()!,
+      });
+
+      // Map attributes
+      await SamlUserAttributeMapper({
+        alias,
+        keys: {
+          serverUrl: getServerUrl()!,
+          realm: getRealm()!,
+        },
+        attributes: [
+          {
+            attributeName: "firstName",
+            friendlyName: "",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName: "lastName",
+            friendlyName: "",
+            userAttribute: "lastName",
+          },
+          {
+            attributeName: "email",
+            friendlyName: "",
+            userAttribute: "email",
+          },
+        ],
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

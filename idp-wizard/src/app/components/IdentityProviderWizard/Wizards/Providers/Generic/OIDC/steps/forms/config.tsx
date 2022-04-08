@@ -30,13 +30,13 @@ export type OidcConfig = {
 
 const configSchema = Yup.object().shape({
   authorizationUrl: Yup.string()
-    .url("Authorization URL should be a valid Url.")
+    .url("Authorization URL should be a valid URL.")
     .required("Authorization URL is a required field."),
   tokenUrl: Yup.string()
-    .url("Token URL should be a valid Url.")
+    .url("Token URL should be a valid URL.")
     .required("Token URL is a required field."),
   userInfoUrl: Yup.string()
-    .url("User Info URL should be a valid Url.")
+    .url("User Info URL should be a valid URL.")
     .required("User Info URL is a required field."),
   validateSignature: Yup.boolean(),
   jwksUrl: Yup.string().when("validateSignature", {
@@ -44,7 +44,7 @@ const configSchema = Yup.object().shape({
     then: (schema) => schema.required(),
   }),
   issuer: Yup.string(),
-  logoutUrl: Yup.string().url("Logout URL should be a valid Url."),
+  logoutUrl: Yup.string().url("Logout URL should be a valid URL."),
 });
 
 type Props = {
@@ -108,7 +108,7 @@ export const Config: FC<Props> = ({
         </FormAlert>
       )}
       <FormGroup
-        label="Authorization Url"
+        label="Authorization URL"
         isRequired
         fieldId="authorizationUrl"
         validated={hasError("authorizationUrl")}
@@ -125,7 +125,7 @@ export const Config: FC<Props> = ({
         />
       </FormGroup>
       <FormGroup
-        label="Token Url"
+        label="Token URL"
         isRequired
         fieldId="tokenUrl"
         validated={hasError("tokenUrl")}
@@ -142,7 +142,7 @@ export const Config: FC<Props> = ({
         />
       </FormGroup>
       <FormGroup
-        label="User Info Url"
+        label="User Info URL"
         fieldId="userInfoUrl"
         validated={hasError("userInfoUrl")}
         helperTextInvalid={errors.userInfoUrl}
@@ -175,7 +175,7 @@ export const Config: FC<Props> = ({
         />
       </FormGroup>
       <FormGroup
-        label="JWKS Url"
+        label="JWKS URL"
         fieldId="jwksUrl"
         validated={hasError("jwksUrl")}
         helperTextInvalid={errors.jwksUrl}
@@ -207,7 +207,7 @@ export const Config: FC<Props> = ({
         />
       </FormGroup>
       <FormGroup
-        label="Logout Url"
+        label="Logout URL"
         fieldId="logoutUrl"
         validated={hasError("logoutUrl")}
         helperTextInvalid={errors.logoutUrl}

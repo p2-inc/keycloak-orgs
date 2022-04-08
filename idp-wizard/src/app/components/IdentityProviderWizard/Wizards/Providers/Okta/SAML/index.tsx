@@ -10,6 +10,7 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { API_RETURN, API_STATUS } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
@@ -37,7 +38,7 @@ export const OktaWizardSaml: FC = () => {
     protocol: Protocols.SAML,
     preface: "okta-saml",
   });
-  const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const ssoUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const audienceUri = `${getServerUrl()}/realms/${getRealm()}`;
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
   const [metadataUrl, setMetadataUrl] = useState("");
@@ -107,7 +108,7 @@ export const OktaWizardSaml: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias: alias,
-      displayName: `Okta SAML Single Sign-on ${alias}`,
+      displayName: `Okta SAML Single Sign-on`,
       providerId: "saml",
       config: metadata!,
     };
@@ -118,11 +119,43 @@ export const OktaWizardSaml: FC = () => {
         realm: getRealm()!,
       });
 
+      // Map attributes
+      await SamlUserAttributeMapper({
+        alias,
+        keys: {
+          serverUrl: getServerUrl()!,
+          realm: getRealm()!,
+        },
+        attributes: [
+          {
+            attributeName: "id",
+            friendlyName: "",
+            userAttribute: "username",
+          },
+          {
+            attributeName: "firstName",
+            friendlyName: "",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName: "lastName",
+            friendlyName: "",
+            userAttribute: "lastName",
+          },
+          {
+            attributeName: "email",
+            friendlyName: "",
+            userAttribute: "email",
+          },
+        ],
+      });
+
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
+      console.log('error', e);
       setResults(`Error creating ${idpCommonName}.`);
       setError(true);
     } finally {
