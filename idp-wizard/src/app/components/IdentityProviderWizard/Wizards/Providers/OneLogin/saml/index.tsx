@@ -26,7 +26,7 @@ export const OneLoginWizard: FC = () => {
   const alias = getAlias({
     provider: Providers.AUTH0,
     protocol: Protocols.OPEN_ID,
-    preface: "auth0-oidc",
+    preface: "onelogin-saml",
   });
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
@@ -39,8 +39,10 @@ export const OneLoginWizard: FC = () => {
     getAuthRealm,
   ] = useKeycloakAdminApi();
 
-  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
+  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const recipient = acsUrl;
+  const acsUrlValidator = acsUrl.replace(/\//g, "\\/");
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [issuerUrl, setIssuerUrl] = useState("");
@@ -174,7 +176,7 @@ export const OneLoginWizard: FC = () => {
     {
       id: 2,
       name: "Enter Service Provider Details",
-      component: <Step2 acsUrl={acsUrl} entityId={entityId} />,
+      component: <Step2 acsUrl={acsUrl} recipient={recipient} acsUrlValidator={acsUrlValidator} entityId={entityId} />,
       hideCancelButton: true,
       enableNext: true,
       canJumpTo: stepIdReached >= 2,

@@ -29,12 +29,8 @@ export const Step2: FC<Props> = ({ acsUrl, entityId }) => {
       ),
     },
     {
-      text: 'Submit the Assertion Consumer Service Endpoint as the "ACS URL" and the "Entity ID".',
+      text: 'Select "Manually Enter", and submit the "ACS URL" and the "Entity ID". Click "Save" once both values are pasted.',
       component: <StepImage src={Images.PINGONE_SAML_4} alt="Step 2.1" />,
-    },
-    {
-      text: 'Scroll down and input "600" for "Assertion Validity Duration (in seconds)", then select "Save and Continue".',
-      component: <StepImage src={Images.PINGONE_SAML_5} alt="Step 2.2" />,
     },
   ];
 
