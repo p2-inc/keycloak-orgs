@@ -198,33 +198,34 @@ export const GenericOIDC: FC = () => {
   }: ClientCreds) => {
     setCredentials({ clientId, clientSecret });
 
-    let resp;
-    try {
-      resp = await Axios.post(
-        metadata.tokenUrl,
-        `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
-      );
-    } catch (e) {
-      return {
-        status: API_STATUS.ERROR,
-        message: "Credentials validation failed. Check values and try again.",
-      };
-    }
+    // let resp;
+    // try {
+    //   resp = await Axios.post(
+    //     metadata.tokenUrl,
+    //     `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
+    //   );
+    // } catch (e) {
+    //   return {
+    //     status: API_STATUS.ERROR,
+    //     message: "Credentials validation failed. Check values and try again.",
+    //   };
+    // }
 
-    if (resp.status === 200) {
-      setCredentialValidationResp(resp.data);
-      setCredentailsValid(true);
-
-      return {
-        status: API_STATUS.SUCCESS,
-        message: "Credentials successfully validated. Continue to next step.",
-      };
-    }
+    // if (resp.status === 200) {
+    //   setCredentialValidationResp(resp.data);
+    setCredentailsValid(true);
 
     return {
-      status: API_STATUS.ERROR,
-      message: "Credentials validation failed. Check values and try again.",
+      status: API_STATUS.SUCCESS,
+      // message: "Credentials successfully validated. Continue to next step.",
+      message: "Credentials saved. Continue to next step.",
     };
+    // }
+
+    // return {
+    //   status: API_STATUS.ERROR,
+    //   message: "Credentials validation failed. Check values and try again.",
+    // };
   };
 
   const validateFn = async () => {
@@ -281,7 +282,7 @@ export const GenericOIDC: FC = () => {
       ),
       enableNext: isFormValid,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 2,
+      canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
@@ -296,7 +297,7 @@ export const GenericOIDC: FC = () => {
       enableNext: credentailsValid,
     },
     {
-      id: 4,
+      id: 3,
       name: "Confirmation",
       component: (
         <WizardConfirmation
@@ -315,7 +316,7 @@ export const GenericOIDC: FC = () => {
       nextButtonText: "Finish",
       hideCancelButton: true,
       enableNext: stepIdReached === finishStep,
-      canJumpTo: stepIdReached >= 4,
+      canJumpTo: stepIdReached >= finishStep,
     },
   ];
 

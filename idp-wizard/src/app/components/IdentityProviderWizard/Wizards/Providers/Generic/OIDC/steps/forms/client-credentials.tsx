@@ -122,7 +122,7 @@ export const ClientCredentials: FC<Props> = ({
           isDisabled={isSubmitting || !formActive}
           isLoading={isSubmitting}
         >
-          Validate Credentials
+          Save Credentials
         </Button>
       </ActionGroup>
     </Form>
