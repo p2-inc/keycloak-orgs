@@ -13,7 +13,7 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-import { Protocols, Providers } from "@app/configurations";
+import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { getAlias } from "@wizardServices";
 import { usePrompt } from "@app/hooks";
 
@@ -45,7 +45,11 @@ export const Auth0WizardOIDC: FC = () => {
   const [validationResults, setValidationResults] = useState<
     Record<string, any> | undefined
   >({});
-  const [config, setConfig] = useState({});
+  const [config, setConfig] = useState({
+    domain: "",
+    clientId: "",
+    clientSecret: "",
+  });
 
   const finishStep = 5;
 
@@ -106,7 +110,12 @@ export const Auth0WizardOIDC: FC = () => {
       alias,
       displayName: `Auth0 OIDC Single Sign-on`,
       providerId: "oidc",
-      config: validationResults,
+      config: {
+        ...OidcDefaults,
+        ...validationResults,
+        clientId: config.clientId,
+        clientSecret: config.clientSecret,
+      },
     };
 
     try {
