@@ -13,7 +13,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { API_RETURN, API_STATUS } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
-import { getAlias } from "@wizardServices";
+import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { usePrompt } from "@app/hooks";
 
@@ -58,6 +58,10 @@ export const OktaWizardSaml: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.OKTA,
+        protocol: Protocols.SAML,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -155,7 +159,7 @@ export const OktaWizardSaml: FC = () => {
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      console.log('error', e);
+      console.log("error", e);
       setResults(`Error creating ${idpCommonName}.`);
       setError(true);
     } finally {

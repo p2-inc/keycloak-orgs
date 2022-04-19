@@ -9,7 +9,7 @@ import { AWS_LOGO } from "@app/images/aws";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { Axios } from "@wizardServices";
+import { Axios, clearAlias } from "@wizardServices";
 import {
   API_RETURN,
   API_STATUS,
@@ -63,6 +63,10 @@ export const AWSSamlWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.AWS,
+        protocol: Protocols.SAML,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
