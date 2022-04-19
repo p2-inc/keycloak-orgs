@@ -11,15 +11,19 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.*;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import lombok.extern.jbosslog.JBossLog;
+import org.jboss.resteasy.spi.HttpRequest;
+import org.jboss.resteasy.spi.HttpResponse;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.resource.RealmResourceProvider;
+import org.keycloak.services.resources.Cors;
 import org.keycloak.theme.Theme;
 
 @JBossLog
@@ -36,6 +40,39 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @Override
   public Object getResource() {
     return this;
+  }
+
+  private void setupCors() {
+    HttpRequest request = session.getContext().getContextObject(HttpRequest.class);
+    HttpResponse response = session.getContext().getContextObject(HttpResponse.class);
+    UriInfo uriInfo = session.getContext().getUri();
+    if (hasCors(response)) return;
+    Cors.add(request)
+        .allowedOrigins(getOrigin(uriInfo))
+        .allowedMethods(METHODS)
+        .exposedHeaders("Location")
+        .auth()
+        .build(response);
+  }
+
+  private boolean hasCors(HttpResponse response) {
+    MultivaluedMap<String, Object> headers = response.getOutputHeaders();
+    if (headers == null) return false;
+    return (headers.get("Access-Control-Allow-Credentials") != null
+        || headers.get("Access-Control-Allow-Origin") != null
+        || headers.get("Access-Control-Expose-Headers") != null);
+  }
+
+  public static final String[] METHODS = {
+    "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+  };
+
+  @OPTIONS
+  @Path("{any:.*}")
+  public Response preflight() {
+    log.debug("CORS OPTIONS preflight request");
+    HttpRequest request = session.getContext().getContextObject(HttpRequest.class);
+    return Cors.add(request, Response.ok()).auth().allowedMethods(METHODS).preflight().build();
   }
 
   /** awful hack version for keycloak-x */
@@ -67,7 +104,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
   }
 
-  /* this version isn't working in Keycloak-X
+  /* this version isn't working in Keycloak-X. TODO test with new version
   @GET
   @Produces(MediaType.TEXT_HTML)
   public Response wizard() {
@@ -77,55 +114,6 @@ public class WizardResourceProvider implements RealmResourceProvider {
     return session.getProvider(LoginFormsProvider.class).setAttribute("wizardResources", wizardResources).setAttribute("realmName", realm.getName()).createForm("wizard.ftl");
   }
   */
-
-  @GET
-  @Path("{path: ^(200|fonts|images|main|site).*}")
-  public Response staticResources(@PathParam("path") final String path) throws IOException {
-    String fileName = getLastPathSegment(session.getContext().getUri());
-    Theme theme = getTheme("wizard");
-    InputStream resource = theme.getResourceAsStream(path);
-    String mimeType = getMimeType(fileName);
-    log.infof("%s [%s] (%s)", path, mimeType, null == resource ? "404" : "200");
-    return null == resource
-        ? Response.status(Response.Status.NOT_FOUND).build()
-        : Response.ok(resource, mimeType).build();
-  }
-
-  @GET
-  @Path("/keycloak.json")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response keycloakJson() {
-    RealmModel realm = session.getContext().getRealm();
-    UriInfo uriInfo = session.getContext().getUri();
-    Map json =
-        ImmutableMap.of(
-            "realm",
-            authRealmOverride,
-            "auth-server-url",
-            getBaseUrl(uriInfo),
-            "resource",
-            "idp-wizard");
-    return Response.ok(json).build();
-  }
-
-  @GET
-  @Path("/config.json")
-  @Produces(MediaType.APPLICATION_JSON)
-  public WizardConfig configJson() {
-    /*
-    groupMapping: true/false. whether group mapping steps should be displayed in the wizards and the group mappers should be created when calling the api
-apiMode: cloud/onprem. which APIs to use
-enableLdap: true/false. allow LDAP wizards (this is related to apiMode, but might change in the future, so adding it separately)
-enableDashboard: true/false. whether or not to show the dashboard and link
-    */
-    return WizardConfig.createFromAttributes(session);
-  }
-
-  private static String getBaseUrl(UriInfo uriInfo) {
-    String u = uriInfo.getBaseUri().toString();
-    if (u != null && u.endsWith("/")) u = u.substring(0, u.length() - 1);
-    return u;
-  }
 
   /*
   @GET
@@ -151,6 +139,55 @@ enableDashboard: true/false. whether or not to show the dashboard and link
     return session.getProvider(LoginFormsProvider.class).setAttribute("wizardResources", wizardResources).setAttribute("realmName", realm.getName()).createForm("wizard.ftl");
   }
   */
+
+  @GET
+  @Path("{path: ^(200|fonts|images|main|site).*}")
+  public Response staticResources(@PathParam("path") final String path) throws IOException {
+    String fileName = getLastPathSegment(session.getContext().getUri());
+    Theme theme = getTheme("wizard");
+    InputStream resource = theme.getResourceAsStream(path);
+    String mimeType = getMimeType(fileName);
+    log.infof("%s [%s] (%s)", path, mimeType, null == resource ? "404" : "200");
+    return null == resource
+        ? Response.status(Response.Status.NOT_FOUND).build()
+        : Response.ok(resource, mimeType).build();
+  }
+
+  @GET
+  @Path("/keycloak.json")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response keycloakJson() {
+    setupCors();
+    RealmModel realm = session.getContext().getRealm();
+    UriInfo uriInfo = session.getContext().getUri();
+    Map json =
+        ImmutableMap.of(
+            "realm",
+            authRealmOverride,
+            "auth-server-url",
+            getBaseUrl(uriInfo),
+            "resource",
+            "idp-wizard");
+    return Response.ok(json).build();
+  }
+
+  @GET
+  @Path("/config.json")
+  @Produces(MediaType.APPLICATION_JSON)
+  public WizardConfig configJson() {
+    setupCors();
+    return WizardConfig.createFromAttributes(session);
+  }
+
+  private static String getBaseUrl(UriInfo uriInfo) {
+    String u = uriInfo.getBaseUri().toString();
+    if (u != null && u.endsWith("/")) u = u.substring(0, u.length() - 1);
+    return u;
+  }
+
+  private static String getOrigin(UriInfo uriInfo) {
+    return uriInfo.getBaseUri().resolve("/").toString();
+  }
 
   private Theme getTheme(String name) {
     try {

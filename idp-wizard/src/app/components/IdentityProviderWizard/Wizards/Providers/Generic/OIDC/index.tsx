@@ -9,7 +9,7 @@ import OpenIdLogo from "@app/images/oidc/openid-logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { Axios } from "@wizardServices";
+import { Axios, clearAlias } from "@wizardServices";
 import { OidcConfig, ClientCreds } from "./steps/forms";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
@@ -84,6 +84,10 @@ export const GenericOIDC: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.OPEN_ID,
+        protocol: Protocols.OPEN_ID,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);

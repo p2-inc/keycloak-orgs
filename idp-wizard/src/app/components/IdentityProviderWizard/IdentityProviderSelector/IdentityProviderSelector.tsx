@@ -21,13 +21,11 @@ import { useHostname } from "@app/hooks/useHostname";
 import { useRoleAccess } from "@app/hooks";
 
 export const IdentityProviderSelector: FC = () => {
+  useTitle("Select your Identity Provider | PhaseTwo");
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
   const [hasAccess] = useRoleAccess();
-
   const hostname = useHostname();
-
-  useTitle("Select your Identity Provider | PhaseTwo");
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -42,7 +40,12 @@ export const IdentityProviderSelector: FC = () => {
               </Link>
             </FlexItem>
             <FlexItem>
-              <Button variant="link" isInline onClick={() => keycloak.logout()}>
+              <Button
+                variant="link"
+                href={keycloak.createLogoutUrl({})}
+                isInline
+                component="a"
+              >
                 Logout
               </Button>
             </FlexItem>

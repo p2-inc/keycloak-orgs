@@ -14,7 +14,7 @@ import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
-import { getAlias } from "@wizardServices";
+import { clearAlias, getAlias } from "@wizardServices";
 import { usePrompt } from "@app/hooks";
 
 export const Auth0WizardOIDC: FC = () => {
@@ -60,6 +60,10 @@ export const Auth0WizardOIDC: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.AUTH0,
+        protocol: Protocols.OPEN_ID,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);

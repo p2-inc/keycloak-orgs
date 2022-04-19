@@ -17,7 +17,7 @@ import {
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
-import { getAlias } from "@wizardServices";
+import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { usePrompt } from "@app/hooks";
 
@@ -64,6 +64,10 @@ export const OneLoginWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.AUTH0,
+        protocol: Protocols.OPEN_ID,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -176,7 +180,14 @@ export const OneLoginWizard: FC = () => {
     {
       id: 2,
       name: "Enter Service Provider Details",
-      component: <Step2 acsUrl={acsUrl} recipient={recipient} acsUrlValidator={acsUrlValidator} entityId={entityId} />,
+      component: (
+        <Step2
+          acsUrl={acsUrl}
+          recipient={recipient}
+          acsUrlValidator={acsUrlValidator}
+          entityId={entityId}
+        />
+      ),
       hideCancelButton: true,
       enableNext: true,
       canJumpTo: stepIdReached >= 2,

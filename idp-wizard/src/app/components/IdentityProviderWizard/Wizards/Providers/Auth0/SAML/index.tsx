@@ -6,7 +6,7 @@ import {
   Wizard,
 } from "@patternfly/react-core";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
-import { Axios } from "@wizardServices";
+import { Axios, clearAlias } from "@wizardServices";
 import * as Steps from "./Steps";
 import * as SharedSteps from "../shared/Steps";
 import authoLogo from "@app/images/auth0/auth0-logo.png";
@@ -56,6 +56,10 @@ export const Auth0WizardSAML: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.AUTH0,
+        protocol: Protocols.SAML,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
@@ -119,22 +123,26 @@ export const Auth0WizardSAML: FC = () => {
         },
         attributes: [
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
             friendlyName: "",
             userAttribute: "firstName",
           },
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
             friendlyName: "",
             userAttribute: "lastName",
           },
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
             friendlyName: "",
             userAttribute: "email",
           },
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
             friendlyName: "",
             userAttribute: "username",
           },

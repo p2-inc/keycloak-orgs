@@ -33,7 +33,8 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     // get override config
     RealmModel realm = session.getContext().getRealm();
     String override =
-        Optional.ofNullable(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY)).orElse(realm.getName());
+        Optional.ofNullable(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY))
+            .orElse(realm.getName());
     log.infof("Using override realm %s", override);
     return new WizardResourceProvider(session, override);
   }
@@ -59,7 +60,9 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
         createClient(realm, session);
       }
     } catch (Exception e) {
-      log.warn("Error initializing idp-wizard clients. Ignoring. You may have to create them manually.", e);
+      log.warn(
+          "Error initializing idp-wizard clients. Ignoring. You may have to create them manually.",
+          e);
     }
   }
 
@@ -107,18 +110,24 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     idpWizard.setRootUrl("${authBaseUrl}");
   }
 
-  private void setClientScopeDefaults(RealmModel realm, KeycloakSession session, ClientModel idpWizard) {
+  private void setClientScopeDefaults(
+      RealmModel realm, KeycloakSession session, ClientModel idpWizard) {
     idpWizard.setFullScopeAllowed(true);
-    session.clientScopes().getClientScopesStream(realm).filter(c -> (c.getRealm().equals(realm) && c.getName().equals("roles"))).forEach(c -> {
-        log.infof("Found 'roles' client scope. Adding as default...");
-        try {
-          idpWizard.addClientScope(c, true);
-        } catch (Exception e) {
-          log.warn("'roles' client scope already exists. skipping...");
-        }
-      });
+    session
+        .clientScopes()
+        .getClientScopesStream(realm)
+        .filter(c -> (c.getRealm().equals(realm) && c.getName().equals("roles")))
+        .forEach(
+            c -> {
+              log.infof("Found 'roles' client scope. Adding as default...");
+              try {
+                idpWizard.addClientScope(c, true);
+              } catch (Exception e) {
+                log.warn("'roles' client scope already exists. skipping...");
+              }
+            });
   }
-                 
+
   @Override
   public void close() {}
 }
