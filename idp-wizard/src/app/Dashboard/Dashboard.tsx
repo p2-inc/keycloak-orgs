@@ -19,12 +19,10 @@ import { useTitle } from "react-use";
 import { useRoleAccess } from "@app/hooks";
 
 const Dashboard: React.FunctionComponent = () => {
+  useTitle("Dashboard | PhaseTwo");
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
-
   const [hasAccess] = useRoleAccess();
-
-  useTitle("Dashboard | PhaseTwo");
 
   return (
     <PageSection>
@@ -46,7 +44,12 @@ const Dashboard: React.FunctionComponent = () => {
               </Link>
             </FlexItem>
             <FlexItem>
-              <Button variant="link" isInline onClick={() => keycloak.logout()}>
+              <Button
+                variant="link"
+                href={keycloak.createLogoutUrl({})}
+                isInline
+                component="a"
+              >
                 Logout
               </Button>
             </FlexItem>
