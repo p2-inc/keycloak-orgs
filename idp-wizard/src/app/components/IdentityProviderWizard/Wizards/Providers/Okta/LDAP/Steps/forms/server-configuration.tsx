@@ -69,6 +69,7 @@ export const LdapServerConfig: FC<Props> = ({
     touched,
     isSubmitting,
     setSubmitting,
+    setFieldValue,
   } = useFormik({
     initialValues: {
       host: config.host || "",
@@ -86,6 +87,27 @@ export const LdapServerConfig: FC<Props> = ({
     },
     validationSchema: ServerConfigSchema,
   });
+
+  const handleHostChange = (val, e) => {
+    handleChange(e);
+    autofillValues(val);
+  };
+
+  const handleBlur = () => {
+    const { host } = values;
+    autofillValues(host);
+  };
+
+  const autofillValues = (host) => {
+    if (host.match(/\w+\.ldap\.okta\.com/gi)) {
+      const splitHost = host.split(".");
+      const custId = splitHost[0];
+      setFieldValue("sslPort", "636");
+      setFieldValue("baseDn", `dc=${custId}, dc=okta, dc=com`);
+      setFieldValue("userBaseDn", `ou=users, dc=${custId}, dc=okta, dc=com`);
+      setFieldValue("groupBaseDn", `ou=groups, dc=${custId}, dc=okta, dc=com`);
+    }
+  };
 
   const hasError = (key: string) =>
     errors[key] && touched[key] ? "error" : "default";
@@ -118,10 +140,11 @@ export const LdapServerConfig: FC<Props> = ({
           id="host"
           name="host"
           value={values.host}
-          onChange={(val, e) => handleChange(e)}
+          onChange={(val, e) => handleHostChange(val, e)}
+          onBlur={(e) => handleBlur()}
           validated={hasError("host")}
           isDisabled={!formActive}
-          placeholder="dev-11111111.ldap.okta.com"
+          placeholder="customer.ldap.okta.com"
         />
       </FormGroup>
 
@@ -159,7 +182,7 @@ export const LdapServerConfig: FC<Props> = ({
           onChange={(val, e) => handleChange(e)}
           validated={hasError("baseDn")}
           isDisabled={!formActive}
-          placeholder="dc=dev-11111111, dc=okta, dc=com"
+          placeholder="dc=customer, dc=okta, dc=com"
         />
       </FormGroup>
 
@@ -178,7 +201,7 @@ export const LdapServerConfig: FC<Props> = ({
           onChange={(val, e) => handleChange(e)}
           validated={hasError("userBaseDn")}
           isDisabled={!formActive}
-          placeholder="ou=users, dc=dev-11111111, dc=okta, dc=com"
+          placeholder="ou=users, dc=customer, dc=okta, dc=com"
         />
       </FormGroup>
 
@@ -197,7 +220,7 @@ export const LdapServerConfig: FC<Props> = ({
           onChange={(val, e) => handleChange(e)}
           validated={hasError("groupBaseDn")}
           isDisabled={!formActive}
-          placeholder="ou=groups, dc=dev-11111111, dc=okta, dc=com"
+          placeholder="ou=groups, dc=customer, dc=okta, dc=com"
         />
       </FormGroup>
 
