@@ -35,7 +35,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     String override =
         Optional.ofNullable(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY))
             .orElse(realm.getName());
-    log.infof("Using override realm %s", override);
+    if (!override.equals(realm.getName())) log.infof("Using override realm %s", override);
     return new WizardResourceProvider(session, override);
   }
 
