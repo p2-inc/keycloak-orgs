@@ -39,16 +39,18 @@ export const PATHS = {
   accessDenied: `${BASE_PATH}/access-denied`,
 };
 
-export function useNavigateToBasePath(realm?: string) {
-  let navigate = useNavigate();
-
+export function generateBasePath(realm?: string) {
   const { realm: realmParam } = useParams();
   const pth = generatePath(`${BASE_PATH}/`, {
     realm: realmParam || realm || "",
   });
+  return pth;
+}
 
+export function useNavigateToBasePath(realm?: string) {
+  let navigate = useNavigate();
+  const pth = generateBasePath(realm);
   const navigateToBasePath = () => navigate(pth);
-
   return navigateToBasePath;
 }
 
