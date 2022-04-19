@@ -12,7 +12,8 @@ export const Step3: FC = () => {
     {
       component: (
         <div>
-          Provide the following Attribute Mappings and select "Save and Close".
+          Provide the following Attribute Mappings and select "Save". The "saml_subject"
+	  mapping that exists will have to be edited to use "Username" as its outgoing value.
           Note you may need to click “Add Attribute” to configure each of the
           mappings.
         </div>
@@ -21,7 +22,8 @@ export const Step3: FC = () => {
     {
       component: (
         <>
-          <DoubleItemClipboardCopy leftValue="id" rightValue="User ID" />
+          <DoubleItemClipboardCopy rightValue="Username" leftValue="saml_subject" />
+          <DoubleItemClipboardCopy rightValue="User ID" leftValue="id" />
           <DoubleItemClipboardCopy
             leftValue="email"
             rightValue="Email Address"

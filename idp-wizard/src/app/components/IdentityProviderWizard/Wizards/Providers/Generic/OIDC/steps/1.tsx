@@ -13,6 +13,9 @@ export const Step1: FC<Props> = ({ redirectUri }) => {
   const instructions: InstructionProps[] = [
     {
       text: "In your identity provider, create an OpenID Connect (OIDC) Application. If you are given the option, choose to create a “confidential” or “web” application. You may need the following information in order to create and configure your application. Don’t worry if you are not asked for these, as not all providers require everything.",
+      component: <div></div>,
+    },
+    {
       component: (
         <ClipboardCopyComponent
           label="Login Redirect URI"

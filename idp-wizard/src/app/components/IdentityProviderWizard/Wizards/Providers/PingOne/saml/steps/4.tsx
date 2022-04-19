@@ -20,7 +20,7 @@ type Props = {
 export const Step4: FC<Props> = ({ handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
-      text: 'Once you have completed the PingOne setup, you will be presented with a summary of the provider configuration. Select the "Configuration" tab and click "Download Metadata"',
+      text: 'Once you have completed the PingOne setup, you will be presented with a summary of the provider configuration. Enable the application for your users by selecting the toggle switch in the upper righthand corner. Select the "Configuration" tab and click "Download Metadata"',
       component: <StepImage src={Images.PINGONE_SAML_7} alt="Step 4.1" />,
     },
     {

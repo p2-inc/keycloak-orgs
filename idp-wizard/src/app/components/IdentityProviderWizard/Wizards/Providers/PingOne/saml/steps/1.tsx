@@ -9,12 +9,8 @@ export const Step1: FC = () => {
       component: <StepImage src={Images.PINGONE_SAML_1} alt="Step 1.1" />,
     },
     {
-      text: "On the following page, select “Advanced Configuration” and click “Configure” next to the SAML option.",
+      text: 'In the pane that opens, enter an “Application Name” and “Description”. Select “SAML Application” and then click “Configure”.',
       component: <StepImage src={Images.PINGONE_SAML_2} alt="Step 1.2" />,
-    },
-    {
-      text: "Enter an “Application Name” and “Description” and click “Next”.",
-      component: <StepImage src={Images.PINGONE_SAML_3} alt="Step 1.3" />,
     },
   ];
 

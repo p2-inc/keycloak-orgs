@@ -15,7 +15,7 @@ import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
-import { Protocols, Providers } from "@app/configurations";
+import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { last } from "lodash";
 import { usePrompt } from "@app/hooks";
 
@@ -59,6 +59,7 @@ export const GenericOIDC: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [url, setUrl] = useState("");
   const [metadata, setMetadata] = useState<OidcConfig>({
+    ...OidcDefaults,
     authorizationUrl: "",
     tokenUrl: "",
     userInfoUrl: "",
@@ -196,27 +197,35 @@ export const GenericOIDC: FC = () => {
     clientSecret,
   }: ClientCreds) => {
     setCredentials({ clientId, clientSecret });
-    const resp = await Axios.post(
-      metadata.tokenUrl,
-      `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
-    );
 
-    kcAdminClient.identityProviders.makeRequest;
+    // let resp;
+    // try {
+    //   resp = await Axios.post(
+    //     metadata.tokenUrl,
+    //     `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
+    //   );
+    // } catch (e) {
+    //   return {
+    //     status: API_STATUS.ERROR,
+    //     message: "Credentials validation failed. Check values and try again.",
+    //   };
+    // }
 
-    if (resp.status === 200) {
-      setCredentialValidationResp(resp.data);
-      setCredentailsValid(true);
-
-      return {
-        status: API_STATUS.SUCCESS,
-        message: "Credentials successfully validated. Continue to next step.",
-      };
-    }
+    // if (resp.status === 200) {
+    //   setCredentialValidationResp(resp.data);
+    setCredentailsValid(true);
 
     return {
-      status: API_STATUS.ERROR,
-      message: "Credentials validation failed. Check values and try again.",
+      status: API_STATUS.SUCCESS,
+      // message: "Credentials successfully validated. Continue to next step.",
+      message: "Credentials saved. Continue to next step.",
     };
+    // }
+
+    // return {
+    //   status: API_STATUS.ERROR,
+    //   message: "Credentials validation failed. Check values and try again.",
+    // };
   };
 
   const validateFn = async () => {
@@ -227,7 +236,7 @@ export const GenericOIDC: FC = () => {
       alias,
       displayName: `OIDC Single Sign-on`,
       providerId: "oidc",
-      config: { ...credentialValidationResp, ...credentials },
+      config: { ...OidcDefaults, ...credentialValidationResp, ...credentials },
     };
 
     try {
@@ -273,7 +282,7 @@ export const GenericOIDC: FC = () => {
       ),
       enableNext: isFormValid,
       hideCancelButton: true,
-      // canJumpTo: stepIdReached >= 2,
+      canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
@@ -288,7 +297,7 @@ export const GenericOIDC: FC = () => {
       enableNext: credentailsValid,
     },
     {
-      id: 4,
+      id: 3,
       name: "Confirmation",
       component: (
         <WizardConfirmation
@@ -307,7 +316,7 @@ export const GenericOIDC: FC = () => {
       nextButtonText: "Finish",
       hideCancelButton: true,
       enableNext: stepIdReached === finishStep,
-      canJumpTo: stepIdReached >= 4,
+      canJumpTo: stepIdReached >= finishStep,
     },
   ];
 

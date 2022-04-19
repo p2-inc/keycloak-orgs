@@ -23,7 +23,7 @@ export const JumpCloudWizard: FC = () => {
   const alias = getAlias({
     provider: Providers.JUMP_CLOUD,
     protocol: Protocols.OPEN_ID,
-    preface: "auth0-oidc",
+    preface: "jumpcloud-saml",
   });
   const navigateToBasePath = useNavigateToBasePath();
   const title = "JumpCloud wizard";

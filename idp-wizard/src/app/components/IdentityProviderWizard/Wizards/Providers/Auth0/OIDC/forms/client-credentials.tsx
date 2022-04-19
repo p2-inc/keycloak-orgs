@@ -17,17 +17,20 @@ import {
 } from "@app/configurations/api-status";
 
 export type ClientCreds = {
+  domain: string;
   clientId: string;
   clientSecret: string;
 };
 
 const ClientCredentialsSchema = Yup.object().shape({
+  domain: Yup.string().required("Domain is a required field."),
   clientId: Yup.string().required("Client Id is a required field."),
   clientSecret: Yup.string().required("Client secret is a required field."),
 });
 
 type Props = {
   handleFormSubmit: ({
+    domain,
     clientId,
     clientSecret,
   }: ClientCreds) => API_RETURN_PROMISE;
@@ -51,6 +54,7 @@ export const ClientCredentials: FC<Props> = ({
     setSubmitting,
   } = useFormik({
     initialValues: {
+      domain: credentials.domain,
       clientId: credentials.clientId,
       clientSecret: credentials.clientSecret,
     },
@@ -81,6 +85,23 @@ export const ClientCredentials: FC<Props> = ({
           />
         </FormAlert>
       )}
+      <FormGroup
+        label="Domain"
+        isRequired
+        fieldId="domain"
+        validated={hasError("domain")}
+        helperTextInvalid={errors.domain}
+      >
+        <TextInput
+          isRequired
+          id="domain"
+          name="domain"
+          value={values.domain}
+          onChange={(val, e) => handleChange(e)}
+          validated={hasError("domain")}
+          isDisabled={!formActive}
+        />
+      </FormGroup>
       <FormGroup
         label="Client Id"
         isRequired
@@ -122,7 +143,7 @@ export const ClientCredentials: FC<Props> = ({
           isDisabled={isSubmitting || !formActive}
           isLoading={isSubmitting}
         >
-          Save Credentials
+          Validate Credentials
         </Button>
       </ActionGroup>
     </Form>
