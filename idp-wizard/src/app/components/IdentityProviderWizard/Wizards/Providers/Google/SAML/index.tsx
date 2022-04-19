@@ -9,7 +9,7 @@ import GoogleLogo from "@app/images/provider-logos/google-workspace-logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { Axios } from "@wizardServices";
+import { Axios, clearAlias } from "@wizardServices";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
@@ -59,6 +59,10 @@ export const GoogleWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.GOOGLE_SAML,
+        protocol: Protocols.SAML,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);

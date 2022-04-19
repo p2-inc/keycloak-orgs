@@ -14,7 +14,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
-import { getAlias } from "@wizardServices";
+import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { usePrompt } from "@app/hooks";
 
@@ -60,6 +60,10 @@ export const PingOneWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
+      clearAlias({
+        provider: Providers.PING_ONE,
+        protocol: Protocols.SAML,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);

@@ -16,9 +16,8 @@ import {
   API_STATUS,
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
-import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
-import { getAlias } from "@wizardServices";
+import { getAlias, clearAlias, SamlUserAttributeMapper } from "@wizardServices";
 import { usePrompt } from "@app/hooks";
 
 export const AzureWizard: FC = () => {
@@ -58,6 +57,10 @@ export const AzureWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.AZURE,
+        protocol: Protocols.SAML,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);

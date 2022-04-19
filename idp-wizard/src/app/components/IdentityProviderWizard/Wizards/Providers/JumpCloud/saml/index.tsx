@@ -14,7 +14,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
-import { getAlias } from "@wizardServices";
+import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { usePrompt } from "@app/hooks";
 
@@ -59,6 +59,10 @@ export const JumpCloudWizard: FC = () => {
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
+      clearAlias({
+        provider: Providers.JUMP_CLOUD,
+        protocol: Protocols.OPEN_ID,
+      });
       navigateToBasePath();
     }
     setStepIdReached(stepIdReached < newStep.id ? newStep.id : stepIdReached);
