@@ -8,7 +8,7 @@ import {
 import keycloak from "../../../keycloak";
 
 export interface FeatureFlagsState {
-  groupMapping: boolean;
+  enableGroupMapping: boolean;
   apiMode: "cloud" | "onprem" | "";
   enableLdap: boolean;
   enableDashboard: boolean;
@@ -17,14 +17,14 @@ export interface FeatureFlagsState {
 type FlagsResponse = FeatureFlagsState;
 
 enum Flags {
-  GroupMapping = "groupMapping",
+  EnableGroupMapping = "enableGroupMapping",
   ApiMode = "apiMode",
   EnableLdap = "enableLdap",
   EnableDashboard = "enableDashboard",
 }
 
 const initialState: FeatureFlagsState = {
-  groupMapping: false,
+  enableGroupMapping: false,
   apiMode: "",
   enableLdap: false,
   enableDashboard: false,
