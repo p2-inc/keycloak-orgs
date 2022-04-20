@@ -48,11 +48,11 @@ public class WizardResourceProvider implements RealmResourceProvider {
     UriInfo uriInfo = session.getContext().getUri();
     if (hasCors(response)) return;
     Cors.add(request)
-        .allowedOrigins(getOrigin(uriInfo))
+        .allowAllOrigins() 
         .allowedMethods(METHODS)
-        .exposedHeaders("Location")
         .auth()
         .build(response);
+    log.infof("hasCors %b", hasCors(response));
   }
 
   private boolean hasCors(HttpResponse response) {
