@@ -30,7 +30,7 @@ const Provider = () => {
   const { provider, protocol } = useParams<
     keyof RouterParams
   >() as RouterParams;
-  const [hasAccess] = useRoleAccess();
+  const { hasAccess } = useRoleAccess();
 
   const providers = [...IdentityProviders, ...GenericIdentityProviders];
 

@@ -17,12 +17,24 @@ import { generatePath, Link } from "react-router-dom";
 import { PATHS } from "@app/routes";
 import { useTitle } from "react-use";
 import { useRoleAccess } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
+import Loading from "@app/utils/Loading";
 
 const Dashboard: React.FunctionComponent = () => {
   useTitle("Dashboard | PhaseTwo");
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
-  const [hasAccess] = useRoleAccess();
+  const { hasAccess, navigateToAccessDenied } = useRoleAccess();
+  const { data: featureFlags, isLoading } = useGetFeatureFlagsQuery();
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (!isLoading && !featureFlags?.enableDashboard) {
+    navigateToAccessDenied();
+    return <Loading />;
+  }
 
   return (
     <PageSection>
