@@ -16,7 +16,7 @@ import {
   IdentityProviders,
   Providers,
 } from "@app/configurations";
-import { BASE_PATH, PATHS } from "@app/routes";
+import { PATHS } from "@app/routes";
 import { useTitle } from "react-use";
 import { useHostname } from "@app/hooks/useHostname";
 import { useRoleAccess } from "@app/hooks";
@@ -31,7 +31,7 @@ export const IdentityProviderSelector: FC = () => {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   return (
-    <PageS ection variant={PageSectionVariants.light}>
+    <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
         <StackItem>
           <Flex justifyContent={{ default: "justifyContentFlexEnd" }}>
@@ -124,6 +124,6 @@ export const IdentityProviderSelector: FC = () => {
           </div>
         </StackItem>
       </Stack>
-    </PageS>
+    </PageSection>
   );
 };
