@@ -7,8 +7,6 @@ import "@app/styles/app.css";
 import { useGetFeatureFlagsQuery } from "./services";
 
 const App: React.FunctionComponent = () => {
-  const { data, error, isLoading } = useGetFeatureFlagsQuery();
-
   return (
     <Router>
       <AppLayout>

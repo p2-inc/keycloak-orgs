@@ -19,6 +19,7 @@ import { BASE_PATH, PATHS } from "@app/routes";
 import { useTitle } from "react-use";
 import { useHostname } from "@app/hooks/useHostname";
 import { useRoleAccess } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const IdentityProviderSelector: FC = () => {
   useTitle("Select your Identity Provider | PhaseTwo");
@@ -26,19 +27,22 @@ export const IdentityProviderSelector: FC = () => {
   let { realm } = useParams();
   const [hasAccess] = useRoleAccess();
   const hostname = useHostname();
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   return (
     <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
         <StackItem>
-          <Flex>
-            <FlexItem align={{ default: "alignRight" }}>
-              <Link to={generatePath(PATHS.dashboard, { realm })}>
-                <Button variant="link" isInline>
-                  Dashboard
-                </Button>
-              </Link>
-            </FlexItem>
+          <Flex justifyContent={{ default: "justifyContentFlexEnd" }}>
+            {featureFlags?.enableDashboard && (
+              <FlexItem>
+                <Link to={generatePath(PATHS.dashboard, { realm })}>
+                  <Button variant="link" isInline>
+                    Dashboard
+                  </Button>
+                </Link>
+              </FlexItem>
+            )}
             <FlexItem>
               <Button
                 variant="link"

@@ -7,8 +7,8 @@ import {
   Button,
 } from "@patternfly/react-core";
 import { generatePath, Link, useParams } from "react-router-dom";
-import { useKeycloak } from "@react-keycloak/web";
 import { PATHS } from "@app/routes";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 interface Props {
   logo: string;
@@ -16,8 +16,8 @@ interface Props {
 }
 
 export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
-  const { keycloak } = useKeycloak();
   const { realm } = useParams();
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -38,13 +38,15 @@ export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
             </Button>
           </Link>
         </FlexItem>
-        <FlexItem>
-          <Link to={generatePath(PATHS.dashboard, { realm })}>
-            <Button variant="link" isInline>
-              Dashboard
-            </Button>
-          </Link>
-        </FlexItem>
+        {featureFlags?.enableDashboard && (
+          <FlexItem>
+            <Link to={generatePath(PATHS.dashboard, { realm })}>
+              <Button variant="link" isInline>
+                Dashboard
+              </Button>
+            </Link>
+          </FlexItem>
+        )}
       </Flex>
     </PageSection>
   );
