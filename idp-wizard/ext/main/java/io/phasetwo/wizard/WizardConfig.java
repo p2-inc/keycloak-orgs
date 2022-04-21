@@ -26,6 +26,8 @@ public class WizardConfig {
         .ifPresent(a -> config.enableLdap(a.toLowerCase().equals("true")));
     Optional.ofNullable(realm.getAttribute(CONFIG_KEY("enableDashboard")))
         .ifPresent(a -> config.enableDashboard(a.toLowerCase().equals("true")));
+    Optional.ofNullable(realm.getAttribute(CONFIG_KEY("emailAsUsername")))
+        .ifPresent(a -> config.emailAsUsername(a.toLowerCase().equals("true")));
     return config;
   }
 
@@ -40,6 +42,9 @@ public class WizardConfig {
 
   @JsonProperty("enableDashboard")
   private boolean enableDashboard = true;
+
+  @JsonProperty("emailAsUsername")
+  private boolean emailAsUsername = false;
 
   @JsonProperty("apiMode")
   public String getApiMode() {
@@ -98,6 +103,21 @@ public class WizardConfig {
 
   public WizardConfig enableDashboard(boolean enableDashboard) {
     this.enableDashboard = enableDashboard;
+    return this;
+  }
+
+  @JsonProperty("emailAsUsername")
+  public boolean getEmailAsUsername() {
+    return emailAsUsername;
+  }
+
+  @JsonProperty("emailAsUsername")
+  public void setEmailAsUsername(boolean emailAsUsername) {
+    this.emailAsUsername = emailAsUsername;
+  }
+
+  public WizardConfig emailAsUsername(boolean emailAsUsername) {
+    this.emailAsUsername = emailAsUsername;
     return this;
   }
 }
