@@ -170,16 +170,16 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
     }
 
     // create default admin user
+    String adminUsername = getDefaultAdminUsername(org);
     UserModel user =
         event
             .getKeycloakSession()
             .users()
-            .addUser(
-                event.getRealm(),
-                KeycloakModelUtils.generateId(),
-                getDefaultAdminUsername(org),
-                true,
-                false);
+            .addUser(event.getRealm(), KeycloakModelUtils.generateId(), adminUsername, true, false);
+    user.setEnabled(true);
+    // other defaults? email? emailVerified? attributes?
+    user.setEmail(String.format("%s@noreply.phasetwo.io", adminUsername)); // todo dynamic email?
+    user.setEmailVerified(true);
     org.grantMembership(user);
     for (String role : DEFAULT_ORG_ROLES) {
       OrganizationRoleModel roleModel = org.getRoleByName(role);
