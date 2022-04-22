@@ -19,7 +19,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 public class PortalLinkAuthenticatorFactory
     implements AuthenticatorFactory, ConfigurableAuthenticatorFactory {
 
-  public static final String PROVIDER_ID = "portal_link";
+  public static final String PROVIDER_ID = "ext-portal-link";
 
   @Override
   public String getId() {

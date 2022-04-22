@@ -67,7 +67,7 @@ public class OrganizationResourceTest {
     assertNotNull(rep.getId());
     assertNull(rep.getDisplayName());
     assertNull(rep.getUrl());
-    assertThat(rep.getRealmId(), is("master"));
+    assertThat(rep.getRealm(), is("master"));
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(id));
@@ -85,7 +85,7 @@ public class OrganizationResourceTest {
     assertNotNull(rep.getId());
     assertNull(rep.getDisplayName());
     assertNull(rep.getUrl());
-    assertThat(rep.getRealmId(), is("master"));
+    assertThat(rep.getRealm(), is("master"));
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(id));
@@ -113,7 +113,7 @@ public class OrganizationResourceTest {
     assertThat(rep.getAttributes().get("foo").get(0), is("bar"));
     assertThat(rep.getDisplayName(), is("Example company"));
     assertThat(rep.getUrl(), is("https://www.example.com/"));
-    assertThat(rep.getRealmId(), is("master"));
+    assertThat(rep.getRealm(), is("master"));
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(id));
@@ -846,7 +846,7 @@ public class OrganizationResourceTest {
     assertThat(rep.getAttributes().size(), is(0));
     assertThat(rep.getDisplayName(), is("Example company"));
     assertThat(rep.getUrl(), is("https://www.example.com/"));
-    assertThat(rep.getRealmId(), is("master"));
+    assertThat(rep.getRealm(), is("master"));
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(orgId1));

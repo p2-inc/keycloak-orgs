@@ -17,7 +17,7 @@ public class Organization {
   private @Valid String name = null;
   private @Valid String displayName = null;
   private @Valid String url = null;
-  private @Valid String realmId = null;
+  private @Valid String realm = null;
   private @Valid Set<String> domains = Sets.newHashSet();
   private @Valid Map<String, List<String>> attributes = Maps.newHashMap();
 
@@ -92,18 +92,18 @@ public class Organization {
   }
 
   /** */
-  public Organization realmId(String realmId) {
-    this.realmId = realmId;
+  public Organization realm(String realm) {
+    this.realm = realm;
     return this;
   }
 
-  @JsonProperty("realmId")
-  public String getRealmId() {
-    return realmId;
+  @JsonProperty("realm")
+  public String getRealm() {
+    return realm;
   }
 
-  public void setRealmId(String realmId) {
-    this.realmId = realmId;
+  public void setRealm(String realm) {
+    this.realm = realm;
   }
 
   public Organization attribute(String name, String value) {
@@ -139,13 +139,13 @@ public class Organization {
         && Objects.equals(displayName, organization.displayName)
         && Objects.equals(domains, organization.domains)
         && Objects.equals(url, organization.url)
-        && Objects.equals(realmId, organization.realmId)
+        && Objects.equals(realm, organization.realm)
         && Objects.equals(attributes, organization.attributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, domains, url, realmId, attributes);
+    return Objects.hash(id, name, displayName, domains, url, realm, attributes);
   }
 
   @Override
@@ -157,7 +157,7 @@ public class Organization {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    domains: ").append(toIndentedString(domains)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
-    sb.append("    realmId: ").append(toIndentedString(realmId)).append("\n");
+    sb.append("    realm: ").append(toIndentedString(realm)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("}");
     return sb.toString();

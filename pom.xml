@@ -10,8 +10,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>4.13.2</junit.version>
-    <keycloak.version>17.0.1</keycloak.version>
-    <resteasy.version>3.13.2.Final</resteasy.version>
+    <keycloak.version>18.0.0</keycloak.version>
+    <resteasy.version>3.15.1.Final</resteasy.version>
     <lombok.version>1.18.22</lombok.version>
     <auto-service.version>1.0.1</auto-service.version>
   </properties>

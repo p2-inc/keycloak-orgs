@@ -7,7 +7,7 @@ public class PortalLinkActionToken extends DefaultActionToken {
 
   public static final String TOKEN_TYPE = "org-portal-link";
 
-  private static final String JSON_FIELD_ORG_ID = "oid";
+  public static final String JSON_FIELD_ORG_ID = "org_id";
 
   private static final String JSON_FIELD_REDIRECT_URI = "rdu";
 

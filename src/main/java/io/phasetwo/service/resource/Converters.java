@@ -6,7 +6,6 @@ import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
-import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.TeamEntity;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.Organization;
@@ -27,19 +26,6 @@ public class Converters {
     return r;
   }
 
-  public static Organization convertOrganizationEntityToOrganization(OrganizationEntity e) {
-    Organization o =
-        new Organization()
-            .id(e.getId())
-            .name(e.getName())
-            .displayName(e.getDisplayName())
-            .domains(e.getDomains())
-            .url(e.getUrl())
-            .realmId(e.getRealmId());
-    e.getAttributes().forEach(a -> o.attribute(a.getName(), a.getValue()));
-    return o;
-  }
-
   public static Organization convertOrganizationModelToOrganization(OrganizationModel e) {
     Organization o =
         new Organization()
@@ -48,7 +34,7 @@ public class Converters {
             .displayName(e.getDisplayName())
             .domains(e.getDomains())
             .url(e.getUrl())
-            .realmId(e.getRealm().getId());
+            .realm(e.getRealm().getName());
     o.setAttributes(e.getAttributes());
     return o;
   }

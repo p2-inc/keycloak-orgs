@@ -79,6 +79,9 @@ public class PortalLinkActionTokenHandler
       authSession.setClientNote(OIDCLoginProtocol.REDIRECT_URI_PARAM, redirectUri);
     }
 
+    // set the orgId to a user session note
+    authSession.setUserSessionNote(PortalLinkActionToken.JSON_FIELD_ORG_ID, token.getOrgId());
+
     String nextAction =
         AuthenticationManager.nextRequiredAction(
             tokenContext.getSession(),
