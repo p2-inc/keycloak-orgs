@@ -72,9 +72,9 @@ export const IdentityProviders: IIDPType[] = [
   {
     name: "ADFS",
     imageSrc: adfsLogo,
-    active: false,
+    active: true,
     id: Providers.ADFS,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
   {
     name: "Auth0",

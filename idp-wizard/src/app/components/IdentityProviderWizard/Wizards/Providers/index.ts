@@ -1,3 +1,4 @@
+export * from "./ADFS";
 export * from "./Auth0";
 export * from "./AWS";
 export * from "./Azure";
