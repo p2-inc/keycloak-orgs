@@ -24,8 +24,8 @@ import { usePrompt } from "@app/hooks";
 export const OneLoginWizard: FC = () => {
   const idpCommonName = "OneLogin IdP";
   const alias = getAlias({
-    provider: Providers.AUTH0,
-    protocol: Protocols.OPEN_ID,
+    provider: Providers.ONE_LOGIN,
+    protocol: Protocols.SAML,
     preface: "onelogin-saml",
   });
   const navigateToBasePath = useNavigateToBasePath();
@@ -65,8 +65,8 @@ export const OneLoginWizard: FC = () => {
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
       clearAlias({
-        provider: Providers.AUTH0,
-        protocol: Protocols.OPEN_ID,
+        provider: Providers.ONE_LOGIN,
+        protocol: Protocols.SAML,
       });
       navigateToBasePath();
     }
