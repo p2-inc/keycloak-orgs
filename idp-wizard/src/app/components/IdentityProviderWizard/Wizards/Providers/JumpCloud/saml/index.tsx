@@ -28,13 +28,8 @@ export const JumpCloudWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "JumpCloud wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;

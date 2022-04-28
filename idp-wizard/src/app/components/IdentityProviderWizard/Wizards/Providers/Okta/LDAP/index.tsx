@@ -25,8 +25,7 @@ export const OktaWizardLDAP: FC = () => {
   const idpCommonName = "Okta LDAP IdP";
   const title = "Okta LDAP Wizard";
   const navigateToBasePath = useNavigateToBasePath();
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const { kcAdminClient, getRealm } = useKeycloakAdminApi();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   const [stepIdReached, setStepIdReached] = useState(1);

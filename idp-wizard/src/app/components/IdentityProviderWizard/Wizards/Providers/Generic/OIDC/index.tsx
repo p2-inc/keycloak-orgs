@@ -35,13 +35,8 @@ export const GenericOIDC: FC = () => {
     preface: "generic-oidc",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
 
   const aliasId = last(alias.split("-"));
   const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${aliasId}/endpoint`;

@@ -30,7 +30,7 @@ export const ConnectionStatus = () => {
   const [idps, setIdps] = useState<idpEntry[] | []>([]);
   const [loading, setLoading] = useState(true);
 
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+  const { kcAdminClient, setKcAdminClientAccessToken, getRealm } =
     useKeycloakAdminApi();
   const realm = getRealm()!;
 

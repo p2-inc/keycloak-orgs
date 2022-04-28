@@ -25,13 +25,8 @@ export const Auth0WizardOIDC: FC = () => {
     preface: "auth0-oidc",
   });
   const navigateToBasePath = useNavigateToBasePath();
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
   const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
 
   const [stepIdReached, setStepIdReached] = useState(1);

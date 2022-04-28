@@ -34,13 +34,8 @@ export const AzureWizard: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;

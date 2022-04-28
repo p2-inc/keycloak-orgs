@@ -32,13 +32,8 @@ export const AWSSamlWizard: FC = () => {
 
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
 
   const acsURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const samlAudience = `${getServerUrl()}/realms/${getRealm()}`;

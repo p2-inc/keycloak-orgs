@@ -25,13 +25,8 @@ export const OktaWizardSaml: FC = () => {
   const [metadata, setMetadata] = useState();
   const [isFormValid, setIsFormValid] = useState(false);
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
 
   const alias = getAlias({
     provider: Providers.OKTA,

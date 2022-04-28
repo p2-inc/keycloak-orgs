@@ -45,11 +45,11 @@ export const useKeycloakAdminApi = () => {
   // Should be able to initiate off the bat and still provide as a callback
   setKcAdminClientAccessToken();
 
-  return [
+  return {
     kcAdminClient,
     setKcAdminClientAccessToken,
     getServerUrl,
     getRealm,
     getAuthRealm,
-  ] as const;
+  };
 };
