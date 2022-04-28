@@ -19,6 +19,7 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useNavigateToBasePath } from "@app/routes";
 import { useKeycloakAdminApi, usePrompt } from "@app/hooks";
 import { API_STATUS } from "@app/configurations";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const OktaWizardLDAP: FC = () => {
   const idpCommonName = "Okta LDAP IdP";
@@ -26,6 +27,7 @@ export const OktaWizardLDAP: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
     useKeycloakAdminApi();
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   const [stepIdReached, setStepIdReached] = useState(1);
 
@@ -43,7 +45,7 @@ export const OktaWizardLDAP: FC = () => {
 
   const [groups, setGroups] = useState("");
 
-  const finishStep = 5;
+  let finishStep = 5;
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
@@ -240,7 +242,7 @@ export const OktaWizardLDAP: FC = () => {
     };
   };
 
-  const steps = [
+  let steps = [
     {
       id: 1,
       name: "Enable LDAP Interface",
@@ -277,6 +279,7 @@ export const OktaWizardLDAP: FC = () => {
       ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
+      isEnabled: featureFlags?.enableGroupMapping,
     },
     {
       id: 4,
@@ -298,6 +301,15 @@ export const OktaWizardLDAP: FC = () => {
       hideCancelButton: true,
     },
   ];
+
+  if (!featureFlags?.enableGroupMapping) {
+    let copySteps = [...steps];
+    copySteps.splice(2, 1);
+    copySteps = copySteps.map((s, i) => ({ ...s, id: i + 1 }));
+    steps = copySteps;
+  }
+
+  finishStep = steps.length + 1;
 
   return (
     <>
