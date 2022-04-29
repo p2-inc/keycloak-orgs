@@ -19,14 +19,12 @@ import { WizardConfirmation, Header } from "@wizardComponents";
 import { useNavigateToBasePath } from "@app/routes";
 import { useKeycloakAdminApi, usePrompt } from "@app/hooks";
 import { API_STATUS } from "@app/configurations";
-import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const OktaWizardLDAP: FC = () => {
   const idpCommonName = "Okta LDAP IdP";
   const title = "Okta LDAP Wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const { kcAdminClient, getRealm } = useKeycloakAdminApi();
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   const [stepIdReached, setStepIdReached] = useState(1);
 
@@ -278,7 +276,6 @@ export const OktaWizardLDAP: FC = () => {
       ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
-      isEnabled: featureFlags?.enableGroupMapping,
     },
     {
       id: 4,
@@ -300,15 +297,6 @@ export const OktaWizardLDAP: FC = () => {
       hideCancelButton: true,
     },
   ];
-
-  if (!featureFlags?.enableGroupMapping) {
-    let copySteps = [...steps];
-    copySteps.splice(2, 1);
-    copySteps = copySteps.map((s, i) => ({ ...s, id: i + 1 }));
-    steps = copySteps;
-  }
-
-  finishStep = steps.length + 1;
 
   return (
     <>

@@ -17,7 +17,6 @@ import {
   API_RETURN_PROMISE,
   API_STATUS,
 } from "@app/configurations/api-status";
-import { useGetFeatureFlagsQuery } from "@app/services";
 
 const ServerConfigSchema = Yup.object().shape({
   host: Yup.string().required("LDAP host is a required field."),
@@ -58,7 +57,6 @@ export const LdapServerConfig: FC<Props> = ({
   config,
   formActive = true,
 }) => {
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const [submissionResp, setSubmissionResp] = useState<API_RETURN | null>();
   const {
     handleSubmit,
@@ -218,23 +216,21 @@ export const LdapServerConfig: FC<Props> = ({
         />
       </FormGroup>
 
-      {featureFlags?.enableGroupMapping && (
-        <FormGroup
-          label="LDAP Group Filter"
-          fieldId="groupFilter"
+      <FormGroup
+        label="LDAP Group Filter"
+        fieldId="groupFilter"
+        validated={hasError("groupFilter")}
+        helperTextInvalid={errors.groupFilter}
+      >
+        <TextInput
+          id="groupFilter"
+          name="groupFilter"
+          value={values.groupFilter}
+          onChange={(val, e) => handleChange(e)}
           validated={hasError("groupFilter")}
-          helperTextInvalid={errors.groupFilter}
-        >
-          <TextInput
-            id="groupFilter"
-            name="groupFilter"
-            value={values.groupFilter}
-            onChange={(val, e) => handleChange(e)}
-            validated={hasError("groupFilter")}
-            isDisabled={!formActive}
-          />
-        </FormGroup>
-      )}
+          isDisabled={!formActive}
+        />
+      </FormGroup>
 
       <ActionGroup style={{ marginTop: 0 }}>
         <Button
