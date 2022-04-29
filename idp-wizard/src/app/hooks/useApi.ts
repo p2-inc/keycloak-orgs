@@ -1,33 +1,43 @@
 import { useGetFeatureFlagsQuery } from "@app/services";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useKeycloakAdminApi } from "./useKeycloakAdminApi";
 
 enum HTTP_METHODS {
-  GET = "GET",
-  POST = "POST",
-  PUT = "PUT",
+  GET,
+  POST,
+  PUT,
 }
+
+type apiEndpointNames =
+  | "getIdPs"
+  | "getIdP"
+  | "createIdP"
+  | "updateIdP"
+  | "importConfig"
+  | "addMapperToIdP";
+
+type endpoint = {
+  method: HTTP_METHODS;
+  endpoint: string;
+};
 
 export const useApi = () => {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
-  const { getRealm, kcAdminClient } = useKeycloakAdminApi();
+  const { getRealm, keycloakToken } = useKeycloakAdminApi();
   const realm = getRealm();
   const [alias, setAlias] = useState("");
   const [orgId, setOrgId] = useState("SET_ORG_ID");
 
-  const baseOPUrl = `/${realm}/identity-provider`;
+  const baseOPUrl = `${realm}/identity-provider`;
   const baseOPUrlInstances = `${baseOPUrl}/instances`;
-  const baseCUrl = `/${realm}/orgs/${orgId}/idps`;
+  const baseCUrl = `${realm}/orgs/${orgId}/idps`;
 
-  console.log("[featureFlags]", featureFlags);
-  console.log(
-    "[kcAdminClient]",
-    kcAdminClient,
-    kcAdminClient.userStorageProvider
-  );
+  useEffect(() => {
+    setOrgId(keycloakToken.org_id);
+  }, [keycloakToken]);
 
   // onprem endpoint
-  const onprem = {
+  const onPremEndpoints: Record<apiEndpointNames, endpoint> = {
     getIdPs: {
       method: HTTP_METHODS.GET,
       endpoint: `${baseOPUrlInstances}`,
@@ -55,7 +65,7 @@ export const useApi = () => {
   };
 
   // cloud endpoints
-  const cloud = {
+  const cloudEndpoints: Record<apiEndpointNames, endpoint> = {
     getIdPs: {
       method: HTTP_METHODS.GET,
       endpoint: `${baseCUrl}`,
@@ -82,9 +92,16 @@ export const useApi = () => {
     },
   };
 
+  let endpoints: Record<apiEndpointNames, endpoint> | undefined;
+  if (featureFlags?.apiMode === "onprem") {
+    endpoints = onPremEndpoints;
+  }
+  if (featureFlags?.apiMode === "cloud") {
+    endpoints = cloudEndpoints;
+  }
+
   return {
     setAlias,
-    onprem,
-    cloud,
+    endpoints,
   };
 };

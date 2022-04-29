@@ -51,5 +51,6 @@ export const useKeycloakAdminApi = () => {
     getServerUrl,
     getRealm,
     getAuthRealm,
+    keycloakToken: keycloak.tokenParsed,
   };
 };
