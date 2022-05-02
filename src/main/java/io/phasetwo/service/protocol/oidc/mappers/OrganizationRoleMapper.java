@@ -69,10 +69,10 @@ public class OrganizationRoleMapper extends AbstractOIDCProtocolMapper
    ]
    gets all the roles for each organization of which the user is a member
   */
-  private Map<String, List<String>> getOrganizationRoleClaim(
+  private Map<String, Object> getOrganizationRoleClaim(
       KeycloakSession session, RealmModel realm, UserModel user) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
-    Map<String, List<String>> claim = Maps.newHashMap();
+    Map<String, Object> claim = Maps.newHashMap();
     orgs.getUserOrganizationsStream(realm, user)
         .forEach(
             o -> {
@@ -82,7 +82,10 @@ public class OrganizationRoleMapper extends AbstractOIDCProtocolMapper
                       r -> {
                         if (r.hasRole(user)) roles.add(r.getName());
                       });
-              claim.put(o.getName(), roles);
+              Map<String, Object> org = Maps.newHashMap();
+              org.put("name", o.getName());
+              org.put("roles", roles);
+              claim.put(o.getId(), org);
             });
     log.infof("created user %s claim %s", user.getUsername(), claim);
     return claim;
@@ -96,7 +99,7 @@ public class OrganizationRoleMapper extends AbstractOIDCProtocolMapper
       KeycloakSession keycloakSession,
       ClientSessionContext clientSessionCtx) {
     log.infof("adding org claim to idToken for %s", userSession.getUser().getUsername());
-    Map<String, List<String>> claim =
+    Map<String, Object> claim =
         getOrganizationRoleClaim(keycloakSession, userSession.getRealm(), userSession.getUser());
     if (claim == null) return;
     OIDCAttributeMapperHelper.mapClaim(token, mappingModel, claim);
@@ -111,7 +114,7 @@ public class OrganizationRoleMapper extends AbstractOIDCProtocolMapper
       ClientSessionContext clientSessionCtx) {
     log.infof("adding org claim to accessToken for %s", userSession.getUser().getUsername());
     UserModel user = userSession.getUser();
-    Map<String, List<String>> claim =
+    Map<String, Object> claim =
         getOrganizationRoleClaim(keycloakSession, userSession.getRealm(), userSession.getUser());
     if (claim == null) return;
     OIDCAttributeMapperHelper.mapClaim(accessTokenResponse, mappingModel, claim);

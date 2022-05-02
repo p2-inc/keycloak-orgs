@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import com.google.common.collect.ImmutableList;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -7,6 +8,8 @@ import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.TeamEntity;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.NotAuthorizedException;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.ClientModel;
@@ -239,9 +242,35 @@ public class OrganizationAdminAuth extends AdminAuth {
     return hasOrgRole(org, ORG_ROLE_MANAGE_IDENTITY_PROVIDERS);
   }
 
+  static String ORGANIZATIONS_CLAIM = "organizations";
+
+  private List<String> getOrganizationRoles(OrganizationModel org) {
+    Object o = getToken().getOtherClaims().get(ORGANIZATIONS_CLAIM);
+    if (o == null || !(o instanceof Map)) return ImmutableList.of();
+    Map<String, Object> orgs = (Map<String, Object>) o;
+    Object os = orgs.get(org.getId());
+    if (os == null || !(os instanceof Map)) return ImmutableList.of();
+    Map<String, Object> osrg = (Map<String, Object>) os;
+    Object rs = osrg.get("roles");
+    if (rs == null || !(rs instanceof List)) return ImmutableList.of();
+    return (List<String>) rs;
+  }
+
+  private boolean hasOrgRoleInToken(OrganizationModel org, String roleName) {
+    return (getOrganizationRoles(org).contains(roleName));
+  }
+
   private boolean hasOrgRole(OrganizationModel org, String roleName) {
+    /*
+    if (!hasOrgRoleInToken(org, roleName)) {
+      log.infof("%s not in token %s", roleName, getToken().getOtherClaims());
+      return false;
+    }
+    */
     OrganizationRoleModel role = org.getRoleByName(roleName);
-    return (role != null && role.hasRole(getUser()));
+    boolean has = (role != null && role.hasRole(getUser()));
+    log.infof("%s has role %s? %b", getUser().getId(), roleName, has);
+    return has;
   }
 
   private void requireOrgRole(OrganizationModel org, String roleName) {

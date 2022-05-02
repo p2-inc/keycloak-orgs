@@ -160,7 +160,9 @@ public class OrganizationResource extends OrganizationAdminResource {
   @POST
   @Path("portal-link")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getPortalLink(@FormParam("userId") String userId) {
+  public Response getPortalLink(
+      @DefaultValue("") @FormParam("userId") String userId,
+      @DefaultValue("") @FormParam("baseUri") String baseUri) {
     // check for existence of idp-wizard client and wizard theme
     ClientModel idpWizardClient = session.clients().getClientByClientId(realm, IDP_WIZARD_CLIENT);
     Theme wizardTheme = getTheme(WIZARD_THEME);
@@ -175,19 +177,14 @@ public class OrganizationResource extends OrganizationAdminResource {
               "Insufficient permission to create portal link for %s", organization.getId()));
     }
     try {
-
       UriInfo uriInfo = session.getContext().getUri();
-      // String redirectUri = idpWizardClient.getBaseUrl();
+      URI base = "".equals(baseUri) ? uriInfo.getBaseUri() : newUri(baseUri);
       String redirectUri =
-          Urls.realmBase(uriInfo.getBaseUri())
-              .path(realm.getName())
-              .path("wizard")
-              .build()
-              .toString();
-      log.debugf("%s redirectUri %s", IDP_WIZARD_CLIENT, redirectUri);
+          Urls.realmBase(base).path(realm.getName()).path("wizard").build().toString();
+      log.infof("%s redirectUri %s", IDP_WIZARD_CLIENT, redirectUri);
 
       UserModel user = null;
-      if (userId != null) {
+      if (userId != null && !"".equals(userId)) {
         user = session.users().getUserById(realm, userId);
       }
       if (user == null) {
@@ -196,11 +193,12 @@ public class OrganizationResource extends OrganizationAdminResource {
                 .users()
                 .getUserByUsername(realm, String.format("org-admin-%s", organization.getId()));
       }
-
-      // check membership and roles
       if (user == null) {
         throw new BadRequestException(String.format("User %s not found", userId));
       }
+      log.infof("Using user %s (%s) for portal-link", user.getUsername(), user.getId());
+
+      // check membership and roles
       if (!organization.hasMembership(user)) {
         throw new BadRequestException(
             String.format("User %s is not a member of this organization", userId));
@@ -245,6 +243,15 @@ public class OrganizationResource extends OrganizationAdminResource {
         .path(LoginActionsService.class, "executeActionToken")
         .queryParam(Constants.KEY, tokenString)
         .queryParam(Constants.CLIENT_ID, clientId);
+  }
+
+  private URI newUri(String u) {
+    try {
+      return new URI(u);
+    } catch (Exception e) {
+      log.warnf(e, "Error creating URI from %s", u);
+    }
+    return null;
   }
 
   /*

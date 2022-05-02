@@ -40,12 +40,14 @@ public class IdentityProviderResource extends OrganizationAdminResource {
 
   @DELETE
   public Response delete() {
+    requireManage();
     return kcResource.delete();
   }
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
   public Response update(IdentityProviderRepresentation providerRep) {
+    requireManage();
     // don't allow override of ownership and other conf vars
     IdentityProvidersResource.idpDefaults(organization, providerRep);
     // force alias
@@ -65,6 +67,7 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   @Path("mappers")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addMapper(IdentityProviderMapperRepresentation mapper) {
+    requireManage();
     return kcResource.addMapper(mapper);
   }
 
@@ -79,12 +82,22 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   @Path("mappers/{id}")
   @Consumes(MediaType.APPLICATION_JSON)
   public void update(@PathParam("id") String id, IdentityProviderMapperRepresentation rep) {
+    requireManage();
     kcResource.update(id, rep);
   }
 
   @DELETE
   @Path("mappers/{id}")
   public void delete(@PathParam("id") String id) {
+    requireManage();
     kcResource.delete(id);
+  }
+
+  private void requireManage() {
+    if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
+      throw new NotAuthorizedException(
+          String.format(
+              "Insufficient permission to manage identity providers for %s", organization.getId()));
+    }
   }
 }

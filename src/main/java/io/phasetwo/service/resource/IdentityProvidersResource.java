@@ -79,6 +79,12 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response createIdentityProvider(IdentityProviderRepresentation representation) {
+    if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
+      throw new NotAuthorizedException(
+          String.format(
+              "Insufficient permission to create identity providers for %s", organization.getId()));
+    }
+
     // Override alias to prevent collisions
     representation.setAlias(KeycloakModelUtils.generateId());
 

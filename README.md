@@ -104,10 +104,12 @@ A group of custom REST resources are made available for administrator and custom
 
 There is currently a single OIDC mapper that adds Organization membership and roles to the token. The format of the addition to the token is
 ```
-   organizations: [
-     foo: [ "admin", "viewer" ],
-     bar: []
-   ]
+  "organizations": {
+    "5aeb9aeb-97a3-4deb-af9f-516615b59a2d" : {
+      "name": "foo",
+      "roles": [ "admin", "viewer" ]
+    }
+  }
 ```
 tbd screenshot of adding/configuring mapper in admin UI
 

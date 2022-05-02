@@ -1,9 +1,12 @@
 package io.phasetwo.service.resource;
 
 import io.phasetwo.service.model.OrganizationModel;
+import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.*;
 
+@JBossLog
 public class OrganizationAdminPermissionEvaluator implements AdminPermissionEvaluator {
 
   private final AdminPermissionEvaluator permissions;
@@ -60,6 +63,10 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
 
       @Override
       public boolean canManageIdentityProviders() {
+        log.infof(
+            "canManageIdentityProviders %b",
+            (realm.canManageIdentityProviders()
+                || auth.hasOrgManageIdentityProviders(organization)));
         // custom
         return (realm.canManageIdentityProviders()
             || auth.hasOrgManageIdentityProviders(organization));
@@ -82,6 +89,9 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
 
       @Override
       public boolean canViewIdentityProviders() {
+        log.infof(
+            "canViewIdentityProviders %b",
+            (realm.canViewIdentityProviders() || auth.hasOrgViewIdentityProviders(organization)));
         // custom
         return (realm.canViewIdentityProviders() || auth.hasOrgViewIdentityProviders(organization));
       }
@@ -103,7 +113,9 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
 
       @Override
       public void requireManageIdentityProviders() {
-        realm.requireManageIdentityProviders();
+        if (!canManageIdentityProviders()) {
+          throw new ForbiddenException();
+        }
       }
 
       @Override
@@ -133,7 +145,9 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
 
       @Override
       public void requireViewIdentityProviders() {
-        realm.requireViewIdentityProviders();
+        if (!canViewIdentityProviders()) {
+          throw new ForbiddenException();
+        }
       }
 
       @Override

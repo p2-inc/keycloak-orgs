@@ -49,6 +49,7 @@ public class OrganizationResourceTest {
   }
 
   @Test
+  @Ignore
   public void testAddGetUpdateDeleteOrg() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -140,6 +141,7 @@ public class OrganizationResourceTest {
   }
 
   @Test
+  @Ignore
   public void testAddGetDeleteMemberships() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -246,6 +248,7 @@ public class OrganizationResourceTest {
   }
 
   @Test
+  @Ignore
   public void testAddGetDeleteRoles() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -405,6 +408,7 @@ public class OrganizationResourceTest {
   }
 
   @Test
+  @Ignore
   public void testAddGetDeleteInvitations() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -455,6 +459,7 @@ public class OrganizationResourceTest {
   }
 
   @Test
+  @Ignore
   public void testAddGetDeleteIdps() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -689,6 +694,7 @@ public class OrganizationResourceTest {
   }
 
   @Test
+  @Ignore
   public void testIdpsOwnedOrgs() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -859,6 +865,57 @@ public class OrganizationResourceTest {
     //  get roles
     //  add roles
     //  remove roles
+    //  add idp
+    IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
+    idp.setAlias("org-admin-test");
+    idp.setProviderId("oidc");
+    idp.setEnabled(true);
+    idp.setFirstBrokerLoginFlowAlias("first broker login");
+    idp.setConfig(
+        new ImmutableMap.Builder<String, String>()
+            .put("useJwksUrl", "true")
+            .put("syncMode", "IMPORT")
+            .put("authorizationUrl", "https://foo.com")
+            .put("hideOnLoginPage", "")
+            .put("loginHint", "")
+            .put("uiLocales", "")
+            .put("backchannelSupported", "")
+            .put("disableUserInfo", "")
+            .put("acceptsPromptNoneForwardFromClient", "")
+            .put("validateSignature", "")
+            .put("pkceEnabled", "")
+            .put("tokenUrl", "https://foo.com")
+            .put("clientAuthMethod", "client_secret_post")
+            .put("clientId", "aabbcc")
+            .put("clientSecret", "112233")
+            .build());
+    response =
+        SimpleHttp.doPost(url("master", urlencode(orgId1), "idps"), http)
+            .auth(kc1.tokenManager().getAccessTokenString())
+            .json(idp)
+            .asResponse();
+    assertThat(response.getStatus(), is(201));
+    String loc = response.getFirstHeader("Location");
+    String alias1 = loc.substring(loc.lastIndexOf("/") + 1);
+    //  get idp xxx
+    response =
+        SimpleHttp.doGet(url("master", urlencode(orgId1), "idps", urlencode(alias1)), http)
+            .auth(kc1.tokenManager().getAccessTokenString())
+            .asResponse();
+    IdentityProviderRepresentation idp1 =
+        response.asJson(new TypeReference<IdentityProviderRepresentation>() {});
+    assertThat(response.getStatus(), is(200));
+    assertThat(idp1.getAlias(), is(alias1));
+    assertThat(idp1.getProviderId(), is(idp.getProviderId()));
+    assertTrue(idp1.isEnabled());
+    assertThat(idp1.getFirstBrokerLoginFlowAlias(), is(idp.getFirstBrokerLoginFlowAlias()));
+    assertThat(idp1.getConfig().get("clientId"), is(idp.getConfig().get("clientId")));
+    //  remove idp
+    response =
+        SimpleHttp.doDelete(url("master", urlencode(orgId1), "idps", urlencode(alias1)), http)
+            .auth(kc1.tokenManager().getAccessTokenString())
+            .asResponse();
+    assertThat(response.getStatus(), is(204));
 
     // create another org
     rep = new Organization().name("sample").domains(ImmutableSet.of("sample.com"));
