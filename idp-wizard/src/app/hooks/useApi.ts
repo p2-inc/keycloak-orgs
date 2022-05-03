@@ -33,7 +33,9 @@ export const useApi = () => {
   const baseCUrl = `${realm}/orgs/${orgId}/idps`;
 
   useEffect(() => {
-    setOrgId(keycloakToken.org_id);
+    if (keycloakToken.org_id) {
+      setOrgId(keycloakToken.org_id);
+    }
   }, [keycloakToken]);
 
   // onprem endpoint
