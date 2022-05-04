@@ -1,3 +1,4 @@
+import ADFS_SAML_0 from "./adfs_saml_0.png";
 import ADFS_SAML_1 from "./adfs_saml_1.png";
 import ADFS_SAML_2 from "./adfs_saml_2.png";
 import ADFS_SAML_3 from "./adfs_saml_3.png";
@@ -9,8 +10,11 @@ import ADFS_SAML_8 from "./adfs_saml_8.png";
 import ADFS_SAML_9 from "./adfs_saml_9.png";
 import ADFS_SAML_10 from "./adfs_saml_10.png";
 import ADFS_SAML_11 from "./adfs_saml_11.png";
+import ADFS_SAML_12 from "./adfs_saml_12.png";
+import ADFS_SAML_13 from "./adfs_saml_13.png";
 
 export {
+  ADFS_SAML_0,
   ADFS_SAML_1,
   ADFS_SAML_2,
   ADFS_SAML_3,
@@ -22,4 +26,6 @@ export {
   ADFS_SAML_9,
   ADFS_SAML_10,
   ADFS_SAML_11,
+  ADFS_SAML_12,
+  ADFS_SAML_13,
 };
