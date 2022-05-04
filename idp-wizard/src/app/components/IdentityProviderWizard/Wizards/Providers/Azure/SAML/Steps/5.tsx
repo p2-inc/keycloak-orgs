@@ -7,7 +7,7 @@ export function AzureStepFive() {
   const hostname = useHostname();
   const instructionList: InstructionProps[] = [
     {
-      text: `In order for your users and gorups of users to be synced to ${hostname} you will need to assign them to your Azure AD SAML Application. Select "Users and groups" from the "Manage" section of the navigations menu.`,
+      text: `In order for your users and groups of users to be synced to ${hostname} you will need to assign them to your Azure AD SAML Application. Select "Users and groups" from the "Manage" section of the navigations menu.`,
       component: <StepImage src={Images.AzureSaml9} alt="Step 4.1" />,
     },
     {

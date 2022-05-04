@@ -1,6 +1,7 @@
 export * from "./Auth0";
 export * from "./AWS";
 export * from "./Azure";
+export * from "./Duo";
 export * from "./Generic";
 export * from "./Google";
 export * from "./JumpCloud";
