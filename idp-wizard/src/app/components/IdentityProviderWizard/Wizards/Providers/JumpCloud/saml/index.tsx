@@ -22,7 +22,7 @@ export const JumpCloudWizard: FC = () => {
   const idpCommonName = "JumpCloud IdP";
   const alias = getAlias({
     provider: Providers.JUMP_CLOUD,
-    protocol: Protocols.OPEN_ID,
+    protocol: Protocols.SAML,
     preface: "jumpcloud-saml",
   });
   const navigateToBasePath = useNavigateToBasePath();
@@ -61,7 +61,7 @@ export const JumpCloudWizard: FC = () => {
     if (stepIdReached === finishStep) {
       clearAlias({
         provider: Providers.JUMP_CLOUD,
-        protocol: Protocols.OPEN_ID,
+        protocol: Protocols.SAML,
       });
       navigateToBasePath();
     }
