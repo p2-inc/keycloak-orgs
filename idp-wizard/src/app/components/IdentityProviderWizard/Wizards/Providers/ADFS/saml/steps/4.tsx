@@ -17,8 +17,18 @@ type Props = {
 export const Step4: FC<Props> = ({ url, handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
-      text: "In the ADFS management console, navigate to AD FS -> Service -> Endpoints, and click to copy the Federation metadata link and paste below.",
-      component: <StepImage src={Images.ADFS_SAML_10} alt="Step 4.1" />,
+      text: (
+        <div>
+          In the ADFS management console, navigate to{" "}
+          <b>
+            AD FS -{">"} Service -{">"} Endpoints
+          </b>
+          , and note the path from the Metadata section. The Identity provider
+          metadata URL will be constructed by combining your server's
+          fully-qualified domain name with this path.
+        </div>
+      ),
+      component: <StepImage src={Images.ADFS_SAML_13} alt="Step 4.1" />,
     },
     {
       component: (

@@ -46,7 +46,9 @@ export const ADFSWizard: FC = () => {
   const acsUrlValidator = acsUrl.replace(/\//g, "\\/");
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
-  const [issuerUrl, setIssuerUrl] = useState("");
+  const [issuerUrl, setIssuerUrl] = useState(
+    "https://HOSTNAME/federationmetadata/2007-06/federationmetadata.xml"
+  );
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
 
