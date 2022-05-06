@@ -11,6 +11,7 @@ import { useParams } from "react-router";
 import { useTitle } from "react-use";
 
 import {
+  ADFSWizard,
   Auth0WizardOIDC,
   Auth0WizardSAML,
   AWSSamlWizard,
@@ -62,6 +63,8 @@ const Provider = () => {
       return <PingOneWizard />;
     case Providers.JUMP_CLOUD:
       return <JumpCloudWizard />;
+    case Providers.ADFS:
+      return <ADFSWizard />;
     case Providers.DUO:
       return <DuoWizard />;
 
