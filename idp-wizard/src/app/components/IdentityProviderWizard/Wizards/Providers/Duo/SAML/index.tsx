@@ -123,33 +123,33 @@ export const DuoWizard: FC = () => {
       });
 
       // Map attributes
-      // await SamlUserAttributeMapper({
-      //   alias,
-      //   keys: {
-      //     serverUrl: getServerUrl()!,
-      //     realm: getRealm()!,
-      //   },
-      //   attributes: [
-      //     {
-      //       attributeName:
-      //         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-      //       friendlyName: "",
-      //       userAttribute: "email",
-      //     },
-      //     {
-      //       attributeName:
-      //         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
-      //       friendlyName: "",
-      //       userAttribute: "firstName",
-      //     },
-      //     {
-      //       attributeName:
-      //         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
-      //       friendlyName: "",
-      //       userAttribute: "lastName",
-      //     },
-      //   ],
-      // });
+      await SamlUserAttributeMapper({
+        alias,
+        keys: {
+          serverUrl: getServerUrl()!,
+          realm: getRealm()!,
+        },
+        attributes: [
+          {
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email",
+            friendlyName: "",
+            userAttribute: "email",
+          },
+          {
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/firstname",
+            friendlyName: "",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/lastname",
+            friendlyName: "",
+            userAttribute: "lastName",
+          },
+        ],
+      });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
