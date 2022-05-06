@@ -52,7 +52,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
         .allowedMethods(METHODS)
         .auth()
         .build(response);
-    log.infof("hasCors %b", hasCors(response));
+    log.debugf("hasCors %b", hasCors(response));
   }
 
   private boolean hasCors(HttpResponse response) {
@@ -147,7 +147,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
     Theme theme = getTheme("wizard");
     InputStream resource = theme.getResourceAsStream(path);
     String mimeType = getMimeType(fileName);
-    log.infof("%s [%s] (%s)", path, mimeType, null == resource ? "404" : "200");
+    log.debugf("%s [%s] (%s)", path, mimeType, null == resource ? "404" : "200");
     return null == resource
         ? Response.status(Response.Status.NOT_FOUND).build()
         : Response.ok(resource, mimeType).build();
