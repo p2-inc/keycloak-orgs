@@ -132,7 +132,6 @@ body,
   display: flex;
   align-items: center;
   border: 2px solid lightgray;
-  padding-top: 8px;
   border-radius: 5px;
 
   img {
