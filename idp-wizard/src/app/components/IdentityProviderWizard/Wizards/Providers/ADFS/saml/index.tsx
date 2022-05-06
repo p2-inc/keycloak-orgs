@@ -42,8 +42,6 @@ export const ADFSWizard: FC = () => {
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const federationMetadataAddress = `${acsUrl}/descriptor`;
-  const recipient = acsUrl;
-  const acsUrlValidator = acsUrl.replace(/\//g, "\\/");
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [issuerUrl, setIssuerUrl] = useState(
@@ -60,10 +58,45 @@ export const ADFSWizard: FC = () => {
 
   const finishStep = 5;
 
-  // usePrompt(
-  //   "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-  //   stepIdReached < finishStep
-  // );
+  usePrompt(
+    "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
+    stepIdReached < finishStep
+  );
+
+  const idpStartConfig = {
+    alias: alias,
+    providerId: "saml",
+    enabled: false,
+    updateProfileFirstLoginMode: "on",
+    trustEmail: false,
+    storeToken: false,
+    addReadTokenRoleOnCreate: false,
+    authenticateByDefault: false,
+    linkOnly: false,
+    firstBrokerLoginFlowAlias: "first broker login",
+    config: {
+      addExtensionsElementWithKeyInfo: "false",
+      allowCreate: "true",
+      authnContextComparisonType: "exact",
+      entityId: entityId,
+      hideOnLoginPage: "",
+      nameIDPolicyFormat:
+        "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+      postBindingAuthnRequest: "true",
+      postBindingLogout: "true",
+      postBindingResponse: "true",
+      principalType: "SUBJECT",
+      signatureAlgorithm: "RSA_SHA256",
+      singleSignOnServiceUrl: "https://example.com",
+      syncMode: "FORCE",
+      useJwksUrl: "true",
+      validateSignature: "true",
+      wantAssertionsEncrypted: "false",
+      wantAssertionsSigned: "true",
+      wantAuthnRequestsSigned: "true",
+      xmlSigKeyInfoKeyNameTransformer: "NONE",
+    },
+  };
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
@@ -89,16 +122,27 @@ export const ADFSWizard: FC = () => {
     setIssuerUrl(url);
 
     try {
+      // Create the IDP first
+      const payload: IdentityProviderRepresentation = {
+        ...idpStartConfig,
+        alias,
+        displayName: `ADFS Single Sign-on`,
+        providerId: "saml",
+      };
+      // create the idp with the start config
+      await kcAdminClient.identityProviders.create(payload);
+
       const resp = await kcAdminClient.identityProviders.importFromUrl({
         fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
       });
-
-      setMetadata({
+      let mdata = {
         ...SamlIDPDefaults,
         ...resp,
-      });
+      };
+
+      setMetadata(mdata);
       setIsFormValid(true);
 
       return {
@@ -113,35 +157,22 @@ export const ADFSWizard: FC = () => {
     }
   };
 
-  // TODO: In this case, if they get to this step and click “Create”,
-  // we need to overlay what came back from the metadata url with what
-  // we originally created, set enabled = true and hit the update endpoint
-  // rather than the create endpoint(PUT rather than POST, with the alias
-  // as the last segment of the url)
   const validateFn = async () => {
     setIsValidating(true);
     setDisableButton(false);
     setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
-      alias,
-      displayName: `ADFS Single Sign-on`,
-      providerId: "saml",
-      config: metadata!,
+      ...idpStartConfig,
+      config: {
+        ...idpStartConfig.config,
+        ...metadata!,
+      },
     };
 
     try {
-      await kcAdminClient.identityProviders.update(
-        {
-          ...payload,
-          realm: getRealm()!,
-        },
-        metadata
-      );
-      // await kcAdminClient.identityProviders.create({
-      //   ...payload,
-      //   realm: getRealm()!,
-      // });
+      // Update the idp
+      await kcAdminClient.identityProviders.update({ alias }, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({
@@ -152,17 +183,20 @@ export const ADFSWizard: FC = () => {
         },
         attributes: [
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
             friendlyName: "",
             userAttribute: "firstName",
           },
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
             friendlyName: "",
             userAttribute: "lastName",
           },
           {
-            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            attributeName:
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
             friendlyName: "",
             userAttribute: "email",
           },
