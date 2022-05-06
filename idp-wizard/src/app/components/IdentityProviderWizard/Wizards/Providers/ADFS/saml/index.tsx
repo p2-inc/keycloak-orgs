@@ -144,30 +144,30 @@ export const ADFSWizard: FC = () => {
       // });
 
       // Map attributes
-      // await SamlUserAttributeMapper({
-      //   alias,
-      //   keys: {
-      //     serverUrl: getServerUrl()!,
-      //     realm: getRealm()!,
-      //   },
-      //   attributes: [
-      //     {
-      //       attributeName: "firstName",
-      //       friendlyName: "",
-      //       userAttribute: "firstName",
-      //     },
-      //     {
-      //       attributeName: "lastName",
-      //       friendlyName: "",
-      //       userAttribute: "lastName",
-      //     },
-      //     {
-      //       attributeName: "email",
-      //       friendlyName: "",
-      //       userAttribute: "email",
-      //     },
-      //   ],
-      // });
+      await SamlUserAttributeMapper({
+        alias,
+        keys: {
+          serverUrl: getServerUrl()!,
+          realm: getRealm()!,
+        },
+        attributes: [
+          {
+            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+            friendlyName: "",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+            friendlyName: "",
+            userAttribute: "lastName",
+          },
+          {
+            attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+            friendlyName: "",
+            userAttribute: "email",
+          },
+        ],
+      });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
