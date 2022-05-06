@@ -15,6 +15,7 @@ import {
   Auth0WizardSAML,
   AWSSamlWizard,
   AzureWizard,
+  DuoWizard,
   GenericLDAP,
   GenericOIDC,
   GenericSAML,
@@ -61,6 +62,8 @@ const Provider = () => {
       return <PingOneWizard />;
     case Providers.JUMP_CLOUD:
       return <JumpCloudWizard />;
+    case Providers.DUO:
+      return <DuoWizard />;
 
     default:
       return <div>No provider found</div>;
