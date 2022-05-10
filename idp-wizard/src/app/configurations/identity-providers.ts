@@ -13,6 +13,7 @@ import pingOneLogo from "@app/images/provider-logos/ping_one_logo.svg";
 import samlLogo from "@app/images/provider-logos/saml_logo.svg";
 import vmwareLogo from "@app/images/provider-logos/vmware_logo.svg";
 import ldapLogo from "@app/images/provider-logos/ldap_logo.svg";
+import duoLogo from "@app/images/duo/duo.svg";
 import { Protocols } from ".";
 
 export enum Providers {
@@ -21,6 +22,7 @@ export enum Providers {
   AUTH0 = "auth0",
   AZURE = "azure",
   CYBERARK = "cyberark",
+  DUO = "duo",
   GOOGLE_SAML = "googlesaml",
   JUMP_CLOUD = "jumpcloud",
   LDAP = "ldap",
@@ -72,9 +74,9 @@ export const IdentityProviders: IIDPType[] = [
   {
     name: "ADFS",
     imageSrc: adfsLogo,
-    active: false,
+    active: true,
     id: Providers.ADFS,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
   {
     name: "Auth0",
@@ -104,7 +106,6 @@ export const IdentityProviders: IIDPType[] = [
     id: Providers.ONE_LOGIN,
     protocols: [Protocols.SAML],
   },
-
   {
     name: "Ping Federate",
     imageSrc: pingFedLogo,
@@ -119,13 +120,19 @@ export const IdentityProviders: IIDPType[] = [
     id: Providers.PING_ONE,
     protocols: [Protocols.SAML],
   },
-
   {
     name: "VMWare",
     imageSrc: vmwareLogo,
     active: false,
     id: Providers.VMWARE,
     protocols: [],
+  },
+  {
+    name: "Duo",
+    imageSrc: duoLogo,
+    active: true,
+    id: Providers.DUO,
+    protocols: [Protocols.SAML],
   },
 ];
 
