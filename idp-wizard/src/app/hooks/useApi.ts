@@ -30,7 +30,7 @@ export const useApi = () => {
 
   const baseOPUrl = `${realm}/identity-provider`;
   const baseOPUrlInstances = `${baseOPUrl}/instances`;
-  const baseCUrl = `${realm}/orgs/${orgId}/idps`;
+  const baseCloudUrl = `${realm}/orgs/${orgId}/idps`;
 
   useEffect(() => {
     if (keycloakToken.org_id) {
@@ -70,27 +70,27 @@ export const useApi = () => {
   const cloudEndpoints: Record<apiEndpointNames, endpoint> = {
     getIdPs: {
       method: HTTP_METHODS.GET,
-      endpoint: `${baseCUrl}`,
+      endpoint: `${baseCloudUrl}`,
     },
     getIdP: {
       method: HTTP_METHODS.GET,
-      endpoint: `${baseCUrl}/${alias}`,
+      endpoint: `${baseCloudUrl}/${alias}`,
     },
     createIdP: {
       method: HTTP_METHODS.POST,
-      endpoint: `${baseCUrl}`,
+      endpoint: `${baseCloudUrl}`,
     },
     updateIdP: {
       method: HTTP_METHODS.PUT,
-      endpoint: `${baseCUrl}/${alias}`,
+      endpoint: `${baseCloudUrl}/${alias}`,
     },
     importConfig: {
       method: HTTP_METHODS.POST,
-      endpoint: `${baseCUrl}/import-config`,
+      endpoint: `${baseCloudUrl}/import-config`,
     },
     addMapperToIdP: {
       method: HTTP_METHODS.POST,
-      endpoint: `${baseCUrl}/${alias}/mappers`,
+      endpoint: `${baseCloudUrl}/${alias}/mappers`,
     },
   };
 
