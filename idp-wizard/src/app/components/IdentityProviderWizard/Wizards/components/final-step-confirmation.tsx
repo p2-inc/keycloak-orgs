@@ -1,3 +1,4 @@
+import { useGetFeatureFlagsQuery } from "@app/services";
 import { Button, Stack, StackItem, Title } from "@patternfly/react-core";
 import {
   CheckCircleIcon,
@@ -35,6 +36,10 @@ export const WizardConfirmation: FC<SuccessProps> = ({
   adminLink,
   adminButtonText,
 }) => {
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
+
+  const isCloud = featureFlags?.apiMode === "cloud";
+
   return (
     <div className="container" style={{ border: 0 }}>
       <Stack hasGutter>
@@ -57,10 +62,10 @@ export const WizardConfirmation: FC<SuccessProps> = ({
             onClick={validationFunction}
             isDisabled={disableButton}
           >
-            {buttonText}
+            {isCloud ? "Create Identity Provider" : buttonText}
           </Button>
         </StackItem>
-        {disableButton && adminLink && (
+        {!isCloud && disableButton && adminLink && (
           <StackItem>
             <Button component="a" href={adminLink}>
               {adminButtonText}
