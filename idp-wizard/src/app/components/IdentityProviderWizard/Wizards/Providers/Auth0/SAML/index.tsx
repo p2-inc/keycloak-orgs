@@ -18,6 +18,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const Auth0WizardSAML: FC = () => {
   const idpCommonName = "Auth0 SAML IdP";
@@ -30,6 +31,9 @@ export const Auth0WizardSAML: FC = () => {
   const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
     useKeycloakAdminApi();
   const { endpoints, setAlias } = useApi();
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
+
+  const isCloud = featureFlags?.apiMode === "cloud";
 
   React.useEffect(() => {
     setAlias(alias);
@@ -113,15 +117,15 @@ export const Auth0WizardSAML: FC = () => {
     };
 
     try {
-      // await kcAdminClient.identityProviders.create({
-      //   ...payload,
-      //   realm: getRealm()!,
-      // });
-
-      await Axios.post(
-        `${getServerUrl()}/admin/realms/${endpoints?.createIdP.endpoint!}`,
-        payload
-      );
+      isCloud
+        ? await Axios.post(
+            `${getServerUrl()}/admin/realms/${endpoints?.createIdP.endpoint!}`,
+            payload
+          )
+        : await kcAdminClient.identityProviders.create({
+            ...payload,
+            realm: getRealm()!,
+          });
 
       // Map attributes
       await SamlUserAttributeMapper({
