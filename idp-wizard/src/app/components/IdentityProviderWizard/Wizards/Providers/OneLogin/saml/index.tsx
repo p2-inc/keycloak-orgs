@@ -31,13 +31,8 @@ export const OneLoginWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
 
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;

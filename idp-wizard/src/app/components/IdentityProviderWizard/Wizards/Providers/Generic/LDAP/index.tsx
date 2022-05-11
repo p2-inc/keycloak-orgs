@@ -23,8 +23,7 @@ export const GenericLDAP: FC = () => {
   const title = "LDAP Wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const { kcAdminClient, getRealm } = useKeycloakAdminApi();
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);

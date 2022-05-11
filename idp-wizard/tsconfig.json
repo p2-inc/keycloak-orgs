@@ -19,6 +19,7 @@
     "strict": true,
     "paths": {
       "@app/*": ["src/app/*"],
+      "@store": ["src/app/store/*"],
       "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"],
       "@wizardComponents": [
         "src/app/components/IdentityProviderWizard/Wizards/components"

@@ -24,8 +24,7 @@ export const OktaWizardLDAP: FC = () => {
   const idpCommonName = "Okta LDAP IdP";
   const title = "Okta LDAP Wizard";
   const navigateToBasePath = useNavigateToBasePath();
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
-    useKeycloakAdminApi();
+  const { kcAdminClient, getRealm } = useKeycloakAdminApi();
 
   const [stepIdReached, setStepIdReached] = useState(1);
 
@@ -43,7 +42,7 @@ export const OktaWizardLDAP: FC = () => {
 
   const [groups, setGroups] = useState("");
 
-  const finishStep = 5;
+  let finishStep = 5;
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
@@ -240,7 +239,7 @@ export const OktaWizardLDAP: FC = () => {
     };
   };
 
-  const steps = [
+  let steps = [
     {
       id: 1,
       name: "Enable LDAP Interface",

@@ -14,31 +14,36 @@ import {
 import {
   GenericIdentityProviders,
   IdentityProviders,
+  Providers,
 } from "@app/configurations";
-import { BASE_PATH, PATHS } from "@app/routes";
+import { PATHS } from "@app/routes";
 import { useTitle } from "react-use";
 import { useHostname } from "@app/hooks/useHostname";
 import { useRoleAccess } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const IdentityProviderSelector: FC = () => {
   useTitle("Select your Identity Provider | PhaseTwo");
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
-  const [hasAccess] = useRoleAccess();
+  const { hasAccess } = useRoleAccess();
   const hostname = useHostname();
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   return (
     <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
         <StackItem>
-          <Flex>
-            <FlexItem align={{ default: "alignRight" }}>
-              <Link to={generatePath(PATHS.dashboard, { realm })}>
-                <Button variant="link" isInline>
-                  Dashboard
-                </Button>
-              </Link>
-            </FlexItem>
+          <Flex justifyContent={{ default: "justifyContentFlexEnd" }}>
+            {featureFlags?.enableDashboard && (
+              <FlexItem>
+                <Link to={generatePath(PATHS.dashboard, { realm })}>
+                  <Button variant="link" isInline>
+                    Dashboard
+                  </Button>
+                </Link>
+              </FlexItem>
+            )}
             <FlexItem>
               <Button
                 variant="link"
@@ -95,25 +100,25 @@ export const IdentityProviderSelector: FC = () => {
                 generic protocols below to connect with your provider.
               </h2>
               <div className="selection-container">
-                {GenericIdentityProviders.map(
-                  ({ name, imageSrc, active, id, protocols }) => {
-                    const pth = generatePath(PATHS.idpProvider, {
-                      realm,
-                      provider: id,
-                      protocol: protocols[0],
-                    });
-                    return (
-                      <Link to={pth} key={id}>
-                        <IdPButton
-                          key={name}
-                          text={name}
-                          image={imageSrc}
-                          active={active}
-                        />
-                      </Link>
-                    );
-                  }
-                )}
+                {GenericIdentityProviders.filter((idp) =>
+                  idp.id === Providers.LDAP ? featureFlags?.enableLdap : true
+                ).map(({ name, imageSrc, active, id, protocols }) => {
+                  const pth = generatePath(PATHS.idpProvider, {
+                    realm,
+                    provider: id,
+                    protocol: protocols[0],
+                  });
+                  return (
+                    <Link to={pth} key={id}>
+                      <IdPButton
+                        key={name}
+                        text={name}
+                        image={imageSrc}
+                        active={active}
+                      />
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>

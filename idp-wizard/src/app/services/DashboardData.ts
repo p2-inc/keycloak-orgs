@@ -28,7 +28,7 @@ export interface DashboardActivity {
 }
 
 export const useEventData = <DashboardActivity>() => {
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+  const { kcAdminClient, setKcAdminClientAccessToken, getRealm } =
     useKeycloakAdminApi();
   const realm = getRealm()!;
 
@@ -83,7 +83,7 @@ export const useEventData = <DashboardActivity>() => {
 };
 
 export const useSummaryData = <IDashboardSummaryData>() => {
-  const [kcAdminClient, setKcAdminClientAccessToken, getServerUrl, getRealm] =
+  const { kcAdminClient, setKcAdminClientAccessToken, getRealm } =
     useKeycloakAdminApi();
   const realm = getRealm()!;
   const [loading, setLoading] = useState(true);
@@ -155,7 +155,7 @@ export const useSummaryData = <IDashboardSummaryData>() => {
 };
 
 export const getKeycloakUsers = async () => {
-  const [kcAdminClient, setKcAdminClientAccessToken] = useKeycloakAdminApi();
+  const { kcAdminClient, setKcAdminClientAccessToken } = useKeycloakAdminApi();
   await setKcAdminClientAccessToken();
   const allUsers = await kcAdminClient.users.find();
   return allUsers;

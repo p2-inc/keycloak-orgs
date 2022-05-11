@@ -1,5 +1,5 @@
 {
-  "realm": "wizard",
+  "realm": "cloud",
   "auth-server-url": "https://app.phasetwo.io/auth",
   "ssl-required": "external",
   "resource": "idp-wizard",

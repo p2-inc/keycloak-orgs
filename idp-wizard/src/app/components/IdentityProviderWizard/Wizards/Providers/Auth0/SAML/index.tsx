@@ -17,7 +17,8 @@ import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const Auth0WizardSAML: FC = () => {
   const idpCommonName = "Auth0 SAML IdP";
@@ -27,15 +28,21 @@ export const Auth0WizardSAML: FC = () => {
     preface: "auth0-saml",
   });
   const navigateToBasePath = useNavigateToBasePath();
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
+  const { endpoints, setAlias } = useApi();
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
+
+  const isCloud = featureFlags?.apiMode === "cloud";
+
+  React.useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
   const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -97,6 +104,7 @@ export const Auth0WizardSAML: FC = () => {
         "Configuration validation failed with SAML. Check file and try again.",
     };
   };
+
   const createIdP = async () => {
     setIsValidating(true);
     setResults(`Creating ${idpCommonName}...`);
@@ -109,10 +117,16 @@ export const Auth0WizardSAML: FC = () => {
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      // TODO: just use the Axios post?
+      isCloud
+        ? await Axios.post(
+            `${getServerUrl()}/admin/realms/${endpoints?.createIdP.endpoint!}`,
+            payload
+          )
+        : await kcAdminClient.identityProviders.create({
+            ...payload,
+            realm: getRealm()!,
+          });
 
       // Map attributes
       await SamlUserAttributeMapper({
@@ -142,11 +156,12 @@ export const Auth0WizardSAML: FC = () => {
           },
           {
             attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/username",
             friendlyName: "",
             userAttribute: "username",
           },
         ],
+        path: endpoints?.addMapperToIdP.endpoint!,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

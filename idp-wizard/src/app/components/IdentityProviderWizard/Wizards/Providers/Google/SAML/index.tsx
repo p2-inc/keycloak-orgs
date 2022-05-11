@@ -29,13 +29,8 @@ export const GoogleWizard: FC = () => {
     preface: "google-saml",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
 
   const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;

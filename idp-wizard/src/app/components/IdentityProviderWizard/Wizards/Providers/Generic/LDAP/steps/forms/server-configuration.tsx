@@ -35,7 +35,7 @@ export type ServerConfig = {
   userBaseDn: string;
   groupBaseDn: string;
   userFilter: string;
-  groupFilter: string;
+  groupFilter?: string;
 };
 
 type Props = {

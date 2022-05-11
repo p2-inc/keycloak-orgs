@@ -9,7 +9,7 @@ import { AWS_LOGO } from "@app/images/aws";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { Axios, clearAlias } from "@wizardServices";
+import { Axios, clearAlias, SamlUserAttributeMapper } from "@wizardServices";
 import {
   API_RETURN,
   API_STATUS,
@@ -19,7 +19,8 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const AWSSamlWizard: FC = () => {
   const idpCommonName = "AWS SSO IdP";
@@ -32,13 +33,15 @@ export const AWSSamlWizard: FC = () => {
 
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
+  const { endpoints, setAlias } = useApi();
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
+
+  const isCloud = featureFlags?.apiMode === "cloud";
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
 
   const acsURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const samlAudience = `${getServerUrl()}/realms/${getRealm()}`;
@@ -83,11 +86,13 @@ export const AWSSamlWizard: FC = () => {
     setProviderUrl(url);
 
     try {
-      const resp = await kcAdminClient.identityProviders.importFromUrl({
+      const payload = {
         fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
-      });
+      };
+
+      const resp = await Axios.post(identifierURL, payload);
 
       setMetadata({
         ...SamlIDPDefaults,
@@ -130,56 +135,37 @@ export const AWSSamlWizard: FC = () => {
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(
+        `${getServerUrl()}/admin/realms/${endpoints?.createIdP.endpoint!}`,
+        payload
+      );
 
-      // For AWS SSO, additional mapping call is required after creation
-      // TODO we should abstract this out into a class that executes API methods
-      // Have to use Axios post bc built in keycloak-js makes the request wrong
-      await Axios.post(
-        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-        {
-          identityProviderAlias: alias,
-          config: {
-            syncMode: "INHERIT",
-            attributes: "[]",
-            "attribute.friendly.name": "email",
-            "user.attribute": "email",
+      //  await kcAdminClient.identityProviders.create({
+      //   ...payload,
+      //   realm: getRealm()!,
+      // });
+
+      await SamlUserAttributeMapper({
+        alias,
+        keys: { serverUrl: getServerUrl()!, realm: getRealm()! },
+        attributes: [
+          {
+            attributeName: "email",
+            friendlyName: "email",
+            userAttribute: "email",
           },
-          name: "email",
-          identityProviderMapper: "saml-user-attribute-idp-mapper",
-        }
-      );
-      await Axios.post(
-        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-        {
-          identityProviderAlias: alias,
-          config: {
-            syncMode: "INHERIT",
-            attributes: "[]",
-            "attribute.friendly.name": "firstName",
-            "user.attribute": "firstName",
+          {
+            attributeName: "firstName",
+            friendlyName: "firstName",
+            userAttribute: "firstName",
           },
-          name: "firstName",
-          identityProviderMapper: "saml-user-attribute-idp-mapper",
-        }
-      );
-      await Axios.post(
-        `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/instances/${alias}/mappers`,
-        {
-          identityProviderAlias: alias,
-          config: {
-            syncMode: "INHERIT",
-            attributes: "[]",
-            "attribute.friendly.name": "lastName",
-            "user.attribute": "lastName",
+          {
+            attributeName: "lastName",
+            friendlyName: "lastName",
+            userAttribute: "lastName",
           },
-          name: "lastName",
-          identityProviderMapper: "saml-user-attribute-idp-mapper",
-        }
-      );
+        ],
+      });
 
       setResults("AWS SAML IdP created successfully. Click finish.");
       setStepIdReached(finishStep);

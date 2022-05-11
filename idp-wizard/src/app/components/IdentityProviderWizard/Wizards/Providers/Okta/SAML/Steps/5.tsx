@@ -18,7 +18,7 @@ export const Step5: FC<Props> = () => {
 
   return (
     <Step
-      title="Step 4: Complete Feedback Section"
+      title="Step 5: Assign People and Groups"
       instructionList={instructions}
     />
   );
