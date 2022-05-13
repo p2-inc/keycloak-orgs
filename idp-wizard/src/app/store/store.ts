@@ -1,13 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { featureFlagApi } from "../services/";
+import { apiSlice } from "../services/";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 export const store = configureStore({
   reducer: {
-    [featureFlagApi.reducerPath]: featureFlagApi.reducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(featureFlagApi.middleware),
+    getDefaultMiddleware().concat(apiSlice.middleware),
 });
 
 setupListeners(store.dispatch);
