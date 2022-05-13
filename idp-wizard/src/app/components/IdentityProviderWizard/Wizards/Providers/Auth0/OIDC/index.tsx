@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -14,8 +14,8 @@ import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
-import { clearAlias, getAlias } from "@wizardServices";
-import { usePrompt } from "@app/hooks";
+import { Axios, clearAlias, getAlias } from "@wizardServices";
+import { useApi, usePrompt } from "@app/hooks";
 
 export const Auth0WizardOIDC: FC = () => {
   const idpCommonName = "Auth0 OIDC IdP";
@@ -25,8 +25,7 @@ export const Auth0WizardOIDC: FC = () => {
     preface: "auth0-oidc",
   });
   const navigateToBasePath = useNavigateToBasePath();
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
+  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
   const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -45,6 +44,17 @@ export const Auth0WizardOIDC: FC = () => {
     clientId: "",
     clientSecret: "",
   });
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const finishStep = 5;
 
@@ -80,11 +90,13 @@ export const Auth0WizardOIDC: FC = () => {
 
     let resp;
     try {
-      resp = await kcAdminClient.identityProviders.importFromUrl({
+      const payload = {
         fromUrl: trustedDomain,
         providerId: "oidc",
         realm: getRealm(),
-      });
+      };
+
+      resp = await Axios.post(identifierURL, payload);
 
       setIsFormValid(true);
       setValidationResults(resp);
@@ -118,10 +130,7 @@ export const Auth0WizardOIDC: FC = () => {
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(createIdPUrl, payload);
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
