@@ -48,12 +48,13 @@ export function useRoleAccess() {
   }
   
   useEffect(() => {
+    if (!featureFlags) return;
     console.log("access control", featureFlags?.apiMode);
     //cloud mode
     if (featureFlags?.apiMode === "cloud") {
       let orgAccess: boolean[] = [];
       requiredOrganizationRoles.map((role) => {
-	return orgAccess.push(keycloak.hasOrganizationRole(role));
+	return orgAccess.push(hasOrganizationRole(role));
       });
       setHasAccess(!orgAccess.includes(false));
     } else {
