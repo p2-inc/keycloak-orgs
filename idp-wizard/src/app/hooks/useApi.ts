@@ -33,7 +33,7 @@ export const useApi = () => {
   const baseCloudUrl = `${realm}/orgs/${orgId}/idps`;
 
   useEffect(() => {
-    if (keycloakToken.org_id) {
+    if (keycloakToken?.org_id) {
       setOrgId(keycloakToken.org_id);
     }
   }, [keycloakToken]);
