@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -18,7 +18,6 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
-import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const Auth0WizardSAML: FC = () => {
   const idpCommonName = "Auth0 SAML IdP";
@@ -28,14 +27,10 @@ export const Auth0WizardSAML: FC = () => {
     preface: "auth0-saml",
   });
   const navigateToBasePath = useNavigateToBasePath();
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
+  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
+
   const { endpoints, setAlias } = useApi();
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
-
-  const isCloud = featureFlags?.apiMode === "cloud";
-
-  React.useEffect(() => {
+  useEffect(() => {
     setAlias(alias);
   }, [alias]);
 
@@ -43,6 +38,8 @@ export const Auth0WizardSAML: FC = () => {
   const identifierURL = `${getServerUrl()}/admin/realms/${
     endpoints?.importConfig.endpoint
   }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -117,16 +114,7 @@ export const Auth0WizardSAML: FC = () => {
     };
 
     try {
-      // TODO: just use the Axios post?
-      isCloud
-        ? await Axios.post(
-            `${getServerUrl()}/admin/realms/${endpoints?.createIdP.endpoint!}`,
-            payload
-          )
-        : await kcAdminClient.identityProviders.create({
-            ...payload,
-            realm: getRealm()!,
-          });
+      await Axios.post(createIdPUrl, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({

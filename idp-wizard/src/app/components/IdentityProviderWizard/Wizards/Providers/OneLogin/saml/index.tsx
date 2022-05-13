@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -15,11 +15,15 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
-import { getAlias, clearAlias } from "@wizardServices";
+import {
+  Axios,
+  SamlUserAttributeMapper,
+  getAlias,
+  clearAlias,
+} from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
 
 export const OneLoginWizard: FC = () => {
   const idpCommonName = "OneLogin IdP";
@@ -49,6 +53,17 @@ export const OneLoginWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const finishStep = 6;
 
@@ -81,11 +96,13 @@ export const OneLoginWizard: FC = () => {
     setIssuerUrl(url);
 
     try {
-      const resp = await kcAdminClient.identityProviders.importFromUrl({
+      const payload = {
         fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
-      });
+      };
+
+      const resp = await Axios.post(identifierURL, payload);
 
       setMetadata({
         ...SamlIDPDefaults,
@@ -105,7 +122,7 @@ export const OneLoginWizard: FC = () => {
     }
   };
 
-  const validateFn = async () => {
+  const createIdP = async () => {
     setIsValidating(true);
     setDisableButton(false);
     setResults(`Creating ${idpCommonName}...`);
@@ -118,10 +135,7 @@ export const OneLoginWizard: FC = () => {
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(createIdPUrl, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({
@@ -215,7 +229,7 @@ export const OneLoginWizard: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={validateFn}
+          validationFunction={createIdP}
           adminLink={adminLink}
           adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />

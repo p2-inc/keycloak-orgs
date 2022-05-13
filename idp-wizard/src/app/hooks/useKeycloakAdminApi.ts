@@ -1,6 +1,9 @@
 import KcAdminClient from "@keycloak/keycloak-admin-client";
+import { KeycloakInstance } from "keycloak-js";
 import { useParams } from "react-router-dom";
 import keycloak from "src/keycloak";
+
+type KeycloakToken = KeycloakInstance["tokenParsed"] & { org_id: string };
 
 export const useKeycloakAdminApi = () => {
   const { realm: pathRealm } = useParams();
@@ -45,12 +48,14 @@ export const useKeycloakAdminApi = () => {
   // Should be able to initiate off the bat and still provide as a callback
   setKcAdminClientAccessToken();
 
+  const keycloakToken: KeycloakToken = keycloak.tokenParsed;
+
   return {
     kcAdminClient,
     setKcAdminClientAccessToken,
     getServerUrl,
     getRealm,
     getAuthRealm,
-    keycloakToken: keycloak.tokenParsed,
+    keycloakToken,
   };
 };

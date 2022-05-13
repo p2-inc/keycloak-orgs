@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -20,7 +20,6 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
-import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const AWSSamlWizard: FC = () => {
   const idpCommonName = "AWS SSO IdP";
@@ -33,15 +32,18 @@ export const AWSSamlWizard: FC = () => {
 
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
-  const { endpoints, setAlias } = useApi();
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
+  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
 
-  const isCloud = featureFlags?.apiMode === "cloud";
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
   const identifierURL = `${getServerUrl()}/admin/realms/${
     endpoints?.importConfig.endpoint
   }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const acsURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const samlAudience = `${getServerUrl()}/realms/${getRealm()}`;
@@ -114,7 +116,7 @@ export const AWSSamlWizard: FC = () => {
     }
   };
 
-  const validateFn = async () => {
+  const createIdP = async () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
     setDisableButton(false);
@@ -128,22 +130,14 @@ export const AWSSamlWizard: FC = () => {
     metadata!.principalType = "SUBJECT";
 
     const payload: IdentityProviderRepresentation = {
-      alias: alias,
+      alias,
       displayName: "AWS SSO Saml",
       providerId: "saml",
       config: metadata!,
     };
 
     try {
-      await Axios.post(
-        `${getServerUrl()}/admin/realms/${endpoints?.createIdP.endpoint!}`,
-        payload
-      );
-
-      //  await kcAdminClient.identityProviders.create({
-      //   ...payload,
-      //   realm: getRealm()!,
-      // });
+      await Axios.post(createIdPUrl, payload);
 
       await SamlUserAttributeMapper({
         alias,
@@ -235,7 +229,7 @@ export const AWSSamlWizard: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={validateFn}
+          validationFunction={createIdP}
           adminLink={adminLink}
           adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />

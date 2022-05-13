@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -17,7 +17,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { last } from "lodash";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
 
 const forms = {
   URL: true,
@@ -35,13 +35,24 @@ export const GenericOIDC: FC = () => {
     preface: "generic-oidc",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
+  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
 
   const aliasId = last(alias.split("-"));
   const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${aliasId}/endpoint`;
-  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/oidc/${alias}`;
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
+  const updateIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.updateIdP
+    .endpoint!}`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -96,11 +107,13 @@ export const GenericOIDC: FC = () => {
     let resp;
     setUrl(url);
     try {
-      resp = await kcAdminClient.identityProviders.importFromUrl({
+      const payload = {
         fromUrl: url,
         providerId: "oidc",
         realm: getRealm(),
-      });
+      };
+
+      const resp = await Axios.post(identifierURL, payload);
 
       setIsFormValid(true);
       setMetadata(resp);
@@ -162,12 +175,14 @@ export const GenericOIDC: FC = () => {
     let resp;
 
     try {
-      resp = await kcAdminClient.identityProviders.create({
+      const payload = {
         alias,
-        displayName: "Generic OIDC Single Sign-on",
+        displayName: "OIDC Single Sign-on",
         providerId: "oidc",
         config,
-      });
+      };
+
+      await Axios.post(identifierURL, payload);
 
       setIsFormValid(true);
       setMetadata(resp);
@@ -227,7 +242,7 @@ export const GenericOIDC: FC = () => {
     // };
   };
 
-  const validateFn = async () => {
+  const createIdP = async () => {
     setIsValidating(true);
     setResults(`Creating ${idpCommonName}...`);
 
@@ -239,10 +254,7 @@ export const GenericOIDC: FC = () => {
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(createIdPUrl, payload);
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
@@ -307,7 +319,7 @@ export const GenericOIDC: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={validateFn}
+          validationFunction={createIdP}
           adminLink={adminLink}
           adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />

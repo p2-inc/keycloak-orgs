@@ -1,3 +1,4 @@
+import { createSlice } from "@reduxjs/toolkit";
 import {
   createApi,
   BaseQueryFn,
@@ -29,6 +30,12 @@ const initialState: FeatureFlagsState = {
   enableLdap: false,
   enableDashboard: false,
 };
+
+// export const featureFlagSlice = createSlice({
+//   name: "featureFlags",
+//   initialState,
+//   reducers: {},
+// });
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: "https://app.phasetwo.io",
@@ -63,8 +70,8 @@ const dynamicBaseQuery: BaseQueryFn<
   return rawBaseQuery(adjustedArgs, api, extraOptions);
 };
 
-export const featureFlagApi = createApi({
-  reducerPath: "featureFlagsApi",
+export const apiSlice = createApi({
+  reducerPath: "api",
   baseQuery: dynamicBaseQuery,
   endpoints: (builder) => ({
     getFeatureFlags: builder.query<FlagsResponse, void>({
@@ -73,4 +80,4 @@ export const featureFlagApi = createApi({
   }),
 });
 
-export const { useGetFeatureFlagsQuery } = featureFlagApi;
+export const { useGetFeatureFlagsQuery } = apiSlice;

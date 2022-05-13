@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -15,11 +15,14 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
+import {
+  Axios,
+  SamlUserAttributeMapper,
+} from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
 
 export const ADFSWizard: FC = () => {
   const idpCommonName = "ADFS IdP";
@@ -31,13 +34,8 @@ export const ADFSWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "ADFS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
+    useKeycloakAdminApi();
 
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
@@ -55,6 +53,19 @@ export const ADFSWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
+  const updateIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.updateIdP
+    .endpoint!}`;
 
   const finishStep = 5;
 
@@ -130,13 +141,16 @@ export const ADFSWizard: FC = () => {
         providerId: "saml",
       };
       // create the idp with the start config
-      await kcAdminClient.identityProviders.create(payload);
 
-      const resp = await kcAdminClient.identityProviders.importFromUrl({
+      await Axios.post(createIdPUrl, payload);
+
+      const urlPayload = {
         fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
-      });
+      };
+      const resp = await Axios.post(identifierURL, urlPayload);
+
       let mdata = {
         ...SamlIDPDefaults,
         ...resp,
@@ -172,7 +186,7 @@ export const ADFSWizard: FC = () => {
 
     try {
       // Update the idp
-      await kcAdminClient.identityProviders.update({ alias }, payload);
+      await Axios.post(updateIdPUrl, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({

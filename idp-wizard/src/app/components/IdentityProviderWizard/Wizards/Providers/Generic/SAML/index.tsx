@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -19,7 +19,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
 
 export const GenericSAML: FC = () => {
   const idpCommonName = "Saml IdP";
@@ -36,7 +36,6 @@ export const GenericSAML: FC = () => {
     preface: "generic-saml",
   });
   const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const samlMetadata = `${getServerUrl()}/realms/${getRealm()}/protocol/saml/descriptor`;
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
@@ -51,6 +50,17 @@ export const GenericSAML: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const finishStep = 6;
 
@@ -74,7 +84,7 @@ export const GenericSAML: FC = () => {
     navigateToBasePath();
   };
 
-  const validateFn = async () => {
+  const createIdP = async () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
     setDisableButton(false);
@@ -88,10 +98,7 @@ export const GenericSAML: FC = () => {
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(createIdPUrl, payload);
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
@@ -188,11 +195,13 @@ export const GenericSAML: FC = () => {
     setMetadataUrl(url);
 
     try {
-      const resp = await kcAdminClient.identityProviders.importFromUrl({
+      const payload = {
         fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
-      });
+      };
+
+      const resp = await Axios.post(identifierURL, payload);
 
       setMetadata({
         ...SamlIDPDefaults,
@@ -269,7 +278,7 @@ export const GenericSAML: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={validateFn}
+          validationFunction={createIdP}
           adminLink={adminLink}
           adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
