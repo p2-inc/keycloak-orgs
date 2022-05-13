@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -10,12 +10,12 @@ import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
+import { Axios, SamlUserAttributeMapper } from "@wizardServices";
 import { API_RETURN, API_STATUS } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
 
 export const OktaWizardSaml: FC = () => {
   const idpCommonName = "Okta SAML IdP";
@@ -43,6 +43,17 @@ export const OktaWizardSaml: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const finishStep = 8;
 
@@ -75,11 +86,13 @@ export const OktaWizardSaml: FC = () => {
     setMetadataUrl(url);
 
     try {
-      const resp = await kcAdminClient.identityProviders.importFromUrl({
+      const payload = {
         fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
-      });
+      };
+
+      const resp = await Axios.post(identifierURL, payload);
 
       setMetadata({
         ...SamlIDPDefaults,
@@ -100,7 +113,7 @@ export const OktaWizardSaml: FC = () => {
     }
   };
 
-  const createOktaSamlIdp = async () => {
+  const createIdP = async () => {
     // On final validation set stepIdReached to steps.length+1
     setIsValidating(true);
     setResults(`Creating ${idpCommonName}...`);
@@ -113,10 +126,7 @@ export const OktaWizardSaml: FC = () => {
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(createIdPUrl, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({
@@ -219,7 +229,7 @@ export const OktaWizardSaml: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={createOktaSamlIdp}
+          validationFunction={createIdP}
           adminLink={adminLink}
           adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />

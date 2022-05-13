@@ -16,7 +16,7 @@ import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
 
 export const GoogleWizard: FC = () => {
   const idpCommonName = "Google SAML IdP";
@@ -29,10 +29,8 @@ export const GoogleWizard: FC = () => {
     preface: "google-saml",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
+  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
 
-  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
@@ -44,6 +42,17 @@ export const GoogleWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const finishStep = 8;
 
@@ -101,22 +110,19 @@ export const GoogleWizard: FC = () => {
     };
   };
 
-  const createGoogleIdp = async () => {
+  const createIdP = async () => {
     setIsValidating(true);
     setResults("Creating SAML IdP...");
 
     const payload: IdentityProviderRepresentation = {
-      alias: alias,
+      alias,
       displayName: "Google SAML Single Sign-on",
       providerId: "saml",
       config: metadata!,
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(createIdPUrl, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({
@@ -211,7 +217,7 @@ export const GoogleWizard: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={createGoogleIdp}
+          validationFunction={createIdP}
           adminLink={adminLink}
           adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />

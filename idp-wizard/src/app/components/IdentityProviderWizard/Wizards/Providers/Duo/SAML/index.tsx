@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -17,8 +17,13 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
-import { getAlias, clearAlias, SamlUserAttributeMapper } from "@wizardServices";
-import { usePrompt } from "@app/hooks";
+import {
+  getAlias,
+  clearAlias,
+  SamlUserAttributeMapper,
+  Axios,
+} from "@wizardServices";
+import { useApi, usePrompt } from "@app/hooks";
 
 export const DuoWizard: FC = () => {
   const idpCommonName = "Duo SAML IdP";
@@ -34,19 +39,24 @@ export const DuoWizard: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
-  const [
-    kcAdminClient,
-    setKcAdminClientAccessToken,
-    getServerUrl,
-    getRealm,
-    getAuthRealm,
-  ] = useKeycloakAdminApi();
+  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const finishStep = 6;
 
@@ -79,11 +89,12 @@ export const DuoWizard: FC = () => {
     setMetadataUrl(metadataUrl);
 
     try {
-      const resp = await kcAdminClient.identityProviders.importFromUrl({
+      const payload = {
         fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
-      });
+      };
+      const resp = await Axios.post(identifierURL, payload);
 
       setMetadata({
         ...SamlIDPDefaults,
@@ -110,17 +121,14 @@ export const DuoWizard: FC = () => {
     setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
-      alias: alias,
+      alias,
       displayName: `Duo SAML Single Sign-on`,
       providerId: "saml",
       config: metadata!,
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(createIdPUrl, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({

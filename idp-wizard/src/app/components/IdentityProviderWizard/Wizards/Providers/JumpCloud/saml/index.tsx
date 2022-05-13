@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   PageSection,
   PageSectionVariants,
@@ -16,7 +16,7 @@ import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
-import { usePrompt } from "@app/hooks";
+import { useApi, usePrompt } from "@app/hooks";
 
 export const JumpCloudWizard: FC = () => {
   const idpCommonName = "JumpCloud IdP";
@@ -33,7 +33,6 @@ export const JumpCloudWizard: FC = () => {
 
   const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
   const entityId = `${getServerUrl()}/realms/${getRealm()}`;
-  const identifierURL = `${getServerUrl()}/admin/realms/${getRealm()}/identity-provider/import-config`;
   const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -44,6 +43,17 @@ export const JumpCloudWizard: FC = () => {
   const [results, setResults] = useState("");
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
+
+  const { endpoints, setAlias } = useApi();
+  useEffect(() => {
+    setAlias(alias);
+  }, [alias]);
+
+  const identifierURL = `${getServerUrl()}/admin/realms/${
+    endpoints?.importConfig.endpoint
+  }`;
+  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
+    .endpoint!}`;
 
   const finishStep = 7;
 
@@ -98,7 +108,7 @@ export const JumpCloudWizard: FC = () => {
     };
   };
 
-  const validateFn = async () => {
+  const createIdP = async () => {
     setIsValidating(true);
     setDisableButton(false);
     setResults(`Creating ${idpCommonName}...`);
@@ -111,10 +121,7 @@ export const JumpCloudWizard: FC = () => {
     };
 
     try {
-      await kcAdminClient.identityProviders.create({
-        ...payload,
-        realm: getRealm()!,
-      });
+      await Axios.post(createIdPUrl, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({
@@ -209,7 +216,7 @@ export const JumpCloudWizard: FC = () => {
           resultsText={results}
           error={error}
           isValidating={isValidating}
-          validationFunction={validateFn}
+          validationFunction={createIdP}
           adminLink={adminLink}
           adminButtonText={`Manage ${idpCommonName} in Keycloak`}
         />
