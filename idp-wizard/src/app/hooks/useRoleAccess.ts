@@ -40,7 +40,7 @@ export function useRoleAccess() {
   function hasOrganizationRole(role) {
     const orgId = keycloak.tokenParsed.org_id;
     const orgs = keycloak.tokenParsed.organizations;
-    console.log("hasOrganizationRole", role, orgId, orgs);
+    //console.log("hasOrganizationRole", role, orgId, orgs);
     if (orgId == null || orgs == null) return false;
     const roles = orgs[orgId].roles;
     if (roles.indexOf(role) > -1) return true;
@@ -49,7 +49,7 @@ export function useRoleAccess() {
   
   useEffect(() => {
     if (!featureFlags) return;
-    console.log("access control", featureFlags?.apiMode);
+    //console.log("access control", featureFlags?.apiMode);
     //cloud mode
     if (featureFlags?.apiMode === "cloud") {
       let orgAccess: boolean[] = [];
