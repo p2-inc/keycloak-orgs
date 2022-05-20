@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  keycloak:
+    build:
+      context: ../../
+      dockerfile: dockerfiles/test/Dockerfile
+
+    container_name: keycloak-org-test
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+    command: --debug start-dev --http-relative-path=/auth
+
+    ports:
+      - 8080:8080
