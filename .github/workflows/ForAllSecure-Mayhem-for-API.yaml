@@ -1,0 +1,46 @@
+name: Mayhem for API
+on:
+    push:
+    pull_request:
+    workflow_dispatch:
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build and Start Repo
+      id: build
+      env:
+        DOCKER_BUILDKIT: 1
+      run: |
+        set -x
+
+        docker-compose -f dockerfiles/test/docker-compose.yml build
+
+        docker-compose -f dockerfiles/test/docker-compose.yml up &
+
+        for i in {1..90} ; do curl --silent localhost:8080/auth/ && break; sleep 5s; done
+
+        AUTH_TOKEN=$(curl --location --request POST "http://localhost:8080/auth/realms/master/protocol/openid-connect/token" \
+          --header 'Content-Type: application/x-www-form-urlencoded' \
+          --data-urlencode 'client_id=admin-cli' \
+          --data-urlencode "username=admin" \
+          --data-urlencode "password=admin" \
+          --data-urlencode 'grant_type=password' | jq -r .access_token)
+
+        echo $auth_token | base64
+
+        echo "::set-output name=AUTH_TOKEN::$AUTH_TOKEN"
+        echo "::set-output name=AUTH_TOKEN::$AUTH_TOKEN" | base64
+
+    - name: Run Mayhem for API to check for vulnerabilities
+      uses: ForAllSecure/mapi-action@v1
+      with:
+        mapi-token: ${{ secrets.MAPI_TOKEN }}
+        api-url: http://localhost:8080/auth/
+        api-spec: https://raw.githubusercontent.com/p2-inc/phasetwo-docs/master/openapi.yaml
+        target: keycloak-orgs
+        run-args: |
+          --header-auth="Authorization: Bearer ${{ steps.build.outputs.AUTH_TOKEN }}" \
+          --resource-hint="realm$:master"
