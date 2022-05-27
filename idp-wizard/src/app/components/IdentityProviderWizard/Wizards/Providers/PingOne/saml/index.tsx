@@ -29,12 +29,16 @@ export const PingOneWizard: FC = () => {
 
   const title = "PingOne wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
-
-  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
+  const { getRealm } = useKeycloakAdminApi();
+  const {
+    setAlias,
+    loginRedirectURL: acsUrl,
+    entityId,
+    adminLinkSaml: adminLink,
+    identifierURL,
+    createIdPUrl,
+    baseServerRealmsUrl,
+  } = useApi();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
@@ -45,16 +49,9 @@ export const PingOneWizard: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
-  const { endpoints, setAlias } = useApi();
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
-
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
 
   const finishStep = 6;
 
@@ -133,7 +130,7 @@ export const PingOneWizard: FC = () => {
       await SamlUserAttributeMapper({
         alias,
         keys: {
-          serverUrl: getServerUrl()!,
+          serverUrl: baseServerRealmsUrl,
           realm: getRealm()!,
         },
         attributes: [

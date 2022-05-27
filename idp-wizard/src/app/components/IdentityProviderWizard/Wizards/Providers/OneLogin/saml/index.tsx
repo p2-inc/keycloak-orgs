@@ -35,14 +35,19 @@ export const OneLoginWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
+  const { getRealm } = useKeycloakAdminApi();
+  const {
+    endpoints,
+    setAlias,
+    entityId,
+    loginRedirectURL: acsUrl,
+    adminLinkSaml: adminLink,
+    identifierURL,
+    createIdPUrl,
+    baseServerRealmsUrl,
+  } = useApi();
 
-  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
-  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const recipient = acsUrl;
   const acsUrlValidator = acsUrl.replace(/\//g, "\\/");
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   const [issuerUrl, setIssuerUrl] = useState("");
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -54,16 +59,9 @@ export const OneLoginWizard: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
-  const { endpoints, setAlias } = useApi();
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
-
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
 
   const finishStep = 6;
 
@@ -141,7 +139,7 @@ export const OneLoginWizard: FC = () => {
       await SamlUserAttributeMapper({
         alias,
         keys: {
-          serverUrl: getServerUrl()!,
+          serverUrl: baseServerRealmsUrl,
           realm: getRealm()!,
         },
         attributes: [
@@ -192,7 +190,7 @@ export const OneLoginWizard: FC = () => {
       component: (
         <Step2
           acsUrl={acsUrl}
-          recipient={recipient}
+          recipient={acsUrl}
           acsUrlValidator={acsUrlValidator}
           entityId={entityId}
         />

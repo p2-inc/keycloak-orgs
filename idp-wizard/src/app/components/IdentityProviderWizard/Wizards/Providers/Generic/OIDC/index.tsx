@@ -16,7 +16,6 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
-import { last } from "lodash";
 import { useApi, usePrompt } from "@app/hooks";
 
 const forms = {
@@ -35,24 +34,18 @@ export const GenericOIDC: FC = () => {
     preface: "generic-oidc",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
+  const { getRealm } = useKeycloakAdminApi();
+  const {
+    setAlias,
+    adminLinkOidc: adminLink,
+    identifierURL,
+    createIdPUrl,
+    loginRedirectURI: redirectUri,
+  } = useApi();
 
-  const aliasId = last(alias.split("-"));
-  const redirectUri = `${getServerUrl()}/auth/realms/${getRealm()}/broker/${aliasId}/endpoint`;
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/oidc/${alias}`;
-
-  const { endpoints, setAlias } = useApi();
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
-
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
-  const updateIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.updateIdP
-    .endpoint!}`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);

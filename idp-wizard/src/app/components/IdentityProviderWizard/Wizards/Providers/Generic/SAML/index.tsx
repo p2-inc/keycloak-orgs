@@ -27,18 +27,23 @@ export const GenericSAML: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
 
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
+  const { getServerUrl, getRealm } = useKeycloakAdminApi();
+  const {
+    setAlias,
+    loginRedirectURL: ssoUrl,
+    entityId,
+    adminLinkSaml: adminLink,
+    identifierURL,
+    createIdPUrl,
+  } = useApi();
 
   const alias = getAlias({
     provider: Providers.SAML,
     protocol: Protocols.SAML,
     preface: "generic-saml",
   });
-  const ssoUrl = `${getServerUrl()}/admin/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
+
   const samlMetadata = `${getServerUrl()}/realms/${getRealm()}/protocol/saml/descriptor`;
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   // Metadata
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -51,16 +56,9 @@ export const GenericSAML: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
-  const { endpoints, setAlias } = useApi();
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
-
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
 
   const finishStep = 6;
 
