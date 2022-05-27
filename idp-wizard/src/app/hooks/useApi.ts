@@ -1,4 +1,5 @@
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { last } from "lodash";
 import { useEffect, useState } from "react";
 import { useKeycloakAdminApi } from "./useKeycloakAdminApi";
 
@@ -23,14 +24,20 @@ type endpoint = {
 
 export const useApi = () => {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
-  const { getRealm, keycloakToken } = useKeycloakAdminApi();
+  const { getRealm, keycloakToken, getServerUrl, getAuthRealm } =
+    useKeycloakAdminApi();
   const realm = getRealm();
+  const authRealm = getAuthRealm();
+  const serverUrl = getServerUrl();
   const [alias, setAlias] = useState("");
   const [orgId, setOrgId] = useState("SET_ORG_ID");
 
   const baseOPUrl = `${realm}/identity-provider`;
   const baseOPUrlInstances = `${baseOPUrl}/instances`;
   const baseCloudUrl = `${realm}/orgs/${orgId}/idps`;
+
+  let serverUrlSuffix = "/admin";
+  const aliasId = last(alias.split("-"));
 
   useEffect(() => {
     if (keycloakToken?.org_id) {
@@ -97,13 +104,40 @@ export const useApi = () => {
   let endpoints: Record<apiEndpointNames, endpoint> | undefined;
   if (featureFlags?.apiMode === "onprem") {
     endpoints = onPremEndpoints;
+    serverUrlSuffix = "/admin";
   }
   if (featureFlags?.apiMode === "cloud") {
     endpoints = cloudEndpoints;
+    serverUrlSuffix = "";
   }
+
+  let baseServerUrl = `${serverUrl}${serverUrlSuffix}`;
+  let baseServerRealmsUrl = `${baseServerUrl}/realms`;
+
+  let adminLinkSaml = `${baseServerUrl}/${authRealm}/console/#/realms/${realm}/identity-provider-settings/provider/saml/${alias}`;
+  let adminLinkOidc = `${baseServerUrl}/${authRealm}/console/#/realms/${realm}/identity-provider-settings/provider/oidc/${alias}`;
+
+  let identifierURL = `${baseServerRealmsUrl}/${endpoints?.importConfig.endpoint}`;
+  let createIdPUrl = `${baseServerRealmsUrl}/${endpoints?.createIdP.endpoint!}`;
+  let updateIdPUrl = `${baseServerRealmsUrl}/${endpoints?.updateIdP.endpoint!}`;
+
+  let entityId = `${serverUrl}/realms/${realm}`;
+  let loginRedirectURL = `${entityId}/broker/${alias}/endpoint`;
+  let loginRedirectURI = `${entityId}/broker/${aliasId}/endpoint`;
+  let federationMetadataAddressUrl = `${loginRedirectURL}/descriptor`;
 
   return {
     setAlias,
     endpoints,
+    baseServerRealmsUrl,
+    adminLinkSaml,
+    adminLinkOidc,
+    identifierURL,
+    createIdPUrl,
+    updateIdPUrl,
+    loginRedirectURL,
+    loginRedirectURI,
+    federationMetadataAddressUrl,
+    entityId,
   };
 };

@@ -29,11 +29,16 @@ export const GoogleWizard: FC = () => {
     preface: "google-saml",
   });
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
-
-  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
+  const { getServerUrl, getRealm } = useKeycloakAdminApi();
+  const {
+    setAlias,
+    loginRedirectURL: acsUrl,
+    entityId,
+    adminLinkSaml: adminLink,
+    identifierURL,
+    createIdPUrl,
+    baseServerRealmsUrl,
+  } = useApi();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
@@ -43,16 +48,9 @@ export const GoogleWizard: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
-  const { endpoints, setAlias } = useApi();
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
-
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
 
   const finishStep = 8;
 
@@ -128,7 +126,7 @@ export const GoogleWizard: FC = () => {
       await SamlUserAttributeMapper({
         alias,
         keys: {
-          serverUrl: getServerUrl()!,
+          serverUrl: baseServerRealmsUrl,
           realm: getRealm()!,
         },
         attributes: [

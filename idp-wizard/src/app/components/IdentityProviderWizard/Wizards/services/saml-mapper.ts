@@ -28,8 +28,8 @@ export const SamlUserAttributeMapper = async ({
     userAttribute,
   }: AttributesConfig) => {
     let endpoint = path
-      ? `${serverUrl}/admin/realms/${path}`
-      : `${serverUrl}/admin/realms/${realm}/identity-provider/instances/${alias}/mappers`;
+      ? `${serverUrl}/${path}`
+      : `${serverUrl}/${realm}/identity-provider/instances/${alias}/mappers`;
 
     return await Axios.post(endpoint, {
       identityProviderAlias: alias,

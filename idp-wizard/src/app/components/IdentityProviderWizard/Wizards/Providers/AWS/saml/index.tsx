@@ -32,26 +32,25 @@ export const AWSSamlWizard: FC = () => {
 
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
+  const { getRealm } = useKeycloakAdminApi();
 
-  const { endpoints, setAlias } = useApi();
+  const {
+    setAlias,
+    identifierURL,
+    createIdPUrl,
+    loginRedirectURL,
+    adminLinkSaml: adminLink,
+    entityId,
+    baseServerRealmsUrl,
+  } = useApi();
+
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
 
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
-
-  const acsURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const samlAudience = `${getServerUrl()}/realms/${getRealm()}`;
-
   const [providerUrl, setProviderUrl] = useState("");
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -141,7 +140,7 @@ export const AWSSamlWizard: FC = () => {
 
       await SamlUserAttributeMapper({
         alias,
-        keys: { serverUrl: getServerUrl()!, realm: getRealm()! },
+        keys: { serverUrl: baseServerRealmsUrl, realm: getRealm()! },
         attributes: [
           {
             attributeName: "email",
@@ -196,7 +195,9 @@ export const AWSSamlWizard: FC = () => {
     {
       id: 3,
       name: "Enter Service Provider Details",
-      component: <Step3 urls={{ samlAudience, acsURL }} />,
+      component: (
+        <Step3 urls={{ samlAudience: entityId, acsURL: loginRedirectURL }} />
+      ),
       hideCancelButton: true,
       enableNext: true,
       canJumpTo: stepIdReached >= 3,

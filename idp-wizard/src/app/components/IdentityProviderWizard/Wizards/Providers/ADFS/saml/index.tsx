@@ -34,13 +34,17 @@ export const ADFSWizard: FC = () => {
   const navigateToBasePath = useNavigateToBasePath();
   const title = "ADFS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { kcAdminClient, getServerUrl, getRealm, getAuthRealm } =
-    useKeycloakAdminApi();
-
-  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
-  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const federationMetadataAddress = `${acsUrl}/descriptor`;
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
+  const { getRealm } = useKeycloakAdminApi();
+  const {
+    setAlias,
+    adminLinkSaml: adminLink,
+    federationMetadataAddressUrl,
+    entityId,
+    identifierURL,
+    createIdPUrl,
+    updateIdPUrl,
+    baseServerRealmsUrl,
+  } = useApi();
 
   const [issuerUrl, setIssuerUrl] = useState(
     "https://HOSTNAME/federationmetadata/2007-06/federationmetadata.xml"
@@ -54,18 +58,9 @@ export const ADFSWizard: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
-  const { endpoints, setAlias } = useApi();
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
-
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
-  const updateIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.updateIdP
-    .endpoint!}`;
 
   const finishStep = 5;
 
@@ -192,7 +187,7 @@ export const ADFSWizard: FC = () => {
       await SamlUserAttributeMapper({
         alias,
         keys: {
-          serverUrl: getServerUrl()!,
+          serverUrl: baseServerRealmsUrl,
           realm: getRealm()!,
         },
         attributes: [
@@ -236,7 +231,7 @@ export const ADFSWizard: FC = () => {
       id: 1,
       name: "Setup Relying Party Trust",
       component: (
-        <Step1 federationMetadataAddress={federationMetadataAddress} />
+        <Step1 federationMetadataAddress={federationMetadataAddressUrl} />
       ),
       hideCancelButton: true,
       enableNext: true,

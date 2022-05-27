@@ -39,24 +39,23 @@ export const DuoWizard: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
-  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
+  const {  getRealm } = useKeycloakAdminApi();
+  const {
+    setAlias,
+    adminLinkSaml: adminLink,
+    loginRedirectURL: acsUrl,
+    entityId,
+    identifierURL,
+    createIdPUrl,
+    baseServerRealmsUrl,
+  } = useApi();
+
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/saml/${alias}`;
 
-  const acsUrl = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
-  const entityId = `${getServerUrl()}/realms/${getRealm()}`;
-
-  const { endpoints, setAlias } = useApi();
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
-
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
 
   const finishStep = 6;
 
@@ -134,7 +133,7 @@ export const DuoWizard: FC = () => {
       await SamlUserAttributeMapper({
         alias,
         keys: {
-          serverUrl: getServerUrl()!,
+          serverUrl: baseServerRealmsUrl,
           realm: getRealm()!,
         },
         attributes: [

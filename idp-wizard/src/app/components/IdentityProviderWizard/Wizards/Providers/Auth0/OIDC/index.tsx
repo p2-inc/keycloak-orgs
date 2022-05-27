@@ -26,13 +26,18 @@ export const Auth0WizardOIDC: FC = () => {
   });
   const navigateToBasePath = useNavigateToBasePath();
   const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
-  const loginRedirectURL = `${getServerUrl()}/realms/${getRealm()}/broker/${alias}/endpoint`;
+  const {
+    setAlias,
+    loginRedirectURL,
+    identifierURL,
+    createIdPUrl,
+    adminLinkOidc: adminLink,
+  } = useApi();
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
   const [error, setError] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
-  const adminLink = `${getServerUrl()}/admin/${getAuthRealm()}/console/#/realms/${getRealm()}/identity-provider-settings/provider/oidc/${alias}`;
 
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -45,16 +50,9 @@ export const Auth0WizardOIDC: FC = () => {
     clientSecret: "",
   });
 
-  const { endpoints, setAlias } = useApi();
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
-
-  const identifierURL = `${getServerUrl()}/admin/realms/${
-    endpoints?.importConfig.endpoint
-  }`;
-  const createIdPUrl = `${getServerUrl()}/admin/realms/${endpoints?.createIdP
-    .endpoint!}`;
 
   const finishStep = 5;
 
