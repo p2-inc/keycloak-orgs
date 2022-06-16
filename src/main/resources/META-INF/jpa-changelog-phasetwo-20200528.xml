@@ -3,7 +3,7 @@
   <changeSet author="garth (generated)" id="1590682724768-2">
     <preConditions onFail="MARK_RAN">
       <not>
-        <dbms type="cockroach"/>
+        <dbms type="cockroachdb"/>
       </not>
     </preConditions>  
     <dropPrimaryKey tableName="USER_ORGANIZATION_ROLE_MAPPING"/>
@@ -11,7 +11,7 @@
   <changeSet author="garth (generated)" id="1590682724768-3">
     <preConditions onFail="MARK_RAN">
       <not>
-        <dbms type="cockroach"/>
+        <dbms type="cockroachdb"/>
       </not>
     </preConditions>  
     <addPrimaryKey columnNames="ID" constraintName="USER_ORGANIZATION_ROLE_MAPPINGPK" tableName="USER_ORGANIZATION_ROLE_MAPPING"/>
@@ -19,6 +19,6 @@
 
   <!-- crdb specific -->
   <changeSet author="garth (generated)" id="1590682724768-crdb">
-    <sql dbms="cockroach">ALTER TABLE USER_ORGANIZATION_ROLE_MAPPING ALTER PRIMARY KEY USING COLUMNS (ID);</sql>
+    <sql dbms="cockroachdb">ALTER TABLE USER_ORGANIZATION_ROLE_MAPPING ALTER PRIMARY KEY USING COLUMNS (ID);</sql>
   </changeSet>
 </databaseChangeLog>
