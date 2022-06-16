@@ -86,7 +86,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     // Override alias to prevent collisions
-    representation.setAlias(KeycloakModelUtils.generateId());
+    //representation.setAlias(KeycloakModelUtils.generateId());
 
     idpDefaults(organization, representation);
 
