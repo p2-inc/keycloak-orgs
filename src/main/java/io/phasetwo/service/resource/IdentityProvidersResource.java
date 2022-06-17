@@ -17,7 +17,6 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.models.utils.StripSecretsUtils;
 import org.keycloak.representations.idm.ComponentRepresentation;
@@ -86,7 +85,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     // Override alias to prevent collisions
-    //representation.setAlias(KeycloakModelUtils.generateId());
+    // representation.setAlias(KeycloakModelUtils.generateId());
 
     idpDefaults(organization, representation);
 

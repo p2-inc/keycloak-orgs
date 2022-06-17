@@ -6,6 +6,7 @@ import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
+import io.phasetwo.service.resource.OrganizationAdminAuth;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -25,7 +26,8 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public OrganizationModel createOrganization(RealmModel realm, String name, UserModel createdBy) {
+  public OrganizationModel createOrganization(
+      RealmModel realm, String name, UserModel createdBy, boolean admin) {
     OrganizationEntity e = new OrganizationEntity();
     e.setId(KeycloakModelUtils.generateId());
     e.setRealmId(realm.getId());
@@ -35,6 +37,15 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     em.flush();
     OrganizationModel org = new OrganizationAdapter(session, realm, em, e);
     session.getKeycloakSessionFactory().publish(orgCreationEvent(realm, org));
+
+    // creator if admin
+    if (admin) {
+      org.grantMembership(createdBy);
+      for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
+        org.getRoleByName(role).grantRole(createdBy);
+      }
+    }
+
     return org;
   }
 

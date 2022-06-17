@@ -65,10 +65,12 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response createOrg(@Valid Organization body) {
     log.infof("Create org for %s", realm.getName());
-    auth.requireViewOrgs();
-    auth.requireManageOrgs();
+    if (!(auth.hasCreateOrg() || (auth.hasViewOrgs() && auth.hasManageOrgs()))) {
+      throw new NotAuthorizedException("Insufficient permission to create organization.");
+    }
 
-    OrganizationModel org = orgs.createOrganization(realm, body.getName(), auth.getUser());
+    OrganizationModel org =
+        orgs.createOrganization(realm, body.getName(), auth.getUser(), auth.hasCreateOrg());
     org.setDisplayName(body.getDisplayName());
     org.setUrl(body.getUrl());
     body.getAttributes().forEach((k, v) -> org.setAttribute(k, v));

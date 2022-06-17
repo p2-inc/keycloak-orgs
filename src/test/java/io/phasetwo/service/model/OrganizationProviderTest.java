@@ -34,7 +34,7 @@ public class OrganizationProviderTest {
       UserModel user = session.users().getUserByUsername(realm, "admin");
 
       OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
-      OrganizationModel org = provider.createOrganization(realm, "foo", user);
+      OrganizationModel org = provider.createOrganization(realm, "foo", user, false);
       id = org.getId();
       org.setDomains(ImmutableSet.of("foo.com"));
       org.setUrl("https://www.foo.com/bar");

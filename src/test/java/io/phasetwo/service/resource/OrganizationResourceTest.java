@@ -57,22 +57,25 @@ public class OrganizationResourceTest {
     String id = createOrg(keycloak, "master", rep);
 
     // import-config
-    Map<String,String> urlConf = ImmutableMap.of("fromUrl", "https://login.microsoftonline.com/74df8381-4935-4fa8-8634-8e3413f93086/federationmetadata/2007-06/federationmetadata.xml?appid=ba149e64-4512-440b-a1b4-ae976d85f1ec",
-                                                 "providerId", "saml",
-                                                 "realm", "master");
+    Map<String, String> urlConf =
+        ImmutableMap.of(
+            "fromUrl",
+                "https://login.microsoftonline.com/74df8381-4935-4fa8-8634-8e3413f93086/federationmetadata/2007-06/federationmetadata.xml?appid=ba149e64-4512-440b-a1b4-ae976d85f1ec",
+            "providerId", "saml",
+            "realm", "master");
     response =
         SimpleHttp.doPost(url("master", urlencode(id), "idps", "import-config"), http)
             .auth(keycloak.tokenManager().getAccessTokenString())
             .json(urlConf)
             .asResponse();
     assertThat(response.getStatus(), is(200));
-    Map<String,String> config = response.asJson(new TypeReference<Map<String,String>>() {});
+    Map<String, String> config = response.asJson(new TypeReference<Map<String, String>>() {});
     log.infof("config %s", config);
-    
+
     // delete org
     deleteOrg(keycloak, "master", id);
   }
-  
+
   @Test
   @Ignore
   public void testAddGetUpdateDeleteOrg() throws Exception {

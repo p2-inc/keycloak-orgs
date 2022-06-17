@@ -23,6 +23,7 @@ import org.keycloak.services.resources.admin.AdminAuth;
 @JBossLog
 public class OrganizationAdminAuth extends AdminAuth {
 
+  public static final String ROLE_CREATE_ORGANIZATION = "create-organization";
   public static final String ROLE_VIEW_ORGANIZATION = "view-organizations";
   public static final String ROLE_MANAGE_ORGANIZATION = "manage-organizations";
 
@@ -30,6 +31,16 @@ public class OrganizationAdminAuth extends AdminAuth {
       RealmModel realm, AccessToken token, UserModel user, ClientModel client) {
     super(realm, token, user, client);
     log.debugf("Realm passed to ctr is %s", realm.getName());
+  }
+
+  // create-organization
+  void requireCreateOrg() {
+    if (!hasAppRole(getClient(), ROLE_CREATE_ORGANIZATION))
+      throw new NotAuthorizedException(ROLE_CREATE_ORGANIZATION);
+  }
+
+  boolean hasCreateOrg() {
+    return hasAppRole(getClient(), ROLE_CREATE_ORGANIZATION);
   }
 
   // view-organizations

@@ -1,6 +1,7 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
+import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_CREATE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_VIEW_ORGANIZATION;
 
@@ -88,13 +89,15 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
             realm -> {
               ClientModel client = realm.getMasterAdminClient();
               if (client.getRole(ROLE_VIEW_ORGANIZATION) == null
-                  && client.getRole(ROLE_MANAGE_ORGANIZATION) == null) {
+                  || client.getRole(ROLE_MANAGE_ORGANIZATION) == null
+                  || client.getRole(ROLE_CREATE_ORGANIZATION) == null) {
                 addMasterAdminRoles(manager, realm);
               }
               if (!realm.getName().equals(Config.getAdminRealm())) {
                 client = realm.getClientByClientId(manager.getRealmAdminClientId(realm));
                 if (client.getRole(ROLE_VIEW_ORGANIZATION) == null
-                    && client.getRole(ROLE_MANAGE_ORGANIZATION) == null) {
+                    || client.getRole(ROLE_MANAGE_ORGANIZATION) == null
+                    || client.getRole(ROLE_CREATE_ORGANIZATION) == null) {
                   addRealmAdminRoles(manager, realm);
                 }
               }
@@ -127,12 +130,15 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
 
   private void addRoles(ClientModel client, RoleModel parent) {
 
-    String[] names = new String[] {ROLE_VIEW_ORGANIZATION, ROLE_MANAGE_ORGANIZATION};
+    String[] names =
+        new String[] {ROLE_CREATE_ORGANIZATION, ROLE_VIEW_ORGANIZATION, ROLE_MANAGE_ORGANIZATION};
 
     for (String name : names) {
-      RoleModel role = client.addRole(name);
-      role.setDescription("${role_" + name + "}");
-      parent.addCompositeRole(role);
+      if (client.getRole(name) == null) {
+        RoleModel role = client.addRole(name);
+        role.setDescription("${role_" + name + "}");
+        parent.addCompositeRole(role);
+      }
     }
   }
 
