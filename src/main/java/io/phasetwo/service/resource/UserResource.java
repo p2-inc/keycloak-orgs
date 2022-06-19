@@ -2,7 +2,9 @@ package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.resource.Converters.*;
 
+import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.Organization;
+import io.phasetwo.service.representation.OrganizationRole;
 import java.util.stream.Stream;
 import javax.validation.constraints.*;
 import javax.ws.rs.*;
@@ -33,6 +35,28 @@ public class UserResource extends OrganizationAdminResource {
     return orgs.getUserOrganizationsStream(realm, user)
         .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
         .map(m -> convertOrganizationModelToOrganization(m));
+  }
+
+  @GET
+  @Path("/{userId}/orgs/{orgId}/roles")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Stream<OrganizationRole> listUserOrgRoles(
+      @PathParam("userId") String userId, @PathParam("orgId") String orgId) {
+    log.infov("Get org roles for %s %s %s", realm.getName(), userId, orgId);
+
+    UserModel user = session.users().getUserById(realm, userId);
+    OrganizationModel org = orgs.getOrganizationById(realm, orgId);
+    if (auth.hasViewOrgs() || auth.hasOrgViewRoles(org)) {
+      if (org.hasMembership(user)) {
+        return org.getRolesStream()
+            .filter(r -> r.hasRole(user))
+            .map(r -> convertOrganizationRole(r));
+      } else {
+        throw new NotFoundException("User is not a member of the organization");
+      }
+    } else {
+      throw new NotAuthorizedException("Insufficient permissions");
+    }
   }
 
   /*

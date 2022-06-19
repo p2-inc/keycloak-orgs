@@ -5,6 +5,7 @@ import io.phasetwo.service.model.OrganizationProvider;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
@@ -26,6 +27,19 @@ public class InvitationRequiredAction implements RequiredActionProvider {
     log.debugf(
         "InvitationRequiredAction.evaluateTriggers called for realm %s and user %s",
         realm.getName(), user.getEmail());
+
+    long cnt = getUserInvites(context, realm, user).count();
+    log.debugf("Found %d invites for %s", cnt, user.getEmail());
+    if (cnt > 0) {
+      log.debugf("Adding InvitationRequiredActionFactory for %s", user.getEmail());
+      user.addRequiredAction(InvitationRequiredActionFactory.PROVIDER_ID);
+    }
+  }
+
+  private Stream<InvitationModel> getUserInvites(
+      RequiredActionContext context, RealmModel realm, UserModel user) {
+    OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
+    return orgs.getUserInvitationsStream(realm, user);
   }
 
   @Override
@@ -36,10 +50,9 @@ public class InvitationRequiredAction implements RequiredActionProvider {
     log.infof(
         "InvitationRequiredAction.requiredActionChallenge called for realm %s and user %s",
         realm.getName(), user.getEmail());
-
     if (user.isEmailVerified() && user.getEmail() != null) {
       List<InvitationModel> invites =
-          orgs.getUserInvitationsStream(realm, user).collect(Collectors.toList());
+          getUserInvites(context, realm, user).collect(Collectors.toList());
       if (invites != null && invites.size() > 0) {
         log.infof("Found %d invites for %s", invites.size(), user.getEmail());
         InvitationsBean ib = new InvitationsBean(realm, invites);
