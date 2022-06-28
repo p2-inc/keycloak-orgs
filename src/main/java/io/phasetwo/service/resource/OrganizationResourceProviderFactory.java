@@ -130,15 +130,20 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
 
   private void addRoles(ClientModel client, RoleModel parent) {
 
-    String[] names =
-        new String[] {ROLE_CREATE_ORGANIZATION, ROLE_VIEW_ORGANIZATION, ROLE_MANAGE_ORGANIZATION};
+    String[] names = new String[] {ROLE_VIEW_ORGANIZATION, ROLE_MANAGE_ORGANIZATION};
 
     for (String name : names) {
-      if (client.getRole(name) == null) {
-        RoleModel role = client.addRole(name);
-        role.setDescription("${role_" + name + "}");
-        parent.addCompositeRole(role);
-      }
+      addRole(name, client, parent, true);
+    }
+
+    addRole(ROLE_CREATE_ORGANIZATION, client, parent, false);
+  }
+
+  private void addRole(String name, ClientModel client, RoleModel parent, boolean composite) {
+    if (client.getRole(name) == null) {
+      RoleModel role = client.addRole(name);
+      role.setDescription("${role_" + name + "}");
+      if (composite) parent.addCompositeRole(role);
     }
   }
 

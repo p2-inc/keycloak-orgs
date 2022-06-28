@@ -90,7 +90,8 @@ public interface OrganizationModel {
   default OrganizationRoleModel getRoleByName(String name) {
     return getRolesStream()
         .filter(r -> name.equals(r.getName()))
-        .collect(MoreCollectors.onlyElement());
+        .collect(MoreCollectors.toOptional())
+        .orElse(null);
   }
 
   void removeRole(String name);

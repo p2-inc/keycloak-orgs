@@ -77,7 +77,6 @@ public class OrganizationResourceTest {
   }
 
   @Test
-  @Ignore
   public void testAddGetUpdateDeleteOrg() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -169,7 +168,6 @@ public class OrganizationResourceTest {
   }
 
   @Test
-  @Ignore
   public void testAddGetDeleteMemberships() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -276,7 +274,48 @@ public class OrganizationResourceTest {
   }
 
   @Test
-  @Ignore
+  public void testDuplicateRoles() throws Exception {
+    Keycloak keycloak = server.client();
+    SimpleHttp.Response response = null;
+
+    Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
+    String id = createOrg(keycloak, "master", rep);
+
+    // get default roles list
+    response =
+        SimpleHttp.doGet(url("master", urlencode(id), "roles"), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .asResponse();
+    assertThat(response.getStatus(), is(200));
+    List<OrganizationRole> roles = response.asJson(new TypeReference<List<OrganizationRole>>() {});
+    assertNotNull(roles);
+    assertThat(roles.size(), is(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
+
+    // create a role
+    String name = "eat-apples";
+    OrganizationRole roleRep = new OrganizationRole().name(name);
+    response =
+        SimpleHttp.doPost(url("master", urlencode(id), "roles"), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleRep)
+            .asResponse();
+    assertThat(response.getStatus(), is(201));
+    assertNotNull(response.getFirstHeader("Location"));
+
+    // attempt to create same name role
+    roleRep = new OrganizationRole().name(name);
+    response =
+        SimpleHttp.doPost(url("master", urlencode(id), "roles"), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleRep)
+            .asResponse();
+    assertThat(response.getStatus(), is(409));
+
+    // delete org
+    deleteOrg(keycloak, "master", id);
+  }
+
+  @Test
   public void testAddGetDeleteRoles() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -436,7 +475,6 @@ public class OrganizationResourceTest {
   }
 
   @Test
-  @Ignore
   public void testAddGetDeleteInvitations() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -487,7 +525,6 @@ public class OrganizationResourceTest {
   }
 
   @Test
-  @Ignore
   public void testAddGetDeleteIdps() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
@@ -496,6 +533,7 @@ public class OrganizationResourceTest {
     String id = createOrg(keycloak, "master", rep);
 
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
+    idp.setAlias("vendor-protocol-1");
     idp.setProviderId("oidc");
     idp.setEnabled(true);
     idp.setFirstBrokerLoginFlowAlias("first broker login");
@@ -544,6 +582,7 @@ public class OrganizationResourceTest {
     assertThat(idps.get(0).getProviderId(), is("oidc"));
 
     // create idp
+    idp.setAlias("vendor-protocol-2");
     response =
         SimpleHttp.doPost(url("master", urlencode(id), "idps"), http)
             .auth(keycloak.tokenManager().getAccessTokenString())
@@ -737,6 +776,7 @@ public class OrganizationResourceTest {
 
     // create idp for org 1
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
+    idp.setAlias("vendor-protocol-A1");
     idp.setProviderId("oidc");
     idp.setEnabled(true);
     idp.setFirstBrokerLoginFlowAlias("first broker login");
@@ -770,6 +810,7 @@ public class OrganizationResourceTest {
     String alias1 = loc.substring(loc.lastIndexOf("/") + 1);
 
     // create idp for org 2
+    idp.setAlias("vendor-protocol-B1");
     response =
         SimpleHttp.doPost(url("master", urlencode(orgId2), "idps"), http)
             .auth(keycloak.tokenManager().getAccessTokenString())
@@ -829,7 +870,6 @@ public class OrganizationResourceTest {
   }
 
   @Test
-  @Ignore
   public void testOrgAdminPermissions() throws Exception {
     Keycloak keycloak = server.client();
     SimpleHttp.Response response = null;
