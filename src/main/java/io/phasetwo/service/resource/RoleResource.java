@@ -40,6 +40,14 @@ public class RoleResource extends OrganizationAdminResource {
     return convertOrganizationRole(role);
   }
 
+  @PUT
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response updateRole(OrganizationRole representation) {
+    canManage();
+    role.setDescription(representation.getDescription());
+    return Response.noContent().build();
+  }
+
   @DELETE
   public Response deleteRole() {
     canManage();
