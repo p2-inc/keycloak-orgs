@@ -35,7 +35,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     String override =
         Optional.ofNullable(realm.getAttribute(AUTH_REALM_OVERRIDE_CONFIG_KEY))
             .orElse(realm.getName());
-    if (!override.equals(realm.getName())) log.infof("Using override realm %s", override);
+    if (!override.equals(realm.getName())) log.debugf("Using override realm %s", override);
     return new WizardResourceProvider(session, override);
   }
 
@@ -48,7 +48,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     factory.register(
         (ProviderEvent event) -> {
           if (event instanceof RealmModel.RealmPostCreateEvent) {
-            log.info("RealmPostCreateEvent");
+            log.debug("RealmPostCreateEvent");
             realmPostCreate((RealmModel.RealmPostCreateEvent) event);
           }
         });
@@ -60,9 +60,9 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
         createClient(realm, session);
       }
     } catch (Exception e) {
-      log.warn(
-          "Error initializing idp-wizard clients. Ignoring. You may have to create them manually.",
-          e);
+      log.warnf(
+          "Error initializing idp-wizard clients. Ignoring. You may have to create them manually. %s",
+          e.getMessage());
     }
   }
 
@@ -73,10 +73,10 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private void createClient(RealmModel realm, KeycloakSession session) {
-    log.infof("Creating %s realm idp-wizard client.", realm.getName());
+    log.debugf("Creating %s realm idp-wizard client.", realm.getName());
     ClientModel idpWizard = session.clients().getClientByClientId(realm, "idp-wizard");
     if (idpWizard == null) {
-      log.infof("No idp-wizard client for %s realm. Creating...", realm.getName());
+      log.debugf("No idp-wizard client for %s realm. Creating...", realm.getName());
       if ("master".equals(realm.getName())) {
         idpWizard = createClientForMaster(realm, session);
       } else {
@@ -119,7 +119,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
         .filter(c -> (c.getRealm().equals(realm) && c.getName().equals("roles")))
         .forEach(
             c -> {
-              log.infof("Found 'roles' client scope. Adding as default...");
+              log.debugf("Found 'roles' client scope. Adding as default...");
               try {
                 idpWizard.addClientScope(c, true);
               } catch (Exception e) {
