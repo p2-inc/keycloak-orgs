@@ -9,6 +9,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
 ## Contents
 
 - [Overview](#overview)
+- [Building](#building)
 - [Installation](#installation)
 - [Extensions](#extensions)
   - [Data](#data)
@@ -34,6 +35,19 @@ But each of these approaches had tradeoffs of scale or frailty we found undesira
 - **Memberships** are the relationship of Users to Organizations. Users may be members of multiple Organizations.
 - **Roles** are mechanisms of role-based security specific to an Organization, much like Keycloak Realm Roles and Client Roles. In addition to a set of standard roles related to Organization data visibilty and management, administrators can create Roles unique to an organization. Users who are Members of Organizations can be granted that Organization's Roles.
 - **Invitations** allow Users and non-Users to be invited to join an Organization. Invitations can be created by administrators or Organization members with permission.
+
+## Building
+
+The build uses keycloak-testsuite-utils. You'll need to install Keycloak from source locally, as the test utility that never gets published to maven central. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
+
+```
+KC_VERSION=18.0.0
+git clone https://github.com/keycloak/keycloak
+git fetch origin --tags
+git checkout $KC_VERSION
+mvn clean install -DskipTests
+```
+Then, checkout this project and run `mvn package`, which will produce a jar in the `target/` directory.
 
 ## Installation
 
