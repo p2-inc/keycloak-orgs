@@ -38,7 +38,7 @@ But each of these approaches had tradeoffs of scale or frailty we found undesira
 
 ## Building
 
-The build uses keycloak-testsuite-utils. You'll need to install Keycloak from source locally, as the test utility that never gets published to maven central. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
+The build uses `keycloak-testsuite-utils` for the unit tests. You'll need to install Keycloak from source locally, as the test utility never gets published to maven central by the Keycloak team. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
 
 ```
 KC_VERSION=18.0.0
