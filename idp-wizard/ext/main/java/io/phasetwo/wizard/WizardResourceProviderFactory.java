@@ -44,7 +44,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
 
   @Override
   public void postInit(KeycloakSessionFactory factory) {
-    KeycloakModelUtils.runJobInTransaction(factory, this::initClients);
+    //KeycloakModelUtils.runJobInTransaction(factory, this::initClients);
     factory.register(
         (ProviderEvent event) -> {
           if (event instanceof RealmModel.RealmPostCreateEvent) {
