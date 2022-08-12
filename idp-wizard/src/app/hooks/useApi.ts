@@ -1,5 +1,5 @@
 import { useGetFeatureFlagsQuery } from "@app/services";
-import { last } from "lodash";
+import _, { isString, last } from "lodash";
 import { useEffect, useState } from "react";
 import { useKeycloakAdminApi } from "./useKeycloakAdminApi";
 
@@ -37,7 +37,7 @@ export const useApi = () => {
   const baseCloudUrl = `${realm}/orgs/${orgId}/idps`;
 
   let serverUrlSuffix = "/admin";
-  const aliasId = last(alias.split("-"));
+  const aliasId = isString(alias) ? last(alias.split("-")) : "";
 
   useEffect(() => {
     if (keycloakToken?.org_id) {
