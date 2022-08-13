@@ -16,9 +16,9 @@ export function getAlias({ provider, protocol, preface }: Props) {
   }
 }
 
-async function setAlias({ provider, protocol, preface }: Props) {
+function setAlias({ provider, protocol, preface }: Props) {
   const alias = `${preface}-${generateId()}`;
-  await localStorage.setItem(`p2_${provider}_${protocol}`, alias);
+  localStorage.setItem(`p2_${provider}_${protocol}`, alias);
   return alias;
 }
 
