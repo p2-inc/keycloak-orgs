@@ -1,6 +1,7 @@
 package io.phasetwo.service.auth.invitation;
 
 import io.phasetwo.service.model.InvitationModel;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import java.util.List;
 import java.util.Map;
@@ -85,16 +86,31 @@ public class InvitationRequiredAction implements RequiredActionProvider {
               if (selected.contains(i.getOrganization().getId())) {
                 // add membership
                 log.infof("selected %s", i.getOrganization().getId());
-                i.getOrganization().grantMembership(user);
+                memberFromInvitation(i, user);
                 // todo future tell the inviter they accepted
               }
               // revoke invitation
               i.getOrganization().revokeInvitation(i.getId());
-            });
+              // todo future tell the inviter they rejected
+           });
 
     context.success();
   }
 
+  void memberFromInvitation(InvitationModel invitation, UserModel user) {
+    // membership
+    invitation.getOrganization().grantMembership(user);
+    // roles
+    invitation.getRoles().stream().forEach(r -> {
+        OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
+        if (role == null) {
+          log.debugf("No org role found for invitation role %s. Skipping...", r);
+        } else {
+          role.grantRole(user);
+        }
+      });
+  }
+    
   @Override
   public void close() {}
 

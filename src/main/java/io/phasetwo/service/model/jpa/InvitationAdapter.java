@@ -1,10 +1,13 @@
 package io.phasetwo.service.model.jpa;
 
+import com.google.common.collect.Sets;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -85,5 +88,15 @@ public class InvitationAdapter implements InvitationModel, JpaModel<InvitationEn
   @Override
   public void setCreatedAt(Date date) {
     invitation.setCreatedAt(date);
+  }
+
+  @Override
+  public Set<String> getRoles() {
+    return invitation.getRoles();
+  }
+
+  @Override
+  public void setRoles(Collection<String> roles) {
+    invitation.setRoles(Sets.newHashSet(roles));
   }
 }

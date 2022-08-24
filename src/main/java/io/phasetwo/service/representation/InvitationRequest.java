@@ -1,6 +1,8 @@
 package io.phasetwo.service.representation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
+import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -8,7 +10,9 @@ import javax.validation.constraints.*;
 public class InvitationRequest {
   private @Email @Valid String email = null;
   private @Valid String inviterId = null;
-
+  private boolean send = false;
+  private @Valid List<String> roles = Lists.newArrayList();
+  
   public InvitationRequest email(String email) {
     this.email = email;
     return this;
@@ -38,6 +42,42 @@ public class InvitationRequest {
     this.inviterId = inviterId;
   }
 
+  public InvitationRequest send(boolean send) {
+    this.send = send;
+    return this;
+  }
+
+  @JsonProperty("send")
+  public boolean isSend() {
+    return send;
+  }
+
+  public void setSend(boolean send) {
+    this.send = send;
+  }
+
+  public InvitationRequest role(String role) {
+    if (roles == null) {
+      roles = Lists.newArrayList();
+    }
+    if (!roles.contains(role)) roles.add(role);
+    return this;
+  }
+
+  public InvitationRequest roles(List<String> roles) {
+    this.roles = roles;
+    return this;
+  }
+
+  @JsonProperty("roles")
+  public List<String> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(List<String> roles) {
+    this.roles = roles;
+  }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -48,12 +88,14 @@ public class InvitationRequest {
     }
     InvitationRequest invitationRequest = (InvitationRequest) o;
     return Objects.equals(email, invitationRequest.email)
-        && Objects.equals(inviterId, invitationRequest.inviterId);
+        && Objects.equals(inviterId, invitationRequest.inviterId)
+        && Objects.equals(send, invitationRequest.send)
+        && Objects.equals(roles, invitationRequest.roles);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(email, inviterId);
+    return Objects.hash(email, inviterId, send, roles);
   }
 
   @Override
@@ -63,6 +105,8 @@ public class InvitationRequest {
 
     sb.append("    email: ").append(toIndentedString(email)).append("\n");
     sb.append("    inviterId: ").append(toIndentedString(inviterId)).append("\n");
+    sb.append("    send: ").append(toIndentedString(send)).append("\n");
+    sb.append("    roles: ").append(toIndentedString(roles)).append("\n");
     sb.append("}");
     return sb.toString();
   }

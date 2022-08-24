@@ -3,6 +3,8 @@ package io.phasetwo.service.model.jpa.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 
@@ -60,6 +62,13 @@ public class InvitationEntity {
       joinColumns = @JoinColumn(name = "INVITATION_ID", referencedColumnName = "ID"),
       inverseJoinColumns = @JoinColumn(name = "TEAM_ID", referencedColumnName = "ID"))
   protected Collection<TeamEntity> teams = new ArrayList<TeamEntity>();
+
+  @ElementCollection
+  @Column(name = "ROLE")
+  @CollectionTable(
+      name = "INVITATION_ROLE",
+      joinColumns = {@JoinColumn(name = "INVITATION_ID")})
+  protected Set<String> roles = new HashSet();
 
   @PrePersist
   protected void onCreate() {
@@ -127,6 +136,14 @@ public class InvitationEntity {
 
   public void setOrganization(OrganizationEntity organization) {
     this.organization = organization;
+  }
+
+  public Set<String> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(Set<String> roles) {
+    this.roles = roles;
   }
 
   @Override

@@ -3,14 +3,23 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
+import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.InvitationRequest;
 import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.validation.Valid;
@@ -20,9 +29,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.Constants;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.resources.admin.AdminRoot;
+import org.keycloak.email.EmailException;
+import org.keycloak.email.EmailTemplateProvider;
+import java.lang.reflect.Method;
 
 @JBossLog
 public class InvitationsResource extends OrganizationAdminResource {
@@ -44,10 +58,15 @@ public class InvitationsResource extends OrganizationAdminResource {
       log.infof("Create invitation for %s %s %s", email, realm.getName(), organization.getId());
       canManage();
 
-      if (email == null || !isValidEmail(email))
+      if (email == null || !isValidEmail(email)) {
         throw new BadRequestException("Invalid email: " + email);
-      Invitation o =
-          convertInvitationModelToInvitation(organization.addInvitation(email, auth.getUser()));
+      }
+      if (!canSetRoles(invitation.getRoles())) {
+        throw new BadRequestException("Unknown role in list.");
+      }
+      InvitationModel i = organization.addInvitation(email, auth.getUser());
+      i.setRoles(invitation.getRoles());        
+      Invitation o = convertInvitationModelToInvitation(i);
 
       adminEvent
           .resource(INVITATION.name())
@@ -65,10 +84,53 @@ public class InvitationsResource extends OrganizationAdminResource {
               .path("invitations")
               .path(o.getId())
               .build();
+
+      if (invitation.isSend()) {
+        try {
+          sendInvitationEmail(email, session, realm, user);
+        } catch (Exception e) {
+          log.warn("Unable to send invitation email", e);
+        }
+      }
+
       return Response.created(location).build();
     } catch (Exception e) {
       throw new InternalServerErrorException(e);
     }
+  }
+
+  boolean canSetRoles(Collection<String> roles) {
+    Set<String> orgRoles = organization.getRolesStream().map(r -> r.getName()).collect(Collectors.toSet());
+    for (String role : roles) {
+      if (!orgRoles.contains(role)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  void sendInvitationEmail(String email, KeycloakSession session, RealmModel realm, UserModel inviter) throws Exception {
+    EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
+
+    // protected void send(String subjectFormatKey, List<Object> subjectAttributes, String bodyTemplate, Map<String, Object> bodyAttributes, String address) throws EmailException {
+    Method sendMethod = FreeMarkerEmailTemplateProvider.class.getDeclaredMethod("send", String.class, List.class, String.class, Map.class, String.class);
+    sendMethod.setAccessible(true);;
+    
+    String realmName = Strings.isNullOrEmpty(realm.getDisplayName()) ? realm.getName() : realm.getDisplayName();
+    String orgName = Strings.isNullOrEmpty(organization.getDisplayName()) ? organization.getName() : organization.getDisplayName();
+    String inviterName = inviter.getEmail(); //todo better display name for inviter
+    
+    String templateName = "invitation-email.ftl";
+    String subjectKey = "invitationEmailSubject";
+    List<Object> subjectAttributes = ImmutableList.of(realmName, orgName, inviterName);
+    Map<String, Object> bodyAttributes = Maps.newHashMap();
+    bodyAttributes.put("email", email);
+    bodyAttributes.put("realmName", realmName);
+    bodyAttributes.put("orgName", orgName);
+    bodyAttributes.put("inviterName", inviterName);
+    // bodyAttributes.put("link", link);
+
+    sendMethod.invoke(emailTemplateProvider, subjectKey, subjectAttributes, templateName, bodyAttributes, email);
   }
 
   @GET

@@ -20,6 +20,7 @@ public class Invitation {
   private @Valid String invitationUrl = null;
   private @Valid String organizationId = null;
   private @Valid List<String> teamIds = Lists.newArrayList();
+  private @Valid List<String> roles = Lists.newArrayList();
 
   public Invitation id(String id) {
     this.id = id;
@@ -143,6 +144,28 @@ public class Invitation {
     this.teamIds = teamIds;
   }
 
+  public Invitation role(String role) {
+    if (roles == null) {
+      roles = Lists.newArrayList();
+    }
+    if (!roles.contains(role)) roles.add(role);
+    return this;
+  }
+
+  public Invitation roles(List<String> roles) {
+    this.roles = roles;
+    return this;
+  }
+
+  @JsonProperty("roles")
+  public List<String> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(List<String> roles) {
+    this.roles = roles;
+  }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -159,12 +182,13 @@ public class Invitation {
         && Objects.equals(inviterId, invitation.inviterId)
         && Objects.equals(organizationId, invitation.organizationId)
         && Objects.equals(invitationUrl, invitation.invitationUrl)
-        && Objects.equals(teamIds, invitation.teamIds);
+        && Objects.equals(roles, invitation.roles)
+        && Objects.equals(roles, invitation.roles);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, email, createdAt, inviterId, organizationId, invitationUrl, teamIds);
+    return Objects.hash(id, email, createdAt, inviterId, organizationId, invitationUrl, teamIds, roles);
   }
 
   @Override
@@ -179,6 +203,7 @@ public class Invitation {
     sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
     sb.append("    invitationUrl: ").append(toIndentedString(invitationUrl)).append("\n");
     sb.append("    teamIds: ").append(toIndentedString(teamIds)).append("\n");
+    sb.append("    roles: ").append(toIndentedString(roles)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -1,6 +1,8 @@
 package io.phasetwo.service.model;
 
 import java.util.Date;
+import java.util.Collection;
+import java.util.Set;
 import org.keycloak.models.UserModel;
 
 public interface InvitationModel {
@@ -24,4 +26,8 @@ public interface InvitationModel {
   Date getCreatedAt();
 
   void setCreatedAt(Date date);
+
+  Set<String> getRoles();
+
+  void setRoles(Collection<String> roles);
 }
