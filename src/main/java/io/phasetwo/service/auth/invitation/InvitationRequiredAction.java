@@ -1,8 +1,8 @@
 package io.phasetwo.service.auth.invitation;
 
 import io.phasetwo.service.model.InvitationModel;
-import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -92,7 +92,7 @@ public class InvitationRequiredAction implements RequiredActionProvider {
               // revoke invitation
               i.getOrganization().revokeInvitation(i.getId());
               // todo future tell the inviter they rejected
-           });
+            });
 
     context.success();
   }
@@ -101,16 +101,18 @@ public class InvitationRequiredAction implements RequiredActionProvider {
     // membership
     invitation.getOrganization().grantMembership(user);
     // roles
-    invitation.getRoles().stream().forEach(r -> {
-        OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
-        if (role == null) {
-          log.debugf("No org role found for invitation role %s. Skipping...", r);
-        } else {
-          role.grantRole(user);
-        }
-      });
+    invitation.getRoles().stream()
+        .forEach(
+            r -> {
+              OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
+              if (role == null) {
+                log.debugf("No org role found for invitation role %s. Skipping...", r);
+              } else {
+                role.grantRole(user);
+              }
+            });
   }
-    
+
   @Override
   public void close() {}
 

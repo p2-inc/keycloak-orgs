@@ -51,6 +51,11 @@ public class MembersResource extends OrganizationAdminResource {
 
     log.infof("Remove member %s from %s %s", userId, realm.getName(), organization.getId());
     UserModel member = session.users().getUserById(realm, userId);
+    if (member
+        .getUsername()
+        .equals(OrganizationResourceProviderFactory.getDefaultAdminUsername(organization))) {
+      throw new ForbiddenException("Cannot remove default organization user.");
+    }
     if (member != null && organization.hasMembership(member)) {
       organization.revokeMembership(member);
       adminEvent

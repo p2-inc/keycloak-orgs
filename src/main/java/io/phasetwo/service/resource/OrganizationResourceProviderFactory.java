@@ -218,7 +218,7 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
     }
   }
 
-  private String getDefaultAdminUsername(OrganizationModel org) {
+  public static String getDefaultAdminUsername(OrganizationModel org) {
     return String.format("org-admin-%s", org.getId());
   }
 }

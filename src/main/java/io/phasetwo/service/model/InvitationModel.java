@@ -1,7 +1,7 @@
 package io.phasetwo.service.model;
 
-import java.util.Date;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 import org.keycloak.models.UserModel;
 

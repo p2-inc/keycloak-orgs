@@ -12,7 +12,7 @@ public class InvitationRequest {
   private @Valid String inviterId = null;
   private boolean send = false;
   private @Valid List<String> roles = Lists.newArrayList();
-  
+
   public InvitationRequest email(String email) {
     this.email = email;
     return this;

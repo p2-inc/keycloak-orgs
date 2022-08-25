@@ -188,7 +188,8 @@ public class Invitation {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, email, createdAt, inviterId, organizationId, invitationUrl, teamIds, roles);
+    return Objects.hash(
+        id, email, createdAt, inviterId, organizationId, invitationUrl, teamIds, roles);
   }
 
   @Override
