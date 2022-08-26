@@ -58,7 +58,7 @@ export const Step1: FC<Props> = ({ federationMetadataAddress }) => {
     {
       text: (
         <div>
-          In the <b>Select Data Source</b> step in the ADFS wizard, enter the
+          In the <b>Select Data Source</b> step in the ADFS wizard, enter the{" "}
           <b>Display Name</b> and click <b>Next</b>.
         </div>
       ),

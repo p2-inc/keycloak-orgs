@@ -29,10 +29,10 @@ export const Step3: FC = () => {
     {
       text: (
         <div>
-          In the following <b>Add Transform Claim Rule Wizard</b>, name the
+          In the following <b>Add Transform Claim Rule Wizard</b>, name the{" "}
           <b>Claim rule name</b> “Name ID”. For <b>Incoming claim type</b>,
-          select UPN. For <b>Outgoing claim type</b>, select “Name ID”. For the
-          <b>Outgoing name ID format</b>, select “Persistent Identifier”. Click
+          select UPN. For <b>Outgoing claim type</b>, select “Name ID”. For the{" "}
+          <b>Outgoing name ID format</b>, select “Persistent Identifier”. Click{" "}
           <b>Finish</b> to save and continue.
         </div>
       ),

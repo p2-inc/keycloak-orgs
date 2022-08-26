@@ -28,7 +28,7 @@ export const Step2: FC = () => {
       text: (
         <div>
           In the <b>Finish</b> step in the ADFS wizard, select{" "}
-          <b>Configure claims issuance policy for this application</b> and click
+          <b>Configure claims issuance policy for this application</b> and click{" "}
           <b>Close</b>.
         </div>
       ),
