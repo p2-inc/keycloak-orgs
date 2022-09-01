@@ -13,7 +13,7 @@ import {
   BindConfig,
   ServerConfig,
   GroupConfig,
-} from "./steps";
+} from "./Steps";
 import oktaLogo from "@app/images/okta/okta-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useNavigateToBasePath } from "@app/routes";
