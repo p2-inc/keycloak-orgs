@@ -5,6 +5,19 @@
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
 
+  <parent>
+    <groupId>com.github.xgp</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>0.3</version>
+  </parent>
+  
+  <developers>
+    <developer>
+      <name>Phase Two, Inc.</name>
+      <url>https://github.com/p2-inc</url>
+    </developer>
+  </developers>
+
   <licenses>
     <license>
       <name>GNU Affero General Public License</name>
@@ -21,6 +34,7 @@
     <resteasy.version>3.15.1.Final</resteasy.version>
     <lombok.version>1.18.22</lombok.version>
     <auto-service.version>1.0.1</auto-service.version>
+    <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
   </properties>
 
   <scm>
