@@ -87,7 +87,7 @@ public class OrganizationRoleMapper extends AbstractOIDCProtocolMapper
               org.put("roles", roles);
               claim.put(o.getId(), org);
             });
-    log.infof("created user %s claim %s", user.getUsername(), claim);
+    log.debugf("created user %s claim %s", user.getUsername(), claim);
     return claim;
   }
 
@@ -98,7 +98,7 @@ public class OrganizationRoleMapper extends AbstractOIDCProtocolMapper
       UserSessionModel userSession,
       KeycloakSession keycloakSession,
       ClientSessionContext clientSessionCtx) {
-    log.infof("adding org claim to idToken for %s", userSession.getUser().getUsername());
+    log.debugf("adding org claim to idToken for %s", userSession.getUser().getUsername());
     Map<String, Object> claim =
         getOrganizationRoleClaim(keycloakSession, userSession.getRealm(), userSession.getUser());
     if (claim == null) return;
@@ -112,7 +112,7 @@ public class OrganizationRoleMapper extends AbstractOIDCProtocolMapper
       UserSessionModel userSession,
       KeycloakSession keycloakSession,
       ClientSessionContext clientSessionCtx) {
-    log.infof("adding org claim to accessToken for %s", userSession.getUser().getUsername());
+    log.debugf("adding org claim to accessToken for %s", userSession.getUser().getUsername());
     UserModel user = userSession.getUser();
     Map<String, Object> claim =
         getOrganizationRoleClaim(keycloakSession, userSession.getRealm(), userSession.getUser());

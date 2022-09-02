@@ -180,7 +180,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
 
   @Override
   public void revokeInvitations(String email) {
-    org.getInvitations().removeIf(inv -> inv.getEmail().equals(email));
+    org.getInvitations().removeIf(inv -> inv.getEmail().equals(email.toLowerCase()));
   }
 
   @Override
@@ -188,7 +188,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
     InvitationEntity inv = new InvitationEntity();
     inv.setId(KeycloakModelUtils.generateId());
     inv.setOrganization(org);
-    inv.setEmail(email);
+    inv.setEmail(email.toLowerCase());
     inv.setInviterId(inviter.getId());
     em.persist(inv);
     org.getInvitations().add(inv);
