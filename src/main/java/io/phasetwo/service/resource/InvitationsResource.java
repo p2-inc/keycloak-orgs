@@ -54,7 +54,7 @@ public class InvitationsResource extends OrganizationAdminResource {
   public Response createInvitation(@Valid InvitationRequest invitation) {
     String email = invitation.getEmail();
     try {
-      log.infof("Create invitation for %s %s %s", email, realm.getName(), organization.getId());
+      log.debugf("Create invitation for %s %s %s", email, realm.getName(), organization.getId());
       canManage();
 
       if (email == null || !isValidEmail(email)) {
@@ -157,7 +157,7 @@ public class InvitationsResource extends OrganizationAdminResource {
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults) {
-    log.infof("Get invitations for %s %s", realm.getName(), organization.getId());
+    log.debugf("Get invitations for %s %s", realm.getName(), organization.getId());
     Optional<String> search = Optional.ofNullable(searchQuery);
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;

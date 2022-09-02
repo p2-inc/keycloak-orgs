@@ -16,7 +16,7 @@ public class UserResourceProviderFactory implements RealmResourceProviderFactory
 
   @Override
   public RealmResourceProvider create(KeycloakSession session) {
-    log.info("UserResourceProviderFactory::create");
+    log.debug("UserResourceProviderFactory::create");
     return new UserResourceProvider(session);
   }
 

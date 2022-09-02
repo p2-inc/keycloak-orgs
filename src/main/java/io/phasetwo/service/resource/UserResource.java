@@ -29,7 +29,7 @@ public class UserResource extends OrganizationAdminResource {
   @Path("/{userId}/orgs")
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<Organization> listUserOrgs(@PathParam("userId") String userId) {
-    log.infov("Get org memberships for %s %s", realm.getName(), userId);
+    log.debugv("Get org memberships for %s %s", realm.getName(), userId);
 
     UserModel user = session.users().getUserById(realm, userId);
     return orgs.getUserOrganizationsStream(realm, user)
@@ -42,7 +42,7 @@ public class UserResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<OrganizationRole> listUserOrgRoles(
       @PathParam("userId") String userId, @PathParam("orgId") String orgId) {
-    log.infov("Get org roles for %s %s %s", realm.getName(), userId, orgId);
+    log.debugv("Get org roles for %s %s %s", realm.getName(), userId, orgId);
 
     UserModel user = session.users().getUserById(realm, userId);
     OrganizationModel org = orgs.getOrganizationById(realm, orgId);
@@ -66,7 +66,7 @@ public class UserResource extends OrganizationAdminResource {
     @Path("/{userId}/teams")
     @Produces(MediaType.APPLICATION_JSON)
     public Response listUserTeams(@PathParam("userId") String userId) {
-      log.infov("Get team memberships for %s %s", realm.getName(), userId);
+      log.debugv("Get team memberships for %s %s", realm.getName(), userId);
       Teams teams =
           mgr.getTeamsByUserId(userId).stream()
               .map(e -> convertTeamEntityToTeam(e))

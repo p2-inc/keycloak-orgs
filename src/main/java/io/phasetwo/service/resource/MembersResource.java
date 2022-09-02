@@ -34,7 +34,7 @@ public class MembersResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<UserRepresentation> getMembers(
       @QueryParam("first") Integer firstResult, @QueryParam("max") Integer maxResults) {
-    log.infof("Get members for %s %s", realm.getName(), organization.getId());
+    log.debugf("Get members for %s %s", realm.getName(), organization.getId());
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     return organization
@@ -49,7 +49,7 @@ public class MembersResource extends OrganizationAdminResource {
   public Response removeMember(@PathParam("userId") String userId) {
     canManage();
 
-    log.infof("Remove member %s from %s %s", userId, realm.getName(), organization.getId());
+    log.debugf("Remove member %s from %s %s", userId, realm.getName(), organization.getId());
     UserModel member = session.users().getUserById(realm, userId);
     if (member
         .getUsername()
@@ -73,7 +73,7 @@ public class MembersResource extends OrganizationAdminResource {
   @GET
   @Path("{userId}")
   public Response getMember(@PathParam("userId") String userId) {
-    log.infof("Check membership %s for %s %s", userId, realm.getName(), organization.getId());
+    log.debugf("Check membership %s for %s %s", userId, realm.getName(), organization.getId());
     UserModel member = session.users().getUserById(realm, userId);
     if (member != null && organization.hasMembership(member)) {
       return Response.noContent().build();
@@ -86,7 +86,7 @@ public class MembersResource extends OrganizationAdminResource {
   @Path("{userId}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response addMember(@PathParam("userId") String userId) {
-    log.infof("Add %s as member for %s %s", userId, realm.getName(), organization.getId());
+    log.debugf("Add %s as member for %s %s", userId, realm.getName(), organization.getId());
     canManage();
 
     UserModel member = session.users().getUserById(realm, userId);

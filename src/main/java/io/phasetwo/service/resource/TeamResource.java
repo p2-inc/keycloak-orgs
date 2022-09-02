@@ -26,7 +26,7 @@ public class TeamResource extends OrganizationAdminResource {
     @DELETE
     @Path("/{teamId}")
     public Response deleteTeam(@PathParam("teamId") String teamId) {
-      log.infov("Delete team for %s %s", realm.getName(), teamId);
+      log.debugv("Delete team for %s %s", realm.getName(), teamId);
 
       TeamEntity removed = mgr.removeTeamById(teamId);
 
@@ -44,7 +44,7 @@ public class TeamResource extends OrganizationAdminResource {
     @Path("/{teamId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTeam(@PathParam("teamId") String teamId) {
-      log.infov("Get team for %s %s", realm.getName(), teamId);
+      log.debugv("Get team for %s %s", realm.getName(), teamId);
 
       return Response.ok().entity(convertTeamEntityToTeam(mgr.getTeamById(teamId))).build();
     }
@@ -56,7 +56,7 @@ public class TeamResource extends OrganizationAdminResource {
         @PathParam("teamId") String teamId,
         @QueryParam("first") Integer firstResult,
         @QueryParam("max") Integer maxResults) {
-      log.infov("Get members for %s %s", realm.getName(), teamId);
+      log.debugv("Get members for %s %s", realm.getName(), teamId);
 
       firstResult = firstResult != null ? firstResult : -1;
       maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
@@ -74,7 +74,7 @@ public class TeamResource extends OrganizationAdminResource {
     @Path("/{teamId}/members/{userId}")
     public Response removeTeamMember(
         @PathParam("teamId") String teamId, @PathParam("userId") String userId) {
-      log.infov("Remove member %s from %s %s", userId, realm.getName(), teamId);
+      log.debugv("Remove member %s from %s %s", userId, realm.getName(), teamId);
 
       int removed = mgr.removeTeamMemberById(teamId, userId);
 
@@ -95,7 +95,7 @@ public class TeamResource extends OrganizationAdminResource {
     @Path("/{teamId}/members/{userId}")
     public Response getTeamMember(
         @PathParam("teamId") String teamId, @PathParam("userId") String userId) {
-      log.infov("Check membership %s for %s %s", userId, realm.getName(), teamId);
+      log.debugv("Check membership %s for %s %s", userId, realm.getName(), teamId);
       if (mgr.getTeamMemberById(teamId, userId) != null) return Response.status(204).build();
       else return Response.status(404).build();
     }
@@ -105,7 +105,7 @@ public class TeamResource extends OrganizationAdminResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addTeamMember(
         @PathParam("teamId") String teamId, @PathParam("userId") String userId) {
-      log.infov("Add %s as member for %s %s", userId, realm.getName(), teamId);
+      log.debugv("Add %s as member for %s %s", userId, realm.getName(), teamId);
 
       if (mgr.addMemberToTeamById(teamId, userId) > 0) {
         adminEvent
@@ -125,7 +125,7 @@ public class TeamResource extends OrganizationAdminResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateTeam(@Valid Team body, @PathParam("teamId") String teamId) {
-      log.infof("Update team for %s %s", realm.getName(), teamId);
+      log.debugf("Update team for %s %s", realm.getName(), teamId);
 
       TeamEntity e = mgr.updateTeam(teamId, body);
       Team o = convertTeamEntityToTeam(e);

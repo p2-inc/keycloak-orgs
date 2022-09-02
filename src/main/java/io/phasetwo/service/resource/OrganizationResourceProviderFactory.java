@@ -56,22 +56,22 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
     factory.register(
         (ProviderEvent event) -> {
           if (event instanceof RealmModel.RealmPostCreateEvent) {
-            log.info("RealmPostCreateEvent");
+            log.debug("RealmPostCreateEvent");
             realmPostCreate((RealmModel.RealmPostCreateEvent) event);
           } else if (event instanceof PostMigrationEvent) {
-            log.info("PostMigrationEvent");
+            log.debug("PostMigrationEvent");
             KeycloakModelUtils.runJobInTransaction(factory, this::initRoles);
           } else if (event instanceof RealmModel.RealmRemovedEvent) {
-            log.info("RealmRemovedEvent");
+            log.debug("RealmRemovedEvent");
             realmRemoved((RealmModel.RealmRemovedEvent) event);
           } else if (event instanceof UserModel.UserRemovedEvent) {
-            log.info("UserRemovedEvent");
+            log.debug("UserRemovedEvent");
             userRemoved((UserModel.UserRemovedEvent) event);
           } else if (event instanceof OrganizationModel.OrganizationCreationEvent) {
-            log.info("OrganizationCreationEvent");
+            log.debug("OrganizationCreationEvent");
             organizationCreation((OrganizationModel.OrganizationCreationEvent) event);
           } else if (event instanceof OrganizationModel.OrganizationRemovedEvent) {
-            log.info("OrganizationRemovedEvent");
+            log.debug("OrganizationRemovedEvent");
             organizationRemoved((OrganizationModel.OrganizationRemovedEvent) event);
           }
         });
@@ -210,7 +210,8 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
             .getUserByUsername(event.getRealm(), getDefaultAdminUsername(event.getOrganization()));
     if (user != null) {
       boolean removed = event.getKeycloakSession().users().removeUser(event.getRealm(), user);
-      log.infof("User removed on deletion of org %s? %b", event.getOrganization().getId(), removed);
+      log.debugf(
+          "User removed on deletion of org %s? %b", event.getOrganization().getId(), removed);
     } else {
       log.warnf(
           "Default org admin %s for org %s doesn't exist. Skipping deletion on org removal.",

@@ -274,13 +274,13 @@ public class OrganizationAdminAuth extends AdminAuth {
   private boolean hasOrgRole(OrganizationModel org, String roleName) {
     /*
     if (!hasOrgRoleInToken(org, roleName)) {
-      log.infof("%s not in token %s", roleName, getToken().getOtherClaims());
+      log.debugf("%s not in token %s", roleName, getToken().getOtherClaims());
       return false;
     }
     */
     OrganizationRoleModel role = org.getRoleByName(roleName);
     boolean has = (role != null && role.hasRole(getUser()));
-    log.infof("%s has role %s? %b", getUser().getId(), roleName, has);
+    log.debugf("%s has role %s? %b", getUser().getId(), roleName, has);
     return has;
   }
 

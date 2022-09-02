@@ -88,7 +88,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   @Path("")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getOrg() {
-    log.infof("Get org for %s %s", realm.getName(), orgId);
+    log.debugf("Get org for %s %s", realm.getName(), orgId);
     return Response.ok().entity(convertOrganizationModelToOrganization(organization)).build();
   }
 
@@ -96,7 +96,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   @Path("")
   @Produces(MediaType.APPLICATION_JSON)
   public Response deleteOrg() {
-    log.infof("Delete org for %s %s", realm.getName(), orgId);
+    log.debugf("Delete org for %s %s", realm.getName(), orgId);
 
     auth.requireManageOrgs();
 
@@ -115,7 +115,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response updateOrg(@Valid Organization body) {
-    log.infof("Update org for %s", realm.getName());
+    log.debugf("Update org for %s", realm.getName());
 
     if (auth.hasManageOrgs() || auth.hasOrgManageOrg(organization)) {
 
@@ -181,7 +181,7 @@ public class OrganizationResource extends OrganizationAdminResource {
       URI base = "".equals(baseUri) ? uriInfo.getBaseUri() : newUri(baseUri);
       String redirectUri =
           Urls.realmBase(base).path(realm.getName()).path("wizard").build().toString();
-      log.infof("%s redirectUri %s", IDP_WIZARD_CLIENT, redirectUri);
+      log.debugf("%s redirectUri %s", IDP_WIZARD_CLIENT, redirectUri);
 
       UserModel user = null;
       if (userId != null && !"".equals(userId)) {
@@ -196,7 +196,7 @@ public class OrganizationResource extends OrganizationAdminResource {
       if (user == null) {
         throw new BadRequestException(String.format("User %s not found", userId));
       }
-      log.infof("Using user %s (%s) for portal-link", user.getUsername(), user.getId());
+      log.debugf("Using user %s (%s) for portal-link", user.getUsername(), user.getId());
 
       // check membership and roles
       if (!organization.hasMembership(user)) {
