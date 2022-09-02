@@ -121,13 +121,10 @@ public class InvitationsResource extends OrganizationAdminResource {
       String email, KeycloakSession session, RealmModel realm, UserModel inviter) throws Exception {
     EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
 
-    // protected void send(String subjectFormatKey, List<Object> subjectAttributes, String
-    // bodyTemplate, Map<String, Object> bodyAttributes, String address) throws EmailException {
     Method sendMethod =
         FreeMarkerEmailTemplateProvider.class.getDeclaredMethod(
             "send", String.class, List.class, String.class, Map.class, String.class);
     sendMethod.setAccessible(true);
-    ;
 
     String realmName =
         Strings.isNullOrEmpty(realm.getDisplayName()) ? realm.getName() : realm.getDisplayName();
@@ -146,6 +143,8 @@ public class InvitationsResource extends OrganizationAdminResource {
     bodyAttributes.put("orgName", orgName);
     bodyAttributes.put("inviterName", inviterName);
     // bodyAttributes.put("link", link);
+
+    emailTemplateProvider.setRealm(realm).setUser(user).setAttribute("realmName", realmName);
 
     sendMethod.invoke(
         emailTemplateProvider, subjectKey, subjectAttributes, templateName, bodyAttributes, email);
