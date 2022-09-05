@@ -49,7 +49,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults) {
-    log.debugf("Get orgs for %s", realm.getName());
+    log.infof("Get orgs for %s", realm.getName());
     log.debugf("listOrgs %s %d %d", searchQuery, firstResult, maxResults);
     Optional<String> search = Optional.ofNullable(searchQuery);
     firstResult = firstResult != null ? firstResult : 0;
@@ -64,7 +64,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response createOrg(@Valid Organization body) {
-    log.debugf("Create org for %s", realm.getName());
+    log.infof("Create org for %s", realm.getName());
     if (!(auth.hasCreateOrg() || (auth.hasViewOrgs() && auth.hasManageOrgs()))) {
       throw new NotAuthorizedException("Insufficient permission to create organization.");
     }

@@ -53,24 +53,25 @@ public class InvitationsResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response createInvitation(@Valid InvitationRequest invitation) {
     String email = invitation.getEmail();
+    log.debugf("Create invitation for %s %s %s", email, realm.getName(), organization.getId());
+    canManage();
+
+    if (email == null || !isValidEmail(email)) {
+      throw new BadRequestException("Invalid email: " + email);
+    }
+    if (!canSetRoles(invitation.getRoles())) {
+      throw new BadRequestException("Unknown role in list.");
+    }
+
+    if (organization.getInvitationsByEmail(email).count() > 0) {
+      log.infof(
+          "invitation for %s %s %s already exists. .",
+          email, realm.getName(), organization.getId());
+      throw new ClientErrorException(
+          String.format("Invitation for %s already exists.", email), Response.Status.CONFLICT);
+    }
+
     try {
-      log.debugf("Create invitation for %s %s %s", email, realm.getName(), organization.getId());
-      canManage();
-
-      if (email == null || !isValidEmail(email)) {
-        throw new BadRequestException("Invalid email: " + email);
-      }
-      if (!canSetRoles(invitation.getRoles())) {
-        throw new BadRequestException("Unknown role in list.");
-      }
-
-      if (organization.getInvitationsByEmail(email).count() > 0) {
-        log.infof(
-            "invitation for %s %s %s already exists. revoking and recreating.",
-            email, realm.getName(), organization.getId());
-        organization.revokeInvitations(email);
-      }
-
       InvitationModel i = organization.addInvitation(email, auth.getUser());
       i.setRoles(invitation.getRoles());
       Invitation o = convertInvitationModelToInvitation(i);

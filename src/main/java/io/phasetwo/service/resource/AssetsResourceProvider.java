@@ -40,23 +40,25 @@ public class AssetsResourceProvider implements RealmResourceProvider {
   @Produces("text/css")
   public Response cssLogin(@Context HttpHeaders headers, @Context UriInfo uriInfo)
       throws IOException {
-    StringBuilder o = new StringBuilder("/* login css */\n");
-    o.append(":root {\n");
-    session
-        .getContext()
-        .getRealm()
-        .getAttributes()
-        .forEach(
-            (k, v) -> {
-              if (k.startsWith(ASSETS_LOGIN_CSS_PREFIX)) {
-                String name = k.substring(ASSETS_LOGIN_CSS_PREFIX.length() + 1);
-                o.append("  --").append(name).append(": ").append(v).append(";\n");
-              }
-            });
-    o.append("}\n");
-
-    InputStream resource =
-        CharSource.wrap(o.toString()).asByteSource(StandardCharsets.UTF_8).openStream();
+    String css = session.getContext().getRealm().getAttribute(ASSETS_LOGIN_CSS_PREFIX);
+    if (css == null) {
+      StringBuilder o = new StringBuilder("/* login css */\n");
+      o.append(":root {\n");
+      session
+          .getContext()
+          .getRealm()
+          .getAttributes()
+          .forEach(
+              (k, v) -> {
+                if (k.startsWith(ASSETS_LOGIN_CSS_PREFIX)) {
+                  String name = k.substring(ASSETS_LOGIN_CSS_PREFIX.length() + 1);
+                  o.append("  --").append(name).append(": ").append(v).append(";\n");
+                }
+              });
+      o.append("}\n");
+      css = o.toString();
+    }
+    InputStream resource = CharSource.wrap(css).asByteSource(StandardCharsets.UTF_8).openStream();
     String mimeType = "text/css";
     return null == resource
         ? Response.status(Response.Status.NOT_FOUND).build()
