@@ -80,7 +80,17 @@ public class OrganizationResource extends OrganizationAdminResource {
       return setupResource(new MembersResource(realm, organization));
     } else {
       throw new NotAuthorizedException(
-          String.format("Insufficient permission to access member for %s", organization.getId()));
+          String.format("Insufficient permission to access members for %s", organization.getId()));
+    }
+  }
+
+  @Path("domains")
+  public DomainsResource domains() {
+    if (auth.hasViewOrgs() || auth.hasOrgViewOrg(organization)) {
+      return setupResource(new DomainsResource(realm, organization));
+    } else {
+      throw new NotAuthorizedException(
+          String.format("Insufficient permission to access domains for %s", organization.getId()));
     }
   }
 
@@ -163,6 +173,8 @@ public class OrganizationResource extends OrganizationAdminResource {
   public Response getPortalLink(
       @DefaultValue("") @FormParam("userId") String userId,
       @DefaultValue("") @FormParam("baseUri") String baseUri) {
+    log.infof("requesting portal-link for user %s, org %s", userId, organization.getId());
+
     // check for existence of idp-wizard client and wizard theme
     ClientModel idpWizardClient = session.clients().getClientByClientId(realm, IDP_WIZARD_CLIENT);
     Theme wizardTheme = getTheme(WIZARD_THEME);
@@ -188,6 +200,12 @@ public class OrganizationResource extends OrganizationAdminResource {
         user = session.users().getUserById(realm, userId);
       }
       if (user == null) {
+        // auth'd user can't grant default org-admin unless they have all roles
+        if (!auth.hasOrgAll(organization)) {
+          throw new NotAuthorizedException(
+              String.format(
+                  "Insufficient permission to create portal link for %s", organization.getId()));
+        }
         user =
             session
                 .users()

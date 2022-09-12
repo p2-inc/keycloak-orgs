@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.phasetwo.service.KeycloakSuite;
+import io.phasetwo.service.representation.Domain;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.InvitationRequest;
 import io.phasetwo.service.representation.Organization;
@@ -46,6 +47,68 @@ public class OrganizationResourceTest {
       o.append("/").append(segment);
     }
     return String.format("%s/realms/%s/orgs%s", server.getAuthUrl(), realm, o.toString());
+  }
+
+  @Test
+  public void testGetDomains() throws Exception {
+    Keycloak keycloak = server.client();
+    SimpleHttp.Response response = null;
+
+    Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
+    String id = createOrg(keycloak, "master", rep);
+
+    response =
+        SimpleHttp.doGet(url("master", urlencode(id), "domains"), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .asResponse();
+    assertThat(response.getStatus(), is(200));
+    List<Domain> domains = response.asJson(new TypeReference<List<Domain>>() {});
+    assertNotNull(domains);
+    assertThat(domains.size(), is(1));
+    Domain domain = domains.get(0);
+    assertThat(domain.getDomainName(), is("example.com"));
+    assertFalse(domain.isVerified());
+    assertNotNull(domain.getRecordKey());
+    assertNotNull(domain.getRecordValue());
+    log.infof(
+        "domain %s %s %s", domain.getDomainName(), domain.getRecordKey(), domain.getRecordValue());
+
+    // update
+    rep.domains(ImmutableSet.of("foo.com", "bar.net"));
+    response =
+        SimpleHttp.doPut(url("master", urlencode(id)), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(rep)
+            .asResponse();
+    assertThat(response.getStatus(), is(204));
+
+    response =
+        SimpleHttp.doGet(url("master", urlencode(id), "domains"), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .asResponse();
+    assertThat(response.getStatus(), is(200));
+    domains = response.asJson(new TypeReference<List<Domain>>() {});
+    assertNotNull(domains);
+    assertThat(domains.size(), is(2));
+    for (Domain d : domains) {
+      assertTrue(d.getDomainName().equals("foo.com") || d.getDomainName().equals("bar.net"));
+      assertFalse(d.isVerified());
+      assertNotNull(d.getRecordKey());
+      assertNotNull(d.getRecordValue());
+      log.infof("domain %s %s %s", d.getDomainName(), d.getRecordKey(), d.getRecordValue());
+    }
+
+    // verify
+    response =
+        SimpleHttp.doPost(
+                url("master", urlencode(id), "domains", urlencode("foo.com"), "verify"), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .param("foo", "bar")
+            .asResponse();
+    assertThat(response.getStatus(), is(202));
+
+    // delete org
+    deleteOrg(keycloak, "master", id);
   }
 
   @Test

@@ -253,6 +253,43 @@ public class OrganizationAdminAuth extends AdminAuth {
     return hasOrgRole(org, ORG_ROLE_MANAGE_IDENTITY_PROVIDERS);
   }
 
+  /**
+   * @param org The selected organization
+   * @return true if the logged-in user has all default org roles *IN* the specified org
+   */
+  boolean hasOrgAll(OrganizationModel org) {
+    for (String role : DEFAULT_ORG_ROLES) {
+      if (!hasOrgRole(org, role)) return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param org The selected organization
+   * @return true if the logged-in user has all default org view roles *IN* the specified org
+   */
+  boolean hasOrgViewAll(OrganizationModel org) {
+    for (String role : DEFAULT_ORG_ROLES) {
+      if (role.startsWith("view")) {
+        if (!hasOrgRole(org, role)) return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @param org The selected organization
+   * @return true if the logged-in user has all default org manage roles *IN* the specified org
+   */
+  boolean hasOrgManageAll(OrganizationModel org) {
+    for (String role : DEFAULT_ORG_ROLES) {
+      if (role.startsWith("manage")) {
+        if (!hasOrgRole(org, role)) return false;
+      }
+    }
+    return true;
+  }
+
   static String ORGANIZATIONS_CLAIM = "organizations";
 
   private List<String> getOrganizationRoles(OrganizationModel org) {

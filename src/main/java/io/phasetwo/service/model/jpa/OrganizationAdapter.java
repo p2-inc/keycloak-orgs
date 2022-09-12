@@ -1,8 +1,10 @@
 package io.phasetwo.service.model.jpa;
 
+import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.model.jpa.entity.DomainEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
@@ -11,8 +13,10 @@ import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -67,12 +71,38 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
 
   @Override
   public Set<String> getDomains() {
-    return org.getDomains();
+    return org.getDomains().stream().map(DomainEntity::getDomain).collect(Collectors.toSet());
   }
 
   @Override
   public void setDomains(Set<String> domains) {
-    org.setDomains(domains);
+    //  org.setDomains(domains);
+    Set<String> lower = domains.stream().map(d -> d.toLowerCase()).collect(Collectors.toSet());
+    org.getDomains().removeIf(e -> !lower.contains(e.getDomain()));
+    lower.removeIf(d -> org.getDomains().stream().filter(e -> d.equals(e.getDomain())).count() > 0);
+    lower.forEach(
+        d -> {
+          DomainEntity de = new DomainEntity();
+          de.setId(KeycloakModelUtils.generateId());
+          de.setDomain(d);
+          de.setVerified(false);
+          de.setOrganization(org);
+          org.getDomains().add(de);
+        });
+  }
+
+  @Override
+  public DomainModel getDomain(String domainName) {
+    TypedQuery<DomainEntity> query =
+        em.createNamedQuery("getDomainByOrganizationAndDomainName", DomainEntity.class);
+    query.setParameter("organization", org);
+    query.setParameter("search", domainName);
+    query.setMaxResults(1);
+    try {
+      return new DomainAdapter(session, realm, em, query.getSingleResult());
+    } catch (Exception e) {
+    }
+    return null;
   }
 
   @Override

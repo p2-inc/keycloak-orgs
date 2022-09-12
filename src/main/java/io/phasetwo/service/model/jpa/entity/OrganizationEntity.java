@@ -4,8 +4,6 @@ import static io.phasetwo.service.model.jpa.entity.Entities.setCollection;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.*;
 import org.hibernate.annotations.Nationalized;
 
@@ -58,12 +56,12 @@ public class OrganizationEntity {
   @Column(name = "CREATED_BY_USER_ID")
   protected String createdBy;
 
-  @ElementCollection
-  @Column(name = "DOMAIN")
-  @CollectionTable(
-      name = "ORGANIZATION_DOMAIN",
-      joinColumns = {@JoinColumn(name = "ORGANIZATION_ID")})
-  protected Set<String> domains = new HashSet();
+  @OneToMany(
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      mappedBy = "organization")
+  protected Collection<DomainEntity> domains = new ArrayList<DomainEntity>();
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "organization")
   protected Collection<OrganizationAttributeEntity> attributes =
@@ -104,6 +102,14 @@ public class OrganizationEntity {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public Collection<DomainEntity> getDomains() {
+    return domains;
+  }
+
+  public void setDomains(Collection<DomainEntity> domains) {
+    setCollection(domains, this.domains);
   }
 
   public Collection<OrganizationAttributeEntity> getAttributes() {
@@ -184,14 +190,6 @@ public class OrganizationEntity {
 
   public void setCreatedBy(String createdBy) {
     this.createdBy = createdBy;
-  }
-
-  public Set<String> getDomains() {
-    return domains;
-  }
-
-  public void setDomains(Set<String> domains) {
-    this.domains = domains;
   }
 
   @Override

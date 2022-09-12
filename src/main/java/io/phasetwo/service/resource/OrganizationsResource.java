@@ -49,8 +49,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults) {
-    log.infof("Get orgs for %s", realm.getName());
-    log.debugf("listOrgs %s %d %d", searchQuery, firstResult, maxResults);
+    log.debugf("listOrgs %s %s %d %d", realm.getName(), searchQuery, firstResult, maxResults);
     Optional<String> search = Optional.ofNullable(searchQuery);
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;

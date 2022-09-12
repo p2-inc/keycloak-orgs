@@ -27,6 +27,8 @@ public interface OrganizationModel {
 
   void setDomains(Set<String> domain);
 
+  DomainModel getDomain(String name);
+
   String getUrl();
 
   void setUrl(String url);

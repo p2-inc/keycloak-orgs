@@ -9,6 +9,7 @@ public class OrganizationEntityProvider implements JpaEntityProvider {
 
   // remember to also put new entity classes in src/main/resources/META-INF/persistence.xml
   private static Class<?>[] entities = {
+    DomainEntity.class,
     OrganizationEntity.class,
     OrganizationAttributeEntity.class,
     OrganizationMemberEntity.class,
