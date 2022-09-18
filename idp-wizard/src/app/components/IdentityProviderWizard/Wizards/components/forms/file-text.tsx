@@ -81,6 +81,7 @@ export const FileText: FC<Props> = ({
         fieldId="idpMetadata"
         validated={hasError}
         helperTextInvalid={errors.idpMetadata}
+        helperText="Paste IDP Metadata."
       >
         <TextArea
           id="idpMetadata"
@@ -99,7 +100,7 @@ export const FileText: FC<Props> = ({
           isDisabled={isSubmitting || !formActive}
           isLoading={isSubmitting}
         >
-          Validate IDP Metadata
+          Validate
         </Button>
       </ActionGroup>
     </Form>
