@@ -41,7 +41,6 @@ export const OktaWizardSaml: FC = () => {
     protocol: Protocols.SAML,
     preface: "okta-saml",
   });
-  const [metadataUrl, setMetadataUrl] = useState("");
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -75,40 +74,33 @@ export const OktaWizardSaml: FC = () => {
     navigateToBasePath();
   };
 
-  const handleFormSubmit = async ({
-    url,
-  }: {
-    url: string;
-  }): Promise<API_RETURN> => {
-    // make call to submit the URL and verify it
-    setMetadataUrl(url);
+  const handleFormSubmit = async ({ idpMetadata }: { idpMetadata: string }) => {
+    const fd = new FormData();
+    fd.append("providerId", "saml");
+    fd.append("file", idpMetadata);
+
+    console.log(fd);
 
     try {
-      const payload = {
-        fromUrl: url,
-        providerId: "saml",
-        realm: getRealm(),
-      };
+      const resp = await Axios.post(identifierURL, fd);
 
-      const resp = await Axios.post(identifierURL, payload);
+      if (resp.status === 200) {
+        setMetadata({ ...SamlIDPDefaults, ...resp.data });
+        setIsFormValid(true);
 
-      setMetadata({
-        ...SamlIDPDefaults,
-        ...resp,
-      });
-      setIsFormValid(true);
-
-      return {
-        status: API_STATUS.SUCCESS,
-        message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
-      };
-    } catch (e) {
-      setIsFormValid(false);
-      return {
-        status: API_STATUS.ERROR,
-        message: `Configuration validation failed with ${idpCommonName}. Check URL and try again.`,
-      };
+        return {
+          status: API_STATUS.SUCCESS,
+          message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
+        };
+      }
+    } catch (err) {
+      console.log(err);
     }
+
+    return {
+      status: API_STATUS.ERROR,
+      message: `Configuration validation failed with ${idpCommonName}. Check file and try again.`,
+    };
   };
 
   const createIdP = async () => {
@@ -209,7 +201,8 @@ export const OktaWizardSaml: FC = () => {
       id: 6,
       name: "Upload Okta IdP Information",
       component: (
-        <Step6 handleFormSubmit={handleFormSubmit} url={metadataUrl} />
+        // <Step6 handleFormSubmit={handleFormSubmit} url={metadataUrl} />
+        <Step6 handleFormSubmit={handleFormSubmit} />
       ),
       enableNext: isFormValid,
       hideCancelButton: true,

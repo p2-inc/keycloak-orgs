@@ -1,38 +1,33 @@
 import React, { FC } from "react";
-import {
-  InstructionProps,
-  Step,
-  StepImage,
-  UrlCard,
-  UrlForm,
-} from "@wizardComponents";
+import { FileCard, InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/okta/saml";
 
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
+import { FileText } from "@app/components/IdentityProviderWizard/Wizards/components/forms";
 
 type Props = {
-  url: string;
-  handleFormSubmit: ({ url }: { url: string }) => API_RETURN_PROMISE;
+  handleFormSubmit: ({
+    idpMetadata,
+  }: {
+    idpMetadata: string;
+  }) => API_RETURN_PROMISE;
 };
 
-export const Step6: FC<Props> = ({ url, handleFormSubmit }) => {
+export const Step6: FC<Props> = ({ handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
-      text: 'In the "Sign On" section, right click and click to copy the "Identity Provider metadata" link and paste below.',
+      text: 'In the "Sign On" section, click the "View SAML setup instructions" link.',
       component: <StepImage src={Images.OktaSaml8} alt="Step 6.1" />,
     },
     {
-      component: <div>Enter and validate the Identity Provider metadata.</div>,
+      text: 'A second window will open with the SAML setup instructions. Find the "Optional" section with the textbox containing the IDP metadata. Copy the entire contents of the text box and paste it below.',
+      component: <StepImage src={Images.OktaSaml9} alt="Step 6.1" />,
     },
     {
       component: (
-        <UrlCard>
-          <UrlForm
-            url={url}
-            urlLabel="Provider URL"
-            handleFormSubmit={handleFormSubmit}
-          />
-        </UrlCard>
+        <FileCard title="Validate IDP Metadata">
+          <FileText handleFormSubmit={handleFormSubmit} />
+        </FileCard>
       ),
     },
   ];

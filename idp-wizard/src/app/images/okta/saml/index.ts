@@ -7,6 +7,7 @@ import OktaSaml6 from "./okta_saml_6.png";
 import OktaSaml7 from "./okta_saml_7.png";
 import OktaSaml7A from "./okta_saml_7a.png";
 import OktaSaml8 from "./okta_saml_8.png";
+import OktaSaml9 from "./okta_saml_9.png";
 
 export {
   OktaSaml1,
@@ -18,4 +19,5 @@ export {
   OktaSaml7,
   OktaSaml7A,
   OktaSaml8,
+  OktaSaml9,
 };
