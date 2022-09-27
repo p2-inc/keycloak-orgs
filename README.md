@@ -1,3 +1,5 @@
+> :rocket: **Try it for free** in the new Phase Two [keycloak managed service](https://phasetwo.io/dashboard/?utm_source=github&utm_medium=readme&utm_campaign=keycloak-orgs). See the [announcement and demo video](https://phasetwo.io/blog/self-service/) for more information.
+
 # Organizations for Keycloak
 
 *Single realm, multi-tenancy for SaaS apps*
@@ -35,6 +37,10 @@ But each of these approaches had tradeoffs of scale or frailty we found undesira
 - **Memberships** are the relationship of Users to Organizations. Users may be members of multiple Organizations.
 - **Roles** are mechanisms of role-based security specific to an Organization, much like Keycloak Realm Roles and Client Roles. In addition to a set of standard roles related to Organization data visibilty and management, administrators can create Roles unique to an organization. Users who are Members of Organizations can be granted that Organization's Roles.
 - **Invitations** allow Users and non-Users to be invited to join an Organization. Invitations can be created by administrators or Organization members with permission.
+
+## Quick start
+
+The easiest way to get started is our [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags). Documentation and examples for using it are in the [phasetwo-containers](https://github.com/p2-inc/phasetwo-containers) repo. The most recent version of this extension is included.
 
 ## Building
 
