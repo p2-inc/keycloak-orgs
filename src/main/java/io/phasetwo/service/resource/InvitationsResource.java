@@ -35,6 +35,7 @@ import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.resources.admin.AdminRoot;
 
 @JBossLog
@@ -62,7 +63,8 @@ public class InvitationsResource extends OrganizationAdminResource {
     if (!canSetRoles(invitation.getRoles())) {
       throw new BadRequestException("Unknown role in list.");
     }
-
+    email = email.toLowerCase();
+    
     if (organization.getInvitationsByEmail(email).count() > 0) {
       log.infof(
           "invitation for %s %s %s already exists. .",
@@ -71,6 +73,13 @@ public class InvitationsResource extends OrganizationAdminResource {
           String.format("Invitation for %s already exists.", email), Response.Status.CONFLICT);
     }
 
+    UserModel user = KeycloakModelUtils.findUserByNameOrEmail(session, realm, email);
+    if (user != null && organization.hasMembership(user)) {
+      log.infof("%s is already a member of %s", email, organization.getId());
+      throw new ClientErrorException(
+          String.format("%s is already a member of this organization.", email), Response.Status.CONFLICT);
+    }
+    
     try {
       InvitationModel i = organization.addInvitation(email, auth.getUser());
       i.setRoles(invitation.getRoles());

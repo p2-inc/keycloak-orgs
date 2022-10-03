@@ -566,6 +566,14 @@ public class OrganizationResourceTest {
     assertThat(invites.get(0).getEmail(), is("johndoe@example.com"));
     String invId = invites.get(0).getId();
 
+    // try a conflicting invitation
+    response =
+        SimpleHttp.doPost(url("master", urlencode(id), "invitations"), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(inv)
+            .asResponse();
+    assertThat(response.getStatus(), is(409));
+    
     // remove pending invitation
     response =
         SimpleHttp.doDelete(url("master", urlencode(id), "invitations", urlencode(invId)), http)
@@ -573,6 +581,33 @@ public class OrganizationResourceTest {
             .asResponse();
     assertThat(response.getStatus(), is(204));
 
+    // create user and give membership
+    CredentialRepresentation pass = new CredentialRepresentation();
+    pass.setType("password");
+    pass.setValue("pass");
+    pass.setTemporary(false);
+    UserRepresentation user1 = new UserRepresentation();
+    user1.setEnabled(true);
+    user1.setUsername("user1");
+    user1.setEmail("johndoe@example.com");
+    user1.setCredentials(ImmutableList.of(pass));
+    user1 = createUser(keycloak, "master", user1);
+    // grant membership to org
+    response =
+        SimpleHttp.doPut(url("master", urlencode(id), "members", user1.getId()), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json("foo") // hack b/c simplehttp doesn't like body-less puts
+            .asResponse();
+    assertThat(response.getStatus(), is(201));
+
+    // try an invitation to that new user
+    response =
+        SimpleHttp.doPost(url("master", urlencode(id), "invitations"), http)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(inv)
+            .asResponse();
+    assertThat(response.getStatus(), is(409));
+    
     // get invitations
     response =
         SimpleHttp.doGet(url("master", urlencode(id), "invitations"), http)
@@ -582,6 +617,9 @@ public class OrganizationResourceTest {
     invites = response.asJson(new TypeReference<List<Invitation>>() {});
     assertNotNull(invites);
     assertThat(invites.size(), is(0));
+
+    // delete user
+    deleteUser(keycloak, "master", user1.getId());
 
     // delete org
     deleteOrg(keycloak, "master", id);

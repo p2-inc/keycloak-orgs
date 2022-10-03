@@ -104,9 +104,14 @@ public class DomainsResource extends OrganizationAdminResource {
   @Path("{domainName}/verify")
   @Produces(MediaType.APPLICATION_JSON)
   public Response verifyDomain(@PathParam("domainName") String domainName) {
+    log.infof("verifyDomain %s %s", domainName, organization.getId());
     if (auth.hasManageOrgs() || auth.hasOrgManageOrg(organization)) {
+      log.infof("startVerification %s %s", domainName, organization.getId());
       startVerification(lookupDomain(domainName).getDomain());
-      return Response.accepted().entity(lookupDomain(domainName)).build();
+      DomainModel d = lookupDomain(domainName);
+      Domain domain = fromModel(d);
+      log.infof("endVerification %s %s %s", domainName, organization.getId(), domain);
+      return Response.accepted().entity(domain).build();
     } else {
       throw new NotAuthorizedException(
           String.format(
