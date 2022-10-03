@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -100,6 +101,8 @@ public interface OrganizationModel {
 
   OrganizationRoleModel addRole(String name);
 
+  Stream<IdentityProviderModel> getIdentityProvidersStream();
+  
   interface OrganizationEvent extends ProviderEvent {
     OrganizationModel getOrganization();
 

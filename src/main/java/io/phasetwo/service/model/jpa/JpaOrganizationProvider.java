@@ -1,8 +1,10 @@
 package io.phasetwo.service.model.jpa;
 
+import com.google.common.net.InternetDomainName;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.jpa.entity.DomainEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
@@ -63,6 +65,15 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   public Stream<OrganizationModel> getOrganizationsStream(
       RealmModel realm, Integer firstResult, Integer maxResults) {
     return searchForOrganizationByNameStream(realm, "%", firstResult, maxResults);
+  }
+
+  @Override
+  public Stream<OrganizationModel> getOrganizationsStreamForDomain(RealmModel realm, String domain, boolean verified) {
+    domain = InternetDomainName.from(domain).toString();
+    TypedQuery<DomainEntity> query = em.createNamedQuery(verified ? "getVerifiedDomainsByName" : "getDomainsByName", DomainEntity.class);
+    query.setParameter("domain", domain);
+    if (verified) query.setParameter("verified", verified);
+    return query.getResultStream().map(de -> new OrganizationAdapter(session, realm, em, de.getOrganization()));
   }
 
   @Override

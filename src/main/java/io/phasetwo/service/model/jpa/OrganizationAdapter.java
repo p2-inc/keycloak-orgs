@@ -1,5 +1,7 @@
 package io.phasetwo.service.model.jpa;
 
+import static io.phasetwo.service.Orgs.*;
+
 import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
@@ -18,6 +20,7 @@ import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import org.keycloak.common.util.MultivaluedHashMap;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -244,5 +247,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
     em.persist(r);
     org.getRoles().add(r);
     return new OrganizationRoleAdapter(session, realm, em, r);
+  }
+
+  @Override
+  public Stream<IdentityProviderModel> getIdentityProvidersStream() {
+    return getRealm().getIdentityProviders().stream().filter(i -> {
+        Map<String, String> config = i.getConfig();
+        return config != null && config.containsKey(ORG_OWNER_CONFIG_KEY) && getId().equals(config.get(ORG_OWNER_CONFIG_KEY));
+      });
   }
 }

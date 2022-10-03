@@ -1,5 +1,7 @@
 package io.phasetwo.service.auth.action;
 
+import static io.phasetwo.service.Orgs.FIELD_ORG_ID;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.keycloak.authentication.actiontoken.DefaultActionToken;
 
@@ -7,11 +9,9 @@ public class PortalLinkActionToken extends DefaultActionToken {
 
   public static final String TOKEN_TYPE = "org-portal-link";
 
-  public static final String JSON_FIELD_ORG_ID = "org_id";
-
   private static final String JSON_FIELD_REDIRECT_URI = "rdu";
 
-  @JsonProperty(value = JSON_FIELD_ORG_ID)
+  @JsonProperty(value = FIELD_ORG_ID)
   private String orgId;
 
   @JsonProperty(value = JSON_FIELD_REDIRECT_URI)

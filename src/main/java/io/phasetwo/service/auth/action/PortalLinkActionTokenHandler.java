@@ -1,5 +1,7 @@
 package io.phasetwo.service.auth.action;
 
+import static io.phasetwo.service.Orgs.*;
+
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.actiontoken.AbstractActionTokenHandler;
@@ -81,7 +83,7 @@ public class PortalLinkActionTokenHandler
     }
 
     // set the orgId to a user session note
-    authSession.setUserSessionNote(PortalLinkActionToken.JSON_FIELD_ORG_ID, token.getOrgId());
+    authSession.setUserSessionNote(FIELD_ORG_ID, token.getOrgId());
 
     String nextAction =
         AuthenticationManager.nextRequiredAction(

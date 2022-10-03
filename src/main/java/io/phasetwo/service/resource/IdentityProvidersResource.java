@@ -2,6 +2,7 @@ package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
+import static io.phasetwo.service.Orgs.*;
 
 import io.phasetwo.service.model.OrganizationModel;
 import java.io.IOException;
@@ -29,7 +30,6 @@ import org.keycloak.services.resources.admin.AdminRoot;
 @JBossLog
 public class IdentityProvidersResource extends OrganizationAdminResource {
 
-  public static final String ORG_OWNER_CONFIG_KEY = "home.idp.discovery.org";
 
   private final OrganizationModel organization;
 
@@ -68,11 +68,12 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   public static void idpDefaults(
       OrganizationModel organization, IdentityProviderRepresentation representation) {
     // defaults? overrides?
-    //  - firstBrokerLoginFlowAlias
-    //  - postBrokerLoginFlowAlias
     representation.getConfig().put("syncMode", "force");
     representation.getConfig().put("hideOnLoginPage", "true");
     representation.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
+    //  - firstBrokerLoginFlowAlias
+    //  - postBrokerLoginFlowAlias
+    representation.setPostBrokerLoginFlowAlias​(ORG_AUTH_FLOW_ALIAS);
   }
 
   @POST
