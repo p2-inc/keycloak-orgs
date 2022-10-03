@@ -102,7 +102,7 @@ public interface OrganizationModel {
   OrganizationRoleModel addRole(String name);
 
   Stream<IdentityProviderModel> getIdentityProvidersStream();
-  
+
   interface OrganizationEvent extends ProviderEvent {
     OrganizationModel getOrganization();
 

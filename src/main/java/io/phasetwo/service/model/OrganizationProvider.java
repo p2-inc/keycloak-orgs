@@ -19,8 +19,9 @@ public interface OrganizationProvider extends Provider {
     return getOrganizationsStream(realm, null, null);
   }
 
-  Stream<OrganizationModel> getOrganizationsStreamForDomain(RealmModel realm, String domain, boolean verified);
-  
+  Stream<OrganizationModel> getOrganizationsStreamForDomain(
+      RealmModel realm, String domain, boolean verified);
+
   Stream<OrganizationModel> searchForOrganizationByNameStream(
       RealmModel realm, String search, Integer firstResult, Integer maxResults);
 

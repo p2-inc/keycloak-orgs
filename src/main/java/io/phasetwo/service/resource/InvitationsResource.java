@@ -64,7 +64,7 @@ public class InvitationsResource extends OrganizationAdminResource {
       throw new BadRequestException("Unknown role in list.");
     }
     email = email.toLowerCase();
-    
+
     if (organization.getInvitationsByEmail(email).count() > 0) {
       log.infof(
           "invitation for %s %s %s already exists. .",
@@ -77,9 +77,10 @@ public class InvitationsResource extends OrganizationAdminResource {
     if (user != null && organization.hasMembership(user)) {
       log.infof("%s is already a member of %s", email, organization.getId());
       throw new ClientErrorException(
-          String.format("%s is already a member of this organization.", email), Response.Status.CONFLICT);
+          String.format("%s is already a member of this organization.", email),
+          Response.Status.CONFLICT);
     }
-    
+
     try {
       InvitationModel i = organization.addInvitation(email, auth.getUser());
       i.setRoles(invitation.getRoles());

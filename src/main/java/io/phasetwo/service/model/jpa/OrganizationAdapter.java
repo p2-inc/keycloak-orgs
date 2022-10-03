@@ -251,9 +251,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
 
   @Override
   public Stream<IdentityProviderModel> getIdentityProvidersStream() {
-    return getRealm().getIdentityProviders().stream().filter(i -> {
-        Map<String, String> config = i.getConfig();
-        return config != null && config.containsKey(ORG_OWNER_CONFIG_KEY) && getId().equals(config.get(ORG_OWNER_CONFIG_KEY));
-      });
+    return getRealm().getIdentityProviders().stream()
+        .filter(
+            i -> {
+              Map<String, String> config = i.getConfig();
+              return config != null
+                  && config.containsKey(ORG_OWNER_CONFIG_KEY)
+                  && getId().equals(config.get(ORG_OWNER_CONFIG_KEY));
+            });
   }
 }

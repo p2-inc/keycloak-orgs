@@ -68,12 +68,17 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public Stream<OrganizationModel> getOrganizationsStreamForDomain(RealmModel realm, String domain, boolean verified) {
+  public Stream<OrganizationModel> getOrganizationsStreamForDomain(
+      RealmModel realm, String domain, boolean verified) {
     domain = InternetDomainName.from(domain).toString();
-    TypedQuery<DomainEntity> query = em.createNamedQuery(verified ? "getVerifiedDomainsByName" : "getDomainsByName", DomainEntity.class);
+    TypedQuery<DomainEntity> query =
+        em.createNamedQuery(
+            verified ? "getVerifiedDomainsByName" : "getDomainsByName", DomainEntity.class);
     query.setParameter("domain", domain);
     if (verified) query.setParameter("verified", verified);
-    return query.getResultStream().map(de -> new OrganizationAdapter(session, realm, em, de.getOrganization()));
+    return query
+        .getResultStream()
+        .map(de -> new OrganizationAdapter(session, realm, em, de.getOrganization()));
   }
 
   @Override
