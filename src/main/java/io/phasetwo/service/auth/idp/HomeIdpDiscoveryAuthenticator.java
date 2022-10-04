@@ -19,6 +19,7 @@ import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAu
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.FederatedIdentityModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
@@ -42,6 +43,12 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
       challenge(context);
     } else {
       LOG.info("Found attempted username from previous authenticator, skipping login form");
+      if (context.getExecution().getRequirement()
+          == AuthenticationExecutionModel.Requirement.REQUIRED) {
+        action(context);
+      } else {
+        context.attempted();
+      }
     }
   }
 
@@ -72,6 +79,7 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
 
   @Override
   public void action(AuthenticationFlowContext context) {
+    LOG.info("home idp discovery action");
     MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
     if (formData.containsKey("cancel")) {
       context.cancelLogin();
@@ -86,7 +94,13 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     final Optional<IdentityProviderModel> homeIdp = discoverHomeIdp(context, username);
 
     if (homeIdp.isEmpty()) {
-      context.attempted();
+      // context.attempted();
+      if (context.getExecution().getRequirement()
+          == AuthenticationExecutionModel.Requirement.REQUIRED) {
+        context.success();
+      } else {
+        context.attempted();
+      }
     } else {
       new Redirector(context).redirectTo(homeIdp.get());
     }

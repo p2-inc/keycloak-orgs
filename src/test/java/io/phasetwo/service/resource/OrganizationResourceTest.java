@@ -48,7 +48,7 @@ public class OrganizationResourceTest {
     }
     return String.format("%s/realms/%s/orgs%s", server.getAuthUrl(), realm, o.toString());
   }
-
+  
   @Test
   public void testGetDomains() throws Exception {
     Keycloak keycloak = server.client();

@@ -14,6 +14,7 @@ import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.managers.AuthenticationManager;
 
@@ -65,9 +66,13 @@ class UsernameNoteAuthenticator extends AbstractUsernameFormAuthenticator
       return;
     }
 
-    log.infof("username set in auth note %s. set attempted", username);
-    //    context.attempted();
-    context.success();
+    log.infof("username set in auth note %s.", username);
+    if (context.getExecution().getRequirement()
+        == AuthenticationExecutionModel.Requirement.REQUIRED) {
+      context.success();
+    } else {
+      context.attempted();
+    }
   }
 
   private String setUserInContext(
