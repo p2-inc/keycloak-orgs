@@ -56,7 +56,7 @@ public final class HomeIdpDiscoveryAuthenticatorFactory
 
   @Override
   public String getHelpText() {
-    return "Redirects users to their home identity provider";
+    return "Redirects you to your home identity provider";
   }
 
   @Override
