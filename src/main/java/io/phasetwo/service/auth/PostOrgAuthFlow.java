@@ -73,7 +73,7 @@ public class PostOrgAuthFlow {
         executions.stream().filter(e -> providerId.equals(e.getAuthenticator())).count() > 0;
 
     if (!hasExecution) {
-      log.infof("adding execution % for auth flow for %s", providerId, ORG_AUTH_FLOW_ALIAS);
+      log.infof("adding execution %s for auth flow for %s", providerId, ORG_AUTH_FLOW_ALIAS);
       ProviderFactory f =
           session.getKeycloakSessionFactory().getProviderFactory(Authenticator.class, providerId);
       AuthenticationExecutionModel execution = new AuthenticationExecutionModel();
