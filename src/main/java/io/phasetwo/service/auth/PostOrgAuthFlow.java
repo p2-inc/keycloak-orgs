@@ -58,6 +58,7 @@ public class PostOrgAuthFlow {
     RealmModel realm = event.getCreatedRealm();
     AuthenticationFlowModel flow = realm.getFlowByAlias(ORG_AUTH_FLOW_ALIAS);
     if (flow == null) {
+      log.infof("creating built-in auth flow for %s", ORG_AUTH_FLOW_ALIAS);
       flow = new AuthenticationFlowModel();
       flow.setAlias(ORG_AUTH_FLOW_ALIAS);
       flow.setBuiltIn(true);
@@ -72,6 +73,7 @@ public class PostOrgAuthFlow {
         executions.stream().filter(e -> providerId.equals(e.getAuthenticator())).count() > 0;
 
     if (!hasExecution) {
+      log.infof("adding execution % for auth flow for %s", providerId, ORG_AUTH_FLOW_ALIAS);
       ProviderFactory f =
           session.getKeycloakSessionFactory().getProviderFactory(Authenticator.class, providerId);
       AuthenticationExecutionModel execution = new AuthenticationExecutionModel();
