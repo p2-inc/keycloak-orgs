@@ -3,6 +3,7 @@ package io.phasetwo.service.auth.idp;
 
 import static org.keycloak.models.AuthenticationExecutionModel.Requirement.*;
 
+import com.google.auto.service.AutoService;
 import java.util.List;
 import java.util.Map;
 import org.jboss.logging.Logger;
@@ -15,6 +16,7 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
+@AutoService(AuthenticatorFactory.class)
 public final class HomeIdpDiscoveryAuthenticatorFactory
     implements AuthenticatorFactory, ServerInfoAwareProviderFactory {
 
