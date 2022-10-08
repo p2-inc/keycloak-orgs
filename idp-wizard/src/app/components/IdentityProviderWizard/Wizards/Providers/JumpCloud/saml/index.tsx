@@ -125,6 +125,7 @@ export const JumpCloudWizard: FC = () => {
 
       // Map attributes
       await SamlUserAttributeMapper({
+        createIdpUrl,
         alias,
         keys: {
           serverUrl: baseServerRealmsUrl,

@@ -120,6 +120,7 @@ export const OktaWizardSaml: FC = () => {
 
       // Map attributes
       await SamlUserAttributeMapper({
+        createIdpUrl,
         alias,
         keys: {
           serverUrl: baseServerRealmsUrl,

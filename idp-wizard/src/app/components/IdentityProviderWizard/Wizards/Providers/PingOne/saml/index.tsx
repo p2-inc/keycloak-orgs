@@ -128,6 +128,7 @@ export const PingOneWizard: FC = () => {
 
       // Map attributes
       await SamlUserAttributeMapper({
+        createIdpUrl,
         alias,
         keys: {
           serverUrl: baseServerRealmsUrl,

@@ -141,6 +141,7 @@ export const AWSSamlWizard: FC = () => {
       await Axios.post(createIdPUrl, payload);
 
       await SamlUserAttributeMapper({
+        createIdpUrl,
         alias,
         keys: { serverUrl: baseServerRealmsUrl, realm: getRealm()! },
         attributes: [

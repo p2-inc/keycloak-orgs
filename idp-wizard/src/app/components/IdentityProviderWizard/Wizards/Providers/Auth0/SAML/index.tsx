@@ -117,6 +117,7 @@ export const Auth0WizardSAML: FC = () => {
 
       // Map attributes
       await SamlUserAttributeMapper({
+        createIdpUrl,
         alias,
         keys: {
           serverUrl: baseServerRealmsUrl,

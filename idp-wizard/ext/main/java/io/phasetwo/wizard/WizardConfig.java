@@ -3,11 +3,12 @@ package io.phasetwo.wizard;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.net.URI;
 import java.util.Optional;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 
-@JsonPropertyOrder({"apiMode", "enableGroupMapping", "enableLdap", "enableDashboard"})
+@JsonPropertyOrder({"domain", "name", "displayName", "logoUrl", "apiMode", "enableGroupMapping", "enableLdap", "enableDashboard", "emailAsUsername"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WizardConfig {
 
@@ -17,6 +18,7 @@ public class WizardConfig {
 
   public static WizardConfig createFromAttributes(KeycloakSession session) {
     RealmModel realm = session.getContext().getRealm();
+    URI uri = session.getContext().getAuthServerUrl();
     WizardConfig config = new WizardConfig();
     Optional.ofNullable(realm.getAttribute(CONFIG_KEY("apiMode")))
         .ifPresent(a -> config.apiMode(a));
@@ -28,8 +30,25 @@ public class WizardConfig {
         .ifPresent(a -> config.enableDashboard(a.toLowerCase().equals("true")));
     Optional.ofNullable(realm.getAttribute(CONFIG_KEY("emailAsUsername")))
         .ifPresent(a -> config.emailAsUsername(a.toLowerCase().equals("true")));
+    Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.logo.url"))) //from keycloak-orgs override
+        .ifPresent(a -> config.logoUrl(a));
+    Optional.ofNullable(realm.getName()).ifPresent(a -> config.name(a));
+    Optional.ofNullable(realm.getDisplayName()).ifPresent(a -> config.displayName(a));
+    if (uri != null) Optional.ofNullable(uri.getHost()).ifPresent(a -> config.domain(a));
     return config;
   }
+
+  @JsonProperty("domain")
+  private String domain;
+
+  @JsonProperty("name")
+  private String name;
+
+  @JsonProperty("displayName")
+  private String displayName;
+
+  @JsonProperty("logoUrl")
+  private String logoUrl;
 
   @JsonProperty("apiMode")
   private String apiMode = "onprem";
@@ -45,6 +64,66 @@ public class WizardConfig {
 
   @JsonProperty("emailAsUsername")
   private boolean emailAsUsername = false;
+
+  @JsonProperty("domain")
+  public String getDomain() {
+    return domain;
+  }
+
+  @JsonProperty("domain")
+  public void setDomain(String domain) {
+    this.domain = domain;
+  }
+
+  public WizardConfig domain(String domain) {
+    this.domain = domain;
+    return this;
+  }
+
+  @JsonProperty("name")
+  public String getName() {
+    return name;
+  }
+
+  @JsonProperty("name")
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public WizardConfig name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  @JsonProperty("displayName")
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+
+  public WizardConfig displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  @JsonProperty("logoUrl")
+  public String getLogoUrl() {
+    return logoUrl;
+  }
+
+  @JsonProperty("logoUrl")
+  public void setLogoUrl(String logoUrl) {
+    this.logoUrl = logoUrl;
+  }
+
+  public WizardConfig logoUrl(String logoUrl) {
+    this.logoUrl = logoUrl;
+    return this;
+  }
 
   @JsonProperty("apiMode")
   public String getApiMode() {

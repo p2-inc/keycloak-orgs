@@ -183,10 +183,11 @@ export const ADFSWizard: FC = () => {
 
     try {
       // Update the idp
-      await Axios.post(updateIdPUrl, payload);
+      await Axios.put(updateIdPUrl, payload);
 
       // Map attributes
       await SamlUserAttributeMapper({
+        createIdpUrl,
         alias,
         keys: {
           serverUrl: baseServerRealmsUrl,

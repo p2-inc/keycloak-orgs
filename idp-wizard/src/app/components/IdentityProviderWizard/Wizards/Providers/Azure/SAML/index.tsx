@@ -137,6 +137,7 @@ export const AzureWizard: FC = () => {
 
       // Map attributes
       await SamlUserAttributeMapper({
+        createIdpUrl,
         alias,
         keys: {
           serverUrl: baseServerRealmsUrl,

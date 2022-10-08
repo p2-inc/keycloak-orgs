@@ -20,17 +20,18 @@ export const SamlUserAttributeMapper = async ({
   alias,
   attributes,
   keys: { serverUrl, realm },
-  path,
+  createIdpUrl,
 }: Props) => {
   const mapAttribute = async ({
     attributeName,
     friendlyName,
     userAttribute,
   }: AttributesConfig) => {
-    let endpoint = path
-      ? `${serverUrl}/${path}`
+    let endpoint = `${createIdpUrl}/${alias}/mappers`;
+    /*
+      ? `${createIdpUrl}/${alias}/mappers`
       : `${serverUrl}/${realm}/identity-provider/instances/${alias}/mappers`;
-
+    */
     return await Axios.post(endpoint, {
       identityProviderAlias: alias,
       config: {
