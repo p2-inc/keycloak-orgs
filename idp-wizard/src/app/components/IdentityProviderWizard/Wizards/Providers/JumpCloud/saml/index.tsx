@@ -87,7 +87,10 @@ export const JumpCloudWizard: FC = () => {
       const resp = await Axios.post(identifierURL, fd);
 
       if (resp.status === 200) {
-        setMetadata({ ...SamlIDPDefaults, ...resp.data });
+        setMetadata({
+          ...SamlIDPDefaults,
+          ...resp.data,
+        });
         setIsFormValid(true);
 
         return {

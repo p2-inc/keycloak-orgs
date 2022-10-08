@@ -88,8 +88,7 @@ export const Auth0WizardSAML: FC = () => {
         setIsFormValid(true);
         return {
           status: API_STATUS.SUCCESS,
-          message:
-            "Configuration successfully validated with SAML. Continue to next step.",
+          message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
         };
       }
     } catch (err) {
@@ -98,8 +97,7 @@ export const Auth0WizardSAML: FC = () => {
 
     return {
       status: API_STATUS.ERROR,
-      message:
-        "Configuration validation failed with SAML. Check file and try again.",
+      message: `Configuration validation failed with ${idpCommonName}. Check file and try again.`,
     };
   };
 

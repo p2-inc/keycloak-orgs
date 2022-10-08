@@ -146,24 +146,26 @@ export const ADFSWizard: FC = () => {
       };
       const resp = await Axios.post(identifierURL, urlPayload);
 
-      let mdata = {
-        ...SamlIDPDefaults,
-        ...resp,
-      };
+      if (resp.status === 200) {
+        setMetadata({
+          ...SamlIDPDefaults,
+          ...resp.data,
+        });
+        setIsFormValid(true);
 
-      setMetadata(mdata);
-      setIsFormValid(true);
-
-      return {
-        status: API_STATUS.SUCCESS,
-        message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
-      };
+        return {
+          status: API_STATUS.SUCCESS,
+          message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
+        };
+      }
     } catch (e) {
-      return {
-        status: API_STATUS.ERROR,
-        message: `Configuration validation failed with ${idpCommonName}. Check URL and try again.`,
-      };
+      console.log(err);
     }
+
+    return {
+      status: API_STATUS.ERROR,
+      message: `Configuration validation failed with ${idpCommonName}. Check URL and try again.`,
+    };
   };
 
   const validateFn = async () => {

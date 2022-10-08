@@ -95,24 +95,26 @@ export const AWSSamlWizard: FC = () => {
 
       const resp = await Axios.post(identifierURL, payload);
 
-      setMetadata({
-        ...SamlIDPDefaults,
-        ...resp,
-      });
-      setIsFormValid(true);
+      if (resp.status === 200) {
+        setMetadata({
+          ...SamlIDPDefaults,
+          ...resp.data,
+        });
+        setIsFormValid(true);
 
-      return {
-        status: API_STATUS.SUCCESS,
-        message:
-          "Configuration successfully validated with AWS SSO SAML. Continue to next step.",
-      };
-    } catch (e) {
-      return {
-        status: API_STATUS.ERROR,
-        message:
-          "Configuration validation failed with AWS SSO SAML. Check URL and try again.",
-      };
+        return {
+          status: API_STATUS.SUCCESS,
+          message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
+        };
+      }
+    } catch (err) {
+      console.log(err);
     }
+
+    return {
+      status: API_STATUS.ERROR,
+      message: `Configuration validation failed with ${idpCommonName}. Check file and try again.`,
+    };
   };
 
   const createIdP = async () => {

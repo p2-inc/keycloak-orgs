@@ -10,7 +10,7 @@ import {
 import { useTitle } from "react-use";
 
 const AccessDenied: React.FunctionComponent = () => {
-  useTitle("Access Denied | PhaseTwo.io");
+  useTitle("Access Denied | Phase Two");
 
   return (
     <PageSection>

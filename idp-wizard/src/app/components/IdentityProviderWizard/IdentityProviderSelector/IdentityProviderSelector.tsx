@@ -23,7 +23,7 @@ import { useRoleAccess } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const IdentityProviderSelector: FC = () => {
-  useTitle("Select your Identity Provider | PhaseTwo");
+  useTitle("Select your Identity Provider | Phase Two");
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
   const { hasAccess } = useRoleAccess();
