@@ -95,22 +95,25 @@ export const DuoWizard: FC = () => {
       };
       const resp = await Axios.post(identifierURL, payload);
 
-      setMetadata({
-        ...SamlIDPDefaults,
-        ...resp,
-      });
-      setIsFormValid(true);
-
-      return {
-        status: API_STATUS.SUCCESS,
-        message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
-      };
-    } catch (e) {
-      return {
-        status: API_STATUS.ERROR,
-        message: `Configuration validation failed with ${idpCommonName}. Check URL and try again.`,
-      };
+      if (resp.status === 200) {
+        setConfigData({
+          ...SamlIDPDefaults,
+          ...resp.data,
+        });
+        setIsFormValid(true);
+        return {
+          status: API_STATUS.SUCCESS,
+          message: `Configuration successfully validated with ${idpCommonName}. Continue to next step.`,
+        };
+      }
+    } catch (err) {
+      console.log(err);
     }
+
+    return {
+      status: API_STATUS.ERROR,
+      message: `Configuration validation failed with ${idpCommonName}. Check file and try again.`,
+    };
   };
 
   const createDuoSamlIdP = async () => {

@@ -108,26 +108,31 @@ export const GenericOIDC: FC = () => {
 
       const resp = await Axios.post(identifierURL, payload);
 
-      setIsFormValid(true);
-      setMetadata(resp);
-      setFormsActive({
-        ...formsActive,
-        FILE: false,
-        CONFIG: false,
-      });
-
-      return {
-        status: API_STATUS.SUCCESS,
-        message:
-          "Configuration successfully validated with OIDC. Continue to next step.",
-      };
+      if (resp.status === 200) {
+        setMetadata({
+          ...resp.data,
+        });
+        setIsFormValid(true);
+        setFormsActive({
+          ...formsActive,
+          FILE: false,
+          CONFIG: false,
+        });
+        return {
+          status: API_STATUS.SUCCESS,
+          message:
+            "Configuration successfully validated with OIDC. Continue to next step.",
+        };
+      }
     } catch (e) {
-      return {
-        status: API_STATUS.ERROR,
-        message:
-          "Configuration validation failed with OIDC. Check URL and try again.",
-      };
+      console.log(err);
     }
+
+    return {
+      status: API_STATUS.ERROR,
+      message:
+        "Configuration validation failed with OIDC. Check URL and try again.",
+    };
   };
 
   const validateFile = async ({ metadataFile }: { metadataFile: File }) => {

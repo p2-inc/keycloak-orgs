@@ -96,19 +96,22 @@ export const Auth0WizardOIDC: FC = () => {
 
       resp = await Axios.post(identifierURL, payload);
 
-      setIsFormValid(true);
-      setValidationResults(resp);
-      return {
-        status: API_STATUS.SUCCESS,
-        message: "Domain and credentials validated. Please continue.",
-      };
+      if (resp.status === 200) {
+        setIsFormValid(true);
+        setValidationResults(resp.data);
+        return {
+          status: API_STATUS.SUCCESS,
+          message: "Domain and credentials validated. Please continue.",
+        };
+      }
     } catch (e) {
-      setIsFormValid(false);
-      return {
-        status: API_STATUS.ERROR,
-        message: "Domain and credentials invalid, please check and try again.",
-      };
+      console.log(err);
     }
+    setIsFormValid(false);
+    return {
+      status: API_STATUS.ERROR,
+      message: "Domain and credentials invalid, please check and try again.",
+    };
   };
 
   const createIdP = async () => {

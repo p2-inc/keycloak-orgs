@@ -21,7 +21,7 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 import Loading from "@app/utils/Loading";
 
 const Dashboard: React.FunctionComponent = () => {
-  useTitle("Dashboard | PhaseTwo");
+  useTitle("Dashboard | Phase Two");
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
   const { hasAccess, navigateToAccessDenied } = useRoleAccess();

@@ -12,7 +12,7 @@ import { useTitle } from "react-use";
 import { useNavigateToBasePath } from "@app/routes";
 
 const NotFound: React.FunctionComponent = () => {
-  useTitle("404 Page Not Found | PhaseTwo.io");
+  useTitle("404 Page Not Found | Phase Two");
   const navigateToBasePath = useNavigateToBasePath();
 
   return (

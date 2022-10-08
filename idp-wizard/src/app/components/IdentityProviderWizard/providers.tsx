@@ -36,7 +36,7 @@ const Provider = () => {
 
   const providers = [...IdentityProviders, ...GenericIdentityProviders];
 
-  useTitle(`${providers.find((ip) => ip.id === provider)?.name} | PhaseTwo`);
+  useTitle(`${providers.find((ip) => ip.id === provider)?.name} | Phase Two`);
 
   switch (provider) {
     case Providers.OKTA:
