@@ -15,6 +15,10 @@ export const AzureStepTwo: FC<Props> = ({ acsUrl, entityId }) => {
       component: <StepImage src={Images.AzureSaml5} alt="Step 2.1" />,
     },
     {
+      text: 'Click the "Add identifier" and "Add reply URL" links to open the fields for editing.',
+      component: <StepImage src={Images.AzureSaml5a} alt="Step 2.1.a" />,
+    },
+    {
       component: (
         <ClipboardCopyComponent
           label="Copy this identifier"

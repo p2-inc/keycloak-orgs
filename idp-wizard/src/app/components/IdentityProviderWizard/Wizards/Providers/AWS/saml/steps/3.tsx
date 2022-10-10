@@ -32,7 +32,7 @@ export const Step3: FC<Props> = ({ urls: { samlAudience, acsURL } }) => {
       ),
     },
     {
-      text: 'Select the link "If you don\'t have a metadata file, you can manually type your metadata values.". Submit the "ACS URL" and the "SAML audience" values into the fields. Click "Save changes".',
+      text: 'Select the link "If you don\'t have a metadata file, you can manually type your metadata values.". Submit the "ACS URL" and the "SAML audience" values into the fields. Click "Submit".',
       component: <StepImage src={Images.AWS_SSO_SAML_4} alt="Step 3.1" />,
     },
   ];

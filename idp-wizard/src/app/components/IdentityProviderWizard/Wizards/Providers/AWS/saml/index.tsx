@@ -141,8 +141,8 @@ export const AWSSamlWizard: FC = () => {
       await Axios.post(createIdPUrl, payload);
 
       await SamlUserAttributeMapper({
-        createIdpUrl,
         alias,
+        createIdPUrl,
         keys: { serverUrl: baseServerRealmsUrl, realm: getRealm()! },
         attributes: [
           {
@@ -168,6 +168,7 @@ export const AWSSamlWizard: FC = () => {
       setError(false);
       setDisableButton(true);
     } catch (e) {
+      console.error(e);
       setResults(
         "Error creating AWS SAML IdP. Please check values or confirm there is no SAML configured already."
       );

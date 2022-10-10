@@ -13,21 +13,22 @@ type Props = {
     serverUrl: string;
     realm: string;
   };
-  path: string;
+  createIdPUrl: string;
 };
 
 export const SamlUserAttributeMapper = async ({
   alias,
   attributes,
   keys: { serverUrl, realm },
-  createIdpUrl,
+  createIdPUrl,
 }: Props) => {
   const mapAttribute = async ({
     attributeName,
     friendlyName,
     userAttribute,
   }: AttributesConfig) => {
-    let endpoint = `${createIdpUrl}/${alias}/mappers`;
+    let endpoint = `${createIdPUrl}/${alias}/mappers`;
+    console.log("using url for idp mapper create", endpoint);
     /*
       ? `${createIdpUrl}/${alias}/mappers`
       : `${serverUrl}/${realm}/identity-provider/instances/${alias}/mappers`;

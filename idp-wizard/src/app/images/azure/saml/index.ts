@@ -5,6 +5,7 @@ import AzureSaml3 from "./azure-3.png";
 import AzureSaml3a from "./azure-3a.png";
 import AzureSaml4 from "./azure-4.png";
 import AzureSaml5 from "./azure-5.png";
+import AzureSaml5a from "./azure-5a.png";
 import AzureSaml6 from "./azure-6.png";
 import AzureSaml7 from "./azure-7.png";
 import AzureSaml8 from "./azure-8.png";
@@ -21,6 +22,7 @@ export {
   AzureSaml3a,
   AzureSaml4,
   AzureSaml5,
+  AzureSaml5a,
   AzureSaml6,
   AzureSaml7,
   AzureSaml8,

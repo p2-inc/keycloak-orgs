@@ -17,7 +17,7 @@ type Props = {
 export const Step2: FC<Props> = ({ url, handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
-      text: 'Enter a "Display Name" and an optional "Description". Click the "Copy URL" link next to the "AWS SSO SAML metadata file" URL, and paste it into the field below. This will load the AWS SSO configuration.',
+      text: 'Enter a "Display Name" and an optional "Description". Click the "Box" icon next to the "IAM Identity Center SAML metadata fille" URL, and paste it into the field below. This will load the AWS SSO configuration.',
       component: <StepImage src={Images.AWS_SSO_SAML_3} alt="Step 2.1" />,
     },
     {
