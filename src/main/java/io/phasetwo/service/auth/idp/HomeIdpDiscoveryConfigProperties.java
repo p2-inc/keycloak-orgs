@@ -19,6 +19,15 @@ final class HomeIdpDiscoveryConfigProperties {
           false,
           false);
 
+  private static final ProviderConfigProperty REQUIRE_VERIFIED_EMAIL_PROPERTY =
+      new ProviderConfigProperty(
+          HomeIdpDiscoveryConfig.REQUIRE_VERIFIED_EMAIL,
+          "Require a verified email",
+          "Whether a verified email address for a user is required to forward to their identity provider.",
+          BOOLEAN_TYPE,
+          false,
+          false);
+
   private static final ProviderConfigProperty REQUIRE_VERIFIED_DOMAIN_PROPERTY =
       new ProviderConfigProperty(
           HomeIdpDiscoveryConfig.REQUIRE_VERIFIED_DOMAIN,
@@ -40,6 +49,7 @@ final class HomeIdpDiscoveryConfigProperties {
   static final List<ProviderConfigProperty> CONFIG_PROPERTIES =
       ProviderConfigurationBuilder.create()
           .property(USER_ATTRIBUTE_PROPERTY)
+          .property(REQUIRE_VERIFIED_EMAIL_PROPERTY)
           .property(REQUIRE_VERIFIED_DOMAIN_PROPERTY)
           .property(FORWARD_TO_LINKED_IDP_PROPERTY)
           .build();

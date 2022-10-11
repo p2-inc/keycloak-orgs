@@ -29,6 +29,8 @@ public class AssetsResourceProvider implements RealmResourceProvider {
   }
 
   public static final String ASSETS_LOGIN_CSS_PREFIX = "_providerConfig.assets.login.css";
+  public static final String ASSETS_LOGIN_LOGO_URL = "_providerConfig.assets.logo.url";
+  public static final String ASSETS_LOGIN_FAVICON_URL = "_providerConfig.assets.favicon.url";
 
   @Override
   public Object getResource() {

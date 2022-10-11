@@ -174,9 +174,11 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     UserModel user = context.getUser();
     if (user == null) {
       emailDomain = getEmailDomain(username);
+      LOG.infof("emailDomain = %s for unknown user %s", emailDomain.orElse("(unknown)"), username);
     } else {
       HomeIdpDiscoveryConfig config = new HomeIdpDiscoveryConfig(context.getAuthenticatorConfig());
       emailDomain = getEmailDomain(user, config);
+      LOG.infof("emailDomain = %s for known user %s", emailDomain.orElse("(unknown)"), username);
     }
 
     if (emailDomain.isPresent()) {
@@ -275,8 +277,10 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
           "Could not find user attribute %s for user %s", config.userAttribute(), user.getId());
       return Optional.empty();
     }
-    if ("email".equalsIgnoreCase(config.userAttribute()) && !user.isEmailVerified()) {
-      LOG.debugf("Email of user %s not verified", user.getId());
+    if (config.requireVerifiedEmail()
+        && "email".equalsIgnoreCase(config.userAttribute())
+        && !user.isEmailVerified()) {
+      LOG.infof("Email of user %s not verified", user.getId());
       return Optional.empty();
     }
     return getEmailDomain(userAttribute);

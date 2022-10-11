@@ -27,10 +27,18 @@ public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory
   }
 
   @Override
-  public void authenticate(AuthenticationFlowContext context) {}
+  public void authenticate(AuthenticationFlowContext context) {
+    log.info("OrgNoteAuthenticatorFactory.authenticate");
+    setNote(context);
+  }
 
   @Override
   public void action(AuthenticationFlowContext context) {
+    log.info("OrgNoteAuthenticatorFactory.action");
+  }
+
+  private void setNote(AuthenticationFlowContext context) {
+    context.attempted();
     BrokeredIdentityContext brokerContext = PostOrgAuthFlow.getBrokeredIdentityContext(context);
     if (!PostOrgAuthFlow.brokeredIdpEnabled(context, brokerContext)) return;
 

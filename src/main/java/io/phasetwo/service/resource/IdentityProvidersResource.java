@@ -68,7 +68,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   public static void idpDefaults(
       OrganizationModel organization, IdentityProviderRepresentation representation) {
     // defaults? overrides?
-    representation.getConfig().put("syncMode", "force");
+    representation.getConfig().put("syncMode", "FORCE");
     representation.getConfig().put("hideOnLoginPage", "true");
     representation.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
     representation.setPostBrokerLoginFlowAlias​(ORG_AUTH_FLOW_ALIAS);
