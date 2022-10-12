@@ -13,13 +13,12 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
 import org.keycloak.provider.ProviderEvent;
-import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
-import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 
 /** */
 @JBossLog
 @AutoService(AuthenticatorFactory.class)
-public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory {
+public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory
+    implements DefaultAuthenticator {
 
   public static final String PROVIDER_ID = "ext-auth-org-note";
 
@@ -28,28 +27,44 @@ public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory {
   }
 
   @Override
+  public void authenticate(AuthenticationFlowContext context) {
+    log.info("OrgNoteAuthenticatorFactory.authenticate");
+    setNote(context);
+  }
+
+  @Override
+  public void action(AuthenticationFlowContext context) {
+    log.info("OrgNoteAuthenticatorFactory.action");
+  }
+
+  private void setNote(AuthenticationFlowContext context) {
+    PostOrgAuthFlow.setStatus(context);
+    BrokeredIdentityContext brokerContext = PostOrgAuthFlow.getBrokeredIdentityContext(context);
+    if (!PostOrgAuthFlow.brokeredIdpEnabled(context, brokerContext)) return;
+
+    Map<String, String> idpConfig = brokerContext.getIdpConfig().getConfig();
+    if (idpConfig != null && idpConfig.containsKey(ORG_OWNER_CONFIG_KEY)) {
+      log.infof(
+          "Set auth note %s = %s for IdP %s",
+          FIELD_ORG_ID,
+          idpConfig.get(ORG_OWNER_CONFIG_KEY),
+          brokerContext.getIdpConfig().getAlias());
+      context
+          .getAuthenticationSession()
+          .setAuthNote(FIELD_ORG_ID, idpConfig.get(ORG_OWNER_CONFIG_KEY));
+    } else {
+      log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
+    }
+  }
+
+  @Override
+  public boolean requiresUser() {
+    return true;
+  }
+
+  @Override
   public Authenticator create(KeycloakSession session) {
-    return new IdpAuthenticator() {
-      @Override
-      public void authenticateImpl​(AuthenticationFlowContext context, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
-        log.info("OrgNoteAuthenticatorFactory.authenticate");
-        context.attempted();
-        if (!PostOrgAuthFlow.brokeredIdpEnabled(context, brokerContext)) return;
-        Map<String, String> idpConfig = brokerContext.getIdpConfig().getConfig();
-        if (idpConfig != null && idpConfig.containsKey(ORG_OWNER_CONFIG_KEY)) {
-          log.infof(
-              "Set auth note %s = %s for IdP %s",
-              FIELD_ORG_ID,
-              idpConfig.get(ORG_OWNER_CONFIG_KEY),
-              brokerContext.getIdpConfig().getAlias());
-          context
-              .getAuthenticationSession()
-              .setAuthNote(FIELD_ORG_ID, idpConfig.get(ORG_OWNER_CONFIG_KEY));
-        } else {
-          log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
-        }
-      }
-    };
+    return this;
   }
 
   @Override

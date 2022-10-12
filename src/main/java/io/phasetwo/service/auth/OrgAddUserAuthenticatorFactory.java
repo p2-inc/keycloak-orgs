@@ -15,13 +15,12 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
 import org.keycloak.provider.ProviderEvent;
-import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
-import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 
 /** */
 @JBossLog
 @AutoService(AuthenticatorFactory.class)
-public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory {
+public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
+    implements DefaultAuthenticator {
 
   public static final String PROVIDER_ID = "ext-auth-org-add-user";
 
@@ -30,31 +29,46 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory {
   }
 
   @Override
-  public Authenticator create(KeycloakSession session) {
-    return new IdpAuthenticator() {
-      @Override
-      public void authenticateImpl​(AuthenticationFlowContext context, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
-        log.info("OrgAddUserAuthenticatorFactory.authenticate");
-        context.attempted();
-        if (!PostOrgAuthFlow.brokeredIdpEnabled(context, brokerContext)) return;
-        
-        Map<String, String> idpConfig = brokerContext.getIdpConfig().getConfig();
-        if (idpConfig != null && idpConfig.containsKey(ORG_OWNER_CONFIG_KEY)) {
-          OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
-          OrganizationModel org =
-              orgs.getOrganizationById(context.getRealm(), idpConfig.get(ORG_OWNER_CONFIG_KEY));
-          if (!org.hasMembership(context.getUser())) {
-            log.infof(
-                "granting membership to %s for user %s",
-                org.getName(), context.getUser().getUsername());
-            org.grantMembership(context.getUser());
-            // TODO default roles from config??
-          }
-        } else {
-          log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
-        }
+  public void authenticate(AuthenticationFlowContext context) {
+    log.info("OrgAddUserAuthenticatorFactory.authenticate");
+    addUser(context);
+  }
+
+  @Override
+  public void action(AuthenticationFlowContext context) {
+    log.info("OrgAddUserAuthenticatorFactory.authenticate");
+  }
+
+  private void addUser(AuthenticationFlowContext context) {
+    PostOrgAuthFlow.setStatus(context);
+    BrokeredIdentityContext brokerContext = PostOrgAuthFlow.getBrokeredIdentityContext(context);
+    if (!PostOrgAuthFlow.brokeredIdpEnabled(context, brokerContext)) return;
+
+    Map<String, String> idpConfig = brokerContext.getIdpConfig().getConfig();
+    if (idpConfig != null && idpConfig.containsKey(ORG_OWNER_CONFIG_KEY)) {
+      OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
+      OrganizationModel org =
+          orgs.getOrganizationById(context.getRealm(), idpConfig.get(ORG_OWNER_CONFIG_KEY));
+      if (!org.hasMembership(context.getUser())) {
+        log.infof(
+            "granting membership to %s for user %s",
+            org.getName(), context.getUser().getUsername());
+        org.grantMembership(context.getUser());
+        // TODO default roles from config??
       }
-    };
+    } else {
+      log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
+    }
+  }
+
+  @Override
+  public boolean requiresUser() {
+    return true;
+  }
+
+  @Override
+  public Authenticator create(KeycloakSession session) {
+    return this;
   }
 
   @Override

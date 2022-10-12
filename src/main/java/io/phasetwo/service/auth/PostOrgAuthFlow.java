@@ -10,6 +10,7 @@ import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.AuthenticationFlowException;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
+import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.events.Errors;
@@ -24,11 +25,27 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 @JBossLog
 public class PostOrgAuthFlow {
 
+  static void setStatus(AuthenticationFlowContext context) {
+    if (context.getExecution().getRequirement()
+        == AuthenticationExecutionModel.Requirement.REQUIRED) {
+      context.success();
+    } else {
+      context.attempted();
+    }
+  }
+
   static BrokeredIdentityContext getBrokeredIdentityContext(AuthenticationFlowContext context) {
     AuthenticationSessionModel clientSession = context.getAuthenticationSession();
     SerializedBrokeredIdentityContext serializedCtx =
         SerializedBrokeredIdentityContext.readFromAuthenticationSession(
             clientSession, AbstractIdpAuthenticator.BROKERED_CONTEXT_NOTE);
+    if (serializedCtx == null) {
+      // get the identity context for post login flow
+      // https://groups.google.com/g/keycloak-user/c/eiX5dCjN3qc
+      serializedCtx =
+          SerializedBrokeredIdentityContext.readFromAuthenticationSession(
+              clientSession, PostBrokerLoginConstants.PBL_BROKERED_IDENTITY_CONTEXT);
+    }
     if (serializedCtx == null) {
       throw new AuthenticationFlowException(
           "Not found serialized context in clientSession",
@@ -78,7 +95,7 @@ public class PostOrgAuthFlow {
           session.getKeycloakSessionFactory().getProviderFactory(Authenticator.class, providerId);
       AuthenticationExecutionModel execution = new AuthenticationExecutionModel();
       execution.setParentFlow(flow.getId());
-      execution.setRequirement(AuthenticationExecutionModel.Requirement.ALTERNATIVE);
+      execution.setRequirement(AuthenticationExecutionModel.Requirement.REQUIRED);
       execution.setAuthenticatorFlow(false);
       execution.setAuthenticator(providerId);
       execution = realm.addAuthenticatorExecution(execution);
