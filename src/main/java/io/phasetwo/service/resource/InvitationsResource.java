@@ -104,8 +104,9 @@ public class InvitationsResource extends OrganizationAdminResource {
               .build();
 
       if (invitation.isSend()) {
+        // TODO use inviter
         try {
-          sendInvitationEmail(email, session, realm, user);
+          sendInvitationEmail(email, session, realm, auth.getUser());
         } catch (Exception e) {
           log.warn("Unable to send invitation email", e);
         }
@@ -143,7 +144,7 @@ public class InvitationsResource extends OrganizationAdminResource {
         Strings.isNullOrEmpty(organization.getDisplayName())
             ? organization.getName()
             : organization.getDisplayName();
-    String inviterName = inviter.getEmail(); // todo better display name for inviter
+    String inviterName = getInviterName(inviter).orElse("");
 
     String templateName = "invitation-email.ftl";
     String subjectKey = "invitationEmailSubject";
@@ -159,6 +160,30 @@ public class InvitationsResource extends OrganizationAdminResource {
 
     sendMethod.invoke(
         emailTemplateProvider, subjectKey, subjectAttributes, templateName, bodyAttributes, email);
+  }
+
+  Optional<String> getInviterName(UserModel user) {
+    if (user == null) return Optional.empty();
+    StringBuilder o = new StringBuilder();
+    if (!Strings.isNullOrEmpty(user.getFirstName())) {
+      o.append(user.getFirstName());
+    }
+    if (!Strings.isNullOrEmpty(user.getLastName())) {
+      if (o.length() > 0) {
+        o.append(" ");
+      }
+      o.append(user.getLastName());
+    }
+    if (!Strings.isNullOrEmpty(user.getEmail())) {
+      if (o.length() > 0) {
+        o.append(" ").append("(");
+      }
+      o.append(user.getEmail());
+      if (o.length() > user.getEmail().length()) {
+        o.append(")");
+      }
+    }
+    return Optional.ofNullable(Strings.emptyToNull(o.toString()));
   }
 
   @GET

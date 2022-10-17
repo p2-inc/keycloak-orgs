@@ -226,6 +226,7 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         orgs.getOrganizationsStreamForDomain(
                 context.getRealm(), domain, config.requireVerifiedDomain())
             .flatMap(o -> o.getIdentityProvidersStream())
+            .filter(IdentityProviderModel::isEnabled)
             .collect(Collectors.toList());
     LOG.infof("Found %d idpsWithDomain %s", idpsWithDomain.size(), domain);
 
