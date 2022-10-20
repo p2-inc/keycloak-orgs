@@ -17,7 +17,7 @@ import {
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-import { getAlias } from "@wizardServices";
+import { getAlias, SamlUserAttributeMapper } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 
@@ -35,6 +35,7 @@ export const GenericSAML: FC = () => {
     adminLinkSaml: adminLink,
     identifierURL,
     createIdPUrl,
+    baseServerRealmsUrl,
   } = useApi();
 
   const alias = getAlias({
@@ -97,6 +98,34 @@ export const GenericSAML: FC = () => {
 
     try {
       await Axios.post(createIdPUrl, payload);
+
+      await SamlUserAttributeMapper({
+        alias,
+        createIdPUrl,
+        keys: { serverUrl: baseServerRealmsUrl, realm: getRealm()! },
+        attributes: [
+          {
+            attributeName: "username",
+            friendlyName: "username",
+            userAttribute: "username",
+          },
+          {
+            attributeName: "email",
+            friendlyName: "email",
+            userAttribute: "email",
+          },
+          {
+            attributeName: "firstName",
+            friendlyName: "firstName",
+            userAttribute: "firstName",
+          },
+          {
+            attributeName: "lastName",
+            friendlyName: "lastName",
+            userAttribute: "lastName",
+          },
+        ],
+      });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);

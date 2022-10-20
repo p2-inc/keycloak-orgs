@@ -134,7 +134,7 @@ export const DuoWizard: FC = () => {
 
       // Map attributes
       await SamlUserAttributeMapper({
-        createIdpUrl,
+        createIdPUrl,
         alias,
         keys: {
           serverUrl: baseServerRealmsUrl,
