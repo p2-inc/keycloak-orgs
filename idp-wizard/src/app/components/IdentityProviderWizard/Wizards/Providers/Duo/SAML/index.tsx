@@ -20,7 +20,8 @@ import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import {
   getAlias,
   clearAlias,
-  SamlUserAttributeMapper,
+  CreateIdp,
+  SamlAttributeMapper,
   Axios,
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
@@ -96,7 +97,7 @@ export const DuoWizard: FC = () => {
       const resp = await Axios.post(identifierURL, payload);
 
       if (resp.status === 200) {
-        setConfigData({
+        setMetadata({
           ...SamlIDPDefaults,
           ...resp.data,
         });
@@ -130,36 +131,15 @@ export const DuoWizard: FC = () => {
     };
 
     try {
-      await Axios.post(createIdPUrl, payload);
-
-      // Map attributes
-      await SamlUserAttributeMapper({
-        createIdPUrl,
+      await CreateIdp({createIdPUrl, payload});
+      
+      await SamlAttributeMapper({
         alias,
-        keys: {
-          serverUrl: baseServerRealmsUrl,
-          realm: getRealm()!,
-        },
-        attributes: [
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email",
-            friendlyName: "",
-            userAttribute: "email",
-          },
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/firstname",
-            friendlyName: "",
-            userAttribute: "firstName",
-          },
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/lastname",
-            friendlyName: "",
-            userAttribute: "lastName",
-          },
-        ],
+        createIdPUrl,
+        usernameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email", friendlyName: "" }, //using email for username
+        emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email", friendlyName: "" },
+        firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/firstname", friendlyName: "" },
+        lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/lastname", friendlyName: "" },
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

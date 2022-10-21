@@ -11,7 +11,7 @@ import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { SamlUserAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
+import { CreateIdp, SamlAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
@@ -121,33 +121,15 @@ export const JumpCloudWizard: FC = () => {
     };
 
     try {
-      await Axios.post(createIdPUrl, payload);
-
-      // Map attributes
-      await SamlUserAttributeMapper({
-        createIdPUrl,
+      await CreateIdp({createIdPUrl, payload});
+      
+      await SamlAttributeMapper({
         alias,
-        keys: {
-          serverUrl: baseServerRealmsUrl,
-          realm: getRealm()!,
-        },
-        attributes: [
-          {
-            attributeName: "firstName",
-            friendlyName: "",
-            userAttribute: "firstName",
-          },
-          {
-            attributeName: "lastName",
-            friendlyName: "",
-            userAttribute: "lastName",
-          },
-          {
-            attributeName: "email",
-            friendlyName: "",
-            userAttribute: "email",
-          },
-        ],
+        createIdPUrl,
+        usernameAttribute: { attributeName: "username", friendlyName: "" },
+        emailAttribute: { attributeName: "email", friendlyName: "" },
+        firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
+        lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

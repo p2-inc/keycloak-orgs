@@ -18,7 +18,8 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useNavigateToBasePath } from "@app/routes";
 import {
   Axios,
-  SamlUserAttributeMapper,
+  CreateIdp,
+  SamlAttributeMapper,
   getAlias,
   clearAlias,
 } from "@wizardServices";
@@ -137,33 +138,15 @@ export const OneLoginWizard: FC = () => {
     };
 
     try {
-      await Axios.post(createIdPUrl, payload);
-
-      // Map attributes
-      await SamlUserAttributeMapper({
-        createIdPUrl,
+      await CreateIdp({createIdPUrl, payload});
+      
+      await SamlAttributeMapper({
         alias,
-        keys: {
-          serverUrl: baseServerRealmsUrl,
-          realm: getRealm()!,
-        },
-        attributes: [
-          {
-            attributeName: "firstName",
-            friendlyName: "",
-            userAttribute: "firstName",
-          },
-          {
-            attributeName: "lastName",
-            friendlyName: "",
-            userAttribute: "lastName",
-          },
-          {
-            attributeName: "email",
-            friendlyName: "",
-            userAttribute: "email",
-          },
-        ],
+        createIdPUrl,
+        usernameAttribute: { attributeName: "username", friendlyName: "" },
+        emailAttribute: { attributeName: "email", friendlyName: "" },
+        firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
+        lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

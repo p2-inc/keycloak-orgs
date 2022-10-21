@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 
-@JsonPropertyOrder({"domain", "name", "displayName", "logoUrl", "apiMode", "enableGroupMapping", "enableLdap", "enableDashboard", "emailAsUsername"})
+@JsonPropertyOrder({"domain", "name", "displayName", "logoUrl", "apiMode", "enableGroupMapping", "enableLdap", "enableDashboard", "emailAsUsername", "trustEmail"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WizardConfig {
 
@@ -30,6 +30,8 @@ public class WizardConfig {
         .ifPresent(a -> config.enableDashboard(a.toLowerCase().equals("true")));
     Optional.ofNullable(realm.getAttribute(CONFIG_KEY("emailAsUsername")))
         .ifPresent(a -> config.emailAsUsername(a.toLowerCase().equals("true")));
+    Optional.ofNullable(realm.getAttribute(CONFIG_KEY("trustEmail")))
+        .ifPresent(a -> config.trustEmail(a.toLowerCase().equals("true")));
     Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.logo.url"))) //from keycloak-orgs override
         .ifPresent(a -> config.logoUrl(a));
     Optional.ofNullable(realm.getName()).ifPresent(a -> config.name(a));
@@ -64,6 +66,9 @@ public class WizardConfig {
 
   @JsonProperty("emailAsUsername")
   private boolean emailAsUsername = false;
+
+  @JsonProperty("trustEmail")
+  private boolean trustEmail = false;
 
   @JsonProperty("domain")
   public String getDomain() {
@@ -197,6 +202,21 @@ public class WizardConfig {
 
   public WizardConfig emailAsUsername(boolean emailAsUsername) {
     this.emailAsUsername = emailAsUsername;
+    return this;
+  }
+
+  @JsonProperty("trustEmail")
+  public boolean getTrustEmail() {
+    return trustEmail;
+  }
+
+  @JsonProperty("trustEmail")
+  public void setTrustEmail(boolean trustEmail) {
+    this.trustEmail = trustEmail;
+  }
+
+  public WizardConfig trustEmail(boolean trustEmail) {
+    this.trustEmail = trustEmail;
     return this;
   }
 }
