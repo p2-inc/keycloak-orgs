@@ -14,11 +14,11 @@ type Props = {
   handleFormSubmit: ({ url }: { url: string }) => API_RETURN_PROMISE;
 };
 
-export const Step4: FC<Props> = ({ url, handleFormSubmit }) => {
+export const Step5: FC<Props> = ({ url, handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
       text: "In the “SSO” section, click to copy the “Issuer URL” and paste below.",
-      component: <StepImage src={Images.OneLogin_SAML_6A} alt="Step 4.1" />,
+      component: <StepImage src={Images.OneLogin_SAML_6A} alt="Step 5.1" />,
     },
     {
       component: (
@@ -35,7 +35,7 @@ export const Step4: FC<Props> = ({ url, handleFormSubmit }) => {
 
   return (
     <Step
-      title="Step 4: Upload OneLogin IdP Information"
+      title="Step 5: Upload OneLogin IdP Information"
       instructionList={instructions}
     />
   );

@@ -133,7 +133,7 @@ export const PingOneWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
-        attributes: [ { userAttribute: "idpUserId", attributeName: "saml_subject", friendlyName: ""} ]
+        attributes: [ { userAttribute: "idpUserId", attributeName: "saml_subject", friendlyName: ""} ],
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
