@@ -7,7 +7,7 @@ import {
 } from "@patternfly/react-core";
 import { PINGONE_LOGO } from "@app/images/pingone";
 import { Header, WizardConfirmation } from "@wizardComponents";
-import { Step1, Step2, Step3, Step4 } from "./steps";
+import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
@@ -133,6 +133,7 @@ export const PingOneWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
+        attributes: [ { userAttribute: "idpUserId", attributeName: "saml_subject", friendlyName: ""} ]
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
@@ -176,11 +177,18 @@ export const PingOneWizard: FC = () => {
     },
     {
       id: 4,
+      name: `Assign Groups`,
+      component: <Step4 />,
+      hideCancelButton: true,
+      enableNext: true,
+      canJumpTo: stepIdReached >= 4,
+    },    {
+      id: 5,
       name: `Upload ${idpCommonName} Information`,
-      component: <Step4 handleFormSubmit={handleFormSubmit} />,
+      component: <Step5 handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       enableNext: isFormValid,
-      canJumpTo: stepIdReached >= 4,
+      canJumpTo: stepIdReached >= 5,
     },
     {
       id: 5,

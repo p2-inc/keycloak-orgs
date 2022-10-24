@@ -6,6 +6,8 @@ import PINGONE_SAML_4 from "./pingone_saml_4.png";
 import PINGONE_SAML_5 from "./pingone_saml_5.png";
 import PINGONE_SAML_6 from "./pingone_saml_6.png";
 import PINGONE_SAML_7 from "./pingone_saml_7.png";
+import PINGONE_SAML_8 from "./pingone_saml_8.png";
+import PINGONE_SAML_9 from "./pingone_saml_9.png";
 
 export {
   PINGONE_LOGO,
@@ -16,4 +18,6 @@ export {
   PINGONE_SAML_5,
   PINGONE_SAML_6,
   PINGONE_SAML_7,
+  PINGONE_SAML_8,
+  PINGONE_SAML_9,
 };
