@@ -1,41 +1,18 @@
 import React, { FC } from "react";
-import {
-  InstructionProps,
-  Step,
-  StepImage,
-  UrlForm,
-  UrlCard,
-} from "@wizardComponents";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/onelogin";
-import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
-type Props = {
-  url: string;
-  handleFormSubmit: ({ url }: { url: string }) => API_RETURN_PROMISE;
-};
-
-export const Step4: FC<Props> = ({ url, handleFormSubmit }) => {
+export const Step4: FC = () => {
   const instructions: InstructionProps[] = [
     {
-      text: "In the “SSO” section, click to copy the “Issuer URL” and paste below.",
-      component: <StepImage src={Images.OneLogin_SAML_6A} alt="Step 4.1" />,
-    },
-    {
-      component: (
-        <UrlCard>
-          <UrlForm
-            url={url}
-            urlLabel="Issuer URL"
-            handleFormSubmit={handleFormSubmit}
-          />
-        </UrlCard>
-      ),
+      text: 'In OneLogin, access policies are optional, as the default is to allow all users to access each application. If you would like to restrict this application by policy, select the "Access" tab, and click "Save" when you have setup your selected access policies.',
+      component: <StepImage src={Images.OneLogin_SAML_7} alt="Step 4.1" />,
     },
   ];
 
   return (
     <Step
-      title="Step 4: Upload OneLogin IdP Information"
+      title="Step 4: Access Policy"
       instructionList={instructions}
     />
   );

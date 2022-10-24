@@ -7,7 +7,7 @@ import {
 } from "@patternfly/react-core";
 import { OneLoginLogo } from "@app/images/onelogin";
 import { Header, WizardConfirmation } from "@wizardComponents";
-import { Step1, Step2, Step3, Step4 } from "./steps";
+import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import {
   API_RETURN,
@@ -147,6 +147,7 @@ export const OneLoginWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
+        attributes: [ { userAttribute: "idpUserId", attributeName: "id", friendlyName: ""} ]
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
@@ -197,14 +198,22 @@ export const OneLoginWizard: FC = () => {
     },
     {
       id: 4,
+      name: "Access Policy",
+      component: <Step4 />,
+      hideCancelButton: true,
+      enableNext: true,
+      canJumpTo: stepIdReached >= 1,
+    },
+    {
+      id: 5,
       name: `Upload ${idpCommonName} Information`,
-      component: <Step4 url={issuerUrl} handleFormSubmit={handleFormSubmit} />,
+      component: <Step5 url={issuerUrl} handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       enableNext: isFormValid,
       canJumpTo: stepIdReached >= 4,
     },
     {
-      id: 5,
+      id: 6,
       name: "Confirmation",
       component: (
         <WizardConfirmation
