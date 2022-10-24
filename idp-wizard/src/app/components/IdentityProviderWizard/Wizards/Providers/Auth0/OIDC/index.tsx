@@ -14,7 +14,7 @@ import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
-import { Axios, clearAlias, getAlias } from "@wizardServices";
+import { Axios, clearAlias, getAlias, CreateIdp } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 
 export const Auth0WizardOIDC: FC = () => {
@@ -131,7 +131,8 @@ export const Auth0WizardOIDC: FC = () => {
     };
 
     try {
-      await Axios.post(createIdPUrl, payload);
+      await CreateIdp({createIdPUrl, payload});
+      // TODO emailAsUsername, Mapper?
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);

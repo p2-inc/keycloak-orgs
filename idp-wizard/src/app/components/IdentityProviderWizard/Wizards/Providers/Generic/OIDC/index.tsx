@@ -9,12 +9,11 @@ import OpenIdLogo from "@app/images/oidc/openid-logo.svg";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { Axios, clearAlias } from "@wizardServices";
+import { Axios, getAlias, clearAlias, CreateIdp } from "@wizardServices";
 import { OidcConfig, ClientCreds } from "./steps/forms";
 import { API_STATUS } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-import { getAlias } from "@wizardServices";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 
@@ -252,8 +251,9 @@ export const GenericOIDC: FC = () => {
     };
 
     try {
-      await Axios.post(createIdPUrl, payload);
-
+      await CreateIdp({createIdPUrl, payload});
+      // TODO emailAsUsername, Mapper?
+      
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
