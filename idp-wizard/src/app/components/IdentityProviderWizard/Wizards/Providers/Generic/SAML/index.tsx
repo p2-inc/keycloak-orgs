@@ -17,7 +17,7 @@ import {
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-import { getAlias, SamlUserAttributeMapper } from "@wizardServices";
+import { getAlias, CreateIdp, SamlAttributeMapper } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 
@@ -97,34 +97,15 @@ export const GenericSAML: FC = () => {
     };
 
     try {
-      await Axios.post(createIdPUrl, payload);
-
-      await SamlUserAttributeMapper({
+      await CreateIdp({createIdPUrl, payload});
+      
+      await SamlAttributeMapper({
         alias,
         createIdPUrl,
-        keys: { serverUrl: baseServerRealmsUrl, realm: getRealm()! },
-        attributes: [
-          {
-            attributeName: "username",
-            friendlyName: "username",
-            userAttribute: "username",
-          },
-          {
-            attributeName: "email",
-            friendlyName: "email",
-            userAttribute: "email",
-          },
-          {
-            attributeName: "firstName",
-            friendlyName: "firstName",
-            userAttribute: "firstName",
-          },
-          {
-            attributeName: "lastName",
-            friendlyName: "lastName",
-            userAttribute: "lastName",
-          },
-        ],
+        usernameAttribute: { attributeName: "username", friendlyName: "username" },
+        emailAttribute: { attributeName: "email", friendlyName: "email" },
+        firstNameAttribute: { attributeName: "firstName", friendlyName: "firstName" },
+        lastNameAttribute: { attributeName: "lastName", friendlyName: "lastName" },
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

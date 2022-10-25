@@ -13,6 +13,8 @@ export interface FeatureFlagsState {
   apiMode: "cloud" | "onprem" | "";
   enableLdap: boolean;
   enableDashboard: boolean;
+  emailAsUsername: boolean;
+  trustEmail: boolean;
 }
 
 type FlagsResponse = FeatureFlagsState;
@@ -22,6 +24,8 @@ enum Flags {
   ApiMode = "apiMode",
   EnableLdap = "enableLdap",
   EnableDashboard = "enableDashboard",
+  EmailAsUsername = "emailAsUsername",
+  TrustEmail = "trustEmail",
 }
 
 const initialState: FeatureFlagsState = {
@@ -29,6 +33,8 @@ const initialState: FeatureFlagsState = {
   apiMode: "",
   enableLdap: false,
   enableDashboard: false,
+  emailAsUsername: false,
+  trustEmail: false,
 };
 
 // export const featureFlagSlice = createSlice({

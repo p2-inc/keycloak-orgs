@@ -9,7 +9,7 @@ import { AWS_LOGO } from "@app/images/aws";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import { Axios, clearAlias, SamlUserAttributeMapper } from "@wizardServices";
+import { Axios, clearAlias, CreateIdp, SamlAttributeMapper } from "@wizardServices";
 import {
   API_RETURN,
   API_STATUS,
@@ -138,29 +138,15 @@ export const AWSSamlWizard: FC = () => {
     };
 
     try {
-      await Axios.post(createIdPUrl, payload);
-
-      await SamlUserAttributeMapper({
+      await CreateIdp({createIdPUrl, payload});
+      
+      await SamlAttributeMapper({
         alias,
         createIdPUrl,
-        keys: { serverUrl: baseServerRealmsUrl, realm: getRealm()! },
-        attributes: [
-          {
-            attributeName: "email",
-            friendlyName: "email",
-            userAttribute: "email",
-          },
-          {
-            attributeName: "firstName",
-            friendlyName: "firstName",
-            userAttribute: "firstName",
-          },
-          {
-            attributeName: "lastName",
-            friendlyName: "lastName",
-            userAttribute: "lastName",
-          },
-        ],
+        usernameAttribute: { attributeName: "username", friendlyName: "" },
+        emailAttribute: { attributeName: "email", friendlyName: "" },
+        firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
+        lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
       });
 
       setResults("AWS SAML IdP created successfully. Click finish.");

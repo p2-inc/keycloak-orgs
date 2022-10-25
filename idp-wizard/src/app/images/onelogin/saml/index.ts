@@ -5,6 +5,7 @@ import OneLogin_SAML_4 from "./onelogin_saml_4.png";
 import OneLogin_SAML_5 from "./onelogin_saml_5.png";
 import OneLogin_SAML_5A from "./onelogin_saml_5a.png";
 import OneLogin_SAML_6A from "./onelogin_saml_6a.png";
+import OneLogin_SAML_7 from "./onelogin_saml_7.png"
 
 export {
   OneLogin_SAML_1,
@@ -14,4 +15,5 @@ export {
   OneLogin_SAML_5,
   OneLogin_SAML_5A,
   OneLogin_SAML_6A,
+  OneLogin_SAML_7,
 };

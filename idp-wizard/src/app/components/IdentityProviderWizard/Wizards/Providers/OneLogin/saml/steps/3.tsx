@@ -21,6 +21,7 @@ export const Step3: FC = () => {
       component: (
         <>
           <DoubleItemClipboardCopy rightValue="UUID" leftValue="id" />
+          <DoubleItemClipboardCopy rightValue="Username" leftValue="username" />
           <DoubleItemClipboardCopy rightValue="Email" leftValue="email" />
           <DoubleItemClipboardCopy rightValue="First name" leftValue="firstName" />
           <DoubleItemClipboardCopy rightValue="Last name" leftValue="lastName" />

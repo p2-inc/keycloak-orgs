@@ -20,7 +20,8 @@ import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import {
   getAlias,
   clearAlias,
-  SamlUserAttributeMapper,
+  CreateIdp,
+  SamlAttributeMapper,
   Axios,
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
@@ -110,7 +111,7 @@ export const AzureWizard: FC = () => {
         };
       }
     } catch (e) {
-      console.log(err);
+      console.log(e);
     }
 
     return {
@@ -133,36 +134,15 @@ export const AzureWizard: FC = () => {
     };
 
     try {
-      await Axios.post(createIdPUrl, payload);
-
-      // Map attributes
-      await SamlUserAttributeMapper({
-        createIdPUrl,
+      await CreateIdp({createIdPUrl, payload});
+      
+      await SamlAttributeMapper({
         alias,
-        keys: {
-          serverUrl: baseServerRealmsUrl,
-          realm: getRealm()!,
-        },
-        attributes: [
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-            friendlyName: "",
-            userAttribute: "email",
-          },
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
-            friendlyName: "",
-            userAttribute: "firstName",
-          },
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
-            friendlyName: "",
-            userAttribute: "lastName",
-          },
-        ],
+        createIdPUrl,
+        usernameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" }, //setting to email
+        emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" },
+        firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", friendlyName: "" },
+        lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", friendlyName: "" },
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

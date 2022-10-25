@@ -1,40 +1,22 @@
 import React, { FC } from "react";
-import {
-  FileCard,
-  InstructionProps,
-  Step,
-  StepImage,
-  MetadataFile,
-} from "@wizardComponents";
+import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import * as Images from "@app/images/pingone";
-import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
-type Props = {
-  handleFormSubmit: ({
-    metadataFile,
-  }: {
-    metadataFile: File;
-  }) => API_RETURN_PROMISE;
-};
-
-export const Step4: FC<Props> = ({ handleFormSubmit }) => {
+export const Step4: FC = () => {
   const instructions: InstructionProps[] = [
     {
-      text: 'Once you have completed the PingOne setup, you will be presented with a summary of the provider configuration. Enable the application for your users by selecting the toggle switch in the upper righthand corner. Select the "Configuration" tab and click "Download Metadata"',
-      component: <StepImage src={Images.PINGONE_SAML_7} alt="Step 4.1" />,
+      text: 'In PingOne, group assignments are optional, as the default is to allow all groups to access each application. If you would like to restrict this application to a set of groups, select the "Edit" icon from the "Access" tab.',
+      component: <StepImage src={Images.PINGONE_SAML_8} alt="Step 4.1" />,
     },
     {
-      component: (
-        <FileCard>
-          <MetadataFile handleFormSubmit={handleFormSubmit} />
-        </FileCard>
-      ),
+      text: 'You can add groups assignments by clicking on the "+" icon next to each group name. Click "Save" when you have completed the assignments',
+      component: <StepImage src={Images.PINGONE_SAML_9} alt="Step 4.2" />,
     },
   ];
 
   return (
     <Step
-      title="Step 4: Upload PingOne IdP Information"
+      title="Step 4: Assign Groups"
       instructionList={instructions}
     />
   );

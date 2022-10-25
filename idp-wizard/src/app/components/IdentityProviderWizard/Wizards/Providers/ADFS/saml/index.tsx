@@ -15,10 +15,7 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import {
-  Axios,
-  SamlUserAttributeMapper,
-} from "@app/components/IdentityProviderWizard/Wizards/services";
+import { Axios, CreateIdp, SamlAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
@@ -137,7 +134,7 @@ export const ADFSWizard: FC = () => {
       };
       // create the idp with the start config
 
-      await Axios.post(createIdPUrl, payload);
+      await CreateIdp({createIdPUrl, payload});
 
       const urlPayload = {
         fromUrl: url,
@@ -159,7 +156,7 @@ export const ADFSWizard: FC = () => {
         };
       }
     } catch (e) {
-      console.log(err);
+      console.log(e);
     }
 
     return {
@@ -185,34 +182,13 @@ export const ADFSWizard: FC = () => {
       // Update the idp
       await Axios.put(updateIdPUrl, payload);
 
-      // Map attributes
-      await SamlUserAttributeMapper({
-        createIdPUrl,
+      await SamlAttributeMapper({
         alias,
-        keys: {
-          serverUrl: baseServerRealmsUrl,
-          realm: getRealm()!,
-        },
-        attributes: [
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
-            friendlyName: "",
-            userAttribute: "firstName",
-          },
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
-            friendlyName: "",
-            userAttribute: "lastName",
-          },
-          {
-            attributeName:
-              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-            friendlyName: "",
-            userAttribute: "email",
-          },
-        ],
+        createIdPUrl,
+        usernameAttribute: { attributeName: "http://schemas.microsoft.com/2012/12/certificatecontext/field/subjectname", friendlyName: "" },
+        emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" },
+        firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", friendlyName: "" },
+        lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", friendlyName: "" },
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
