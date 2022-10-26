@@ -71,7 +71,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     representation.getConfig().put("syncMode", "FORCE");
     representation.getConfig().put("hideOnLoginPage", "true");
     representation.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
-    representation.setPostBrokerLoginFlowAlias​(ORG_AUTH_FLOW_ALIAS);
+    representation.setPostBrokerLoginFlowAlias(ORG_AUTH_FLOW_ALIAS);
     //  - firstBrokerLoginFlowAlias
   }
 
