@@ -17,10 +17,10 @@ import org.keycloak.provider.ProviderEvent;
 public class IdpAuthenticator extends AbstractIdpAuthenticator implements DefaultAuthenticator {
 
   @Override
-  public void authenticateImpl​(AuthenticationFlowContext context, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
+  public void authenticateImpl(AuthenticationFlowContext context, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
   }
 
   @Override
-  public void actionImpl​(AuthenticationFlowContext context, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
+  public void actionImpl(AuthenticationFlowContext context, SerializedBrokeredIdentityContext serializedCtx, BrokeredIdentityContext brokerContext) {
   }  
 }
