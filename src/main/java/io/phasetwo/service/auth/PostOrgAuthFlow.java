@@ -2,7 +2,6 @@ package io.phasetwo.service.auth;
 
 import static io.phasetwo.service.Orgs.*;
 
-import java.util.List;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -85,9 +84,12 @@ public class PostOrgAuthFlow {
       flow = realm.addAuthenticationFlow(flow);
     }
 
-    List<AuthenticationExecutionModel> executions = realm.getAuthenticationExecutions(flow.getId());
     boolean hasExecution =
-        executions.stream().filter(e -> providerId.equals(e.getAuthenticator())).count() > 0;
+        realm
+                .getAuthenticationExecutionsStream(flow.getId())
+                .filter(e -> providerId.equals(e.getAuthenticator()))
+                .count()
+            > 0;
 
     if (!hasExecution) {
       log.infof("adding execution %s for auth flow for %s", providerId, ORG_AUTH_FLOW_ALIAS);

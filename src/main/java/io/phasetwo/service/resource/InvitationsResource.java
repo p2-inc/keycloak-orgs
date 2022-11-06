@@ -83,7 +83,7 @@ public class InvitationsResource extends OrganizationAdminResource {
 
     try {
       InvitationModel i = organization.addInvitation(email, auth.getUser());
-      i.setRoles(invitation.getRoles());
+      if (invitation.getRoles() != null) i.setRoles(invitation.getRoles());
       Invitation o = convertInvitationModelToInvitation(i);
 
       adminEvent
@@ -119,6 +119,7 @@ public class InvitationsResource extends OrganizationAdminResource {
   }
 
   boolean canSetRoles(Collection<String> roles) {
+    if (roles == null || roles.isEmpty()) return true;
     Set<String> orgRoles =
         organization.getRolesStream().map(r -> r.getName()).collect(Collectors.toSet());
     for (String role : roles) {

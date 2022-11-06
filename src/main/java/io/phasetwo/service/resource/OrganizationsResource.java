@@ -72,7 +72,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
         orgs.createOrganization(realm, body.getName(), auth.getUser(), auth.hasCreateOrg());
     org.setDisplayName(body.getDisplayName());
     org.setUrl(body.getUrl());
-    body.getAttributes().forEach((k, v) -> org.setAttribute(k, v));
+    if (body.getAttributes() != null)
+      body.getAttributes().forEach((k, v) -> org.setAttribute(k, v));
     if (body.getDomains() != null) org.setDomains(body.getDomains());
 
     Organization o = convertOrganizationModelToOrganization(org);

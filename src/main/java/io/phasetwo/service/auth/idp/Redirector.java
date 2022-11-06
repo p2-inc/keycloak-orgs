@@ -67,7 +67,10 @@ final class Redirector {
       String relayState = clientSessionCode.getOrGenerateCode();
       encodedState =
           IdentityBrokerState.decoded(
-              relayState, authSession.getClient().getClientId(), authSession.getTabId());
+              relayState,
+              authSession.getClient().getId(),
+              authSession.getClient().getClientId(),
+              authSession.getTabId());
     }
 
     KeycloakSession keycloakSession = context.getSession();

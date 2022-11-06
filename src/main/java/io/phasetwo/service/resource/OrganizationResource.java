@@ -133,7 +133,8 @@ public class OrganizationResource extends OrganizationAdminResource {
       organization.setDisplayName(body.getDisplayName());
       organization.setUrl(body.getUrl());
       organization.removeAttributes();
-      body.getAttributes().forEach((k, v) -> organization.setAttribute(k, v));
+      if (body.getAttributes() != null)
+        body.getAttributes().forEach((k, v) -> organization.setAttribute(k, v));
       if (body.getDomains() != null) organization.setDomains(body.getDomains());
 
       Organization o = convertOrganizationModelToOrganization(organization);
