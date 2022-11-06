@@ -9,7 +9,7 @@
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo</main.java.package>
-    <keycloak.version>16.1.1</keycloak.version>
+    <keycloak.version>20.0.0</keycloak.version>
     <guava.version>30.1-jre</guava.version>
     <lombok.version>1.18.22</lombok.version>
     <auto-service.version>1.0.1</auto-service.version>
