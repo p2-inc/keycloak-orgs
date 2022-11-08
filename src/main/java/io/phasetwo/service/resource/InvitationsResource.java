@@ -65,6 +65,8 @@ public class InvitationsResource extends OrganizationAdminResource {
     }
     email = email.toLowerCase();
 
+    String link = Optional.ofNullable(invitation.getRedirectUri()).orElse("");
+
     if (organization.getInvitationsByEmail(email).count() > 0) {
       log.infof(
           "invitation for %s %s %s already exists. .",
@@ -106,7 +108,7 @@ public class InvitationsResource extends OrganizationAdminResource {
       if (invitation.isSend()) {
         // TODO use inviter
         try {
-          sendInvitationEmail(email, session, realm, auth.getUser());
+          sendInvitationEmail(email, session, realm, auth.getUser(), link);
         } catch (Exception e) {
           log.warn("Unable to send invitation email", e);
         }
@@ -130,8 +132,7 @@ public class InvitationsResource extends OrganizationAdminResource {
     return true;
   }
 
-  void sendInvitationEmail(
-      String email, KeycloakSession session, RealmModel realm, UserModel inviter) throws Exception {
+  void sendInvitationEmail(String email, KeycloakSession session, RealmModel realm, UserModel inviter, String link) throws Exception {
     EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
 
     Method sendMethod =
@@ -155,7 +156,7 @@ public class InvitationsResource extends OrganizationAdminResource {
     bodyAttributes.put("realmName", realmName);
     bodyAttributes.put("orgName", orgName);
     bodyAttributes.put("inviterName", inviterName);
-    // bodyAttributes.put("link", link);
+    bodyAttributes.put("link", link);
 
     emailTemplateProvider.setRealm(realm).setUser(user).setAttribute("realmName", realmName);
 
