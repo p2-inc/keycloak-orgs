@@ -132,7 +132,9 @@ public class InvitationsResource extends OrganizationAdminResource {
     return true;
   }
 
-  void sendInvitationEmail(String email, KeycloakSession session, RealmModel realm, UserModel inviter, String link) throws Exception {
+  void sendInvitationEmail(
+      String email, KeycloakSession session, RealmModel realm, UserModel inviter, String link)
+      throws Exception {
     EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
 
     Method sendMethod =

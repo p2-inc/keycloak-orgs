@@ -1,8 +1,8 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.*;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
-import static io.phasetwo.service.Orgs.*;
 
 import io.phasetwo.service.model.OrganizationModel;
 import java.io.IOException;
@@ -29,7 +29,6 @@ import org.keycloak.services.resources.admin.AdminRoot;
 
 @JBossLog
 public class IdentityProvidersResource extends OrganizationAdminResource {
-
 
   private final OrganizationModel organization;
 

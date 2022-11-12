@@ -170,6 +170,7 @@ public class OrganizationResource extends OrganizationAdminResource {
 
   @POST
   @Path("portal-link")
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.APPLICATION_JSON)
   public Response getPortalLink(
       @DefaultValue("") @FormParam("userId") String userId,
@@ -201,8 +202,8 @@ public class OrganizationResource extends OrganizationAdminResource {
         user = session.users().getUserById(realm, userId);
       }
       if (user == null) {
-        // auth'd user can't grant default org-admin unless they have all roles
-        if (!auth.hasOrgAll(organization)) {
+        // auth'd user can't grant default org-admin unless they have all roles or global manage
+        if (!auth.hasManageOrgs() && !auth.hasOrgAll(organization)) {
           throw new NotAuthorizedException(
               String.format(
                   "Insufficient permission to create portal link for %s", organization.getId()));
@@ -248,8 +249,8 @@ public class OrganizationResource extends OrganizationAdminResource {
       return Response.ok()
           .entity(ImmutableMap.of("user", user.getId(), "link", link, "redirect", redirectUri))
           .build();
-
     } catch (Exception e) {
+      if (e instanceof WebApplicationException) throw e;
       log.warn("Error creating portal link", e);
     }
     return Response.serverError().build();

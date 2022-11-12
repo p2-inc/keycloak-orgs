@@ -13,7 +13,7 @@ public class InvitationRequest {
   private boolean send = false;
   private @Valid List<String> roles = Lists.newArrayList();
   private String redirectUri = null;
-  
+
   public InvitationRequest email(String email) {
     this.email = email;
     return this;

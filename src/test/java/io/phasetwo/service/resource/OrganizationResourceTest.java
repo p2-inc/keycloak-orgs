@@ -48,7 +48,7 @@ public class OrganizationResourceTest {
     }
     return String.format("%s/realms/%s/orgs%s", server.getAuthUrl(), realm, o.toString());
   }
-  
+
   @Test
   public void testGetDomains() throws Exception {
     Keycloak keycloak = server.client();
@@ -573,7 +573,7 @@ public class OrganizationResourceTest {
             .json(inv)
             .asResponse();
     assertThat(response.getStatus(), is(409));
-    
+
     // remove pending invitation
     response =
         SimpleHttp.doDelete(url("master", urlencode(id), "invitations", urlencode(invId)), http)
@@ -607,7 +607,7 @@ public class OrganizationResourceTest {
             .json(inv)
             .asResponse();
     assertThat(response.getStatus(), is(409));
-    
+
     // get invitations
     response =
         SimpleHttp.doGet(url("master", urlencode(id), "invitations"), http)
