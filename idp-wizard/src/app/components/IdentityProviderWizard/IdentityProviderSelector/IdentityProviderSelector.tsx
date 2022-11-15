@@ -1,15 +1,7 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { IdPButton } from "./components/IdPButton";
-import { useKeycloak } from "@react-keycloak/web";
 import { generatePath, Link, useParams } from "react-router-dom";
 import {
-  ApplicationLauncher,
-  ApplicationLauncherGroup,
-  ApplicationLauncherItem,
-  ApplicationLauncherSeparator,
-  Button,
-  Flex,
-  FlexItem,
   PageSection,
   PageSectionVariants,
   Stack,
@@ -23,85 +15,21 @@ import {
 import { PATHS } from "@app/routes";
 import { useTitle } from "react-use";
 import { useHostname } from "@app/hooks/useHostname";
-import { useRoleAccess } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
-import cs from "classnames";
+import { MainNav } from "@app/components/navigation/main-nav";
 
 export const IdentityProviderSelector: FC = () => {
   useTitle("Select your Identity Provider | Phase Two");
-  const { keycloak } = useKeycloak();
+
   let { realm } = useParams();
-  const { hasAccess } = useRoleAccess();
   const hostname = useHostname();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const onToggle = (isOpen: boolean) => setIsOpen(isOpen);
-  const onSelect = (_event: any) => setIsOpen((prevIsOpen) => !prevIsOpen);
-
-  const linkStyle: React.CSSProperties = {
-    color: "var(--pf-c-app-launcher__menu-item--Color)",
-    textDecoration: "none",
-  };
-
-  // TODO: add icons
-  const appLauncherItems: React.ReactElement[] = [
-    <ApplicationLauncherItem
-      key="dashboard"
-      component={
-        <Link to={generatePath(PATHS.dashboard, { realm })} style={linkStyle}>
-          Dashboard
-        </Link>
-      }
-      className={cs({
-        "pf-u-display-none": featureFlags?.enableDashboard !== false,
-      })}
-    />,
-    <ApplicationLauncherItem
-      key="idpSelector"
-      component={
-        <Link to={generatePath(PATHS.idpSelector, { realm })} style={linkStyle}>
-          IDP Selector
-        </Link>
-      }
-    />,
-
-    <ApplicationLauncherGroup key="group 1c">
-      <ApplicationLauncherItem
-        key="switchOrganization"
-        isDisabled
-        onClick={() => console.log("wire me up")}
-      >
-        Switch Organization
-      </ApplicationLauncherItem>
-      <ApplicationLauncherSeparator key="separator" />
-    </ApplicationLauncherGroup>,
-    <ApplicationLauncherItem
-      key="logout"
-      component={
-        <Link to={keycloak.createLogoutUrl({})} style={linkStyle}>
-          Logout
-        </Link>
-      }
-    />,
-  ];
 
   return (
     <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
         <StackItem>
-          <Flex justifyContent={{ default: "justifyContentSpaceBetween" }}>
-            <FlexItem>
-              <ApplicationLauncher
-                onSelect={onSelect}
-                onToggle={onToggle}
-                isOpen={isOpen}
-                items={appLauncherItems}
-              />
-            </FlexItem>
-            <FlexItem>Logo</FlexItem>
-          </Flex>
+          <MainNav />
         </StackItem>
         <StackItem isFilled>
           <div className="container">
