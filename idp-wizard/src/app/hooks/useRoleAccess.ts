@@ -30,7 +30,7 @@ export function useRoleAccess() {
   const [hasAccess, setHasAccess] = useState<null | boolean>(null);
 
   function navigateToAccessDenied() {
-    navigate(
+    window.location.replace(
       generatePath(PATHS.accessDenied, {
         realm,
       })
