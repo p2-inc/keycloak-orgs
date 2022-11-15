@@ -6,13 +6,13 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { Dashboard } from "@app/Dashboard/Dashboard";
+import { Dashboard } from "@app/components/Dashboard/Dashboard";
 import { NotFound } from "@app/NotFound/NotFound";
 import { IdentityProviderSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdentityProviderSelector";
 import Provider from "./components/IdentityProviderWizard/providers";
 import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
 import { Protocols, Providers } from "./configurations";
-import { AccessDenied } from "./AccessDenied/AccessDenied";
+import { AccessDenied } from "./components/AccessDenied/AccessDenied";
 
 export interface RouterParams {
   provider: Providers;
