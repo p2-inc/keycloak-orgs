@@ -2,7 +2,7 @@ import { PATHS } from "@app/routes";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { useKeycloak } from "@react-keycloak/web";
 import { useEffect, useState } from "react";
-import { generatePath, useNavigate, useParams } from "react-router-dom";
+import { generatePath, useParams } from "react-router-dom";
 
 const requiredResourceRoles = [
   "manage-identity-providers",
@@ -25,7 +25,6 @@ export function useRoleAccess() {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
-  let navigate = useNavigate();
   // Starts as null to make true/false explicit states
   const [hasAccess, setHasAccess] = useState<null | boolean>(null);
 
@@ -49,6 +48,7 @@ export function useRoleAccess() {
   useEffect(() => {
     if (!featureFlags) return;
     //console.log("access control", featureFlags?.apiMode);
+
     //cloud mode
     if (featureFlags?.apiMode === "cloud") {
       let orgAccess: boolean[] = [];
@@ -58,7 +58,8 @@ export function useRoleAccess() {
       setHasAccess(!orgAccess.includes(false));
     } else {
       // onprem mode
-      // if the keycloak realm is the master realm, then look at the <path-realm>-realm resource-roles rather than "realm-management"
+      // if the keycloak realm is the master realm,
+      // then look at the < path - realm > -realm resource - roles rather than "realm-management"
       const resource =
         keycloak.realm === "master" ? `${realm}-realm` : "realm-management";
       let roleAccess: boolean[] = [];
@@ -69,11 +70,13 @@ export function useRoleAccess() {
     }
   }, [keycloak?.token]);
 
-  useEffect(() => {
-    if (hasAccess === false && realm) {
-      navigateToAccessDenied();
-    }
-  }, [hasAccess, realm]);
+  // Can't use this here in order to get correct role access for use with
+  // the Org Selector
+  // useEffect(() => {
+  //   if (hasAccess === false && realm) {
+  //     navigateToAccessDenied();
+  //   }
+  // }, [hasAccess, realm]);
 
   return { hasAccess, navigateToAccessDenied };
 }

@@ -1,7 +1,9 @@
+import { useAppSelector } from "@app/hooks/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { Flex, FlexItem, Title } from "@patternfly/react-core";
-import React from "react";
+import React, { useState } from "react";
 import { AppLauncher } from "./app-launcher";
+import { OrgPicker } from "./org-picker";
 
 type Props = {
   title?: string;
@@ -9,16 +11,23 @@ type Props = {
 
 const MainNav: React.FC<Props> = ({ title }) => {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
+  const currentOrg = useAppSelector((state) => state.settings.selectedOrg);
+
+  const [isOrgPickerOpen, setIsOrgPickerOpen] = useState(false);
 
   return (
     <Flex
       justifyContent={{ default: "justifyContentSpaceBetween" }}
-      alignItems={{ default: "alignItemsCenter" }}
+      alignItems={{ default: "alignItemsFlexStart" }}
     >
       <FlexItem>
         <Flex alignItems={{ default: "alignItemsCenter" }}>
           <FlexItem>
-            <AppLauncher />
+            <AppLauncher toggleOrgPicker={setIsOrgPickerOpen} />
+            <OrgPicker
+              open={isOrgPickerOpen}
+              toggleModal={setIsOrgPickerOpen}
+            />
           </FlexItem>
           <FlexItem>
             {title && (
@@ -29,8 +38,11 @@ const MainNav: React.FC<Props> = ({ title }) => {
           </FlexItem>
         </Flex>
       </FlexItem>
-      <FlexItem>
+      <FlexItem style={{ textAlign: "end" }}>
         {featureFlags?.logoUrl && <img src={featureFlags.logoUrl} />}
+        <Title headingLevel="h2" size="lg">
+          {currentOrg}
+        </Title>
       </FlexItem>
     </Flex>
   );

@@ -22,7 +22,11 @@ let activeStyle = {
   fontWeight: "bold",
 };
 
-const AppLauncher = () => {
+type Props = {
+  toggleOrgPicker: (orgPickerState: boolean) => void;
+};
+
+const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
   const { hasAccess } = useRoleAccess();
   let { realm } = useParams();
   const { keycloak } = useKeycloak();
@@ -35,7 +39,6 @@ const AppLauncher = () => {
   const dashPath = generatePath(PATHS.dashboard, { realm });
   const idpPath = generatePath(PATHS.idpSelector, { realm });
 
-  // TODO: add icons
   const AppLauncherItems: React.ReactElement[] = [
     <ApplicationLauncherItem
       key="dashboard"
@@ -73,9 +76,8 @@ const AppLauncher = () => {
     <ApplicationLauncherGroup key="group 1c">
       <ApplicationLauncherItem
         key="switchOrganization"
-        isDisabled
-        onClick={() => console.log("wire me up")}
-        title="Coming soon..."
+        onClick={() => toggleOrgPicker(true)}
+        title="Change the active organization for IdP creation."
       >
         Switch Organization
       </ApplicationLauncherItem>
