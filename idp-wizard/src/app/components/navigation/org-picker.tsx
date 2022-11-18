@@ -1,10 +1,13 @@
+import { useRoleAccess } from "@app/hooks";
 import { useAppDispatch, useAppSelector } from "@app/hooks/hooks";
 import { setOrganization } from "@app/services";
 import {
   Button,
+  Checkbox,
   Dropdown,
   DropdownItem,
   DropdownToggle,
+  FormGroup,
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
@@ -21,6 +24,7 @@ const OrgPicker: React.FC<Props> = ({
   open: isModalOpen,
   toggleModal: setIsModalOpen,
 }) => {
+  const { hasOrganizationRoles, hasRealmRoles } = useRoleAccess();
   const dispatch = useAppDispatch();
   const currentOrg = useAppSelector((state) => state.settings.selectedOrg);
   const { keycloak } = useKeycloak();
@@ -31,6 +35,7 @@ const OrgPicker: React.FC<Props> = ({
   const [selectedOrg, setSelectedOrg] = useState<string>();
 
   useEffect(() => {
+    // TODO the App needs to determine this when it starts up
     dispatch(setOrganization("Chicken Kablooey"));
   }, []);
 
@@ -47,16 +52,6 @@ const OrgPicker: React.FC<Props> = ({
     setIsDropdownOpen(false);
   };
 
-  const handleDropdownToggle = (isDropdownOpen: boolean) => {
-    setIsDropdownOpen(isDropdownOpen);
-  };
-
-  const onSelect = (evt: React.SyntheticEvent<HTMLDivElement, Event>) => {
-    setSelectedOrg(evt.target.value);
-    setIsDropdownOpen(!isDropdownOpen);
-    onFocus();
-  };
-
   const onFocus = () => {
     const element = document.getElementById("modal-dropdown-toggle");
     (element as HTMLElement).focus();
@@ -71,22 +66,33 @@ const OrgPicker: React.FC<Props> = ({
     }
   };
 
-  // orgs.map...
+  // Check realm access for a full global state
+  // if not full global then a per org basis is required
 
-  const dropdownItems = Object.keys(orgs).map((orgId) => (
-    <DropdownItem key={orgId} component="button" value={orgId}>
-      {orgs[orgId].name}
-    </DropdownItem>
-  ));
+  const OrgCheckboxGroups = Object.keys(orgs).map((orgId) => {
+    // each org has a checkbox
+    // with the right roles for the org
+    // it will also have the Global option for that org
+    const orgName = orgs[orgId].name;
 
-  // const dropdownItems = [
-  //   <DropdownItem key="org1" component="button" value="Garth">
-  //     Org 1
-  //   </DropdownItem>,
-  //   <DropdownItem key="org2" component="button" value="Wayne">
-  //     Org 2
-  //   </DropdownItem>,
-  // ];
+    const hasAdminRole = hasOrganizationRoles("admin", orgId);
+
+    // has role
+    return (
+      <FormGroup
+        role="group"
+        fieldId={`basic-form-checkbox-group-${orgId}`}
+        label={orgName}
+        className="pf-u-mb-md"
+        key={orgId}
+      >
+        {hasAdminRole && (
+          <Checkbox label="Global" aria-label="Global" id={`${orgId}_global`} />
+        )}
+        <Checkbox label={orgName} aria-label={orgName} id={orgId} />
+      </FormGroup>
+    );
+  });
 
   return (
     <Modal
@@ -109,26 +115,18 @@ const OrgPicker: React.FC<Props> = ({
       </div>
       <br />
       <div>
-        <Dropdown
-          onSelect={onSelect}
-          toggle={
-            <DropdownToggle
-              id="modal-dropdown-toggle"
-              onToggle={handleDropdownToggle}
-              toggleIndicator={CaretDownIcon}
-            >
-              {selectedOrg
-                ? `Selected Org: ${orgs[selectedOrg].name}`
-                : currentOrg
-                ? `Current Org: ${currentOrg}`
-                : "Select Organization"}
-            </DropdownToggle>
-          }
-          isOpen={isDropdownOpen}
-          dropdownItems={dropdownItems}
-          menuAppendTo="parent"
-        />
+        {hasRealmRoles("admin") && (
+          <FormGroup
+            role="group"
+            fieldId={`basic-form-checkbox-group-realm`}
+            label="Global Realm Setting"
+            className="pf-u-mb-md"
+          >
+            <Checkbox label="Global" aria-label="Global" id={`realm_global`} />
+          </FormGroup>
+        )}
       </div>
+      <div>{OrgCheckboxGroups.map((grp) => grp)}</div>
     </Modal>
   );
 };
