@@ -47,12 +47,10 @@ const baseUrl = () => {
   if (keycloak.authServerUrl) {
     const u = new URL(keycloak.authServerUrl);
     return u.origin;
+  } else {
+    console.log("authServerUrl not set");
+    return `${window.location.protocol}//${window.location.host}`;
   }
-  if (keycloakJson["auth-server-url"]) {
-    const u = new URL(keycloakJson["auth-server-url"]);
-    return u.origin;
-  }
-  return `${window.location.protocol}//${window.location.host}`;
 }
 
 const rawBaseQuery = fetchBaseQuery({
