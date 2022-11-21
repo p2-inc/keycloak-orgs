@@ -18,6 +18,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const Auth0WizardSAML: FC = () => {
   const idpCommonName = "Auth0 SAML IdP";
@@ -28,7 +29,7 @@ export const Auth0WizardSAML: FC = () => {
   });
   const navigateToBasePath = useNavigateToBasePath();
   const { getRealm } = useKeycloakAdminApi();
-
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const {
     endpoints,
     setAlias,
@@ -113,7 +114,7 @@ export const Auth0WizardSAML: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -122,6 +123,7 @@ export const Auth0WizardSAML: FC = () => {
         emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" },
         firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", friendlyName: "" },
         lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", friendlyName: "" },
+	featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

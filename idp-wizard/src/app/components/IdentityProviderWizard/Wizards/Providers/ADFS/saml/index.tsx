@@ -20,6 +20,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const ADFSWizard: FC = () => {
   const idpCommonName = "ADFS IdP";
@@ -28,6 +29,7 @@ export const ADFSWizard: FC = () => {
     protocol: Protocols.SAML,
     preface: "adfs-saml",
   });
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const title = "ADFS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -134,7 +136,7 @@ export const ADFSWizard: FC = () => {
       };
       // create the idp with the start config
 
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
 
       const urlPayload = {
         fromUrl: url,
@@ -189,6 +191,7 @@ export const ADFSWizard: FC = () => {
         emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" },
         firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", friendlyName: "" },
         lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", friendlyName: "" },
+	featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

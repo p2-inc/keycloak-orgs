@@ -7,6 +7,7 @@ import {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import keycloak from "../../../keycloak";
+import keycloakJson from "../../../keycloak.json";
 
 export interface FeatureFlagsState {
   enableGroupMapping: boolean;
@@ -43,9 +44,15 @@ const initialState: FeatureFlagsState = {
 //   reducers: {},
 // });
 const baseUrl = () => {
-  const hostname = window.location.hostname;
-  if (hostname === 'localhost') return "https://app.phasetwo.io";
-  else return `${window.location.protocol}//${window.location.host}`;
+  if (keycloak.authServerUrl) {
+    const u = new URL(keycloak.authServerUrl);
+    return u.origin;
+  }
+  if (keycloakJson["auth-server-url"]) {
+    const u = new URL(keycloakJson["auth-server-url"]);
+    return u.origin;
+  }
+  return `${window.location.protocol}//${window.location.host}`;
 }
 
 const rawBaseQuery = fetchBaseQuery({

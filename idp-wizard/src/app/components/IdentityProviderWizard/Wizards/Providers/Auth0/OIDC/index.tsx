@@ -16,6 +16,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { Axios, clearAlias, getAlias, CreateIdp } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const Auth0WizardOIDC: FC = () => {
   const idpCommonName = "Auth0 OIDC IdP";
@@ -24,6 +25,7 @@ export const Auth0WizardOIDC: FC = () => {
     protocol: Protocols.OPEN_ID,
     preface: "auth0-oidc",
   });
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
   const {
@@ -131,7 +133,7 @@ export const Auth0WizardOIDC: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       // TODO emailAsUsername, Mapper?
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

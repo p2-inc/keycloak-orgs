@@ -25,6 +25,7 @@ import {
   Axios,
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const AzureWizard: FC = () => {
   const idpCommonName = "Azure SAML IdP";
@@ -33,6 +34,7 @@ export const AzureWizard: FC = () => {
     protocol: Protocols.SAML,
     preface: "azure-saml",
   });
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -132,9 +134,10 @@ export const AzureWizard: FC = () => {
       providerId: "saml",
       config: metadata!,
     };
+    console.log("foo");
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -143,6 +146,7 @@ export const AzureWizard: FC = () => {
         emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" },
         firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", friendlyName: "" },
         lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", friendlyName: "" },
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
@@ -150,6 +154,7 @@ export const AzureWizard: FC = () => {
       setError(false);
       setDisableButton(true);
     } catch (e) {
+      console.error(e);
       setResults(
         `Error creating ${idpCommonName}. Please confirm there is no Azure SAML configured already.`
       );

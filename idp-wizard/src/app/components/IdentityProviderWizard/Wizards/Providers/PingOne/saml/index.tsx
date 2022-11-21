@@ -17,6 +17,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const PingOneWizard: FC = () => {
   const idpCommonName = "PingOne IdP";
@@ -26,7 +27,7 @@ export const PingOneWizard: FC = () => {
     preface: "pingone-saml",
   });
   const navigateToBasePath = useNavigateToBasePath();
-
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const title = "PingOne wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getRealm } = useKeycloakAdminApi();
@@ -124,7 +125,7 @@ export const PingOneWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -134,6 +135,7 @@ export const PingOneWizard: FC = () => {
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
         attributes: [ { userAttribute: "idpUserId", attributeName: "saml_subject", friendlyName: ""} ],
+	featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

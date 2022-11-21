@@ -1,13 +1,16 @@
 package io.phasetwo.wizard;
 
 import com.google.auto.service.AutoService;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.Map;
 import java.util.Optional;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config.Scope;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderEvent;
@@ -110,6 +113,41 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     idpWizard.setRootUrl("${authBaseUrl}");
   }
 
+  private void setOrganizationRoleMapper(ClientModel idpWizard) {
+    ProtocolMapperModel pro = new ProtocolMapperModel();
+    pro.setProtocolMapper("oidc-organization-role-mapper");
+    pro.setProtocol("openid-connect");
+    pro.setName("organizations");
+    Map<String,String> config = new ImmutableMap.Builder<String,String>()
+                                .put("id.token.claim", "true")
+                                .put("access.token.claim", "true")
+                                .put("claim.name", "organizations")
+                                .put("jsonType.label", "JSON")
+                                .put("userinfo.token.claim", "true")
+                                .build();
+    pro.setConfig(config);
+    //      "consentRequired": false,
+    idpWizard.addProtocolMapper(pro);
+  }
+
+  private void setOrganizationIdMapper(ClientModel idpWizard) {
+    ProtocolMapperModel pro = new ProtocolMapperModel();
+    pro.setProtocolMapper("oidc-usersessionmodel-note-mapper");
+    pro.setProtocol("openid-connect");
+    pro.setName("org_id");
+    Map<String,String> config = new ImmutableMap.Builder<String,String>()
+                                .put("user.session.note", "org_id")
+                                .put("id.token.claim", "true")
+                                .put("access.token.claim", "true")
+                                .put("claim.name", "org_id")
+                                .put("jsonType.label", "String")
+                                .put("userinfo.token.claim", "true")
+                                .build();
+    pro.setConfig(config);
+    //      "consentRequired": false,
+    idpWizard.addProtocolMapper(pro);
+  }
+  
   private void setClientScopeDefaults(
       RealmModel realm, KeycloakSession session, ClientModel idpWizard) {
     idpWizard.setFullScopeAllowed(true);
@@ -126,6 +164,8 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
                 log.warn("'roles' client scope already exists. skipping...");
               }
             });
+    setOrganizationRoleMapper(idpWizard);
+    setOrganizationIdMapper(idpWizard);
   }
 
   @Override

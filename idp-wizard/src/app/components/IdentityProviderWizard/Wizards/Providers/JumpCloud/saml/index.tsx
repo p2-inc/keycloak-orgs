@@ -17,6 +17,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const JumpCloudWizard: FC = () => {
   const idpCommonName = "JumpCloud IdP";
@@ -25,6 +26,7 @@ export const JumpCloudWizard: FC = () => {
     protocol: Protocols.SAML,
     preface: "jumpcloud-saml",
   });
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const title = "JumpCloud wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -121,7 +123,7 @@ export const JumpCloudWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -130,6 +132,7 @@ export const JumpCloudWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
+	featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

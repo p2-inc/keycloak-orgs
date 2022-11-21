@@ -20,6 +20,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const AWSSamlWizard: FC = () => {
   const idpCommonName = "AWS SSO IdP";
@@ -28,8 +29,8 @@ export const AWSSamlWizard: FC = () => {
     protocol: Protocols.SAML,
     preface: "awssso-saml",
   });
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
-
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getRealm } = useKeycloakAdminApi();
@@ -138,7 +139,7 @@ export const AWSSamlWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -147,6 +148,7 @@ export const AWSSamlWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
+	featureFlags,
       });
 
       setResults("AWS SAML IdP created successfully. Click finish.");

@@ -7,13 +7,13 @@ Phase Two idp-wizard for on-prem onboarding and enterprise SSO self-management.
 ```bash
 git clone https://github.com/p2-inc/idp-wizard
 cd idp-wizard
-npm install && npm run start:dev
+npm install --legacy-peer-deps && npm run start:dev
 ```
 
 ## Development scripts
 ```sh
 # Install development/build dependencies
-npm install
+npm install --legacy-peer-deps
 
 # Start the development server
 npm run start:dev

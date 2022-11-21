@@ -17,12 +17,13 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const GoogleWizard: FC = () => {
   const idpCommonName = "Google SAML IdP";
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
-
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const alias = getAlias({
     provider: Providers.GOOGLE_SAML,
     protocol: Protocols.SAML,
@@ -120,7 +121,7 @@ export const GoogleWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -129,6 +130,7 @@ export const GoogleWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
+	featureFlags
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

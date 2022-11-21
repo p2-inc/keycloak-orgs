@@ -16,12 +16,13 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const OktaWizardSaml: FC = () => {
   const idpCommonName = "Okta SAML IdP";
   const title = "Okta wizard";
   const navigateToBasePath = useNavigateToBasePath();
-
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const [metadata, setMetadata] = useState();
   const [isFormValid, setIsFormValid] = useState(false);
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -116,7 +117,7 @@ export const OktaWizardSaml: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -125,6 +126,7 @@ export const OktaWizardSaml: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
+	featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

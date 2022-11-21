@@ -16,6 +16,7 @@ import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/
 import { useNavigateToBasePath } from "@app/routes";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 const forms = {
   URL: true,
@@ -32,6 +33,7 @@ export const GenericOIDC: FC = () => {
     protocol: Protocols.OPEN_ID,
     preface: "generic-oidc",
   });
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getRealm } = useKeycloakAdminApi();
   const {
@@ -251,7 +253,7 @@ export const GenericOIDC: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       // TODO emailAsUsername, Mapper?
       
       setResults(`${idpCommonName} created successfully. Click finish.`);
