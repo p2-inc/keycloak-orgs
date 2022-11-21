@@ -42,9 +42,14 @@ const initialState: FeatureFlagsState = {
 //   initialState,
 //   reducers: {},
 // });
+const baseUrl = () => {
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost') return "https://app.phasetwo.io";
+  else return `${window.location.protocol}//${window.location.host}`;
+}
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "https://app.phasetwo.io",
+  baseUrl: baseUrl(),
 });
 
 const dynamicBaseQuery: BaseQueryFn<
