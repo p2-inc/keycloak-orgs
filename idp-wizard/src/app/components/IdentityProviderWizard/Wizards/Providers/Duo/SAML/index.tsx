@@ -25,6 +25,7 @@ import {
   Axios,
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const DuoWizard: FC = () => {
   const idpCommonName = "Duo SAML IdP";
@@ -33,6 +34,7 @@ export const DuoWizard: FC = () => {
     protocol: Protocols.SAML,
     preface: "duo-saml",
   });
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -131,7 +133,7 @@ export const DuoWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -140,6 +142,7 @@ export const DuoWizard: FC = () => {
         emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email", friendlyName: "" },
         firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/firstname", friendlyName: "" },
         lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/lastname", friendlyName: "" },
+	featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

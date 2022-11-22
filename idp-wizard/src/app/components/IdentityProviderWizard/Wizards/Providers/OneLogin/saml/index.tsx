@@ -25,6 +25,7 @@ import {
 } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const OneLoginWizard: FC = () => {
   const idpCommonName = "OneLogin IdP";
@@ -33,6 +34,7 @@ export const OneLoginWizard: FC = () => {
     protocol: Protocols.SAML,
     preface: "onelogin-saml",
   });
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -138,7 +140,7 @@ export const OneLoginWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -147,7 +149,8 @@ export const OneLoginWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
-        attributes: [ { userAttribute: "idpUserId", attributeName: "id", friendlyName: ""} ]
+        attributes: [ { userAttribute: "idpUserId", attributeName: "id", friendlyName: ""} ],
+	featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

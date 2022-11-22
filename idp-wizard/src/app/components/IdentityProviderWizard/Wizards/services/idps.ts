@@ -1,5 +1,5 @@
 import { Axios } from "./axios";
-import { useGetFeatureFlagsQuery } from "@app/services";
+import { FeatureFlagsState, useGetFeatureFlagsQuery } from "@app/services";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 
 const usernameAttributeName = "username";
@@ -11,13 +11,14 @@ const idpUsernameAttributeName = "idpUsername";
 type CreateIdpProps = {
   createIdPUrl: string;
   payload: IdentityProviderRepresentation;
+  featureFlags: FeatureFlagsState | undefined;
 };
   
 export const CreateIdp = async ({
   createIdPUrl,
   payload,
+  featureFlags
 }: CreateIdpProps) => {
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
   payload.trustEmail = featureFlags?.trustEmail;
   return Axios.post(createIdPUrl, payload);
 };
@@ -47,6 +48,7 @@ type MapperProps = {
   firstNameAttribute: MapperConfig;
   lastNameAttribute: MapperConfig;
   attributes?: AttributesConfig[];
+  featureFlags: FeatureFlagsState | undefined;
 };
 
 export const SamlAttributeMapper = async ({
@@ -57,8 +59,8 @@ export const SamlAttributeMapper = async ({
   firstNameAttribute,
   lastNameAttribute,
   attributes = [],
+  featureFlags,
 }: MapperProps) => {
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
   if (featureFlags?.emailAsUsername) {
     // create a new attribute mapper with the idpUsername from the usernameAttribute
     attributes.push({

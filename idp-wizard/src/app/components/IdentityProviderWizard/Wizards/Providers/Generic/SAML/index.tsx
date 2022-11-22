@@ -20,12 +20,13 @@ import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, CreateIdp, SamlAttributeMapper } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const GenericSAML: FC = () => {
   const idpCommonName = "Saml IdP";
   const title = "Generic SAML wizard";
   const navigateToBasePath = useNavigateToBasePath();
-
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getServerUrl, getRealm } = useKeycloakAdminApi();
   const {
@@ -97,7 +98,7 @@ export const GenericSAML: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload});
+      await CreateIdp({createIdPUrl, payload, featureFlags});
       
       await SamlAttributeMapper({
         alias,
@@ -106,6 +107,7 @@ export const GenericSAML: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "email" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "firstName" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "lastName" },
+	featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
