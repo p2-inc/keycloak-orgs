@@ -1,6 +1,7 @@
 import { useAppSelector } from "@app/hooks/hooks";
+import { useOrganization } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
-import { Flex, FlexItem, Title } from "@patternfly/react-core";
+import { Divider, Flex, FlexItem, Title } from "@patternfly/react-core";
 import React, { useState } from "react";
 import { AppLauncher } from "./app-launcher";
 import { OrgPicker } from "./org-picker";
@@ -11,9 +12,14 @@ type Props = {
 
 const MainNav: React.FC<Props> = ({ title }) => {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
-  const currentOrg = useAppSelector((state) => state.settings.selectedOrg);
+  const { getSelectedOrgName } = useOrganization();
+  const currentOrg = getSelectedOrgName();
 
-  const [isOrgPickerOpen, setIsOrgPickerOpen] = useState(false);
+  //TODO Move into store so that the picker state can easily be accessed
+  // depending on the location it gets determined that it should be used
+  // to pick an org
+  // Autoopen when
+  const [isOrgPickerOpen, setIsOrgPickerOpen] = useState(true);
 
   return (
     <Flex
@@ -30,19 +36,28 @@ const MainNav: React.FC<Props> = ({ title }) => {
             />
           </FlexItem>
           <FlexItem>
-            {title && (
-              <Title headingLevel="h1" size="3xl">
-                {title}
-              </Title>
-            )}
+            <Flex alignItems={{ default: "alignItemsCenter" }}>
+              {title && (
+                <FlexItem>
+                  <Title headingLevel="h2" size="lg" playsInline>
+                    {title}
+                  </Title>
+                </FlexItem>
+              )}
+              {title && currentOrg && <Divider isVertical />}
+              {currentOrg && (
+                <FlexItem>
+                  <Title headingLevel="h2" size="lg" playsInline>
+                    {currentOrg}
+                  </Title>
+                </FlexItem>
+              )}
+            </Flex>
           </FlexItem>
         </Flex>
       </FlexItem>
       <FlexItem style={{ textAlign: "end" }}>
         {featureFlags?.logoUrl && <img src={featureFlags.logoUrl} />}
-        <Title headingLevel="h2" size="lg">
-          {currentOrg}
-        </Title>
       </FlexItem>
     </Flex>
   );

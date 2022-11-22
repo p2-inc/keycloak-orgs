@@ -162,3 +162,10 @@ body,
     }
   }
 }
+
+.checkbox-group {
+  border: 2px solid lightgray;
+  border-radius: 5px;
+  padding: var(--pf-global--spacer--md);
+  margin-bottom: var(--pf-global--spacer--sm);
+}

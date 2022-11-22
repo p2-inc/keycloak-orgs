@@ -4,14 +4,11 @@ import { setOrganization } from "@app/services";
 import {
   Button,
   Checkbox,
-  Dropdown,
-  DropdownItem,
-  DropdownToggle,
+  Divider,
   FormGroup,
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
-import { CaretDownIcon } from "@patternfly/react-icons";
 import { useKeycloak } from "@react-keycloak/web";
 import React, { useState, useEffect } from "react";
 
@@ -29,68 +26,48 @@ const OrgPicker: React.FC<Props> = ({
   const currentOrg = useAppSelector((state) => state.settings.selectedOrg);
   const { keycloak } = useKeycloak();
   const orgs = keycloak?.tokenParsed?.organizations;
-  console.log("[orgs]", orgs, keycloak?.tokenParsed);
+  console.log("[orgs]", orgs, currentOrg);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<string>();
 
   useEffect(() => {
-    // TODO the App needs to determine this when it starts up
-    dispatch(setOrganization("Chicken Kablooey"));
-  }, []);
+    if (currentOrg) setSelectedOrg(currentOrg);
+  }, [currentOrg]);
 
   const handleModalConfirm = () => {
-    dispatch(
-      setOrganization((selectedOrg && orgs[selectedOrg].name) || currentOrg!)
-    );
+    dispatch(setOrganization(selectedOrg || currentOrg!));
     handleModalToggle();
   };
 
   const handleModalToggle = () => {
     setIsModalOpen(!isModalOpen);
     setSelectedOrg(undefined);
-    setIsDropdownOpen(false);
-  };
-
-  const onFocus = () => {
-    const element = document.getElementById("modal-dropdown-toggle");
-    (element as HTMLElement).focus();
   };
 
   const onEscapePress = () => {
-    if (isDropdownOpen) {
-      setIsDropdownOpen(!isDropdownOpen);
-      onFocus();
-    } else {
-      handleModalToggle();
-    }
+    handleModalToggle();
   };
 
-  // Check realm access for a full global state
-  // if not full global then a per org basis is required
-
   const OrgCheckboxGroups = Object.keys(orgs).map((orgId) => {
-    // each org has a checkbox
-    // with the right roles for the org
-    // it will also have the Global option for that org
     const orgName = orgs[orgId].name;
 
     const hasAdminRole = hasOrganizationRoles("admin", orgId);
 
-    // has role
+    if (!hasAdminRole) return <></>;
+
     return (
-      <FormGroup
-        role="group"
-        fieldId={`basic-form-checkbox-group-${orgId}`}
-        label={orgName}
-        className="pf-u-mb-md"
-        key={orgId}
-      >
-        {hasAdminRole && (
-          <Checkbox label="Global" aria-label="Global" id={`${orgId}_global`} />
-        )}
-        <Checkbox label={orgName} aria-label={orgName} id={orgId} />
-      </FormGroup>
+      <div className="checkbox-group" key={orgId}>
+        <FormGroup role="group" fieldId={`basic-form-checkbox-group-${orgId}`}>
+          <Checkbox
+            label={orgName}
+            aria-label={orgName}
+            id={orgId}
+            description={`Configure the ${orgName} organziation.`}
+            isChecked={orgId === selectedOrg}
+            onChange={() => setSelectedOrg(orgId)}
+          />
+        </FormGroup>
+      </div>
     );
   });
 
@@ -114,19 +91,24 @@ const OrgPicker: React.FC<Props> = ({
         For which Organization are you configuring an Identity Provider?
       </div>
       <br />
-      <div>
-        {hasRealmRoles("admin") && (
-          <FormGroup
-            role="group"
-            fieldId={`basic-form-checkbox-group-realm`}
-            label="Global Realm Setting"
-            className="pf-u-mb-md"
-          >
-            <Checkbox label="Global" aria-label="Global" id={`realm_global`} />
-          </FormGroup>
-        )}
-      </div>
       <div>{OrgCheckboxGroups.map((grp) => grp)}</div>
+      {hasRealmRoles("admin") && (
+        <>
+          <Divider className="pf-u-mt-lg pf-u-mb-lg" />
+          <div className="checkbox-group">
+            <FormGroup role="group" fieldId={`basic-form-checkbox-group-realm`}>
+              <Checkbox
+                label="Global"
+                aria-label="Global"
+                id={`realm_global`}
+                description={`No organization selected. Site administration config.`}
+                isChecked={"realm_global" === selectedOrg}
+                onChange={() => setSelectedOrg("realm_global")}
+              />
+            </FormGroup>
+          </div>{" "}
+        </>
+      )}
     </Modal>
   );
 };
