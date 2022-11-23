@@ -25,46 +25,30 @@ import org.keycloak.representations.IDToken;
 
 @JBossLog
 @AutoService(ProtocolMapper.class)
-public class OrganizationRoleMapper extends AbstractOrganizationMapper {
+public class OrganizationAttributeMapper extends AbstractOrganizationMapper {
 
-  public static final String PROVIDER_ID = "oidc-organization-role-mapper";
+  public static final String PROVIDER_ID = "oidc-organization-attribute-mapper";
 
   private static final List<ProviderConfigProperty> configProperties = Lists.newArrayList();
 
   static {
-    OIDCAttributeMapperHelper.addAttributeConfig(configProperties, OrganizationRoleMapper.class);
+    OIDCAttributeMapperHelper.addAttributeConfig(configProperties, OrganizationAttributeMapper.class);
   }
 
-  public OrganizationRoleMapper() {
-    super(PROVIDER_ID, "Organization Role", TOKEN_MAPPER_CATEGORY, "Map organization roles in a token claim.", configProperties);
+  public OrganizationAttributeMapper() {
+    super(PROVIDER_ID, "Organization Attribute", TOKEN_MAPPER_CATEGORY, "Map organization attributes in a token claim.", configProperties);
   }
 
-  /*
-   organizations: [
-     foo: [
-       "admin"
-          ],
-     bar: []
-   ]
-   gets all the roles for each organization of which the user is a member
-  */
   @Override
-  protected Map<String, Object> getOrganizationClaim(
-      KeycloakSession session, RealmModel realm, UserModel user) {
+  protected Map<String, Object> getOrganizationClaim(KeycloakSession session, RealmModel realm, UserModel user) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
     Map<String, Object> claim = Maps.newHashMap();
     orgs.getUserOrganizationsStream(realm, user)
         .forEach(
             o -> {
-              List<String> roles = Lists.newArrayList();
-              o.getRolesStream()
-                  .forEach(
-                      r -> {
-                        if (r.hasRole(user)) roles.add(r.getName());
-                      });
               Map<String, Object> org = Maps.newHashMap();
               org.put("name", o.getName());
-              org.put("roles", roles);
+              org.put("attributes", o.getAttributes());
               claim.put(o.getId(), org);
             });
     log.debugf("created user %s claim %s", user.getUsername(), claim);
