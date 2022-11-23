@@ -5,16 +5,25 @@ import { AppLayout } from "@app/AppLayout/AppLayout";
 import { AppRoutes } from "@app/routes";
 import "@app/styles/app.css";
 import { useEffect } from "react";
-import { setOrganization, setMustPickOrg } from "@app/services";
+import { setOrganization, setMustPickOrg, setApiMode } from "@app/services";
 import { useAppDispatch } from "@app/hooks/hooks";
 import { useKeycloak } from "@react-keycloak/web";
 import { useRoleAccess } from "@app/hooks";
-import { first } from "lodash";
+import { first, has } from "lodash";
+import { useGetFeatureFlagsQuery } from "@app/services";
 
 const App: React.FC = () => {
   const dispatch = useAppDispatch();
   const { hasOrganizationRoles, hasRealmRoles } = useRoleAccess();
   const { keycloak } = useKeycloak();
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
+
+  // Set apiMode into Settings
+  useEffect(() => {
+    if (featureFlags && has(featureFlags, "apiMode")) {
+      dispatch(setApiMode(featureFlags?.apiMode));
+    }
+  }, [featureFlags]);
 
   // Organization setup and selection
   const kcTPOrgId = keycloak?.tokenParsed?.org_id;

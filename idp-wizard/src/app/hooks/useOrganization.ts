@@ -10,6 +10,9 @@ export function useOrganization() {
     return orgs[currentOrg!];
   }
   function getCurrentOrgName() {
+    if (currentOrg === "global") {
+      return "Global";
+    }
     return orgs[currentOrg!]?.name;
   }
 

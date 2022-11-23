@@ -105,11 +105,11 @@ const OrgPicker: React.FC<Props> = ({
               <Radio
                 label="Global"
                 aria-label="Global"
-                id={`realm_global`}
-                name={`realm_global`}
+                id={`global`}
+                name={`global`}
                 description={`No organization selected. Site administration config.`}
-                isChecked={"realm_global" === selectedOrg}
-                onChange={() => setSelectedOrg("realm_global")}
+                isChecked={"global" === selectedOrg}
+                onChange={() => setSelectedOrg("global")}
               />
             </FormGroup>
           </div>{" "}

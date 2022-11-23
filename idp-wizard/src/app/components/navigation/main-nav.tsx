@@ -1,6 +1,6 @@
-import { useAppSelector } from "@app/hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@app/hooks/hooks";
 import { useOrganization } from "@app/hooks";
-import { useGetFeatureFlagsQuery } from "@app/services";
+import { setMustPickOrg, useGetFeatureFlagsQuery } from "@app/services";
 import { Divider, Flex, FlexItem, Title } from "@patternfly/react-core";
 import React, { useEffect, useState } from "react";
 import { AppLauncher } from "./app-launcher";
@@ -11,14 +11,18 @@ type Props = {
 };
 
 const MainNav: React.FC<Props> = ({ title }) => {
+  const dispatch = useAppDispatch();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
-  const { getCurrentOrgName, currentOrg } = useOrganization();
+  const { getCurrentOrgName } = useOrganization();
   const mustPickOrg = useAppSelector((state) => state.settings.mustPickOrg);
   const currentOrgName = getCurrentOrgName();
   const [isOrgPickerOpen, setIsOrgPickerOpen] = useState(mustPickOrg);
 
   useEffect(() => {
-    if (mustPickOrg) setIsOrgPickerOpen(mustPickOrg);
+    if (mustPickOrg) {
+      setIsOrgPickerOpen(mustPickOrg);
+      dispatch(setMustPickOrg(false));
+    }
   }, [mustPickOrg]);
 
   return (

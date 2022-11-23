@@ -1,8 +1,8 @@
 import { PATHS } from "@app/routes";
-import { useGetFeatureFlagsQuery } from "@app/services";
 import { useKeycloak } from "@react-keycloak/web";
 import { useEffect, useState } from "react";
 import { generatePath, useParams } from "react-router-dom";
+import { useAppSelector } from "./hooks";
 
 export const requiredOrganizationResourceRoles = [
   "view-identity-providers",
@@ -64,7 +64,8 @@ export const requiredRealmAdminRoles = [
 ];
 
 export function useRoleAccess() {
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
+  const apiMode = useAppSelector((state) => state.settings.apiMode);
+  const currentOrg = useAppSelector((state) => state.settings.currentOrg);
   const { keycloak } = useKeycloak();
   let { realm } = useParams();
   // Starts as null to make true/false explicit states
@@ -132,14 +133,15 @@ export function useRoleAccess() {
     return !roleAccess.includes(false);
   }
 
+  // TODO: Check that access is being configured correctly
   function checkAccess() {
-    if (!featureFlags) return;
-    // console.log("access control", featureFlags?.apiMode);
-    const orgId = keycloak?.tokenParsed?.org_id;
+    if (currentOrg === "global") {
+      setHasOrgAccess(true);
+    }
 
     //cloud mode
-    if (featureFlags?.apiMode === "cloud") {
-      setHasOrgAccess(hasOrganizationRoles("admin", orgId));
+    if (apiMode === "cloud") {
+      setHasOrgAccess(hasOrganizationRoles("admin", currentOrg));
     } else {
       // onprem mode
       // if the keycloak realm is the master realm,
@@ -151,13 +153,13 @@ export function useRoleAccess() {
         return roleAccess.push(keycloak.hasResourceRole(role, resource));
       });
       setHasOrgAccess(!roleAccess.includes(false));
-      setHasOrgAccess(hasOrganizationRoles("resource", orgId));
+      setHasOrgAccess(hasOrganizationRoles("resource", currentOrg));
     }
   }
 
   useEffect(() => {
     checkAccess();
-  }, [keycloak?.tokenParsed, featureFlags]);
+  }, [keycloak?.tokenParsed, apiMode]);
 
   useEffect(() => {
     checkAccess();
