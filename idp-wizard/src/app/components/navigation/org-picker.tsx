@@ -8,6 +8,7 @@ import {
   FormGroup,
   Modal,
   ModalVariant,
+  Radio,
 } from "@patternfly/react-core";
 import { useKeycloak } from "@react-keycloak/web";
 import React, { useState, useEffect } from "react";
@@ -23,16 +24,20 @@ const OrgPicker: React.FC<Props> = ({
 }) => {
   const { hasOrganizationRoles, hasRealmRoles } = useRoleAccess();
   const dispatch = useAppDispatch();
-  const currentOrg = useAppSelector((state) => state.settings.selectedOrg);
+  const currentOrg = useAppSelector((state) => state.settings.currentOrg);
   const { keycloak } = useKeycloak();
   const orgs = keycloak?.tokenParsed?.organizations;
-  console.log("[orgs]", orgs, currentOrg);
+  // console.log("[orgs]", orgs, currentOrg);
 
   const [selectedOrg, setSelectedOrg] = useState<string>();
 
   useEffect(() => {
     if (currentOrg) setSelectedOrg(currentOrg);
   }, [currentOrg]);
+
+  useEffect(() => {
+    if (isModalOpen && currentOrg) setSelectedOrg(currentOrg);
+  }, [isModalOpen]);
 
   const handleModalConfirm = () => {
     dispatch(setOrganization(selectedOrg || currentOrg!));
@@ -48,20 +53,20 @@ const OrgPicker: React.FC<Props> = ({
     handleModalToggle();
   };
 
-  const OrgCheckboxGroups = Object.keys(orgs).map((orgId) => {
+  const OrgRadioGroups = Object.keys(orgs).map((orgId) => {
     const orgName = orgs[orgId].name;
-
     const hasAdminRole = hasOrganizationRoles("admin", orgId);
 
     if (!hasAdminRole) return <></>;
 
     return (
-      <div className="checkbox-group" key={orgId}>
-        <FormGroup role="group" fieldId={`basic-form-checkbox-group-${orgId}`}>
-          <Checkbox
+      <div className="radio-group" key={orgId}>
+        <FormGroup role="group" fieldId={`basic-form-radio-group-${orgId}`}>
+          <Radio
             label={orgName}
             aria-label={orgName}
             id={orgId}
+            name={orgId}
             description={`Configure the ${orgName} organziation.`}
             isChecked={orgId === selectedOrg}
             onChange={() => setSelectedOrg(orgId)}
@@ -91,16 +96,17 @@ const OrgPicker: React.FC<Props> = ({
         For which Organization are you configuring an Identity Provider?
       </div>
       <br />
-      <div>{OrgCheckboxGroups.map((grp) => grp)}</div>
+      <div>{OrgRadioGroups.map((grp) => grp)}</div>
       {hasRealmRoles("admin") && (
         <>
           <Divider className="pf-u-mt-lg pf-u-mb-lg" />
-          <div className="checkbox-group">
-            <FormGroup role="group" fieldId={`basic-form-checkbox-group-realm`}>
-              <Checkbox
+          <div className="radio-group">
+            <FormGroup role="group" fieldId={`basic-form-radio-group-realm`}>
+              <Radio
                 label="Global"
                 aria-label="Global"
                 id={`realm_global`}
+                name={`realm_global`}
                 description={`No organization selected. Site administration config.`}
                 isChecked={"realm_global" === selectedOrg}
                 onChange={() => setSelectedOrg("realm_global")}

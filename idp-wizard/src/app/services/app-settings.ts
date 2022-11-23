@@ -2,20 +2,30 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 interface Settings {
-  selectedOrg: string | null;
+  currentOrg: string | null;
+  mustPickOrg: boolean;
+  // realm
+  // org, orgId
+  // onprem or not
 }
 
-const initialState = { selectedOrg: null } as Settings;
+const initialState = {
+  currentOrg: null,
+  mustPickOrg: false,
+} as Settings;
 
 const settingsSlice = createSlice({
   name: "settings",
   initialState,
   reducers: {
     setOrganization(state, action: PayloadAction<string>) {
-      state.selectedOrg = action.payload;
+      state.currentOrg = action.payload;
+    },
+    setMustPickOrg(state, action: PayloadAction<boolean>) {
+      state.mustPickOrg = action.payload;
     },
   },
 });
 
-export const { setOrganization } = settingsSlice.actions;
+export const { setOrganization, setMustPickOrg } = settingsSlice.actions;
 export { settingsSlice };

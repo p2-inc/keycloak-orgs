@@ -27,7 +27,7 @@ type Props = {
 };
 
 const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
-  const { hasAccess } = useRoleAccess();
+  const { hasOrgAccess } = useRoleAccess();
   let { realm } = useParams();
   const { keycloak } = useKeycloak();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
@@ -55,7 +55,7 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
       }
       className={cs({
         "pf-u-display-none":
-          featureFlags?.enableDashboard !== false || !hasAccess,
+          featureFlags?.enableDashboard !== false || !hasOrgAccess,
       })}
     />,
     <ApplicationLauncherItem

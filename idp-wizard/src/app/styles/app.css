@@ -163,7 +163,7 @@ body,
   }
 }
 
-.checkbox-group {
+.radio-group {
   border: 2px solid lightgray;
   border-radius: 5px;
   padding: var(--pf-global--spacer--md);

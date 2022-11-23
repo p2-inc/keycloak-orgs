@@ -4,14 +4,14 @@ import { useAppSelector } from "./hooks";
 export function useOrganization() {
   const { keycloak } = useKeycloak();
   const orgs = keycloak?.tokenParsed?.organizations;
-  const currentOrg = useAppSelector((state) => state.settings.selectedOrg);
+  const currentOrg = useAppSelector((state) => state.settings.currentOrg);
 
-  function getSelectedOrg() {
+  function getCurrentOrg() {
     return orgs[currentOrg!];
   }
-  function getSelectedOrgName() {
+  function getCurrentOrgName() {
     return orgs[currentOrg!]?.name;
   }
 
-  return { getSelectedOrg, getSelectedOrgName };
+  return { currentOrg, getCurrentOrg, getCurrentOrgName };
 }

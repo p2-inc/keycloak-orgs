@@ -2,7 +2,7 @@ import { useAppSelector } from "@app/hooks/hooks";
 import { useOrganization } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { Divider, Flex, FlexItem, Title } from "@patternfly/react-core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AppLauncher } from "./app-launcher";
 import { OrgPicker } from "./org-picker";
 
@@ -12,14 +12,14 @@ type Props = {
 
 const MainNav: React.FC<Props> = ({ title }) => {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
-  const { getSelectedOrgName } = useOrganization();
-  const currentOrg = getSelectedOrgName();
+  const { getCurrentOrgName, currentOrg } = useOrganization();
+  const mustPickOrg = useAppSelector((state) => state.settings.mustPickOrg);
+  const currentOrgName = getCurrentOrgName();
+  const [isOrgPickerOpen, setIsOrgPickerOpen] = useState(mustPickOrg);
 
-  //TODO Move into store so that the picker state can easily be accessed
-  // depending on the location it gets determined that it should be used
-  // to pick an org
-  // Autoopen when
-  const [isOrgPickerOpen, setIsOrgPickerOpen] = useState(true);
+  useEffect(() => {
+    if (mustPickOrg) setIsOrgPickerOpen(mustPickOrg);
+  }, [mustPickOrg]);
 
   return (
     <Flex
@@ -44,11 +44,11 @@ const MainNav: React.FC<Props> = ({ title }) => {
                   </Title>
                 </FlexItem>
               )}
-              {title && currentOrg && <Divider isVertical />}
-              {currentOrg && (
+              {title && currentOrgName && <Divider isVertical />}
+              {currentOrgName && (
                 <FlexItem>
                   <Title headingLevel="h2" size="lg" playsInline>
-                    {currentOrg}
+                    {currentOrgName}
                   </Title>
                 </FlexItem>
               )}
