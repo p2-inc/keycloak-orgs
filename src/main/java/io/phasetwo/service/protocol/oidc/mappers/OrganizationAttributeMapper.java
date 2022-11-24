@@ -7,21 +7,12 @@ import io.phasetwo.service.model.OrganizationProvider;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.UserSessionModel;
 import org.keycloak.protocol.ProtocolMapper;
-import org.keycloak.protocol.oidc.mappers.AbstractOIDCProtocolMapper;
-import org.keycloak.protocol.oidc.mappers.OIDCAccessTokenMapper;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
-import org.keycloak.protocol.oidc.mappers.OIDCIDTokenMapper;
-import org.keycloak.protocol.oidc.mappers.UserInfoTokenMapper;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.IDToken;
 
 @JBossLog
 @AutoService(ProtocolMapper.class)
@@ -32,15 +23,22 @@ public class OrganizationAttributeMapper extends AbstractOrganizationMapper {
   private static final List<ProviderConfigProperty> configProperties = Lists.newArrayList();
 
   static {
-    OIDCAttributeMapperHelper.addAttributeConfig(configProperties, OrganizationAttributeMapper.class);
+    OIDCAttributeMapperHelper.addAttributeConfig(
+        configProperties, OrganizationAttributeMapper.class);
   }
 
   public OrganizationAttributeMapper() {
-    super(PROVIDER_ID, "Organization Attribute", TOKEN_MAPPER_CATEGORY, "Map organization attributes in a token claim.", configProperties);
+    super(
+        PROVIDER_ID,
+        "Organization Attribute",
+        TOKEN_MAPPER_CATEGORY,
+        "Map organization attributes in a token claim.",
+        configProperties);
   }
 
   @Override
-  protected Map<String, Object> getOrganizationClaim(KeycloakSession session, RealmModel realm, UserModel user) {
+  protected Map<String, Object> getOrganizationClaim(
+      KeycloakSession session, RealmModel realm, UserModel user) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
     Map<String, Object> claim = Maps.newHashMap();
     orgs.getUserOrganizationsStream(realm, user)

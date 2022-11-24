@@ -1,9 +1,5 @@
 package io.phasetwo.service.protocol.oidc.mappers;
 
-import com.google.auto.service.AutoService;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.phasetwo.service.model.OrganizationProvider;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
@@ -13,7 +9,6 @@ import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
-import org.keycloak.protocol.ProtocolMapper;
 import org.keycloak.protocol.oidc.mappers.AbstractOIDCProtocolMapper;
 import org.keycloak.protocol.oidc.mappers.OIDCAccessTokenMapper;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
@@ -27,7 +22,12 @@ import org.keycloak.representations.IDToken;
 public abstract class AbstractOrganizationMapper extends AbstractOIDCProtocolMapper
     implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
 
-  AbstractOrganizationMapper(String providerId, String displayType, String displayCategory, String helpText, List<ProviderConfigProperty> config) {
+  AbstractOrganizationMapper(
+      String providerId,
+      String displayType,
+      String displayCategory,
+      String helpText,
+      List<ProviderConfigProperty> config) {
     this.providerId = providerId;
     this.displayType = displayType;
     this.displayCategory = displayCategory;
@@ -66,7 +66,8 @@ public abstract class AbstractOrganizationMapper extends AbstractOIDCProtocolMap
     return helpText;
   }
 
-  protected abstract Map<String, Object> getOrganizationClaim(KeycloakSession session, RealmModel realm, UserModel user);
+  protected abstract Map<String, Object> getOrganizationClaim(
+      KeycloakSession session, RealmModel realm, UserModel user);
 
   @Override
   protected void setClaim(
@@ -76,7 +77,8 @@ public abstract class AbstractOrganizationMapper extends AbstractOIDCProtocolMap
       KeycloakSession keycloakSession,
       ClientSessionContext clientSessionCtx) {
     log.debugf("adding org claim to idToken for %s", userSession.getUser().getUsername());
-    Object claim = getOrganizationClaim(keycloakSession, userSession.getRealm(), userSession.getUser());
+    Object claim =
+        getOrganizationClaim(keycloakSession, userSession.getRealm(), userSession.getUser());
     if (claim == null) return;
     OIDCAttributeMapperHelper.mapClaim(token, mappingModel, claim);
   }
@@ -90,7 +92,8 @@ public abstract class AbstractOrganizationMapper extends AbstractOIDCProtocolMap
       ClientSessionContext clientSessionCtx) {
     log.debugf("adding org claim to accessToken for %s", userSession.getUser().getUsername());
     UserModel user = userSession.getUser();
-    Object claim = getOrganizationClaim(keycloakSession, userSession.getRealm(), userSession.getUser());
+    Object claim =
+        getOrganizationClaim(keycloakSession, userSession.getRealm(), userSession.getUser());
     if (claim == null) return;
     OIDCAttributeMapperHelper.mapClaim(accessTokenResponse, mappingModel, claim);
   }

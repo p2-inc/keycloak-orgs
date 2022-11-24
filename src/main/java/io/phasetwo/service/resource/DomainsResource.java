@@ -19,8 +19,8 @@ import org.keycloak.models.RealmModel;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SimpleResolver;
-import org.xbill.DNS.Type;
 import org.xbill.DNS.TXTRecord;
+import org.xbill.DNS.Type;
 
 @JBossLog
 public class DomainsResource extends OrganizationAdminResource {
