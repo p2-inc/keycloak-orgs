@@ -32,6 +32,7 @@ import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.IdentityProviderMapperRepresentation;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 @JBossLog
@@ -49,6 +50,14 @@ public class OrganizationResourceTest {
     return String.format("%s/realms/%s/orgs%s", server.getAuthUrl(), realm, o.toString());
   }
 
+  @Test
+  public void testRealmId() throws Exception {
+    Keycloak keycloak = server.client();
+    RealmRepresentation r = keycloak.realm("master").toRepresentation();
+    assertThat(r.getRealm(), is("master"));
+    assertThat(r.getId(), not("master"));
+  }
+  
   @Test
   public void testGetDomains() throws Exception {
     Keycloak keycloak = server.client();
@@ -266,7 +275,10 @@ public class OrganizationResourceTest {
             .json("foo") // hack b/c simplehttp doesn't like body-less puts
             .asResponse();
     assertThat(response.getStatus(), is(201));
-
+    assertNotNull(response.getFirstHeader("Location"));
+    String loc = response.getFirstHeader("Location");
+    assertThat(loc, is(url("master", urlencode(id), "members", user.getId())));
+    
     // check membership after add
     response =
         SimpleHttp.doGet(url("master", urlencode(id), "members", user.getId()), http)
@@ -308,6 +320,9 @@ public class OrganizationResourceTest {
             .json("foo") // hack b/c simplehttp doesn't like body-less puts
             .asResponse();
     assertThat(response.getStatus(), is(201));
+    assertNotNull(response.getFirstHeader("Location"));
+    loc = response.getFirstHeader("Location");
+    assertThat(loc, is(url("master", urlencode(id), "members", user.getId())));
 
     // call the users/:id/orgs endpoint
     String userOrgsUrl =
@@ -460,6 +475,9 @@ public class OrganizationResourceTest {
             .json("foo") // hack b/c simplehttp doesn't like body-less puts
             .asResponse();
     assertThat(response.getStatus(), is(201));
+    assertNotNull(response.getFirstHeader("Location"));
+    String loc = response.getFirstHeader("Location");
+    assertThat(loc, is(url("master", urlencode(id), "members", user.getId())));
 
     // grant role to user
     grantUserRole(keycloak, id, name, user.getId());
@@ -553,6 +571,11 @@ public class OrganizationResourceTest {
             .json(inv)
             .asResponse();
     assertThat(response.getStatus(), is(201));
+    assertNotNull(response.getFirstHeader("Location"));
+    String loc = response.getFirstHeader("Location");
+    String inviteId = loc.substring(loc.lastIndexOf("/") + 1);
+    assertNotNull(inviteId);
+    assertThat(loc, is(url("master", urlencode(id), "invitations", inviteId)));
 
     // get invitations
     response =
@@ -666,7 +689,8 @@ public class OrganizationResourceTest {
     assertThat(response.getStatus(), is(201));
     String loc = response.getFirstHeader("Location");
     String alias1 = loc.substring(loc.lastIndexOf("/") + 1);
-
+    assertThat(loc, is(url("master", urlencode(id), "idps", alias1)));
+    
     // get idps
     response =
         SimpleHttp.doGet(url("master", urlencode(id), "idps"), http)
@@ -692,6 +716,7 @@ public class OrganizationResourceTest {
     assertThat(response.getStatus(), is(201));
     loc = response.getFirstHeader("Location");
     String alias2 = loc.substring(loc.lastIndexOf("/") + 1);
+    assertThat(loc, is(url("master", urlencode(id), "idps", alias2)));
 
     // get idps
     response =
@@ -909,6 +934,7 @@ public class OrganizationResourceTest {
     assertThat(response.getStatus(), is(201));
     String loc = response.getFirstHeader("Location");
     String alias1 = loc.substring(loc.lastIndexOf("/") + 1);
+    assertThat(loc, is(url("master", urlencode(orgId1), "idps", alias1)));
 
     // create idp for org 2
     idp.setAlias("vendor-protocol-B1");
@@ -920,6 +946,7 @@ public class OrganizationResourceTest {
     assertThat(response.getStatus(), is(201));
     loc = response.getFirstHeader("Location");
     String alias2 = loc.substring(loc.lastIndexOf("/") + 1);
+    assertThat(loc, is(url("master", urlencode(orgId2), "idps", alias1)));
 
     // check that org 1 can only see idp 1
     response =
@@ -1159,6 +1186,7 @@ public class OrganizationResourceTest {
     String loc = response.getFirstHeader("Location");
     String id = loc.substring(loc.lastIndexOf("/") + 1);
     assertThat(name, is(id));
+    assertThat(loc, is(url("master", urlencode(orgId), "roles", id)));
     return id;
   }
 
@@ -1173,6 +1201,10 @@ public class OrganizationResourceTest {
             .json("foo") // hack b/c simplehttp doesn't like body-less puts
             .asResponse();
     assertThat(response.getStatus(), is(201));
+    assertNotNull(response.getFirstHeader("Location"));
+    String loc = response.getFirstHeader("Location");
+    String id = loc.substring(loc.lastIndexOf("/") + 1);
+    assertThat(loc, is(url("master", urlencode(orgId), "roles", urlencode(role), "users", userId)));
   }
 
   private void checkUserRole(
@@ -1197,6 +1229,7 @@ public class OrganizationResourceTest {
     String loc = response.getFirstHeader("Location");
     String id = loc.substring(loc.lastIndexOf("/") + 1);
     assertNotNull(id);
+    assertThat(loc, is(url(realm, id)));
     return id;
   }
 

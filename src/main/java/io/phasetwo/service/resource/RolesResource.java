@@ -6,7 +6,6 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.OrganizationRole;
-import java.net.URI;
 import java.util.stream.Stream;
 import javax.validation.constraints.*;
 import javax.ws.rs.*;
@@ -14,8 +13,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.RealmModel;
-import org.keycloak.services.resources.admin.AdminRoot;
 
 @JBossLog
 public class RolesResource extends OrganizationAdminResource {
@@ -60,15 +59,17 @@ public class RolesResource extends OrganizationAdminResource {
     }
     r = organization.addRole(representation.getName());
     r.setDescription(representation.getDescription());
-    // /auth/realms/:realm/orgs/:orgId/roles/:name"
-    URI location =
-        AdminRoot.realmsUrl(session.getContext().getUri())
-            .path(realm.getName())
-            .path("orgs")
-            .path(organization.getId())
-            .path("roles")
-            .path(r.getName())
-            .build();
-    return Response.created(location).build();
+
+    OrganizationRole or = convertOrganizationRole(r);
+    adminEvent
+        .resource(ORGANIZATION_ROLE.name())
+        .operation(OperationType.CREATE)
+        .resourcePath(session.getContext().getUri(), or.getName())
+        .representation(or)
+        .success();
+
+    return Response.created(
+            session.getContext().getUri().getAbsolutePathBuilder().path(or.getName()).build())
+        .build();
   }
 }

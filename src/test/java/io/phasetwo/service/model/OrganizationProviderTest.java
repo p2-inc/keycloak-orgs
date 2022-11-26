@@ -80,5 +80,20 @@ public class OrganizationProviderTest {
     } finally {
       session.close();
     }
+
+    session = factory.create();
+    session.getTransactionManager().begin();
+    try {
+      RealmModel realm = session.realms().getRealmByName("master");
+      UserModel user = session.users().getUserByUsername(realm, "admin");
+      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
+
+      boolean removed = provider.removeOrganization(realm, id);
+      assertTrue(removed);
+      
+      session.getTransactionManager().commit();
+    } finally {
+      session.close();
+    }
   }
 }

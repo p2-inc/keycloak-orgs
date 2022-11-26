@@ -5,7 +5,6 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import io.phasetwo.service.model.OrganizationModel;
-import java.net.URI;
 import java.util.stream.Stream;
 import javax.validation.constraints.*;
 import javax.ws.rs.*;
@@ -17,7 +16,6 @@ import org.keycloak.models.Constants;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.services.resources.admin.AdminRoot;
 
 @JBossLog
 public class MembersResource extends OrganizationAdminResource {
@@ -100,16 +98,8 @@ public class MembersResource extends OrganizationAdminResource {
             .representation(userId)
             .success();
       }
-      // /auth/realms/:realm/orgs/:orgId/members/:userId"
-      URI location =
-          AdminRoot.realmsUrl(session.getContext().getUri())
-              .path(realm.getName())
-              .path("orgs")
-              .path(organization.getId())
-              .path("members")
-              .path(userId)
-              .build();
-      return Response.created(location).build();
+      return Response.created(session.getContext().getUri().getAbsolutePathBuilder().build())
+          .build();
     } else {
       throw new NotFoundException();
     }

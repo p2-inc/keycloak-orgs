@@ -7,18 +7,18 @@ import static org.keycloak.models.utils.ModelToRepresentation.*;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.OrganizationRole;
-import java.net.URI;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
 import javax.validation.constraints.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.services.resources.admin.AdminRoot;
 
 @JBossLog
 public class RoleResource extends OrganizationAdminResource {
@@ -44,7 +44,19 @@ public class RoleResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response updateRole(OrganizationRole representation) {
     canManage();
-    role.setDescription(representation.getDescription());
+
+    if (!Objects.equals(role.getDescription(), representation.getDescription())) {
+      role.setDescription(representation.getDescription());
+
+      OrganizationRole or = convertOrganizationRole(role);
+      adminEvent
+          .resource(ORGANIZATION_ROLE.name())
+          .operation(OperationType.UPDATE)
+          .resourcePath(session.getContext().getUri(), or.getName())
+          .representation(or)
+          .success();
+    }
+
     return Response.noContent().build();
   }
 
@@ -58,6 +70,13 @@ public class RoleResource extends OrganizationAdminResource {
     }
 
     organization.removeRole(name);
+
+    adminEvent
+        .resource(ORGANIZATION_ROLE.name())
+        .operation(OperationType.DELETE)
+        .resourcePath(session.getContext().getUri(), name)
+        .success();
+
     return Response.noContent().build();
   }
 
@@ -96,20 +115,17 @@ public class RoleResource extends OrganizationAdminResource {
       }
       if (!role.hasRole(user)) {
         role.grantRole(user);
+
+        adminEvent
+            .resource(ORGANIZATION_ROLE_MAPPING.name())
+            .operation(OperationType.CREATE)
+            .resourcePath(session.getContext().getUri())
+            .representation(userId)
+            .success();
       }
 
-      // /auth/realms/:realm/orgs/:orgId/roles/:name/users/:userId"
-      URI location =
-          AdminRoot.realmsUrl(session.getContext().getUri())
-              .path(realm.getName())
-              .path("orgs")
-              .path(organization.getId())
-              .path("roles")
-              .path(role.getName())
-              .path("users")
-              .path(userId)
-              .build();
-      return Response.created(location).build();
+      return Response.created(session.getContext().getUri().getAbsolutePathBuilder().build())
+          .build();
     } else {
       throw new NotFoundException(String.format("User %s doesn't exist", userId));
     }
@@ -124,6 +140,12 @@ public class RoleResource extends OrganizationAdminResource {
     UserModel user = session.users().getUserById(realm, userId);
     if (user != null && role.hasRole(user)) {
       role.revokeRole(user);
+      adminEvent
+          .resource(ORGANIZATION_ROLE_MAPPING.name())
+          .operation(OperationType.DELETE)
+          .resourcePath(session.getContext().getUri())
+          .representation(userId)
+          .success();
       return Response.noContent().build();
     } else {
       throw new NotFoundException(String.format("User %s doesn't have role %s", userId, name));

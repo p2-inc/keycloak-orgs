@@ -6,7 +6,6 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
 import io.phasetwo.service.model.OrganizationModel;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.validation.constraints.*;
@@ -25,7 +24,6 @@ import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.representations.idm.TestLdapConnectionRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.managers.LDAPServerCapabilitiesManager;
-import org.keycloak.services.resources.admin.AdminRoot;
 
 @JBossLog
 public class IdentityProvidersResource extends OrganizationAdminResource {
@@ -103,16 +101,14 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
-      // /auth/realms/:realm/orgs/:orgId/idps/:alias"
-      URI location =
-          AdminRoot.realmsUrl(session.getContext().getUri())
-              .path(realm.getName())
-              .path("orgs")
-              .path(organization.getId())
-              .path("idps")
-              .path(representation.getAlias())
-              .build();
-      return Response.created(location).build();
+      return Response.created(
+              session
+                  .getContext()
+                  .getUri()
+                  .getAbsolutePathBuilder()
+                  .path(representation.getAlias())
+                  .build())
+          .build();
     } else {
       return resp;
     }

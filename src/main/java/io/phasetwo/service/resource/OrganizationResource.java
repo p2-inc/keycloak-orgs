@@ -115,6 +115,7 @@ public class OrganizationResource extends OrganizationAdminResource {
           .resource(ORGANIZATION.name())
           .operation(OperationType.DELETE)
           .resourcePath(session.getContext().getUri(), orgId)
+          .representation(orgId)
           .success();
     }
     return Response.status(204).build();

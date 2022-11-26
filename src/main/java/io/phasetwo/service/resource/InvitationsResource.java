@@ -36,7 +36,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.services.resources.admin.AdminRoot;
 
 @JBossLog
 public class InvitationsResource extends OrganizationAdminResource {
@@ -95,15 +94,7 @@ public class InvitationsResource extends OrganizationAdminResource {
           .representation(o)
           .success();
 
-      // /auth/realms/:realm/orgs/:orgId/invtations/:name"
-      URI location =
-          AdminRoot.realmsUrl(session.getContext().getUri())
-              .path(realm.getName())
-              .path("orgs")
-              .path(organization.getId())
-              .path("invitations")
-              .path(o.getId())
-              .build();
+      URI location = session.getContext().getUri().getAbsolutePathBuilder().path(o.getId()).build();
 
       if (invitation.isSend()) {
         // TODO use inviter

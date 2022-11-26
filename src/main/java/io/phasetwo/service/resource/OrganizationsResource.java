@@ -5,7 +5,6 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.Organization;
-import java.net.URI;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.validation.Valid;
@@ -18,7 +17,6 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.RealmModel;
-import org.keycloak.services.resources.admin.AdminRoot;
 
 @JBossLog
 public class OrganizationsResource extends OrganizationAdminResource {
@@ -85,13 +83,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
         .representation(o)
         .success();
 
-    // /auth/realms/:realm/orgs/:orgId/roles/:name"
-    URI location =
-        AdminRoot.realmsUrl(session.getContext().getUri())
-            .path(realm.getName())
-            .path("orgs")
-            .path(o.getId())
-            .build();
-    return Response.created(location).build();
+    return Response.created(
+            session.getContext().getUri().getAbsolutePathBuilder().path(o.getId()).build())
+        .build();
   }
 }
