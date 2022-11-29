@@ -15,7 +15,6 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 export const IdPProtocolSelector: FC = ({}) => {
   const { provider, realm } = useParams<keyof RouterParams>() as RouterParams;
   let navigate = useNavigate();
-  const { hasAccess } = useRoleAccess();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   const currentProvider = IdentityProviders.find((i) => i.id === provider)!;

@@ -1,4 +1,4 @@
-import { useGetFeatureFlagsQuery } from "@app/services";
+import { useAppSelector } from "@app/hooks/hooks";
 import { Button, Stack, StackItem, Title } from "@patternfly/react-core";
 import {
   CheckCircleIcon,
@@ -36,9 +36,8 @@ export const WizardConfirmation: FC<SuccessProps> = ({
   adminLink,
   adminButtonText,
 }) => {
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
-
-  const isCloud = featureFlags?.apiMode === "cloud";
+  const apiMode = useAppSelector((state) => state.settings.apiMode);
+  const isCloud = apiMode === "cloud";
 
   return (
     <div className="container" style={{ border: 0 }}>
