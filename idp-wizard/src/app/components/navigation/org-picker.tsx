@@ -49,9 +49,7 @@ const OrgPicker: React.FC<Props> = ({
     setSelectedOrg(undefined);
   };
 
-  const onEscapePress = () => {
-    handleModalToggle();
-  };
+  const onEscapePress = () => false;
 
   const OrgRadioGroups = Object.keys(orgs).map((orgId) => {
     const orgName = orgs[orgId].name;
@@ -78,7 +76,7 @@ const OrgPicker: React.FC<Props> = ({
 
   return (
     <Modal
-      title="Organization Selector"
+      title="Choose Your Organization"
       variant={ModalVariant.small}
       isOpen={isModalOpen}
       onClose={handleModalToggle}
@@ -86,10 +84,8 @@ const OrgPicker: React.FC<Props> = ({
         <Button key="confirm" variant="primary" onClick={handleModalConfirm}>
           Confirm
         </Button>,
-        <Button key="cancel" variant="link" onClick={handleModalToggle}>
-          Cancel
-        </Button>,
       ]}
+      showClose={false}
       onEscapePress={onEscapePress}
     >
       <div>
