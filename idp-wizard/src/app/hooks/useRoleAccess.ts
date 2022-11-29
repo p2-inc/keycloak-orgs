@@ -21,32 +21,6 @@ export const requiredOrganizationAdminRoles = [
   "manage-identity-providers",
 ];
 
-// Realm Roles
-// [
-//   "view-identity-providers",
-//   "view-realm",
-//   "manage-organizations",
-//   "manage-identity-providers",
-//   "impersonation",
-//   "realm-admin",
-//   "create-client",
-//   "manage-users",
-//   "query-realms",
-//   "publish-events",
-//   "view-authorization",
-//   "query-clients",
-//   "query-users",
-//   "manage-events",
-//   "manage-realm",
-//   "view-organizations",
-//   "view-events",
-//   "view-users",
-//   "create-organization",
-//   "view-clients",
-//   "manage-authorization",
-//   "manage-clients",
-//   "query-groups",
-// ];
 export const requiredRealmResourceRoles = [
   "view-identity-providers",
   "manage-identity-providers",
