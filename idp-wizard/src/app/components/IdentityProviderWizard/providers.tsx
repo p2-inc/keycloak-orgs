@@ -4,7 +4,6 @@ import {
   Protocols,
   Providers,
 } from "@app/configurations";
-import { useRoleAccess } from "@app/hooks";
 import { RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
@@ -32,7 +31,6 @@ const Provider = () => {
   const { provider, protocol } = useParams<
     keyof RouterParams
   >() as RouterParams;
-  const { hasAccess } = useRoleAccess();
 
   const providers = [...IdentityProviders, ...GenericIdentityProviders];
 

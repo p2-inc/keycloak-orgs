@@ -1,6 +1,7 @@
 import { useGetFeatureFlagsQuery } from "@app/services";
-import _, { isString, last } from "lodash";
+import { isString, last } from "lodash";
 import { useEffect, useState } from "react";
+import { useAppSelector } from "./hooks";
 import { useKeycloakAdminApi } from "./useKeycloakAdminApi";
 
 enum HTTP_METHODS {
@@ -24,6 +25,7 @@ type endpoint = {
 
 export const useApi = () => {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
+  const apiMode = useAppSelector((state) => state.settings.apiMode);
   const { getRealm, keycloakToken, getServerUrl, getAuthRealm } =
     useKeycloakAdminApi();
   const realm = getRealm();
@@ -102,11 +104,11 @@ export const useApi = () => {
   };
 
   let endpoints: Record<apiEndpointNames, endpoint> | undefined;
-  if (featureFlags?.apiMode === "onprem") {
+  if (apiMode === "onprem") {
     endpoints = onPremEndpoints;
     serverUrlSuffix = "/admin";
   }
-  if (featureFlags?.apiMode === "cloud") {
+  if (apiMode === "cloud") {
     endpoints = cloudEndpoints;
     serverUrlSuffix = "";
   }

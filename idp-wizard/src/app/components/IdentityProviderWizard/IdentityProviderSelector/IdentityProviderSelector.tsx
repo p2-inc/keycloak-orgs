@@ -1,11 +1,7 @@
 import React, { FC } from "react";
 import { IdPButton } from "./components/IdPButton";
-import { useKeycloak } from "@react-keycloak/web";
 import { generatePath, Link, useParams } from "react-router-dom";
 import {
-  Button,
-  Flex,
-  FlexItem,
   PageSection,
   PageSectionVariants,
   Stack,
@@ -19,14 +15,13 @@ import {
 import { PATHS } from "@app/routes";
 import { useTitle } from "react-use";
 import { useHostname } from "@app/hooks/useHostname";
-import { useRoleAccess } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { MainNav } from "@app/components/navigation/main-nav";
 
 export const IdentityProviderSelector: FC = () => {
   useTitle("Select your Identity Provider | Phase Two");
-  const { keycloak } = useKeycloak();
+
   let { realm } = useParams();
-  const { hasAccess } = useRoleAccess();
   const hostname = useHostname();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
 
@@ -34,27 +29,7 @@ export const IdentityProviderSelector: FC = () => {
     <PageSection variant={PageSectionVariants.light}>
       <Stack hasGutter>
         <StackItem>
-          <Flex justifyContent={{ default: "justifyContentFlexEnd" }}>
-            {featureFlags?.enableDashboard && (
-              <FlexItem>
-                <Link to={generatePath(PATHS.dashboard, { realm })}>
-                  <Button variant="link" isInline>
-                    Dashboard
-                  </Button>
-                </Link>
-              </FlexItem>
-            )}
-            <FlexItem>
-              <Button
-                variant="link"
-                href={keycloak.createLogoutUrl({})}
-                isInline
-                component="a"
-              >
-                Logout
-              </Button>
-            </FlexItem>
-          </Flex>
+          <MainNav />
         </StackItem>
         <StackItem isFilled>
           <div className="container">

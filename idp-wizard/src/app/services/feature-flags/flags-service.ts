@@ -16,6 +16,10 @@ export interface FeatureFlagsState {
   enableDashboard: boolean;
   emailAsUsername: boolean;
   trustEmail: boolean;
+  displayName: string;
+  domain: string;
+  logoUrl: string;
+  name: string;
 }
 
 type FlagsResponse = FeatureFlagsState;
@@ -36,6 +40,10 @@ const initialState: FeatureFlagsState = {
   enableDashboard: false,
   emailAsUsername: false,
   trustEmail: false,
+  displayName: "Identity Provider",
+  domain: "",
+  logoUrl: null,
+  name: null,
 };
 
 // export const featureFlagSlice = createSlice({
