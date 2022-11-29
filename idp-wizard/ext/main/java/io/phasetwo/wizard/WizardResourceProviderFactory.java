@@ -96,6 +96,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     idpWizard.setBaseUrl(path);
     idpWizard.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
     idpWizard.setWebOrigins(ImmutableSet.of("/*"));
+    idpWizard.setAttribute("post.logout.redirect.uris", "+");
     return idpWizard;
   }
 
@@ -104,6 +105,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     setDefaults(idpWizard);
     idpWizard.setRedirectUris(ImmutableSet.of("/*"));
     idpWizard.setWebOrigins(ImmutableSet.of("/*"));
+    idpWizard.setAttribute("post.logout.redirect.uris", "+");
     return idpWizard;
   }
 
