@@ -1,6 +1,6 @@
 import { useRoleAccess } from "@app/hooks";
 import { useAppDispatch, useAppSelector } from "@app/hooks/hooks";
-import { setOrganization } from "@app/services";
+import { setOrganization, setApiMode } from "@app/services";
 import {
   Button,
   Checkbox,
@@ -41,6 +41,10 @@ const OrgPicker: React.FC<Props> = ({
 
   const handleModalConfirm = () => {
     dispatch(setOrganization(selectedOrg || currentOrg!));
+    dispatch(
+      selectedOrg === "global" ? setApiMode("onprem") : setApiMode("cloud")
+    );
+
     handleModalToggle();
   };
 
@@ -101,9 +105,9 @@ const OrgPicker: React.FC<Props> = ({
               <Radio
                 label="Global"
                 aria-label="Global"
-                id={`global`}
-                name={`global`}
-                description={`No organization selected. Site administration config.`}
+                id="global"
+                name="global"
+                description="No organization selected. Site administration config."
                 isChecked={"global" === selectedOrg}
                 onChange={() => setSelectedOrg("global")}
               />
