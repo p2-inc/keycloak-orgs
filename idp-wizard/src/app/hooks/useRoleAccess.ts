@@ -92,6 +92,7 @@ export function useRoleAccess() {
   }
 
   function hasOrganizationRoles(roleGroup: "admin" | "resource", orgId) {
+    // console.log("[hasOrganizationRoles]", roleGroup, orgId);
     let roleAccess: boolean[] = [];
     let roleGroupUsage;
     if (roleGroup === "admin") {
@@ -107,10 +108,10 @@ export function useRoleAccess() {
     return !roleAccess.includes(false);
   }
 
-  // TODO: Check that access is being configured correctly
   function checkAccess() {
     if (currentOrg === "global") {
       setHasOrgAccess(true);
+      return;
     }
 
     //cloud mode
@@ -126,6 +127,7 @@ export function useRoleAccess() {
       requiredOrganizationResourceRoles.map((role) => {
         return roleAccess.push(keycloak.hasResourceRole(role, resource));
       });
+      // TODO: What is the point of doing two checks for org access that set the same thing?
       setHasOrgAccess(!roleAccess.includes(false));
       setHasOrgAccess(hasOrganizationRoles("resource", currentOrg));
     }
