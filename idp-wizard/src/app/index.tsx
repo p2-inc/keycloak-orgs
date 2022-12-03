@@ -6,7 +6,7 @@ import { AppRoutes } from "@app/routes";
 import "@app/styles/app.css";
 import { useEffect } from "react";
 import { setOrganization, setMustPickOrg, setApiMode } from "@app/services";
-import { useAppDispatch } from "@app/hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@app/hooks";
 import { useKeycloak } from "@react-keycloak/web";
 import { useRoleAccess } from "@app/hooks";
 import { first, has } from "lodash";
@@ -17,9 +17,15 @@ const App: React.FC = () => {
   const { hasOrganizationRoles, hasRealmRoles } = useRoleAccess();
   const { keycloak } = useKeycloak();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
+  const apiMode = useAppSelector((state) => state.settings.apiMode);
+  const organization = useAppSelector((state) => state.settings.currentOrg);
 
   // Set apiMode into Settings
   useEffect(() => {
+    // console.log("[apiMode useEffect]", apiMode);
+    if (apiMode) {
+      return;
+    }
     if (featureFlags && has(featureFlags, "apiMode")) {
       dispatch(setApiMode(featureFlags?.apiMode));
     }
@@ -36,6 +42,10 @@ const App: React.FC = () => {
     .filter((orgId) => orgId);
 
   useEffect(() => {
+    // console.log("[useEffect Org Check]", organization);
+    if (organization) {
+      return;
+    }
     if (kcTPOrgId) {
       const hasAdminRole = hasOrganizationRoles("admin", kcTPOrgId);
       if (hasAdminRole) {

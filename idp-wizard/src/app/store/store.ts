@@ -1,12 +1,26 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { apiSlice, settingsSlice } from "../services/";
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { combineReducers } from "redux";
+
+import { persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
+
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["settings"],
+};
+
+const reducers = combineReducers({
+  [apiSlice.reducerPath]: apiSlice.reducer,
+  settings: settingsSlice.reducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, reducers);
 
 export const store = configureStore({
-  reducer: {
-    [apiSlice.reducerPath]: apiSlice.reducer,
-    settings: settingsSlice.reducer,
-  },
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(apiSlice.middleware),
 });
