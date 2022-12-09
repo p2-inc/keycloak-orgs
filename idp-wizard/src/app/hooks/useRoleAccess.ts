@@ -30,12 +30,6 @@ export const requiredRealmResourceRoles = [
   "view-realm",
   "manage-realm",
 ];
-export const requiredRealmAdminRoles = [
-  "view-organizations",
-  "manage-organizations",
-  "view-identity-providers",
-  "manage-identity-providers",
-];
 
 export function useRoleAccess() {
   const apiMode = useAppSelector((state) => state.settings.apiMode);
@@ -66,14 +60,7 @@ export function useRoleAccess() {
 
   function hasRealmRoles(roleGroup: "admin" | "resource") {
     let roleAccess: boolean[] = [];
-    let roleGroupUsage;
-    if (roleGroup === "admin") {
-      // Check these
-      roleGroupUsage = requiredRealmAdminRoles;
-    }
-    if (roleGroup === "resource") {
-      roleGroupUsage = requiredRealmResourceRoles;
-    }
+    let roleGroupUsage = requiredRealmResourceRoles;
 
     roleGroupUsage.map((role) => {
       return roleAccess.push(hasRealmRole(role));
@@ -87,7 +74,7 @@ export function useRoleAccess() {
     const orgs = keycloak?.tokenParsed?.organizations;
     if (orgId === null || orgId === undefined || orgs === null) return false;
     const roles = orgs[orgId]?.roles;
-    if (roles.indexOf(role) > -1) return true;
+    if (roles && roles.indexOf(role) > -1) return true;
     else return false;
   }
 
