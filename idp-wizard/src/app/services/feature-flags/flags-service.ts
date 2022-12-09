@@ -1,4 +1,3 @@
-import { createSlice } from "@reduxjs/toolkit";
 import {
   createApi,
   BaseQueryFn,
@@ -52,6 +51,7 @@ const initialState: FeatureFlagsState = {
 //   reducers: {},
 // });
 const baseUrl = () => {
+  // console.log("[keycloak.authServerUrl]", keycloak.authServerUrl);
   if (keycloak.authServerUrl) {
     const u = new URL(keycloak.authServerUrl);
     return u.origin;
@@ -59,17 +59,19 @@ const baseUrl = () => {
     console.log("authServerUrl not set");
     return `${window.location.protocol}//${window.location.host}`;
   }
-}
+};
 
-const rawBaseQuery = fetchBaseQuery({
-  baseUrl: baseUrl(),
-});
+// const API_HOST = ENV.API_HOST || keycloak.authHost;
 
 const dynamicBaseQuery: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+  const rawBaseQuery = fetchBaseQuery({
+    baseUrl: baseUrl(),
+  });
+
   // TODO: @xgp is this the correct realm to leverage? or should it be pathRealm?
   const pathRealm = keycloak.realm;
   // const pathRealm = window.location.pathname.split("/")[4];
