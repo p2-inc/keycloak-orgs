@@ -97,7 +97,7 @@ const OrgPicker: React.FC<Props> = ({
       </div>
       <br />
       <div>{OrgRadioGroups.map((grp) => grp)}</div>
-      {hasRealmRoles("admin") && (
+      {hasRealmRoles() && (
         <>
           <Divider className="pf-u-mt-lg pf-u-mb-lg" />
           <div className="radio-group">
