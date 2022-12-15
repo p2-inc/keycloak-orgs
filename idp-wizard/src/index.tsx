@@ -1,12 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "@app/index";
-
 import { store } from "@app/store";
 import { Provider as ReduxProvider } from "react-redux";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import keycloak from "./keycloak";
 import Loading from "@app/utils/Loading";
+import { PersistGate } from "redux-persist/integration/react";
+import { persistStore } from "redux-persist";
+let persistor = persistStore(store);
 
 if (process.env.NODE_ENV !== "production") {
   const config = {
@@ -33,7 +35,9 @@ ReactDOM.render(
     LoadingComponent={<Loading />}
   >
     <ReduxProvider store={store}>
-      <App />
+      <PersistGate loading={null} persistor={persistor}>
+        <App />
+      </PersistGate>
     </ReduxProvider>
   </ReactKeycloakProvider>,
   document.getElementById("root") as HTMLElement

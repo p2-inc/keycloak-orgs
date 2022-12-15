@@ -39,6 +39,12 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
   const dashPath = generatePath(PATHS.dashboard, { realm });
   const idpPath = generatePath(PATHS.idpSelector, { realm });
 
+  const logOut = (e) => {
+    e.preventDefault();
+    localStorage.clear();
+    window.location.assign(keycloak.createLogoutUrl());
+  };
+
   const AppLauncherItems: React.ReactElement[] = [
     <ApplicationLauncherItem
       key="dashboard"
@@ -86,7 +92,7 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
     <ApplicationLauncherItem
       key="logout"
       component={
-        <a href={keycloak.createLogoutUrl({})} style={linkStyle}>
+        <a href={keycloak.createLogoutUrl()} onClick={logOut} style={linkStyle}>
           Logout
         </a>
       }
