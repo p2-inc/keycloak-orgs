@@ -48,7 +48,6 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
   const orgs = keycloak?.tokenParsed?.organizations;
   const orgsToPick = Object.keys(orgs).map((orgId) => {
     const hasAdminRole = hasOrganizationRoles("admin", orgId);
-
     if (hasAdminRole) return orgId;
   });
   const hasNoOrgsToPick = orgsToPick.length <= 1 || !hasRealmRoles();
