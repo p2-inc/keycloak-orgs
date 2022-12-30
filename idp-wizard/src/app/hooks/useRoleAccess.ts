@@ -58,7 +58,7 @@ export function useRoleAccess() {
     else return false;
   }
 
-  function hasRealmRoles(roleGroup: "admin" | "resource") {
+  function hasRealmRoles() {
     let roleAccess: boolean[] = [];
     let roleGroupUsage = requiredRealmResourceRoles;
 
