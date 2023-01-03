@@ -27,7 +27,7 @@ type Props = {
 };
 
 const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
-  const { hasOrgAccess } = useRoleAccess();
+  const { hasOrgAccess, hasOrganizationRoles, hasRealmRoles } = useRoleAccess();
   let { realm } = useParams();
   const { keycloak } = useKeycloak();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
@@ -44,6 +44,13 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
     localStorage.clear();
     window.location.assign(keycloak.createLogoutUrl());
   };
+
+  const orgs = keycloak?.tokenParsed?.organizations;
+  const orgsToPick = Object.keys(orgs).map((orgId) => {
+    const hasAdminRole = hasOrganizationRoles("admin", orgId);
+    if (hasAdminRole) return orgId;
+  });
+  const hasNoOrgsToPick = orgsToPick.length <= 1 || !hasRealmRoles();
 
   const AppLauncherItems: React.ReactElement[] = [
     <ApplicationLauncherItem
@@ -84,6 +91,9 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
         key="switchOrganization"
         onClick={() => toggleOrgPicker(true)}
         title="Change the active organization for IdP creation."
+        className={cs({
+          "pf-u-display-none": hasNoOrgsToPick,
+        })}
       >
         Switch Organization
       </ApplicationLauncherItem>
