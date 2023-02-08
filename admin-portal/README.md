@@ -1,10 +1,15 @@
-# PhaseTwo Self Serve v2
+# PhaseTwo Admin Portal
 
 More self-serve. More better.
 
 ## Getting Started
 
-First, run the development server:
+First, setup:
+```bash
+yarn
+```
+
+Then, run the development server:
 
 ```bash
 yarn dev
