@@ -13,7 +13,6 @@ import { ReactKeycloakProvider } from '@react-keycloak/web';
 import Loading from 'components/elements/loading';
 import Layout from "components/layouts/layout";
 
-/*
 const router = createBrowserRouter([
   {
     path: "/",
@@ -25,21 +24,32 @@ const router = createBrowserRouter([
         element: <Organizations />,
       },
       {
-        path: "/organizations/details",
+        path: "/organizations/:id/details",
         element: <OrganizationDetail />,
       },
       {
-        path: "/organizations/settings",
+        path: "/organizations/:id/settings",
         element: <OrganizationSettings />,
       },
       {
         path: "/profile",
         element: <Profile />,
       },
+      {
+        path: "/profile/signin",
+        element: <Profile />,
+      },
+      {
+        path: "/profile/activity",
+        element: <Profile />,
+      },
+      {
+        path: "/profile/linked",
+        element: <Profile />,
+      },
     ],
   },
 ]);
-*/
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -47,22 +57,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <ReactKeycloakProvider authClient={keycloak} initOptions={{ onLoad: 'login-required', checkLoginIframe: false, }} LoadingComponent={<Loading />}>
     <React.StrictMode>
-      <BrowserRouter>
-      <Layout>
-        <Routes>
-           <Route path="/organizations" element={<Organizations />} />
-           <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </Layout>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </React.StrictMode>
   </ReactKeycloakProvider>
 );
-
-/*
-<React.StrictMode>
-<ReactKeycloakProvider authClient={keycloak} initOptions={{ onLoad: 'login-required', checkLoginIframe: false, }} LoadingComponent={<Loading />}>
-  <RouterProvider router={router} />
-</ReactKeycloakProvider>
-</React.StrictMode>
-*/

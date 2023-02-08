@@ -7,10 +7,10 @@ import cs from "classnames";
 import { KeyIcon, SquaresPlusIcon, UserCircleIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline'
 
 const navigation = [
-  { name: 'General', href: '#', icon: UserCircleIcon, current: true },
-  { name: 'Signing in', href: '#', icon: KeyIcon, current: false },
-  { name: 'Device activity', href: '#', icon: DevicePhoneMobileIcon, current: false },
-  { name: 'Linked accounts', href: '#', icon: SquaresPlusIcon, current: false },
+  { name: 'General', href: '/profile', icon: UserCircleIcon, current: true },
+  { name: 'Signing in', href: '/profile/signin', icon: KeyIcon, current: false },
+  { name: 'Device activity', href: '/profile/activity', icon: DevicePhoneMobileIcon, current: false },
+  { name: 'Linked accounts', href: '/profile/linked', icon: SquaresPlusIcon, current: false },
 ]
 
 export default function Profile() {

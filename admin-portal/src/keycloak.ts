@@ -1,11 +1,6 @@
 import Keycloak from "keycloak-js";
 
-const keycloak = new Keycloak('keycloak.json');
-keycloak.init({}).then(function(authenticated) {
-  //console.log("", keycloak);
-}).catch(function() {
-  alert('failed to initialize');
-});
+const keycloak = new Keycloak('/keycloak.json');
 
 setInterval(async () => {
     if (keycloak.isTokenExpired(10)) {
