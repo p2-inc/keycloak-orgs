@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import DesktopSidebarNav from "../navs/desktop-sidebar-nav";
-import { CloudIcon, GaugeIcon, IconType, PeopleIcon } from "../icons";
+import { CloudIcon, GaugeIcon, IconType, PeopleIcon, PersonIcon } from "../icons";
 
 export type User = {
   name: string;
@@ -19,8 +19,7 @@ export type NavigationItem = {
 };
 
 const navigation: NavigationItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: GaugeIcon },
-  { name: "Deployments", href: "/deployments", icon: CloudIcon },
+  { name: "Profile", href: "/profile", icon: PersonIcon },
   {
     name: "Organizations",
     href: "/organizations",
