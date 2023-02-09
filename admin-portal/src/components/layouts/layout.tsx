@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: React.ReactElement }) {
 
   return (
     <>
-      <div className="flex h-full">
+      <div className="flex h-full antialiased">
         {/* Static sidebar for desktop */}
         <DesktopSidebarNav
           navigation={navigation}
