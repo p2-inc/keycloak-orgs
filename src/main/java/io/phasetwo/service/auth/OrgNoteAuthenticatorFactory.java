@@ -45,13 +45,16 @@ public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory
     Map<String, String> idpConfig = brokerContext.getIdpConfig().getConfig();
     if (idpConfig != null && idpConfig.containsKey(ORG_OWNER_CONFIG_KEY)) {
       log.infof(
-          "Set auth note %s = %s for IdP %s",
+          "Set auth/session note %s = %s for IdP %s",
           FIELD_ORG_ID,
           idpConfig.get(ORG_OWNER_CONFIG_KEY),
           brokerContext.getIdpConfig().getAlias());
       context
           .getAuthenticationSession()
           .setAuthNote(FIELD_ORG_ID, idpConfig.get(ORG_OWNER_CONFIG_KEY));
+      context
+          .getAuthenticationSession()
+          .setUserSessionNote(FIELD_ORG_ID, idpConfig.get(ORG_OWNER_CONFIG_KEY));
     } else {
       log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
     }
@@ -74,12 +77,12 @@ public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory
 
   @Override
   public String getHelpText() {
-    return "Sets an auth note of the org_id if an organization-owned IdP was used to log in. Use only in Post Login Flows.";
+    return "Sets an auth and user session notes of the org_id if an organization-owned IdP was used to log in. Use only in Post Login Flows.";
   }
 
   @Override
   public String getDisplayType() {
-    return "Org To Auth Note";
+    return "Org To Auth/Session Note";
   }
 
   @Override
