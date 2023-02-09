@@ -13,7 +13,7 @@ const Loading = () => {
           cy="12"
           r="10"
           stroke="currentColor"
-          stroke-width="3"
+          strokeWidth="3"
         ></circle>
         <path
           className="opacity-75"

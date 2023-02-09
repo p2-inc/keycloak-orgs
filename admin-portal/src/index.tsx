@@ -2,7 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  redirect,
+  RouterProvider,
+} from "react-router-dom";
 import ErrorPage from "./pages/error-page";
 import Organizations from "pages/organizations";
 import OrganizationDetail from "pages/organizations/detail";
@@ -32,21 +37,18 @@ const router = createBrowserRouter([
       },
       {
         path: "/profile",
-        element: <Profile />,
+        index: true,
+        loader: () => redirect("/profile/general"),
       },
       {
-        path: "/profile/signin",
-        element: <Profile />,
-      },
-      {
-        path: "/profile/activity",
-        element: <Profile />,
-      },
-      {
-        path: "/profile/linked",
+        path: "/profile/*",
         element: <Profile />,
       },
     ],
+  },
+  {
+    path: "*",
+    element: <Navigate to="organizations" />,
   },
 ]);
 

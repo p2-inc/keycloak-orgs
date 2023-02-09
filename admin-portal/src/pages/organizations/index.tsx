@@ -6,6 +6,7 @@ import MainContentArea from "components/layouts/main-content-area";
 import TopHeader from "components/navs/top-header";
 import { PlusIcon } from "components/icons";
 import Table from "components/elements/table/table";
+import PrimaryContentArea from "components/navs/primary-content";
 
 export default function Organizations() {
   return (
@@ -27,12 +28,9 @@ export default function Organizations() {
       />
       <MainContentArea>
         {/* Primary content */}
-        <section
-          aria-labelledby="primary-heading"
-          className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto px-4"
-        >
+        <PrimaryContentArea>
           <Table />
-        </section>
+        </PrimaryContentArea>
       </MainContentArea>
     </>
   );
