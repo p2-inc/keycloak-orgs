@@ -57,7 +57,6 @@ const DesktopSidebarNav: React.FC<Props> = ({
                 )}
               >
                 {navigation.map((item) => {
-                  console.log(item);
                   return (
                     <NavLink
                       key={item.name}
@@ -69,7 +68,8 @@ const DesktopSidebarNav: React.FC<Props> = ({
                             "group:text-p2blue-700 border-p2blue-700 bg-white text-p2blue-700":
                               isActive,
                             "w-full border-0": !menuCollapsed,
-                            "border-p2blue-700": menuCollapsed && isActive,
+                            "border-p2blue-700 text-p2blue-700 hover:border-p2blue-700":
+                              menuCollapsed && isActive,
                           }
                         )
                       }

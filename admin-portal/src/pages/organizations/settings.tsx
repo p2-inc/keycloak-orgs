@@ -1,6 +1,6 @@
 import Button from "components/elements/forms/buttons/button";
 import MainContentArea from "components/layouts/main-content-area";
-import SecondaryMainContentMenu from "components/navs/secondary-main-content-menu";
+import SecondaryMainContentMenu from "components/layouts/secondary-main-content-menu-area";
 import TopHeader from "components/navs/top-header";
 
 export default function OrganizationSettings() {
