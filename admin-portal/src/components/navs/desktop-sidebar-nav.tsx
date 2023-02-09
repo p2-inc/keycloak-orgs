@@ -1,5 +1,5 @@
 import cs from "classnames";
-import { Link } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { ChevronIcon, DoubleSlashBrandIcon, FullBrandIcon } from "../icons";
 import { NavigationItem, User } from "../layouts/layout";
 
@@ -10,19 +10,12 @@ type Props = {
   user: User;
 };
 
-function ActivePath(asPath: string, currentHref: string) {
-  return asPath.startsWith(currentHref);
-}
-
 const DesktopSidebarNav: React.FC<Props> = ({
   menuCollapsed,
   setMenuCollapsed,
   navigation,
   user,
 }) => {
-  // const { asPath } = useRouter();
-  const asPath = "foo";
-
   return (
     <>
       {/* If using a mobile view: <div className="hidden lg:flex lg:flex-shrink-0"> */}
@@ -63,31 +56,35 @@ const DesktopSidebarNav: React.FC<Props> = ({
                   }
                 )}
               >
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={cs(
-                      "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 hover:bg-white",
-                      {
-                        "group:text-p2blue-700 bg-white text-p2blue-700":
-                          asPath === item.href,
-                        "w-full border-0": !menuCollapsed,
-                        "border-p2blue-700":
-                          menuCollapsed && ActivePath(asPath, item.href),
+                {navigation.map((item) => {
+                  console.log(item);
+                  return (
+                    <NavLink
+                      key={item.name}
+                      to={item.href}
+                      className={({ isActive }) =>
+                        cs(
+                          "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 hover:bg-white",
+                          {
+                            "group:text-p2blue-700 border-p2blue-700 bg-white text-p2blue-700":
+                              isActive,
+                            "w-full border-0": !menuCollapsed,
+                            "border-p2blue-700": menuCollapsed && isActive,
+                          }
+                        )
                       }
-                    )}
-                  >
-                    <item.icon
-                      className={cs("h-[18] w-[18] fill-current")}
-                      aria-hidden="true"
-                    />
-                    <span className="sr-only">{item.name}</span>
-                    {!menuCollapsed && (
-                      <span className="pl-2">{item.name}</span>
-                    )}
-                  </Link>
-                ))}
+                    >
+                      <item.icon
+                        className={cs("h-[18] w-[18]", item.iconClass)}
+                        aria-hidden="true"
+                      />
+                      <span className="sr-only">{item.name}</span>
+                      {!menuCollapsed && (
+                        <span className="pl-2">{item.name}</span>
+                      )}
+                    </NavLink>
+                  );
+                })}
               </nav>
             </div>
             <div

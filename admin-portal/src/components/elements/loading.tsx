@@ -1,43 +1,26 @@
-import React from 'react';
-
-function keyframes() {
-  return {
-    __html: "@keyframes spin { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) }}"
-  };
-}
-
-function style(size, stroke, color) {
-  return {
-    inner: {
-      animation: 'spin 0.5s linear infinite',
-      height: size,
-      width: size,
-      border: `${stroke} solid transparent`,
-      borderTopColor: color,
-      borderRadius: '100%',
-      boxSizing: 'border-box',
-    },
-    outer: {
-      height: '100%',
-      width: '100%',
-      display: 'flex',
-      flexFlow: 'column nowrap',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }
-  };
-}
-
-const Loading = ({
-  size = '50px',
-  stroke = '3px',
-  color = '#000'
-}) => {
-  const styles = style(size, stroke, color);
+const Loading = () => {
   return (
-    <div style={styles.outer}>
-      <div style={styles.inner} />
-      <style dangerouslySetInnerHTML={keyframes()}/>
+    <div className="grid h-full w-full place-items-center">
+      <svg
+        className="-ml-1 mr-3 h-12 w-12 animate-spin text-black"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="3"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
     </div>
   );
 };
