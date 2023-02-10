@@ -9,9 +9,9 @@ type Props = {
 
 const TopHeader: FC<Props> = ({ header, badgeVal, rightAreaItems }) => {
   return (
-    <div className="flex px-4 pt-6">
+    <div className="flex px-10 py-6">
       <div className="flex items-center">
-        <h1 className="text-2xl">{header}</h1>
+        <h1 className="text-2xl font-medium">{header}</h1>
         {badgeVal && (
           <div className="ml-2">
             <Badge>{badgeVal}</Badge>

@@ -1,17 +1,16 @@
 import SecondaryMainContentMenuArea from "components/layouts/secondary-main-content-menu-area";
 import TopHeader from "components/navs/top-header";
-import cs from "classnames";
 import {
   KeyIcon,
   SquaresPlusIcon,
   UserCircleIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
-import { NavLink } from "react-router-dom";
 import FixedWidthMainContent from "components/layouts/main-content-area copy";
 import PrimaryContentArea from "components/layouts/primary-content-area";
-import GeneralProfile from "./general";
 import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
+import SigninProfile from "./signin";
+import RoleProfile from "./role";
 
 const navigation = [
   {
@@ -48,7 +47,7 @@ export default function Profile() {
 
         {/* Primary content */}
         <PrimaryContentArea>
-          <GeneralProfile />
+          <RoleProfile />
         </PrimaryContentArea>
       </FixedWidthMainContent>
     </>
