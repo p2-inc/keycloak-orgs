@@ -10,6 +10,7 @@ import FixedWidthMainContent from "components/layouts/main-content-area copy";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
 import SigninProfile from "./signin";
+import RoleProfile from "./role";
 
 const navigation = [
   {
@@ -46,7 +47,7 @@ export default function Profile() {
 
         {/* Primary content */}
         <PrimaryContentArea>
-          <SigninProfile />
+          <RoleProfile />
         </PrimaryContentArea>
       </FixedWidthMainContent>
     </>
