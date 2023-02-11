@@ -19,7 +19,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
   return (
     <>
       {/* If using a mobile view: <div className="hidden lg:flex lg:flex-shrink-0"> */}
-      <div className="flex flex-shrink-0">
+      <div className="flex flex-shrink-0 h-full">
         <div
           className={cs(
             "flex w-[70px] flex-col transition-[width] duration-150 ease-in-out",

@@ -17,7 +17,7 @@ const ActivityProfile = () => {
               <div className="p-4 pr-0 pb-0">
                 <ComputerIcon className="fill-p2gray-800" />
               </div>
-              <div className="text-sm font-semibold text-p2gray-900 p-4 pl-2 pb-0">
+              <div className="text-sm font-semibold text-p2gray-900 p-4 md:pl-2 pb-0">
                 Linux / Chrome / 107.0.0
               </div>
             </div>

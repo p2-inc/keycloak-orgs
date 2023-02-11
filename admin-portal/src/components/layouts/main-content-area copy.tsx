@@ -5,7 +5,7 @@ const FixedWidthMainContent: React.FC<{
   children: React.ReactElement | React.ReactElement[];
   className?: string;
 }> = ({ children, className }) => (
-  <div className={cs("flex max-w-7xl flex-grow", className)}>{children}</div>
+  <div className={cs("md:flex", className)}>{children}</div>
 );
 
 export default FixedWidthMainContent;
