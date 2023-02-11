@@ -16,6 +16,11 @@ import Profile from "pages/profile";
 import keycloak from "keycloak";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import Loading from "components/elements/loading";
+import RoleProfile from "pages/profile/role";
+import SigninProfile from "pages/profile/signin";
+import GeneralProfile from "pages/profile/general";
+import ActivityProfile from "pages/profile/activity";
+import LinkedProfile from "pages/profile/linked";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +48,28 @@ const router = createBrowserRouter([
       {
         path: "/profile/*",
         element: <Profile />,
+        children: [
+          {
+            path: 'general',
+            element: <GeneralProfile />
+          },
+          {
+            path: 'role',
+            element: <RoleProfile />
+          },
+          {
+            path: 'signin',
+            element: <SigninProfile />
+          },
+          {
+            path: 'activity',
+            element: <ActivityProfile />
+          },
+          {
+            path: 'linked',
+            element: <LinkedProfile />
+          }
+        ]
       },
     ],
   },
