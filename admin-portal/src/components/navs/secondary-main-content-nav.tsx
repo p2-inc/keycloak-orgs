@@ -37,7 +37,7 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
             className="flex w-full items-center rounded-md border-2 border-gray-200 px-4 py-2 text-sm font-medium"
             onClick={toggleMenu}
           >
-            <div className="flex items-center flex-1">
+            <div className="flex flex-1 items-center">
               <activeItem.icon
                 className={cs("-ml-1 mr-3 h-6 w-6 flex-shrink-0")}
                 aria-hidden="true"
@@ -45,7 +45,7 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
               {activeItem?.name}
             </div>
             <div className="flex-shrink-0">
-              <ChevronIcon className="stroke-gray-600 rotate-90" />
+              <ChevronIcon className="rotate-90 stroke-gray-600" />
             </div>
           </button>
         )}
@@ -56,15 +56,10 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
             key={item.name}
             to={item.href}
             className={({ isActive }) =>
-              cs(
-                {
-                  "font-semibold text-p2blue-700  hover:text-p2blue-700":
-                    isActive,
-                  "text-gray-900 hover:bg-gray-50 hover:text-gray-900":
-                    !isActive,
-                },
-                "group flex items-center rounded-md px-3 py-2 text-sm "
-              )
+              cs("group flex items-center rounded-md px-3 py-2 text-sm transition", {
+                "font-semibold text-p2blue-700 hover:text-p2blue-700": isActive,
+                "text-gray-900 hover:bg-gray-50 hover:text-gray-900": !isActive,
+              })
             }
             onClick={toggleMenu}
           >
