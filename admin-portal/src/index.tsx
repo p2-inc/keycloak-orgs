@@ -50,26 +50,26 @@ const router = createBrowserRouter([
         element: <Profile />,
         children: [
           {
-            path: 'general',
-            element: <GeneralProfile />
+            path: "general",
+            element: <GeneralProfile />,
           },
           {
-            path: 'role',
-            element: <RoleProfile />
+            path: "role",
+            element: <RoleProfile />,
           },
           {
-            path: 'signin',
-            element: <SigninProfile />
+            path: "signin",
+            element: <SigninProfile />,
           },
           {
-            path: 'activity',
-            element: <ActivityProfile />
+            path: "activity",
+            element: <ActivityProfile />,
           },
           {
-            path: 'linked',
-            element: <LinkedProfile />
-          }
-        ]
+            path: "linked",
+            element: <LinkedProfile />,
+          },
+        ],
       },
     ],
   },

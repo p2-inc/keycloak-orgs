@@ -1,5 +1,5 @@
 import { FC, ReactElement } from "react";
-import Badge from "../elements/badge";
+import RoundBadge from "../elements/badges/round-badge";
 
 type Props = {
   header: string;
@@ -14,7 +14,7 @@ const TopHeader: FC<Props> = ({ header, badgeVal, rightAreaItems }) => {
         <h1 className="text-2xl font-medium">{header}</h1>
         {badgeVal && (
           <div className="ml-2">
-            <Badge>{badgeVal}</Badge>
+            <RoundBadge>{badgeVal}</RoundBadge>
           </div>
         )}
       </div>

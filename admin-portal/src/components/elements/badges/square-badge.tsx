@@ -6,11 +6,11 @@ type Props = {
   className?: string;
 };
 
-const Badge: FC<Props> = ({ children, className }) => {
+const SquareBadge: FC<Props> = ({ children, className }) => {
   return (
     <span
       className={cs(
-        "inline-flex flex-shrink-0 items-center rounded-full border-2 border-gray-800 bg-white px-2.5 py-0.5 text-xs font-medium text-gray-800",
+        "rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium",
         className
       )}
     >
@@ -19,4 +19,4 @@ const Badge: FC<Props> = ({ children, className }) => {
   );
 };
 
-export default Badge;
+export default SquareBadge;

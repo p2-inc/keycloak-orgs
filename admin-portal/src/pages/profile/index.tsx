@@ -6,7 +6,7 @@ import {
   UserCircleIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
-import FixedWidthMainContent from "components/layouts/main-content-area copy";
+import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
 import { Outlet } from "react-router-dom";

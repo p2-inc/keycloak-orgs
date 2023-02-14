@@ -1,8 +1,8 @@
 const Loading = () => {
   return (
-    <div className="grid h-full w-full place-items-center">
+    <div className="grid h-screen w-screen place-items-center">
       <svg
-        className="-ml-1 mr-3 h-12 w-12 animate-spin text-black"
+        className="-ml-1 mr-3 h-12 w-12 animate-spin text-p2blue-700"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"

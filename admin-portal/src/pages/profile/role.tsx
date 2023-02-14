@@ -1,3 +1,4 @@
+import SquareBadge from "components/elements/badges/square-badge";
 import Button from "components/elements/forms/buttons/button";
 import Switch from "components/elements/forms/switches/switch";
 import SectionHeader from "components/navs/section-header";
@@ -14,9 +15,7 @@ const RoleProfile = () => {
       <div className="md:grid md:grid-cols-2 md:gap-4">
         <Switch>
           <div className="space-y-1 pr-4">
-            <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-              read-org
-            </span>
+            <SquareBadge>read-org</SquareBadge>
             <p className="text-sm text-p2gray-900/60">
               One morning, when Gregor Samsa woke from troubled dreams
             </p>
@@ -24,9 +23,7 @@ const RoleProfile = () => {
         </Switch>
         <Switch>
           <div className="space-y-1 pr-4">
-            <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-              read-org
-            </span>
+            <SquareBadge>read-org</SquareBadge>
             <p className="text-sm text-p2gray-900/60">
               One morning, when Gregor Samsa woke from troubled dreams
             </p>
@@ -34,9 +31,7 @@ const RoleProfile = () => {
         </Switch>
         <Switch>
           <div className="space-y-1 pr-4">
-            <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-              read-org
-            </span>
+            <SquareBadge>read-org</SquareBadge>
             <p className="text-sm text-p2gray-900/60">
               One morning, when Gregor Samsa woke from troubled dreams
             </p>
@@ -44,9 +39,7 @@ const RoleProfile = () => {
         </Switch>
         <Switch>
           <div className="space-y-1 pr-4">
-            <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-              read-org
-            </span>
+            <SquareBadge>read-org</SquareBadge>
             <p className="text-sm text-p2gray-900/60">
               One morning, when Gregor Samsa woke from troubled dreams
             </p>
