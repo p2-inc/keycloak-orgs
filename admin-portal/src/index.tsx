@@ -21,6 +21,8 @@ import SigninProfile from "pages/profile/signin";
 import GeneralProfile from "pages/profile/general";
 import ActivityProfile from "pages/profile/activity";
 import LinkedProfile from "pages/profile/linked";
+import { store } from "./store/";
+import { Provider } from "react-redux";
 
 const router = createBrowserRouter([
   {
@@ -88,8 +90,10 @@ root.render(
     initOptions={{ onLoad: "login-required", checkLoginIframe: false }}
     LoadingComponent={<Loading />}
   >
-    <React.StrictMode>
-      <RouterProvider router={router} />
-    </React.StrictMode>
+    <Provider store={store}>
+      <React.StrictMode>
+        <RouterProvider router={router} />
+      </React.StrictMode>
+    </Provider>
   </ReactKeycloakProvider>
 );

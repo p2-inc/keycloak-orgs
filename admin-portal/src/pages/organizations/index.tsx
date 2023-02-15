@@ -8,6 +8,7 @@ import { PlusIcon } from "components/icons";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import { Link } from "react-router-dom";
 import Stat from "components/elements/cards/stat";
+import { useGetOrgsQuery } from "store/orgs/service";
 
 const people = [
   {
@@ -49,37 +50,19 @@ const SubTitle = ({ children }) => (
   <div className=" text-[14px]">{children}</div>
 );
 
-const ProgressBar = ({ percent = 20 }) => {
-  const radius = 10;
-  const circumference = radius * 2 * Math.PI;
-  return (
-    <svg className="h-6 w-6">
-      <circle
-        className="text-gray-300"
-        stroke-width="3"
-        stroke="currentColor"
-        fill="transparent"
-        r={radius}
-        cx="12"
-        cy="12"
-      />
-      <circle
-        className=" text-p2blue-700"
-        stroke-width="3"
-        stroke-dasharray={circumference}
-        stroke-dashoffset={circumference - (percent / 100) * circumference}
-        stroke-linecap="round"
-        stroke="currentColor"
-        fill="transparent"
-        r={radius}
-        cx="12"
-        cy="12"
-      />
-    </svg>
-  );
-};
-
 export default function Organizations() {
+  // const [organizations, setOrganizations] = useState();
+  const { data: orgs } = useGetOrgsQuery(1);
+
+  // async function fetchOrgs() {
+  //   const res = await Orgs.getOrgs();
+  //   console.log("🚀 ~ file: index.tsx:59 ~ fetchOrgs ~ res", res);
+  // }
+
+  // useEffect(() => {
+  //   fetchOrgs();
+  // }, []);
+
   return (
     <>
       <TopHeader

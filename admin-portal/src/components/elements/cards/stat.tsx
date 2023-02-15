@@ -11,7 +11,7 @@ const ProgressBar = ({ percent = 20 }) => {
     <svg className="h-6 w-6">
       <circle
         className="text-gray-300"
-        stroke-width="3"
+        strokeWidth="3"
         stroke="currentColor"
         fill="transparent"
         r={radius}
@@ -20,10 +20,10 @@ const ProgressBar = ({ percent = 20 }) => {
       />
       <circle
         className=" text-p2blue-700"
-        stroke-width="3"
-        stroke-dasharray={circumference}
-        stroke-dashoffset={circumference - (percent / 100) * circumference}
-        stroke-linecap="round"
+        strokeWidth="3"
+        strokeDasharray={circumference}
+        strokeDashoffset={circumference - (percent / 100) * circumference}
+        strokeLinecap="round"
         stroke="currentColor"
         fill="transparent"
         r={radius}
