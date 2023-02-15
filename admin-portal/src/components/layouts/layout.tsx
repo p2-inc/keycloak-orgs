@@ -39,19 +39,22 @@ export default function Layout({ children }: { children: React.ReactElement }) {
 
   return (
     <>
-      <div className="flex h-full antialiased">
-        {/* Static sidebar for desktop */}
-        <DesktopSidebarNav
-          navigation={navigation}
-          user={user}
-          setMenuCollapsed={setMenuCollapsed}
-          menuCollapsed={menuCollapsed}
-        />
-
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <main className="flex flex-1 flex-col overflow-hidden">
-            {children}
-          </main>
+      <div className="flex h-screen">
+        <div className="">
+          {/* Static sidebar for desktop */}
+          <DesktopSidebarNav
+            navigation={navigation}
+            user={user}
+            setMenuCollapsed={setMenuCollapsed}
+            menuCollapsed={menuCollapsed}
+          />
+        </div>
+        <div className="flex-1 overflow-y-auto pb-20">
+          <div className="">
+            <main className="">
+              {children}
+            </main>
+          </div>
         </div>
       </div>
     </>

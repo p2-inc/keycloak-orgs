@@ -6,17 +6,21 @@ import {
   UserCircleIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
-import FixedWidthMainContent from "components/layouts/main-content-area copy";
+import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
-import SigninProfile from "./signin";
-import RoleProfile from "./role";
+import { Outlet } from "react-router-dom";
 
 const navigation = [
   {
     name: "General",
     href: "/profile/general",
     icon: UserCircleIcon,
+  },
+  {
+    name: "Role",
+    href: "/profile/role",
+    icon: KeyIcon,
   },
   {
     name: "Signing in",
@@ -47,7 +51,7 @@ export default function Profile() {
 
         {/* Primary content */}
         <PrimaryContentArea>
-          <RoleProfile />
+          <Outlet />
         </PrimaryContentArea>
       </FixedWidthMainContent>
     </>
