@@ -23,6 +23,7 @@ import ActivityProfile from "pages/profile/activity";
 import LinkedProfile from "pages/profile/linked";
 import { store } from "./store/";
 import { Provider } from "react-redux";
+import Invitation from "pages/invitation";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: "/organizations/:id/settings",
         element: <OrganizationSettings />,
+      },
+      {
+        path: "/invitation",
+        element: <Invitation />,
       },
       {
         path: "/profile",

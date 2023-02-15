@@ -4,10 +4,31 @@
 
 @layer components {
   #root {
-   
   }
   html,
   body {
     @apply antialiased;
+  }
+
+  .loading-animate {
+    @apply bg-[conic-gradient(from_0deg,var(--tw-gradient-stops))];
+    @apply from-[#C7DFF0]/0;
+    @apply to-[#1476B7];
+
+    -webkit-animation: LoadingAnimation 1.5s linear infinite;
+    -moz-animation: LoadingAnimation 1.5s linear infinite;
+    animation: LoadingAnimation 1.5s linear infinite;
+  }
+
+  @keyframes LoadingAnimation {
+    0%{
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(180deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 }
