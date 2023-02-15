@@ -3,16 +3,32 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import config from "config";
 
 interface FeatureFlagsState {
-  enableGroupMapping: boolean;
-  apiMode: "cloud" | "onprem" | "";
-  enableLdap: boolean;
-  enableDashboard: boolean;
-  emailAsUsername: boolean;
-  trustEmail: boolean;
-  displayName: string;
-  domain: string;
-  logoUrl: string;
   name: string;
+  logoUrl: string;
+  faviconUrl: string;
+  profileEnabled: boolean;
+  registrationEmailAsUsername: boolean;
+  passwordUpdateAllowed: boolean;
+  twoFactorUpdateAllowed: boolean;
+  totpConfigured: boolean;
+  passwordlessUpdateAllowed: boolean;
+  deviceActivityEnabled: boolean;
+  linkedAccountsEnabled: boolean;
+  eventsEnabled: boolean;
+  editUsernameAllowed: boolean;
+  internationalizationEnabled: boolean;
+  resourcesEnabled: boolean;
+  viewGroupsEnabled: boolean;
+  deleteAccountAllowed: boolean;
+  updateEmailFeatureEnabled: boolean;
+  updateEmailActionEnabled: boolean;
+  organizationsEnabled: boolean;
+  orgDetailsEnabled: boolean;
+  orgMembersEnabled: boolean;
+  orgInvitationsEnabled: boolean;
+  orgDomainsEnabled: boolean;
+  orgSsoEnabled: boolean;
+  orgEventsEnabled: boolean;
 }
 
 // Define a service using a base URL and expected endpoints
