@@ -1,6 +1,5 @@
 import Keycloak, { KeycloakLoginOptions } from "keycloak-js";
-
-declare const baseUrl: string;
+import config from "config";
 
 export class KeycloakService {
     private keycloakAuth: Keycloak;
@@ -25,7 +24,7 @@ export class KeycloakService {
         this.keycloakAuth.login(options);
     }
 
-    public logout(redirectUri: string = baseUrl): void {
+    public logout(redirectUri: string = config.baseUrl): void {
         this.keycloakAuth.logout({redirectUri: redirectUri});
     }
 
