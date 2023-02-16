@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 import {
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
-} from "store/p2-api/p2-api";
+} from "store/apis/orgs";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();

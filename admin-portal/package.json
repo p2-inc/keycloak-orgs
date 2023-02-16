@@ -30,7 +30,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "api-generate": " npx @rtk-query/codegen-openapi openapi-config.ts"
+    "orgs-api": " npx @rtk-query/codegen-openapi orgs-openapi-config.ts",
+    "profile-api": " npx @rtk-query/codegen-openapi profile-openapi-config.ts"
   },
   "eslintConfig": {
     "extends": [

@@ -1,4 +1,4 @@
-import { emptySplitApi as api } from "../empty-api";
+import { emptySplitApi as api } from "./empty";
 export const addTagTypes = [
   "Organizations",
   "Organization Memberships",
@@ -494,7 +494,7 @@ const injectedRtkApi = api
     }),
     overrideExisting: false,
   });
-export { injectedRtkApi as p2Api };
+export { injectedRtkApi as orgsApi };
 export type GetOrganizationsApiResponse =
   /** status 200 success */ OrganizationRepresentation[];
 export type GetOrganizationsApiArg = {

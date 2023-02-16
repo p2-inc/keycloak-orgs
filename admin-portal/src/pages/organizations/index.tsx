@@ -8,7 +8,7 @@ import { PlusIcon } from "components/icons";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import { Link } from "react-router-dom";
 import Stat from "components/elements/cards/stat";
-import { useGetOrganizationsQuery } from "store/p2-api/p2-api";
+import { useGetOrganizationsQuery } from "store/apis/orgs";
 import { apiRealm } from "api/helpers";
 
 const people = [

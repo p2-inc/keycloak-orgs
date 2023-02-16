@@ -3,10 +3,10 @@ import type { ConfigFile } from "@rtk-query/codegen-openapi";
 const config: ConfigFile = {
   schemaFile:
     "https://raw.githubusercontent.com/p2-inc/phasetwo-docs/master/openapi.yaml",
-  apiFile: "./src/store/empty-api.ts",
+  apiFile: "./src/store/apis/empty.ts",
   apiImport: "emptySplitApi",
-  outputFile: "./src/store/p2-api/p2-api.ts",
-  exportName: "p2Api",
+  outputFile: "./src/store/apis/orgs.ts",
+  exportName: "orgsApi",
   hooks: true,
   tag: true,
 };
