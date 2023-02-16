@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { ComputerIcon } from "components/icons/computer";
 import SectionHeader from "components/navs/section-header";
 import { useDeleteCurrentSessionMutation, useDeleteSessionMutation, useGetDevicesQuery, DeviceRepresentation, SessionRepresentation, ClientRepresentation } from "store/apis/profile";
-import { apiRealm } from "api/helpers";
+import { apiRealm } from "store/apis/helpers";
 import { keycloakService } from "keycloak";
 import TimeUtil from "services/time-util";
 

@@ -1,6 +1,6 @@
 import Button from "components/elements/forms/buttons/button";
 import SectionHeader from "components/navs/section-header";
-import { apiRealm } from "api/helpers";
+import { apiRealm } from "store/apis/helpers";
 import { keycloakService } from "keycloak";
 import { useGetLinkedAccountsQuery, useDeleteLinkedProviderMutation, LinkedAccountRepresentation } from "store/apis/profile";
 

@@ -9,7 +9,7 @@ import PrimaryContentArea from "components/layouts/primary-content-area";
 import { Link } from "react-router-dom";
 import Stat from "components/elements/cards/stat";
 import { useGetOrganizationsQuery } from "store/apis/orgs";
-import { apiRealm } from "api/helpers";
+import { apiRealm } from "store/apis/helpers";
 
 const people = [
   {
