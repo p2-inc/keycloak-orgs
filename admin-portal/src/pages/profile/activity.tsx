@@ -34,15 +34,10 @@ const ActivityProfile = () => {
     else return TimeUtil.format(time * 1000);
   }
 
-
   //findDeviceTypeIcon
-
   //findOS
-
   //findOSVersion
-
   //makeClientsString
-
   //isShowSignOutAll
 
   return (
