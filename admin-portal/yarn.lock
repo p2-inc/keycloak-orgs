@@ -1622,11 +1622,6 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@p2-inc/js-sdk@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@p2-inc/js-sdk/-/js-sdk-0.0.7.tgz#6ad876fc34cfc53a80dc89a9b628c1f741047aa3"
-  integrity sha512-VPgETATOtvVDOfl2TM2dkDhpiRhk1XRRwJC/Z52Zy1Z5xZNws5HkYP1jayEzOjAgYbvtNhYd5YQG4z649EFAlw==
-
 "@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
   version "0.5.10"
   resolved "https://registry.npmjs.org/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.5.10.tgz"

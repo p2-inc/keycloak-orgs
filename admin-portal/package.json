@@ -5,7 +5,6 @@
   "dependencies": {
     "@headlessui/react": "^1.7.10",
     "@heroicons/react": "^2.0.14",
-    "@p2-inc/js-sdk": "^0.0.7",
     "@react-keycloak/web": "^3.4.0",
     "@reduxjs/toolkit": "^1.9.2",
     "@testing-library/jest-dom": "^5.14.1",
