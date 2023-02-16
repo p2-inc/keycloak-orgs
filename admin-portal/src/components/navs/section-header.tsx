@@ -1,16 +1,18 @@
-import { FC } from "react";
+import { FC, ReactElement } from "react";
 import cs from "classnames";
 
 type Props = {
   title: string;
   description?: string;
   variant?: "large" | "small";
+  icon?: ReactElement;
 };
 
 const SectionHeader: FC<Props> = ({
   title,
   description,
   variant = "large",
+  icon,
 }) => {
   return (
     <div
@@ -19,6 +21,11 @@ const SectionHeader: FC<Props> = ({
         "space-y-1": variant === "small",
       })}
     >
+      {icon && (
+        <>
+          {icon}
+        </>
+      )}
       <h2
         className={cs("font-semibold text-p2gray-900", {
           "text-2xl": variant === "large",
