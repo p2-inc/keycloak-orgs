@@ -1,18 +1,18 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { featureFlagsApi } from "./feature-flags/service";
-import { orgsApi } from "./orgs/service";
+import { emptySplitApi } from "./empty-api";
 // import featureFlagReducer from "./feature-flags/slice";
 
 export const store = configureStore({
   reducer: {
     [featureFlagsApi.reducerPath]: featureFlagsApi.reducer,
-    [orgsApi.reducerPath]: orgsApi.reducer,
+    [emptySplitApi.reducerPath]: emptySplitApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       featureFlagsApi.middleware,
-      orgsApi.middleware
+      emptySplitApi.middleware
     ),
 });
 

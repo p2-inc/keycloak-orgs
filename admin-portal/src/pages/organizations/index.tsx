@@ -8,7 +8,8 @@ import { PlusIcon } from "components/icons";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import { Link } from "react-router-dom";
 import Stat from "components/elements/cards/stat";
-import { useGetOrgsQuery } from "store/orgs/service";
+import { useGetOrganizationsQuery } from "store/p2-api/p2-api";
+import { apiRealm } from "api/helpers";
 
 const people = [
   {
@@ -51,17 +52,7 @@ const SubTitle = ({ children }) => (
 );
 
 export default function Organizations() {
-  // const [organizations, setOrganizations] = useState();
-  const { data: orgs } = useGetOrgsQuery(1);
-
-  // async function fetchOrgs() {
-  //   const res = await Orgs.getOrgs();
-  //   console.log("🚀 ~ file: index.tsx:59 ~ fetchOrgs ~ res", res);
-  // }
-
-  // useEffect(() => {
-  //   fetchOrgs();
-  // }, []);
+  const { data: orgs = [] } = useGetOrganizationsQuery({ realm: apiRealm });
 
   return (
     <>
@@ -84,15 +75,12 @@ export default function Organizations() {
         {/* Primary content */}
         <PrimaryContentArea>
           <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {people.map((person, index) => (
-              <Link to={`/organizations/${index}/details`}>
-                <li
-                  key={person.email}
-                  className="col-span-1 flex flex-col rounded-lg border bg-white p-6"
-                >
+            {orgs.map((org) => (
+              <Link to={`/organizations/${org.id}/details`} key={org.id}>
+                <li className="col-span-1 flex flex-col rounded-lg border bg-white p-6">
                   <div className="mb-7">
-                    <Title>{person.name}</Title>
-                    <SubTitle>{person.title}</SubTitle>
+                    <Title>{org.displayName}</Title>
+                    <SubTitle>{org.name}</SubTitle>
                   </div>
                   <div className="flex flex-row space-x-8">
                     <Stat value="4" label="members" />

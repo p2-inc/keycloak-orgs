@@ -29,7 +29,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "api-generate": " npx @rtk-query/codegen-openapi openapi-config.ts"
   },
   "eslintConfig": {
     "extends": [
@@ -50,9 +51,11 @@
     ]
   },
   "devDependencies": {
+    "@rtk-query/codegen-openapi": "^1.0.0",
     "@tailwindcss/forms": "^0.5.3",
     "prettier": "^2.8.3",
     "prettier-plugin-tailwindcss": "^0.2.2",
-    "tailwindcss": "^3.2.4"
+    "tailwindcss": "^3.2.4",
+    "ts-node": "^10.9.1"
   }
 }

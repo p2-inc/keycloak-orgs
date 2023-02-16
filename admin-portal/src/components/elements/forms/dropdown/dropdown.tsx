@@ -1,4 +1,4 @@
-import { FC, ReactElement, useState, ChangeEvent } from "react";
+import { FC, ReactElement, useState } from "react";
 import { ChevronIcon } from "../../../icons";
 import cs from "classnames";
 

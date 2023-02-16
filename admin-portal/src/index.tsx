@@ -36,11 +36,11 @@ const router = createBrowserRouter([
         element: <Organizations />,
       },
       {
-        path: "/organizations/:id/details",
+        path: "/organizations/:orgId/details",
         element: <OrganizationDetail />,
       },
       {
-        path: "/organizations/:id/settings",
+        path: "/organizations/:orgId/settings",
         element: <OrganizationSettings />,
       },
       {

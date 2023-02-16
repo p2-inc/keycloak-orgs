@@ -7,11 +7,9 @@ import {
   OrganizationMembershipsApi,
   OrganizationRolesApi,
   UsersApi,
-  IdentityProviderMapperRepresentation,
   IdentityProviderRepresentation,
   InvitationRepresentation,
   InvitationRequestRepresentation,
-  MagicLinkRepresentation,
   OrganizationDomainRepresentation,
   OrganizationRepresentation,
   OrganizationRoleRepresentation,
@@ -71,7 +69,7 @@ export const Orgs = {
         userId: userId,
       })
       .then((resp) => {
-        return resp.raw.status == 204;
+        return resp.raw.status === 204;
       });
   },
 
@@ -94,7 +92,7 @@ export const Orgs = {
         name: name,
       })
       .then((resp) => {
-        return resp.raw.status == 204;
+        return resp.raw.status === 204;
       });
   },
 
@@ -225,7 +223,7 @@ export const Orgs = {
 
   removeDomain: async function (orgId: string, domain: string): Promise<void> {
     this.getOrg(orgId).then((org) => {
-      org.domains = org.domains?.filter((d) => d != domain);
+      org.domains = org.domains?.filter((d) => d !== domain);
       return this.editOrg(org);
     });
   },

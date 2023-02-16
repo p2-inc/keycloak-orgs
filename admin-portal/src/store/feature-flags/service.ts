@@ -34,7 +34,7 @@ interface FeatureFlagsState {
 // Define a service using a base URL and expected endpoints
 export const featureFlagsApi = createApi({
   reducerPath: "featureFlagsApi",
-  baseQuery: fetchBaseQuery({ baseUrl: `${config.baseUrl}/${config.realm}` }),
+  baseQuery: fetchBaseQuery({ baseUrl: `/${config.realm}` }),
   endpoints: (builder) => ({
     getFeatureFlags: builder.query<FeatureFlagsState, void>({
       query: () => `config.json`,
