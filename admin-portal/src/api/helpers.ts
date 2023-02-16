@@ -1,4 +1,4 @@
-import keycloak from "keycloak";
+import { keycloak } from "keycloak";
 import config from "config";
 import { Configuration } from "@p2-inc/js-sdk";
 

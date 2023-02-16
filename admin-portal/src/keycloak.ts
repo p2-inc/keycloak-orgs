@@ -1,11 +1,13 @@
 import Keycloak from "keycloak-js";
+import { KeycloakService } from "services/keycloak.service";
 
-const keycloak = new Keycloak("/keycloak.json");
+const kc = new Keycloak("/keycloak.json");
 
 setInterval(async () => {
-  if (keycloak.isTokenExpired(10)) {
-    keycloak.updateToken(10);
+  if (kc.isTokenExpired(10)) {
+    kc.updateToken(10);
   }
 }, 5 * 1000); // 5 seconds
 
-export default keycloak;
+export const keycloak = kc;
+export const keycloakService = new KeycloakService(kc);

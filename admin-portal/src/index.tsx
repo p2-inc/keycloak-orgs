@@ -13,7 +13,7 @@ import Organizations from "pages/organizations";
 import OrganizationDetail from "pages/organizations/detail";
 import OrganizationSettings from "pages/organizations/settings";
 import Profile from "pages/profile";
-import keycloak from "keycloak";
+import { keycloak } from "keycloak";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import Loading from "components/elements/loading";
 import RoleProfile from "pages/profile/role";
