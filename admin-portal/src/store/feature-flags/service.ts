@@ -4,6 +4,7 @@ import config from "config";
 
 interface FeatureFlagsState {
   name: string;
+  displayName: string;
   logoUrl: string;
   faviconUrl: string;
   profileEnabled: boolean;
