@@ -1,8 +1,8 @@
 // Need to use the React-specific entry point to import createApi
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import config from "config";
+import { emptySplitApi as api } from "../apis/empty";
 
-interface FeatureFlagsState {
+import config from "config";
+export interface FeatureFlagsState {
   name: string;
   displayName: string;
   logoUrl: string;
@@ -32,17 +32,15 @@ interface FeatureFlagsState {
   orgEventsEnabled: boolean;
 }
 
-// Define a service using a base URL and expected endpoints
-export const featureFlagsApi = createApi({
-  reducerPath: "featureFlagsApi",
-  baseQuery: fetchBaseQuery({ baseUrl: `/${config.realm}` }),
-  endpoints: (builder) => ({
-    getFeatureFlags: builder.query<FeatureFlagsState, void>({
-      query: () => `config.json`,
+export const featureFlagsApi = api
+  .enhanceEndpoints({ addTagTypes: ["FeatureFlags"] })
+  .injectEndpoints({
+    endpoints: (build) => ({
+      getFeatureFlags: build.query<FeatureFlagsState, void>({
+        query: () => `${config.realm}/config.json`,
+        providesTags: ["FeatureFlags"],
+      }),
     }),
-  }),
-});
+  });
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
 export const { useGetFeatureFlagsQuery } = featureFlagsApi;

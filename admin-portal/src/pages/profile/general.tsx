@@ -1,8 +1,10 @@
 import Button from "components/elements/forms/buttons/button";
 import FormTextInputWithLabel from "components/elements/forms/inputs/text-input-with-label";
 import SectionHeader from "components/navs/section-header";
+import { useFeatureFlags } from "store/feature-flags/hooks";
 
 const GeneralProfile = () => {
+  const { featureFlags } = useFeatureFlags();
   return (
     <div>
       <div className="mb-12">
@@ -12,11 +14,13 @@ const GeneralProfile = () => {
         />
       </div>
       <form className="space-y-4">
-        <FormTextInputWithLabel
-          slug="email"
-          label="Email"
-          inputArgs={{ placeholder: "you@email.com" }}
-        />
+        {featureFlags.updateEmailFeatureEnabled && (
+          <FormTextInputWithLabel
+            slug="email"
+            label="Email"
+            inputArgs={{ placeholder: "you@email.com" }}
+          />
+        )}
         <FormTextInputWithLabel
           slug="firstName"
           label="First Name"
