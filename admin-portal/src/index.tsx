@@ -23,7 +23,9 @@ import ActivityProfile from "pages/profile/activity";
 import LinkedProfile from "pages/profile/linked";
 import { store } from "./store/";
 import { Provider } from "react-redux";
-import Invitation from "pages/invitation";
+import Invitation from "pages/invitation/index";
+import SendingInvitation from "pages/invitation/sending";
+import NewInvitation from "pages/invitation/new";
 
 const router = createBrowserRouter([
   {
@@ -46,6 +48,16 @@ const router = createBrowserRouter([
       {
         path: "/invitation",
         element: <Invitation />,
+        children: [
+          {
+            path: "new",
+            element: <NewInvitation />,
+          },
+          {
+            path: "sending",
+            element: <SendingInvitation />,
+          },
+        ]
       },
       {
         path: "/profile",
