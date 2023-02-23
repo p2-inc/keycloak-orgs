@@ -8,55 +8,21 @@ import { PlusIcon } from "components/icons";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import { Link } from "react-router-dom";
 import Stat from "components/elements/cards/stat";
-import { useGetOrganizationsQuery } from "store/apis/orgs";
+import {
+  useGetOrganizationDomainQuery,
+  useGetOrganizationsQuery,
+} from "store/apis/orgs";
 import { apiRealm } from "store/apis/helpers";
 import OrganizationsLoader from "components/loaders/organizations";
 import OrganizationItem from "components/elements/organizations/item";
-
-const people = [
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-];
-
-const Title = ({ children }) => (
-  <div className=" font-semibold">{children}</div>
-);
-const SubTitle = ({ children }) => (
-  <div className=" text-[14px]">{children}</div>
-);
+import DomainStat from "./domain-stat";
 
 export default function Organizations() {
   const { data: orgs = [], isFetching } = useGetOrganizationsQuery({
     realm: apiRealm,
   });
+
+  console.log("🚀 ~ file: index.tsx:18 ~ Organizations ~ orgs:", orgs);
 
   return (
     <>
@@ -95,7 +61,7 @@ export default function Organizations() {
                     subTitle={org.name}
                   >
                     <Stat value="4" label="members" />
-                    <Stat percent={50} value="3" label="domains" />
+                    <DomainStat org={org} realm={apiRealm} />
                   </OrganizationItem>
                 ))}
               </div>
