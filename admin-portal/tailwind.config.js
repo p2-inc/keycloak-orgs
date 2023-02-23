@@ -21,8 +21,8 @@ module.exports = {
         },
       },
       dropShadow: {
-        "btn-dark": "0px 1px 10px rgba(11, 25, 35, 0.5)",
-        "btn-light": "0px 1px 10px rgba(11, 25, 35, 0.2)",
+        "btn-dark": "0px 1px 10px rgba(11, 25, 35, 0.4)",
+        "btn-light": "0px 1px 10px rgba(11, 25, 35, 0.1)",
       },
     },
   },

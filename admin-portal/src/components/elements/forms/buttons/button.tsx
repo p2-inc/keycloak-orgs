@@ -8,16 +8,18 @@ type ButtonProps = { isBlackButton?: boolean } & React.DetailedHTMLProps<
 
 export const ButtonIconLeftClasses = "fill-current -ml-1 mr-2 h-5 w-5";
 
-const Button: FC<ButtonProps> = ({ children, isBlackButton }, ...args) => {
+const Button: FC<ButtonProps> = ({ children, isBlackButton, className }, ...args) => {
   return (
     <button
       {...args}
       className={cs(
         "group",
-        "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1"
+        "inline-flex",
+        "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
+        className
       )}
     >
-      <div className={cs("relative")}>
+      <div className="relative w-full">
         <div
           className={cs(
             "relative z-20 rounded-[4px] p-px",
@@ -31,11 +33,13 @@ const Button: FC<ButtonProps> = ({ children, isBlackButton }, ...args) => {
         >
           <div
             className={cs(
-              "flex items-center rounded-[3px] px-4 py-2 text-sm font-medium",
+              "flex items-center justify-center rounded-[3px] px-4 py-2 text-sm font-medium",
               {
-                "bg-p2gray-900 group-enabled:text-white group-disabled:text-white/50 group-disabled:bg-neutral-400": isBlackButton,
+                "bg-p2gray-900 group-enabled:text-white group-disabled:bg-neutral-400 group-disabled:text-white/50":
+                  isBlackButton,
                 "group-enabled:group-hover:bg-p2gray-800": isBlackButton,
-                "bg-neutral-50 group-enabled:text-p2gray-900 group-disabled:text-p2gray-900/50": !isBlackButton,
+                "bg-neutral-50 group-enabled:text-p2gray-900 group-disabled:text-p2gray-900/50":
+                  !isBlackButton,
               }
             )}
           >

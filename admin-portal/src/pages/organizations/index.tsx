@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
 import Stat from "components/elements/cards/stat";
 import { useGetOrganizationsQuery } from "store/apis/orgs";
 import { apiRealm } from "store/apis/helpers";
+import OrganizationsLoader from "components/loaders/organizations";
+import OrganizationItem from "components/elements/organizations/item";
 
 const people = [
   {
@@ -52,7 +54,9 @@ const SubTitle = ({ children }) => (
 );
 
 export default function Organizations() {
-  const { data: orgs = [] } = useGetOrganizationsQuery({ realm: apiRealm });
+  const { data: orgs = [], isFetching } = useGetOrganizationsQuery({
+    realm: apiRealm,
+  });
 
   return (
     <>
@@ -63,8 +67,9 @@ export default function Organizations() {
           <>
             <FormTextInputWithIcon
               inputArgs={{ placeholder: "Search Organizations" }}
+              className="w-full md:w-auto"
             />
-            <Button isBlackButton>
+            <Button isBlackButton className="w-full md:w-auto">
               <PlusIcon className={ButtonIconLeftClasses} aria-hidden="true" />
               Create Organization
             </Button>
@@ -74,22 +79,28 @@ export default function Organizations() {
       <MainContentArea>
         {/* Primary content */}
         <PrimaryContentArea>
-          <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {orgs.map((org) => (
-              <Link to={`/organizations/${org.id}/details`} key={org.id}>
-                <li className="col-span-1 flex flex-col rounded-lg border bg-white p-6">
-                  <div className="mb-7">
-                    <Title>{org.displayName}</Title>
-                    <SubTitle>{org.name}</SubTitle>
-                  </div>
-                  <div className="flex flex-row space-x-8">
+          <div>
+            {isFetching && (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                <OrganizationsLoader />
+              </div>
+            )}
+            {!isFetching && (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {orgs.map((org) => (
+                  <OrganizationItem
+                    key={org.id}
+                    link={`/organizations/${org.id}/details`}
+                    title={org.displayName}
+                    subTitle={org.name}
+                  >
                     <Stat value="4" label="members" />
                     <Stat percent={50} value="3" label="domains" />
-                  </div>
-                </li>
-              </Link>
-            ))}
-          </ul>
+                  </OrganizationItem>
+                ))}
+              </div>
+            )}
+          </div>
         </PrimaryContentArea>
       </MainContentArea>
     </>
