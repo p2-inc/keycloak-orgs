@@ -12,51 +12,15 @@ import { useGetOrganizationsQuery } from "store/apis/orgs";
 import { apiRealm } from "store/apis/helpers";
 import OrganizationsLoader from "components/loaders/organizations";
 import OrganizationItem from "components/elements/organizations/item";
-
-const people = [
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-  {
-    name: "Garth Patil",
-    title: "Grand Master",
-    email: "gpatil@phasetwo.com",
-    role: "Master",
-  },
-];
-
-const Title = ({ children }) => (
-  <div className=" font-semibold">{children}</div>
-);
-const SubTitle = ({ children }) => (
-  <div className=" text-[14px]">{children}</div>
-);
+import DomainStat from "./components/domain-stat";
+import MembersStat from "./components/members-stat";
 
 export default function Organizations() {
   const { data: orgs = [], isFetching } = useGetOrganizationsQuery({
     realm: apiRealm,
   });
+
+  console.log("🚀 ~ file: index.tsx:18 ~ Organizations ~ orgs:", orgs);
 
   return (
     <>
@@ -94,8 +58,8 @@ export default function Organizations() {
                     title={org.displayName}
                     subTitle={org.name}
                   >
-                    <Stat value="4" label="members" />
-                    <Stat percent={50} value="3" label="domains" />
+                    <MembersStat org={org} realm={apiRealm} />
+                    <DomainStat org={org} realm={apiRealm} />
                   </OrganizationItem>
                 ))}
               </div>
