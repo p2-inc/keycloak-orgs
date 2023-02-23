@@ -8,14 +8,12 @@ import { PlusIcon } from "components/icons";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import { Link } from "react-router-dom";
 import Stat from "components/elements/cards/stat";
-import {
-  useGetOrganizationDomainQuery,
-  useGetOrganizationsQuery,
-} from "store/apis/orgs";
+import { useGetOrganizationsQuery } from "store/apis/orgs";
 import { apiRealm } from "store/apis/helpers";
 import OrganizationsLoader from "components/loaders/organizations";
 import OrganizationItem from "components/elements/organizations/item";
 import DomainStat from "./components/domain-stat";
+import MembersStat from "./components/members-stat";
 
 export default function Organizations() {
   const { data: orgs = [], isFetching } = useGetOrganizationsQuery({
@@ -60,7 +58,7 @@ export default function Organizations() {
                     title={org.displayName}
                     subTitle={org.name}
                   >
-                    <Stat value="4" label="members" />
+                    <MembersStat org={org} realm={apiRealm} />
                     <DomainStat org={org} realm={apiRealm} />
                   </OrganizationItem>
                 ))}
