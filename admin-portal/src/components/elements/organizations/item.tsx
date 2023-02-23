@@ -7,32 +7,43 @@ type Props = {
   link: string;
   title?: string;
   subTitle?: string;
+  viewType: string;
 };
 
-const Title = ({ children }) => (
-  <div className="font-semibold">{children}</div>
-);
+const Title = ({ children }) => <div className="font-semibold">{children}</div>;
 const SubTitle = ({ children }) => (
   <div className="text-[14px]">{children}</div>
 );
 
-const OrganizationItem: FC<Props> = ({ children, link, title, subTitle }) => {
+const OrganizationItem: FC<Props> = ({
+  children,
+  link,
+  title,
+  subTitle,
+  viewType,
+}) => {
   return (
     <Link
       to={link}
       className={cs(
-        "group block pb-1",
-        "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1"
+        "group block",
+        "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
+        {
+          "pb-1": viewType === "grid",
+        }
       )}
     >
       <div className="relative">
         <div className="relative z-20">
           <div
             className={cs(
-              "col-span-1 flex flex-col rounded-md border border-gray-200 bg-gray-50",
-              "px-10 py-9",
-              "space-y-5",
-              "group-hover:bg-white group-hover:border-gray-300"
+              "col-span-1 flex",
+              "group-hover:border-gray-300 group-hover:bg-white",
+              {
+                "flex-col space-y-5 rounded-md border border-gray-200 bg-gray-50 px-10 py-9":
+                  viewType === "grid",
+                "flex-row justify-between px-4 py-2": viewType === "list",
+              }
             )}
           >
             <div className="">
@@ -42,14 +53,16 @@ const OrganizationItem: FC<Props> = ({ children, link, title, subTitle }) => {
             <div className="flex flex-row space-x-8">{children}</div>
           </div>
         </div>
-        <div
-          className={cs(
-            "absolute inset-x-3 bottom-0 z-10 h-1/2 rounded-full bg-white opacity-0",
-            "transition-opacity duration-200",
-            "group-hover:opacity-100",
-            "drop-shadow-btn-light group-active:hidden"
-          )}
-        ></div>
+        {viewType === "grid" && (
+          <div
+            className={cs(
+              "absolute inset-x-3 bottom-0 z-10 h-1/2 rounded-full bg-white opacity-0",
+              "transition-opacity duration-200",
+              "group-hover:opacity-100",
+              "drop-shadow-btn-light group-active:hidden"
+            )}
+          ></div>
+        )}
       </div>
     </Link>
   );
