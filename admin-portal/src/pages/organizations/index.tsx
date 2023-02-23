@@ -15,7 +15,7 @@ import {
 import { apiRealm } from "store/apis/helpers";
 import OrganizationsLoader from "components/loaders/organizations";
 import OrganizationItem from "components/elements/organizations/item";
-import DomainStat from "./domain-stat";
+import DomainStat from "./components/domain-stat";
 
 export default function Organizations() {
   const { data: orgs = [], isFetching } = useGetOrganizationsQuery({
