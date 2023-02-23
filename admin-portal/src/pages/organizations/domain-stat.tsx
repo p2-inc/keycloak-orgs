@@ -14,7 +14,6 @@ const DomainStat: React.FC<Props> = ({ org, realm }) => {
     realm,
     orgId: org.id!,
   });
-  console.log("🚀 ~ file: domain-stat.tsx:17 ~ domains:", domains);
 
   const verifiedPercentage =
     domains.length > 0
