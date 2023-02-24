@@ -26,6 +26,12 @@ import { Provider } from "react-redux";
 import Invitation from "pages/invitation/index";
 import SendingInvitation from "pages/invitation/sending";
 import NewInvitation from "pages/invitation/new";
+import DomainsAdd from "pages/organizations/domains/add";
+import DomainsVerify from "pages/organizations/domains/verify";
+import DomainContainer from "pages/organizations/domains";
+import SettingsGeneral from "pages/organizations/settings/general";
+import SettingsDomain from "pages/organizations/settings/domains";
+import SettingsSSO from "pages/organizations/settings/sso";
 
 const router = createBrowserRouter([
   {
@@ -43,7 +49,45 @@ const router = createBrowserRouter([
       },
       {
         path: "/organizations/:orgId/settings",
+        index: true,
+        loader: () => redirect("general"),
+      },
+      {
+        path: "/organizations/:orgId/settings/*",
         element: <OrganizationSettings />,
+        children: [
+          {
+            path: "general",
+            element: <SettingsGeneral />,
+          },
+          {
+            path: "domains",
+            element: <SettingsDomain />,
+          },
+          {
+            path: "sso",
+            element: <SettingsSSO />,
+          },
+        ],
+      },
+      {
+        path: "/organizations/:orgId/domains",
+        index: true,
+        loader: () => redirect("add"),
+      },
+      {
+        path: "/organizations/:orgId/domains/*",
+        element: <DomainContainer />,
+        children: [
+          {
+            path: "add",
+            element: <DomainsAdd />,
+          },
+          {
+            path: "verify",
+            element: <DomainsVerify />,
+          },
+        ],
       },
       {
         path: "/invitation",
@@ -57,12 +101,12 @@ const router = createBrowserRouter([
             path: "sending",
             element: <SendingInvitation />,
           },
-        ]
+        ],
       },
       {
         path: "/profile",
         index: true,
-        loader: () => redirect("/profile/general"),
+        loader: () => redirect("general"),
       },
       {
         path: "/profile/*",
