@@ -8,10 +8,14 @@ type ButtonProps = { isBlackButton?: boolean } & React.DetailedHTMLProps<
 
 export const ButtonIconLeftClasses = "fill-current -ml-1 mr-2 h-5 w-5";
 
-const Button: FC<ButtonProps> = ({ children, isBlackButton, className }, ...args) => {
+const Button: FC<ButtonProps> = (
+  { children, isBlackButton, className, onClick },
+  ...args
+) => {
   return (
     <button
       {...args}
+      onClick={onClick}
       className={cs(
         "group",
         "inline-flex",
