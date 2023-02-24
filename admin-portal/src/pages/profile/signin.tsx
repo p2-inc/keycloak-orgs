@@ -18,7 +18,7 @@ const SigninProfile = () => {
             description="Sign in by entering your password."
             variant="small"
           />
-          <Table />
+          {/* <Table /> */}
         </div>
         <div className="space-y-5">
           <SectionHeader
