@@ -9,7 +9,9 @@ import { Link, useParams } from "react-router-dom";
 import {
   useCreatePortalLinkMutation,
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
+  useGetIdpsQuery,
   useGetOrganizationByIdQuery,
+  useGetOrganizationDomainsQuery,
   useGetOrganizationInvitationsQuery,
   useGetOrganizationMembershipsQuery,
 } from "store/apis/orgs";
@@ -44,6 +46,17 @@ export default function OrganizationDetail() {
     orgId: org?.id!,
     realm: apiRealm,
   });
+  const { data: domains = [] } = useGetOrganizationDomainsQuery({
+    orgId: org?.id!,
+    realm: apiRealm,
+  });
+  const verifiedDomains =
+    domains.length > 0 ? domains.filter((d) => d.verified).length : 0;
+  const { data: idps = [] } = useGetIdpsQuery({
+    orgId: org?.id!,
+    realm: apiRealm,
+  });
+
   const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
 
   // Role checking
@@ -64,16 +77,6 @@ export default function OrganizationDetail() {
   //   loadUser();
   // }, []);
 
-  console.log(
-    "🚀 ~ file: detail.tsx:34 ~ OrganizationDetail ~ invites:",
-    invites
-  );
-  console.log(
-    "🚀 ~ file: detail.tsx:27 ~ OrganizationDetail ~ members:",
-    members
-  );
-  console.log("🚀 ~ file: detail.tsx:14 ~ OrganizationDetail ~ org", org);
-
   const columns: TableColumns = [
     { key: "userName", data: "Username" },
     { key: "email", data: "Email" },
@@ -88,9 +91,9 @@ export default function OrganizationDetail() {
   }));
 
   const OpenSSOLink = async () => {
-    const user = await keycloak.loadUserProfile();
+    // const user = await keycloak.loadUserProfile();
 
-    // TODO: used in self serve, is this the correct method?
+    // TODO: used in self serve, is this the correct link to the "wizard"?
     const link = `${keycloak.authServerUrl}realms/${
       keycloak.realm
     }/wizard/?org_id=${encodeURIComponent(org?.id!)}`;
@@ -154,7 +157,7 @@ export default function OrganizationDetail() {
             <OrganizationActionCard>
               <OACTopRow>
                 <div>Icon</div>
-                <Stat label="active SSO connections" value={"TBD"}></Stat>
+                <Stat label="active SSO connections" value={idps.length}></Stat>
               </OACTopRow>
               <div>
                 Setup SSO connections as necessary for this organization.
@@ -170,8 +173,8 @@ export default function OrganizationDetail() {
             <OrganizationActionCard>
               <OACTopRow>
                 <div>Icon</div>
-                <Stat label="Domains" value={"TBD"}></Stat>
-                <Stat label="Pending" value={"TBD"}></Stat>
+                <Stat label="Domains" value={domains.length}></Stat>
+                <Stat label="Pending" value={verifiedDomains}></Stat>
               </OACTopRow>
               <div>
                 Setup associated domains and verify them to ensure full
