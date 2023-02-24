@@ -1,3 +1,4 @@
+import cs from "classnames";
 import { apiRealm } from "store/apis/helpers";
 import Button, {
   ButtonIconLeftClasses,
@@ -27,10 +28,18 @@ import OrganizationActionCard, {
 } from "components/elements/organizations/action-card";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import Stat from "components/elements/cards/stat";
-import { PlusIcon } from "components/icons";
+import {
+  BuildingIcon,
+  DoubleSlashBrandIcon,
+  GlobeIcon,
+  PersonIcon,
+  PlusIcon,
+} from "components/icons";
 import { keycloak } from "keycloak";
 import { useEffect, useState } from "react";
 import { KeycloakProfile } from "keycloak-js";
+import RoundedIcon from "components/elements/rounded-icon";
+import { UserIcon } from "@heroicons/react/20/solid";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
@@ -133,7 +142,12 @@ export default function OrganizationDetail() {
             {/* Invite new members */}
             <OrganizationActionCard>
               <OACTopRow>
-                <div>Icon</div>
+                <RoundedIcon>
+                  <PersonIcon
+                    className={cs("h-[18] w-[18] stroke-current")}
+                    aria-hidden="true"
+                  />
+                </RoundedIcon>
                 <Stat label="members" value={members.length}></Stat>
                 <Stat label="pending" value={invites.length}></Stat>
               </OACTopRow>
@@ -156,7 +170,9 @@ export default function OrganizationDetail() {
             {/* Setup SSO */}
             <OrganizationActionCard>
               <OACTopRow>
-                <div>Icon</div>
+                <RoundedIcon>
+                  <BuildingIcon />
+                </RoundedIcon>
                 <Stat label="active SSO connections" value={idps.length}></Stat>
               </OACTopRow>
               <div>
@@ -172,7 +188,9 @@ export default function OrganizationDetail() {
             {/* Setup domains */}
             <OrganizationActionCard>
               <OACTopRow>
-                <div>Icon</div>
+                <RoundedIcon>
+                  <GlobeIcon />
+                </RoundedIcon>
                 <Stat label="Domains" value={domains.length}></Stat>
                 <Stat label="Pending" value={verifiedDomains}></Stat>
               </OACTopRow>
