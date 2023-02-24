@@ -6,30 +6,31 @@ import MainContentArea from "components/layouts/main-content-area";
 import TopHeader from "components/navs/top-header";
 import { PlusIcon } from "components/icons";
 import PrimaryContentArea from "components/layouts/primary-content-area";
-import Stat from "components/elements/cards/stat";
 import { useGetOrganizationsQuery } from "store/apis/orgs";
 import { apiRealm } from "store/apis/helpers";
 import OrganizationsLoader from "components/loaders/organizations";
 import OrganizationItem from "components/elements/organizations/item";
-import ViewSwitch from "components/elements/forms/switches/view-switch";
+import ViewSwitch, {
+  ViewLayoutOptions,
+} from "components/elements/forms/switches/view-switch";
 import { useState } from "react";
 import cs from "classnames";
 import DomainStat from "./components/domain-stat";
 import MembersStat from "./components/members-stat";
 
 export default function Organizations() {
-  const [viewType, setViewType] = useState("grid");
+  const [viewType, setViewType] = useState<ViewLayoutOptions>(
+    ViewLayoutOptions.GRID
+  );
   const { data: orgs = [], isFetching } = useGetOrganizationsQuery({
     realm: apiRealm,
   });
-
-  console.log("🚀 ~ file: index.tsx:18 ~ Organizations ~ orgs:", orgs);
 
   return (
     <>
       <TopHeader
         header="Organizations"
-        badgeVal="2"
+        badgeVal={orgs.length}
         rightAreaItems={
           <>
             <FormTextInputWithIcon
@@ -57,9 +58,9 @@ export default function Organizations() {
               <div
                 className={cs({
                   "grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3":
-                    viewType === "grid",
+                    viewType === ViewLayoutOptions.GRID,
                   "divide-y rounded-md border border-gray-200 bg-gray-50":
-                    viewType === "list",
+                    viewType === ViewLayoutOptions.LIST,
                 })}
               >
                 {orgs.map((org) => (

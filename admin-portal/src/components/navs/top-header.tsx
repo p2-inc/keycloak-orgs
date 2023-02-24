@@ -4,7 +4,7 @@ import HeaderLayout from "./components/header-layout";
 
 type Props = {
   header: string;
-  badgeVal?: string;
+  badgeVal?: string | number;
   rightAreaItems?: ReactElement | ReactElement[];
 };
 
