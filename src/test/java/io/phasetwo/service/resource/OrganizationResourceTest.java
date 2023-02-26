@@ -1,77 +1,81 @@
-package io.phasetwo.service.resources;
+package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Helpers.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import io.phasetwo.service.KeycloakSuite;
+import io.phasetwo.service.openapi.PhaseTwo;
+import io.phasetwo.service.openapi.api.IdentityProvidersApi;
+import io.phasetwo.service.openapi.api.OrganizationDomainsApi;
+import io.phasetwo.service.openapi.api.OrganizationInvitationsApi;
+import io.phasetwo.service.openapi.api.OrganizationMembershipsApi;
+import io.phasetwo.service.openapi.api.OrganizationRolesApi;
+import io.phasetwo.service.openapi.api.OrganizationsApi;
+import io.phasetwo.service.openapi.api.UsersApi;
 import io.phasetwo.service.representation.Domain;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.InvitationRequest;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationRole;
-import io.phasetwo.service.resource.OrganizationAdminAuth;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.junit.ClassRule;
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.IdentityProviderMapperRepresentation;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
+
+import static io.phasetwo.service.Helpers.createUser;
+import static io.phasetwo.service.Helpers.deleteUser;
+import static io.phasetwo.service.Helpers.urlencode;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 @JBossLog
-public class OrganizationResourceTest {
-
-  @ClassRule public static KeycloakSuite server = KeycloakSuite.SERVER;
-
-  CloseableHttpClient http = HttpClients.createDefault();
-
-  String url(String realm, String... segments) {
-    StringBuilder o = new StringBuilder();
-    for (String segment : segments) {
-      o.append("/").append(segment);
+public class OrganizationResourceTest extends AbstractResourceTest {
+  Response response;
+  
+  @After
+  public void close() {
+    // trick to avoid 'try-with-resources statement' intellij warning
+    if (response != null) {
+      response.close();
     }
-    return String.format("%s/realms/%s/orgs%s", server.getAuthUrl(), realm, o.toString());
   }
 
   @Test
-  public void testRealmId() throws Exception {
-    Keycloak keycloak = server.client();
-    RealmRepresentation r = keycloak.realm("master").toRepresentation();
-    assertThat(r.getRealm(), is("master"));
-    assertThat(r.getId(), not("master"));
+  public void testRealmId() {
+    try(Keycloak keycloak = server.client()) {
+      RealmRepresentation r = keycloak.realm(REALM).toRepresentation();
+      assertThat(r.getRealm(), is(REALM));
+      assertThat(r.getId(), not(REALM));
+    }
   }
   
   @Test
-  public void testGetDomains() throws Exception {
-    Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+  public void testGetDomains() {
+    PhaseTwo client = phaseTwo();
+    OrganizationDomainsApi domainsApi = client.domains();
+    OrganizationsApi organizationsApi = client.organizations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "domains"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = domainsApi.getOrganizationDomains(REALM, id);
     assertThat(response.getStatus(), is(200));
-    List<Domain> domains = response.asJson(new TypeReference<List<Domain>>() {});
+    List<Domain> domains = response.readEntity(new GenericType<List<Domain>>() {});
     assertNotNull(domains);
     assertThat(domains.size(), is(1));
     Domain domain = domains.get(0);
@@ -84,19 +88,12 @@ public class OrganizationResourceTest {
 
     // update
     rep.domains(ImmutableSet.of("foo.com", "bar.net"));
-    response =
-        SimpleHttp.doPut(url("master", urlencode(id)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(rep)
-            .asResponse();
+    response = organizationsApi.updateOrganization(REALM, id, rep);
     assertThat(response.getStatus(), is(204));
 
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "domains"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = domainsApi.getOrganizationDomains(REALM, id);
     assertThat(response.getStatus(), is(200));
-    domains = response.asJson(new TypeReference<List<Domain>>() {});
+    domains = response.readEntity(new GenericType<List<Domain>>() {});
     assertNotNull(domains);
     assertThat(domains.size(), is(2));
     for (Domain d : domains) {
@@ -108,25 +105,21 @@ public class OrganizationResourceTest {
     }
 
     // verify
-    response =
-        SimpleHttp.doPost(
-                url("master", urlencode(id), "domains", urlencode("foo.com"), "verify"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .param("foo", "bar")
-            .asResponse();
+    response = domainsApi.verifyDomain(REALM, id, "foo.com");
     assertThat(response.getStatus(), is(202));
 
     // delete org
-    deleteOrg(keycloak, "master", id);
+    deleteOrg(organizationsApi, REALM, id);
   }
 
   @Test
-  public void testImportConfig() throws Exception {
-    Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+  public void testImportConfig() {
+    PhaseTwo client = phaseTwo();
+    IdentityProvidersApi idpsApi = client.idps();
+    OrganizationsApi organizationsApi = client.organizations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
     // import-config
     Map<String, String> urlConf =
@@ -134,77 +127,60 @@ public class OrganizationResourceTest {
             "fromUrl",
                 "https://login.microsoftonline.com/74df8381-4935-4fa8-8634-8e3413f93086/federationmetadata/2007-06/federationmetadata.xml?appid=ba149e64-4512-440b-a1b4-ae976d85f1ec",
             "providerId", "saml",
-            "realm", "master");
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "idps", "import-config"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(urlConf)
-            .asResponse();
+            "realm", REALM);
+    response = idpsApi.importIdpJson(REALM, id, urlConf);
     assertThat(response.getStatus(), is(200));
-    Map<String, String> config = response.asJson(new TypeReference<Map<String, String>>() {});
+    Map<String, String> config = response.readEntity(new GenericType<Map<String, String>>() {});
     log.infof("config %s", config);
 
     // delete org
-    deleteOrg(keycloak, "master", id);
+    deleteOrg(organizationsApi, REALM, id);
   }
 
   @Test
-  public void testAddGetUpdateDeleteOrg() throws Exception {
-    Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+  public void testAddGetUpdateDeleteOrg() {
+    PhaseTwo client = phaseTwo();
+    OrganizationsApi organizationsApi = client.organizations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
     // get single
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = organizationsApi.getOrganizationById(REALM, id);
     assertThat(response.getStatus(), is(200));
-    rep = response.asJson(new TypeReference<Organization>() {});
+    rep = response.readEntity(new GenericType<Organization>() {});
     assertNotNull(rep);
     assertNotNull(rep.getId());
     assertNull(rep.getDisplayName());
     assertNull(rep.getUrl());
-    assertThat(rep.getRealm(), is("master"));
+    assertThat(rep.getRealm(), is(REALM));
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(id));
 
     // get list
-    response =
-        SimpleHttp.doGet(url("master"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = organizationsApi.getOrganizations(REALM, null, 0, 10);
     assertThat(response.getStatus(), is(200));
-    List<Organization> orgs = response.asJson(new TypeReference<List<Organization>>() {});
+    List<Organization> orgs = response.readEntity(new GenericType<List<Organization>>() {});
     assertNotNull(orgs);
     assertThat(orgs.size(), is(1));
     rep = orgs.get(0);
     assertNotNull(rep.getId());
     assertNull(rep.getDisplayName());
     assertNull(rep.getUrl());
-    assertThat(rep.getRealm(), is("master"));
+    assertThat(rep.getRealm(), is(REALM));
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(id));
 
     // update
     rep.url("https://www.example.com/").displayName("Example company").attribute("foo", "bar");
-    response =
-        SimpleHttp.doPut(url("master", urlencode(id)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(rep)
-            .asResponse();
+    response = organizationsApi.updateOrganization(REALM, id, rep);
     assertThat(response.getStatus(), is(204));
 
     // get single
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
-    rep = response.asJson(new TypeReference<Organization>() {});
+    response = organizationsApi.getOrganizationById(REALM, id);
+    rep = response.readEntity(new GenericType<Organization>() {});
     assertThat(response.getStatus(), is(200));
     assertNotNull(rep.getId());
     assertNotNull(rep.getAttributes());
@@ -213,86 +189,66 @@ public class OrganizationResourceTest {
     assertThat(rep.getAttributes().get("foo").get(0), is("bar"));
     assertThat(rep.getDisplayName(), is("Example company"));
     assertThat(rep.getUrl(), is("https://www.example.com/"));
-    assertThat(rep.getRealm(), is("master"));
+    assertThat(rep.getRealm(), is(REALM));
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(id));
 
     // delete
-    deleteOrg(keycloak, "master", id);
+    deleteOrg(organizationsApi, REALM, id);
 
     // get single
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = organizationsApi.getOrganizationById(REALM, id);
     assertThat(response.getStatus(), is(404));
 
     // get list
-    response =
-        SimpleHttp.doGet(url("master"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = organizationsApi.getOrganizations(REALM, null, 0, 10);
     assertThat(response.getStatus(), is(200));
-    orgs = response.asJson(new TypeReference<List<Organization>>() {});
+    orgs = response.readEntity(new GenericType<List<Organization>>() {});
     assertNotNull(orgs);
     assertThat(orgs.size(), is(0));
   }
 
   @Test
-  public void testAddGetDeleteMemberships() throws Exception {
+  public void testAddGetDeleteMemberships() {
     Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+    PhaseTwo client = phaseTwo(keycloak);
+    OrganizationMembershipsApi membershipsApi = client.members();
+    OrganizationsApi organizationsApi = client.organizations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
     // get empty members list
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "members"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = membershipsApi.getOrganizationMemberships(REALM, id);
     assertThat(response.getStatus(), is(200));
     List<UserRepresentation> members =
-        response.asJson(new TypeReference<List<UserRepresentation>>() {});
+        response.readEntity(new GenericType<List<UserRepresentation>>() {});
     assertNotNull(members);
     assertThat(members.size(), is(1)); // org admin default
 
     // create a user
-    UserRepresentation user = createUser(keycloak, "master", "johndoe");
+    UserRepresentation user = createUser(keycloak, REALM, "johndoe");
 
     // check membership before add
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "members", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = membershipsApi.checkOrganizationMembership(REALM, id, user.getId());
     assertThat(response.getStatus(), is(404));
 
     // add membership
-    response =
-        SimpleHttp.doPut(url("master", urlencode(id), "members", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json("foo") // hack b/c simplehttp doesn't like body-less puts
-            .asResponse();
+    response = membershipsApi.addOrganizationMember(REALM, id, user.getId());
     assertThat(response.getStatus(), is(201));
-    assertNotNull(response.getFirstHeader("Location"));
-    String loc = response.getFirstHeader("Location");
-    assertThat(loc, is(url("master", urlencode(id), "members", user.getId())));
+    assertNotNull(response.getHeaderString("Location"));
+    String loc = response.getHeaderString("Location");
+    assertThat(loc, is(url(REALM, urlencode(id), "members", user.getId())));
     
     // check membership after add
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "members", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = membershipsApi.checkOrganizationMembership(REALM, id, user.getId());
     assertThat(response.getStatus(), is(204));
 
     // get members list
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "members"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = membershipsApi.getOrganizationMemberships(REALM, id);
     assertThat(response.getStatus(), is(200));
-    members = response.asJson(new TypeReference<List<UserRepresentation>>() {});
+    members = response.readEntity(new GenericType<List<UserRepresentation>>() {});
     assertNotNull(members);
     assertThat(members.size(), is(2)); // +default org admin
     int idx = 0;
@@ -300,308 +256,233 @@ public class OrganizationResourceTest {
     assertThat(members.get(idx).getUsername(), is("johndoe"));
 
     // delete membership
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(id), "members", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = membershipsApi.removeOrganizationMember(REALM, id, user.getId());
     assertThat(response.getStatus(), is(204));
 
     // check membership after delete
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "members", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = membershipsApi.checkOrganizationMembership(REALM, id, user.getId());
     assertThat(response.getStatus(), is(404));
 
     // add membership
-    response =
-        SimpleHttp.doPut(url("master", urlencode(id), "members", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json("foo") // hack b/c simplehttp doesn't like body-less puts
-            .asResponse();
+    response = membershipsApi.addOrganizationMember(REALM, id, user.getId());
     assertThat(response.getStatus(), is(201));
-    assertNotNull(response.getFirstHeader("Location"));
-    loc = response.getFirstHeader("Location");
-    assertThat(loc, is(url("master", urlencode(id), "members", user.getId())));
+    assertNotNull(response.getHeaderString("Location"));
+    loc = response.getHeaderString("Location");
+    assertThat(loc, is(url(REALM, urlencode(id), "members", user.getId())));
 
-    // call the users/:id/orgs endpoint
-    String userOrgsUrl =
-        String.format("%s/realms/%s/users/%s/orgs", server.getAuthUrl(), "master", user.getId());
-    response =
-        SimpleHttp.doGet(userOrgsUrl, http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    UsersApi usersApi = client.users();
+    response = usersApi.realmUsersUserIdOrgsGet(REALM, user.getId());
     assertThat(response.getStatus(), is(200));
-    List<Organization> orgs = response.asJson(new TypeReference<List<Organization>>() {});
+    List<Organization> orgs = response.readEntity(new GenericType<List<Organization>>() {});
     assertNotNull(orgs);
     assertThat(orgs.size(), is(1));
     assertThat(orgs.get(0).getName(), is("example"));
 
     // delete user
-    deleteUser(keycloak, "master", user.getId());
+    deleteUser(keycloak, REALM, user.getId());
 
     // check membership after delete user
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "members", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = membershipsApi.checkOrganizationMembership(REALM, id, user.getId());
     assertThat(response.getStatus(), is(404));
 
     // delete org
-    deleteOrg(keycloak, "master", id);
+    deleteOrg(organizationsApi, REALM, id);
   }
 
   @Test
-  public void testDuplicateRoles() throws Exception {
-    Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+  public void testDuplicateRoles() {
+    PhaseTwo client = phaseTwo();
+    OrganizationRolesApi rolesApi = client.roles();
+    OrganizationsApi organizationsApi = client.organizations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
     // get default roles list
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "roles"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.getOrganizationRoles(REALM, id);
     assertThat(response.getStatus(), is(200));
-    List<OrganizationRole> roles = response.asJson(new TypeReference<List<OrganizationRole>>() {});
+    List<OrganizationRole> roles = response.readEntity(new GenericType<List<OrganizationRole>>() {});
     assertNotNull(roles);
     assertThat(roles.size(), is(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
     // create a role
     String name = "eat-apples";
     OrganizationRole roleRep = new OrganizationRole().name(name);
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "roles"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(roleRep)
-            .asResponse();
+    response = rolesApi.createOrganizationRole(REALM, id, roleRep);
     assertThat(response.getStatus(), is(201));
-    assertNotNull(response.getFirstHeader("Location"));
+    assertNotNull(response.getHeaderString("Location"));
 
     // attempt to create same name role
     roleRep = new OrganizationRole().name(name);
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "roles"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(roleRep)
-            .asResponse();
+    response = rolesApi.createOrganizationRole(REALM, id, roleRep);
     assertThat(response.getStatus(), is(409));
 
     // delete org
-    deleteOrg(keycloak, "master", id);
+    deleteOrg(organizationsApi, REALM, id);
   }
 
   @Test
-  public void testAddGetDeleteRoles() throws Exception {
+  public void testAddGetDeleteRoles() {
     Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+    PhaseTwo client = phaseTwo(keycloak);
+    OrganizationRolesApi rolesApi = client.roles();
+    OrganizationMembershipsApi membershipsApi = client.members();
+    OrganizationsApi organizationsApi = client.organizations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
     // get default roles list
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "roles"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.getOrganizationRoles(REALM, id);
     assertThat(response.getStatus(), is(200));
-    List<OrganizationRole> roles = response.asJson(new TypeReference<List<OrganizationRole>>() {});
+    List<OrganizationRole> roles = response.readEntity(new GenericType<List<OrganizationRole>>() {});
     assertNotNull(roles);
     assertThat(roles.size(), is(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
     // create a role
-    String name = createRole(keycloak, id, "eat-apples");
+    String name = createRole(rolesApi, id, "eat-apples");
 
     // get single role
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "roles", urlencode(name)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.getOrganizationRole(REALM, id, name);
     assertThat(response.getStatus(), is(200));
-    OrganizationRole role = response.asJson(new TypeReference<OrganizationRole>() {});
+    OrganizationRole role = response.readEntity(new GenericType<OrganizationRole>() {});
     assertNotNull(role);
     assertNotNull(role.getId());
     assertThat(role.getName(), is("eat-apples"));
 
     // get role list
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "roles"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.getOrganizationRoles(REALM, id);
     assertThat(response.getStatus(), is(200));
-    roles = response.asJson(new TypeReference<List<OrganizationRole>>() {});
+    roles = response.readEntity(new GenericType<List<OrganizationRole>>() {});
     assertNotNull(roles);
     assertThat(roles.size(), is(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 1));
 
     // delete role
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(id), "roles", urlencode(name)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.deleteOrganizationRole(REALM, id, name);
     assertThat(response.getStatus(), is(204));
 
     // get single role 404
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "roles", urlencode(name)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.getOrganizationRole(REALM, id, name);
     assertThat(response.getStatus(), is(404));
 
     // create 3 roles
     String[] ra = {"eat-apples", "bake-pies", "view-fair"};
     for (String r : ra) {
-      createRole(keycloak, id, r);
+      createRole(rolesApi, id, r);
     }
 
     // get role list
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "roles"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.getOrganizationRoles(REALM, id);
     assertThat(response.getStatus(), is(200));
-    roles = response.asJson(new TypeReference<List<OrganizationRole>>() {});
+    roles = response.readEntity(new GenericType<List<OrganizationRole>>() {});
     assertNotNull(roles);
     assertThat(roles.size(), is(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
 
     // create a user
-    UserRepresentation user = createUser(keycloak, "master", "johndoe");
+    UserRepresentation user = createUser(keycloak, REALM, "johndoe");
 
     // add membership
-    response =
-        SimpleHttp.doPut(url("master", urlencode(id), "members", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json("foo") // hack b/c simplehttp doesn't like body-less puts
-            .asResponse();
+    response = membershipsApi.addOrganizationMember(REALM, id, user.getId());
     assertThat(response.getStatus(), is(201));
-    assertNotNull(response.getFirstHeader("Location"));
-    String loc = response.getFirstHeader("Location");
-    assertThat(loc, is(url("master", urlencode(id), "members", user.getId())));
+    assertNotNull(response.getHeaderString("Location"));
+    String loc = response.getHeaderString("Location");
+    assertThat(loc, is(url(REALM, urlencode(id), "members", user.getId())));
 
     // grant role to user
-    grantUserRole(keycloak, id, name, user.getId());
+    grantUserRole(rolesApi, id, name, user.getId());
 
     // get users with role
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "roles", urlencode(name), "users"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.getUserOrganizationRoles(REALM, id, name);
     assertThat(response.getStatus(), is(200));
-    List<UserRepresentation> rs = response.asJson(new TypeReference<List<UserRepresentation>>() {});
+    List<UserRepresentation> rs = response.readEntity(new GenericType<List<UserRepresentation>>() {});
     assertNotNull(rs);
     assertThat(rs.size(), is(1));
     assertThat(rs.get(0).getUsername(), is("johndoe"));
 
     // check if user has role
-    checkUserRole(keycloak, id, name, user.getId(), 204);
+    checkUserRole(rolesApi, id, name, user.getId(), 204);
 
     // revoke role from user
-    response =
-        SimpleHttp.doDelete(
-                url("master", urlencode(id), "roles", urlencode(name), "users", user.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.revokeUserOrganizationRole(REALM, id, name, user.getId());
     assertThat(response.getStatus(), is(204));
 
     // get users with role
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "roles", urlencode(name), "users"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = rolesApi.getUserOrganizationRoles(REALM, id, name);
     assertThat(response.getStatus(), is(200));
-    rs = response.asJson(new TypeReference<List<UserRepresentation>>() {});
+    rs = response.readEntity(new GenericType<List<UserRepresentation>>() {});
     assertNotNull(rs);
     assertThat(rs.size(), is(0));
 
     // check if user has role
-    checkUserRole(keycloak, id, name, user.getId(), 404);
+    checkUserRole(rolesApi, id, name, user.getId(), 404);
 
     // grant more roles
     for (String r : ra) {
-      grantUserRole(keycloak, id, r, user.getId());
+      grantUserRole(rolesApi, id, r, user.getId());
     }
 
     // check if user has role
     for (String r : ra) {
-      checkUserRole(keycloak, id, r, user.getId(), 204);
+      checkUserRole(rolesApi, id, r, user.getId(), 204);
     }
 
     // delete user
-    deleteUser(keycloak, "master", user.getId());
+    deleteUser(keycloak, REALM, user.getId());
 
     // get users with role
     for (String r : ra) {
-      response =
-          SimpleHttp.doGet(url("master", urlencode(id), "roles", urlencode(r), "users"), http)
-              .auth(keycloak.tokenManager().getAccessTokenString())
-              .asResponse();
+      response = rolesApi.getUserOrganizationRoles(REALM, id, r);
       assertThat(response.getStatus(), is(200));
-      rs = response.asJson(new TypeReference<List<UserRepresentation>>() {});
+      rs = response.readEntity(new GenericType<List<UserRepresentation>>() {});
       assertNotNull(rs);
       assertThat(rs.size(), is(0));
     }
 
     // delete roles
     for (String r : ra) {
-      response =
-          SimpleHttp.doDelete(url("master", urlencode(id), "roles", urlencode(r)), http)
-              .auth(keycloak.tokenManager().getAccessTokenString())
-              .asResponse();
+      response = rolesApi.deleteOrganizationRole(REALM, id, r);
       assertThat(response.getStatus(), is(204));
     }
 
     // delete org
-    deleteOrg(keycloak, "master", id);
+    deleteOrg(organizationsApi, REALM, id);
   }
 
   @Test
-  public void testAddGetDeleteInvitations() throws Exception {
+  public void testAddGetDeleteInvitations() {
     Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+    PhaseTwo client = phaseTwo(keycloak);
+    OrganizationsApi organizationsApi = client.organizations();
+    OrganizationInvitationsApi invitationsApi = client.invitations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
     // create invitation
     InvitationRequest inv = new InvitationRequest().email("johndoe@example.com");
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "invitations"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(inv)
-            .asResponse();
+    response = invitationsApi.addOrganizationInvitation(REALM, id, inv);
     assertThat(response.getStatus(), is(201));
-    assertNotNull(response.getFirstHeader("Location"));
-    String loc = response.getFirstHeader("Location");
+    assertNotNull(response.getHeaderString("Location"));
+    String loc = response.getHeaderString("Location");
     String inviteId = loc.substring(loc.lastIndexOf("/") + 1);
     assertNotNull(inviteId);
-    assertThat(loc, is(url("master", urlencode(id), "invitations", inviteId)));
+    assertThat(loc, is(url(REALM, urlencode(id), "invitations", inviteId)));
 
     // get invitations
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "invitations"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = invitationsApi.getOrganizationInvitations(REALM, id);
     assertThat(response.getStatus(), is(200));
-    List<Invitation> invites = response.asJson(new TypeReference<List<Invitation>>() {});
+    List<Invitation> invites = response.readEntity(new GenericType<List<Invitation>>() {});
     assertNotNull(invites);
     assertThat(invites.size(), is(1));
     assertThat(invites.get(0).getEmail(), is("johndoe@example.com"));
     String invId = invites.get(0).getId();
 
     // try a conflicting invitation
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "invitations"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(inv)
-            .asResponse();
+    response = invitationsApi.addOrganizationInvitation(REALM, id, inv);
     assertThat(response.getStatus(), is(409));
 
     // remove pending invitation
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(id), "invitations", urlencode(invId)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = invitationsApi.removeOrganizationInvitation(REALM, id, invId);
     assertThat(response.getStatus(), is(204));
 
     // create user and give membership
@@ -614,47 +495,37 @@ public class OrganizationResourceTest {
     user1.setUsername("user1");
     user1.setEmail("johndoe@example.com");
     user1.setCredentials(ImmutableList.of(pass));
-    user1 = createUser(keycloak, "master", user1);
+    user1 = createUser(keycloak, REALM, user1);
     // grant membership to org
-    response =
-        SimpleHttp.doPut(url("master", urlencode(id), "members", user1.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json("foo") // hack b/c simplehttp doesn't like body-less puts
-            .asResponse();
+    response = client.members().addOrganizationMember(REALM, id, user1.getId());
     assertThat(response.getStatus(), is(201));
 
     // try an invitation to that new user
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "invitations"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(inv)
-            .asResponse();
+    response = invitationsApi.addOrganizationInvitation(REALM, id, inv);
     assertThat(response.getStatus(), is(409));
 
     // get invitations
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "invitations"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = invitationsApi.getOrganizationInvitations(REALM, id);
     assertThat(response.getStatus(), is(200));
-    invites = response.asJson(new TypeReference<List<Invitation>>() {});
+    invites = response.readEntity(new GenericType<List<Invitation>>() {});
     assertNotNull(invites);
     assertThat(invites.size(), is(0));
 
     // delete user
-    deleteUser(keycloak, "master", user1.getId());
+    deleteUser(keycloak, REALM, user1.getId());
 
     // delete org
-    deleteOrg(keycloak, "master", id);
+    deleteOrg(organizationsApi, REALM, id);
   }
 
   @Test
-  public void testAddGetDeleteIdps() throws Exception {
-    Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+  public void testAddGetDeleteIdps() {
+    PhaseTwo client = phaseTwo();
+    IdentityProvidersApi idpsApi = client.idps();
+    OrganizationsApi organizationsApi = client.organizations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
     idp.setAlias("vendor-protocol-1");
@@ -681,24 +552,17 @@ public class OrganizationResourceTest {
             .build());
 
     // create idp
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(idp)
-            .asResponse();
+    response = idpsApi.createIdp(REALM, id, idp);
     assertThat(response.getStatus(), is(201));
-    String loc = response.getFirstHeader("Location");
+    String loc = response.getHeaderString("Location");
     String alias1 = loc.substring(loc.lastIndexOf("/") + 1);
-    assertThat(loc, is(url("master", urlencode(id), "idps", alias1)));
+    assertThat(loc, is(url(REALM, urlencode(id), "idps", alias1)));
     
     // get idps
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdps(REALM, id);
     assertThat(response.getStatus(), is(200));
     List<IdentityProviderRepresentation> idps =
-        response.asJson(new TypeReference<List<IdentityProviderRepresentation>>() {});
+        response.readEntity(new GenericType<List<IdentityProviderRepresentation>>() {});
     assertNotNull(idps);
     assertThat(idps.size(), is(1));
     assertTrue(idps.get(0).isEnabled());
@@ -708,23 +572,16 @@ public class OrganizationResourceTest {
 
     // create idp
     idp.setAlias("vendor-protocol-2");
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(idp)
-            .asResponse();
+    response = idpsApi.createIdp(REALM, id, idp);
     assertThat(response.getStatus(), is(201));
-    loc = response.getFirstHeader("Location");
+    loc = response.getHeaderString("Location");
     String alias2 = loc.substring(loc.lastIndexOf("/") + 1);
-    assertThat(loc, is(url("master", urlencode(id), "idps", alias2)));
+    assertThat(loc, is(url(REALM, urlencode(id), "idps", alias2)));
 
     // get idps
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdps(REALM, id);
     assertThat(response.getStatus(), is(200));
-    idps = response.asJson(new TypeReference<List<IdentityProviderRepresentation>>() {});
+    idps = response.readEntity(new GenericType<List<IdentityProviderRepresentation>>() {});
     assertNotNull(idps);
     assertThat(idps.size(), is(2));
     for (IdentityProviderRepresentation i : idps) {
@@ -736,13 +593,10 @@ public class OrganizationResourceTest {
     }
 
     // get mappers for idp
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "idps", urlencode(alias1), "mappers"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdpMappers(REALM, id, alias1);
     assertThat(response.getStatus(), is(200));
     List<IdentityProviderMapperRepresentation> mappers =
-        response.asJson(new TypeReference<List<IdentityProviderMapperRepresentation>>() {});
+        response.readEntity(new GenericType<List<IdentityProviderMapperRepresentation>>() {});
     assertThat(mappers.size(), is(0));
 
     // add a mapper to the idp
@@ -757,42 +611,24 @@ public class OrganizationResourceTest {
             .put("user.attribute", "name")
             .put("claim", "name")
             .build());
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "idps", urlencode(alias1), "mappers"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(mapper)
-            .asResponse();
+    response = idpsApi.addIdpMapper(REALM, id, alias1, mapper);
     assertThat(response.getStatus(), is(201));
-    loc = response.getFirstHeader("Location");
+    loc = response.getHeaderString("Location");
     String mapperId = loc.substring(loc.lastIndexOf("/") + 1);
 
     // get single mapper for idp
-    response =
-        SimpleHttp.doGet(
-                url(
-                    "master",
-                    urlencode(id),
-                    "idps",
-                    urlencode(alias1),
-                    "mappers",
-                    urlencode(mapperId)),
-                http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdpMapper(REALM, id, alias1, mapperId);
     assertThat(response.getStatus(), is(200));
-    mapper = response.asJson(new TypeReference<IdentityProviderMapperRepresentation>() {});
+    mapper = response.readEntity(new GenericType<IdentityProviderMapperRepresentation>() {});
     assertNotNull(mapper);
     assertThat(mapper.getName(), is("name"));
     assertThat(mapper.getIdentityProviderAlias(), is(alias1));
     assertThat(mapper.getIdentityProviderMapper(), is("oidc-user-attribute-idp-mapper"));
 
     // get mappers for idp
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "idps", urlencode(alias1), "mappers"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdpMappers(REALM, id, alias1);
     assertThat(response.getStatus(), is(200));
-    mappers = response.asJson(new TypeReference<List<IdentityProviderMapperRepresentation>>() {});
+    mappers = response.readEntity(new GenericType<List<IdentityProviderMapperRepresentation>>() {});
     assertThat(mappers.size(), is(1));
 
     // update mapper for idp
@@ -802,103 +638,58 @@ public class OrganizationResourceTest {
             .put("user.attribute", "lastName")
             .put("claim", "familyName")
             .build());
-    response =
-        SimpleHttp.doPut(
-                url(
-                    "master",
-                    urlencode(id),
-                    "idps",
-                    urlencode(alias1),
-                    "mappers",
-                    urlencode(mapperId)),
-                http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(mapper)
-            .asResponse();
+    response = idpsApi.updateIdpMapper(REALM, id, alias1, mapperId, mapper);
     assertThat(response.getStatus(), is(204));
 
     // get single mapper for idp
-    response =
-        SimpleHttp.doGet(
-                url(
-                    "master",
-                    urlencode(id),
-                    "idps",
-                    urlencode(alias1),
-                    "mappers",
-                    urlencode(mapperId)),
-                http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdpMapper(REALM, id, alias1, mapperId);
     assertThat(response.getStatus(), is(200));
-    mapper = response.asJson(new TypeReference<IdentityProviderMapperRepresentation>() {});
+    mapper = response.readEntity(new GenericType<IdentityProviderMapperRepresentation>() {});
     assertNotNull(mapper);
     assertThat(mapper.getConfig().get("user.attribute"), is("lastName"));
     assertThat(mapper.getConfig().get("claim"), is("familyName"));
 
     // delete mappers for idp
-    response =
-        SimpleHttp.doDelete(
-                url(
-                    "master",
-                    urlencode(id),
-                    "idps",
-                    urlencode(alias1),
-                    "mappers",
-                    urlencode(mapperId)),
-                http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.deleteIdpMapper(REALM, id, alias1, mapperId);
     assertThat(response.getStatus(), is(204));
 
     // get mappers for idp
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "idps", urlencode(alias1), "mappers"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdpMappers(REALM, id, alias1);
     assertThat(response.getStatus(), is(200));
-    mappers = response.asJson(new TypeReference<List<IdentityProviderMapperRepresentation>>() {});
+    mappers = response.readEntity(new GenericType<List<IdentityProviderMapperRepresentation>>() {});
     assertThat(mappers.size(), is(0));
 
     // delete idps
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(id), "idps", urlencode(alias1)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.deleteIdp(REALM, id, alias1);
     assertThat(response.getStatus(), is(204));
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(id), "idps", urlencode(alias2)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.deleteIdp(REALM, id, alias2);
     assertThat(response.getStatus(), is(204));
 
     // get idps
-    response =
-        SimpleHttp.doGet(url("master", urlencode(id), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdps(REALM, id);
     assertThat(response.getStatus(), is(200));
-    idps = response.asJson(new TypeReference<List<IdentityProviderRepresentation>>() {});
+    idps = response.readEntity(new GenericType<List<IdentityProviderRepresentation>>() {});
     assertNotNull(idps);
     assertThat(idps.size(), is(0));
 
     // delete org
-    deleteOrg(keycloak, "master", id);
+    deleteOrg(organizationsApi, REALM, id);
   }
 
   @Test
   @Ignore
-  public void testIdpsOwnedOrgs() throws Exception {
-    Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+  public void testIdpsOwnedOrgs() {
+    PhaseTwo client = phaseTwo();
+    IdentityProvidersApi idpsApi = client.idps();
+    OrganizationsApi organizationsApi = client.organizations();
 
     // create one org
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String orgId1 = createOrg(keycloak, "master", rep);
+    String orgId1 = createOrg(organizationsApi, REALM, rep);
 
     // create another org
     rep = new Organization().name("sample").domains(ImmutableSet.of("sample.com"));
-    String orgId2 = createOrg(keycloak, "master", rep);
+    String orgId2 = createOrg(organizationsApi, REALM, rep);
 
     // create idp for org 1
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
@@ -926,85 +717,64 @@ public class OrganizationResourceTest {
             .build());
 
     // create idp for org1
-    response =
-        SimpleHttp.doPost(url("master", urlencode(orgId1), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(idp)
-            .asResponse();
+    response = idpsApi.createIdp(REALM, orgId1, idp);
     assertThat(response.getStatus(), is(201));
-    String loc = response.getFirstHeader("Location");
+    String loc = response.getHeaderString("Location");
     String alias1 = loc.substring(loc.lastIndexOf("/") + 1);
-    assertThat(loc, is(url("master", urlencode(orgId1), "idps", alias1)));
+    assertThat(loc, is(url(REALM, urlencode(orgId1), "idps", alias1)));
 
     // create idp for org 2
     idp.setAlias("vendor-protocol-B1");
-    response =
-        SimpleHttp.doPost(url("master", urlencode(orgId2), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(idp)
-            .asResponse();
+    response = idpsApi.createIdp(REALM, orgId2, idp);
     assertThat(response.getStatus(), is(201));
-    loc = response.getFirstHeader("Location");
+    loc = response.getHeaderString("Location");
     String alias2 = loc.substring(loc.lastIndexOf("/") + 1);
-    assertThat(loc, is(url("master", urlencode(orgId2), "idps", alias1)));
+    assertThat(loc, is(url(REALM, urlencode(orgId2), "idps", alias1)));
 
     // check that org 1 can only see idp 1
-    response =
-        SimpleHttp.doGet(url("master", urlencode(orgId1), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdps(REALM, orgId1);
     assertThat(response.getStatus(), is(200));
     List<IdentityProviderRepresentation> idps =
-        response.asJson(new TypeReference<List<IdentityProviderRepresentation>>() {});
+        response.readEntity(new GenericType<List<IdentityProviderRepresentation>>() {});
     assertNotNull(idps);
     assertThat(idps.size(), is(1));
     assertThat(idps.get(0).getAlias(), is(alias1));
 
     // check that org 2 can only see idp 2
-    response =
-        SimpleHttp.doGet(url("master", urlencode(orgId2), "idps"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.getIdps(REALM, orgId2);
     assertThat(response.getStatus(), is(200));
-    idps = response.asJson(new TypeReference<List<IdentityProviderRepresentation>>() {});
+    idps = response.readEntity(new GenericType<List<IdentityProviderRepresentation>>() {});
     assertNotNull(idps);
     assertThat(idps.size(), is(1));
     assertThat(idps.get(0).getAlias(), is(alias2));
 
     // check that org 1 cannot delete/update idp 2
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(orgId1), "idps", urlencode(alias2)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.deleteIdp(REALM, orgId1, alias2);
     assertThat(response.getStatus(), not(200));
 
     // delete idps 1 & 2
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(orgId1), "idps", urlencode(alias1)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.deleteIdp(REALM, orgId1, alias1);
     assertThat(response.getStatus(), is(204));
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(orgId2), "idps", urlencode(alias2)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.deleteIdp(REALM, orgId2, alias2);
     assertThat(response.getStatus(), is(204));
 
     // delete org 2
-    deleteOrg(keycloak, "master", orgId2);
+    deleteOrg(organizationsApi, REALM, orgId2);
 
     // delete org 1
-    deleteOrg(keycloak, "master", orgId1);
+    deleteOrg(organizationsApi, REALM, orgId1);
   }
 
   @Test
-  public void testOrgAdminPermissions() throws Exception {
+  public void testOrgAdminPermissions() {
     Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+    PhaseTwo client1 = phaseTwo(keycloak);
+    OrganizationsApi organizationsApi1 = client1.organizations();
+    OrganizationMembershipsApi membershipsApi = client1.members();
 
     // create one org
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String orgId1 = createOrg(keycloak, "master", rep);
+    String orgId1 = createOrg(organizationsApi1, REALM, rep);
 
     // create a normal user
     CredentialRepresentation pass = new CredentialRepresentation();
@@ -1015,41 +785,33 @@ public class OrganizationResourceTest {
     user1.setEnabled(true);
     user1.setUsername("user1");
     user1.setCredentials(ImmutableList.of(pass));
-    user1 = createUser(keycloak, "master", user1);
+    user1 = createUser(keycloak, REALM, user1);
     // grant membership to org
-    response =
-        SimpleHttp.doPut(url("master", urlencode(orgId1), "members", user1.getId()), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json("foo") // hack b/c simplehttp doesn't like body-less puts
-            .asResponse();
+    response = membershipsApi.addOrganizationMember(REALM, orgId1, user1.getId());
     assertThat(response.getStatus(), is(201));
 
     // grant org admin permissions
     for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
-      grantUserRole(keycloak, orgId1, role, user1.getId());
+      grantUserRole(client1.roles(), orgId1, role, user1.getId());
     }
 
-    Keycloak kc1 = server.client("master", "admin-cli", "user1", "pass");
+    Keycloak kc1 = server.client(REALM, "admin-cli", "user1", "pass");
+    PhaseTwo client2 = phaseTwo(kc1);
+    OrganizationsApi organizationsApi2 = client2.organizations();
+
     // check that user has permissions to
     //  update org
     rep.url("https://www.example.com/").displayName("Example company");
-    response =
-        SimpleHttp.doPut(url("master", urlencode(orgId1)), http)
-            .auth(kc1.tokenManager().getAccessTokenString())
-            .json(rep)
-            .asResponse();
+    response = organizationsApi2.updateOrganization(REALM, orgId1, rep);
     assertThat(response.getStatus(), is(204));
-    response =
-        SimpleHttp.doGet(url("master", urlencode(orgId1)), http)
-            .auth(kc1.tokenManager().getAccessTokenString())
-            .asResponse();
-    rep = response.asJson(new TypeReference<Organization>() {});
+    response = organizationsApi2.getOrganizationById(REALM, orgId1);
+    rep = response.readEntity(new GenericType<Organization>() {});
     assertThat(response.getStatus(), is(200));
     assertNotNull(rep.getId());
     assertThat(rep.getAttributes().size(), is(0));
     assertThat(rep.getDisplayName(), is("Example company"));
     assertThat(rep.getUrl(), is("https://www.example.com/"));
-    assertThat(rep.getRealm(), is("master"));
+    assertThat(rep.getRealm(), is(REALM));
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(orgId1));
@@ -1086,21 +848,15 @@ public class OrganizationResourceTest {
             .put("clientId", "aabbcc")
             .put("clientSecret", "112233")
             .build());
-    response =
-        SimpleHttp.doPost(url("master", urlencode(orgId1), "idps"), http)
-            .auth(kc1.tokenManager().getAccessTokenString())
-            .json(idp)
-            .asResponse();
+
+    IdentityProvidersApi idpsApi = client2.idps();
+    response = idpsApi.createIdp(REALM, orgId1, idp);
     assertThat(response.getStatus(), is(201));
-    String loc = response.getFirstHeader("Location");
+    String loc = response.getHeaderString("Location");
     String alias1 = loc.substring(loc.lastIndexOf("/") + 1);
     //  get idp xxx
-    response =
-        SimpleHttp.doGet(url("master", urlencode(orgId1), "idps", urlencode(alias1)), http)
-            .auth(kc1.tokenManager().getAccessTokenString())
-            .asResponse();
-    IdentityProviderRepresentation idp1 =
-        response.asJson(new TypeReference<IdentityProviderRepresentation>() {});
+    response = idpsApi.getIdp(REALM, orgId1, alias1);
+    IdentityProviderRepresentation idp1 = response.readEntity(new GenericType<IdentityProviderRepresentation>() {});
     assertThat(response.getStatus(), is(200));
     assertThat(idp1.getAlias(), is(alias1));
     assertThat(idp1.getProviderId(), is(idp.getProviderId()));
@@ -1108,24 +864,16 @@ public class OrganizationResourceTest {
     assertThat(idp1.getFirstBrokerLoginFlowAlias(), is(idp.getFirstBrokerLoginFlowAlias()));
     assertThat(idp1.getConfig().get("clientId"), is(idp.getConfig().get("clientId")));
     //  remove idp
-    response =
-        SimpleHttp.doDelete(url("master", urlencode(orgId1), "idps", urlencode(alias1)), http)
-            .auth(kc1.tokenManager().getAccessTokenString())
-            .asResponse();
+    response = idpsApi.deleteIdp(REALM, orgId1, alias1);
     assertThat(response.getStatus(), is(204));
 
     // create another org
     rep = new Organization().name("sample").domains(ImmutableSet.of("sample.com"));
-    String orgId2 = createOrg(keycloak, "master", rep);
+    String orgId2 = createOrg(organizationsApi1, REALM, rep);
 
-    // check that user does not have permission to
-    //  update org
+    // check that user does not have permission to update org
     rep.url("https://www.sample.com/").displayName("Sample company");
-    response =
-        SimpleHttp.doPut(url("master", urlencode(orgId2)), http)
-            .auth(kc1.tokenManager().getAccessTokenString())
-            .json(rep)
-            .asResponse();
+    response = organizationsApi2.updateOrganization(REALM, orgId2, rep);
     assertThat(response.getStatus(), is(401));
     //  get memberships
     //  add memberships
@@ -1138,32 +886,26 @@ public class OrganizationResourceTest {
     //  remove roles
 
     // delete user
-    deleteUser(keycloak, "master", user1.getId());
+    deleteUser(keycloak, REALM, user1.getId());
 
     // delete other org
-    deleteOrg(keycloak, "master", orgId2);
+    deleteOrg(organizationsApi1, REALM, orgId2);
 
     // delete org
-    deleteOrg(keycloak, "master", orgId1);
+    deleteOrg(organizationsApi1, REALM, orgId1);
   }
 
   @Test
   @Ignore
-  public void testOrgPortalLink() throws Exception {
-    Keycloak keycloak = server.client();
-    SimpleHttp.Response response = null;
+  public void testOrgPortalLink() {
+    OrganizationsApi organizationsApi = phaseTwo().organizations();
 
     Organization rep = new Organization().name("example").domains(ImmutableSet.of("example.com"));
-    String id = createOrg(keycloak, "master", rep);
+    String id = createOrg(organizationsApi, REALM, rep);
 
-    response =
-        SimpleHttp.doPost(url("master", urlencode(id), "portal-link"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .param("foo", "bar") // simplehttp doesnt like empty requests for post
-            .asResponse();
-
+    response = organizationsApi.createPortalLink(REALM, id, "foobar");
     assertThat(response.getStatus(), is(200));
-    Map<String, String> resp = response.asJson(new TypeReference<Map<String, String>>() {});
+    Map<String, String> resp = response.readEntity(new GenericType<Map<String, String>>() {});
     assertNotNull(resp.get("user"));
     assertNotNull(resp.get("link"));
     assertNotNull(resp.get("redirect"));
@@ -1171,73 +913,6 @@ public class OrganizationResourceTest {
     System.err.println(String.format("portal-link %s", resp));
 
     // delete org
-    deleteOrg(keycloak, "master", id);
-  }
-
-  private String createRole(Keycloak keycloak, String orgId, String name) throws Exception {
-    OrganizationRole rep = new OrganizationRole().name(name);
-    SimpleHttp.Response response =
-        SimpleHttp.doPost(url("master", urlencode(orgId), "roles"), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(rep)
-            .asResponse();
-    assertThat(response.getStatus(), is(201));
-    assertNotNull(response.getFirstHeader("Location"));
-    String loc = response.getFirstHeader("Location");
-    String id = loc.substring(loc.lastIndexOf("/") + 1);
-    assertThat(name, is(id));
-    assertThat(loc, is(url("master", urlencode(orgId), "roles", id)));
-    return id;
-  }
-
-  private void grantUserRole(Keycloak keycloak, String orgId, String role, String userId)
-      throws Exception {
-    // grant role to user
-    // PUT /:realm/orgs/:orgId/roles/:name/users/:userId
-    SimpleHttp.Response response =
-        SimpleHttp.doPut(
-                url("master", urlencode(orgId), "roles", urlencode(role), "users", userId), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json("foo") // hack b/c simplehttp doesn't like body-less puts
-            .asResponse();
-    assertThat(response.getStatus(), is(201));
-    assertNotNull(response.getFirstHeader("Location"));
-    String loc = response.getFirstHeader("Location");
-    String id = loc.substring(loc.lastIndexOf("/") + 1);
-    assertThat(loc, is(url("master", urlencode(orgId), "roles", urlencode(role), "users", userId)));
-  }
-
-  private void checkUserRole(
-      Keycloak keycloak, String orgId, String role, String userId, int status) throws Exception {
-    // check if user has role
-    SimpleHttp.Response response =
-        SimpleHttp.doGet(
-                url("master", urlencode(orgId), "roles", urlencode(role), "users", userId), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
-    assertThat(response.getStatus(), is(status));
-  }
-
-  private String createOrg(Keycloak keycloak, String realm, Organization rep) throws Exception {
-    SimpleHttp.Response response =
-        SimpleHttp.doPost(url(realm), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .json(rep)
-            .asResponse();
-    assertThat(response.getStatus(), is(201));
-    assertNotNull(response.getFirstHeader("Location"));
-    String loc = response.getFirstHeader("Location");
-    String id = loc.substring(loc.lastIndexOf("/") + 1);
-    assertNotNull(id);
-    assertThat(loc, is(url(realm, id)));
-    return id;
-  }
-
-  private void deleteOrg(Keycloak keycloak, String realm, String orgId) throws Exception {
-    SimpleHttp.Response response =
-        SimpleHttp.doDelete(url(realm, urlencode(orgId)), http)
-            .auth(keycloak.tokenManager().getAccessTokenString())
-            .asResponse();
-    assertThat(response.getStatus(), is(204));
+    deleteOrg(organizationsApi, REALM, id);
   }
 }
