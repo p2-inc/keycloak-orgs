@@ -176,7 +176,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // get single
     ClientErrorException ex = assertThrows(ClientErrorException.class, organizationResource::get);
-    assertThat(ex.getResponse().getStatus(), is(404));
+    assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_NOT_FOUND));
 
     // get list
     organizations = organizationsResource.get();
