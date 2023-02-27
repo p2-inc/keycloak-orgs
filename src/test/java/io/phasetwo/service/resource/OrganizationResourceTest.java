@@ -66,10 +66,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   @Test
   public void testGetDomains() {
     PhaseTwo client = phaseTwo();
-    OrganizationsResource organizationsResource = client.organizations(REALM);
-    String id = createDefaultOrg(organizationsResource);
-    OrganizationResource organizationResource = organizationsResource.organization(id);
-    OrganizationDomainsResource domainsResource = organizationResource.domains();
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
+    OrganizationResource orgResource = orgsResource.organization(id);
+    OrganizationDomainsResource domainsResource = orgResource.domains();
 
     List<OrganizationDomainRepresentation> domains = domainsResource.get();
     assertThat(domains, notNullValue());
@@ -83,7 +83,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         "domain %s %s %s", domain.getDomainName(), domain.getRecordKey(), domain.getRecordValue());
 
     // update
-    organizationResource.update(organizationResource.get().domains(List.of("foo.com", "bar.net")));
+    orgResource.update(orgResource.get().domains(List.of("foo.com", "bar.net")));
 
     domains = domainsResource.get();
     assertThat(domains, notNullValue());
@@ -101,14 +101,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     domainsResource.verify("foo.com");
 
     // delete org
-    organizationResource.delete();
+    orgResource.delete();
   }
 
   @Test
   public void testImportConfig() {
     PhaseTwo client = phaseTwo();
-    OrganizationsResource organizationsResource = client.organizations(REALM);
-    String id = createDefaultOrg(organizationsResource);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
     IdentityProvidersApi idpsApi = client.getIdentityProvidersApi();
 
     // import-config
@@ -127,20 +127,20 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(config, hasEntry("wantAuthnRequestsSigned", "false"));
 
     // delete org
-    organizationsResource.organization(id).delete();
+    orgsResource.organization(id).delete();
   }
 
   @Test
   public void testAddGetUpdateDeleteOrg() {
     PhaseTwo client = phaseTwo();
-    OrganizationsResource organizationsResource = client.organizations(REALM);
-    String id = organizationsResource.create(
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = orgsResource.create(
             new OrganizationRepresentation().name("example").domains(List.of("example.com"))
     );
-    OrganizationResource organizationResource = organizationsResource.organization(id);
+    OrganizationResource orgResource = orgsResource.organization(id);
 
     // get single
-    OrganizationRepresentation rep = organizationResource.get();
+    OrganizationRepresentation rep = orgResource.get();
     assertThat(rep, notNullValue());
     assertThat(rep.getId(), notNullValue());
     assertThat(rep.getDisplayName(), nullValue());
@@ -151,7 +151,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(rep.getId(), is(id));
 
     // get list
-    List<OrganizationRepresentation> organizations = organizationsResource.get();
+    List<OrganizationRepresentation> organizations = orgsResource.get();
     assertThat(organizations, notNullValue());
     assertThat(organizations, hasSize(1));
     rep = organizations.get(0);
@@ -165,10 +165,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // update
     rep.url("https://www.example.com/").displayName("Example company").attributes(ImmutableMap.of("foo", List.of("bar")));
-    organizationResource.update(rep);
+    orgResource.update(rep);
 
     // get single
-    rep = organizationResource.get();
+    rep = orgResource.get();
     assertThat(rep.getId(), notNullValue());
     assertThat(rep.getAttributes(), notNullValue());
     assertThat(rep.getAttributes().keySet(), hasSize(1));
@@ -182,14 +182,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(rep.getId(), is(id));
 
     // delete
-    organizationResource.delete();
+    orgResource.delete();
 
     // get single
-    ClientErrorException ex = assertThrows(ClientErrorException.class, organizationResource::get);
+    ClientErrorException ex = assertThrows(ClientErrorException.class, orgResource::get);
     assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_NOT_FOUND));
 
     // get list
-    organizations = organizationsResource.get();
+    organizations = orgsResource.get();
     assertThat(organizations, notNullValue());
     assertThat(organizations, empty());
   }
@@ -198,11 +198,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   public void testAddGetDeleteMemberships() {
     Keycloak keycloak = server.client();
     PhaseTwo client = phaseTwo(keycloak);
-    OrganizationsResource organizationsResource = client.organizations(REALM);
-    String id = createDefaultOrg(organizationsResource);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
 
-    OrganizationResource organizationResource = organizationsResource.organization(id);
-    OrganizationMembershipsResource membershipsResource = organizationResource.memberships();
+    OrganizationResource orgResource = orgsResource.organization(id);
+    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
 
     // get empty members list
     List<UserRepresentation> members = membershipsResource.members();
@@ -245,16 +245,16 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(membershipsResource.isMember(user.getId()), is(false));
 
     // delete org
-    organizationResource.delete();
+    orgResource.delete();
   }
 
   @Test
   public void testDuplicateRoles() {
     PhaseTwo client = phaseTwo();
-    OrganizationsResource organizationsResource = client.organizations(REALM);
-    String id = createDefaultOrg(organizationsResource);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
 
-    OrganizationRolesResource rolesResource = organizationsResource.organization(id).roles();
+    OrganizationRolesResource rolesResource = orgsResource.organization(id).roles();
 
     // get default roles list
     List<OrganizationRoleRepresentation> roles = rolesResource.get();
@@ -272,19 +272,19 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_CONFLICT));
 
     // delete org
-    organizationsResource.organization(id).delete();
+    orgsResource.organization(id).delete();
   }
 
   @Test
   public void testAddGetDeleteRoles() {
     Keycloak keycloak = server.client();
     PhaseTwo client = phaseTwo(keycloak);
-    OrganizationsResource organizationsResource = client.organizations(REALM);
-    String id = createDefaultOrg(organizationsResource);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
 
-    OrganizationResource organizationResource = organizationsResource.organization(id);
-    OrganizationRolesResource rolesResource = organizationResource.roles();
-    OrganizationMembershipsResource membershipsResource = organizationResource.memberships();
+    OrganizationResource orgResource = orgsResource.organization(id);
+    OrganizationRolesResource rolesResource = orgResource.roles();
+    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
 
     // get default roles list
     List<OrganizationRoleRepresentation> roles = rolesResource.get();
@@ -377,18 +377,18 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     }
 
     // delete org
-    organizationResource.delete();
+    orgResource.delete();
   }
 
   @Test
   public void testAddGetDeleteInvitations() {
     Keycloak keycloak = server.client();
     PhaseTwo client = phaseTwo(keycloak);
-    OrganizationsResource organizationsResource = client.organizations(REALM);
-    String id = createDefaultOrg(organizationsResource);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
 
-    OrganizationResource organizationResource = organizationsResource.organization(id);
-    OrganizationInvitationsResource invitationsResource = organizationResource.invitations();
+    OrganizationResource orgResource = orgsResource.organization(id);
+    OrganizationInvitationsResource invitationsResource = orgResource.invitations();
 
     // create invitation
     InvitationRequestRepresentation inv = new InvitationRequestRepresentation().email("johndoe@example.com");
@@ -422,7 +422,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     user1.setCredentials(ImmutableList.of(pass));
     user1 = createUser(keycloak, REALM, user1);
     // grant membership to org
-    organizationResource.memberships().add(user1.getId());
+    orgResource.memberships().add(user1.getId());
 
     // try an invitation to that new user
     ex = assertThrows(ClientErrorException.class, () -> invitationsResource.add(inv));
@@ -437,17 +437,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteUser(keycloak, REALM, user1.getId());
 
     // delete org
-    organizationResource.delete();
+    orgResource.delete();
   }
 
   @Test
   public void testAddGetDeleteIdps() {
     PhaseTwo client = phaseTwo();
-    OrganizationsResource organizationsResource = client.organizations(REALM);
-    String id = createDefaultOrg(organizationsResource);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
 
-    OrganizationResource organizationResource = organizationsResource.organization(id);
-    OrganizationIdentityProvidersResource idpResource = organizationResource.identityProviders();
+    OrganizationResource orgResource = orgsResource.organization(id);
+    OrganizationIdentityProvidersResource idpResource = orgResource.identityProviders();
 
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
     idp.setAlias("vendor-protocol-1");
@@ -563,26 +563,26 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(idps, empty());
 
     // delete org
-    organizationResource.delete();
+    orgResource.delete();
   }
 
   @Test
   @Ignore
   public void testIdpsOwnedOrgs() {
     PhaseTwo client = phaseTwo();
-    OrganizationsResource organizationsResource = client.organizations(REALM);
+    OrganizationsResource orgsResource = client.organizations(REALM);
 
-    String orgId1 = organizationsResource.create(new OrganizationRepresentation()
+    String orgId1 = orgsResource.create(new OrganizationRepresentation()
             .name("example")
             .domains(List.of("example.com")));
-    String orgId2 = organizationsResource.create(new OrganizationRepresentation()
+    String orgId2 = orgsResource.create(new OrganizationRepresentation()
             .name("sample")
             .domains(List.of("sample.com")));
 
     OrganizationIdentityProvidersResource firstIdpResource =
-            organizationsResource.organization(orgId1).identityProviders();
+            orgsResource.organization(orgId1).identityProviders();
     OrganizationIdentityProvidersResource secondIdpResource =
-            organizationsResource.organization(orgId2).identityProviders();
+            orgsResource.organization(orgId2).identityProviders();
 
     // create idp for org 1
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
@@ -638,20 +638,20 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     secondIdpResource.delete(alias2);
 
     // delete orgs
-    organizationsResource.organization(orgId1).delete();
-    organizationsResource.organization(orgId2).delete();
+    orgsResource.organization(orgId1).delete();
+    orgsResource.organization(orgId2).delete();
   }
 
   @Test
   public void testOrgAdminPermissions() {
     Keycloak keycloak = server.client();
     PhaseTwo client1 = phaseTwo(keycloak);
-    OrganizationsResource organizationsResource = client1.organizations(REALM);
-    String orgId1 = createDefaultOrg(organizationsResource);
+    OrganizationsResource orgsResource = client1.organizations(REALM);
+    String orgId1 = createDefaultOrg(orgsResource);
 
-    OrganizationResource organizationResource = organizationsResource.organization(orgId1);
-    OrganizationMembershipsResource membershipsResource = organizationResource.memberships();
-    OrganizationRolesResource rolesResource = organizationResource.roles();
+    OrganizationResource orgResource = orgsResource.organization(orgId1);
+    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
+    OrganizationRolesResource rolesResource = orgResource.roles();
 
     // create a normal user
     CredentialRepresentation pass = new CredentialRepresentation();
@@ -742,7 +742,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // create another org
     rep = new OrganizationRepresentation().name("sample").domains(List.of("sample.com"));
-    String orgId2 = organizationsResource.create(rep);
+    String orgId2 = orgsResource.create(rep);
 
     // check that user does not have permission to update org
     rep.url("https://www.sample.com/").displayName("Sample company");
@@ -762,18 +762,18 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteUser(keycloak, REALM, user1.getId());
 
     // delete orgs
-    organizationResource.delete();
-    organizationsResource.organization(orgId2).delete();
+    orgResource.delete();
+    orgsResource.organization(orgId2).delete();
   }
 
   @Test
   @Ignore
   public void testOrgPortalLink() {
-    OrganizationsResource organizationsResource = phaseTwo().organizations(REALM);
-    String id = createDefaultOrg(organizationsResource);
+    OrganizationsResource orgsResource = phaseTwo().organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
 
-    OrganizationResource organizationResource = organizationsResource.organization(id);
-    PortalLinkRepresentation link = organizationResource.portalLink(Optional.of("foobar"));
+    OrganizationResource orgResource = orgsResource.organization(id);
+    PortalLinkRepresentation link = orgResource.portalLink(Optional.of("foobar"));
     assertThat(link, notNullValue());
     assertThat(link.getUser(), notNullValue());
     assertThat(link.getLink(), notNullValue());
@@ -782,6 +782,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     System.err.println(String.format("portal-link %s", link));
 
     // delete org
-    organizationResource.delete();
+    orgResource.delete();
   }
 }
