@@ -22,6 +22,7 @@ import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.client.openapi.model.UserRepresentation;
 import lombok.extern.jbosslog.JBossLog;
+import org.apache.http.HttpStatus;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.keycloak.admin.client.Keycloak;
@@ -174,7 +175,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     organizationResource.delete();
 
     // get single
-    assertThrows(ClientErrorException.class, organizationResource::get);
+    ClientErrorException ex = assertThrows(ClientErrorException.class, organizationResource::get);
+    assertThat(ex.getResponse().getStatus(), is(404));
 
     // get list
     organizations = organizationsResource.get();
@@ -257,8 +259,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(rolesResource.create(roleRep), notNullValue());
 
     // attempt to create same name role
-    assertThrows(ClientErrorException.class, () -> rolesResource.create(
+    ClientErrorException ex = assertThrows(ClientErrorException.class, () -> rolesResource.create(
             new OrganizationRoleRepresentation().name(name)));
+    assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_CONFLICT));
 
     // delete org
     organizationsResource.organization(id).delete();
@@ -392,7 +395,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     String invId = invites.get(0).getId();
 
     // try a conflicting invitation
-    assertThrows(ClientErrorException.class, () -> invitationsResource.add(inv));
+    ClientErrorException ex = assertThrows(ClientErrorException.class, () -> invitationsResource.add(inv));
+    assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_CONFLICT));
 
     // remove pending invitation
     invitationsResource.delete(invId);
@@ -413,7 +417,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     organizationResource.memberships().add(user1.getId());
 
     // try an invitation to that new user
-    assertThrows(ClientErrorException.class, () -> invitationsResource.add(inv));
+    ex = assertThrows(ClientErrorException.class, () -> invitationsResource.add(inv));
+    assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_CONFLICT));
 
     // get invitations
     invites = invitationsResource.get();
