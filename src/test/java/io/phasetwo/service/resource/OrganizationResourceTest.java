@@ -38,12 +38,17 @@ import java.util.Optional;
 
 import static io.phasetwo.service.Helpers.createUser;
 import static io.phasetwo.service.Helpers.deleteUser;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.oneOf;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertThrows;
 
 @JBossLog
@@ -115,6 +120,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             "realm", REALM);
     Map<String, Object> config = idpsApi.importIdpJson(REALM, id, urlConf);
     assertThat(config, notNullValue());
+    assertThat(config.keySet(), hasSize(11));
+    assertThat(config, hasEntry("loginHint", "false"));
+    assertThat(config, hasEntry("postBindingLogout", "false"));
+    assertThat(config, hasEntry("validateSignature", "false"));
+    assertThat(config, hasEntry("wantAuthnRequestsSigned", "false"));
 
     // delete org
     organizationsResource.organization(id).delete();
@@ -213,9 +223,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     members = membershipsResource.members();
     assertThat(members, notNullValue());
     assertThat(members, hasSize(2)); // +default org admin
-    int idx = 0;
-    if (members.get(idx).getUsername().startsWith("org")) idx++;
-    assertThat(members.get(idx).getUsername(), is("johndoe"));
+    assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
 
     // delete membership and check
     membershipsResource.remove(user.getId());
@@ -338,7 +346,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // get users with role
     rs = rolesResource.users(name);
     assertThat(rs, notNullValue());
-    assertThat(rs, hasSize(0));
+    assertThat(rs, empty());
 
     // check if user has role
     assertThat(rolesResource.hasRole(name, user.getId()), is(false));
@@ -360,7 +368,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     for (String roleName : additionalRoles) {
       rs = rolesResource.users(roleName);
       assertThat(rs, notNullValue());
-      assertThat(rs, hasSize(0));
+      assertThat(rs, empty());
     }
 
     // delete roles
@@ -423,7 +431,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // get invitations
     invites = invitationsResource.get();
     assertThat(invites, notNullValue());
-    assertThat(invites, hasSize(0));
+    assertThat(invites, empty());
 
     // delete user
     deleteUser(keycloak, REALM, user1.getId());
