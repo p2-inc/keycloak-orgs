@@ -1,5 +1,7 @@
 package io.phasetwo.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
@@ -13,9 +15,15 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.ClientBuilderWrapper;
+import org.keycloak.admin.client.JacksonProvider;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.spi.ResteasyClientClassicProvider;
 import org.keycloak.testsuite.KeycloakServer;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 
 public class KeycloakSuite implements TestRule {
 
@@ -128,15 +136,23 @@ public class KeycloakSuite implements TestRule {
 
   private static Keycloak getAdminClient(
       String url, String realm, String clientId, String username, String password) {
-    Keycloak keycloak =
-        KeycloakBuilder.builder()
-            .serverUrl(url)
-            .realm(realm)
-            .grantType(OAuth2Constants.PASSWORD)
-            .clientId(clientId)
-            .username(username)
-            .password(password)
+
+    JacksonProvider resteasyJacksonProvider = new JacksonProvider();
+    resteasyJacksonProvider.setMapper(new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
+    Client client = ClientBuilderWrapper
+            .create(null, false)
+            .register(resteasyJacksonProvider, 100)
             .build();
-    return keycloak;
+
+    return KeycloakBuilder.builder()
+        .serverUrl(url)
+        .realm(realm)
+        .grantType(OAuth2Constants.PASSWORD)
+        .clientId(clientId)
+        .username(username)
+        .password(password)
+        .resteasyClient(client)
+        .build();
   }
 }
