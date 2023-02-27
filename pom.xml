@@ -274,7 +274,7 @@
 	<dependency>
 	  <groupId>io.phasetwo</groupId>
 	  <artifactId>phasetwo-admin-client</artifactId>
-	  <version>0.0.3-SNAPSHOT</version>
+	  <version>0.1.1</version>
 	  <scope>test</scope>
 	</dependency>
 	<dependency>
