@@ -271,6 +271,18 @@
 	  <version>${junit.version}</version>
 	  <scope>test</scope>
 	</dependency>
+	<dependency>
+	  <groupId>io.phasetwo</groupId>
+	  <artifactId>phasetwo-admin-client</artifactId>
+	  <version>0.0.3-SNAPSHOT</version>
+	  <scope>test</scope>
+	</dependency>
+	<dependency>
+	  <groupId>org.hamcrest</groupId>
+	  <artifactId>hamcrest-core</artifactId>
+	  <version>2.2</version>
+	  <scope>test</scope>
+	</dependency>
 	<dependency> <!-- if you're getting a missing dependency error here, you need to install keycloak from source locally, as this never hits maven central -->
 	  <groupId>org.keycloak</groupId>
 	  <artifactId>keycloak-testsuite-utils</artifactId>
