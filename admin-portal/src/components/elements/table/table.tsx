@@ -23,8 +23,8 @@ type Props = {
 
 const Table: React.FC<Props> = ({ columns, rows }) => {
   return (
-    <div className="overflow-scroll rounded-md">
-      <table className="min-w-full divide-y divide-gray-200  border border-gray-200 bg-gray-50 text-sm font-medium text-black">
+    <div className="overflow-auto rounded-md border border-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 rounded-md  bg-gray-50 text-sm font-medium text-black">
         <thead>
           <tr>
             {columns.map((column, index) => (

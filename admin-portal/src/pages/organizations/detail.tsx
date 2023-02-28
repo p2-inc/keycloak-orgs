@@ -30,16 +30,16 @@ import PrimaryContentArea from "components/layouts/primary-content-area";
 import Stat from "components/elements/cards/stat";
 import {
   BuildingIcon,
-  DoubleSlashBrandIcon,
   GlobeIcon,
   PersonIcon,
   PlusIcon,
 } from "components/icons";
 import { keycloak } from "keycloak";
+import RoundedIcon from "components/elements/rounded-icon";
+import MemberRoles from "./components/member-roles";
+import MembersActionMenu from "./components/member-action-menu";
 import { useEffect, useState } from "react";
 import { KeycloakProfile } from "keycloak-js";
-import RoundedIcon from "components/elements/rounded-icon";
-import { UserIcon } from "@heroicons/react/20/solid";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
@@ -66,49 +66,47 @@ export default function OrganizationDetail() {
     realm: apiRealm,
   });
 
-  const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
+  // const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
 
-  // Role checking
-  // const [user, setUser] = useState<KeycloakProfile>();
+  const [user, setUser] = useState<KeycloakProfile>();
 
-  // const { data } = useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery({
-  //   orgId: orgId!,
-  //   realm: apiRealm,
-  //   userId: user?.id,
-  // });
+  async function loadUser() {
+    const u = await keycloak.loadUserProfile();
+    setUser(u);
+  }
 
-  // async function loadUser() {
-  //   const u = await keycloak.loadUserProfile();
-  //   setUser(u);
-  // }
-
-  // useEffect(() => {
-  //   loadUser();
-  // }, []);
+  useEffect(() => {
+    loadUser();
+  }, []);
 
   const columns: TableColumns = [
-    { key: "userName", data: "Username" },
+    { key: "name", data: "Name" },
     { key: "email", data: "Email" },
-    { key: "firstName", data: "First Name" },
-    { key: "role", data: "Last Name" },
+    { key: "roles", data: "Roles" },
+    { key: "action", data: "" },
   ];
   const rows: TableRows = members.map((member) => ({
-    username: member.username,
     email: member.email,
-    firstName: member.firstName,
-    lastName: member.lastName,
+    name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
+    roles: <MemberRoles member={member} orgId={orgId!} realm={apiRealm} />,
+    action: (
+      <MembersActionMenu
+        member={member}
+        user={user}
+        orgId={orgId!}
+        realm={apiRealm}
+      />
+    ),
   }));
 
   const OpenSSOLink = async () => {
-    // const user = await keycloak.loadUserProfile();
-
-    // TODO: used in self serve, is this the correct link to the "wizard"?
     const link = `${keycloak.authServerUrl}realms/${
       keycloak.realm
     }/wizard/?org_id=${encodeURIComponent(org?.id!)}`;
     window.open(link);
 
-    // TODO: or is this the correct method? throws a 415 error
+    // const user = await keycloak.loadUserProfile();
+    // TODO: switch when method is ready
     // try {
     // const portalLink = await createPortalLink({
     //   orgId: org?.id!,
