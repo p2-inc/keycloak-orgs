@@ -6,14 +6,23 @@ type Props = {
   header: string;
   badgeVal?: string | number;
   rightAreaItems?: ReactElement | ReactElement[];
+  leftAreaItems?: ReactElement | ReactElement[];
+  collapseOnMobile?: boolean;
 };
 
-const TopHeader: FC<Props> = ({ header, badgeVal, rightAreaItems }) => {
+const TopHeader: FC<Props> = ({
+  header,
+  badgeVal,
+  rightAreaItems,
+  leftAreaItems,
+  collapseOnMobile,
+}) => {
   return (
     <HeaderLayout
       leftAreaItems={
         <>
-          <h1 className="text-2xl font-medium">{header}</h1>
+          {leftAreaItems}
+          <h1 className="text-xl font-medium">{header}</h1>
           {badgeVal && (
             <div className="ml-2">
               <RoundBadge>{badgeVal}</RoundBadge>
@@ -22,6 +31,7 @@ const TopHeader: FC<Props> = ({ header, badgeVal, rightAreaItems }) => {
         </>
       }
       rightAreaItems={rightAreaItems}
+      collapseOnMobile={collapseOnMobile}
     />
   );
 };
