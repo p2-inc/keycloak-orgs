@@ -1,13 +1,14 @@
 import cs from "classnames";
 import { FC } from "react";
 import { Link } from "react-router-dom";
+import { ViewLayoutOptions } from "../forms/switches/view-switch";
 
 type Props = {
   children: React.ReactNode;
   link: string;
   title?: string;
   subTitle?: string;
-  viewType: string;
+  viewType: ViewLayoutOptions;
 };
 
 const Title = ({ children }) => <div className="font-semibold">{children}</div>;
@@ -29,7 +30,7 @@ const OrganizationItem: FC<Props> = ({
         "group block",
         "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
         {
-          "pb-1": viewType === "grid",
+          "pb-1": viewType === ViewLayoutOptions.GRID,
         }
       )}
     >
@@ -41,19 +42,20 @@ const OrganizationItem: FC<Props> = ({
               "group-hover:border-gray-300 group-hover:bg-white",
               {
                 "flex-col space-y-5 rounded-md border border-gray-200 bg-gray-50 px-10 py-9":
-                  viewType === "grid",
-                "flex-row justify-between px-4 py-2": viewType === "list",
+                  viewType === ViewLayoutOptions.GRID,
+                "flex-row justify-between px-4 py-2":
+                  viewType === ViewLayoutOptions.LIST,
               }
             )}
           >
-            <div className="">
+            <div>
               <Title>{title}</Title>
               <SubTitle>{subTitle}</SubTitle>
             </div>
             <div className="flex flex-row space-x-8">{children}</div>
           </div>
         </div>
-        {viewType === "grid" && (
+        {viewType === ViewLayoutOptions.GRID && (
           <div
             className={cs(
               "absolute inset-x-3 bottom-0 z-10 h-1/2 rounded-full bg-white opacity-0",

@@ -1,10 +1,6 @@
-import Button, {
-  ButtonIconLeftClasses,
-} from "components/elements/forms/buttons/button";
 import FormTextInputWithIcon from "components/elements/forms/inputs/text-input-with-icon";
 import MainContentArea from "components/layouts/main-content-area";
 import TopHeader from "components/navs/top-header";
-import { PlusIcon } from "components/icons";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import { useGetOrganizationsQuery } from "store/apis/orgs";
 import { apiRealm } from "store/apis/helpers";
@@ -38,10 +34,6 @@ export default function Organizations() {
               className="w-full md:w-auto"
             />
             <ViewSwitch onChange={(value) => setViewType(value)} />
-            <Button isBlackButton className="w-full md:w-auto">
-              <PlusIcon className={ButtonIconLeftClasses} aria-hidden="true" />
-              Create Organization
-            </Button>
           </>
         }
       />

@@ -6,7 +6,7 @@ import { ChevronIcon } from "components/icons";
 type NavigationItem = {
   name: string;
   href: string;
-  icon: React.ForwardRefExoticComponent<
+  icon?: React.ForwardRefExoticComponent<
     React.SVGProps<SVGSVGElement> & {
       title?: string | undefined;
       titleId?: string | undefined;
@@ -38,10 +38,12 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
             onClick={toggleMenu}
           >
             <div className="flex flex-1 items-center">
-              <activeItem.icon
-                className={cs("-ml-1 mr-3 h-6 w-6 flex-shrink-0")}
-                aria-hidden="true"
-              />
+              {activeItem.icon && (
+                <activeItem.icon
+                  className={cs("-ml-1 mr-3 h-6 w-6 flex-shrink-0")}
+                  aria-hidden="true"
+                />
+              )}
               {activeItem?.name}
             </div>
             <div className="flex-shrink-0">
@@ -56,18 +58,25 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
             key={item.name}
             to={item.href}
             className={({ isActive }) =>
-              cs("group flex items-center rounded-md px-3 py-2 text-sm transition", {
-                "font-semibold text-p2blue-700 hover:text-p2blue-700": isActive,
-                "text-gray-900 hover:bg-gray-50 hover:text-gray-900": !isActive,
-              })
+              cs(
+                "group flex items-center rounded-md px-3 py-2 text-sm transition",
+                {
+                  "font-semibold text-p2blue-700 hover:text-p2blue-700":
+                    isActive,
+                  "text-gray-900 hover:bg-gray-50 hover:text-gray-900":
+                    !isActive,
+                }
+              )
             }
             onClick={toggleMenu}
           >
             <>
-              <item.icon
-                className={cs("-ml-1 mr-3 h-6 w-6 flex-shrink-0")}
-                aria-hidden="true"
-              />
+              {item.icon && (
+                <item.icon
+                  className={cs("-ml-1 mr-3 h-6 w-6 flex-shrink-0")}
+                  aria-hidden="true"
+                />
+              )}
               <span className="truncate">{item.name}</span>
             </>
           </NavLink>
