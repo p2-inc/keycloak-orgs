@@ -6,7 +6,7 @@ type Props = {
 };
 
 export const OACTopRow: FC<Props> = ({ children }) => (
-  <div className="flex space-x-10">{children}</div>
+  <div className="space-y-3 md:flex md:space-y-0 md:space-x-10">{children}</div>
 );
 
 const OrganizationActionCard: FC<Props> = ({ children }) => {
@@ -17,7 +17,8 @@ const OrganizationActionCard: FC<Props> = ({ children }) => {
           <div
             className={`col-span-1 flex h-full flex-col justify-between 
                       space-y-6 rounded-md border border-gray-200
-                      py-9 px-10`}
+                      p-4
+                      md:py-9 md:px-10`}
           >
             {children}
           </div>

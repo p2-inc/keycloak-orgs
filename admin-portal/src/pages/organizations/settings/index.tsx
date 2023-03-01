@@ -26,7 +26,19 @@ export default function OrganizationSettings() {
   return (
     <>
       <TopHeader
-        header="Organization Settings"
+        header="Settings"
+        collapseOnMobile={true}
+        leftAreaItems={
+          <div className="mr-2 flex items-center space-x-2">
+            <Link
+              to={`/organizations/${orgId}/details`}
+              className="-ml-3 -mr-3 rounded-lg px-3 py-1 font-medium transition hover:bg-gray-100 md:text-xl"
+            >
+              <div>Organization</div>
+            </Link>
+            <div className="hidden text-xl opacity-20 md:block">/</div>
+          </div>
+        }
         rightAreaItems={
           <>
             <Link to={`/organizations/${orgId}/details`}>

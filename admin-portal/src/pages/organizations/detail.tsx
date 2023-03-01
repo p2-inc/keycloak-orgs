@@ -125,6 +125,18 @@ export default function OrganizationDetail() {
     <>
       <TopHeader
         header={`${org?.displayName || ""} Organization`.trim()}
+        collapseOnMobile={true}
+        leftAreaItems={
+          <div className="mr-2 flex items-center space-x-2">
+            <Link
+              to={`/organizations`}
+              className="-ml-3 -mr-3 rounded-lg px-3 py-1 font-medium transition hover:bg-gray-100 md:text-xl"
+            >
+              <div>Organizations</div>
+            </Link>
+            <div className="hidden text-xl opacity-20 md:block">/</div>
+          </div>
+        }
         rightAreaItems={
           <>
             <Link to={`/organizations/${org?.id}/settings`}>
