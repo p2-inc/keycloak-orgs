@@ -1,9 +1,33 @@
 import { UserIcon } from "@heroicons/react/20/solid";
 import SectionHeader from "components/navs/section-header";
 import cs from "classnames";
-import FormTextInputWithLabel from "components/elements/forms/inputs/text-input-with-label";
 import Button from "components/elements/forms/buttons/button";
 import Dropdown from "components/elements/forms/dropdown/dropdown";
+import { useAddOrganizationInvitationMutation } from "store/apis/orgs";
+import { useState } from "react";
+import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
+import { useForm } from "react-hook-form";
+import { apiRealm } from "store/apis/helpers";
+import { useNavigate, useParams } from "react-router-dom";
+import { useKeycloak } from "@react-keycloak/web";
+import SquareBadge from "components/elements/badges/square-badge";
+import P2Toast from "components/utils/toast";
+
+export const defaultRoles = [
+  "view-organization",
+  "manage-organization",
+  "view-members",
+  "manage-members",
+  "view-roles",
+  "manage-roles",
+  "view-invitations",
+  "manage-invitations",
+  "view-identity-providers",
+  "manage-identity-providers",
+] as const;
+
+const adminRoles = [...defaultRoles];
+const memberRoles = defaultRoles.filter((r) => r.includes("view"));
 
 const loadingIcon = (
   <div className="mb-8">
@@ -19,68 +43,117 @@ const loadingIcon = (
 const admin = (
   <div>
     <div className="text-sm font-medium">Admin</div>
-    <div className="space-x-2">
-      <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-        read-org
-      </span>
-      <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-        read-org
-      </span>
-      <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-        read-org
-      </span>
+    <div className="flex flex-wrap justify-start">
+      {adminRoles.map((ar) => (
+        <SquareBadge className="mt-1 mr-1">{ar}</SquareBadge>
+      ))}
     </div>
   </div>
 );
 const member = (
   <div>
     <div className="text-sm font-medium">Member</div>
-    <div className="space-x-2">
-      <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-        read-org
-      </span>
-      <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-        read-org
-      </span>
-      <span className="rounded border border-p2gray-900 px-1 py-px font-mono text-xs font-medium">
-        read-org
-      </span>
+    <div className="flex flex-wrap justify-start">
+      {adminRoles.map((ar) => (
+        <SquareBadge className="mt-1 mr-1">{ar}</SquareBadge>
+      ))}
     </div>
   </div>
 );
 
 const NewInvitation = () => {
+  const { keycloak } = useKeycloak();
+  const navigate = useNavigate();
+
+  let { orgId } = useParams();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+
+  const [selectedRoles, setSelectedRoles] = useState([]);
+  const [addOrganizationInvitation] = useAddOrganizationInvitationMutation();
+
+  const onSubmit = async (data) => {
+    console.log("🚀 ~ file: new.tsx:79 ~ onSubmit ~ onSubmit:", data);
+    if (selectedRoles.length > 0 && data.email) {
+      const resp = await addOrganizationInvitation({
+        orgId: orgId!,
+        realm: apiRealm,
+        invitationRequestRepresentation: {
+          email: data.email,
+          inviterId: keycloak.tokenParsed?.sub,
+          roles: selectedRoles,
+        },
+      });
+      //@ts-ignore
+      if (resp.error) {
+        return P2Toast({
+          error: true,
+          //@ts-ignore
+          title: resp.error?.data?.error,
+        });
+      }
+
+      reset();
+      P2Toast({
+        success: true,
+        title: `${data.email} has been sent an invitation.`,
+      });
+      navigate(`/organizations/${orgId}/details`);
+    }
+  };
+
+  const isSendButtonDisabled = !selectedRoles;
   return (
     <div className="mt-16">
       <SectionHeader
         title="Invite new member"
-        description="One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin."
+        description="Add a new member to the organization by entering their email and assigning them a role within the organization. An email will be sent to them with instructions on how to join."
         icon={loadingIcon}
       />
-      <div className="mt-8 space-y-4">
-        <Dropdown
-          items={[
-            { content: admin, value: "United States", id: 1 },
-            { content: member, value: "Canada", id: 2 },
-            {
-              content: <div className="text-sm font-medium">Custom</div>,
-              value: "Canada",
-              id: 2,
-            },
-          ]}
-          emptyContent={<span>Select role</span>}
-          className="block w-full"
-        />
-        <FormTextInputWithLabel
-          slug="email"
-          label="Email"
-          inputArgs={{ placeholder: "you@email.com" }}
-        />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="mt-8 space-y-4">
+          {/* TODO: Update this component to a headless UI then integrate with form */}
+          <Dropdown
+            items={[
+              { content: admin, value: adminRoles, id: 1 },
+              { content: member, value: memberRoles, id: 2 },
+              {
+                content: <div className="text-sm font-medium">Custom</div>,
+                value: "Canada",
+                id: 2,
+              },
+            ]}
+            emptyContent={<span>Select role</span>}
+            className="block w-full"
+            onChange={(selection) => setSelectedRoles(selection.value)}
+          />
+          <RHFFormTextInputWithLabel
+            slug="email"
+            label="Email"
+            register={register}
+            registerArgs={{
+              pattern:
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            }}
+            error={errors.email}
+            inputArgs={{
+              type: "email",
+              placeholder: "you@email.com",
+              required: true,
+            }}
+          />
 
-        <div className="mt-4">
-          <Button isBlackButton={true}>Send invitation</Button>
+          <div className="mt-4">
+            <Button isBlackButton disabled={isSendButtonDisabled} type="submit">
+              Send invitation
+            </Button>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

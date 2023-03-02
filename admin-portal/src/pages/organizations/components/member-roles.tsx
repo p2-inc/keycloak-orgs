@@ -1,4 +1,5 @@
 import SquareBadge from "components/elements/badges/square-badge";
+import RolesLoader from "components/loaders/roles";
 import {
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   UserRepresentation,
@@ -11,16 +12,20 @@ type Props = {
 };
 
 const MemberRoles: React.FC<Props> = ({ member, orgId, realm }) => {
-  const { data: roles = [] } = useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery({
-    orgId,
-    realm,
-    userId: member.id!,
-  });
+  const { data: roles = [], isLoading } =
+    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery({
+      orgId,
+      realm,
+      userId: member.id!,
+    });
 
   return (
-    <div className="space-x-2 space-y-2">
+    <div className="flex flex-wrap justify-start ">
+      {isLoading && <RolesLoader />}
       {roles.map((role) => (
-        <SquareBadge>{role.name}</SquareBadge>
+        <SquareBadge key={role.name} className="mt-1 mr-1">
+          {role.name}
+        </SquareBadge>
       ))}
     </div>
   );

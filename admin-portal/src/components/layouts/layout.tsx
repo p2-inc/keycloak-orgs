@@ -51,9 +51,7 @@ export default function Layout({ children }: { children: React.ReactElement }) {
         </div>
         <div className="flex-1 overflow-y-auto pb-20">
           <div className="">
-            <main className="">
-              {children}
-            </main>
+            <main className="m-auto max-w-7xl">{children}</main>
           </div>
         </div>
       </div>

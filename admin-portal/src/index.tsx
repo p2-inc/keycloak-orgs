@@ -24,7 +24,6 @@ import LinkedProfile from "pages/profile/linked";
 import { store } from "./store/";
 import { Provider } from "react-redux";
 import Invitation from "pages/invitation/index";
-import SendingInvitation from "pages/invitation/sending";
 import NewInvitation from "pages/invitation/new";
 import DomainsAdd from "pages/organizations/domains/add";
 import DomainsVerify from "pages/organizations/domains/verify";
@@ -32,6 +31,8 @@ import DomainContainer from "pages/organizations/domains";
 import SettingsGeneral from "pages/organizations/settings/general";
 import SettingsDomain from "pages/organizations/settings/domains";
 import SettingsSSO from "pages/organizations/settings/sso";
+import toast, { ToastBar, Toaster } from "react-hot-toast";
+import { CheckCircleIcon, XMarkIcon } from "@heroicons/react/20/solid";
 
 const router = createBrowserRouter([
   {
@@ -90,16 +91,12 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "/invitation",
+        path: "/organizations/:orgId/invitation",
         element: <Invitation />,
         children: [
           {
             path: "new",
             element: <NewInvitation />,
-          },
-          {
-            path: "sending",
-            element: <SendingInvitation />,
           },
         ],
       },
@@ -156,5 +153,10 @@ root.render(
         <RouterProvider router={router} />
       </React.StrictMode>
     </Provider>
+    <Toaster
+      toastOptions={{
+        duration: 6000,
+      }}
+    />
   </ReactKeycloakProvider>
 );

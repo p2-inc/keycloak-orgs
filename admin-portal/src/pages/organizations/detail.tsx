@@ -68,17 +68,6 @@ export default function OrganizationDetail() {
 
   // const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
 
-  const [user, setUser] = useState<KeycloakProfile>();
-
-  async function loadUser() {
-    const u = await keycloak.loadUserProfile();
-    setUser(u);
-  }
-
-  useEffect(() => {
-    loadUser();
-  }, []);
-
   const columns: TableColumns = [
     { key: "name", data: "Name" },
     { key: "email", data: "Email" },
@@ -90,12 +79,7 @@ export default function OrganizationDetail() {
     name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
     roles: <MemberRoles member={member} orgId={orgId!} realm={apiRealm} />,
     action: (
-      <MembersActionMenu
-        member={member}
-        user={user}
-        orgId={orgId!}
-        realm={apiRealm}
-      />
+      <MembersActionMenu member={member} orgId={orgId!} realm={apiRealm} />
     ),
   }));
 
@@ -165,7 +149,7 @@ export default function OrganizationDetail() {
                 Invite new members or remove members from the organization.
               </div>
               <div>
-                <Link to="/invitation/new">
+                <Link to={`/organizations/${orgId}/invitation/new`}>
                   <Button isBlackButton>
                     <PlusIcon
                       className={ButtonIconLeftClasses}

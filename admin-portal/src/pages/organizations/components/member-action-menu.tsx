@@ -8,6 +8,9 @@ import {
 } from "store/apis/orgs";
 import { KeycloakProfile } from "keycloak-js";
 import MemberRemovalConfirmationDialog from "./member-removal-confirmation-dialog";
+import P2Toast from "components/utils/toast";
+import useUser from "components/utils/useUser";
+import fullName from "components/utils/fullName";
 
 type Props = {
   member: UserRepresentation;
@@ -16,35 +19,35 @@ type Props = {
   realm: string;
 };
 
-export default function MembersActionMenu({
-  member,
-  user,
-  orgId,
-  realm,
-}: Props) {
+export default function MembersActionMenu({ member, orgId, realm }: Props) {
   // TODO: check roles here
+  const { user } = useUser();
   const isRemoveDisabled = !user || member.id === user?.id;
   const [isRemoveConfOpen, setRemoveConfOpen] = useState(false);
 
-  const [removeOrganizationMember, { isSuccess }] =
+  const [removeOrganizationMember, { isLoading }] =
     useRemoveOrganizationMemberMutation();
 
   function confirmRemoveOrganizationMember() {
-    console.log("removal confirmed");
-    setRemoveConfOpen(false);
-
-    // removeOrganizationMember({
-    //   orgId,
-    //   realm,
-    //   userId: member.id!,
-    // })
-    //   .then((resp) => {
-    //     console.log("success");
-    //     setRemoveConfOpen(false);
-    //   })
-    //   .catch((e) => {
-    //     console.error(e);
-    //   });
+    removeOrganizationMember({
+      orgId,
+      realm,
+      userId: member.id!,
+    })
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `${fullName(member)} removed from organization.`,
+        });
+        setRemoveConfOpen(false);
+      })
+      .catch((e) => {
+        P2Toast({
+          error: true,
+          title: "Error during removal. Please try again.",
+        });
+        console.error(e);
+      });
   }
 
   return (
@@ -54,6 +57,7 @@ export default function MembersActionMenu({
         setOpen={setRemoveConfOpen}
         confirmSelection={confirmRemoveOrganizationMember}
         member={member}
+        isLoading={isLoading}
       />
 
       <Menu as="div" className="relative inline-block text-left">

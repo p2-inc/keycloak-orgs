@@ -2,12 +2,14 @@ import { Fragment, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { UserRepresentation } from "store/apis/orgs";
+import fullName from "components/utils/fullName";
 
 type Props = {
   open: boolean;
   setOpen: (open: boolean) => void;
   confirmSelection: () => void;
   member: UserRepresentation;
+  isLoading?: boolean;
 };
 
 export default function MemberRemovalConfirmationDialog({
@@ -15,6 +17,7 @@ export default function MemberRemovalConfirmationDialog({
   setOpen,
   confirmSelection,
   member,
+  isLoading,
 }: Props) {
   const cancelButtonRef = useRef(null);
 
@@ -62,10 +65,7 @@ export default function MemberRemovalConfirmationDialog({
                       as="h3"
                       className="text-base font-semibold leading-6 text-gray-900"
                     >
-                      Confirm removal of{" "}
-                      {member.firstName || member.lastName
-                        ? `${member.firstName} ${member.lastName}`.trim()
-                        : member.username || member.email || "member"}
+                      <>Confirm removal of {fullName(member)}</>
                     </Dialog.Title>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
@@ -81,6 +81,7 @@ export default function MemberRemovalConfirmationDialog({
                     type="button"
                     className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
                     onClick={confirmSelection}
+                    disabled={isLoading}
                   >
                     Remove
                   </button>
@@ -89,7 +90,30 @@ export default function MemberRemovalConfirmationDialog({
                     className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
                     onClick={() => setOpen(false)}
                     ref={cancelButtonRef}
+                    disabled={isLoading}
                   >
+                    {isLoading && (
+                      <svg
+                        className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          stroke-width="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    )}
                     Cancel
                   </button>
                 </div>
