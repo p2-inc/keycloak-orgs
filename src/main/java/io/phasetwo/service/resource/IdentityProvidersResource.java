@@ -13,7 +13,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
@@ -126,8 +125,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @Path("import-config")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.APPLICATION_JSON)
-  public Map<String, String> importConfig(MultipartFormDataInput input) throws IOException {
-    return getIdpResource().importFrom(input);
+  public Map<String, String> importConfig() throws IOException {
+    return getIdpResource().importFrom();
   }
 
   private boolean idpInOrg(IdentityProviderModel provider) {
