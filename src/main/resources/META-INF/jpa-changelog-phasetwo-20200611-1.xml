@@ -1,9 +1,29 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
     <changeSet author="garth" id="20200611-1-0">
-      <renameColumn columnDataType="VARCHAR(36)"  
-		    newColumnName="TEAM_ID"  
-		    oldColumnName="teams_ID"  
-		    tableName="INVITATION_TEAM"/>  
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <dbms type="mysql"/>
+            </not>
+        </preConditions>
+        <renameColumn columnDataType="VARCHAR(36)"
+            newColumnName="TEAM_ID"
+            oldColumnName="teams_ID"
+            tableName="INVITATION_TEAM"/>
+    </changeSet>
+
+    <!-- mysql specific -->
+    <changeSet author="garth" id="20200611-1-">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql"/>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="INVITATION_TEAM" constraintName="FK_lhea5u4vqt3n9694kq7hyl5at"/>
+        <dropUniqueConstraint tableName="INVITATION_TEAM" constraintName="UK_lhea5u4vqt3n9694kq7hyl5at"/>
+        <renameColumn columnDataType="VARCHAR(36)"
+            newColumnName="TEAM_ID"
+            oldColumnName="teams_ID"
+            tableName="INVITATION_TEAM"/>
+        <addUniqueConstraint columnNames="TEAM_ID" constraintName="UK_lhea5u4vqt3n9694kq7hyl5at" tableName="INVITATION_TEAM"/>
+        <addForeignKeyConstraint baseColumnNames="TEAM_ID" baseTableName="INVITATION_TEAM" constraintName="FK_lhea5u4vqt3n9694kq7hyl5at" deferrable="false" initiallyDeferred="false" referencedColumnNames="ID" referencedTableName="TEAM"/>
     </changeSet>
 </databaseChangeLog>

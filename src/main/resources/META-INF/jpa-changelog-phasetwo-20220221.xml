@@ -2,8 +2,21 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
   <changeSet author="garth" id="org-name-unique-constraint-drop">
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <dbms type="mysql"/>
+        </not>
+    </preConditions>
+    <dropUniqueConstraint constraintName="UK_19A0TR48O23ALOR84GB8E3GC2" tableName="ORGANIZATION_ATTRIBUTE"/>
+  </changeSet>
+
+  <!-- mysql specific -->
+  <changeSet author="garth" id="org-name-unique-constraint-drop-1">
+    <preConditions onFail="MARK_RAN">
+        <dbms type="mysql"/>
+    </preConditions>
+    <dropForeignKeyConstraint baseTableName="ORGANIZATION_ATTRIBUTE" constraintName="FK_519erdjtqivq189pm1ouanaix"/>
     <dropUniqueConstraint constraintName="UK_19A0TR48O23ALOR84GB8E3GC2" tableName="ORGANIZATION_ATTRIBUTE"/>
   </changeSet>
 
 </databaseChangeLog>
-      
