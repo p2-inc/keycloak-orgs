@@ -12,6 +12,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
 import SquareBadge from "components/elements/badges/square-badge";
 import P2Toast from "components/utils/toast";
+import { Listbox } from "@headlessui/react";
+import { ChevronIcon } from "components/icons";
 
 export const defaultRoles = [
   "view-organization",
@@ -40,26 +42,10 @@ const loadingIcon = (
   </div>
 );
 
-const admin = (
-  <div>
-    <div className="text-sm font-medium">Admin</div>
-    <div className="flex flex-wrap justify-start">
-      {adminRoles.map((ar) => (
-        <SquareBadge className="mt-1 mr-1">{ar}</SquareBadge>
-      ))}
-    </div>
-  </div>
-);
-const member = (
-  <div>
-    <div className="text-sm font-medium">Member</div>
-    <div className="flex flex-wrap justify-start">
-      {adminRoles.map((ar) => (
-        <SquareBadge className="mt-1 mr-1">{ar}</SquareBadge>
-      ))}
-    </div>
-  </div>
-);
+const roles = [
+  { id: 1, name: "Admin", items: adminRoles },
+  { id: 2, name: "Member", items: memberRoles },
+];
 
 const NewInvitation = () => {
   const { keycloak } = useKeycloak();
@@ -73,19 +59,19 @@ const NewInvitation = () => {
     reset,
   } = useForm();
 
-  const [selectedRoles, setSelectedRoles] = useState([]);
   const [addOrganizationInvitation] = useAddOrganizationInvitationMutation();
+  const [selectedRole, setselectedRole] = useState(roles[0]);
 
   const onSubmit = async (data) => {
     console.log("🚀 ~ file: new.tsx:79 ~ onSubmit ~ onSubmit:", data);
-    if (selectedRoles.length > 0 && data.email) {
+    if (selectedRole && data.email) {
       const resp = await addOrganizationInvitation({
         orgId: orgId!,
         realm: apiRealm,
         invitationRequestRepresentation: {
           email: data.email,
           inviterId: keycloak.tokenParsed?.sub,
-          roles: selectedRoles,
+          roles: [selectedRole.name],
         },
       });
       //@ts-ignore
@@ -106,7 +92,7 @@ const NewInvitation = () => {
     }
   };
 
-  const isSendButtonDisabled = !selectedRoles;
+  const isSendButtonDisabled = !selectedRole;
   return (
     <div className="mt-16">
       <SectionHeader
@@ -116,21 +102,41 @@ const NewInvitation = () => {
       />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mt-8 space-y-4">
-          {/* TODO: Update this component to a headless UI then integrate with form */}
-          <Dropdown
-            items={[
-              { content: admin, value: adminRoles, id: 1 },
-              { content: member, value: memberRoles, id: 2 },
-              {
-                content: <div className="text-sm font-medium">Custom</div>,
-                value: "Canada",
-                id: 2,
-              },
-            ]}
-            emptyContent={<span>Select role</span>}
-            className="block w-full"
-            onChange={(selection) => setSelectedRoles(selection.value)}
-          />
+          <Listbox value={selectedRole} onChange={setselectedRole}>
+            <div className="relative z-50">
+              <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white">
+                <div>{selectedRole.name}</div>
+                <ChevronIcon className="rotate-90 stroke-gray-800" />
+              </Listbox.Button>
+              <Listbox.Options className="absolute w-full">
+                <div className="pb-10">
+                  <div className="relative bottom-0 z-30 max-h-96 divide-y overflow-auto rounded border border-neutral-300 bg-white">
+                    {roles.map((role) => (
+                      <Listbox.Option
+                        key={role.id}
+                        value={role}
+                        className="cursor-pointer p-4 hover:bg-neutral-50 space-y-2"
+                      >
+                        <div className="font-semibold">{role.name}</div>
+                        <div>
+                          {role.items.map((ar) => (
+                            <SquareBadge className="mt-1 mr-1">
+                              {ar}
+                            </SquareBadge>
+                          ))}
+                        </div>
+                      </Listbox.Option>
+                    ))}
+                  </div>
+                  <div
+                    className={cs(
+                      "absolute inset-x-3 bottom-10 z-10 h-1/2 rounded-full bg-white drop-shadow-btn-light"
+                    )}
+                  ></div>
+                </div>
+              </Listbox.Options>
+            </div>
+          </Listbox>
           <RHFFormTextInputWithLabel
             slug="email"
             label="Email"
