@@ -3,6 +3,7 @@ import FormTextInputWithLabel from "components/elements/forms/inputs/text-input-
 import RoundedIcon from "components/elements/rounded-icon";
 import { GlobeIcon } from "components/icons";
 import SectionHeader from "components/navs/section-header";
+import { Link, useParams } from "react-router-dom";
 
 const addIcon = (
   <RoundedIcon className="my-4">
@@ -11,12 +12,16 @@ const addIcon = (
 );
 
 const DomainsAdd = () => {
+  let { orgId } = useParams();
   return (
-    <div className="py-20">
+    <div className="md:py-20">
       <SectionHeader
         title="Add new domain"
         description="One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin."
         icon={addIcon}
+        rightContent={
+          <Link to={`/organizations/${orgId}/details`} className="font-medium inline-block px-4 py-2 opacity-60 rounded-lg transition hover:bg-gray-100 hover:opacity-100">Cancel</Link>
+        }
       />
       <div className="py-10 space-y-5">
         <FormTextInputWithLabel
