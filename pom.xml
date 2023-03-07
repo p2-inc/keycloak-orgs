@@ -20,8 +20,8 @@
 
   <licenses>
     <license>
-      <name>GNU Affero General Public License</name>
-      <url>https://www.gnu.org/licenses/agpl-3.0.en.html</url>
+      <name>Elastic License v2</name>
+      <url>https://raw.githubusercontent.com/elastic/elasticsearch/main/licenses/ELASTIC-LICENSE-2.0.txt</url>
     </license>
   </licenses>
 
