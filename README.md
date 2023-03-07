@@ -47,7 +47,7 @@ The easiest way to get started is our [Docker image](https://quay.io/repository/
 The build uses `keycloak-testsuite-utils` for the unit tests. You'll need to install Keycloak from source locally, as the test utility never gets published to maven central by the Keycloak team. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
 
 ```
-KC_VERSION=18.0.0
+KC_VERSION=21.0.1
 git clone https://github.com/keycloak/keycloak
 git fetch origin --tags
 git checkout $KC_VERSION
@@ -60,12 +60,15 @@ Then, checkout this project and run `mvn package`, which will produce a jar in t
 The maven build uses the shade plugin to package a fat-jar with all dependencies, except for the [`keycloak-admin-client`](https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client). Put the `keycloak-orgs` jar and `keycloak-admin-client` jar (that corresponds to your Keycloak version) in your `provider` (for Quarkus-based distribution) or in `standalone/deployments` (for Wildfly, legacy distribution) directory and restart Keycloak. It is unknown if these extensions will work with hot reloading using the legacy distribution.
 
 During the first run, some initial migrations steps will occur:
-- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with H2 and Postgres. Other database types may fail.
+- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with MySQL, H2, and Postgres. Other database types may fail.
 - Initial `realm-management` client roles (`view-organizations` and `manage-organizations`) will be be added to each realm.
+
+### Admin UI
+If you are using the extension as bundled in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags) or by building our [Admin UI theme](https://github.com/p2-inc/keycloak-ui), you must take an additional step in order to show that theme. In the Admin Console UI, go to the *Realm Settings* -> *Themes* page and select `phasetwo.v2`. Then, the "Organizations" section will be available in the left navigation.
 
 ### Compatibility
 
-Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Please file an issue if you have successfully installed it with prior versions.
+Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Please file an issue if you have successfully installed it with prior versions. Additionally, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags). 
 
 ## Extensions
 
@@ -143,7 +146,7 @@ A custom Authenticator and Required Action must be installed and configured corr
 
 #### IdP Discovery
 
-Organizations may optionally be given permission to manage their own IdP. The custom resources that allow this write a configuration in the IdP entities that is compatible with a 3rd party extension that allows for IdP discovery based on email domain configured for the Organization. It works by writing the `home.idp.discovery.domains` value into the `config` map for the IdP. Information on installing and further configuration is available at [sventorben/keycloak-home-idp-discovery](https://github.com/sventorben/keycloak-home-idp-discovery).
+Organizations may optionally be given permission to manage their own IdP. The custom resources that allow this write a configuration in the IdP entities that is compatible with a 3rd party extension that allows for IdP discovery based on email domain configured for the Organization. It works by writing the `home.idp.discovery.domains` value into the `config` map for the IdP. Information on further configuration is available at [sventorben/keycloak-home-idp-discovery](https://github.com/sventorben/keycloak-home-idp-discovery).
 
 tbd screenshot of installing in flow
 

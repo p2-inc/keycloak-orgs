@@ -3,7 +3,7 @@ package io.phasetwo.service.resource;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.jboss.resteasy.spi.HttpRequest;
+import org.keycloak.http.HttpRequest;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resources.Cors;
 

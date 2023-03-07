@@ -2,15 +2,32 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
   <changeSet author="garth" id="drop-column-user-org-role-org-0">
-    <dropUniqueConstraint  catalogName="cat"  
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <dbms type="mysql"/>
+        </not>
+    </preConditions>
+    <dropUniqueConstraint
             constraintName="UK_S5FNFVSRU9I4QPH9GB8V4FXFM"
-            tableName="USER_ORGANIZATION_ROLE_MAPPING"  
-            uniqueColumns="ORGANIZATION_ID, USER_ID, ROLE_ID"/>  
+            tableName="USER_ORGANIZATION_ROLE_MAPPING"
+            uniqueColumns="ORGANIZATION_ID, USER_ID, ROLE_ID"/>
   </changeSet>
-  
+
+  <!-- mysql specific -->
+  <changeSet author="garth" id="drop-column-user-org-role-org-0-1">
+    <preConditions onFail="MARK_RAN">
+      <dbms type="mysql"/>
+    </preConditions>
+    <dropForeignKeyConstraint baseTableName="USER_ORGANIZATION_ROLE_MAPPING" constraintName="FK_HGF6S4UUNYWDKP4244YTNGBAD"/>
+    <dropUniqueConstraint
+            constraintName="UK_S5FNFVSRU9I4QPH9GB8V4FXFM"
+            tableName="USER_ORGANIZATION_ROLE_MAPPING"
+            uniqueColumns="ORGANIZATION_ID, USER_ID, ROLE_ID"/>
+  </changeSet>
+
   <changeSet author="garth" id="drop-column-user-org-role-org-1">
-    <dropColumn tableName="USER_ORGANIZATION_ROLE_MAPPING">  
-      <column  name="ORGANIZATION_ID"/>  
+    <dropColumn tableName="USER_ORGANIZATION_ROLE_MAPPING">
+      <column  name="ORGANIZATION_ID"/>
     </dropColumn>
   </changeSet>
 

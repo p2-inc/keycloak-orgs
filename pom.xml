@@ -3,7 +3,7 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.11-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
@@ -30,7 +30,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>4.13.2</junit.version>
-    <keycloak.version>20.0.1</keycloak.version>
+    <keycloak.version>21.0.1</keycloak.version>
     <lombok.version>1.18.22</lombok.version>
     <auto-service.version>1.0.1</auto-service.version>
     <jackson.version>2.13.4</jackson.version>
@@ -269,6 +269,18 @@
 	  <groupId>junit</groupId>
 	  <artifactId>junit</artifactId>
 	  <version>${junit.version}</version>
+	  <scope>test</scope>
+	</dependency>
+	<dependency>
+	  <groupId>io.phasetwo</groupId>
+	  <artifactId>phasetwo-admin-client</artifactId>
+	  <version>0.1.1</version>
+	  <scope>test</scope>
+	</dependency>
+	<dependency>
+	  <groupId>org.hamcrest</groupId>
+	  <artifactId>hamcrest-core</artifactId>
+	  <version>2.2</version>
 	  <scope>test</scope>
 	</dependency>
 	<dependency> <!-- if you're getting a missing dependency error here, you need to install keycloak from source locally, as this never hits maven central -->
