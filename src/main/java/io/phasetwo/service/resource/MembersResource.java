@@ -44,7 +44,7 @@ public class MembersResource extends OrganizationAdminResource {
   @DELETE
   @Path("{userId}")
   public Response removeMember(@PathParam("userId") String userId) {
-    canManage();
+    canDelete(userId);
 
     log.debugf("Remove member %s from %s %s", userId, realm.getName(), organization.getId());
     UserModel member = session.users().getUserById(realm, userId);
@@ -110,6 +110,14 @@ public class MembersResource extends OrganizationAdminResource {
           String.format(
               "User %s doesn't have permission to manage members in org %s",
               auth.getUser().getId(), organization.getName()));
+    }
+  }
+
+  private void canDelete(String userId) {
+    var seppuku = (userId == getUser().getId());
+
+    if (!seppuku) {
+      canManage();
     }
   }
 }
