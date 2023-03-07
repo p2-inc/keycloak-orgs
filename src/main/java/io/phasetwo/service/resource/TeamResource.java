@@ -6,14 +6,14 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import javax.validation.constraints.*;
 import javax.ws.rs.*;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.KeycloakSession;
 
 /** */
 @JBossLog
 public class TeamResource extends OrganizationAdminResource {
 
-  public TeamResource(RealmModel realm) {
-    super(realm);
+  public TeamResource(KeycloakSession session) {
+    super(session);
   }
 
   ////////

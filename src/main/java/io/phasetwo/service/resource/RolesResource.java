@@ -12,17 +12,15 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.events.admin.OperationType;
-import org.keycloak.models.RealmModel;
 
 @JBossLog
 public class RolesResource extends OrganizationAdminResource {
 
   private final OrganizationModel organization;
 
-  public RolesResource(RealmModel realm, OrganizationModel organization) {
-    super(realm);
+  public RolesResource(OrganizationAdminResource parent, OrganizationModel organization) {
+    super(parent);
     this.organization = organization;
   }
 
@@ -31,10 +29,7 @@ public class RolesResource extends OrganizationAdminResource {
     if (organization.getRoleByName(name) == null) {
       throw new NotFoundException();
     }
-    RoleResource resource = new RoleResource(realm, organization, name);
-    ResteasyProviderFactory.getInstance().injectProperties(resource);
-    resource.setup();
-    return resource;
+    return new RoleResource(this, organization, name);
   }
 
   @GET

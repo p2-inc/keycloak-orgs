@@ -1,8 +1,6 @@
 package io.phasetwo.service.resource;
 
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
 
 public class TeamResourceProvider extends BaseRealmResourceProvider {
 
@@ -12,9 +10,7 @@ public class TeamResourceProvider extends BaseRealmResourceProvider {
 
   @Override
   protected Object getRealmResource() {
-    RealmModel realm = session.getContext().getRealm();
-    TeamResource team = new TeamResource(realm);
-    ResteasyProviderFactory.getInstance().injectProperties(team);
+    TeamResource team = new TeamResource(session);
     team.setup();
     return team;
   }

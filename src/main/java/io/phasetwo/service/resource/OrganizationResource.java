@@ -23,7 +23,6 @@ import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.Constants;
-import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.Urls;
 import org.keycloak.services.resources.LoginActionsService;
@@ -36,8 +35,8 @@ public class OrganizationResource extends OrganizationAdminResource {
   protected final OrganizationModel organization;
   protected final String orgId;
 
-  public OrganizationResource(RealmModel realm, OrganizationModel organization) {
-    super(realm);
+  public OrganizationResource(OrganizationAdminResource parent, OrganizationModel organization) {
+    super(parent);
     this.organization = organization;
     this.orgId = organization.getId();
   }
@@ -45,7 +44,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   @Path("idps")
   public IdentityProvidersResource identityProviders() {
     if (auth.hasViewOrgs() || auth.hasOrgViewIdentityProviders(organization)) {
-      return setupResource(new IdentityProvidersResource(realm, organization));
+      return new IdentityProvidersResource(this, organization);
     } else {
       throw new NotAuthorizedException(
           String.format(
@@ -56,7 +55,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   @Path("roles")
   public RolesResource roles() {
     if (auth.hasViewOrgs() || auth.hasOrgViewRoles(organization)) {
-      return setupResource(new RolesResource(realm, organization));
+      return new RolesResource(this, organization);
     } else {
       throw new NotAuthorizedException(
           String.format("Insufficient permission to access role for %s", organization.getId()));
@@ -66,7 +65,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   @Path("invitations")
   public InvitationsResource invitations() {
     if (auth.hasViewOrgs() || auth.hasOrgViewInvitations(organization)) {
-      return setupResource(new InvitationsResource(realm, organization));
+      return new InvitationsResource(this, organization);
     } else {
       throw new NotAuthorizedException(
           String.format(
@@ -77,7 +76,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   @Path("members")
   public MembersResource members() {
     if (auth.hasViewOrgs() || auth.hasOrgViewMembers(organization)) {
-      return setupResource(new MembersResource(realm, organization));
+      return new MembersResource(this, organization);
     } else {
       throw new NotAuthorizedException(
           String.format("Insufficient permission to access members for %s", organization.getId()));
@@ -87,7 +86,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   @Path("domains")
   public DomainsResource domains() {
     if (auth.hasViewOrgs() || auth.hasOrgViewOrg(organization)) {
-      return setupResource(new DomainsResource(realm, organization));
+      return new DomainsResource(this, organization);
     } else {
       throw new NotAuthorizedException(
           String.format("Insufficient permission to access domains for %s", organization.getId()));

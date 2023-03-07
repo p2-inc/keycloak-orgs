@@ -15,7 +15,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.models.RealmModel;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SimpleResolver;
@@ -27,8 +26,8 @@ public class DomainsResource extends OrganizationAdminResource {
 
   private final OrganizationModel organization;
 
-  public DomainsResource(RealmModel realm, OrganizationModel organization) {
-    super(realm);
+  public DomainsResource(OrganizationAdminResource parent, OrganizationModel organization) {
+    super(parent);
     this.organization = organization;
   }
 

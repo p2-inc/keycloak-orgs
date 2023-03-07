@@ -5,11 +5,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.persistence.EntityManager;
 import lombok.extern.jbosslog.JBossLog;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.managers.AppAuthManager;
 
 /** */
@@ -19,14 +18,14 @@ public class OrganizationAdminResource extends AbstractAdminResource<Organizatio
   protected OrganizationProvider orgs;
   protected EntityManager em;
 
-  protected OrganizationAdminResource(RealmModel realm) {
-    super(realm);
+  protected OrganizationAdminResource(KeycloakSession session) {
+    super(session);
+    init();
   }
 
-  protected <T extends OrganizationAdminResource> T setupResource(T resource) {
-    ResteasyProviderFactory.getInstance().injectProperties(resource);
-    resource.setup();
-    return resource;
+  protected OrganizationAdminResource(OrganizationAdminResource parent) {
+    super(parent);
+    init();
   }
 
   protected final Keycloak getKeycloakForUser() {
@@ -68,7 +67,6 @@ public class OrganizationAdminResource extends AbstractAdminResource<Organizatio
     }
   }
 
-  @Override
   protected final void init() {
     this.em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
     this.orgs = session.getProvider(OrganizationProvider.class);

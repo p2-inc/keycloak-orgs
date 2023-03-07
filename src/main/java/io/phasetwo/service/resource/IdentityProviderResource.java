@@ -10,7 +10,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.models.RealmModel;
 import org.keycloak.representations.idm.IdentityProviderMapperRepresentation;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
@@ -22,11 +21,11 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   private final org.keycloak.services.resources.admin.IdentityProviderResource kcResource;
 
   public IdentityProviderResource(
-      RealmModel realm,
+      OrganizationAdminResource parent,
       OrganizationModel organization,
       String alias,
       org.keycloak.services.resources.admin.IdentityProviderResource kcResource) {
-    super(realm);
+    super(parent);
     this.organization = organization;
     this.alias = alias;
     this.kcResource = kcResource;

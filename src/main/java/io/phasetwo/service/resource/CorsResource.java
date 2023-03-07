@@ -5,7 +5,6 @@ import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.http.HttpRequest;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.resources.Cors;
 
 @JBossLog
 public class CorsResource {

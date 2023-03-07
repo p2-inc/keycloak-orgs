@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
-import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -22,8 +21,8 @@ public class MembersResource extends OrganizationAdminResource {
 
   private final OrganizationModel organization;
 
-  public MembersResource(RealmModel realm, OrganizationModel organization) {
-    super(realm);
+  public MembersResource(OrganizationAdminResource parent, OrganizationModel organization) {
+    super(parent);
     this.organization = organization;
   }
 

@@ -10,15 +10,15 @@ import javax.validation.constraints.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 
 /** */
 @JBossLog
 public class UserResource extends OrganizationAdminResource {
 
-  public UserResource(RealmModel realm) {
-    super(realm);
+  public UserResource(KeycloakSession session) {
+    super(session);
   }
 
   ////////

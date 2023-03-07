@@ -13,16 +13,15 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
-import org.keycloak.models.RealmModel;
+import org.keycloak.models.KeycloakSession;
 
 @JBossLog
 public class OrganizationsResource extends OrganizationAdminResource {
 
-  public OrganizationsResource(RealmModel realm) {
-    super(realm);
+  public OrganizationsResource(KeycloakSession session) {
+    super(session);
   }
 
   @Path("{orgId}")
@@ -30,10 +29,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     OrganizationModel org = orgs.getOrganizationById(realm, orgId);
     if (org == null) throw new NotFoundException(String.format("%s not found", orgId));
     if ((auth.hasViewOrgs() || auth.hasOrgViewOrg(org)) && auth.isOrgInRealm(org)) {
-      OrganizationResource resource = new OrganizationResource(realm, org);
-      ResteasyProviderFactory.getInstance().injectProperties(resource);
-      resource.setup();
-      return resource;
+      return new OrganizationResource(this, org);
     } else {
       throw new NotAuthorizedException(
           String.format("Insufficient permission to access %s", orgId));

@@ -13,9 +13,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.models.IdentityProviderModel;
-import org.keycloak.models.RealmModel;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.models.utils.StripSecretsUtils;
 import org.keycloak.representations.idm.ComponentRepresentation;
@@ -29,8 +27,9 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
 
   private final OrganizationModel organization;
 
-  public IdentityProvidersResource(RealmModel realm, OrganizationModel organization) {
-    super(realm);
+  public IdentityProvidersResource(
+      OrganizationAdminResource parent, OrganizationModel organization) {
+    super(parent);
     this.organization = organization;
   }
 
@@ -43,11 +42,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
         && organization.getId().equals(provider.getConfig().get(ORG_OWNER_CONFIG_KEY)))) {
       throw new NotFoundException(String.format("%s not found", alias));
     }
-    IdentityProviderResource resource =
-        new IdentityProviderResource(realm, organization, alias, kcResource);
-    ResteasyProviderFactory.getInstance().injectProperties(resource);
-    resource.setup();
-    return resource;
+    return new IdentityProviderResource(this, organization, alias, kcResource);
   }
 
   @GET
