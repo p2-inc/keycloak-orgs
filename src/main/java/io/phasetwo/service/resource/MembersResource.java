@@ -114,9 +114,7 @@ public class MembersResource extends OrganizationAdminResource {
   }
 
   private void canDelete(String userId) {
-    var seppuku = (userId == getUser().getId());
-
-    if (!seppuku) {
+    if (userId != getUser().getId()) {
       canManage();
     }
   }
