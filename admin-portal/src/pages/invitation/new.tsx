@@ -8,7 +8,7 @@ import { useState } from "react";
 import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
 import { useForm } from "react-hook-form";
 import { apiRealm } from "store/apis/helpers";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
 import SquareBadge from "components/elements/badges/square-badge";
 import P2Toast from "components/utils/toast";
@@ -32,7 +32,7 @@ const adminRoles = [...defaultRoles];
 const memberRoles = defaultRoles.filter((r) => r.includes("view"));
 
 const loadingIcon = (
-  <div className="mb-8">
+  <div>
     <div className={cs("relative h-12 w-12 overflow-hidden rounded-md")}>
       <div className="absolute -inset-10 z-10 bg-gradient-to-tr from-[#C7DFF0] to-[#1476B7]"></div>
       <div className="absolute inset-[2px] z-20 flex items-center justify-center rounded bg-white">
@@ -94,11 +94,14 @@ const NewInvitation = () => {
 
   const isSendButtonDisabled = !selectedRole;
   return (
-    <div className="mt-16">
+    <div className="mt-4 md:mt-16">
       <SectionHeader
         title="Invite new member"
         description="Add a new member to the organization by entering their email and assigning them a role within the organization. An email will be sent to them with instructions on how to join."
         icon={loadingIcon}
+        rightContent={
+          <Link to={`/organizations/${orgId}/details`} className="font-medium inline-block px-4 py-2 opacity-60 rounded-lg transition hover:bg-gray-100 hover:opacity-100">Cancel</Link>
+        }
       />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mt-8 space-y-4">
@@ -115,7 +118,7 @@ const NewInvitation = () => {
                       <Listbox.Option
                         key={role.id}
                         value={role}
-                        className="cursor-pointer p-4 hover:bg-neutral-50 space-y-2"
+                        className="cursor-pointer space-y-2 p-4 hover:bg-neutral-50"
                       >
                         <div className="font-semibold">{role.name}</div>
                         <div>

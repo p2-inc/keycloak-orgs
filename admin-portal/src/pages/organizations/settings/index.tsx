@@ -4,7 +4,10 @@ import SecondaryMainContentMenuArea from "components/layouts/secondary-main-cont
 import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
+import { apiRealm } from "store/apis/helpers";
 import { Link, Outlet, useParams } from "react-router-dom";
+import Breadcrumbs from "components/navs/breadcrumbs";
+import { useGetOrganizationByIdQuery } from "store/apis/orgs";
 
 const navigation = [
   {
@@ -23,21 +26,21 @@ const navigation = [
 
 export default function OrganizationSettings() {
   let { orgId } = useParams();
+  const { data: org } = useGetOrganizationByIdQuery({
+    orgId: orgId!,
+    realm: apiRealm,
+  });
   return (
     <>
       <TopHeader
         header="Settings"
         collapseOnMobile={true}
         leftAreaItems={
-          <div className="mr-2 flex items-center space-x-2">
-            <Link
-              to={`/organizations/${orgId}/details`}
-              className="-ml-3 -mr-3 rounded-lg px-3 py-1 font-medium transition hover:bg-gray-100 md:text-xl"
-            >
-              <div>Organization</div>
-            </Link>
-            <div className="hidden text-xl opacity-20 md:block">/</div>
-          </div>
+          <Breadcrumbs
+            items={[
+              { title: "Organizations", link: `/organizations` },
+              { title: `${org?.displayName || "Organization"}`.trim(), link: `/organizations/${orgId}/details` }]}
+          />
         }
         rightAreaItems={
           <>

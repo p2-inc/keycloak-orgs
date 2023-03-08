@@ -40,6 +40,7 @@ import MemberRoles from "./components/member-roles";
 import MembersActionMenu from "./components/member-action-menu";
 import { useEffect, useState } from "react";
 import { KeycloakProfile } from "keycloak-js";
+import Breadcrumbs from "components/navs/breadcrumbs";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
@@ -108,18 +109,12 @@ export default function OrganizationDetail() {
   return (
     <>
       <TopHeader
-        header={`${org?.displayName || ""} Organization`.trim()}
+        header={`${org?.displayName || ""}`.trim()}
         collapseOnMobile={true}
         leftAreaItems={
-          <div className="mr-2 flex items-center space-x-2">
-            <Link
-              to={`/organizations`}
-              className="-ml-3 -mr-3 rounded-lg px-3 py-1 font-medium transition hover:bg-gray-100 md:text-xl"
-            >
-              <div>Organizations</div>
-            </Link>
-            <div className="hidden text-xl opacity-20 md:block">/</div>
-          </div>
+          <Breadcrumbs
+            items={[{ title: "Organizations", link: "/organizations" }]}
+          />
         }
         rightAreaItems={
           <>
