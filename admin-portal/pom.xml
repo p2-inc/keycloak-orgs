@@ -97,7 +97,7 @@
 	      <goal>yarn</goal>
 	    </goals>
 	    <configuration>
-	      <arguments>build</arguments>
+	      <arguments>build-mvn</arguments>
 	    </configuration>
 	    <phase>generate-resources</phase>
           </execution>
@@ -113,6 +113,25 @@
         <version>3.2.0</version>
         <executions>
           <execution>
+            <id>copy-resources-index</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/classes/theme/portal/login/</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>build</directory>
+                  <filtering>false</filtering>
+		  <includes>
+		    <include>index.html</include>
+		  </includes>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+          <execution>
             <id>copy-resources</id>
             <phase>process-resources</phase>
             <goals>
@@ -122,13 +141,31 @@
               <outputDirectory>${project.build.directory}/classes/theme/portal/login/resources</outputDirectory>
               <resources>          
                 <resource>
-                  <directory>dist</directory>
+                  <directory>build</directory>
                   <filtering>false</filtering>
                 </resource>
               </resources>              
             </configuration>            
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+	<groupId>com.coderplus.maven.plugins</groupId>
+	<artifactId>copy-rename-maven-plugin</artifactId>
+	<version>1.0.1</version>
+	<executions>
+	  <execution>
+	    <id>copy-and-rename-file</id>
+	    <phase>process-resources</phase>
+	    <goals>
+	      <goal>rename</goal>
+	    </goals>
+	    <configuration>
+	      <sourceFile>${project.build.directory}/classes/theme/portal/login/index.html</sourceFile>
+	      <destinationFile>${project.build.directory}/classes/theme/portal/login/portal.ftl</destinationFile>
+	    </configuration>
+	  </execution>
+	</executions>
       </plugin>
     </plugins>
     <sourceDirectory>ext/main/java</sourceDirectory>
