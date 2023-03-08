@@ -101,7 +101,7 @@ public class PortalResourceProvider implements RealmResourceProvider {
   */
 
   @GET
-  @Path("{path: ^(200|fonts|images|main|site).*}")
+  @Path("{path: ^(asset-manifest|logo|manifest|static).*}")
   public Response staticResources(@PathParam("path") final String path) throws IOException {
     String fileName = getLastPathSegment(session.getContext().getUri());
     Theme theme = getTheme("portal");
