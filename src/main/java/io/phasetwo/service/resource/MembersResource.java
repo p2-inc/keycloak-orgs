@@ -114,7 +114,7 @@ public class MembersResource extends OrganizationAdminResource {
   }
 
   private void canDelete(String userId) {
-    if (userId != getUser().getId()) {
+    if (userId != user.getId()) {
       canManage();
     }
   }
