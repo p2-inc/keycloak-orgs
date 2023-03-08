@@ -2,17 +2,23 @@ import Button from "components/elements/forms/buttons/button";
 import SectionHeader from "components/navs/section-header";
 import { apiRealm } from "store/apis/helpers";
 import { keycloakService } from "keycloak";
-import { useGetLinkedAccountsQuery, useDeleteLinkedProviderMutation, LinkedAccountRepresentation } from "store/apis/profile";
+import {
+  useGetLinkedAccountsQuery,
+  useDeleteLinkedProviderMutation,
+  LinkedAccountRepresentation,
+} from "store/apis/profile";
 
 const LinkedProfile = () => {
-  const { data: accounts = [] } = useGetLinkedAccountsQuery({ realm: apiRealm });
-  const [ deleteAccount, { isSuccess }] = useDeleteLinkedProviderMutation();
+  const { data: accounts = [] } = useGetLinkedAccountsQuery({
+    realm: apiRealm,
+  });
+  const [deleteAccount, { isSuccess }] = useDeleteLinkedProviderMutation();
 
   const unLinkAccount = (account: LinkedAccountRepresentation): void => {
     deleteAccount({
       realm: apiRealm,
-      providerId: account.providerName!
-    }).then( () => {
+      providerId: account.providerName!,
+    }).then(() => {
       //refresh accoutns? automatic?
       //ContentAlert.
     });
@@ -21,7 +27,7 @@ const LinkedProfile = () => {
   /*
   private linkAccount(account: LinkedAccount): void {
     const url = '/linked-accounts/' + account.providerName;
-
+ 
     const redirectUri: string = createRedirect(this.props.location.pathname);
 
     this.context!.doGet<{accountLinkUri: string}>(url, { params: {providerId: account.providerName, redirectUri}})
@@ -40,13 +46,15 @@ const LinkedProfile = () => {
           description="Manage logins through third-party accounts."
         />
       </div>
-      <div className="w-full rounded border border-gray-200 bg-gray-50 divide-y">
-        {accounts.map( (account: LinkedAccountRepresentation) => (
+      <div className="w-full divide-y rounded border border-gray-200 bg-gray-50">
+        {accounts.map((account: LinkedAccountRepresentation) => (
           <div className="flex items-center justify-between p-2">
             <div className="px-2">
               <span className="font-medium">{account.displayName}</span>
             </div>
-            <div><Button isBlackButton>Link account</Button></div>
+            <div>
+              <Button isBlackButton>Link account</Button>
+            </div>
           </div>
         ))}
       </div>

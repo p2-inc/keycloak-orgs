@@ -1,7 +1,9 @@
 import { FC } from "react";
 import cs from "classnames";
 
-type ButtonProps = { isBlackButton?: boolean } & React.DetailedHTMLProps<
+type ButtonProps = {
+  isBlackButton?: boolean;
+} & React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   HTMLButtonElement
 >;
@@ -20,7 +22,7 @@ const Button: FC<ButtonProps> = ({
       className={cs(
         "group",
         "inline-flex",
-        "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
+        "focus:shadow-sm focus:outline-1 focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
         className
       )}
     >

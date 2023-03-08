@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import Button from "components/elements/forms/buttons/button";
 import FormTextInputWithLabel from "components/elements/forms/inputs/text-input-with-label";
 import SectionHeader from "components/navs/section-header";
@@ -7,7 +7,10 @@ import { KeycloakService } from "services/keycloak.service";
 import { apiRealm } from "store/apis/helpers";
 import { useKeycloak } from "@react-keycloak/web";
 import { useFeatureFlags } from "store/feature-flags/hooks";
-import { useGetAccountQuery, useUpdateAccountMutation } from 'store/apis/profile';
+import {
+  useGetAccountQuery,
+  useUpdateAccountMutation,
+} from "store/apis/profile";
 
 interface FormFields {
   readonly username?: string;
@@ -24,10 +27,13 @@ interface AccountPageState {
 
 const GeneralProfile = () => {
   const { keycloak, initialized } = useKeycloak();
-  const [ state, setState ] = useState<AccountPageState | undefined>(undefined);
+  const [state, setState] = useState<AccountPageState | undefined>(undefined);
   const { featureFlags } = useFeatureFlags();
-  const { data, error } = useGetAccountQuery({ userProfileMetadata: true, realm: apiRealm });
-  const [ updateAccount, { isSuccess }] = useUpdateAccountMutation();
+  const { data, error } = useGetAccountQuery({
+    userProfileMetadata: true,
+    realm: apiRealm,
+  });
+  const [updateAccount, { isSuccess }] = useUpdateAccountMutation();
 
   /*
   export type AccountRepresentation = {
@@ -41,29 +47,25 @@ const GeneralProfile = () => {
   };
   */
 
-
   const DEFAULT_STATE: AccountPageState = {
     errors: {
-        username: '',
-        firstName: '',
-        lastName: '',
-        email: ''
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
     },
     formFields: {
-        username: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        attributes: {}
-    }
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      attributes: {},
+    },
   };
 
   //setState(DEFAULT_STATE);
   console.log(data);
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
-
-  };
-
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {};
 
   const handleCancel = (): void => {
     //how do i refresh the data

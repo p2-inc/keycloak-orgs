@@ -2,7 +2,6 @@ import { UserIcon } from "@heroicons/react/20/solid";
 import SectionHeader from "components/navs/section-header";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
-import Dropdown from "components/elements/forms/dropdown/dropdown";
 import { useAddOrganizationInvitationMutation } from "store/apis/orgs";
 import { useState } from "react";
 import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
@@ -100,7 +99,12 @@ const NewInvitation = () => {
         description="Add a new member to the organization by entering their email and assigning them a role within the organization. An email will be sent to them with instructions on how to join."
         icon={loadingIcon}
         rightContent={
-          <Link to={`/organizations/${orgId}/details`} className="font-medium inline-block px-4 py-2 opacity-60 rounded-lg transition hover:bg-gray-100 hover:opacity-100">Cancel</Link>
+          <Link
+            to={`/organizations/${orgId}/details`}
+            className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
+          >
+            Cancel
+          </Link>
         }
       />
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -121,7 +125,7 @@ const NewInvitation = () => {
                         className="cursor-pointer space-y-2 p-4 hover:bg-neutral-50"
                       >
                         <div className="font-semibold">{role.name}</div>
-                        <div>
+                        <div className="flex flex-wrap">
                           {role.items.map((ar) => (
                             <SquareBadge className="mt-1 mr-1">
                               {ar}
