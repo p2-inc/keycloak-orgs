@@ -23,3 +23,6 @@ yarn-debug.log*
 yarn-error.log*
 
 *~
+/node
+/target
+/keycloak.v2
