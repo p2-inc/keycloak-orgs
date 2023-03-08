@@ -11,15 +11,14 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.*;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import lombok.extern.jbosslog.JBossLog;
-import org.jboss.resteasy.spi.HttpRequest;
-import org.jboss.resteasy.spi.HttpResponse;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
+import org.keycloak.http.HttpRequest;
+import org.keycloak.http.HttpResponse;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.resource.RealmResourceProvider;
@@ -43,24 +42,10 @@ public class WizardResourceProvider implements RealmResourceProvider {
   }
 
   private void setupCors() {
-    HttpRequest request = session.getContext().getContextObject(HttpRequest.class);
-    HttpResponse response = session.getContext().getContextObject(HttpResponse.class);
+    HttpRequest request = session.getContext().getHttpRequest();
+    HttpResponse response = session.getContext().getHttpResponse();
     UriInfo uriInfo = session.getContext().getUri();
-    if (hasCors(response)) return;
-    Cors.add(request)
-        .allowAllOrigins() 
-        .allowedMethods(METHODS)
-        .auth()
-        .build(response);
-    log.debugf("hasCors %b", hasCors(response));
-  }
-
-  private boolean hasCors(HttpResponse response) {
-    MultivaluedMap<String, Object> headers = response.getOutputHeaders();
-    if (headers == null) return false;
-    return (headers.get("Access-Control-Allow-Credentials") != null
-        || headers.get("Access-Control-Allow-Origin") != null
-        || headers.get("Access-Control-Expose-Headers") != null);
+    Cors.add(request).allowAllOrigins().allowedMethods(METHODS).auth().build(response);
   }
 
   public static final String[] METHODS = {

@@ -5,23 +5,34 @@
   <packaging>jar</packaging>
   <version>1.0.0-SNAPSHOT</version>
 
+  <parent>
+    <groupId>com.github.xgp</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>0.7</version>
+  </parent>
+
+  <licenses>
+    <license>
+      <name>Elastic License v2</name>
+      <url>https://raw.githubusercontent.com/elastic/elasticsearch/main/licenses/ELASTIC-LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
   <properties>
-    <java.version>1.8</java.version>
+    <java.version>11</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <main.java.package>io.phasetwo</main.java.package>
-    <keycloak.version>20.0.0</keycloak.version>
+    <main.java.package>io.phasetwo.wizard</main.java.package>
+    <keycloak.version>21.0.1</keycloak.version>
     <guava.version>30.1-jre</guava.version>
     <lombok.version>1.18.22</lombok.version>
     <auto-service.version>1.0.1</auto-service.version>
   </properties>
 
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <name>GitHub Packages Releases</name>
-      <url>https://maven.pkg.github.com/p2-inc/idp-wizard</url>
-    </repository>
-  </distributionManagement>
+  <scm>
+    <url>https://github.com/p2-inc/idp-wizard</url>
+    <connection>scm:git:git@github.com:p2-inc/idp-wizard.git</connection>
+    <tag>HEAD</tag>
+  </scm>
 
   <build>
     <plugins>

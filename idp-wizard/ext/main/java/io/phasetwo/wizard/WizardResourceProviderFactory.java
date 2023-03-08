@@ -12,7 +12,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderEvent;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
@@ -47,7 +46,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
 
   @Override
   public void postInit(KeycloakSessionFactory factory) {
-    //KeycloakModelUtils.runJobInTransaction(factory, this::initClients);
+    // KeycloakModelUtils.runJobInTransaction(factory, this::initClients);
     factory.register(
         (ProviderEvent event) -> {
           if (event instanceof RealmModel.RealmPostCreateEvent) {
@@ -59,9 +58,13 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
 
   private void initClients(KeycloakSession session) {
     try {
-      session.realms().getRealmsStream().forEach(realm -> {
-          createClient(realm, session);
-        });
+      session
+          .realms()
+          .getRealmsStream()
+          .forEach(
+              realm -> {
+                createClient(realm, session);
+              });
     } catch (Exception e) {
       log.warnf(
           "Error initializing idp-wizard clients. Ignoring. You may have to create them manually. %s",
@@ -120,13 +123,14 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     pro.setProtocolMapper("oidc-organization-role-mapper");
     pro.setProtocol("openid-connect");
     pro.setName("organizations");
-    Map<String,String> config = new ImmutableMap.Builder<String,String>()
-                                .put("id.token.claim", "true")
-                                .put("access.token.claim", "true")
-                                .put("claim.name", "organizations")
-                                .put("jsonType.label", "JSON")
-                                .put("userinfo.token.claim", "true")
-                                .build();
+    Map<String, String> config =
+        new ImmutableMap.Builder<String, String>()
+            .put("id.token.claim", "true")
+            .put("access.token.claim", "true")
+            .put("claim.name", "organizations")
+            .put("jsonType.label", "JSON")
+            .put("userinfo.token.claim", "true")
+            .build();
     pro.setConfig(config);
     //      "consentRequired": false,
     idpWizard.addProtocolMapper(pro);
@@ -137,19 +141,20 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     pro.setProtocolMapper("oidc-usersessionmodel-note-mapper");
     pro.setProtocol("openid-connect");
     pro.setName("org_id");
-    Map<String,String> config = new ImmutableMap.Builder<String,String>()
-                                .put("user.session.note", "org_id")
-                                .put("id.token.claim", "true")
-                                .put("access.token.claim", "true")
-                                .put("claim.name", "org_id")
-                                .put("jsonType.label", "String")
-                                .put("userinfo.token.claim", "true")
-                                .build();
+    Map<String, String> config =
+        new ImmutableMap.Builder<String, String>()
+            .put("user.session.note", "org_id")
+            .put("id.token.claim", "true")
+            .put("access.token.claim", "true")
+            .put("claim.name", "org_id")
+            .put("jsonType.label", "String")
+            .put("userinfo.token.claim", "true")
+            .build();
     pro.setConfig(config);
     //      "consentRequired": false,
     idpWizard.addProtocolMapper(pro);
   }
-  
+
   private void setClientScopeDefaults(
       RealmModel realm, KeycloakSession session, ClientModel idpWizard) {
     idpWizard.setFullScopeAllowed(true);

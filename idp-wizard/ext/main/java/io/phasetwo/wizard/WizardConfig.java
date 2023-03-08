@@ -8,7 +8,18 @@ import java.util.Optional;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 
-@JsonPropertyOrder({"domain", "name", "displayName", "logoUrl", "apiMode", "enableGroupMapping", "enableLdap", "enableDashboard", "emailAsUsername", "trustEmail"})
+@JsonPropertyOrder({
+  "domain",
+  "name",
+  "displayName",
+  "logoUrl",
+  "apiMode",
+  "enableGroupMapping",
+  "enableLdap",
+  "enableDashboard",
+  "emailAsUsername",
+  "trustEmail"
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WizardConfig {
 
@@ -32,7 +43,9 @@ public class WizardConfig {
         .ifPresent(a -> config.emailAsUsername(a.toLowerCase().equals("true")));
     Optional.ofNullable(realm.getAttribute(CONFIG_KEY("trustEmail")))
         .ifPresent(a -> config.trustEmail(a.toLowerCase().equals("true")));
-    Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.logo.url"))) //from keycloak-orgs override
+    Optional.ofNullable(
+            realm.getAttribute(
+                String.format("_providerConfig.assets.logo.url"))) // from keycloak-orgs override
         .ifPresent(a -> config.logoUrl(a));
     Optional.ofNullable(realm.getName()).ifPresent(a -> config.name(a));
     Optional.ofNullable(realm.getDisplayName()).ifPresent(a -> config.displayName(a));
