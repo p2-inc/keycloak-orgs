@@ -1,7 +1,18 @@
 {
-  "name": "phasetwo-self-v2-cra",
+  "name": "phasetwo-admin-ui",
+  "author": {
+    "name": "Phase//"
+  },
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "orgs-api": " npx @rtk-query/codegen-openapi orgs-openapi-config.ts",
+    "profile-api": " npx @rtk-query/codegen-openapi profile-openapi-config.ts"
+  },
   "dependencies": {
     "@headlessui/react": "^1.7.10",
     "@heroicons/react": "^2.0.14",
@@ -27,13 +38,13 @@
     "typescript": "^4.4.2",
     "web-vitals": "^2.1.0"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "orgs-api": " npx @rtk-query/codegen-openapi orgs-openapi-config.ts",
-    "profile-api": " npx @rtk-query/codegen-openapi profile-openapi-config.ts"
+  "devDependencies": {
+    "@rtk-query/codegen-openapi": "^1.0.0",
+    "@tailwindcss/forms": "^0.5.3",
+    "prettier": "^2.8.3",
+    "prettier-plugin-tailwindcss": "^0.2.2",
+    "tailwindcss": "^3.2.4",
+    "ts-node": "^10.9.1"
   },
   "eslintConfig": {
     "extends": [
@@ -52,13 +63,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@rtk-query/codegen-openapi": "^1.0.0",
-    "@tailwindcss/forms": "^0.5.3",
-    "prettier": "^2.8.3",
-    "prettier-plugin-tailwindcss": "^0.2.2",
-    "tailwindcss": "^3.2.4",
-    "ts-node": "^10.9.1"
   }
 }
