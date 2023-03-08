@@ -67,9 +67,11 @@ public class PortalResourceProvider implements RealmResourceProvider {
     String portalResources = ".";
     Theme theme = getTheme("portal");
     RealmModel realm = session.getContext().getRealm();
+    Locale locale = session.getContext().resolveLocale(user);
     LoginFormsProvider form =
         session
             .getProvider(LoginFormsProvider.class)
+            .setAttribute("locale", locale.toLanguageTag())
             .setAttribute("portalResources", portalResources)
             .setAttribute("realmName", realm.getName());
     FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;

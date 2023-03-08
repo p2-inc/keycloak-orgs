@@ -4,7 +4,7 @@ import cs from "classnames";
 type Props = {
   title: string;
   description?: string;
-  variant?: "large" | "small";
+  variant?: "large" | "medium" | "small";
   icon?: ReactElement;
   rightContent?: ReactElement;
 };
@@ -20,7 +20,8 @@ const SectionHeader: FC<Props> = ({
     <div
       className={cs({
         "space-y-2": variant === "large",
-        "space-y-1": variant === "small",
+        "space-y-1": variant === "medium",
+        "space-y-0": variant === "small"
       })}
     >
       {(icon || rightContent) && (
@@ -32,7 +33,8 @@ const SectionHeader: FC<Props> = ({
       <h2
         className={cs("font-semibold text-p2gray-900", {
           "text-2xl": variant === "large",
-          "text-xl": variant === "small",
+          "text-xl": variant === "medium",
+          "text-l": variant === "small",
         })}
       >
         {title}

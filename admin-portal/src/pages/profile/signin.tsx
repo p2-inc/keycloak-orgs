@@ -8,22 +8,52 @@ const SigninProfile = () => {
       <div className="mb-12">
         <SectionHeader
           title="Signing in"
-          description="One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin."
+          description="Configure ways to sign in."
         />
       </div>
       <div className="space-y-12">
         <div className="space-y-5">
           <SectionHeader
             title="Basic authentication"
+            variant="medium"
+          />
+          <SectionHeader
+            title="Password"
             description="Sign in by entering your password."
             variant="small"
           />
           {/* <Table /> */}
         </div>
+      </div>
+      <div className="space-y-12">
         <div className="space-y-5">
           <SectionHeader
-            title="Two factor authnetication"
-            description="Sign in by entering your password."
+            title="Two-factor authentication"
+            variant="medium"
+          />
+          <SectionHeader
+            title="Authenticator application"
+            description="Enter a verification code from authenticator application."
+            variant="small"
+          />
+          {/* <Table /> */}
+          <SectionHeader
+            title="Security key"
+            description="Use your security key to sign in."
+            variant="small"
+          />
+          {/* <Table /> */}
+        </div>
+      </div>
+      <div className="space-y-12">
+        <div className="space-y-5">
+          <SectionHeader
+            title="Passwordless"
+            variant="medium"
+          />
+          <SectionHeader
+            title="Security key"
+            description="Use your security key for passwordless sign in."
             variant="small"
           />
           <div className="flex items-center justify-center rounded border border-gray-200 bg-gray-50 py-8">

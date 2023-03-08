@@ -7,6 +7,10 @@ import {
   useDeleteLinkedProviderMutation,
   LinkedAccountRepresentation,
 } from "store/apis/profile";
+import Table, {
+  TableColumns,
+  TableRows,
+} from "components/elements/table/table";
 
 const LinkedProfile = () => {
   const { data: accounts = [] } = useGetLinkedAccountsQuery({
@@ -14,7 +18,7 @@ const LinkedProfile = () => {
   });
   const [deleteAccount, { isSuccess }] = useDeleteLinkedProviderMutation();
 
-  const unLinkAccount = (account: LinkedAccountRepresentation): void => {
+  const unlinkAccount = (account: LinkedAccountRepresentation): void => {
     deleteAccount({
       realm: apiRealm,
       providerId: account.providerName!,
@@ -24,10 +28,10 @@ const LinkedProfile = () => {
     });
   };
 
-  /*
-  private linkAccount(account: LinkedAccount): void {
+  const linkAccount = (account: LinkedAccountRepresentation) => {
     const url = '/linked-accounts/' + account.providerName;
  
+    /*
     const redirectUri: string = createRedirect(this.props.location.pathname);
 
     this.context!.doGet<{accountLinkUri: string}>(url, { params: {providerId: account.providerName, redirectUri}})
@@ -35,8 +39,54 @@ const LinkedProfile = () => {
             console.log({response});
             window.location.href = response.data!.accountLinkUri;
         });
-  }
-  */
+    */
+  };
+  
+  const label = (account: LinkedAccountRepresentation): React.ReactNode => {
+    if (account.social) {
+      return (<><label className="block text-sm font-medium text-blue-700">Social login</label></>);
+    }
+    return (<><label className="block text-sm font-medium text-green-700">System defined</label></>);
+  };
+
+  const linkedColumns: TableColumns = [
+    { key: "providerAlias", data: "Provider" },
+    { key: "displayName", data: "Name" },
+    { key: "label", data: "Label" },
+    { key: "username", data: "Username" },
+    { key: "action", data: "" },
+  ];
+  
+  const linkedRows: TableRows = accounts.filter((account) => account.connected).map((account) => ({
+    providerAlias: account.providerAlias,
+    displayName: account.displayName,
+    label: label(account),
+    username: account.linkedUsername,
+    action: (<Button
+      isBlackButton
+      className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
+      onClick={()=>unlinkAccount(account)}
+    >Unlink account</Button>),
+  }));
+
+
+  const unlinkedColumns: TableColumns = [
+    { key: "providerAlias", data: "Provider" },
+    { key: "displayName", data: "Name" },
+    { key: "label", data: "Label" },
+    { key: "action", data: "" },
+  ];
+  
+  const unlinkedRows: TableRows = accounts.filter((account) => !account.connected).map((account) => ({
+    providerAlias: account.providerAlias,
+    displayName: account.displayName,
+    label: label(account),
+    action: (<Button
+      isBlackButton
+      className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
+      onClick={()=>linkAccount(account)}
+    >Link account</Button>),
+  }));
 
   return (
     <div>
@@ -46,17 +96,23 @@ const LinkedProfile = () => {
           description="Manage logins through third-party accounts."
         />
       </div>
-      <div className="w-full divide-y rounded border border-gray-200 bg-gray-50">
-        {accounts.map((account: LinkedAccountRepresentation) => (
-          <div className="flex items-center justify-between p-2">
-            <div className="px-2">
-              <span className="font-medium">{account.displayName}</span>
-            </div>
-            <div>
-              <Button isBlackButton>Link account</Button>
-            </div>
-          </div>
-        ))}
+      <div className="mb-12">
+        <SectionHeader
+          title="Linked login providers"
+          variant="medium"
+        />
+      </div>
+      <div className="px-4 py-4 md:px-10 md:py-6">
+        <Table columns={linkedColumns} rows={linkedRows} />
+      </div>
+      <div className="mb-12">
+        <SectionHeader
+          title="Unlinked login providers"
+          variant="medium"
+        />
+      </div>
+      <div className="px-4 py-4 md:px-10 md:py-6">
+        <Table columns={unlinkedColumns} rows={unlinkedRows} />
       </div>
     </div>
   );

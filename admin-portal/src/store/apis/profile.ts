@@ -370,7 +370,7 @@ export type DeviceRepresentation = {
 };
 export type LinkedAccountRepresentation = {
   connected?: boolean;
-  isSocial?: boolean;
+  social?: boolean;
   providerAlias?: string;
   providerName?: string;
   displayName?: string;
