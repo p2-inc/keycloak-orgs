@@ -16,6 +16,7 @@ import { apiRealm } from "store/apis/helpers";
 import { keycloakService } from "keycloak";
 import TimeUtil from "services/time-util";
 import Button from "components/elements/forms/buttons/button";
+import { Smartphone, Monitor } from "lucide-react";
 
 type SignOutSessionState = {
   device: DeviceRepresentation;
@@ -71,13 +72,10 @@ const ActivityProfile = () => {
     session: SessionRepresentation,
     device: DeviceRepresentation
   ): React.ReactNode => {
-    const deviceType: boolean = device.mobile ?? false;
-    if (deviceType === true) {
-      //return (<MobileIcon className="fill-p2gray-800" id={elementId('icon-mobile', session, 'device')} />);
-      return <ComputerIcon className="fill-p2gray-800" />;
+    if (device.mobile) {
+      return <Smartphone id={elementId("icon-mobile", session, "device")} />;
     }
-    //return (<ComputerIcon className="fill-p2gray-800" id={elementId('icon-desktop', session, 'device')} />);
-    return <ComputerIcon className="fill-p2gray-800" />;
+    return <Monitor id={elementId("icon-desktop", session, "device")} />;
   };
 
   const findOS = (device: DeviceRepresentation): string => {
@@ -168,34 +166,28 @@ const ActivityProfile = () => {
         {isFetching && <ActivityLoader />}
         {!isFetching &&
           devices.map((device: DeviceRepresentation, deviceIndex: number) => (
-            <>
+            <div className="divide-y">
               {device.sessions!.map(
                 (session: SessionRepresentation, sessionIndex: number) => (
                   <Fragment
                     key={"device-" + deviceIndex + "-session-" + sessionIndex}
                   >
-                    <div className="md:flex md:items-center">
-                      <div className="p-4 pr-0 pb-0">
-                        {findDeviceTypeIcon(session, device)}
-                      </div>
-                      <div className="p-4 pb-0 text-sm font-semibold text-p2gray-900 md:pl-2">
-                        <span
-                          id={elementId("browser", session)}
-                          className="pf-u-mr-md session-title"
-                        >
-                          {findOS(device)} {findOSVersion(device)} /{" "}
-                          {session.browser}
-                        </span>
-                        {session.current && (
-                          <>
-                            <label
-                              id={elementId("current-badge", session)}
-                              className="block text-sm font-medium text-green-700"
+                    <div>
+                      <div className="items-center space-y-2 px-4 pt-3 md:flex md:justify-between md:space-y-0">
+                        <div className="md:flex md:items-center">
+                          <div className="py-2 md:py-0">
+                            {findDeviceTypeIcon(session, device)}
+                          </div>
+                          <div className="space-y-2 text-sm font-semibold text-p2gray-900 md:pl-2">
+                            <span
+                              id={elementId("browser", session)}
+                              className="pf-u-mr-md session-title"
                             >
-                              Current session
-                            </label>
-                          </>
-                        )}
+                              {findOS(device)} {findOSVersion(device)} /{" "}
+                              {session.browser}
+                            </span>
+                          </div>
+                        </div>
                         {!session.current && (
                           <Button
                             onClick={() => {
@@ -205,45 +197,56 @@ const ActivityProfile = () => {
                                 session,
                               });
                             }}
-                            className="ml-2"
                           >
                             Sign out session
                           </Button>
                         )}
+                        {session.current && (
+                          <span
+                            id={elementId("current-badge", session)}
+                            className="rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700 flex items-center space-x-2"
+                          >
+                            <span className="relative flex h-2 w-2">
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2blue-700 opacity-75"></span>
+                              <span className="relative inline-flex h-2 w-2 rounded-full bg-p2blue-700"></span>
+                            </span>
+                            <span>Current session</span>
+                          </span>
+                        )}
                       </div>
-                    </div>
-                    <div className="md:grid md:grid-cols-5">
-                      <div className="p-4">
-                        <ActivityItem title="IP address">
-                          {session.ipAddress}
-                        </ActivityItem>
-                      </div>
-                      <div className="p-4">
-                        <ActivityItem title="Last accessed">
-                          {time(session.lastAccess)}
-                        </ActivityItem>
-                      </div>
-                      <div className="p-4">
-                        <ActivityItem title="Clients">
-                          {session.clients &&
-                            makeClientsString(session.clients)}
-                        </ActivityItem>
-                      </div>
-                      <div className="p-4">
-                        <ActivityItem title="Started">
-                          {time(session.started)}
-                        </ActivityItem>
-                      </div>
-                      <div className="p-4">
-                        <ActivityItem title="Expires">
-                          {time(session.expires)}
-                        </ActivityItem>
+                      <div className="p-4 md:grid md:grid-cols-5">
+                        <div className="">
+                          <ActivityItem title="IP address">
+                            {session.ipAddress}
+                          </ActivityItem>
+                        </div>
+                        <div className="">
+                          <ActivityItem title="Last accessed">
+                            {time(session.lastAccess)}
+                          </ActivityItem>
+                        </div>
+                        <div className="">
+                          <ActivityItem title="Clients">
+                            {session.clients &&
+                              makeClientsString(session.clients)}
+                          </ActivityItem>
+                        </div>
+                        <div className="">
+                          <ActivityItem title="Started">
+                            {time(session.started)}
+                          </ActivityItem>
+                        </div>
+                        <div className="">
+                          <ActivityItem title="Expires">
+                            {time(session.expires)}
+                          </ActivityItem>
+                        </div>
                       </div>
                     </div>
                   </Fragment>
                 )
               )}
-            </>
+            </div>
           ))}
       </div>
     </div>

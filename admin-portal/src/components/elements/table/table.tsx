@@ -10,6 +10,7 @@ export const tdClasses = "whitespace-normal px-3 py-4";
 export type TableColumns = {
   key: string;
   data: string | React.ReactElement;
+  columnClasses?: string;
 }[];
 
 export type TableRows = {
@@ -45,10 +46,13 @@ const Table: React.FC<Props> = ({ columns, rows }) => {
             <tr key={index}>
               {columns.map((column, index) => (
                 <td
-                  className={cs({
-                    [firstTdClasses]: index === 0,
-                    [tdClasses]: index > 0,
-                  })}
+                  className={cs(
+                    {
+                      [firstTdClasses]: index === 0,
+                      [tdClasses]: index > 0,
+                    },
+                    column.columnClasses
+                  )}
                   key={column.key}
                 >
                   {row[column.key]}

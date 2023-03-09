@@ -30,6 +30,7 @@
     "is-valid-domain": "^0.1.6",
     "keycloak-js": "^20.0.3",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.124.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.43.3",

@@ -12,6 +12,7 @@ import { useGetOrganizationDomainsQuery } from "store/apis/orgs";
 const columns: TableColumns = [
   { key: "domain_name", data: "Domain name" },
   { key: "verifiedC", data: "Validated" },
+  { key: "action", data: "", columnClasses: "flex justify-end" },
 ];
 
 const SettingsDomain = () => {
@@ -30,6 +31,12 @@ const SettingsDomain = () => {
     ) : (
       <div>
         <span className="mr-2 text-orange-600">Verification pending</span>
+      </div>
+    ),
+    action: domain.verified ? (
+      <></>
+    ) : (
+      <div>
         <Button
           onClick={() =>
             navigate(
