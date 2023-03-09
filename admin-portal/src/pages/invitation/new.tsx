@@ -59,7 +59,7 @@ const NewInvitation = () => {
   } = useForm();
 
   const [addOrganizationInvitation] = useAddOrganizationInvitationMutation();
-  const [selectedRole, setselectedRole] = useState(roles[0]);
+  const [selectedRole, setSelectedRole] = useState(roles[0]);
 
   const onSubmit = async (data) => {
     console.log("🚀 ~ file: new.tsx:79 ~ onSubmit ~ onSubmit:", data);
@@ -109,7 +109,7 @@ const NewInvitation = () => {
       />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mt-8 space-y-4">
-          <Listbox value={selectedRole} onChange={setselectedRole}>
+          <Listbox value={selectedRole} onChange={setSelectedRole}>
             <div className="relative z-50">
               <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white">
                 <div>{selectedRole.name}</div>

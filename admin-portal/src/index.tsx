@@ -28,11 +28,7 @@ import NewInvitation from "pages/invitation/new";
 import DomainsAdd from "pages/organizations/domains/add";
 import DomainsVerify from "pages/organizations/domains/verify";
 import DomainContainer from "pages/organizations/domains";
-import SettingsGeneral from "pages/organizations/settings/general";
-import SettingsDomain from "pages/organizations/settings/domains";
-import SettingsSSO from "pages/organizations/settings/sso";
-import toast, { ToastBar, Toaster } from "react-hot-toast";
-import { CheckCircleIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { Toaster } from "react-hot-toast";
 
 const router = createBrowserRouter([
   {
@@ -50,27 +46,9 @@ const router = createBrowserRouter([
       },
       {
         path: "/organizations/:orgId/settings",
-        index: true,
-        loader: () => redirect("general"),
-      },
-      {
-        path: "/organizations/:orgId/settings/*",
         element: <OrganizationSettings />,
-        children: [
-          {
-            path: "general",
-            element: <SettingsGeneral />,
-          },
-          {
-            path: "domains",
-            element: <SettingsDomain />,
-          },
-          {
-            path: "sso",
-            element: <SettingsSSO />,
-          },
-        ],
       },
+
       {
         path: "/organizations/:orgId/domains",
         index: true,
@@ -85,7 +63,7 @@ const router = createBrowserRouter([
             element: <DomainsAdd />,
           },
           {
-            path: "verify",
+            path: "verify/:domainRecord",
             element: <DomainsVerify />,
           },
         ],
@@ -154,6 +132,7 @@ root.render(
       </React.StrictMode>
     </Provider>
     <Toaster
+      position="top-right"
       toastOptions={{
         duration: 6000,
       }}

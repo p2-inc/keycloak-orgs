@@ -8,19 +8,22 @@ import { apiRealm } from "store/apis/helpers";
 import { Link, Outlet, useParams } from "react-router-dom";
 import Breadcrumbs from "components/navs/breadcrumbs";
 import { useGetOrganizationByIdQuery } from "store/apis/orgs";
+import SettingsGeneral from "./general";
+import SettingsDomain from "./domains";
+import SettingsSSO from "./sso";
 
 const navigation = [
   {
     name: "General",
-    href: "general",
+    href: "#general",
   },
   {
     name: "Domains",
-    href: "domains",
+    href: "#domains",
   },
   {
     name: "SSO",
-    href: "sso",
+    href: "#sso",
   },
 ];
 
@@ -39,7 +42,11 @@ export default function OrganizationSettings() {
           <Breadcrumbs
             items={[
               { title: "Organizations", link: `/organizations` },
-              { title: `${org?.displayName || "Organization"}`.trim(), link: `/organizations/${orgId}/details` }]}
+              {
+                title: `${org?.displayName || "Organization"}`.trim(),
+                link: `/organizations/${orgId}/details`,
+              },
+            ]}
           />
         }
         rightAreaItems={
@@ -58,7 +65,11 @@ export default function OrganizationSettings() {
 
         {/* Primary content */}
         <PrimaryContentArea>
-          <Outlet />
+          <SettingsGeneral />
+          <hr className="my-10" />
+          <SettingsDomain />
+          <hr className="my-10" />
+          <SettingsSSO />
         </PrimaryContentArea>
       </FixedWidthMainContent>
     </>

@@ -59,10 +59,10 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
             to={item.href}
             className={({ isActive }) =>
               cs(
-                "group flex items-center rounded-md px-3 py-2 text-sm transition",
+                "group flex items-center rounded-md px-3 py-2 text-sm text-gray-900 transition hover:bg-gray-50 hover:text-gray-900",
                 {
                   "font-semibold text-p2blue-700 hover:text-p2blue-700":
-                    isActive,
+                    isActive && !item.href.startsWith("#"),
                   "text-gray-900 hover:bg-gray-50 hover:text-gray-900":
                     !isActive,
                 }
