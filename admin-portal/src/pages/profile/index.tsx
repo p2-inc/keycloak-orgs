@@ -18,11 +18,6 @@ const navigation = [
     icon: UserCircleIcon,
   },
   {
-    name: "Role",
-    href: "/profile/role",
-    icon: KeyIcon,
-  },
-  {
     name: "Signing in",
     href: "/profile/signin",
     icon: KeyIcon,
