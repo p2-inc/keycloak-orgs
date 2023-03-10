@@ -3,11 +3,12 @@ import CopyBlock from "components/elements/organizations/copy-block";
 import RoundedIcon from "components/elements/rounded-icon";
 import { GlobeIcon } from "components/icons";
 import SectionHeader from "components/navs/section-header";
-import { useParams } from "react-router-dom";
+import P2Toast from "components/utils/toast";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { apiRealm } from "store/apis/helpers";
 import {
-  useGetOrganizationDomainQuery,
   useGetOrganizationDomainsQuery,
+  useVerifyDomainMutation,
 } from "store/apis/orgs";
 
 const addIcon = (
@@ -18,13 +19,53 @@ const addIcon = (
 
 const DomainsVerify = () => {
   let { orgId, domainRecord } = useParams();
+  const navigate = useNavigate();
 
-  const { data: domains = [], isLoading } = useGetOrganizationDomainsQuery({
+  const { data: domains = [] } = useGetOrganizationDomainsQuery({
     realm: apiRealm,
     orgId: orgId!,
   });
 
   const domain = domains.find((domain) => domain.record_value === domainRecord);
+
+  const [verifyDomain, { isLoading: isVerifyDomainLoading }] =
+    useVerifyDomainMutation();
+
+  const checkVerification = async () => {
+    if (domain && domain.domain_name) {
+      const resp = await verifyDomain({
+        domainName: domain.domain_name,
+        orgId: orgId!,
+        realm: apiRealm,
+      });
+
+      //@ts-ignore
+      if (resp.error) {
+        return P2Toast({
+          error: true,
+          //@ts-ignore
+          title: `${domain.domain_name} failed to verify. ${resp.error?.data?.error}`,
+        });
+      }
+
+      //@ts-ignore
+      if (resp.data) {
+        //@ts-ignore
+        if (resp.data.verified) {
+          P2Toast({
+            success: true,
+            title: `${domain.domain_name} has been verified.`,
+          });
+          navigate(`/organizations/${orgId}/settings`);
+        } else {
+          P2Toast({
+            error: true,
+            title: `${domain.domain_name} failed to verify. Please check DNS records and try again.`,
+          });
+        }
+      }
+    }
+  };
 
   return (
     <div className="space-y-10 md:py-20">
@@ -33,6 +74,14 @@ const DomainsVerify = () => {
           title="Verify domain"
           description="Use the following details to verify your domain."
           icon={addIcon}
+          rightContent={
+            <Link
+              to={`/organizations/${orgId}/settings`}
+              className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
+            >
+              Back to Settings
+            </Link>
+          }
         />
       </div>
       <div>
@@ -44,7 +93,13 @@ const DomainsVerify = () => {
           label="Use this code for the value of the TXT record"
           value={domain?.record_value}
         />
-        <Button isBlackButton={true}>Verify</Button>
+        <Button
+          isBlackButton={true}
+          onClick={checkVerification}
+          disabled={isVerifyDomainLoading}
+        >
+          Verify
+        </Button>
       </div>
     </div>
   );

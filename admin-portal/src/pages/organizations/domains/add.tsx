@@ -94,12 +94,20 @@ const DomainsAdd = () => {
         description="Add a new domain to this organization."
         icon={addIcon}
         rightContent={
-          <Link
-            to={`/organizations/${orgId}/details`}
-            className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
-          >
-            Cancel
-          </Link>
+          <div className="space-x-2">
+            <Link
+              to={`/organizations/${orgId}/details`}
+              className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
+            >
+              Details
+            </Link>
+            <Link
+              to={`/organizations/${orgId}/settings`}
+              className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
+            >
+              Settings
+            </Link>
+          </div>
         }
       />
       {org.domains && org.domains?.length > 0 && (

@@ -59,9 +59,9 @@ export default function OrganizationSettings() {
       />
       <FixedWidthMainContent>
         {/* Secondary menu */}
-        <SecondaryMainContentMenuArea>
+        {/* <SecondaryMainContentMenuArea>
           <SecondaryMainContentNav navigation={navigation} />
-        </SecondaryMainContentMenuArea>
+        </SecondaryMainContentMenuArea> */}
 
         {/* Primary content */}
         <PrimaryContentArea>

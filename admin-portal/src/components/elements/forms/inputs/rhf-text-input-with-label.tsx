@@ -13,14 +13,14 @@ type Props = {
   slug: string;
   label: string;
   register: UseFormRegister<FieldValues>;
-  registerArgs: {
+  registerArgs?: {
     [key: string]: any;
   };
   inputArgs?: DetailedHTMLProps<
     InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   >;
-  error: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined;
+  error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined;
 };
 
 const RHFFormTextInputWithLabel: FC<Props> = ({

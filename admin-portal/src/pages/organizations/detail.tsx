@@ -8,8 +8,6 @@ import TopHeader from "components/navs/top-header";
 import SectionHeader from "components/navs/section-header";
 import { Link, useParams } from "react-router-dom";
 import {
-  useCreatePortalLinkMutation,
-  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetIdpsQuery,
   useGetOrganizationByIdQuery,
   useGetOrganizationDomainsQuery,
@@ -34,13 +32,11 @@ import {
   PersonIcon,
   PlusIcon,
 } from "components/icons";
-import { keycloak } from "keycloak";
 import RoundedIcon from "components/elements/rounded-icon";
 import MemberRoles from "./components/member-roles";
 import MembersActionMenu from "./components/member-action-menu";
-import { useEffect, useState } from "react";
-import { KeycloakProfile } from "keycloak-js";
 import Breadcrumbs from "components/navs/breadcrumbs";
+import OpenSSOLink from "components/utils/ssoLink";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
@@ -83,28 +79,6 @@ export default function OrganizationDetail() {
       <MembersActionMenu member={member} orgId={orgId!} realm={apiRealm} />
     ),
   }));
-
-  const OpenSSOLink = async () => {
-    const link = `${keycloak.authServerUrl}realms/${
-      keycloak.realm
-    }/wizard/?org_id=${encodeURIComponent(org?.id!)}`;
-    window.open(link);
-
-    // const user = await keycloak.loadUserProfile();
-    // TODO: switch when method is ready
-    // try {
-    // const portalLink = await createPortalLink({
-    //   orgId: org?.id!,
-    //   realm: apiRealm,
-    //   body: {
-    //     userId: user.id,
-    //   },
-    // });
-    // window.open(portalLink);
-    // } catch (e) {
-    //   console.error(e);
-    // }
-  };
 
   return (
     <>
@@ -168,7 +142,10 @@ export default function OrganizationDetail() {
                 Setup SSO connections as necessary for this organization.
               </div>
               <div>
-                <Button isBlackButton onClick={OpenSSOLink}>
+                <Button
+                  isBlackButton
+                  onClick={() => OpenSSOLink({ orgId: orgId! })}
+                >
                   Setup SSO
                 </Button>
               </div>

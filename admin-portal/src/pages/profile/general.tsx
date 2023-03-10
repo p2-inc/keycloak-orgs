@@ -11,7 +11,7 @@ import {
   useGetAccountQuery,
   useUpdateAccountMutation,
 } from "store/apis/profile";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 interface FormFields {
   readonly username?: string;
@@ -77,11 +77,11 @@ const GeneralProfile = () => {
           description="Manage your user profile information."
         />
       </div>
-      <form className="space-y-4">
+      <form className="max-w-xl space-y-4">
         {featureFlags.updateEmailFeatureEnabled && (
           <FormTextInputWithLabel
             slug="email"
-            label={t('email')}
+            label={t("email")}
             inputArgs={{ value: data?.email }}
           />
         )}
@@ -95,8 +95,12 @@ const GeneralProfile = () => {
           label="Last Name"
           inputArgs={{ value: data?.lastName }}
         />
-        <Button isBlackButton onClick={handleSubmit}>Save</Button>
-        <Button onClick={handleCancel}>Cancel</Button>
+        <div className="space-x-2">
+          <Button isBlackButton onClick={handleSubmit}>
+            Save
+          </Button>
+          <Button onClick={handleCancel}>Cancel</Button>
+        </div>
       </form>
     </div>
   );

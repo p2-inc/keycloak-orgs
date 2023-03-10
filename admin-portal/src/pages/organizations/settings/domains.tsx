@@ -5,7 +5,7 @@ import Table, {
 } from "components/elements/table/table";
 import { PlusIcon } from "components/icons";
 import SectionHeader from "components/navs/section-header";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { apiRealm } from "store/apis/helpers";
 import { useGetOrganizationDomainsQuery } from "store/apis/orgs";
 
@@ -22,7 +22,6 @@ const SettingsDomain = () => {
     realm: apiRealm,
     orgId: orgId!,
   });
-  console.log("🚀 ~ file: domains.tsx:21 ~ SettingsDomain ~ domains:", domains);
 
   const rows: TableRows = domains.map((domain) => ({
     ...domain,
@@ -54,18 +53,20 @@ const SettingsDomain = () => {
     <div className="space-y-4">
       <div>
         <SectionHeader
-          title="Domain Settings"
-          description="One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin."
+          title="Domains"
+          description="View linked domains and verify DNS entries."
         />
       </div>
       <div>
-        <Button isBlackButton={true}>
-          <PlusIcon
-            aria-hidden="true"
-            className="-ml-1 mr-2 h-5 w-5 fill-current"
-          />
-          Add new domain
-        </Button>
+        <Link to={`/organizations/${orgId}/domains/add`}>
+          <Button isBlackButton={true}>
+            <PlusIcon
+              aria-hidden="true"
+              className="-ml-1 mr-2 h-5 w-5 fill-current"
+            />
+            Add new domain
+          </Button>
+        </Link>
       </div>
       {/* TODO: add loading state */}
       {!isLoading && (

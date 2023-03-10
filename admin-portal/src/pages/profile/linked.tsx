@@ -11,6 +11,8 @@ import Table, {
   TableColumns,
   TableRows,
 } from "components/elements/table/table";
+
+// TODO: Scope this down to a specific set of icons and not import the whole set
 import * as icons from "lucide-react";
 
 const LinkedProfile = () => {
@@ -24,7 +26,7 @@ const LinkedProfile = () => {
       realm: apiRealm,
       providerId: account.providerName!,
     }).then(() => {
-      //refresh accoutns? automatic?
+      //refresh accounts? automatic?
       //ContentAlert.
     });
   };
@@ -47,7 +49,7 @@ const LinkedProfile = () => {
     if (account.social) {
       return (
         <>
-          <label className="rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700 inline-block items-center space-x-2">
+          <label className="inline-block items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700">
             Social login
           </label>
         </>
@@ -55,7 +57,7 @@ const LinkedProfile = () => {
     }
     return (
       <>
-        <label className="rounded border border-green-700/30 bg-green-700/10 px-3 py-1 text-xs font-medium text-green-700 inline-block items-center space-x-2">
+        <label className="inline-block items-center space-x-2 rounded border border-green-700/30 bg-green-700/10 px-3 py-1 text-xs font-medium text-green-700">
           System defined
         </label>
       </>
@@ -64,11 +66,11 @@ const LinkedProfile = () => {
 
   const icon = (account: LinkedAccountRepresentation): React.ReactNode => {
     const k = Object.keys(icons);
-    const f = k.find(t => t.toLowerCase() === account.providerAlias?.toLowerCase());
-    const LucideIcon = icons[f || "Key"];
-    return (
-      <LucideIcon />
+    const f = k.find(
+      (t) => t.toLowerCase() === account.providerAlias?.toLowerCase()
     );
+    const LucideIcon = icons[f || "Key"];
+    return <LucideIcon />;
   };
 
   const linkedColumns: TableColumns = [
