@@ -12,6 +12,7 @@ import {
   useUpdateAccountMutation,
 } from "store/apis/profile";
 import { useTranslation } from "react-i18next";
+import GeneralLoader from "components/loaders/general";
 
 interface FormFields {
   readonly username?: string;
@@ -31,7 +32,7 @@ const GeneralProfile = () => {
   const { keycloak, initialized } = useKeycloak();
   const [state, setState] = useState<AccountPageState | undefined>(undefined);
   const { featureFlags } = useFeatureFlags();
-  const { data, error } = useGetAccountQuery({
+  const { data, error, isLoading } = useGetAccountQuery({
     userProfileMetadata: true,
     realm: apiRealm,
   });
@@ -77,31 +78,34 @@ const GeneralProfile = () => {
           description="Manage your user profile information."
         />
       </div>
-      <form className="max-w-xl space-y-4">
-        {featureFlags.updateEmailFeatureEnabled && (
+      {isLoading && <GeneralLoader />}
+      {!isLoading && (
+        <form className="max-w-xl space-y-4">
+          {featureFlags.updateEmailFeatureEnabled && (
+            <FormTextInputWithLabel
+              slug="email"
+              label={t("email")}
+              inputArgs={{ value: data?.email }}
+            />
+          )}
           <FormTextInputWithLabel
-            slug="email"
-            label={t("email")}
-            inputArgs={{ value: data?.email }}
+            slug="firstName"
+            label="First Name"
+            inputArgs={{ value: data?.firstName }}
           />
-        )}
-        <FormTextInputWithLabel
-          slug="firstName"
-          label="First Name"
-          inputArgs={{ value: data?.firstName }}
-        />
-        <FormTextInputWithLabel
-          slug="lastName"
-          label="Last Name"
-          inputArgs={{ value: data?.lastName }}
-        />
-        <div className="space-x-2">
-          <Button isBlackButton onClick={handleSubmit}>
-            Save
-          </Button>
-          <Button onClick={handleCancel}>Cancel</Button>
-        </div>
-      </form>
+          <FormTextInputWithLabel
+            slug="lastName"
+            label="Last Name"
+            inputArgs={{ value: data?.lastName }}
+          />
+          <div className="space-x-2">
+            <Button isBlackButton onClick={handleSubmit}>
+              Save
+            </Button>
+            <Button onClick={handleCancel}>Cancel</Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 };

@@ -4,14 +4,14 @@ import SectionHeader from "components/navs/section-header";
 
 const SigninProfile = () => {
   return (
-    <div>
-      <div className="mb-12">
+    <div className="space-y-12">
+      <div>
         <SectionHeader
           title="Signing in"
           description="Configure ways to sign in."
         />
       </div>
-      <div className="space-y-12">
+      <div>
         <div className="space-y-5">
           <SectionHeader
             title="Basic authentication"
@@ -25,7 +25,7 @@ const SigninProfile = () => {
           {/* <Table /> */}
         </div>
       </div>
-      <div className="space-y-12">
+      <div>
         <div className="space-y-5">
           <SectionHeader
             title="Two-factor authentication"
@@ -45,7 +45,7 @@ const SigninProfile = () => {
           {/* <Table /> */}
         </div>
       </div>
-      <div className="space-y-12">
+      <div>
         <div className="space-y-5">
           <SectionHeader
             title="Passwordless"

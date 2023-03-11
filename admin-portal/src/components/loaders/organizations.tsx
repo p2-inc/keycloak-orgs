@@ -7,6 +7,7 @@ const OrganizationsLoader: React.FC = ({}) => {
         "col-span-1 flex flex-col rounded-md border border-gray-200 bg-gray-50",
         "px-10 py-9",
         "space-y-6",
+        "min-h-[179px]"
       )}
     >
       <div className="space-y-2 animate-pulse">

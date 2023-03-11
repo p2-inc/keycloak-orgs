@@ -22,7 +22,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
       <div className="flex flex-shrink-0 h-full">
         <div
           className={cs(
-            "flex w-[70px] flex-col transition-[width] duration-150 ease-in-out",
+            "flex w-[70px] flex-col transition-[width] duration-150 ease-in-out border-r border-r-gray-100",
             {
               "w-64": !menuCollapsed,
             }
