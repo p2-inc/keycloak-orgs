@@ -14,7 +14,7 @@ import Table, {
 import * as icons from "components/icons/providers";
 
 const LinkedProfile = () => {
-  const { data: accounts = [] } = useGetLinkedAccountsQuery({
+  const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
     realm: apiRealm,
   });
   const [deleteAccount, { isSuccess }] = useDeleteLinkedProviderMutation();
@@ -136,11 +136,11 @@ const LinkedProfile = () => {
       <div className="space-y-8">
         <div className="space-y-4">
           <SectionHeader title="Linked login providers" variant="medium" />
-          <Table columns={linkedColumns} rows={linkedRows} />
+          <Table columns={linkedColumns} rows={linkedRows} isLoading={isLoading} />
         </div>
         <div className="space-y-4">
           <SectionHeader title="Unlinked login providers" variant="medium" />
-          <Table columns={unlinkedColumns} rows={unlinkedRows} />
+          <Table columns={unlinkedColumns} rows={unlinkedRows} isLoading={isLoading} />
         </div>
       </div>
     </div>

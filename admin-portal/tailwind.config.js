@@ -16,13 +16,13 @@ module.exports = {
           900: "#252627",
         },
         p2grad: {
-          100: "#A0BDEC",
+          100: "#739FE5",
           200: "#295398",
         },
       },
       dropShadow: {
-        "btn-dark": "0px 1px 10px rgba(11, 25, 35, 0.4)",
-        "btn-light": "0px 1px 10px rgba(11, 25, 35, 0.1)",
+        "btn-dark": "0px 1px 8px rgba(11, 25, 35, 0.4)",
+        "btn-light": "0px 1px 8px rgba(11, 25, 35, 0.1)",
       },
     },
   },

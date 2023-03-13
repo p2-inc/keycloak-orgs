@@ -197,6 +197,7 @@ const ActivityProfile = () => {
                                 session,
                               });
                             }}
+                            isCompact
                           >
                             Sign out session
                           </Button>

@@ -21,11 +21,11 @@ const CopyBlock: FC<Props> = ({ label, value }) => {
   };
 
   return (
-    <div className="items-center justify-between space-x-2 border-t border-t-gray-200 py-4 pt-6 md:flex">
+    <div className="space-x-2 border-t border-t-gray-200 py-4 pt-6">
       <div>
         <div className="text-sm font-semibold">{label}</div>
-        <div className="flex items-center space-x-2">
-          <div className="overflow-x-hidden text-ellipsis py-2 text-xl font-medium">
+        <div className="flex items-center space-x-2 justify-between">
+          <div className="overflow-x-auto py-2 text-xl font-medium">
             {value}
           </div>
           <Button onClick={() => copyToClipBoard(value)}>{copySuccess}</Button>

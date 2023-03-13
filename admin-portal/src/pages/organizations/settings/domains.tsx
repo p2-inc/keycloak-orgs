@@ -68,12 +68,9 @@ const SettingsDomain = () => {
           </Button>
         </Link>
       </div>
-      {/* TODO: add loading state */}
-      {!isLoading && (
-        <div>
-          <Table columns={columns} rows={rows} />
-        </div>
-      )}
+      <div>
+        <Table columns={columns} rows={rows} isLoading={isLoading} />
+      </div>
     </div>
   );
 };

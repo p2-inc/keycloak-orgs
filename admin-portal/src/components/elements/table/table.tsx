@@ -20,9 +20,40 @@ export type TableRows = {
 type Props = {
   columns: TableColumns;
   rows: TableRows;
+  isLoading?: boolean;
 };
 
-const Table: React.FC<Props> = ({ columns, rows }) => {
+const loadingState = (columns) => {
+  return (
+    <div className="overflow-auto rounded-md border border-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 bg-gray-50 text-sm font-medium text-black">
+        <thead className="animate-pulse">
+          <tr>
+            {columns.map(() => (
+              <th className="p-4">
+                <div className="h-4 w-1/4 rounded-md bg-gray-300"></div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="animate-pulse">
+          <tr>
+            {columns.map(() => (
+              <td className="p-4">
+                <div className="h-4 w-1/2 rounded-md bg-gray-300"></div>
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+const Table: React.FC<Props> = ({ columns, rows, isLoading }) => {
+  if (isLoading) {
+    return loadingState(columns);
+  }
   return (
     <div className="overflow-auto rounded-md border border-gray-200">
       <table className="min-w-full divide-y divide-gray-200 rounded-md  bg-gray-50 text-sm font-medium text-black">

@@ -30,7 +30,7 @@ const OrganizationItem: FC<Props> = ({
         "group block",
         "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
         {
-          "pb-1": viewType === ViewLayoutOptions.GRID,
+          "md:pb-3": viewType === ViewLayoutOptions.GRID,
         }
       )}
     >

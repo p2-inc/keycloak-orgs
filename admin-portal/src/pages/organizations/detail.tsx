@@ -44,7 +44,7 @@ export default function OrganizationDetail() {
     orgId: orgId!,
     realm: apiRealm,
   });
-  const { data: members = [] } = useGetOrganizationMembershipsQuery({
+  const { data: members = [], isLoading } = useGetOrganizationMembershipsQuery({
     orgId: orgId!,
     realm: apiRealm,
   });
@@ -198,8 +198,8 @@ export default function OrganizationDetail() {
               />
             }
           />
-          <div className="px-4 py-4 md:px-10 md:py-6">
-            <Table columns={columns} rows={rows} />
+          <div className="px-4 py-4 md:px-10 md:py-2">
+            <Table columns={columns} rows={rows} isLoading={isLoading} />
           </div>
         </section>
       </MainContentArea>
