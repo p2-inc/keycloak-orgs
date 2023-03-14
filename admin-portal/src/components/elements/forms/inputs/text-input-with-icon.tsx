@@ -13,7 +13,7 @@ type Props = {
 
 const FormTextInputWithIcon: FC<Props> = ({ inputArgs = {}, className }) => {
   return (
-    <div className={cs("relative rounded-md shadow-sm", className)}>
+    <div className={cs("relative rounded-md", className)}>
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
         <MagnifyingGlassIcon
           className="h-5 w-5 text-p2blue-900"

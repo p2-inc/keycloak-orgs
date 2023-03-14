@@ -42,7 +42,7 @@ const RHFFormTextInputWithLabel: FC<Props> = ({
           id={slug}
           className={cs(
             BasicFormClasses,
-            "block w-full rounded-md border-gray-300 shadow-sm focus:border-transparent focus:ring-[#134FC2] sm:text-sm",
+            "block w-full rounded-md border-gray-300 focus:border-transparent focus:ring-[#134FC2] sm:text-sm",
             {
               "border-pink-500 text-pink-600 focus:border-pink-500 focus:ring-pink-500":
                 error,

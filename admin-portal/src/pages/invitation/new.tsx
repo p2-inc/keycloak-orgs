@@ -13,6 +13,7 @@ import SquareBadge from "components/elements/badges/square-badge";
 import P2Toast from "components/utils/toast";
 import { Listbox } from "@headlessui/react";
 import { ChevronIcon } from "components/icons";
+import RoleBadge from "components/elements/badges/role-badge";
 
 export const defaultRoles = [
   "view-organization",
@@ -126,10 +127,8 @@ const NewInvitation = () => {
                       >
                         <div className="font-semibold">{role.name}</div>
                         <div className="flex flex-wrap">
-                          {role.items.map((ar) => (
-                            <SquareBadge className="mt-1 mr-1">
-                              {ar}
-                            </SquareBadge>
+                          {role.items.sort().map((ar) => (
+                            <RoleBadge name={ar} />
                           ))}
                         </div>
                       </Listbox.Option>

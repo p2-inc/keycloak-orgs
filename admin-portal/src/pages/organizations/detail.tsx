@@ -192,15 +192,17 @@ export default function OrganizationDetail() {
                 )}
               </>
             }
-            rightAreaItems={
+          />
+          <div className="px-4 pb-4 space-y-2 md:px-10 md:pb-40">
+            <div>
               <FormTextInputWithIcon
                 inputArgs={{ placeholder: "Search Members" }}
                 className="w-full md:w-auto"
               />
-            }
-          />
-          <div className="px-4 py-4 md:px-10 md:py-2">
-            <MembersTable rows={rows} isLoading={isLoading} />
+            </div>
+            <div>
+              <MembersTable rows={rows} isLoading={isLoading} />
+            </div>
           </div>
         </section>
       </MainContentArea>
