@@ -37,6 +37,7 @@ import MemberRoles from "./components/member-roles";
 import MembersActionMenu from "./components/member-action-menu";
 import Breadcrumbs from "components/navs/breadcrumbs";
 import OpenSSOLink from "components/utils/ssoLink";
+import MembersTable from "components/elements/table/members-table";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
@@ -178,7 +179,7 @@ export default function OrganizationDetail() {
       <MainContentArea>
         <section
           aria-labelledby="members-area"
-          className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto"
+          className="flex h-full min-w-0 flex-1 flex-col"
         >
           <HeaderLayout
             leftAreaItems={
@@ -199,7 +200,7 @@ export default function OrganizationDetail() {
             }
           />
           <div className="px-4 py-4 md:px-10 md:py-2">
-            <Table columns={columns} rows={rows} isLoading={isLoading} />
+            <MembersTable rows={rows} isLoading={isLoading} />
           </div>
         </section>
       </MainContentArea>
