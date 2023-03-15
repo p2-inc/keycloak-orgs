@@ -55,7 +55,7 @@ public class DomainsResource extends OrganizationAdminResource {
         .recordValue(getRecordValue(d.getDomain()));
   }
 
-  private static final String RECORD_KEY = "_phasetwo-domain-ownership";
+  private static final String RECORD_KEY = "_org-domain-ownership";
 
   private String getRecordKey(String domainName) {
     return String.format("%s.%s", RECORD_KEY, domainName);
