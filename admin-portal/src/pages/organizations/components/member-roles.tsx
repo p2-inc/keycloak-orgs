@@ -6,6 +6,8 @@ import {
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   UserRepresentation,
 } from "store/apis/orgs";
+import { roleSettings } from "services/role";
+import RoleBadge from "components/elements/badges/role-badge";
 
 type Props = {
   member: UserRepresentation;
@@ -14,29 +16,11 @@ type Props = {
 };
 
 type FilteredRoleProp = {
-  regexp: string;
+  regexp: RegExp;
   regexpName: string;
   regexpClassName: string;
   roles: Array<any>;
 };
-
-const prefixes = [
-  {
-    regexp: "^view-",
-    name: "view roles",
-    className: "bg-[#7CE0C3]",
-  },
-  {
-    regexp: "^manage-",
-    name: "manage roles",
-    className: "bg-[#C07CE0]",
-  },
-  {
-    regexp: "^(?!view-|manage-).*$",
-    name: "other roles",
-    className: "bg-gray-600",
-  },
-];
 
 const FilteredRole: React.FC<FilteredRoleProp> = ({
   regexp,
@@ -44,8 +28,7 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
   regexpClassName,
   roles,
 }) => {
-  const r = new RegExp(regexp);
-  const filtered = roles.filter((f) => r.test(f.name));
+  const filtered = roles.filter((f) => regexp.test(f.name));
   if (filtered.length > 0) {
     return (
       <Menu
@@ -62,14 +45,11 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
             </span>
           </div>
         </Menu.Button>
-        <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute right-0 z-10 w-60 p-4 mt-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           {filtered.map((filteredRole) => (
             <Menu.Item>
-              <div className="flex items-center space-x-2 px-2 py-1">
-                <span
-                  className={`inline-block h-2 w-2 rounded-full ${regexpClassName}`}
-                ></span>
-                <span className="inline-block">{filteredRole.name}</span>
+              <div>
+                <RoleBadge name={filteredRole.name} />
               </div>
             </Menu.Item>
           ))}
@@ -94,7 +74,7 @@ const MemberRoles: React.FC<Props> = ({ member, orgId, realm }) => {
       {isLoading && (
         <div className="h-[30px] w-32 animate-pulse rounded bg-gray-200 inline-block"></div>
       )}
-      {prefixes.map((f, key) => (
+      {roleSettings.map((f, key) => (
         <>
           {!isLoading && (
           <FilteredRole
