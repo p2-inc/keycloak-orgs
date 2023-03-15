@@ -3,6 +3,7 @@ import SectionHeader from "components/navs/section-header";
 import { apiRealm } from "store/apis/helpers";
 import { keycloakService } from "keycloak";
 import {
+  useBuildLinkingUriQuery,
   useGetLinkedAccountsQuery,
   useDeleteLinkedProviderMutation,
   LinkedAccountRepresentation,
@@ -30,9 +31,21 @@ const LinkedProfile = () => {
   };
 
   const linkAccount = (account: LinkedAccountRepresentation) => {
+    /*
+    const { data: accountLinkUri } = useBuildLinkingUriQuery({ 
+      realm: apiRealm,
+      providerId: account.providerAlias ?? "",
+      redirectUri: window.location.href,
+    })
+    console.log("uri", accountLinkUri?.accountLinkUri);
+    */
+   
     const url = "/linked-accounts/" + account.providerName;
 
     /*
+
+https://app.phasetwo.io/auth/realms/test/account/linked-accounts/google?providerId=google&redirectUri=https%253A%252F%252Fapp.phasetwo.io%252Fauth%252Frealms%252Ftest%252Faccount%252F%252F%2523%252Fsecurity%252Flinked-accounts
+
     const redirectUri: string = createRedirect(this.props.location.pathname);
 
     this.context!.doGet<{accountLinkUri: string}>(url, { params: {providerId: account.providerName, redirectUri}})

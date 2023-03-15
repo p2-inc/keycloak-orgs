@@ -1,8 +1,97 @@
 import Button from "components/elements/forms/buttons/button";
-import Table from "components/elements/table/table";
 import SectionHeader from "components/navs/section-header";
+import {
+  useGetCredentialsQuery,
+  useDeleteCredentialMutation,
+  useUpdateCredentialLabelMutation,
+  UserCredentialMetadataRepresentation,
+  CredentialRepresentation,
+  CredentialMetadataRepresentation,
+} from "store/apis/profile";
+import { apiRealm } from "store/apis/helpers";
+import Table, {
+  TableColumns,
+  TableRows,
+} from "components/elements/table/table";
+import TimeUtil from "services/time-util";
+import { t } from "i18next";
+
+type CredContainer = {
+  credential: CredentialRepresentation,
+  metadata: CredentialMetadataRepresentation
+};
+
+const time = (time: string | undefined): string => {
+  if (time === undefined) return "unknown";
+  let t: number = Number(time);
+  return TimeUtil.format(t * 1000);
+};
 
 const SigninProfile = () => {
+  const { data: credentials = [], isLoading } = useGetCredentialsQuery({
+    realm: apiRealm,
+  });
+  const [deleteCredential, { isSuccess }] = useDeleteCredentialMutation();
+
+  const removeCredential = (credential: CredentialMetadataRepresentation): void => {
+    if (credential === undefined) return;
+    deleteCredential({
+      realm: apiRealm,
+      credentialId: credential.id!,
+    }).then(() => {
+      //refresh accounts? automatic?
+      //ContentAlert.
+    });
+  };
+
+  const setUpCredential = (credentialType: string): void => {
+
+  };
+
+  const updateAIA = (updateAction: string): void => {
+
+  };
+
+  const cols: TableColumns = [
+    { key: "name", data: "Name" },
+    { key: "created", data: "Created" },
+    { key: "action", data: "", columnClasses: "flex justify-end" },
+  ];
+
+  const rowsForType = (credentialType: string, credentials: CredentialRepresentation[]): TableRows => {
+    const metadatas: UserCredentialMetadataRepresentation[] = [];
+    credentials
+    .filter((credential) => credential.type === credentialType)
+    .forEach((credential) => {
+      console.log("cred", credential);
+      if (credential.userCredentialMetadatas) {
+        metadatas.push(...credential.userCredentialMetadatas);
+      }
+    });
+    console.log("creds", credentialType, metadatas);
+    return metadatas
+    .map((metadata) => ({
+      name: metadata.credential?.userLabel,
+      created: time(metadata.credential?.createdDate),
+      action: (
+        <Button
+          isBlackButton
+          className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
+          onClick={() => {
+            if (credentialType === 'password') {
+              updateAIA("UPDATE_PASSWORD");
+            } else {
+              removeCredential(metadata.credential!);
+            }
+          }
+        }
+        >
+          Remove
+        </Button>
+      ),
+    }));
+  };
+  
   return (
     <div className="space-y-12">
       <div>
@@ -22,7 +111,7 @@ const SigninProfile = () => {
             description="Sign in by entering your password."
             variant="small"
           />
-          {/* <Table /> */}
+          <Table columns={cols} rows={rowsForType("password", credentials)} isLoading={isLoading} />
         </div>
       </div>
       <div>
@@ -36,13 +125,19 @@ const SigninProfile = () => {
             description="Enter a verification code from authenticator application."
             variant="small"
           />
-          {/* <Table /> */}
+          <Button onClick={() => setUpCredential("otp")}>
+            Set up authenticator application
+          </Button>
+          <Table columns={cols} rows={rowsForType("otp", credentials)} isLoading={isLoading} />
           <SectionHeader
             title="Security key"
             description="Use your security key to sign in."
             variant="small"
           />
-          {/* <Table /> */}
+          <Button onClick={() => setUpCredential("webauthn")}>
+            Set up security key
+          </Button>
+          <Table columns={cols} rows={rowsForType("webauthn", credentials)} isLoading={isLoading} />
         </div>
       </div>
       <div>
@@ -56,9 +151,10 @@ const SigninProfile = () => {
             description="Use your security key for passwordless sign in."
             variant="small"
           />
-          <div className="flex items-center justify-center rounded border border-gray-200 bg-gray-50 py-8">
-            <Button isBlackButton>Setup authenticator app</Button>
-          </div>
+          <Button onClick={() => setUpCredential("webauthn-passwordless")}>
+            Set up security key
+          </Button>
+          <Table columns={cols} rows={rowsForType("webauthn-passwordless", credentials)} isLoading={isLoading} />
         </div>
       </div>
     </div>
