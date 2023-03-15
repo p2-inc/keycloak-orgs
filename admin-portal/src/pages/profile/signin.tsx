@@ -14,7 +14,9 @@ import Table, {
   TableRows,
 } from "components/elements/table/table";
 import TimeUtil from "services/time-util";
+import { keycloakService } from "keycloak";
 import { t } from "i18next";
+import { AIACommand } from "services/aia-command";
 
 type CredContainer = {
   credential: CredentialRepresentation,
@@ -24,7 +26,7 @@ type CredContainer = {
 const time = (time: string | undefined): string => {
   if (time === undefined) return "unknown";
   let t: number = Number(time);
-  return TimeUtil.format(t * 1000);
+  return TimeUtil.format(t);
 };
 
 const SigninProfile = () => {
@@ -44,12 +46,12 @@ const SigninProfile = () => {
     });
   };
 
-  const setUpCredential = (credentialType: string): void => {
-
+  const setUpCredential = (action: string): void => {
+    updateAIA(action);
   };
 
-  const updateAIA = (updateAction: string): void => {
-
+  const updateAIA = (action: string): void => {
+    new AIACommand(keycloakService, action).execute();
   };
 
   const cols: TableColumns = [
@@ -63,15 +65,13 @@ const SigninProfile = () => {
     credentials
     .filter((credential) => credential.type === credentialType)
     .forEach((credential) => {
-      console.log("cred", credential);
       if (credential.userCredentialMetadatas) {
         metadatas.push(...credential.userCredentialMetadatas);
       }
     });
-    console.log("creds", credentialType, metadatas);
     return metadatas
     .map((metadata) => ({
-      name: metadata.credential?.userLabel,
+      name: metadata.credential?.userLabel ?? credentialType,
       created: time(metadata.credential?.createdDate),
       action: (
         <Button
@@ -125,7 +125,7 @@ const SigninProfile = () => {
             description="Enter a verification code from authenticator application."
             variant="small"
           />
-          <Button onClick={() => setUpCredential("otp")}>
+          <Button onClick={() => setUpCredential("CONFIGURE_TOTP")}>
             Set up authenticator application
           </Button>
           <Table columns={cols} rows={rowsForType("otp", credentials)} isLoading={isLoading} />
@@ -134,7 +134,7 @@ const SigninProfile = () => {
             description="Use your security key to sign in."
             variant="small"
           />
-          <Button onClick={() => setUpCredential("webauthn")}>
+          <Button onClick={() => setUpCredential("webauthn-register")}>
             Set up security key
           </Button>
           <Table columns={cols} rows={rowsForType("webauthn", credentials)} isLoading={isLoading} />
@@ -151,7 +151,7 @@ const SigninProfile = () => {
             description="Use your security key for passwordless sign in."
             variant="small"
           />
-          <Button onClick={() => setUpCredential("webauthn-passwordless")}>
+          <Button onClick={() => setUpCredential("webauthn-register-passwordless")}>
             Set up security key
           </Button>
           <Table columns={cols} rows={rowsForType("webauthn-passwordless", credentials)} isLoading={isLoading} />
