@@ -1,13 +1,16 @@
+import { Menu, Popover } from "@headlessui/react";
 import cs from "classnames";
+import Button from "components/elements/forms/buttons/button";
+import { ExternalLink } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import { ChevronIcon, DoubleSlashBrandIcon, FullBrandIcon } from "../icons";
-import { NavigationItem, User } from "../layouts/layout";
+import { NavigationItem, UserInfo } from "../layouts/layout";
 
 type Props = {
   menuCollapsed: boolean;
   setMenuCollapsed: (collapsed: boolean) => void;
   navigation: NavigationItem[];
-  user: User;
+  user: UserInfo;
 };
 
 const DesktopSidebarNav: React.FC<Props> = ({
@@ -19,16 +22,16 @@ const DesktopSidebarNav: React.FC<Props> = ({
   return (
     <>
       {/* If using a mobile view: <div className="hidden lg:flex lg:flex-shrink-0"> */}
-      <div className="flex flex-shrink-0 h-full">
+      <div className="flex h-full flex-shrink-0">
         <div
           className={cs(
-            "flex w-[70px] flex-col transition-[width] duration-150 ease-in-out border-r border-r-gray-100",
+            "flex w-[70px] flex-col border-r border-r-gray-100 transition-[width] duration-150 ease-in-out",
             {
               "w-64": !menuCollapsed,
             }
           )}
         >
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-gray-50">
+          <div className="flex min-h-0 flex-1 flex-col bg-gray-50">
             <div className="flex-1">
               {menuCollapsed ? (
                 <div
@@ -75,8 +78,9 @@ const DesktopSidebarNav: React.FC<Props> = ({
                       }
                     >
                       <item.icon
-                        className={cs("h-[18] w-[18]", item.iconClass)}
-                        aria-hidden="true"
+                        className="h-5 w-5"
+                        // className={cs("h-[18] w-[18]", item.iconClass)}
+                        // aria-hidden="true"
                       />
                       <span className="sr-only">{item.name}</span>
                       {!menuCollapsed && (
@@ -88,26 +92,41 @@ const DesktopSidebarNav: React.FC<Props> = ({
               </nav>
             </div>
             <div
-              className={cs("flex pb-5", {
-                "flex-shrink-0": menuCollapsed,
+              className={cs("p-5", {
+                "flex flex-shrink-0 justify-center": menuCollapsed,
+                "": !menuCollapsed,
               })}
             >
-              <Link
-                to="#"
-                className={cs("flex  font-semibold", {
-                  "items-center px-6": !menuCollapsed,
-                  "w-full flex-shrink-0": menuCollapsed,
-                })}
-              >
-                <div className="mx-auto block grid h-8 w-8 place-items-center rounded-full bg-white text-sm">
-                  {user.name.substring(0, 1)}
-                </div>
-                {!menuCollapsed && <p className="ml-2 text-sm">{user.name}</p>}
-                <div className="sr-only">
-                  <p>{user.name}</p>
-                  <p>Account settings</p>
-                </div>
-              </Link>
+              <Popover className="relative">
+                <Popover.Button className="outline-none">
+                  <div className="flex items-center">
+                    <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm font-semibold">
+                      {user.name.substring(0, 1)}
+                    </div>
+                    {!menuCollapsed && (
+                      <p className="ml-2 text-sm font-semibold">{user.name}</p>
+                    )}
+                  </div>
+                </Popover.Button>
+                <Popover.Panel className="absolute bottom-10 left-0 z-[100] w-72 divide-y bg-white px-5 shadow-lg">
+                  <div className="py-5">
+                    <div className="font-semibold">{user.name}</div>
+                    <div className="text-sm text-gray-500">{user.email}</div>
+                  </div>
+                  <div className="py-1">
+                    <Link
+                      to=""
+                      className="group -mx-3 flex items-center rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 justify-between"
+                    >
+                      <div>Return to homepage</div>
+                      <ExternalLink className="w-4 h-4" />
+                    </Link>
+                  </div>
+                  <div className="py-5">
+                    <Button className="w-full">Log Out</Button>
+                  </div>
+                </Popover.Panel>
+              </Popover>
             </div>
           </div>
         </div>

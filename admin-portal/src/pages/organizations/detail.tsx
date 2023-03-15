@@ -26,18 +26,13 @@ import OrganizationActionCard, {
 } from "components/elements/organizations/action-card";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import Stat from "components/elements/cards/stat";
-import {
-  BuildingIcon,
-  GlobeIcon,
-  PersonIcon,
-  PlusIcon,
-} from "components/icons";
 import RoundedIcon from "components/elements/rounded-icon";
 import MemberRoles from "./components/member-roles";
 import MembersActionMenu from "./components/member-action-menu";
 import Breadcrumbs from "components/navs/breadcrumbs";
 import OpenSSOLink from "components/utils/ssoLink";
 import MembersTable from "components/elements/table/members-table";
+import { Building, Globe, Network, Plus, User } from "lucide-react";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
@@ -107,24 +102,18 @@ export default function OrganizationDetail() {
             <OrganizationActionCard>
               <OACTopRow>
                 <RoundedIcon>
-                  <PersonIcon
-                    className={cs("h-[18] w-[18] stroke-current")}
-                    aria-hidden="true"
-                  />
+                  <User className="w-5 h-5" />
                 </RoundedIcon>
                 <Stat label="members" value={members.length}></Stat>
                 <Stat label="pending" value={invites.length}></Stat>
               </OACTopRow>
-              <div>
+              <div className="text-sm text-gray-600 leading-relaxed">
                 Invite new members or remove members from the organization.
               </div>
               <div>
                 <Link to={`/organizations/${orgId}/invitation/new`}>
                   <Button isBlackButton>
-                    <PlusIcon
-                      className={ButtonIconLeftClasses}
-                      aria-hidden="true"
-                    />
+                    <Plus className="w-5 mr-2" />
                     Invite new members
                   </Button>
                 </Link>
@@ -135,11 +124,11 @@ export default function OrganizationDetail() {
             <OrganizationActionCard>
               <OACTopRow>
                 <RoundedIcon>
-                  <BuildingIcon />
+                  <Network className="w-5 h-5" />
                 </RoundedIcon>
                 <Stat label="active SSO connections" value={idps.length}></Stat>
               </OACTopRow>
-              <div>
+              <div className="text-sm text-gray-600 leading-relaxed">
                 Setup SSO connections as necessary for this organization.
               </div>
               <div>
@@ -156,12 +145,12 @@ export default function OrganizationDetail() {
             <OrganizationActionCard>
               <OACTopRow>
                 <RoundedIcon>
-                  <GlobeIcon />
+                  <Globe className="w-5 h-5" />
                 </RoundedIcon>
                 <Stat label="Domains" value={domains.length}></Stat>
                 <Stat label="Pending" value={verifiedDomains}></Stat>
               </OACTopRow>
-              <div>
+              <div className="text-sm text-gray-600 leading-relaxed">
                 Setup associated domains and verify them to ensure full
                 security.
               </div>

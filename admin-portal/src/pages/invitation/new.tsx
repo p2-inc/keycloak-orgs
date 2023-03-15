@@ -14,6 +14,7 @@ import P2Toast from "components/utils/toast";
 import { Listbox } from "@headlessui/react";
 import { ChevronIcon } from "components/icons";
 import RoleBadge from "components/elements/badges/role-badge";
+import { User } from "lucide-react";
 
 export const defaultRoles = [
   "view-organization",
@@ -36,7 +37,7 @@ const loadingIcon = (
     <div className={cs("relative h-12 w-12 overflow-hidden rounded-md")}>
       <div className="absolute -inset-10 z-10 bg-gradient-to-tr from-[#C7DFF0] to-[#1476B7]"></div>
       <div className="absolute inset-[2px] z-20 flex items-center justify-center rounded bg-white">
-        <UserIcon className="h-5 w-5"></UserIcon>
+        <User />
       </div>
     </div>
   </div>

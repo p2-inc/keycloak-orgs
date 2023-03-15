@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import DesktopSidebarNav from "../navs/desktop-sidebar-nav";
 import { IconType, PeopleIcon, PersonIcon } from "../icons";
+import { Building2, User, Users } from "lucide-react";
 
-export type User = {
+export type UserInfo = {
   name: string;
   email: string;
 };
@@ -23,13 +24,13 @@ const navigation: NavigationItem[] = [
   {
     name: "Profile",
     href: "/profile",
-    icon: PersonIcon,
+    icon: User,
     iconClass: "stroke-current",
   },
   {
     name: "Organizations",
     href: "/organizations",
-    icon: PeopleIcon,
+    icon: Building2,
     iconClass: "fill-current",
   },
 ];

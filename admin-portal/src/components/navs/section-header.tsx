@@ -19,8 +19,7 @@ const SectionHeader: FC<Props> = ({
   return (
     <div
       className={cs({
-        "space-y-2": variant === "large",
-        "space-y-1": variant === "medium",
+        "space-y-1": variant === "large" || variant === "medium",
         "space-y-0": variant === "small"
       })}
     >
@@ -40,7 +39,7 @@ const SectionHeader: FC<Props> = ({
         {title}
       </h2>
       {description && (
-        <p className="max-w-prose text-base text-p2gray-900/80">
+        <p className="max-w-prose text-base text-gray-600">
           {description}
         </p>
       )}
