@@ -17,6 +17,7 @@ import TimeUtil from "services/time-util";
 import { keycloakService } from "keycloak";
 import { t } from "i18next";
 import { AIACommand } from "services/aia-command";
+import P2Toast from "components/utils/toast";
 
 type CredContainer = {
   credential: CredentialRepresentation,
@@ -41,10 +42,17 @@ const SigninProfile = () => {
       realm: apiRealm,
       credentialId: credential.id!,
     }).then(() => {
-      //refresh accounts? automatic?
-      //ContentAlert.
-    });
-  };
+      P2Toast({
+        success: true,
+        title: `${credential.userLabel ?? ""} removed.`,
+      });
+    }).catch((e) => {
+      P2Toast({
+        error: true,
+        title: `Error removing ${credential.userLabel ?? ""} . Please try again.`,
+      });
+      console.error(e);
+    });  };
 
   const setUpCredential = (action: string): void => {
     updateAIA(action);
@@ -103,7 +111,7 @@ const SigninProfile = () => {
       <div>
         <div className="space-y-5">
           <SectionHeader
-            title="Basic authentication"
+            title={t("basic-authentication")}
             variant="medium"
           />
           <SectionHeader
