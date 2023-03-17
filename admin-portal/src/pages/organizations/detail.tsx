@@ -1,8 +1,5 @@
-import cs from "classnames";
 import { apiRealm } from "store/apis/helpers";
-import Button, {
-  ButtonIconLeftClasses,
-} from "components/elements/forms/buttons/button";
+import Button from "components/elements/forms/buttons/button";
 import MainContentArea from "components/layouts/main-content-area";
 import TopHeader from "components/navs/top-header";
 import SectionHeader from "components/navs/section-header";
@@ -17,10 +14,7 @@ import {
 import RoundBadge from "components/elements/badges/round-badge";
 import FormTextInputWithIcon from "components/elements/forms/inputs/text-input-with-icon";
 import HeaderLayout from "components/navs/components/header-layout";
-import Table, {
-  TableColumns,
-  TableRows,
-} from "components/elements/table/table";
+import { TableRows } from "components/elements/table/table";
 import OrganizationActionCard, {
   OACTopRow,
 } from "components/elements/organizations/action-card";
@@ -32,7 +26,7 @@ import MembersActionMenu from "./components/member-action-menu";
 import Breadcrumbs from "components/navs/breadcrumbs";
 import OpenSSOLink from "components/utils/ssoLink";
 import MembersTable from "components/elements/table/members-table";
-import { Building, Globe, Network, Plus, User } from "lucide-react";
+import { Globe, Network, Plus, User } from "lucide-react";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
@@ -61,20 +55,16 @@ export default function OrganizationDetail() {
 
   // const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
 
-  const columns: TableColumns = [
-    { key: "name", data: "Name" },
-    { key: "email", data: "Email" },
-    { key: "roles", data: "Roles" },
-    { key: "action", data: "" },
-  ];
-  const rows: TableRows = members.map((member) => ({
-    email: member.email,
-    name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
-    roles: <MemberRoles member={member} orgId={orgId!} realm={apiRealm} />,
-    action: (
-      <MembersActionMenu member={member} orgId={orgId!} realm={apiRealm} />
-    ),
-  }));
+  const rows: TableRows = members
+    .filter((member) => !member.email?.startsWith("org-admin"))
+    .map((member) => ({
+      email: member.email,
+      name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
+      roles: <MemberRoles member={member} orgId={orgId!} realm={apiRealm} />,
+      action: (
+        <MembersActionMenu member={member} orgId={orgId!} realm={apiRealm} />
+      ),
+    }));
 
   return (
     <>
@@ -102,18 +92,18 @@ export default function OrganizationDetail() {
             <OrganizationActionCard>
               <OACTopRow>
                 <RoundedIcon>
-                  <User className="w-5 h-5" />
+                  <User className="h-5 w-5" />
                 </RoundedIcon>
                 <Stat label="members" value={members.length}></Stat>
                 <Stat label="pending" value={invites.length}></Stat>
               </OACTopRow>
-              <div className="text-sm text-gray-600 leading-relaxed">
+              <div className="text-sm leading-relaxed text-gray-600">
                 Invite new members or remove members from the organization.
               </div>
               <div>
                 <Link to={`/organizations/${orgId}/invitation/new`}>
                   <Button isBlackButton>
-                    <Plus className="w-5 mr-2" />
+                    <Plus className="mr-2 w-5" />
                     Invite new members
                   </Button>
                 </Link>
@@ -124,11 +114,11 @@ export default function OrganizationDetail() {
             <OrganizationActionCard>
               <OACTopRow>
                 <RoundedIcon>
-                  <Network className="w-5 h-5" />
+                  <Network className="h-5 w-5" />
                 </RoundedIcon>
                 <Stat label="active SSO connections" value={idps.length}></Stat>
               </OACTopRow>
-              <div className="text-sm text-gray-600 leading-relaxed">
+              <div className="text-sm leading-relaxed text-gray-600">
                 Setup SSO connections as necessary for this organization.
               </div>
               <div>
@@ -145,12 +135,12 @@ export default function OrganizationDetail() {
             <OrganizationActionCard>
               <OACTopRow>
                 <RoundedIcon>
-                  <Globe className="w-5 h-5" />
+                  <Globe className="h-5 w-5" />
                 </RoundedIcon>
                 <Stat label="Domains" value={domains.length}></Stat>
                 <Stat label="Pending" value={verifiedDomains}></Stat>
               </OACTopRow>
-              <div className="text-sm text-gray-600 leading-relaxed">
+              <div className="text-sm leading-relaxed text-gray-600">
                 Setup associated domains and verify them to ensure full
                 security.
               </div>
@@ -182,7 +172,7 @@ export default function OrganizationDetail() {
               </>
             }
           />
-          <div className="px-4 pb-4 space-y-2 md:px-10 md:pb-40">
+          <div className="space-y-2 px-4 pb-4 md:px-10 md:pb-40">
             <div>
               <FormTextInputWithIcon
                 inputArgs={{ placeholder: "Search Members" }}

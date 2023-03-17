@@ -1,4 +1,5 @@
 {
   "plugins": ["prettier-plugin-tailwindcss"],
-  "pluginSearchDirs": false
+  "pluginSearchDirs": false,
+  "organizeImportsSkipDestructiveCodeActions": true
 }

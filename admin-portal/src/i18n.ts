@@ -17,7 +17,7 @@ i18n
       escapeValue: false,
     },
     backend: {
-      loadPath: joinPath('./', "locales/{{lng}}/{{ns}}.json"),
+      loadPath: joinPath("./", "locales/{{lng}}/{{ns}}.json"),
     },
   });
 

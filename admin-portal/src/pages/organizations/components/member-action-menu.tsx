@@ -60,10 +60,13 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
         isLoading={isLoading}
       />
 
-      <Menu as="div" className="relative text-left inline-block w-full md:w-auto">
-        <div className="h-[40px] flex items-center">
+      <Menu
+        as="div"
+        className="relative inline-block w-full text-left md:w-auto"
+      >
+        <div className="flex h-[40px] items-center">
           <Menu.Button className="w-full">
-            <div className="flex justify-center items-center space-x-2 rounded border border-gray-200 md:border-transparent py-1 px-4 md:px-1 text-sm hover:border-gray-800 transition w-full">
+            <div className="flex w-full items-center justify-center space-x-2 rounded border border-gray-200 py-1 px-4 text-sm transition hover:border-gray-800 md:border-transparent md:px-1">
               <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
               <span className="md:hidden">Open options</span>
             </div>

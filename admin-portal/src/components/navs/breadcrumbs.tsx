@@ -14,7 +14,7 @@ const Breadcrumbs: FC<Props> = ({ items }) => {
   return (
     <div className="flex">
       {items.map((item) => (
-        <div className="flex space-x-3 mr-3 items-center">
+        <div className="mr-3 flex items-center space-x-3">
           <Link
             to={item.link}
             className="-ml-3 -mr-3 rounded-lg px-3 py-1 font-medium transition hover:bg-gray-100 md:text-xl"

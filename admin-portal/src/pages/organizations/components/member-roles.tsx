@@ -45,7 +45,7 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
             </span>
           </div>
         </Menu.Button>
-        <Menu.Items className="absolute right-0 z-10 w-60 p-4 mt-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute right-0 z-10 mt-2 w-60 origin-top-right rounded-md bg-white p-4 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           {filtered.map((filteredRole) => (
             <Menu.Item>
               <div>
@@ -72,17 +72,18 @@ const MemberRoles: React.FC<Props> = ({ member, orgId, realm }) => {
   return (
     <>
       {isLoading && (
-        <div className="h-[30px] w-32 animate-pulse rounded bg-gray-200 inline-block"></div>
+        <div className="inline-block h-[30px] w-32 animate-pulse rounded bg-gray-200"></div>
       )}
       {roleSettings.map((f, key) => (
         <>
           {!isLoading && (
-          <FilteredRole
-            regexp={f.regexp}
-            regexpName={f.name}
-            roles={roles}
-            regexpClassName={f.className}
-          />)}
+            <FilteredRole
+              regexp={f.regexp}
+              regexpName={f.name}
+              roles={roles}
+              regexpClassName={f.className}
+            />
+          )}
         </>
       ))}
     </>

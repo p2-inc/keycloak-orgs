@@ -116,10 +116,10 @@ const DesktopSidebarNav: React.FC<Props> = ({
                   <div className="py-1">
                     <Link
                       to=""
-                      className="group -mx-3 flex items-center rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 justify-between"
+                      className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900"
                     >
                       <div>Return to homepage</div>
-                      <ExternalLink className="w-4 h-4" />
+                      <ExternalLink className="h-4 w-4" />
                     </Link>
                   </div>
                   <div className="py-5">
