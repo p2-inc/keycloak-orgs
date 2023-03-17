@@ -1,7 +1,6 @@
 import Button from "components/elements/forms/buttons/button";
 import SectionHeader from "components/navs/section-header";
 import { apiRealm } from "store/apis/helpers";
-import { keycloakService } from "keycloak";
 import {
   useBuildLinkingUriQuery,
   useGetLinkedAccountsQuery,
@@ -9,7 +8,6 @@ import {
   LinkedAccountRepresentation,
   BuildLinkingUriApiArg,
 } from "store/apis/profile";
-import { store } from "store";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
 import { useState, useEffect } from "react";
 import Table, {
@@ -23,7 +21,7 @@ const LinkedProfile = () => {
   const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
     realm: apiRealm,
   });
-  const [deleteAccount, { isSuccess }] = useDeleteLinkedProviderMutation();
+  const [deleteAccount] = useDeleteLinkedProviderMutation();
   const [buildLinkState, setBuildLinkState] = useState<
     typeof skipToken | BuildLinkingUriApiArg
   >(skipToken);
@@ -45,7 +43,6 @@ const LinkedProfile = () => {
           error: true,
           title: `Error during unlinking from ${account.providerName} . Please try again.`,
         });
-        console.error(e);
       });
   };
 
@@ -67,19 +64,15 @@ const LinkedProfile = () => {
   const label = (account: LinkedAccountRepresentation): React.ReactNode => {
     if (account.social) {
       return (
-        <>
-          <label className="inline-block items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700">
-            Social login
-          </label>
-        </>
+        <label className="inline-block items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700">
+          Social login
+        </label>
       );
     }
     return (
-      <>
-        <label className="inline-block items-center space-x-2 rounded border border-green-700/30 bg-green-700/10 px-3 py-1 text-xs font-medium text-green-700">
-          System defined
-        </label>
-      </>
+      <label className="inline-block items-center space-x-2 rounded border border-green-700/30 bg-green-700/10 px-3 py-1 text-xs font-medium text-green-700">
+        System defined
+      </label>
     );
   };
 

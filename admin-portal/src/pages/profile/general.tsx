@@ -1,73 +1,65 @@
-import React, { useState } from "react";
+import { useEffect } from "react";
 import Button from "components/elements/forms/buttons/button";
-import FormTextInputWithLabel from "components/elements/forms/inputs/text-input-with-label";
 import SectionHeader from "components/navs/section-header";
-import { AIACommand } from "services/aia-command";
-import { KeycloakService } from "services/keycloak.service";
 import { apiRealm } from "store/apis/helpers";
-import { useKeycloak } from "@react-keycloak/web";
 import { useFeatureFlags } from "store/feature-flags/hooks";
 import {
   useGetAccountQuery,
   useUpdateAccountMutation,
 } from "store/apis/profile";
 import { useTranslation } from "react-i18next";
-import GeneralLoader from "components/loaders/general";
-
-interface FormFields {
-  readonly username?: string;
-  readonly firstName?: string;
-  readonly lastName?: string;
-  readonly email?: string;
-  attributes?: { locale?: [string] };
-}
-
-interface AccountPageState {
-  readonly errors: FormFields;
-  readonly formFields: FormFields;
-}
+import { useForm } from "react-hook-form";
+import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
+import P2Toast from "components/utils/toast";
 
 const GeneralProfile = () => {
   const { t } = useTranslation();
-  const { keycloak, initialized } = useKeycloak();
-  const [state, setState] = useState<AccountPageState | undefined>(undefined);
   const { featureFlags } = useFeatureFlags();
-  const { data, error, isLoading } = useGetAccountQuery({
+  const { data: account, isLoading: isLoadingAccount } = useGetAccountQuery({
     userProfileMetadata: true,
     realm: apiRealm,
   });
-  const [updateAccount, { isSuccess }] = useUpdateAccountMutation();
 
-  const DEFAULT_STATE: AccountPageState = {
-    errors: {
-      username: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-    },
-    formFields: {
-      username: "",
-      firstName: "",
-      lastName: "",
-      email: "",
-      attributes: {},
-    },
-  };
+  const [updateAccount, { isLoading: isUpdatingAccount }] =
+    useUpdateAccountMutation();
 
-  //setState(DEFAULT_STATE);
-  console.log(data);
-  const handleSubmit = (): void => {};
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty },
+    setValue,
+    reset,
+  } = useForm();
 
-  const handleCancel = (): void => {
-    //how do i refresh the data
-  };
+  useEffect(() => {
+    setValue("firstName", account?.firstName);
+    setValue("lastName", account?.lastName);
+    setValue("email", account?.email);
+  }, [account]);
 
-  const handleDelete = (keycloak: KeycloakService): void => {
-    new AIACommand(keycloak, "delete_account").execute();
-  };
+  const onSubmit = async (formData) => {
+    const updatedAccount = {
+      ...account,
+      ...formData,
+    };
 
-  const handleEmailUpdate = (keycloak: KeycloakService): void => {
-    new AIACommand(keycloak, "UPDATE_EMAIL").execute();
+    updateAccount({
+      accountRepresentation: updatedAccount,
+      realm: apiRealm,
+    })
+      .unwrap()
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `Profile updated successfully.`,
+        });
+      })
+      .catch((err) => {
+        return P2Toast({
+          error: true,
+          title: `Error during Profile update. ${err.data.error}`,
+        });
+      });
   };
 
   return (
@@ -78,34 +70,62 @@ const GeneralProfile = () => {
           description="Manage your user profile information."
         />
       </div>
-      {isLoading && <GeneralLoader />}
-      {!isLoading && (
-        <form className="max-w-xl space-y-4">
-          {featureFlags.updateEmailFeatureEnabled && (
-            <FormTextInputWithLabel
-              slug="email"
-              label={t("email")}
-              inputArgs={{ value: data?.email }}
-            />
-          )}
-          <FormTextInputWithLabel
-            slug="firstName"
-            label="First Name"
-            inputArgs={{ value: data?.firstName }}
+
+      <form className="max-w-xl space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        {featureFlags.updateEmailFeatureEnabled && (
+          <RHFFormTextInputWithLabel
+            slug="email"
+            label={t("email")}
+            register={register}
+            registerArgs={{
+              required: true,
+              pattern: /\S+@\S+\.\S+/,
+            }}
+            inputArgs={{
+              disabled: isLoadingAccount,
+              placeholder: "your@email.com",
+              type: "email",
+            }}
+            error={errors.email}
           />
-          <FormTextInputWithLabel
-            slug="lastName"
-            label="Last Name"
-            inputArgs={{ value: data?.lastName }}
-          />
-          <div className="space-x-2">
-            <Button isBlackButton onClick={handleSubmit}>
-              Save
-            </Button>
-            <Button onClick={handleCancel}>Cancel</Button>
-          </div>
-        </form>
-      )}
+        )}
+        <RHFFormTextInputWithLabel
+          slug="firstName"
+          label="First Name"
+          register={register}
+          inputArgs={{ disabled: isLoadingAccount, placeholder: "First name" }}
+          error={errors.firstName}
+        />
+        <RHFFormTextInputWithLabel
+          slug="lastName"
+          label="Last Name"
+          register={register}
+          inputArgs={{ disabled: isLoadingAccount, placeholder: "Last name" }}
+          error={errors.lastName}
+        />
+        <div className="space-x-2">
+          <Button
+            isBlackButton
+            type="submit"
+            disabled={isUpdatingAccount || isLoadingAccount || !isDirty}
+          >
+            Save
+          </Button>
+          <Button
+            type="button"
+            onClick={() =>
+              reset({
+                email: account?.username,
+                firstName: account?.firstName,
+                lastName: account?.lastName,
+              })
+            }
+            disabled={isUpdatingAccount || !isDirty}
+          >
+            Reset
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

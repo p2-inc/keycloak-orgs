@@ -142,7 +142,7 @@ const SigninProfile = () => {
           </div>
         </div>
         <div>
-          <div className="space-y-5">
+          <div className="space-y-8">
             <div className="flex items-center space-x-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700">
                 <Smartphone className="h-5 w-5" />
