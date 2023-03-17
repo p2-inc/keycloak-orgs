@@ -39,7 +39,7 @@ const LinkedProfile = () => {
     })
     console.log("uri", accountLinkUri?.accountLinkUri);
     */
-   
+
     const url = "/linked-accounts/" + account.providerName;
 
     /*
@@ -149,11 +149,19 @@ https://app.phasetwo.io/auth/realms/test/account/linked-accounts/google?provider
       <div className="space-y-8">
         <div className="space-y-4">
           <SectionHeader title="Linked login providers" variant="medium" />
-          <Table columns={linkedColumns} rows={linkedRows} isLoading={isLoading} />
+          <Table
+            columns={linkedColumns}
+            rows={linkedRows}
+            isLoading={isLoading}
+          />
         </div>
         <div className="space-y-4">
           <SectionHeader title="Unlinked login providers" variant="medium" />
-          <Table columns={unlinkedColumns} rows={unlinkedRows} isLoading={isLoading} />
+          <Table
+            columns={unlinkedColumns}
+            rows={unlinkedRows}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>

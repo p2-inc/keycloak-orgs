@@ -11,8 +11,9 @@
     "build-mvn": "PUBLIC_URL='/auth/realms/${realmName}/portal' react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "orgs-api": " npx @rtk-query/codegen-openapi orgs-openapi-config.ts",
-    "profile-api": " npx @rtk-query/codegen-openapi profile-openapi-config.ts"
+    "orgs-api": "npx @rtk-query/codegen-openapi orgs-openapi-config.ts",
+    "profile-api": "npx @rtk-query/codegen-openapi profile-openapi-config.ts",
+    "format-files": "npx prettier --write ."
   },
   "dependencies": {
     "@headlessui/react": "^1.7.10",

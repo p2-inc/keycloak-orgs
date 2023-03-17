@@ -28,7 +28,7 @@ const FormTextInputWithLabel: FC<Props> = ({
           id={slug}
           className={cs(
             BasicFormClasses,
-            "block w-full rounded-md border-gray-300 sm:text-sm focus:border-transparent focus:ring-[#134FC2]"
+            "block w-full rounded-md border-gray-300 focus:border-transparent focus:ring-[#134FC2] sm:text-sm"
           )}
           placeholder="placeholder"
           {...inputArgs}

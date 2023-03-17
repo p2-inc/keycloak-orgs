@@ -20,7 +20,7 @@ const SectionHeader: FC<Props> = ({
     <div
       className={cs({
         "space-y-1": variant === "large" || variant === "medium",
-        "space-y-0": variant === "small"
+        "space-y-0": variant === "small",
       })}
     >
       {(icon || rightContent) && (
@@ -39,9 +39,7 @@ const SectionHeader: FC<Props> = ({
         {title}
       </h2>
       {description && (
-        <p className="max-w-prose text-base text-gray-600">
-          {description}
-        </p>
+        <p className="max-w-prose text-base text-gray-600">{description}</p>
       )}
     </div>
   );

@@ -55,7 +55,7 @@ const Table: React.FC<Props> = ({ columns, rows, isLoading }) => {
     return loadingState(columns);
   }
   return (
-    <div className="overflow-auto md:overflow-visible rounded-md border border-gray-200">
+    <div className="overflow-auto rounded-md border border-gray-200 md:overflow-visible">
       <table className="min-w-full divide-y divide-gray-200 rounded-md  bg-gray-50 text-sm font-medium text-black">
         <thead>
           <tr>
