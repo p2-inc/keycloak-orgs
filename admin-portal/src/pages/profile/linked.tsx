@@ -1,7 +1,6 @@
 import Button from "components/elements/forms/buttons/button";
 import SectionHeader from "components/navs/section-header";
 import { apiRealm } from "store/apis/helpers";
-import { keycloakService } from "keycloak";
 import {
   useBuildLinkingUriQuery,
   useGetLinkedAccountsQuery,
@@ -9,7 +8,6 @@ import {
   LinkedAccountRepresentation,
   BuildLinkingUriApiArg,
 } from "store/apis/profile";
-import { store } from "store";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
 import { useState, useEffect } from "react";
 import Table, {
@@ -23,30 +21,33 @@ const LinkedProfile = () => {
   const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
     realm: apiRealm,
   });
-  const [deleteAccount, { isSuccess }] = useDeleteLinkedProviderMutation();
-  const [buildLinkState, setBuildLinkState] = useState<typeof skipToken | BuildLinkingUriApiArg>(skipToken); 
-  const { data: buildLinker } = useBuildLinkingUriQuery(buildLinkState)
+  const [deleteAccount] = useDeleteLinkedProviderMutation();
+  const [buildLinkState, setBuildLinkState] = useState<
+    typeof skipToken | BuildLinkingUriApiArg
+  >(skipToken);
+  const { data: buildLinker } = useBuildLinkingUriQuery(buildLinkState);
 
   const unlinkAccount = (account: LinkedAccountRepresentation): void => {
     deleteAccount({
       realm: apiRealm,
       providerId: account.providerName!,
-    }).then(() => {
-      P2Toast({
-        success: true,
-        title: `${account.providerName} unlinked.`,
+    })
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `${account.providerName} unlinked.`,
+        });
+      })
+      .catch((e) => {
+        P2Toast({
+          error: true,
+          title: `Error during unlinking from ${account.providerName} . Please try again.`,
+        });
       });
-    }).catch((e) => {
-      P2Toast({
-        error: true,
-        title: `Error during unlinking from ${account.providerName} . Please try again.`,
-      });
-      console.error(e);
-    });
   };
 
   const linkAccount = (account: LinkedAccountRepresentation) => {
-    setBuildLinkState({ 
+    setBuildLinkState({
       realm: apiRealm,
       providerId: account.providerAlias ?? "",
       redirectUri: window.location.href,
@@ -60,25 +61,20 @@ const LinkedProfile = () => {
       //https://www.keycloak.org/docs/latest/server_development/index.html#client-initiated-account-linking
       window.location.href = buildLinker.accountLinkUri;
     }
-  },[buildLinker]);
-
+  }, [buildLinker]);
 
   const label = (account: LinkedAccountRepresentation): React.ReactNode => {
     if (account.social) {
       return (
-        <>
-          <label className="inline-block items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700">
-            Social login
-          </label>
-        </>
+        <label className="inline-block items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700">
+          Social login
+        </label>
       );
     }
     return (
-      <>
-        <label className="inline-block items-center space-x-2 rounded border border-green-700/30 bg-green-700/10 px-3 py-1 text-xs font-medium text-green-700">
-          System defined
-        </label>
-      </>
+      <label className="inline-block items-center space-x-2 rounded border border-green-700/30 bg-green-700/10 px-3 py-1 text-xs font-medium text-green-700">
+        System defined
+      </label>
     );
   };
 
@@ -156,11 +152,19 @@ const LinkedProfile = () => {
       <div className="space-y-8">
         <div className="space-y-4">
           <SectionHeader title="Linked login providers" variant="medium" />
-          <Table columns={linkedColumns} rows={linkedRows} isLoading={isLoading} />
+          <Table
+            columns={linkedColumns}
+            rows={linkedRows}
+            isLoading={isLoading}
+          />
         </div>
         <div className="space-y-4">
           <SectionHeader title="Unlinked login providers" variant="medium" />
-          <Table columns={unlinkedColumns} rows={unlinkedRows} isLoading={isLoading} />
+          <Table
+            columns={unlinkedColumns}
+            rows={unlinkedRows}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>

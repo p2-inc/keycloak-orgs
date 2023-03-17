@@ -19,4 +19,4 @@ export const roleSettings = [
 export function getRoleSettings(name: string) {
   const settings = roleSettings.find((f) => f.regexp.test(name));
   return settings;
-};
+}

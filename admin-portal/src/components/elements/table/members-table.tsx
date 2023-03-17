@@ -1,4 +1,3 @@
-import cs from "classnames";
 import { TableRows } from "./table";
 
 type Props = {
@@ -20,8 +19,8 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
       {!isLoading && (
         <>
           <div className="divide-y md:hidden">
-            {rows.map((item, key) => (
-              <div className="p-4">
+            {rows.map((item) => (
+              <div className="p-4" key={item["email"]}>
                 <div className="text-sm font-semibold">{item["name"]}</div>
                 <div className="text-sm text-gray-500">{item["email"]}</div>
                 <div className="space-y-1 py-2">{item["roles"]}</div>
@@ -30,8 +29,8 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
             ))}
           </div>
           <table className="hidden w-full divide-y md:table">
-            {rows.map((item, key) => (
-              <tr className="">
+            {rows.map((item) => (
+              <tr key={item["email"]}>
                 <td className="px-5 py-4 align-middle">
                   <div className="text-sm font-semibold">{item["name"]}</div>
                   <div className="text-sm text-gray-500">{item["email"]}</div>

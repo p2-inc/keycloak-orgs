@@ -26,6 +26,7 @@ import org.keycloak.services.managers.AuthenticationManager;
   "displayName",
   "logoUrl",
   "faviconUrl",
+  "appiconUrl",
   "profileEnabled",
   "registrationEmailAsUsername",
   "passwordUpdateAllowed",
@@ -113,6 +114,9 @@ public class PortalConfig {
     // faviconUrl
     Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.favicon.url")))
         .ifPresent(a -> config.faviconUrl(a));
+    // appiconUrl
+    Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.appicon.url")))
+        .ifPresent(a -> config.appiconUrl(a));
     // profileEnabled
     config.profileEnabled(CONFIG_ENABLED(realm, "profile.enabled", true));
     // registrationEmailAsUsername
@@ -178,6 +182,9 @@ public class PortalConfig {
 
   @JsonProperty("faviconUrl")
   private String faviconUrl;
+
+  @JsonProperty("appiconUrl")
+  private String appiconUrl;
 
   @JsonProperty("profileEnabled")
   private Boolean profileEnabled;
@@ -305,6 +312,21 @@ public class PortalConfig {
 
   public PortalConfig faviconUrl(String faviconUrl) {
     this.faviconUrl = faviconUrl;
+    return this;
+  }
+
+  @JsonProperty("appiconUrl")
+  public String getAppiconUrl() {
+    return appiconUrl;
+  }
+
+  @JsonProperty("appiconUrl")
+  public void setAppiconUrl(String appiconUrl) {
+    this.appiconUrl = appiconUrl;
+  }
+
+  public PortalConfig appiconUrl(String appiconUrl) {
+    this.appiconUrl = appiconUrl;
     return this;
   }
 

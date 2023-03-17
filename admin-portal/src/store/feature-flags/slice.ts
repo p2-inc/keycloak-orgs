@@ -8,6 +8,7 @@ const initialState = {
   displayName: "",
   logoUrl: "",
   faviconUrl: "",
+  appiconUrl: "",
   profileEnabled: true,
   registrationEmailAsUsername: true,
   passwordUpdateAllowed: true,
@@ -45,6 +46,7 @@ const slice = createSlice({
         state.displayName = payload.displayName;
         state.logoUrl = payload.logoUrl;
         state.faviconUrl = payload.faviconUrl;
+        state.appiconUrl = payload.appiconUrl;
         state.profileEnabled = payload.profileEnabled;
         state.registrationEmailAsUsername = payload.registrationEmailAsUsername;
         state.passwordUpdateAllowed = payload.passwordUpdateAllowed;

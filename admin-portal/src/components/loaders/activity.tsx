@@ -1,4 +1,4 @@
-const ActivityLoader: React.FC = ({}) => {
+const ActivityLoader: React.FC = () => {
   return (
     <div className="animate-pulse">
       <div className="md:flex md:items-center">

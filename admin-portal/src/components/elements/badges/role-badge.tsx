@@ -9,8 +9,10 @@ type Props = {
 const RoleBadge: FC<Props> = ({ name }) => {
   const settings = getRoleSettings(name);
   return (
-    <span className="space-x-2 flex items-center px-1 py-1">
-      <span className={`w-2.5 h-2.5 rounded-full inline-block flex-shrink-0 ${settings?.className}`}></span>
+    <span className="flex items-center space-x-2 px-1 py-1">
+      <span
+        className={`inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full ${settings?.className}`}
+      ></span>
       <span className="inline-block text-sm">{name}</span>
     </span>
   );

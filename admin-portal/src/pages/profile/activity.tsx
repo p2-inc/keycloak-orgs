@@ -205,7 +205,7 @@ const ActivityProfile = () => {
                         {session.current && (
                           <span
                             id={elementId("current-badge", session)}
-                            className="rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700 flex items-center space-x-2"
+                            className="flex items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700"
                           >
                             <span className="relative flex h-2 w-2">
                               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2blue-700 opacity-75"></span>

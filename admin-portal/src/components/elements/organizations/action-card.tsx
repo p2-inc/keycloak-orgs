@@ -11,10 +11,10 @@ export const OACTopRow: FC<Props> = ({ children }) => (
 
 const OrganizationActionCard: FC<Props> = ({ children }) => {
   return (
-    <div className={cs("block h-full")}>
-      <div className="relative h-full">
-        <div className="relative z-20 h-full">
-          <div className="col-span-1 flex h-full flex-col justify-between space-y-6 rounded-md border border-gray-200 p-4 md:py-9 md:px-10">
+    <div className={cs("block")}>
+      <div className="relative">
+        <div className="relative z-20">
+          <div className="col-span-1 flex flex-col justify-between space-y-6 rounded-md border border-gray-200 p-4 md:py-9 md:px-10">
             {children}
           </div>
         </div>
