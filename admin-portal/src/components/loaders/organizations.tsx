@@ -1,6 +1,6 @@
 import cs from "classnames";
 
-const OrganizationsLoader: React.FC = ({}) => {
+const OrganizationsLoader: React.FC = () => {
   return (
     <div
       className={cs(
@@ -10,11 +10,11 @@ const OrganizationsLoader: React.FC = ({}) => {
         "min-h-[179px]"
       )}
     >
-      <div className="space-y-2 animate-pulse">
+      <div className="animate-pulse space-y-2">
         <div className="h-3 w-28 rounded-md bg-gray-300"></div>
         <div className="h-2 w-20 rounded-md bg-gray-300"></div>
       </div>
-      <div className="grid grid-cols-2 animate-pulse">
+      <div className="grid animate-pulse grid-cols-2">
         <div className="space-y-2">
           <div className="h-5 w-5 rounded-md bg-gray-300"></div>
           <div className="h-2 w-8 rounded-md bg-gray-300"></div>
