@@ -17,6 +17,7 @@ import TimeUtil from "services/time-util";
 import { keycloakService } from "keycloak";
 import { t } from "i18next";
 import { AIACommand } from "services/aia-command";
+import P2Toast from "components/utils/toast";
 import { Key, Link2, Lock, Smartphone } from "lucide-react";
 
 type CredContainer = {
@@ -43,10 +44,22 @@ const SigninProfile = () => {
     deleteCredential({
       realm: apiRealm,
       credentialId: credential.id!,
-    }).then(() => {
-      //refresh accounts? automatic?
-      //ContentAlert.
-    });
+    })
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `${credential.userLabel ?? ""} removed.`,
+        });
+      })
+      .catch((e) => {
+        P2Toast({
+          error: true,
+          title: `Error removing ${
+            credential.userLabel ?? ""
+          } . Please try again.`,
+        });
+        console.error(e);
+      });
   };
 
   const setUpCredential = (action: string): void => {
@@ -111,7 +124,10 @@ const SigninProfile = () => {
               <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700">
                 <Lock className="h-5 w-5" />
               </div>
-              <SectionHeader title="Basic authentication" variant="medium" />
+              <SectionHeader
+                title={t("basic-authentication")}
+                variant="medium"
+              />
             </div>
             <SectionHeader
               title="Password"
