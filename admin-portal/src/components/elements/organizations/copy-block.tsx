@@ -4,9 +4,10 @@ import Button from "../forms/buttons/button";
 type Props = {
   label: string;
   value?: string;
+  labelNumber?: number;
 };
 
-const CopyBlock: FC<Props> = ({ label, value }) => {
+const CopyBlock: FC<Props> = ({ label, value, labelNumber }) => {
   const [copySuccess, setCopySuccess] = useState("Copy");
 
   const copyToClipBoard = async (copyMe) => {
@@ -21,13 +22,14 @@ const CopyBlock: FC<Props> = ({ label, value }) => {
   };
 
   return (
-    <div className="space-x-2 border-t border-t-gray-200 py-4 pt-6">
-      <div>
-        <div className="text-sm font-semibold">{label}</div>
-        <div className="flex items-center justify-between space-x-2">
-          <div className="overflow-x-auto py-2 text-xl font-medium">
-            {value}
-          </div>
+    <div>
+      <div className="space-y-2">
+        <div className="flex items-center space-x-3">
+          {labelNumber && <div className="font-semibold w-7 h-7 bg-gray-900 text-white items-center justify-center flex text-sm rounded-full flex-shrink-0">{labelNumber}</div>}
+          <div className="font-semibold">{label}</div>
+        </div>
+        <div className="flex items-center justify-between space-x-10 rounded border p-2 hover:border-gray-400 transition">
+          <div className="break-all p-2 text-sm text-gray-800">{value}</div>
           <Button onClick={() => copyToClipBoard(value)}>{copySuccess}</Button>
         </div>
       </div>

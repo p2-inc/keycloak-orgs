@@ -84,12 +84,14 @@ const DomainsVerify = () => {
           }
         />
       </div>
-      <div>
+      <div className="space-y-8">
         <CopyBlock
+          labelNumber={1}
           label="Create a TXT record in your DNS configuration for the following hostname"
           value={domain?.record_key}
         />
         <CopyBlock
+          labelNumber={2}
           label="Use this code for the value of the TXT record"
           value={domain?.record_value}
         />
