@@ -17,6 +17,7 @@ import TimeUtil from "services/time-util";
 import { keycloakService } from "keycloak";
 import { t } from "i18next";
 import { AIACommand } from "services/aia-command";
+import P2Toast from "components/utils/toast";
 import { Key, Link2, Lock, Smartphone } from "lucide-react";
 
 type CredContainer = {
@@ -43,10 +44,22 @@ const SigninProfile = () => {
     deleteCredential({
       realm: apiRealm,
       credentialId: credential.id!,
-    }).then(() => {
-      //refresh accounts? automatic?
-      //ContentAlert.
-    });
+    })
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `${credential.userLabel ?? ""} removed.`,
+        });
+      })
+      .catch((e) => {
+        P2Toast({
+          error: true,
+          title: `Error removing ${
+            credential.userLabel ?? ""
+          } . Please try again.`,
+        });
+        console.error(e);
+      });
   };
 
   const setUpCredential = (action: string): void => {
@@ -111,7 +124,10 @@ const SigninProfile = () => {
               <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700">
                 <Lock className="h-5 w-5" />
               </div>
-              <SectionHeader title="Basic authentication" variant="medium" />
+              <SectionHeader
+                title={t("basic-authentication")}
+                variant="medium"
+              />
             </div>
             <SectionHeader
               title="Password"
@@ -137,7 +153,7 @@ const SigninProfile = () => {
               />
             </div>
 
-            <div className="md:flex space-y-4 md:space-y-0 items-center justify-between">
+            <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
               <SectionHeader
                 title="Authenticator application"
                 description="Enter a verification code from authenticator application."
@@ -158,7 +174,7 @@ const SigninProfile = () => {
               isLoading={isLoading}
             />
 
-            <div className="md:flex space-y-4 md:space-y-0 items-center justify-between">
+            <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
               <SectionHeader
                 title="Security key"
                 description="Use your security key to sign in."
@@ -186,7 +202,7 @@ const SigninProfile = () => {
               </div>
               <SectionHeader title="Passwordless" variant="medium" />
             </div>
-            <div className="md:flex space-y-4 md:space-y-0 items-center justify-between">
+            <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
               <SectionHeader
                 title="Security key"
                 description="Use your security key for passwordless sign in."

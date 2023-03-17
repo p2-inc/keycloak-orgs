@@ -7,54 +7,59 @@ import {
   useGetLinkedAccountsQuery,
   useDeleteLinkedProviderMutation,
   LinkedAccountRepresentation,
+  BuildLinkingUriApiArg,
 } from "store/apis/profile";
+import { store } from "store";
+import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { useState, useEffect } from "react";
 import Table, {
   TableColumns,
   TableRows,
 } from "components/elements/table/table";
 import * as icons from "components/icons/providers";
+import P2Toast from "components/utils/toast";
 
 const LinkedProfile = () => {
   const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
     realm: apiRealm,
   });
   const [deleteAccount, { isSuccess }] = useDeleteLinkedProviderMutation();
+  const [buildLinkState, setBuildLinkState] = useState<typeof skipToken | BuildLinkingUriApiArg>(skipToken); 
+  const { data: buildLinker } = useBuildLinkingUriQuery(buildLinkState)
 
   const unlinkAccount = (account: LinkedAccountRepresentation): void => {
     deleteAccount({
       realm: apiRealm,
       providerId: account.providerName!,
     }).then(() => {
-      //refresh accounts? automatic?
-      //ContentAlert.
+      P2Toast({
+        success: true,
+        title: `${account.providerName} unlinked.`,
+      });
+    }).catch((e) => {
+      P2Toast({
+        error: true,
+        title: `Error during unlinking from ${account.providerName} . Please try again.`,
+      });
+      console.error(e);
     });
   };
 
   const linkAccount = (account: LinkedAccountRepresentation) => {
-    /*
-    const { data: accountLinkUri } = useBuildLinkingUriQuery({ 
+    setBuildLinkState({ 
       realm: apiRealm,
       providerId: account.providerAlias ?? "",
       redirectUri: window.location.href,
-    })
-    console.log("uri", accountLinkUri?.accountLinkUri);
-    */
-   
-    const url = "/linked-accounts/" + account.providerName;
-
-    /*
-
-https://app.phasetwo.io/auth/realms/test/account/linked-accounts/google?providerId=google&redirectUri=https%253A%252F%252Fapp.phasetwo.io%252Fauth%252Frealms%252Ftest%252Faccount%252F%252F%2523%252Fsecurity%252Flinked-accounts
-
-    const redirectUri: string = createRedirect(this.props.location.pathname);
-
-    this.context!.doGet<{accountLinkUri: string}>(url, { params: {providerId: account.providerName, redirectUri}})
-        .then((response: HttpResponse<{accountLinkUri: string}>) => {
-            console.log({response});
-            window.location.href = response.data!.accountLinkUri;
-        });
-    */
+    });
   };
+
+  useEffect(() => {
+    if (buildLinker && buildLinker.accountLinkUri) {
+      console.log(buildLinker.accountLinkUri);
+      window.location.href = buildLinker.accountLinkUri;
+    }
+  },[buildLinker]);
+
 
   const label = (account: LinkedAccountRepresentation): React.ReactNode => {
     if (account.social) {
