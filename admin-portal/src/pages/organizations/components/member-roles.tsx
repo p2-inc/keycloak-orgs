@@ -1,6 +1,3 @@
-import SquareBadge from "components/elements/badges/square-badge";
-import Button from "components/elements/forms/buttons/button";
-import RolesLoader from "components/loaders/roles";
 import { Menu } from "@headlessui/react";
 import {
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
@@ -47,7 +44,7 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
         </Menu.Button>
         <Menu.Items className="absolute right-0 z-10 mt-2 w-60 origin-top-right rounded-md bg-white p-4 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           {filtered.map((filteredRole) => (
-            <Menu.Item>
+            <Menu.Item key={filteredRole.name}>
               <div>
                 <RoleBadge name={filteredRole.name} />
               </div>
@@ -71,21 +68,19 @@ const MemberRoles: React.FC<Props> = ({ member, orgId, realm }) => {
 
   return (
     <>
-      {isLoading && (
+      {isLoading ? (
         <div className="inline-block h-[30px] w-32 animate-pulse rounded bg-gray-200"></div>
+      ) : (
+        roleSettings.map((f) => (
+          <FilteredRole
+            regexp={f.regexp}
+            regexpName={f.name}
+            roles={roles}
+            regexpClassName={f.className}
+            key={f.name}
+          />
+        ))
       )}
-      {roleSettings.map((f, key) => (
-        <>
-          {!isLoading && (
-            <FilteredRole
-              regexp={f.regexp}
-              regexpName={f.name}
-              roles={roles}
-              regexpClassName={f.className}
-            />
-          )}
-        </>
-      ))}
     </>
   );
 };

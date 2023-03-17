@@ -29,18 +29,20 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
             ))}
           </div>
           <table className="hidden w-full divide-y md:table">
-            {rows.map((item) => (
-              <tr key={item["email"]}>
-                <td className="px-5 py-4 align-middle">
-                  <div className="text-sm font-semibold">{item["name"]}</div>
-                  <div className="text-sm text-gray-500">{item["email"]}</div>
-                </td>
-                <td className="space-x-2 px-5 py-4 text-right align-middle">
-                  {item["roles"]}
-                </td>
-                <td className="px-1 py-4 align-middle">{item["action"]}</td>
-              </tr>
-            ))}
+            <tbody>
+              {rows.map((item) => (
+                <tr key={item["email"]}>
+                  <td className="px-5 py-4 align-middle">
+                    <div className="text-sm font-semibold">{item["name"]}</div>
+                    <div className="text-sm text-gray-500">{item["email"]}</div>
+                  </td>
+                  <td className="space-x-2 px-5 py-4 text-right align-middle">
+                    {item["roles"]}
+                  </td>
+                  <td className="px-1 py-4 align-middle">{item["action"]}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </>
       )}

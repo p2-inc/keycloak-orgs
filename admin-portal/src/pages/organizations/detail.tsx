@@ -55,16 +55,19 @@ export default function OrganizationDetail() {
 
   // const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
 
-  const rows: TableRows = members
-    .filter((member) => !member.email?.startsWith("org-admin"))
-    .map((member) => ({
-      email: member.email,
-      name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
-      roles: <MemberRoles member={member} orgId={orgId!} realm={apiRealm} />,
-      action: (
-        <MembersActionMenu member={member} orgId={orgId!} realm={apiRealm} />
-      ),
-    }));
+  const filteredMembers = members.filter(
+    (member) => !member.email?.startsWith("org-admin")
+  );
+  const totalMembers = filteredMembers.length;
+
+  const rows: TableRows = filteredMembers.map((member) => ({
+    email: member.email,
+    name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
+    roles: <MemberRoles member={member} orgId={orgId!} realm={apiRealm} />,
+    action: (
+      <MembersActionMenu member={member} orgId={orgId!} realm={apiRealm} />
+    ),
+  }));
 
   return (
     <>
@@ -94,7 +97,7 @@ export default function OrganizationDetail() {
                 <RoundedIcon>
                   <User className="h-5 w-5" />
                 </RoundedIcon>
-                <Stat label="members" value={members.length}></Stat>
+                <Stat label="members" value={totalMembers}></Stat>
                 <Stat label="pending" value={invites.length}></Stat>
               </OACTopRow>
               <div className="text-sm leading-relaxed text-gray-600">
@@ -164,11 +167,9 @@ export default function OrganizationDetail() {
             leftAreaItems={
               <>
                 <SectionHeader title="Members" variant="small" />
-                {members && (
-                  <div className="ml-2">
-                    <RoundBadge>{members.length}</RoundBadge>
-                  </div>
-                )}
+                <div className="ml-2">
+                  <RoundBadge>{totalMembers}</RoundBadge>
+                </div>
               </>
             }
           />
