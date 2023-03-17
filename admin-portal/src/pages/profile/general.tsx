@@ -12,6 +12,12 @@ import { useForm } from "react-hook-form";
 import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
 import P2Toast from "components/utils/toast";
 
+const ROOT_ATTRIBUTES = ["username", "firstName", "lastName", "email"];
+const isRootAttribute = (attr?: string) => attr && ROOT_ATTRIBUTES.includes(attr);
+const fieldName = (name: string) => `${isRootAttribute(name) ? "" : "attributes."}${name}`;
+const unWrap = (key: string) => key.substring(2, key.length - 1);
+const isBundleKey = (key?: string) => key?.includes("${");
+
 const GeneralProfile = () => {
   const { t } = useTranslation();
   const { featureFlags } = useFeatureFlags();
@@ -23,6 +29,18 @@ const GeneralProfile = () => {
   const [updateAccount, { isLoading: isUpdatingAccount }] =
     useUpdateAccountMutation();
 
+  /*
+  //setState(DEFAULT_STATE);
+  console.log(data);
+  const handleSubmit = (): void => {
+    //updateAccount()
+  };
+
+  const handleCancel = (): void => {
+    //how do i refresh the data
+    refetch();
+  };
+  */
   const {
     register,
     handleSubmit,
@@ -62,6 +80,20 @@ const GeneralProfile = () => {
       });
   };
 
+  /*
+            {(data?.userProfileMetadata?.attributes || []).filter((attribute) => !isRootAttribute(attribute.name)).map((attribute) =>(
+            <FormTextInputWithLabel
+              slug={attribute.name!}
+              label={
+                (isBundleKey(attribute.displayName)
+                  ? t(unWrap(attribute.displayName!))
+                  : attribute.displayName) || attribute.name!
+              }
+              inputArgs={{ value: data ? data[attribute.name!] : "" }}
+            />
+          ))}
+  */
+
   return (
     <div>
       <div className="mb-12">
@@ -70,8 +102,24 @@ const GeneralProfile = () => {
           description="Manage your user profile information."
         />
       </div>
-
-      <form className="max-w-xl space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <form className="max-w-xl space-y-4" onSubmit={handleSubmit(onSubmit)}> <>
+        {!featureFlags.registrationEmailAsUsername && (
+          <RHFFormTextInputWithLabel
+            slug="username"
+            label={t("username")}
+            register={register}
+            registerArgs={{
+              required: true,
+              pattern: /\S+@\S+\.\S+/,
+            }}
+            inputArgs={{
+              disabled: isLoadingAccount,
+              placeholder: "you",
+              type: "username",
+	    }}
+            error={errors.username}
+          />
+        )}
         {featureFlags.updateEmailFeatureEnabled && (
           <RHFFormTextInputWithLabel
             slug="email"
@@ -125,7 +173,7 @@ const GeneralProfile = () => {
             Reset
           </Button>
         </div>
-      </form>
+      </> </form>
     </div>
   );
 };

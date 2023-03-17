@@ -57,6 +57,8 @@ const LinkedProfile = () => {
   useEffect(() => {
     if (buildLinker && buildLinker.accountLinkUri) {
       console.log(buildLinker.accountLinkUri);
+      //todo change the client_id in the requests params
+      //https://www.keycloak.org/docs/latest/server_development/index.html#client-initiated-account-linking
       window.location.href = buildLinker.accountLinkUri;
     }
   }, [buildLinker]);
