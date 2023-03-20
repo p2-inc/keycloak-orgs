@@ -4,7 +4,7 @@ import SecondaryMainContentMenuArea from "components/layouts/secondary-main-cont
 import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import { Link, Outlet, useParams } from "react-router-dom";
 import Breadcrumbs from "components/navs/breadcrumbs";
 import { useGetOrganizationByIdQuery } from "store/apis/orgs";
@@ -31,7 +31,7 @@ export default function OrganizationSettings() {
   let { orgId } = useParams();
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
-    realm: apiRealm,
+    realm: config.env.realm,
   });
   return (
     <>

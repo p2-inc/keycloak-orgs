@@ -14,6 +14,7 @@ import Organizations from "pages/organizations";
 import OrganizationDetail from "pages/organizations/detail";
 import OrganizationSettings from "pages/organizations/settings";
 import Profile from "pages/profile";
+import { config } from "config";
 import { keycloak } from "keycloak";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
 import Loading from "components/elements/loading";
@@ -30,6 +31,7 @@ import DomainsAdd from "pages/organizations/domains/add";
 import DomainsVerify from "pages/organizations/domains/verify";
 import DomainContainer from "pages/organizations/domains";
 import { Toaster } from "react-hot-toast";
+import { basename } from "path";
 
 export type P2Params = {
   orgId: string;
@@ -121,7 +123,9 @@ const router = createBrowserRouter([
     path: "*",
     element: <Navigate to="organizations" />,
   },
-]);
+],{
+  basename: config.basename,
+});
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

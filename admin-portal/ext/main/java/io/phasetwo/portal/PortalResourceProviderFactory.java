@@ -81,12 +81,17 @@ public class PortalResourceProviderFactory implements RealmResourceProviderFacto
       } else {
         adminPortal = createClientForRealm(realm, session);
       }
+      updateAccountConsoleForRealm(realm, session);
     }
     setClientScopeDefaults(realm, session, adminPortal);
   }
 
+  private String getRedirectPath(RealmModel realm) {
+    return String.format("/realms/%s/portal/", realm.getName());
+  }
+
   private ClientModel createClientForRealm(RealmModel realm, KeycloakSession session) {
-    String path = String.format("/realms/%s/wizard/", realm.getName());
+    String path = getRedirectPath(realm);
     ClientModel adminPortal = session.clients().addClient(realm, "admin-portal");
     setDefaults(adminPortal);
     adminPortal.setBaseUrl(path);
@@ -94,6 +99,11 @@ public class PortalResourceProviderFactory implements RealmResourceProviderFacto
     adminPortal.setWebOrigins(ImmutableSet.of("/*"));
     adminPortal.setAttribute("post.logout.redirect.uris", "+");
     return adminPortal;
+  }
+
+  private void updateAccountConsoleForRealm(RealmModel realm, KeycloakSession session) {
+    ClientModel accountConsole = session.clients().getClientByClientId(realm, "account-console");
+    accountConsole.addRedirectUri(String.format("%s*", getRedirectPath(realm)));
   }
 
   private ClientModel createClientForMaster(RealmModel realm, KeycloakSession session) {

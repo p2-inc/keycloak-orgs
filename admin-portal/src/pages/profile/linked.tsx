@@ -1,6 +1,6 @@
 import Button from "components/elements/forms/buttons/button";
 import SectionHeader from "components/navs/section-header";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import {
   useBuildLinkingUriQuery,
   useGetLinkedAccountsQuery,
@@ -19,7 +19,7 @@ import P2Toast from "components/utils/toast";
 
 const LinkedProfile = () => {
   const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
-    realm: apiRealm,
+    realm: config.env.realm,
   });
   const [deleteAccount] = useDeleteLinkedProviderMutation();
   const [buildLinkState, setBuildLinkState] = useState<
@@ -29,7 +29,7 @@ const LinkedProfile = () => {
 
   const unlinkAccount = (account: LinkedAccountRepresentation): void => {
     deleteAccount({
-      realm: apiRealm,
+      realm: config.env.realm,
       providerId: account.providerName!,
     })
       .then(() => {
@@ -48,7 +48,7 @@ const LinkedProfile = () => {
 
   const linkAccount = (account: LinkedAccountRepresentation) => {
     setBuildLinkState({
-      realm: apiRealm,
+      realm: config.env.realm,
       providerId: account.providerAlias ?? "",
       redirectUri: window.location.href,
     });

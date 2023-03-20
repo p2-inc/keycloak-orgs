@@ -8,7 +8,7 @@ import {
   CredentialRepresentation,
   CredentialMetadataRepresentation,
 } from "store/apis/profile";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import Table, {
   TableColumns,
   TableRows,
@@ -33,7 +33,7 @@ const time = (time: string | undefined): string => {
 
 const SigninProfile = () => {
   const { data: credentials = [], isLoading } = useGetCredentialsQuery({
-    realm: apiRealm,
+    realm: config.env.realm,
   });
   const [deleteCredential, { isSuccess }] = useDeleteCredentialMutation();
 
@@ -42,7 +42,7 @@ const SigninProfile = () => {
   ): void => {
     if (credential === undefined) return;
     deleteCredential({
-      realm: apiRealm,
+      realm: config.env.realm,
       credentialId: credential.id!,
     })
       .then(() => {

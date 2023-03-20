@@ -1,9 +1,9 @@
-import { apiRealm } from "store/apis/helpers";
 import Button from "components/elements/forms/buttons/button";
 import MainContentArea from "components/layouts/main-content-area";
 import TopHeader from "components/navs/top-header";
 import SectionHeader from "components/navs/section-header";
 import { Link, useParams } from "react-router-dom";
+import { config } from "config";
 import {
   useGetIdpsQuery,
   useGetOrganizationByIdQuery,
@@ -32,25 +32,25 @@ export default function OrganizationDetail() {
   let { orgId } = useParams();
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
-    realm: apiRealm,
+    realm: config.env.realm,
   });
   const { data: members = [], isLoading } = useGetOrganizationMembershipsQuery({
     orgId: orgId!,
-    realm: apiRealm,
+    realm: config.env.realm,
   });
   const { data: invites = [] } = useGetOrganizationInvitationsQuery({
     orgId: org?.id!,
-    realm: apiRealm,
+    realm: config.env.realm,
   });
   const { data: domains = [] } = useGetOrganizationDomainsQuery({
     orgId: org?.id!,
-    realm: apiRealm,
+    realm: config.env.realm,
   });
   const verifiedDomains =
     domains.length > 0 ? domains.filter((d) => d.verified).length : 0;
   const { data: idps = [] } = useGetIdpsQuery({
     orgId: org?.id!,
-    realm: apiRealm,
+    realm: config.env.realm,
   });
 
   // const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
@@ -63,9 +63,9 @@ export default function OrganizationDetail() {
   const rows: TableRows = filteredMembers.map((member) => ({
     email: member.email,
     name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
-    roles: <MemberRoles member={member} orgId={orgId!} realm={apiRealm} />,
+    roles: <MemberRoles member={member} orgId={orgId!} realm={config.env.realm} />,
     action: (
-      <MembersActionMenu member={member} orgId={orgId!} realm={apiRealm} />
+      <MembersActionMenu member={member} orgId={orgId!} realm={config.env.realm} />
     ),
   }));
 

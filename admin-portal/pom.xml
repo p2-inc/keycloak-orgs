@@ -24,6 +24,7 @@
     <main.java.package>io.phasetwo.portal</main.java.package>
     <keycloak.version>21.0.1</keycloak.version>
     <guava.version>30.1-jre</guava.version>
+    <commons-lang3.version>3.11</commons-lang3.version>
     <lombok.version>1.18.22</lombok.version>
     <auto-service.version>1.0.1</auto-service.version>
   </properties>
@@ -215,6 +216,12 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

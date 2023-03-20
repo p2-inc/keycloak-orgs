@@ -7,7 +7,7 @@ import { P2Params } from "index";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import {
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
@@ -19,7 +19,7 @@ const SettingsGeneral = () => {
   const { data: org, isLoading: isLoadingOrganization } =
     useGetOrganizationByIdQuery({
       orgId: orgId!,
-      realm: apiRealm,
+      realm: config.env.realm,
     });
 
   const {
@@ -44,7 +44,7 @@ const SettingsGeneral = () => {
 
     const resp = await updateOrg({
       orgId,
-      realm: apiRealm,
+      realm: config.env.realm,
       organizationRepresentation: updatedOrg,
     });
 

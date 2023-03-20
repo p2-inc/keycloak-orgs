@@ -5,7 +5,7 @@ import { GlobeIcon } from "components/icons";
 import SectionHeader from "components/navs/section-header";
 import P2Toast from "components/utils/toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import {
   useGetOrganizationDomainsQuery,
   useVerifyDomainMutation,
@@ -22,7 +22,7 @@ const DomainsVerify = () => {
   const navigate = useNavigate();
 
   const { data: domains = [] } = useGetOrganizationDomainsQuery({
-    realm: apiRealm,
+    realm: config.env.realm,
     orgId: orgId!,
   });
 
@@ -36,7 +36,7 @@ const DomainsVerify = () => {
       const resp = await verifyDomain({
         domainName: domain.domain_name,
         orgId: orgId!,
-        realm: apiRealm,
+        realm: config.env.realm,
       });
 
       //@ts-ignore

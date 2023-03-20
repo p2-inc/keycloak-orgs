@@ -29,8 +29,10 @@
     -->
     <title>${realmName} Admin Portal</title>
     <script>
-      var locale = "${locale}";
-      if (locale === "${locale}") locale = "en";
+      var environment = {};
+      try {
+        environment = JSON.parse("${environment?no_esc}");
+      } catch (e) {}
     </script>
   </head>
   <body>

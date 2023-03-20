@@ -6,7 +6,7 @@ import SectionHeader from "components/navs/section-header";
 import P2Toast from "components/utils/toast";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import {
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
@@ -25,7 +25,7 @@ const DomainsAdd = () => {
 
   const { data: org = {} } = useGetOrganizationByIdQuery({
     orgId: orgId!,
-    realm: apiRealm,
+    realm: config.env.realm,
   });
 
   const [updateOrg] = useUpdateOrganizationMutation();
@@ -65,7 +65,7 @@ const DomainsAdd = () => {
 
       const resp = await updateOrg({
         orgId: orgId!,
-        realm: apiRealm,
+        realm: config.env.realm,
         organizationRepresentation: orgCopy,
       });
 

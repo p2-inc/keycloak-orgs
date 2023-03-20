@@ -3,7 +3,7 @@ import MainContentArea from "components/layouts/main-content-area";
 import TopHeader from "components/navs/top-header";
 import PrimaryContentArea from "components/layouts/primary-content-area";
 import { useGetOrganizationsQuery } from "store/apis/orgs";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import OrganizationsLoader from "components/loaders/organizations";
 import OrganizationItem from "components/elements/organizations/item";
 import ViewSwitch, {
@@ -19,7 +19,7 @@ export default function Organizations() {
     ViewLayoutOptions.GRID
   );
   const { data: orgs = [], isFetching } = useGetOrganizationsQuery({
-    realm: apiRealm,
+    realm: config.env.realm,
   });
 
   return (
@@ -63,8 +63,8 @@ export default function Organizations() {
                     subTitle={org.name}
                     viewType={viewType}
                   >
-                    <MembersStat org={org} realm={apiRealm} />
-                    <DomainStat org={org} realm={apiRealm} />
+                    <MembersStat org={org} realm={config.env.realm} />
+                    <DomainStat org={org} realm={config.env.realm} />
                   </OrganizationItem>
                 ))}
               </div>

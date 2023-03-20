@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.net.URI;
-import java.util.Optional;
 import javax.annotation.Generated;
 import org.keycloak.authentication.requiredactions.DeleteAccount;
 import org.keycloak.common.Profile;
@@ -16,17 +15,10 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.models.RoleModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.Auth;
-import org.keycloak.services.managers.AuthenticationManager;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-  "name",
-  "displayName",
-  "logoUrl",
-  "faviconUrl",
-  "appiconUrl",
   "profileEnabled",
   "registrationEmailAsUsername",
   "passwordUpdateAllowed",
@@ -52,7 +44,7 @@ import org.keycloak.services.managers.AuthenticationManager;
   "orgEventsEnabled"
 })
 @Generated("jsonschema2pojo")
-public class PortalConfig {
+public class PortalFeatures {
 
   public static String CONFIG_KEY(String property) {
     return String.format("_providerConfig.portal.%s", property);
@@ -64,22 +56,8 @@ public class PortalConfig {
     return ("true".equals(v));
   }
 
-  public static PortalConfig createFromAttributes(KeycloakSession session) {
+  public static PortalFeatures fromSession(KeycloakSession session, Auth auth) {
     RealmModel realm = session.getContext().getRealm();
-    Auth auth = null;
-    AppAuthManager authManager = new AppAuthManager();
-    AuthenticationManager.AuthResult authResult =
-        authManager.authenticateIdentityCookie(session, realm);
-    if (authResult != null) {
-      auth =
-          new Auth(
-              realm,
-              authResult.getToken(),
-              authResult.getUser(),
-              session.getContext().getClient(),
-              authResult.getSession(),
-              true);
-    }
     UserModel user = null;
     boolean isTotpConfigured = false;
     boolean deleteAccountAllowed = false;
@@ -103,20 +81,7 @@ public class PortalConfig {
     }
     URI uri = session.getContext().getAuthServerUrl();
 
-    PortalConfig config = new PortalConfig();
-    // name
-    Optional.ofNullable(realm.getName()).ifPresent(a -> config.name(a));
-    // displayName
-    Optional.ofNullable(realm.getDisplayName()).ifPresent(a -> config.displayName(a));
-    // logoUrl
-    Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.logo.url")))
-        .ifPresent(a -> config.logoUrl(a));
-    // faviconUrl
-    Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.favicon.url")))
-        .ifPresent(a -> config.faviconUrl(a));
-    // appiconUrl
-    Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.appicon.url")))
-        .ifPresent(a -> config.appiconUrl(a));
+    PortalFeatures config = new PortalFeatures();
     // profileEnabled
     config.profileEnabled(CONFIG_ENABLED(realm, "profile.enabled", true));
     // registrationEmailAsUsername
@@ -170,21 +135,6 @@ public class PortalConfig {
 
     return config;
   }
-
-  @JsonProperty("name")
-  private String name;
-
-  @JsonProperty("displayName")
-  private String displayName;
-
-  @JsonProperty("logoUrl")
-  private String logoUrl;
-
-  @JsonProperty("faviconUrl")
-  private String faviconUrl;
-
-  @JsonProperty("appiconUrl")
-  private String appiconUrl;
 
   @JsonProperty("profileEnabled")
   private Boolean profileEnabled;
@@ -255,81 +205,6 @@ public class PortalConfig {
   @JsonProperty("orgEventsEnabled")
   private Boolean orgEventsEnabled;
 
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-
-  @JsonProperty("name")
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public PortalConfig name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  @JsonProperty("displayName")
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  @JsonProperty("displayName")
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
-  }
-
-  public PortalConfig displayName(String displayName) {
-    this.displayName = displayName;
-    return this;
-  }
-
-  @JsonProperty("logoUrl")
-  public String getLogoUrl() {
-    return logoUrl;
-  }
-
-  @JsonProperty("logoUrl")
-  public void setLogoUrl(String logoUrl) {
-    this.logoUrl = logoUrl;
-  }
-
-  public PortalConfig logoUrl(String logoUrl) {
-    this.logoUrl = logoUrl;
-    return this;
-  }
-
-  @JsonProperty("faviconUrl")
-  public String getFaviconUrl() {
-    return faviconUrl;
-  }
-
-  @JsonProperty("faviconUrl")
-  public void setFaviconUrl(String faviconUrl) {
-    this.faviconUrl = faviconUrl;
-  }
-
-  public PortalConfig faviconUrl(String faviconUrl) {
-    this.faviconUrl = faviconUrl;
-    return this;
-  }
-
-  @JsonProperty("appiconUrl")
-  public String getAppiconUrl() {
-    return appiconUrl;
-  }
-
-  @JsonProperty("appiconUrl")
-  public void setAppiconUrl(String appiconUrl) {
-    this.appiconUrl = appiconUrl;
-  }
-
-  public PortalConfig appiconUrl(String appiconUrl) {
-    this.appiconUrl = appiconUrl;
-    return this;
-  }
-
   @JsonProperty("profileEnabled")
   public Boolean getProfileEnabled() {
     return profileEnabled;
@@ -340,7 +215,7 @@ public class PortalConfig {
     this.profileEnabled = profileEnabled;
   }
 
-  public PortalConfig profileEnabled(Boolean profileEnabled) {
+  public PortalFeatures profileEnabled(Boolean profileEnabled) {
     this.profileEnabled = profileEnabled;
     return this;
   }
@@ -355,7 +230,7 @@ public class PortalConfig {
     this.registrationEmailAsUsername = registrationEmailAsUsername;
   }
 
-  public PortalConfig registrationEmailAsUsername(Boolean registrationEmailAsUsername) {
+  public PortalFeatures registrationEmailAsUsername(Boolean registrationEmailAsUsername) {
     this.registrationEmailAsUsername = registrationEmailAsUsername;
     return this;
   }
@@ -370,7 +245,7 @@ public class PortalConfig {
     this.passwordUpdateAllowed = passwordUpdateAllowed;
   }
 
-  public PortalConfig passwordUpdateAllowed(Boolean passwordUpdateAllowed) {
+  public PortalFeatures passwordUpdateAllowed(Boolean passwordUpdateAllowed) {
     this.passwordUpdateAllowed = passwordUpdateAllowed;
     return this;
   }
@@ -385,7 +260,7 @@ public class PortalConfig {
     this.twoFactorUpdateAllowed = twoFactorUpdateAllowed;
   }
 
-  public PortalConfig twoFactorUpdateAllowed(Boolean twoFactorUpdateAllowed) {
+  public PortalFeatures twoFactorUpdateAllowed(Boolean twoFactorUpdateAllowed) {
     this.twoFactorUpdateAllowed = twoFactorUpdateAllowed;
     return this;
   }
@@ -400,7 +275,7 @@ public class PortalConfig {
     this.totpConfigured = totpConfigured;
   }
 
-  public PortalConfig totpConfigured(Boolean totpConfigured) {
+  public PortalFeatures totpConfigured(Boolean totpConfigured) {
     this.totpConfigured = totpConfigured;
     return this;
   }
@@ -415,7 +290,7 @@ public class PortalConfig {
     this.passwordlessUpdateAllowed = passwordlessUpdateAllowed;
   }
 
-  public PortalConfig passwordlessUpdateAllowed(Boolean passwordlessUpdateAllowed) {
+  public PortalFeatures passwordlessUpdateAllowed(Boolean passwordlessUpdateAllowed) {
     this.passwordlessUpdateAllowed = passwordlessUpdateAllowed;
     return this;
   }
@@ -430,7 +305,7 @@ public class PortalConfig {
     this.deviceActivityEnabled = deviceActivityEnabled;
   }
 
-  public PortalConfig deviceActivityEnabled(Boolean deviceActivityEnabled) {
+  public PortalFeatures deviceActivityEnabled(Boolean deviceActivityEnabled) {
     this.deviceActivityEnabled = deviceActivityEnabled;
     return this;
   }
@@ -445,7 +320,7 @@ public class PortalConfig {
     this.linkedAccountsEnabled = linkedAccountsEnabled;
   }
 
-  public PortalConfig linkedAccountsEnabled(Boolean linkedAccountsEnabled) {
+  public PortalFeatures linkedAccountsEnabled(Boolean linkedAccountsEnabled) {
     this.linkedAccountsEnabled = linkedAccountsEnabled;
     return this;
   }
@@ -460,7 +335,7 @@ public class PortalConfig {
     this.eventsEnabled = eventsEnabled;
   }
 
-  public PortalConfig eventsEnabled(Boolean eventsEnabled) {
+  public PortalFeatures eventsEnabled(Boolean eventsEnabled) {
     this.eventsEnabled = eventsEnabled;
     return this;
   }
@@ -475,7 +350,7 @@ public class PortalConfig {
     this.editUsernameAllowed = editUsernameAllowed;
   }
 
-  public PortalConfig editUsernameAllowed(Boolean editUsernameAllowed) {
+  public PortalFeatures editUsernameAllowed(Boolean editUsernameAllowed) {
     this.editUsernameAllowed = editUsernameAllowed;
     return this;
   }
@@ -490,7 +365,7 @@ public class PortalConfig {
     this.internationalizationEnabled = internationalizationEnabled;
   }
 
-  public PortalConfig internationalizationEnabled(Boolean internationalizationEnabled) {
+  public PortalFeatures internationalizationEnabled(Boolean internationalizationEnabled) {
     this.internationalizationEnabled = internationalizationEnabled;
     return this;
   }
@@ -505,7 +380,7 @@ public class PortalConfig {
     this.resourcesEnabled = resourcesEnabled;
   }
 
-  public PortalConfig resourcesEnabled(Boolean resourcesEnabled) {
+  public PortalFeatures resourcesEnabled(Boolean resourcesEnabled) {
     this.resourcesEnabled = resourcesEnabled;
     return this;
   }
@@ -520,7 +395,7 @@ public class PortalConfig {
     this.viewGroupsEnabled = viewGroupsEnabled;
   }
 
-  public PortalConfig viewGroupsEnabled(Boolean viewGroupsEnabled) {
+  public PortalFeatures viewGroupsEnabled(Boolean viewGroupsEnabled) {
     this.viewGroupsEnabled = viewGroupsEnabled;
     return this;
   }
@@ -535,7 +410,7 @@ public class PortalConfig {
     this.deleteAccountAllowed = deleteAccountAllowed;
   }
 
-  public PortalConfig deleteAccountAllowed(Boolean deleteAccountAllowed) {
+  public PortalFeatures deleteAccountAllowed(Boolean deleteAccountAllowed) {
     this.deleteAccountAllowed = deleteAccountAllowed;
     return this;
   }
@@ -550,7 +425,7 @@ public class PortalConfig {
     this.updateEmailFeatureEnabled = updateEmailFeatureEnabled;
   }
 
-  public PortalConfig updateEmailFeatureEnabled(Boolean updateEmailFeatureEnabled) {
+  public PortalFeatures updateEmailFeatureEnabled(Boolean updateEmailFeatureEnabled) {
     this.updateEmailFeatureEnabled = updateEmailFeatureEnabled;
     return this;
   }
@@ -565,7 +440,7 @@ public class PortalConfig {
     this.updateEmailActionEnabled = updateEmailActionEnabled;
   }
 
-  public PortalConfig updateEmailActionEnabled(Boolean updateEmailActionEnabled) {
+  public PortalFeatures updateEmailActionEnabled(Boolean updateEmailActionEnabled) {
     this.updateEmailActionEnabled = updateEmailActionEnabled;
     return this;
   }
@@ -580,7 +455,7 @@ public class PortalConfig {
     this.organizationsEnabled = organizationsEnabled;
   }
 
-  public PortalConfig organizationsEnabled(Boolean organizationsEnabled) {
+  public PortalFeatures organizationsEnabled(Boolean organizationsEnabled) {
     this.organizationsEnabled = organizationsEnabled;
     return this;
   }
@@ -595,7 +470,7 @@ public class PortalConfig {
     this.orgDetailsEnabled = orgDetailsEnabled;
   }
 
-  public PortalConfig orgDetailsEnabled(Boolean orgDetailsEnabled) {
+  public PortalFeatures orgDetailsEnabled(Boolean orgDetailsEnabled) {
     this.orgDetailsEnabled = orgDetailsEnabled;
     return this;
   }
@@ -610,7 +485,7 @@ public class PortalConfig {
     this.orgMembersEnabled = orgMembersEnabled;
   }
 
-  public PortalConfig orgMembersEnabled(Boolean orgMembersEnabled) {
+  public PortalFeatures orgMembersEnabled(Boolean orgMembersEnabled) {
     this.orgMembersEnabled = orgMembersEnabled;
     return this;
   }
@@ -625,7 +500,7 @@ public class PortalConfig {
     this.orgInvitationsEnabled = orgInvitationsEnabled;
   }
 
-  public PortalConfig orgInvitationsEnabled(Boolean orgInvitationsEnabled) {
+  public PortalFeatures orgInvitationsEnabled(Boolean orgInvitationsEnabled) {
     this.orgInvitationsEnabled = orgInvitationsEnabled;
     return this;
   }
@@ -640,7 +515,7 @@ public class PortalConfig {
     this.orgDomainsEnabled = orgDomainsEnabled;
   }
 
-  public PortalConfig orgDomainsEnabled(Boolean orgDomainsEnabled) {
+  public PortalFeatures orgDomainsEnabled(Boolean orgDomainsEnabled) {
     this.orgDomainsEnabled = orgDomainsEnabled;
     return this;
   }
@@ -655,7 +530,7 @@ public class PortalConfig {
     this.orgSsoEnabled = orgSsoEnabled;
   }
 
-  public PortalConfig orgSsoEnabled(Boolean orgSsoEnabled) {
+  public PortalFeatures orgSsoEnabled(Boolean orgSsoEnabled) {
     this.orgSsoEnabled = orgSsoEnabled;
     return this;
   }
@@ -670,7 +545,7 @@ public class PortalConfig {
     this.orgEventsEnabled = orgEventsEnabled;
   }
 
-  public PortalConfig orgEventsEnabled(Boolean orgEventsEnabled) {
+  public PortalFeatures orgEventsEnabled(Boolean orgEventsEnabled) {
     this.orgEventsEnabled = orgEventsEnabled;
     return this;
   }

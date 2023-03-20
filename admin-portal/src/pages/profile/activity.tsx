@@ -1,5 +1,4 @@
 import { Fragment, useState } from "react";
-import { ComputerIcon } from "components/icons/computer";
 import SectionHeader from "components/navs/section-header";
 import ActivityLoader from "components/loaders/activity";
 import ActivityItem from "components/elements/activity/item";
@@ -12,7 +11,7 @@ import {
   SessionRepresentation,
   ClientRepresentation,
 } from "store/apis/profile";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import { keycloakService } from "keycloak";
 import TimeUtil from "services/time-util";
 import Button from "components/elements/forms/buttons/button";
@@ -29,14 +28,14 @@ const ActivityProfile = () => {
   const [signOutSessionData, setSignOutSessionData] =
     useState<SignOutSessionState>();
   const { data: devices = [], isFetching } = useGetDevicesQuery({
-    realm: apiRealm,
+    realm: config.env.realm,
   });
   const [deleteSessions] = useDeleteCurrentSessionMutation();
   const [deleteSession, { isSuccess }] = useDeleteSessionMutation();
 
   const signOutAll = () => {
     deleteSessions({
-      realm: apiRealm,
+      realm: config.env.realm,
     }).then(() => {
       keycloakService.logout();
     });
@@ -47,7 +46,7 @@ const ActivityProfile = () => {
     session: SessionRepresentation
   ) => {
     deleteSession({
-      realm: apiRealm,
+      realm: config.env.realm,
       sessionId: session.id!,
     }).then(() => {
       //refresh devices? automatic?

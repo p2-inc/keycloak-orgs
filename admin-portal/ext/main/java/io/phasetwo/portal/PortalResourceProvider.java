@@ -1,12 +1,16 @@
 package io.phasetwo.portal;
 
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.*;
 import javax.ws.rs.WebApplicationException;
@@ -21,15 +25,19 @@ import org.keycloak.http.HttpRequest;
 import org.keycloak.http.HttpResponse;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.services.Urls;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.Auth;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resources.Cors;
+import org.keycloak.services.resources.RealmsResource;
 import org.keycloak.theme.Theme;
 
 @JBossLog
 public class PortalResourceProvider implements RealmResourceProvider {
+
+  private static ObjectMapper mapper = new ObjectMapper();
 
   private final KeycloakSession session;
   private final String authRealmOverride;
@@ -81,27 +89,82 @@ public class PortalResourceProvider implements RealmResourceProvider {
     return Cors.add(request, Response.ok()).auth().allowedMethods(METHODS).preflight().build();
   }
 
-  /** awful hack version for keycloak-x */
+  @GET
+  @Path("{path: ^(profile|organizations).*}")
+  @Produces(MediaType.TEXT_HTML)
+  public Response forward() {
+    return portal();
+  }
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   public Response portal() {
     init();
-    String portalResources = ".";
-    Theme theme = getTheme("portal");
     RealmModel realm = session.getContext().getRealm();
+    Theme theme = getTheme("portal");
+    UriInfo uriInfo = session.getContext().getUri();
+    URI authUrl = uriInfo.getBaseUri();
+    URI portalBaseUrl =
+        uriInfo
+            .getBaseUriBuilder()
+            .path(RealmsResource.class)
+            .path(realm.getName())
+            .path("portal")
+            .path("/")
+            .build(realm);
+    String portalResources =
+        Urls.themeRoot(authUrl).getPath() + "/" + "admin-portal" + "/" + theme.getName();
 
-    Locale locale = null;
-    if (auth != null) locale = session.getContext().resolveLocale(auth.getUser());
-    else locale = new Locale(session.getContext().getRealm().getDefaultLocale());
-
-    LoginFormsProvider form =
-        session
-            .getProvider(LoginFormsProvider.class)
-            .setAttribute("locale", locale.toLanguageTag())
-            .setAttribute("portalResources", portalResources)
-            .setAttribute("realmName", realm.getName());
-    FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
+    Locale locale = new Locale("en");
     try {
+      if (auth != null && auth.getUser() != null) {
+        locale = session.getContext().resolveLocale(auth.getUser());
+      } else {
+        locale = new Locale(realm.getDefaultLocale() != null ? realm.getDefaultLocale() : "en");
+      }
+    } catch (Exception e) {
+      log.warn("Unable to determine locale.");
+    }
+
+    try {
+      String referer =
+          session
+              .getContext()
+              .getHttpRequest()
+              .getHttpHeaders()
+              .getRequestHeaders()
+              .getFirst("Referer");
+      PortalEnvironment env =
+          new PortalEnvironment()
+              .realm(realm.getName())
+              .locale(locale.toLanguageTag())
+              .authServerUrl(
+                  authUrl.getPath().endsWith("/") ? authUrl.toString() : authUrl.toString() + "/")
+              .baseUrl(portalBaseUrl.toString())
+              .resourceUrl(portalResources)
+              .refererUrl(referer)
+              .isRunningAsTheme(true);
+      Optional.ofNullable(realm.getName()).ifPresent(a -> env.name(a));
+      Optional.ofNullable(realm.getDisplayName()).ifPresent(a -> env.displayName(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.logo.url")))
+          .ifPresent(a -> env.logoUrl(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.favicon.url")))
+          .ifPresent(a -> env.faviconUrl(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.appicon.url")))
+          .ifPresent(a -> env.appiconUrl(a));
+      env.setFeatures(PortalFeatures.fromSession(session, auth));
+
+      // String envStr = StringEscapeUtils.escapeJson(mapper.writeValueAsString(env));
+      String envStr =
+          new String(JsonStringEncoder.getInstance().quoteAsString(mapper.writeValueAsString(env)));
+      // String envStr = mapper.writeValueAsString(env);
+      log.infof("set environment string to %s", envStr);
+      LoginFormsProvider form =
+          session
+              .getProvider(LoginFormsProvider.class)
+              .setAttribute("environment", envStr)
+              .setAttribute("realmName", realm.getName());
+      FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
       Method processTemplateMethod =
           fm.getClass()
               .getDeclaredMethod("processTemplate", Theme.class, String.class, Locale.class);
@@ -117,19 +180,8 @@ public class PortalResourceProvider implements RealmResourceProvider {
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
   }
 
-  /* this version isn't working in Keycloak-X. TODO test with new version
   @GET
-  @Produces(MediaType.TEXT_HTML)
-  public Response wizard() {
-    String wizardResources = ".";
-    log.debugf("wizardResources %s", wizardResources);
-    RealmModel realm = session.getContext().getRealm();
-    return session.getProvider(LoginFormsProvider.class).setAttribute("wizardResources", wizardResources).setAttribute("realmName", realm.getName()).createForm("wizard.ftl");
-  }
-  */
-
-  @GET
-  @Path("{path: ^(asset-manifest|logo|manifest|static).*}")
+  @Path("{path: ^(asset-manifest|logo|manifest|static|locales|favicon).*}")
   public Response staticResources(@PathParam("path") final String path) throws IOException {
     String fileName = getLastPathSegment(session.getContext().getUri());
     Theme theme = getTheme("portal");
@@ -157,14 +209,6 @@ public class PortalResourceProvider implements RealmResourceProvider {
             "resource",
             "admin-portal");
     return Response.ok(json).build();
-  }
-
-  @GET
-  @Path("/config.json")
-  @Produces(MediaType.APPLICATION_JSON)
-  public PortalConfig portalJson() {
-    setupCors();
-    return PortalConfig.createFromAttributes(session);
   }
 
   private static String getBaseUrl(UriInfo uriInfo) {

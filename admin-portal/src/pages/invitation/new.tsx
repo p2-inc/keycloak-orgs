@@ -6,7 +6,7 @@ import { useAddOrganizationInvitationMutation } from "store/apis/orgs";
 import { useState } from "react";
 import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
 import { useForm } from "react-hook-form";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
 import SquareBadge from "components/elements/badges/square-badge";
@@ -68,7 +68,7 @@ const NewInvitation = () => {
     if (selectedRole && data.email) {
       const resp = await addOrganizationInvitation({
         orgId: orgId!,
-        realm: apiRealm,
+        realm: config.env.realm,
         invitationRequestRepresentation: {
           email: data.email,
           inviterId: keycloak.tokenParsed?.sub,

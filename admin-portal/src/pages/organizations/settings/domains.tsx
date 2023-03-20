@@ -6,7 +6,7 @@ import Table, {
 import { PlusIcon } from "components/icons";
 import SectionHeader from "components/navs/section-header";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { apiRealm } from "store/apis/helpers";
+import { config } from "config";
 import { useGetOrganizationDomainsQuery } from "store/apis/orgs";
 
 const columns: TableColumns = [
@@ -19,7 +19,7 @@ const SettingsDomain = () => {
   let { orgId } = useParams();
   const navigate = useNavigate();
   const { data: domains = [], isLoading } = useGetOrganizationDomainsQuery({
-    realm: apiRealm,
+    realm: config.env.realm,
     orgId: orgId!,
   });
 

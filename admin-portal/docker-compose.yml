@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  keycloak:
+      image: quay.io/phasetwo/phasetwo-keycloak:latest
+      environment:
+        KC_FEATURES: preview
+        KC_HTTP_RELATIVE_PATH: /auth
+        KEYCLOAK_ADMIN: admin
+        KEYCLOAK_ADMIN_PASSWORD: admin
+      ports:
+        - 8080:8080
+      volumes: 
+        - ./target/admin-portal-1.0.0-SNAPSHOT.jar:/opt/keycloak/providers/admin-portal.jar
+      command: [ "start-dev --spi-email-template-provider=freemarker-plus-mustache --spi-email-template-freemarker-plus-mustache-enabled=true" ] 

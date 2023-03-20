@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import Button from "components/elements/forms/buttons/button";
 import SectionHeader from "components/navs/section-header";
-import { apiRealm } from "store/apis/helpers";
-import { useFeatureFlags } from "store/feature-flags/hooks";
+import { config } from "config";
 import {
   useGetAccountQuery,
   useUpdateAccountMutation,
@@ -20,10 +19,10 @@ const isBundleKey = (key?: string) => key?.includes("${");
 
 const GeneralProfile = () => {
   const { t } = useTranslation();
-  const { featureFlags } = useFeatureFlags();
+  const featureFlags = config.env.features;
   const { data: account, isLoading: isLoadingAccount } = useGetAccountQuery({
     userProfileMetadata: true,
-    realm: apiRealm,
+    realm: config.env.realm,
   });
 
   const [updateAccount, { isLoading: isUpdatingAccount }] =
@@ -63,7 +62,7 @@ const GeneralProfile = () => {
 
     updateAccount({
       accountRepresentation: updatedAccount,
-      realm: apiRealm,
+      realm: config.env.realm,
     })
       .unwrap()
       .then(() => {
