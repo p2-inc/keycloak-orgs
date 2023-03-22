@@ -12,8 +12,10 @@ import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text
 import P2Toast from "components/utils/toast";
 
 const ROOT_ATTRIBUTES = ["username", "firstName", "lastName", "email"];
-const isRootAttribute = (attr?: string) => attr && ROOT_ATTRIBUTES.includes(attr);
-const fieldName = (name: string) => `${isRootAttribute(name) ? "" : "attributes."}${name}`;
+const isRootAttribute = (attr?: string) =>
+  attr && ROOT_ATTRIBUTES.includes(attr);
+const fieldName = (name: string) =>
+  `${isRootAttribute(name) ? "" : "attributes."}${name}`;
 const unWrap = (key: string) => key.substring(2, key.length - 1);
 const isBundleKey = (key?: string) => key?.includes("${");
 
@@ -52,7 +54,7 @@ const GeneralProfile = () => {
     setValue("firstName", account?.firstName);
     setValue("lastName", account?.lastName);
     setValue("email", account?.email);
-  }, [account]);
+  }, [account, setValue]);
 
   const onSubmit = async (formData) => {
     const updatedAccount = {
@@ -101,78 +103,83 @@ const GeneralProfile = () => {
           description="Manage your user profile information."
         />
       </div>
-      <form className="max-w-xl space-y-4" onSubmit={handleSubmit(onSubmit)}> <>
-        {!featureFlags.registrationEmailAsUsername && (
+      <form className="max-w-xl space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <>
+          {!featureFlags.registrationEmailAsUsername && (
+            <RHFFormTextInputWithLabel
+              slug="username"
+              label={t("username")}
+              register={register}
+              registerArgs={{
+                required: true,
+                pattern: /\S+@\S+\.\S+/,
+              }}
+              inputArgs={{
+                disabled: isLoadingAccount,
+                placeholder: "you",
+                type: "username",
+              }}
+              error={errors.username}
+            />
+          )}
+          {featureFlags.updateEmailFeatureEnabled && (
+            <RHFFormTextInputWithLabel
+              slug="email"
+              label={t("email")}
+              register={register}
+              registerArgs={{
+                required: true,
+                pattern: /\S+@\S+\.\S+/,
+              }}
+              inputArgs={{
+                disabled: isLoadingAccount,
+                placeholder: "your@email.com",
+                type: "email",
+              }}
+              error={errors.email}
+            />
+          )}
           <RHFFormTextInputWithLabel
-            slug="username"
-            label={t("username")}
+            slug="firstName"
+            label="First Name"
             register={register}
-            registerArgs={{
-              required: true,
-              pattern: /\S+@\S+\.\S+/,
-            }}
             inputArgs={{
               disabled: isLoadingAccount,
-              placeholder: "you",
-              type: "username",
-	    }}
-            error={errors.username}
+              placeholder: "First name",
+            }}
+            error={errors.firstName}
           />
-        )}
-        {featureFlags.updateEmailFeatureEnabled && (
           <RHFFormTextInputWithLabel
-            slug="email"
-            label={t("email")}
+            slug="lastName"
+            label="Last Name"
             register={register}
-            registerArgs={{
-              required: true,
-              pattern: /\S+@\S+\.\S+/,
-            }}
-            inputArgs={{
-              disabled: isLoadingAccount,
-              placeholder: "your@email.com",
-              type: "email",
-            }}
-            error={errors.email}
+            inputArgs={{ disabled: isLoadingAccount, placeholder: "Last name" }}
+            error={errors.lastName}
           />
-        )}
-        <RHFFormTextInputWithLabel
-          slug="firstName"
-          label="First Name"
-          register={register}
-          inputArgs={{ disabled: isLoadingAccount, placeholder: "First name" }}
-          error={errors.firstName}
-        />
-        <RHFFormTextInputWithLabel
-          slug="lastName"
-          label="Last Name"
-          register={register}
-          inputArgs={{ disabled: isLoadingAccount, placeholder: "Last name" }}
-          error={errors.lastName}
-        />
-        <div className="space-x-2">
-          <Button
-            isBlackButton
-            type="submit"
-            disabled={isUpdatingAccount || isLoadingAccount || !isDirty}
-          >
-            Save
-          </Button>
-          <Button
-            type="button"
-            onClick={() =>
-              reset({
-                email: account?.username,
-                firstName: account?.firstName,
-                lastName: account?.lastName,
-              })
-            }
-            disabled={isUpdatingAccount || !isDirty}
-          >
-            Reset
-          </Button>
-        </div>
-      </> </form>
+          <div className="space-x-2">
+            <Button
+              isBlackButton
+              type="submit"
+              disabled={isUpdatingAccount || isLoadingAccount || !isDirty}
+            >
+              Save
+            </Button>
+            <Button
+              type="button"
+              onClick={() =>
+                reset({
+                  email: account?.username,
+                  firstName: account?.firstName,
+                  lastName: account?.lastName,
+                })
+              }
+              disabled={isUpdatingAccount || !isDirty}
+            >
+              Reset
+            </Button>
+          </div>
+        </>
+      </form>
     </div>
   );
 };

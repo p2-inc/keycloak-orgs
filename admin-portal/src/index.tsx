@@ -32,100 +32,115 @@ import DomainsVerify from "pages/organizations/domains/verify";
 import DomainContainer from "pages/organizations/domains";
 import { Toaster } from "react-hot-toast";
 import { basename } from "path";
+import Roles from "pages/member/roles";
+import Member from "pages/member";
 
 export type P2Params = {
   orgId: string;
   domainRecord: string;
 };
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        path: "/organizations",
-        element: <Organizations />,
-      },
-      {
-        path: "/organizations/:orgId/details",
-        element: <OrganizationDetail />,
-      },
-      {
-        path: "/organizations/:orgId/settings",
-        element: <OrganizationSettings />,
-      },
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <App />,
+      errorElement: <ErrorPage />,
+      children: [
+        {
+          path: "/organizations",
+          element: <Organizations />,
+        },
+        {
+          path: "/organizations/:orgId/details",
+          element: <OrganizationDetail />,
+        },
+        {
+          path: "/organizations/:orgId/settings",
+          element: <OrganizationSettings />,
+        },
 
-      {
-        path: "/organizations/:orgId/domains",
-        index: true,
-        loader: () => redirect("add"),
-      },
-      {
-        path: "/organizations/:orgId/domains/*",
-        element: <DomainContainer />,
-        children: [
-          {
-            path: "add",
-            element: <DomainsAdd />,
-          },
-          {
-            path: "verify/:domainRecord",
-            element: <DomainsVerify />,
-          },
-        ],
-      },
-      {
-        path: "/organizations/:orgId/invitation",
-        element: <Invitation />,
-        children: [
-          {
-            path: "new",
-            element: <NewInvitation />,
-          },
-        ],
-      },
-      {
-        path: "/profile",
-        index: true,
-        loader: () => redirect("general"),
-      },
-      {
-        path: "/profile/*",
-        element: <Profile />,
-        children: [
-          {
-            path: "general",
-            element: <GeneralProfile />,
-          },
-          {
-            path: "role",
-            element: <RoleProfile />,
-          },
-          {
-            path: "signin",
-            element: <SigninProfile />,
-          },
-          {
-            path: "activity",
-            element: <ActivityProfile />,
-          },
-          {
-            path: "linked",
-            element: <LinkedProfile />,
-          },
-        ],
-      },
-    ],
-  },
+        {
+          path: "/organizations/:orgId/domains",
+          index: true,
+          loader: () => redirect("add"),
+        },
+        {
+          path: "/organizations/:orgId/domains/*",
+          element: <DomainContainer />,
+          children: [
+            {
+              path: "add",
+              element: <DomainsAdd />,
+            },
+            {
+              path: "verify/:domainRecord",
+              element: <DomainsVerify />,
+            },
+          ],
+        },
+        {
+          path: "/organizations/:orgId/invitation",
+          element: <Invitation />,
+          children: [
+            {
+              path: "new",
+              element: <NewInvitation />,
+            },
+          ],
+        },
+        {
+          path: "/organizations/:orgId/members/:memberId",
+          element: <Member />,
+          children: [
+            {
+              path: "roles",
+              element: <Roles />,
+            },
+          ],
+        },
+        {
+          path: "/profile",
+          index: true,
+          loader: () => redirect("general"),
+        },
+        {
+          path: "/profile/*",
+          element: <Profile />,
+          children: [
+            {
+              path: "general",
+              element: <GeneralProfile />,
+            },
+            {
+              path: "role",
+              element: <RoleProfile />,
+            },
+            {
+              path: "signin",
+              element: <SigninProfile />,
+            },
+            {
+              path: "activity",
+              element: <ActivityProfile />,
+            },
+            {
+              path: "linked",
+              element: <LinkedProfile />,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      path: "*",
+      element: <Navigate to="organizations" />,
+    },
+  ],
   {
-    path: "*",
-    element: <Navigate to="organizations" />,
-  },
-],{
-  basename: config.basename,
-});
+    basename: config.basename,
+  }
+);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

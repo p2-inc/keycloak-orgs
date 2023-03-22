@@ -63,9 +63,15 @@ export default function OrganizationDetail() {
   const rows: TableRows = filteredMembers.map((member) => ({
     email: member.email,
     name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
-    roles: <MemberRoles member={member} orgId={orgId!} realm={config.env.realm} />,
+    roles: (
+      <MemberRoles member={member} orgId={orgId!} realm={config.env.realm} />
+    ),
     action: (
-      <MembersActionMenu member={member} orgId={orgId!} realm={config.env.realm} />
+      <MembersActionMenu
+        member={member}
+        orgId={orgId!}
+        realm={config.env.realm}
+      />
     ),
   }));
 

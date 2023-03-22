@@ -35,7 +35,7 @@ const SigninProfile = () => {
   const { data: credentials = [], isLoading } = useGetCredentialsQuery({
     realm: config.env.realm,
   });
-  const [deleteCredential, { isSuccess }] = useDeleteCredentialMutation();
+  const [deleteCredential] = useDeleteCredentialMutation();
 
   const removeCredential = (
     credential: CredentialMetadataRepresentation

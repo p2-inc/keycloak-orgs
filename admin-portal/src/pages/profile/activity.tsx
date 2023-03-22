@@ -31,7 +31,7 @@ const ActivityProfile = () => {
     realm: config.env.realm,
   });
   const [deleteSessions] = useDeleteCurrentSessionMutation();
-  const [deleteSession, { isSuccess }] = useDeleteSessionMutation();
+  const [deleteSession] = useDeleteSessionMutation();
 
   const signOutAll = () => {
     deleteSessions({

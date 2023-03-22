@@ -5,6 +5,8 @@ import {
 } from "store/apis/orgs";
 import { roleSettings } from "services/role";
 import RoleBadge from "components/elements/badges/role-badge";
+import cs from "classnames";
+import { Link } from "react-router-dom";
 
 type Props = {
   member: UserRepresentation;
@@ -17,6 +19,8 @@ type FilteredRoleProp = {
   regexpName: string;
   regexpClassName: string;
   roles: Array<any>;
+  member: UserRepresentation;
+  orgId: string;
 };
 
 const FilteredRole: React.FC<FilteredRoleProp> = ({
@@ -24,6 +28,8 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
   regexpName,
   regexpClassName,
   roles,
+  member,
+  orgId,
 }) => {
   const filtered = roles.filter((f) => regexp.test(f.name));
   if (filtered.length > 0) {
@@ -50,6 +56,17 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
               </div>
             </Menu.Item>
           ))}
+          <Menu.Item>
+            <Link to={`/organizations/${orgId}/members/${member.id}/roles`}>
+              <button
+                className={cs(
+                  "mt-1 rounded-sm bg-gray-200 px-2 py-1 text-left text-xs text-gray-700"
+                )}
+              >
+                edit
+              </button>
+            </Link>
+          </Menu.Item>
         </Menu.Items>
       </Menu>
     );
@@ -78,6 +95,8 @@ const MemberRoles: React.FC<Props> = ({ member, orgId, realm }) => {
             roles={roles}
             regexpClassName={f.className}
             key={f.name}
+            member={member}
+            orgId={orgId}
           />
         ))
       )}
