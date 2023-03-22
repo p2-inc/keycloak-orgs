@@ -18,6 +18,7 @@ import * as icons from "components/icons/providers";
 import P2Toast from "components/utils/toast";
 
 const LinkedProfile = () => {
+  const featureFlags = config.env.features;
   const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
     realm: config.env.realm,
   });
@@ -142,32 +143,39 @@ const LinkedProfile = () => {
     }));
 
   return (
-    <div>
-      <div className="mb-12">
-        <SectionHeader
-          title="Linked accounts"
-          description="Manage logins through third-party accounts."
-        />
-      </div>
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <SectionHeader title="Linked login providers" variant="medium" />
-          <Table
-            columns={linkedColumns}
-            rows={linkedRows}
-            isLoading={isLoading}
-          />
+    <>
+      {featureFlags.linkedAccountsEnabled && (
+        <div>
+          <div className="mb-12">
+            <SectionHeader
+              title="Linked accounts"
+              description="Manage logins through third-party accounts."
+            />
+          </div>
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <SectionHeader title="Linked login providers" variant="medium" />
+              <Table
+                columns={linkedColumns}
+                rows={linkedRows}
+                isLoading={isLoading}
+              />
+            </div>
+            <div className="space-y-4">
+              <SectionHeader
+                title="Unlinked login providers"
+                variant="medium"
+              />
+              <Table
+                columns={unlinkedColumns}
+                rows={unlinkedRows}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
         </div>
-        <div className="space-y-4">
-          <SectionHeader title="Unlinked login providers" variant="medium" />
-          <Table
-            columns={unlinkedColumns}
-            rows={unlinkedRows}
-            isLoading={isLoading}
-          />
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 
