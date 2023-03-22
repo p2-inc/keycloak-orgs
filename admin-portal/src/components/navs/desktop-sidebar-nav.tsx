@@ -1,6 +1,7 @@
 import { Popover } from "@headlessui/react";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
+import { config } from "config";
 import useUser from "components/utils/useUser";
 import { keycloakService } from "keycloak";
 import { ExternalLink } from "lucide-react";
@@ -19,6 +20,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
   setMenuCollapsed,
   navigation,
 }) => {
+  console.log("config.env.logoUrl", config.env.logoUrl);
   const { user, fullName } = useUser();
 
   return (
@@ -40,16 +42,28 @@ const DesktopSidebarNav: React.FC<Props> = ({
                   className="group flex items-center justify-center py-4 pt-8 hover:cursor-pointer "
                   onClick={() => setMenuCollapsed(!menuCollapsed)}
                 >
-                  <DoubleSlashBrandIcon />
-                  <ChevronIcon className="stroke-gray-400 group-hover:stroke-gray-600 " />
+                  {config.env.appiconUrl ? (
+                    <img
+                      src={config.env.appiconUrl}
+                      className="h-full w-full max-w-[50]"
+                      alt="App Icon"
+                    />
+                  ) : (
+                    <DoubleSlashBrandIcon />
+                  )}
+                  <ChevronIcon className="stroke-gray-400 group-hover:stroke-gray-600" />
                 </div>
               ) : (
                 <div
                   className="group flex items-center justify-between py-4 pr-4 pl-8 pt-8 hover:cursor-pointer"
                   onClick={() => setMenuCollapsed(!menuCollapsed)}
                 >
-                  <FullBrandIcon />
-                  <ChevronIcon className="rotate-180 stroke-gray-400 group-hover:stroke-gray-600 " />
+                  {config.env.logoUrl ? (
+                    <img src={config.env.appiconUrl} alt="App Icon" />
+                  ) : (
+                    <FullBrandIcon />
+                  )}
+                  <ChevronIcon className="rotate-180 stroke-gray-400 group-hover:stroke-gray-600" />
                 </div>
               )}
               <nav
