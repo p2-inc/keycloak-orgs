@@ -2,6 +2,7 @@ package io.phasetwo.service.model.jpa;
 
 import static io.phasetwo.service.Orgs.*;
 
+import com.google.common.base.Strings;
 import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
@@ -159,6 +160,23 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
       em.persist(a);
       org.getAttributes().add(a);
     }
+  }
+
+  @Override
+  public Stream<UserModel> searchForMembersStream(
+      String search, Integer firstResult, Integer maxResults) {
+    // TODO this could be optimized for large member lists with a query
+    return getMembersStream()
+        .filter(
+            (m) -> {
+              if (Strings.isNullOrEmpty(search)) return true;
+              return (m.getEmail() != null && m.getEmail().toLowerCase().contains(search))
+                  || (m.getUsername() != null && m.getUsername().toLowerCase().contains(search))
+                  || (m.getFirstName() != null && m.getFirstName().toLowerCase().contains(search))
+                  || (m.getLastName() != null && m.getLastName().toLowerCase().contains(search));
+            })
+        .skip(firstResult)
+        .limit(maxResults);
   }
 
   @Override

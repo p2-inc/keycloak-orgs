@@ -30,14 +30,14 @@ public class MembersResource extends OrganizationAdminResource {
   @Path("")
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<UserRepresentation> getMembers(
-      @QueryParam("first") Integer firstResult, @QueryParam("max") Integer maxResults) {
-    log.debugf("Get members for %s %s", realm.getName(), organization.getId());
+      @QueryParam("search") String searchQuery,
+      @QueryParam("first") Integer firstResult,
+      @QueryParam("max") Integer maxResults) {
+    log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     return organization
-        .getMembersStream()
-        .skip(firstResult)
-        .limit(maxResults)
+        .searchForMembersStream(searchQuery, firstResult, maxResults)
         .map(m -> toRepresentation(session, realm, m));
   }
 

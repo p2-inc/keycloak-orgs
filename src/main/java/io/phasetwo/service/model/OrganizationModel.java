@@ -70,6 +70,8 @@ public interface OrganizationModel {
 
   Stream<UserModel> getMembersStream();
 
+  Stream<UserModel> searchForMembersStream(String search, Integer firstResult, Integer maxResults);
+
   boolean hasMembership(UserModel user);
 
   void grantMembership(UserModel user);

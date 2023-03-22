@@ -5,7 +5,6 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.Organization;
-import java.util.Optional;
 import java.util.stream.Stream;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -44,7 +43,6 @@ public class OrganizationsResource extends OrganizationAdminResource {
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults) {
     log.debugf("listOrgs %s %s %d %d", realm.getName(), searchQuery, firstResult, maxResults);
-    Optional<String> search = Optional.ofNullable(searchQuery);
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     return orgs.searchForOrganizationByNameStream(realm, searchQuery, firstResult, maxResults)
