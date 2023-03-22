@@ -4,32 +4,41 @@
 
 *Single realm, multi-tenancy for SaaS apps*
 
-This project intends to provide a range of Keycloak extensions focused on solving several of the common use cases of multi-tenant SaaS applications that Keycloak does not solve out of the box. 
+This project intends to provide a range of Keycloak extensions focused on solving several of the common use cases of multi-tenant SaaS applications that Keycloak does not solve out of the box.
 
 The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud offering, and are released here as part of its commitment to making its [core extensions](https://phasetwo.io/docs/introduction/open-source) open source. Please consult the [license](COPYING) for information regarding use.
 
 ## Contents
 
-- [Overview](#overview)
-- [Building](#building)
-- [Installation](#installation)
-- [Extensions](#extensions)
-  - [Data](#data)
-    - [Models](#models)
-	- [Entities](#entities)
-  - [Resources](#resources)
-  - [Mappers](#mappers)
-  - [Authentication](#authentication)
+- [Organizations for Keycloak](#organizations-for-keycloak)
+  - [Contents](#contents)
+  - [Overview](#overview)
+    - [Definitions](#definitions)
+  - [Quick start](#quick-start)
+  - [Building](#building)
+  - [Installation](#installation)
+    - [Admin UI](#admin-ui)
+    - [Compatibility](#compatibility)
+  - [Extensions](#extensions)
+    - [Data](#data)
+      - [Models](#models)
+      - [Entities](#entities)
+    - [Resources](#resources)
+    - [Mappers](#mappers)
+    - [Authentication](#authentication)
+      - [Invitations](#invitations)
+      - [IdP Discovery](#idp-discovery)
 
 ## Overview
 
 If you search for "multi-tenant Keycloak", you'll find several opinionated approaches, each promising, and each with their own tradeoffs. This project represents one such approach. It was built initially for a multi-tenant, public cloud, SaaS application. It has now been, in the form of the [Phase Two](https://phasetwo.io) cloud offering, adopted by several other companies for the same purpose.
 
 Other approaches that we tried and decided against were:
+
 - One Realm for each tenant
 - Using existing Keycloak Groups to model Organizations, Roles and Memberships
 
-But each of these approaches had tradeoffs of scale or frailty we found undesirable or unacceptable to meet our requirements. Instead, we opted to make Organizations, and their Invitations, Roles and Memberships first-class entities in Keycloak. 
+But each of these approaches had tradeoffs of scale or frailty we found undesirable or unacceptable to meet our requirements. Instead, we opted to make Organizations, and their Invitations, Roles and Memberships first-class entities in Keycloak.
 
 ### Definitions
 
@@ -46,13 +55,14 @@ The easiest way to get started is our [Docker image](https://quay.io/repository/
 
 The build uses `keycloak-testsuite-utils` for the unit tests. You'll need to install Keycloak from source locally, as the test utility never gets published to maven central by the Keycloak team. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
 
-```
+```bash
 KC_VERSION=21.0.1
 git clone https://github.com/keycloak/keycloak
 git fetch origin --tags
 git checkout $KC_VERSION
 mvn clean install -DskipTests
 ```
+
 Then, checkout this project and run `mvn package`, which will produce a jar in the `target/` directory.
 
 ## Installation
@@ -60,21 +70,24 @@ Then, checkout this project and run `mvn package`, which will produce a jar in t
 The maven build uses the shade plugin to package a fat-jar with all dependencies, except for the [`keycloak-admin-client`](https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client). Put the `keycloak-orgs` jar and `keycloak-admin-client` jar (that corresponds to your Keycloak version) in your `provider` (for Quarkus-based distribution) or in `standalone/deployments` (for Wildfly, legacy distribution) directory and restart Keycloak. It is unknown if these extensions will work with hot reloading using the legacy distribution.
 
 During the first run, some initial migrations steps will occur:
+
 - Database migrations will be run to add the tables for use by the JPA entities. These have been tested with MySQL, H2, and Postgres. Other database types may fail.
 - Initial `realm-management` client roles (`view-organizations` and `manage-organizations`) will be be added to each realm.
 
 ### Admin UI
+
 If you are using the extension as bundled in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags) or by building our [Admin UI theme](https://github.com/p2-inc/keycloak-ui), you must take an additional step in order to show that theme. In the Admin Console UI, go to the *Realm Settings* -> *Themes* page and select `phasetwo.v2`. Then, the "Organizations" section will be available in the left navigation.
 
 ### Compatibility
 
-Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Please file an issue if you have successfully installed it with prior versions. Additionally, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags). 
+Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Please file an issue if you have successfully installed it with prior versions. Additionally, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags).
 
 ## Extensions
 
 ### Data
 
 We've adopted a similar model that Keycloak uses for making the Organization data available to the application. There is a custom SPI that makes the [OrganizationProvider](src/main/java/io/phasetwo/service/model/OrganizationProvider.java) available. The methods provided are:
+
 ```java
   OrganizationModel createOrganization(
       RealmModel realm, String name, UserModel createdBy);
@@ -101,6 +114,7 @@ We've adopted a similar model that Keycloak uses for making the Organization dat
 #### Models
 
 The OrganizationProvider returns model delegates that wrap the underlying entities and provide conveniences for working with the data. They are available in the `io.phasetwo.service.model` package.
+
 - [OrganizationModel](src/main/java/io/phasetwo/service/model/OrganizationModel.java)
 - [OrganizationRoleModel](src/main/java/io/phasetwo/service/model/OrganizationRoleModel.java)
 - [InvitationModel](src/main/java/io/phasetwo/service/model/InvitationModel.java)
@@ -108,6 +122,7 @@ The OrganizationProvider returns model delegates that wrap the underlying entiti
 #### Entities
 
 There are JPA entities that represent the underlying tables that are available in the `io.phasetwo.service.model.jpa.entity` package. The providers and models are implemented using these entities in the `io.phasetwo.service.model.jpa` package.
+
 - [OrganizationEntity](src/main/java/io/phasetwo/service/model/jpa/entity/OrganizationEntity.java)
 - [OrganizationAttributeEntity](src/main/java/io/phasetwo/service/model/jpa/entity/OrganizationAttributeEntity.java)
 - [OrganizationMemberEntity](src/main/java/io/phasetwo/service/model/jpa/entity/OrganizationMemberEntity.java)
@@ -118,6 +133,7 @@ There are JPA entities that represent the underlying tables that are available i
 ### Resources
 
 A group of custom REST resources are made available for administrator and customer use and UI. Current documentation on the available resource methods is in this [openapi.yaml](https://github.com/p2-inc/phasetwo-docs/blob/master/openapi.yaml) specification file, and you can find browsable documentation on the [Phase Two API](https://phasetwo.io/api/) site.
+
 - Organizations - CRUD Organizations
 - Memberships - CRUD and check User-Organization membership
 - Roles - CRUD Organization Roles and grant/revoke Roles to Users
@@ -126,7 +142,8 @@ A group of custom REST resources are made available for administrator and custom
 ### Mappers
 
 There is currently a single OIDC mapper that adds Organization membership and roles to the token. The format of the addition to the token is
-```
+
+```json
   "organizations": {
     "5aeb9aeb-97a3-4deb-af9f-516615b59a2d" : {
       "name": "foo",
@@ -134,7 +151,10 @@ There is currently a single OIDC mapper that adds Organization membership and ro
     }
   }
 ```
-tbd screenshot of adding/configuring mapper in admin UI
+
+You can configure the mapper, by going to **Clients** > ***your-client-name*** > **Client scopes** > ***your-client-name*-dedicated** and choosing to add a new mapper **By configuration**. Once selected, choose the **Organization Role** mapper from the list and specify the details like the following:
+
+![mapper](./docs/assets/mapper.png)
 
 ### Authentication
 
@@ -153,4 +173,3 @@ tbd screenshot of installing in flow
 -----
 
 All documentation, source code and other files in this repository are Copyright 2023 Phase Two, Inc.
-
