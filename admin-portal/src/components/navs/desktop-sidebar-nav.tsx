@@ -1,24 +1,26 @@
-import { Menu, Popover } from "@headlessui/react";
+import { Popover } from "@headlessui/react";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
+import useUser from "components/utils/useUser";
+import { keycloakService } from "keycloak";
 import { ExternalLink } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import { ChevronIcon, DoubleSlashBrandIcon, FullBrandIcon } from "../icons";
-import { NavigationItem, UserInfo } from "../layouts/layout";
+import { NavigationItem } from "../layouts/layout";
 
 type Props = {
   menuCollapsed: boolean;
   setMenuCollapsed: (collapsed: boolean) => void;
   navigation: NavigationItem[];
-  user: UserInfo;
 };
 
 const DesktopSidebarNav: React.FC<Props> = ({
   menuCollapsed,
   setMenuCollapsed,
   navigation,
-  user,
 }) => {
+  const { user, fullName } = useUser();
+
   return (
     <>
       {/* If using a mobile view: <div className="hidden lg:flex lg:flex-shrink-0"> */}
@@ -101,21 +103,21 @@ const DesktopSidebarNav: React.FC<Props> = ({
                 <Popover.Button className="outline-none">
                   <div className="flex items-center">
                     <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm font-semibold">
-                      {user.name.substring(0, 1)}
+                      {fullName().substring(0, 1)}
                     </div>
                     {!menuCollapsed && (
-                      <p className="ml-2 text-sm font-semibold">{user.name}</p>
+                      <p className="ml-2 text-sm font-semibold">{fullName()}</p>
                     )}
                   </div>
                 </Popover.Button>
                 <Popover.Panel className="absolute bottom-10 left-0 z-[100] w-72 divide-y bg-white px-5 shadow-lg">
                   <div className="py-5">
-                    <div className="font-semibold">{user.name}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
+                    <div className="font-semibold">{fullName()}</div>
+                    <div className="text-sm text-gray-500">{user?.email}</div>
                   </div>
                   <div className="py-1">
                     <Link
-                      to=""
+                      to="/"
                       className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900"
                     >
                       <div>Return to homepage</div>
@@ -123,7 +125,12 @@ const DesktopSidebarNav: React.FC<Props> = ({
                     </Link>
                   </div>
                   <div className="py-5">
-                    <Button className="w-full">Log Out</Button>
+                    <Button
+                      className="w-full"
+                      onClick={() => keycloakService.logout()}
+                    >
+                      Log Out
+                    </Button>
                   </div>
                 </Popover.Panel>
               </Popover>

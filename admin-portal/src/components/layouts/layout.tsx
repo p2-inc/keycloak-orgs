@@ -3,16 +3,6 @@ import DesktopSidebarNav from "../navs/desktop-sidebar-nav";
 import { IconType, PeopleIcon, PersonIcon } from "../icons";
 import { Building2, User, Users } from "lucide-react";
 
-export type UserInfo = {
-  name: string;
-  email: string;
-};
-
-const user = {
-  name: "Garth Patil",
-  email: "garth@phasetwo.io",
-};
-
 export type NavigationItem = {
   name: string;
   href: string;
@@ -45,7 +35,6 @@ export default function Layout({ children }: { children: React.ReactElement }) {
           {/* Static sidebar for desktop */}
           <DesktopSidebarNav
             navigation={navigation}
-            user={user}
             setMenuCollapsed={setMenuCollapsed}
             menuCollapsed={menuCollapsed}
           />
