@@ -115,7 +115,7 @@ const GeneralProfile = () => {
                 pattern: /\S+@\S+\.\S+/,
               }}
               inputArgs={{
-                disabled: isLoadingAccount,
+                disabled: isLoadingAccount || !featureFlags.editUsernameAllowed,
                 placeholder: "you",
                 type: "username",
               }}

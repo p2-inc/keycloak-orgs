@@ -93,19 +93,23 @@ const SigninProfile = () => {
       name: metadata.credential?.userLabel ?? credentialType,
       created: time(metadata.credential?.createdDate),
       action: (
-        <Button
-          isCompact
-          className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
-          onClick={() => {
-            if (credentialType === "password") {
-              updateAIA("UPDATE_PASSWORD");
-            } else {
-              removeCredential(metadata.credential!);
-            }
-          }}
-        >
-          Remove
-        </Button>
+        <>
+          {featureFlags.passwordUpdateAllowed && (
+            <Button
+              isCompact
+              className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
+              onClick={() => {
+                if (credentialType === "password") {
+                  updateAIA("UPDATE_PASSWORD");
+                } else {
+                  removeCredential(metadata.credential!);
+                }
+              }}
+            >
+              Remove
+            </Button>
+          )}
+        </>
       ),
     }));
   };
