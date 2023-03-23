@@ -3,6 +3,7 @@ import { FC } from "react";
 import { Link } from "react-router-dom";
 import { ViewLayoutOptions } from "../forms/switches/view-switch";
 import { config } from "config";
+const { features: featureFlags } = config.env;
 
 type Props = {
   children: React.ReactNode;
@@ -61,8 +62,6 @@ const OrganizationItem: FC<Props> = ({
   subTitle,
   viewType,
 }) => {
-  const featureFlags = config.env.features;
-
   return (
     <>
       {featureFlags.orgDetailsEnabled && (

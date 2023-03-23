@@ -13,47 +13,34 @@ import SecondaryMainContentNav, {
 } from "components/navs/secondary-main-content-nav";
 import { Outlet } from "react-router-dom";
 import { config } from "config";
+const { features: featureFlags } = config.env;
 
-const navigation: NavigationItem[] = [];
-
-const addToNavigation = (data: NavigationItem, condition: boolean) => {
-  if (condition) {
-    navigation.push(data);
-  }
-};
-const featureFlags = config.env.features;
-addToNavigation(
+const navigation: NavigationItem[] = [
   {
     name: "General",
     href: "/profile/general",
     icon: UserCircleIcon,
+    isActive: true,
   },
-  true
-);
-addToNavigation(
   {
     name: "Signing in",
     href: "/profile/signin",
     icon: KeyIcon,
+    isActive: true,
   },
-  true
-);
-addToNavigation(
   {
     name: "Device activity",
     href: "/profile/activity",
     icon: DevicePhoneMobileIcon,
+    isActive: featureFlags.deviceActivityEnabled,
   },
-  featureFlags.deviceActivityEnabled
-);
-addToNavigation(
   {
     name: "Linked accounts",
     href: "/profile/linked",
     icon: SquaresPlusIcon,
+    isActive: featureFlags.linkedAccountsEnabled,
   },
-  featureFlags.linkedAccountsEnabled
-);
+];
 
 export default function Profile() {
   return (
@@ -62,7 +49,9 @@ export default function Profile() {
       <FixedWidthMainContent>
         {/* Secondary menu */}
         <SecondaryMainContentMenuArea>
-          <SecondaryMainContentNav navigation={navigation} />
+          <SecondaryMainContentNav
+            navigation={navigation.filter((n) => n.isActive)}
+          />
         </SecondaryMainContentMenuArea>
 
         {/* Primary content */}

@@ -18,7 +18,7 @@ import * as icons from "components/icons/providers";
 import P2Toast from "components/utils/toast";
 
 const LinkedProfile = () => {
-  const featureFlags = config.env.features;
+  const { features: featureFlags } = config.env;
   const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
     realm: config.env.realm,
   });

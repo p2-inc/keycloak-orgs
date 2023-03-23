@@ -32,7 +32,7 @@ const ActivityProfile = () => {
   });
   const [deleteSessions] = useDeleteCurrentSessionMutation();
   const [deleteSession] = useDeleteSessionMutation();
-  const featureFlags = config.env.features;
+  const { features: featureFlags } = config.env;
 
   const signOutAll = () => {
     deleteSessions({
@@ -165,8 +165,9 @@ const ActivityProfile = () => {
             )}
           </div>
           <div className="w-full rounded border border-gray-200 bg-gray-50">
-            {isFetching && <ActivityLoader />}
-            {!isFetching &&
+            {isFetching ? (
+              <ActivityLoader />
+            ) : (
               devices.map(
                 (device: DeviceRepresentation, deviceIndex: number) => (
                   <div className="divide-y">
@@ -257,7 +258,8 @@ const ActivityProfile = () => {
                     )}
                   </div>
                 )
-              )}
+              )
+            )}
           </div>
         </div>
       )}

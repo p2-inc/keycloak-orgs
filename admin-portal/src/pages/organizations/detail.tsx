@@ -30,7 +30,7 @@ import { Globe, Network, Plus, User } from "lucide-react";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
-  const featureFlags = config.env.features;
+  const { features: featureFlags } = config.env;
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
     realm: config.env.realm,

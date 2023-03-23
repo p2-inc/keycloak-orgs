@@ -12,6 +12,7 @@ export type NavigationItem = {
       titleId?: string | undefined;
     }
   >;
+  isActive: boolean;
 };
 
 type Props = {

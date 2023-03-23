@@ -32,7 +32,7 @@ const time = (time: string | undefined): string => {
 };
 
 const SigninProfile = () => {
-  const featureFlags = config.env.features;
+  const { features: featureFlags } = config.env;
   const { data: credentials = [], isLoading } = useGetCredentialsQuery({
     realm: config.env.realm,
   });
