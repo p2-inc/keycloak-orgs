@@ -208,7 +208,7 @@ const Roles = () => {
           />
         </div>
       )}
-      <div className="mt-8 divide-y">
+      <div className="mt-8 divide-y dark:divide-zinc-600">
         {isLoading
           ? Array.from(defaultRoles).map((r) => <Loader />)
           : roleData.map((item) => (

@@ -35,7 +35,7 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
       <div className="md:hidden">
         {activeItem && (
           <button
-            className="flex w-full items-center rounded-md border-2 border-gray-200 px-4 py-2 text-sm font-medium"
+            className="flex w-full items-center rounded-md border-2 border-gray-200 px-4 py-2 text-sm font-medium dark:border-zinc-600 dark:text-zinc-200"
             onClick={toggleMenu}
           >
             <div className="flex flex-1 items-center">
