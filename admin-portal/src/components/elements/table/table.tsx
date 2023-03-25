@@ -1,10 +1,10 @@
 import cs from "classnames";
 
 export const firstThClasses =
-  "py-3.5 pl-4 pr-3 text-left font-medium text-black sm:pl-6";
-export const thClasses = "px-3 py-3.5 text-left font-medium text-black";
+  "py-3.5 pl-4 pr-3 text-left font-medium text-black dark:text-zinc-200 sm:pl-6";
+export const thClasses = "px-3 py-3.5 text-left font-medium text-black dark:text-zinc-200";
 export const firstTdClasses =
-  "whitespace-normal py-4 pl-4 pr-3 font-medium text-black sm:pl-6";
+  "whitespace-normal py-4 pl-4 pr-3 font-medium text-black dark:text-zinc-200 sm:pl-6";
 export const tdClasses = "whitespace-normal px-3 py-4";
 
 export type TableColumns = {
@@ -26,7 +26,7 @@ type Props = {
 const loadingState = (columns) => {
   return (
     <div className="overflow-auto rounded-md border border-gray-200">
-      <table className="min-w-full divide-y divide-gray-200 bg-gray-50 text-sm font-medium text-black">
+      <table className="min-w-full divide-y divide-gray-200 bg-gray-50 text-sm font-medium text-black dark:text-zinc-600">
         <thead className="animate-pulse">
           <tr>
             {columns.map(() => (
@@ -55,8 +55,8 @@ const Table: React.FC<Props> = ({ columns, rows, isLoading }) => {
     return loadingState(columns);
   }
   return (
-    <div className="overflow-auto rounded-md border border-gray-200 md:overflow-visible">
-      <table className="min-w-full divide-y divide-gray-200 rounded-md  bg-gray-50 text-sm font-medium text-black">
+    <div className="overflow-auto rounded-md border border-gray-200 dark:border-zinc-600 md:overflow-visible">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-zinc-600 rounded-md bg-gray-50 dark:bg-p2dark-1000 text-sm font-medium text-black dark:text-zinc-200">
         <thead>
           <tr>
             {columns.map((column, index) => (
@@ -72,7 +72,7 @@ const Table: React.FC<Props> = ({ columns, rows, isLoading }) => {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y divide-gray-200 dark:divide-zinc-600">
           {rows.map((row, index) => (
             <tr key={index}>
               {columns.map((column, index) => (

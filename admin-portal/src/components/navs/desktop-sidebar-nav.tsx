@@ -28,13 +28,13 @@ const DesktopSidebarNav: React.FC<Props> = ({
       <div className="flex h-full flex-shrink-0">
         <div
           className={cs(
-            "flex w-[70px] flex-col border-r border-r-gray-100 transition-[width] duration-150 ease-in-out",
+            "flex w-[70px] flex-col border-r border-r-gray-100 transition-[width] duration-150 ease-in-out dark:border-r-zinc-800",
             {
               "w-64": !menuCollapsed,
             }
           )}
         >
-          <div className="flex min-h-0 flex-1 flex-col bg-gray-50">
+          <div className="flex min-h-0 flex-1 flex-col bg-gray-50 dark:bg-p2dark-1000">
             <div className="flex-1">
               {menuCollapsed ? (
                 <div
@@ -81,12 +81,13 @@ const DesktopSidebarNav: React.FC<Props> = ({
                       to={item.href}
                       className={({ isActive }) =>
                         cs(
-                          "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 hover:bg-white",
+                          "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 dark:hover:border-zinc-600 hover:bg-white dark:hover:bg-p2dark-900",
                           {
-                            "group:text-p2blue-700 border-p2blue-700 bg-white text-p2blue-700":
+                            "dark:border-zinc-600 dark:text-white": !isActive,
+                            "group:text-p2blue-700 border-p2blue-700 bg-white text-p2blue-700 dark:bg-p2dark-900":
                               isActive,
                             "w-full border-0": !menuCollapsed,
-                            "border-p2blue-700 text-p2blue-700 hover:border-p2blue-700":
+                            "border-p2blue-700 text-p2blue-700 hover:border-p2blue-700 dark:hover:border-p2blue-700 dark:hover:bg-p2dark-900":
                               menuCollapsed && isActive,
                           }
                         )
@@ -94,8 +95,6 @@ const DesktopSidebarNav: React.FC<Props> = ({
                     >
                       <item.icon
                         className="h-5 w-5"
-                        // className={cs("h-[18] w-[18]", item.iconClass)}
-                        // aria-hidden="true"
                       />
                       <span className="sr-only">{item.name}</span>
                       {!menuCollapsed && (
@@ -116,22 +115,22 @@ const DesktopSidebarNav: React.FC<Props> = ({
                 <Popover.Button className="outline-none">
                   <div className="flex items-center">
                     <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm font-semibold">
-                      {fullName().substring(0, 1)}
+                    {fullName().substring(0, 1)}
                     </div>
                     {!menuCollapsed && (
-                      <p className="ml-2 text-sm font-semibold">{fullName()}</p>
+                      <p className="ml-2 text-sm font-semibold dark:text-white">{fullName()}</p>
                     )}
                   </div>
                 </Popover.Button>
-                <Popover.Panel className="absolute bottom-10 left-0 z-[100] w-72 divide-y bg-white px-5 shadow-lg">
+                <Popover.Panel className="absolute bottom-10 left-0 z-[100] w-72 divide-y dark:divide-zinc-700 bg-white dark:bg-p2dark-900 border dark:border-zinc-700 px-5 shadow-lg rounded-lg">
                   <div className="py-5">
-                    <div className="font-semibold">{fullName()}</div>
+                    <div className="font-semibold dark:text-gray-200">{fullName()}</div>
                     <div className="text-sm text-gray-500">{user?.email}</div>
                   </div>
                   <div className="py-1">
                     <Link
                       to="/"
-                      className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900"
+                      className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-200 transition hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-gray-100"
                     >
                       <div>Return to homepage</div>
                       <ExternalLink className="h-4 w-4" />
