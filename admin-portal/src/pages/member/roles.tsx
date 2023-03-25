@@ -24,7 +24,7 @@ const loadingIcon = (
   <div>
     <div className={cs("relative h-12 w-12 overflow-hidden rounded-md")}>
       <div className="absolute -inset-10 z-10 bg-gradient-to-tr from-[#C7DFF0] to-[#1476B7]"></div>
-      <div className="absolute inset-[2px] z-20 flex items-center justify-center rounded bg-white">
+      <div className="absolute inset-[2px] z-20 flex items-center justify-center rounded bg-white dark:bg-p2dark-1000 dark:text-zinc-200">
         <User />
       </div>
     </div>
@@ -184,7 +184,7 @@ const Roles = () => {
         rightContent={
           <Link
             to={`/organizations/${orgId}/details`}
-            className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
+            className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
           >
             Back
           </Link>

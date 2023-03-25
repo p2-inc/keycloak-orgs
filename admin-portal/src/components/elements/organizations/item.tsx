@@ -29,7 +29,7 @@ const InnerItem = ({ children, title, subTitle, viewType }) => {
             {
               "flex-col space-y-5 rounded-md border border-gray-200 bg-gray-50 px-10 py-9 dark:bg-p2dark-1000 dark:border-zinc-600":
                 viewType === ViewLayoutOptions.GRID,
-              "flex-row justify-between px-4 py-2":
+              "flex-row justify-between px-5 py-4":
                 viewType === ViewLayoutOptions.LIST,
             }
           )}
@@ -69,7 +69,7 @@ const OrganizationItem: FC<Props> = ({
           to={link}
           className={cs(
             "group block",
-            "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
+            "focus:outline-none focus:ring-0",
             {
               "md:pb-3": viewType === ViewLayoutOptions.GRID,
             }

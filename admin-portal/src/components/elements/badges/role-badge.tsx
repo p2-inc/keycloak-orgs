@@ -13,7 +13,7 @@ const RoleBadge: FC<Props> = ({ name }) => {
       <span
         className={`inline-block h-2.5 w-2.5 flex-shrink-0 rounded-full ${settings?.className}`}
       ></span>
-      <span className="inline-block text-sm">{name}</span>
+      <span className="inline-block text-sm dark:text-zinc-200">{name}</span>
     </span>
   );
 };

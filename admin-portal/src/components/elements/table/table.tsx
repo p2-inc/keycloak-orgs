@@ -25,13 +25,13 @@ type Props = {
 
 const loadingState = (columns) => {
   return (
-    <div className="overflow-auto rounded-md border border-gray-200">
-      <table className="min-w-full divide-y divide-gray-200 bg-gray-50 text-sm font-medium text-black dark:text-zinc-600">
+    <div className="overflow-auto rounded-md border border-gray-200 dark:border-zinc-600">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-zinc-600 bg-gray-50 dark:bg-p2dark-1000 text-sm font-medium text-black dark:text-zinc-600">
         <thead className="animate-pulse">
           <tr>
             {columns.map(() => (
               <th className="p-4">
-                <div className="h-4 w-1/4 rounded-md bg-gray-300"></div>
+                <div className="h-4 w-1/4 rounded-md bg-gray-300 dark:bg-zinc-600"></div>
               </th>
             ))}
           </tr>
@@ -40,7 +40,7 @@ const loadingState = (columns) => {
           <tr>
             {columns.map(() => (
               <td className="p-4">
-                <div className="h-4 w-1/2 rounded-md bg-gray-300"></div>
+                <div className="h-4 w-1/2 rounded-md bg-gray-300 dark:bg-zinc-600"></div>
               </td>
             ))}
           </tr>

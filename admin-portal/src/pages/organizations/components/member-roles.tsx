@@ -48,7 +48,7 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
             </span>
           </div>
         </Menu.Button>
-        <Menu.Items className="absolute right-0 z-10 mt-2 w-60 origin-top-right rounded-md bg-white p-4 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute right-0 z-10 mt-2 w-60 origin-top-right rounded-md bg-white p-4 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-p2dark-900 dark:border-zinc-600 dark:border">
           {filtered.map((filteredRole) => (
             <Menu.Item key={filteredRole.name}>
               <div>
