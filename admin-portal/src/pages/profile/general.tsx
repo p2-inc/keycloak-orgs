@@ -21,7 +21,7 @@ const isBundleKey = (key?: string) => key?.includes("${");
 
 const GeneralProfile = () => {
   const { t } = useTranslation();
-  const featureFlags = config.env.features;
+  const { features: featureFlags } = config.env;
   const { data: account, isLoading: isLoadingAccount } = useGetAccountQuery({
     userProfileMetadata: true,
     realm: config.env.realm,
@@ -115,7 +115,7 @@ const GeneralProfile = () => {
                 pattern: /\S+@\S+\.\S+/,
               }}
               inputArgs={{
-                disabled: isLoadingAccount,
+                disabled: isLoadingAccount || !featureFlags.editUsernameAllowed,
                 placeholder: "you",
                 type: "username",
               }}

@@ -14,7 +14,7 @@ export interface Environment {
   refererUrl: string;
   isRunningAsTheme: boolean;
   features: Features;
-};
+}
 
 export interface Features {
   profileEnabled: boolean;
@@ -84,7 +84,7 @@ const initialEnvironment: Environment = {
   refererUrl: "",
   isRunningAsTheme: false,
   features: initialFeatures,
-}
+};
 
 var env: Environment = isEmpty(environment) ? initialEnvironment : environment;
 

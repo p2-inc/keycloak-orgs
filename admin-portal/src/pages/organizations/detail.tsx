@@ -30,6 +30,7 @@ import { Globe, Network, Plus, User } from "lucide-react";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
+  const { features: featureFlags } = config.env;
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
     realm: config.env.realm,
@@ -98,67 +99,76 @@ export default function OrganizationDetail() {
         <PrimaryContentArea>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {/* Invite new members */}
-            <OrganizationActionCard>
-              <OACTopRow>
-                <RoundedIcon>
-                  <User className="h-5 w-5" />
-                </RoundedIcon>
-                <Stat label="members" value={totalMembers}></Stat>
-                <Stat label="pending" value={invites.length}></Stat>
-              </OACTopRow>
-              <div className="text-sm leading-relaxed text-gray-600">
-                Invite new members or remove members from the organization.
-              </div>
-              <div>
-                <Link to={`/organizations/${orgId}/invitation/new`}>
-                  <Button isBlackButton>
-                    <Plus className="mr-2 w-5" />
-                    Invite new members
-                  </Button>
-                </Link>
-              </div>
-            </OrganizationActionCard>
+            {featureFlags.orgInvitationsEnabled && (
+              <OrganizationActionCard>
+                <OACTopRow>
+                  <RoundedIcon>
+                    <User className="h-5 w-5" />
+                  </RoundedIcon>
+                  <Stat label="members" value={totalMembers}></Stat>
+                  <Stat label="pending" value={invites.length}></Stat>
+                </OACTopRow>
+                <div className="text-sm leading-relaxed text-gray-600">
+                  Invite new members or remove members from the organization.
+                </div>
+                <div>
+                  <Link to={`/organizations/${orgId}/invitation/new`}>
+                    <Button isBlackButton>
+                      <Plus className="mr-2 w-5" />
+                      Invite new members
+                    </Button>
+                  </Link>
+                </div>
+              </OrganizationActionCard>
+            )}
 
             {/* Setup SSO */}
-            <OrganizationActionCard>
-              <OACTopRow>
-                <RoundedIcon>
-                  <Network className="h-5 w-5" />
-                </RoundedIcon>
-                <Stat label="active SSO connections" value={idps.length}></Stat>
-              </OACTopRow>
-              <div className="text-sm leading-relaxed text-gray-600">
-                Setup SSO connections as necessary for this organization.
-              </div>
-              <div>
-                <Button
-                  isBlackButton
-                  onClick={() => OpenSSOLink({ orgId: orgId! })}
-                >
-                  Setup SSO
-                </Button>
-              </div>
-            </OrganizationActionCard>
+            {featureFlags.orgSsoEnabled && (
+              <OrganizationActionCard>
+                <OACTopRow>
+                  <RoundedIcon>
+                    <Network className="h-5 w-5" />
+                  </RoundedIcon>
+                  <Stat
+                    label="active SSO connections"
+                    value={idps.length}
+                  ></Stat>
+                </OACTopRow>
+                <div className="text-sm leading-relaxed text-gray-600">
+                  Setup SSO connections as necessary for this organization.
+                </div>
+                <div>
+                  <Button
+                    isBlackButton
+                    onClick={() => OpenSSOLink({ orgId: orgId! })}
+                  >
+                    Setup SSO
+                  </Button>
+                </div>
+              </OrganizationActionCard>
+            )}
 
             {/* Setup domains */}
-            <OrganizationActionCard>
-              <OACTopRow>
-                <RoundedIcon>
-                  <Globe className="h-5 w-5" />
-                </RoundedIcon>
-                <Stat label="Domains" value={domains.length}></Stat>
-                <Stat label="Pending" value={verifiedDomains}></Stat>
-              </OACTopRow>
-              <div className="text-sm leading-relaxed text-gray-600">
-                Setup associated domains and verify them to ensure full
-                security.
-              </div>
-              <div>
-                <Link to={`/organizations/${org?.id}/domains/add`}>
-                  <Button isBlackButton>Setup domains</Button>
-                </Link>
-              </div>
-            </OrganizationActionCard>
+            {featureFlags.orgDomainsEnabled && (
+              <OrganizationActionCard>
+                <OACTopRow>
+                  <RoundedIcon>
+                    <Globe className="h-5 w-5" />
+                  </RoundedIcon>
+                  <Stat label="Domains" value={domains.length}></Stat>
+                  <Stat label="Pending" value={verifiedDomains}></Stat>
+                </OACTopRow>
+                <div className="text-sm leading-relaxed text-gray-600">
+                  Setup associated domains and verify them to ensure full
+                  security.
+                </div>
+                <div>
+                  <Link to={`/organizations/${org?.id}/domains/add`}>
+                    <Button isBlackButton>Setup domains</Button>
+                  </Link>
+                </div>
+              </OrganizationActionCard>
+            )}
           </div>
         </PrimaryContentArea>
       </MainContentArea>
@@ -186,9 +196,11 @@ export default function OrganizationDetail() {
                 className="w-full md:w-auto"
               />
             </div>
-            <div>
-              <MembersTable rows={rows} isLoading={isLoading} />
-            </div>
+            {featureFlags.orgMembersEnabled && (
+              <div>
+                <MembersTable rows={rows} isLoading={isLoading} />
+              </div>
+            )}
           </div>
         </section>
       </MainContentArea>

@@ -8,29 +8,37 @@ import {
 } from "@heroicons/react/24/outline";
 import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
 import PrimaryContentArea from "components/layouts/primary-content-area";
-import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
+import SecondaryMainContentNav, {
+  NavigationItem,
+} from "components/navs/secondary-main-content-nav";
 import { Outlet } from "react-router-dom";
+import { config } from "config";
+const { features: featureFlags } = config.env;
 
-const navigation = [
+const navigation: NavigationItem[] = [
   {
     name: "General",
     href: "/profile/general",
     icon: UserCircleIcon,
+    isActive: true,
   },
   {
     name: "Signing in",
     href: "/profile/signin",
     icon: KeyIcon,
+    isActive: true,
   },
   {
     name: "Device activity",
     href: "/profile/activity",
     icon: DevicePhoneMobileIcon,
+    isActive: featureFlags.deviceActivityEnabled,
   },
   {
     name: "Linked accounts",
     href: "/profile/linked",
     icon: SquaresPlusIcon,
+    isActive: featureFlags.linkedAccountsEnabled,
   },
 ];
 
@@ -41,7 +49,9 @@ export default function Profile() {
       <FixedWidthMainContent>
         {/* Secondary menu */}
         <SecondaryMainContentMenuArea>
-          <SecondaryMainContentNav navigation={navigation} />
+          <SecondaryMainContentNav
+            navigation={navigation.filter((n) => n.isActive)}
+          />
         </SecondaryMainContentMenuArea>
 
         {/* Primary content */}

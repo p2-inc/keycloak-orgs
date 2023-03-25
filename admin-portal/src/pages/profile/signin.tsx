@@ -32,6 +32,7 @@ const time = (time: string | undefined): string => {
 };
 
 const SigninProfile = () => {
+  const { features: featureFlags } = config.env;
   const { data: credentials = [], isLoading } = useGetCredentialsQuery({
     realm: config.env.realm,
   });
@@ -92,19 +93,23 @@ const SigninProfile = () => {
       name: metadata.credential?.userLabel ?? credentialType,
       created: time(metadata.credential?.createdDate),
       action: (
-        <Button
-          isCompact
-          className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
-          onClick={() => {
-            if (credentialType === "password") {
-              updateAIA("UPDATE_PASSWORD");
-            } else {
-              removeCredential(metadata.credential!);
-            }
-          }}
-        >
-          Remove
-        </Button>
+        <>
+          {featureFlags.passwordUpdateAllowed && (
+            <Button
+              isCompact
+              className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
+              onClick={() => {
+                if (credentialType === "password") {
+                  updateAIA("UPDATE_PASSWORD");
+                } else {
+                  removeCredential(metadata.credential!);
+                }
+              }}
+            >
+              Remove
+            </Button>
+          )}
+        </>
       ),
     }));
   };
@@ -141,89 +146,93 @@ const SigninProfile = () => {
             />
           </div>
         </div>
-        <div>
-          <div className="space-y-8">
-            <div className="flex items-center space-x-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700">
-                <Smartphone className="h-5 w-5" />
+        {featureFlags.twoFactorUpdateAllowed && (
+          <div>
+            <div className="space-y-8">
+              <div className="flex items-center space-x-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700">
+                  <Smartphone className="h-5 w-5" />
+                </div>
+                <SectionHeader
+                  title="Two-factor authentication"
+                  variant="medium"
+                />
               </div>
-              <SectionHeader
-                title="Two-factor authentication"
-                variant="medium"
-              />
-            </div>
 
-            <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
-              <SectionHeader
-                title="Authenticator application"
-                description="Enter a verification code from authenticator application."
-                variant="small"
-              />
+              <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
+                <SectionHeader
+                  title="Authenticator application"
+                  description="Enter a verification code from authenticator application."
+                  variant="small"
+                />
 
-              <Button
-                isBlackButton
-                onClick={() => setUpCredential("CONFIGURE_TOTP")}
-              >
-                Set up authenticator
-              </Button>
-            </div>
-
-            <Table
-              columns={cols}
-              rows={rowsForType("otp", credentials)}
-              isLoading={isLoading}
-            />
-
-            <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
-              <SectionHeader
-                title="Security key"
-                description="Use your security key to sign in."
-                variant="small"
-              />
-              <Button
-                isBlackButton
-                onClick={() => setUpCredential("webauthn-register")}
-              >
-                Set up security key
-              </Button>
-            </div>
-            <Table
-              columns={cols}
-              rows={rowsForType("webauthn", credentials)}
-              isLoading={isLoading}
-            />
-          </div>
-        </div>
-        <div>
-          <div className="space-y-5">
-            <div className="flex items-center space-x-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700">
-                <Key className="h-5 w-5" />
+                <Button
+                  isBlackButton
+                  onClick={() => setUpCredential("CONFIGURE_TOTP")}
+                >
+                  Set up authenticator
+                </Button>
               </div>
-              <SectionHeader title="Passwordless" variant="medium" />
-            </div>
-            <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
-              <SectionHeader
-                title="Security key"
-                description="Use your security key for passwordless sign in."
-                variant="small"
+
+              <Table
+                columns={cols}
+                rows={rowsForType("otp", credentials)}
+                isLoading={isLoading}
               />
-              <Button
-                isBlackButton
-                onClick={() =>
-                  setUpCredential("webauthn-register-passwordless")
-                }
-              >
-                Set up security key
-              </Button>
+
+              <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
+                <SectionHeader
+                  title="Security key"
+                  description="Use your security key to sign in."
+                  variant="small"
+                />
+                <Button
+                  isBlackButton
+                  onClick={() => setUpCredential("webauthn-register")}
+                >
+                  Set up security key
+                </Button>
+              </div>
+              <Table
+                columns={cols}
+                rows={rowsForType("webauthn", credentials)}
+                isLoading={isLoading}
+              />
             </div>
-            <Table
-              columns={cols}
-              rows={rowsForType("webauthn-passwordless", credentials)}
-              isLoading={isLoading}
-            />
           </div>
-        </div>
+        )}
+        {featureFlags.passwordlessUpdateAllowed && (
+          <div>
+            <div className="space-y-5">
+              <div className="flex items-center space-x-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700">
+                  <Key className="h-5 w-5" />
+                </div>
+                <SectionHeader title="Passwordless" variant="medium" />
+              </div>
+              <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
+                <SectionHeader
+                  title="Security key"
+                  description="Use your security key for passwordless sign in."
+                  variant="small"
+                />
+                <Button
+                  isBlackButton
+                  onClick={() =>
+                    setUpCredential("webauthn-register-passwordless")
+                  }
+                >
+                  Set up security key
+                </Button>
+              </div>
+              <Table
+                columns={cols}
+                rows={rowsForType("webauthn-passwordless", credentials)}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -20,7 +20,6 @@ const DesktopSidebarNav: React.FC<Props> = ({
   setMenuCollapsed,
   navigation,
 }) => {
-  console.log("config.env.logoUrl", config.env.logoUrl);
   const { user, fullName } = useUser();
 
   return (

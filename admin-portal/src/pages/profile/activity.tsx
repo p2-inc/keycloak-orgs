@@ -32,6 +32,7 @@ const ActivityProfile = () => {
   });
   const [deleteSessions] = useDeleteCurrentSessionMutation();
   const [deleteSession] = useDeleteSessionMutation();
+  const { features: featureFlags } = config.env;
 
   const signOutAll = () => {
     deleteSessions({
@@ -119,137 +120,150 @@ const ActivityProfile = () => {
   };
 
   return (
-    <div>
-      {showSignOutAllConfModal && (
-        <ConfirmationModal
-          open={showSignOutAllConfModal}
-          close={() => setShowSignOutAllConfModal(false)}
-          buttonTitle="Sign out all devices"
-          buttonId="sign-out-all"
-          modalTitle="Sign out all devices"
-          modalMessage="This action will sign out all the devices that have signed in to your account, including the current device you are using."
-          onContinue={() => signOutAll()}
-        />
-      )}
-      {showSignOutSession && signOutSessionData && (
-        <ConfirmationModal
-          open={!!showSignOutSession}
-          close={() => {
-            setShowSignOutSession(false);
-            setSignOutSessionData(undefined);
-          }}
-          modalTitle="Sign out"
-          modalMessage="Sign out this session?"
-          onContinue={() =>
-            signOutSession(
-              signOutSessionData.device,
-              signOutSessionData.session
-            )
-          }
-        />
-      )}
-      <div className="mb-12">
-        <SectionHeader
-          title="Device activity"
-          description="Sign out of any unfamiliar devices."
-        />
-        {isShowSignOutAll(devices) && (
-          <div className="mt-3">
-            <Button onClick={() => setShowSignOutAllConfModal(true)}>
-              Sign out all devices
-            </Button>
-          </div>
-        )}
-      </div>
-      <div className="w-full rounded border border-gray-200 bg-gray-50">
-        {isFetching && <ActivityLoader />}
-        {!isFetching &&
-          devices.map((device: DeviceRepresentation, deviceIndex: number) => (
-            <div className="divide-y">
-              {device.sessions!.map(
-                (session: SessionRepresentation, sessionIndex: number) => (
-                  <Fragment
-                    key={"device-" + deviceIndex + "-session-" + sessionIndex}
-                  >
-                    <div>
-                      <div className="items-center space-y-2 px-4 pt-3 md:flex md:justify-between md:space-y-0">
-                        <div className="md:flex md:items-center">
-                          <div className="py-2 md:py-0">
-                            {findDeviceTypeIcon(session, device)}
-                          </div>
-                          <div className="space-y-2 text-sm font-semibold text-p2gray-900 md:pl-2">
-                            <span
-                              id={elementId("browser", session)}
-                              className="pf-u-mr-md session-title"
-                            >
-                              {findOS(device)} {findOSVersion(device)} /{" "}
-                              {session.browser}
-                            </span>
-                          </div>
-                        </div>
-                        {!session.current && (
-                          <Button
-                            onClick={() => {
-                              setShowSignOutSession(true);
-                              setSignOutSessionData({
-                                device,
-                                session,
-                              });
-                            }}
-                            isCompact
-                          >
-                            Sign out session
-                          </Button>
-                        )}
-                        {session.current && (
-                          <span
-                            id={elementId("current-badge", session)}
-                            className="flex items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700"
-                          >
-                            <span className="relative flex h-2 w-2">
-                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2blue-700 opacity-75"></span>
-                              <span className="relative inline-flex h-2 w-2 rounded-full bg-p2blue-700"></span>
-                            </span>
-                            <span>Current session</span>
-                          </span>
-                        )}
-                      </div>
-                      <div className="p-4 md:grid md:grid-cols-5">
-                        <div className="">
-                          <ActivityItem title="IP address">
-                            {session.ipAddress}
-                          </ActivityItem>
-                        </div>
-                        <div className="">
-                          <ActivityItem title="Last accessed">
-                            {time(session.lastAccess)}
-                          </ActivityItem>
-                        </div>
-                        <div className="">
-                          <ActivityItem title="Clients">
-                            {session.clients &&
-                              makeClientsString(session.clients)}
-                          </ActivityItem>
-                        </div>
-                        <div className="">
-                          <ActivityItem title="Started">
-                            {time(session.started)}
-                          </ActivityItem>
-                        </div>
-                        <div className="">
-                          <ActivityItem title="Expires">
-                            {time(session.expires)}
-                          </ActivityItem>
-                        </div>
-                      </div>
-                    </div>
-                  </Fragment>
+    <>
+      {featureFlags.deviceActivityEnabled && (
+        <div>
+          {showSignOutAllConfModal && (
+            <ConfirmationModal
+              open={showSignOutAllConfModal}
+              close={() => setShowSignOutAllConfModal(false)}
+              buttonTitle="Sign out all devices"
+              buttonId="sign-out-all"
+              modalTitle="Sign out all devices"
+              modalMessage="This action will sign out all the devices that have signed in to your account, including the current device you are using."
+              onContinue={() => signOutAll()}
+            />
+          )}
+          {showSignOutSession && signOutSessionData && (
+            <ConfirmationModal
+              open={!!showSignOutSession}
+              close={() => {
+                setShowSignOutSession(false);
+                setSignOutSessionData(undefined);
+              }}
+              modalTitle="Sign out"
+              modalMessage="Sign out this session?"
+              onContinue={() =>
+                signOutSession(
+                  signOutSessionData.device,
+                  signOutSessionData.session
                 )
-              )}
-            </div>
-          ))}
-      </div>
-    </div>
+              }
+            />
+          )}
+          <div className="mb-12">
+            <SectionHeader
+              title="Device activity"
+              description="Sign out of any unfamiliar devices."
+            />
+            {isShowSignOutAll(devices) && (
+              <div className="mt-3">
+                <Button onClick={() => setShowSignOutAllConfModal(true)}>
+                  Sign out all devices
+                </Button>
+              </div>
+            )}
+          </div>
+          <div className="w-full rounded border border-gray-200 bg-gray-50">
+            {isFetching ? (
+              <ActivityLoader />
+            ) : (
+              devices.map(
+                (device: DeviceRepresentation, deviceIndex: number) => (
+                  <div className="divide-y">
+                    {device.sessions!.map(
+                      (
+                        session: SessionRepresentation,
+                        sessionIndex: number
+                      ) => (
+                        <Fragment
+                          key={
+                            "device-" + deviceIndex + "-session-" + sessionIndex
+                          }
+                        >
+                          <div>
+                            <div className="items-center space-y-2 px-4 pt-3 md:flex md:justify-between md:space-y-0">
+                              <div className="md:flex md:items-center">
+                                <div className="py-2 md:py-0">
+                                  {findDeviceTypeIcon(session, device)}
+                                </div>
+                                <div className="space-y-2 text-sm font-semibold text-p2gray-900 md:pl-2">
+                                  <span
+                                    id={elementId("browser", session)}
+                                    className="pf-u-mr-md session-title"
+                                  >
+                                    {findOS(device)} {findOSVersion(device)} /{" "}
+                                    {session.browser}
+                                  </span>
+                                </div>
+                              </div>
+                              {!session.current && (
+                                <Button
+                                  onClick={() => {
+                                    setShowSignOutSession(true);
+                                    setSignOutSessionData({
+                                      device,
+                                      session,
+                                    });
+                                  }}
+                                  isCompact
+                                >
+                                  Sign out session
+                                </Button>
+                              )}
+                              {session.current && (
+                                <span
+                                  id={elementId("current-badge", session)}
+                                  className="flex items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700"
+                                >
+                                  <span className="relative flex h-2 w-2">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2blue-700 opacity-75"></span>
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-p2blue-700"></span>
+                                  </span>
+                                  <span>Current session</span>
+                                </span>
+                              )}
+                            </div>
+                            <div className="p-4 md:grid md:grid-cols-5">
+                              <div className="">
+                                <ActivityItem title="IP address">
+                                  {session.ipAddress}
+                                </ActivityItem>
+                              </div>
+                              <div className="">
+                                <ActivityItem title="Last accessed">
+                                  {time(session.lastAccess)}
+                                </ActivityItem>
+                              </div>
+                              <div className="">
+                                <ActivityItem title="Clients">
+                                  {session.clients &&
+                                    makeClientsString(session.clients)}
+                                </ActivityItem>
+                              </div>
+                              <div className="">
+                                <ActivityItem title="Started">
+                                  {time(session.started)}
+                                </ActivityItem>
+                              </div>
+                              <div className="">
+                                <ActivityItem title="Expires">
+                                  {time(session.expires)}
+                                </ActivityItem>
+                              </div>
+                            </div>
+                          </div>
+                        </Fragment>
+                      )
+                    )}
+                  </div>
+                )
+              )
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

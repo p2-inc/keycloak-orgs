@@ -3,7 +3,7 @@ import cs from "classnames";
 import { useState } from "react";
 import { ChevronIcon } from "components/icons";
 
-type NavigationItem = {
+export type NavigationItem = {
   name: string;
   href: string;
   icon?: React.ForwardRefExoticComponent<
@@ -12,6 +12,7 @@ type NavigationItem = {
       titleId?: string | undefined;
     }
   >;
+  isActive: boolean;
 };
 
 type Props = {
