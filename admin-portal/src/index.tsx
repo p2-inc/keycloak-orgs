@@ -34,6 +34,7 @@ import { Toaster } from "react-hot-toast";
 import { basename } from "path";
 import Roles from "pages/member/roles";
 import Member from "pages/member";
+import ProfileDelete from "pages/profile-delete";
 
 export type P2Params = {
   orgId: string;
@@ -103,6 +104,10 @@ const router = createBrowserRouter(
           path: "/profile",
           index: true,
           loader: () => redirect("general"),
+        },
+        {
+          path: "/profile-delete",
+          element: <ProfileDelete />
         },
         {
           path: "/profile/*",
