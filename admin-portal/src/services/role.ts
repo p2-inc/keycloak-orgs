@@ -9,11 +9,11 @@ export const roleSettings = [
     name: "manage roles",
     className: "bg-[#C07CE0]",
   },
-  {
-    regexp: new RegExp("^(?!view-|manage-).*$"),
-    name: "other roles",
-    className: "bg-gray-600",
-  },
+  // {
+  //   regexp: new RegExp("^(?!view-|manage-).*$"),
+  //   name: "other roles",
+  //   className: "bg-gray-600",
+  // },
 ];
 
 export function getRoleSettings(name: string) {

@@ -1,12 +1,10 @@
 import SectionHeader from "components/navs/section-header";
 import cs from "classnames";
-import Button from "components/elements/forms/buttons/button";
 import {
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetOrganizationMembershipsQuery,
   useGrantUserOrganizationRoleMutation,
   useRevokeUserOrganizationRoleMutation,
-  useUpdateOrganizationRoleMutation,
 } from "store/apis/orgs";
 import { useState } from "react";
 import { config } from "config";
@@ -84,6 +82,9 @@ const SwitchItem = ({
     </Switch.Group>
   );
 };
+
+const buttonClasses =
+  "rounded bg-indigo-50 py-1 px-2 text-xs font-semibold text-p2blue-700 shadow-sm enabled:hover:bg-indigo-100 disabled:opacity-50";
 
 const Roles = () => {
   let { orgId, memberId } = useParams();
@@ -171,6 +172,101 @@ const Roles = () => {
       };
     });
 
+  const grantAllRoles = () => {
+    let grantRoles = roleData.filter((rd) => !rd.isChecked);
+    setUpdatingRoles([...grantRoles.map((gr) => gr.name)]);
+    Promise.all(
+      grantRoles.map((ir) =>
+        grantUserOrganizationRole({
+          name: ir.name,
+          orgId: orgId!,
+          userId: memberId!,
+          realm: config.env.realm,
+        })
+      )
+    )
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `Granted all roles to user.`,
+        });
+      })
+      .catch(() => {
+        P2Toast({
+          error: true,
+          title: `Error granting all roles to user. Please try again.`,
+        });
+      })
+      .finally(() => {
+        setUpdatingRoles([]);
+        refetchRoles();
+      });
+  };
+
+  const revokeAllRoles = () => {
+    const revokeRoles = roleData.filter((rd) => rd.isChecked);
+    setUpdatingRoles([...revokeRoles.map((gr) => gr.name)]);
+    Promise.all(
+      revokeRoles.map((ir) =>
+        revokeUserOrganizationRole({
+          name: ir.name,
+          orgId: orgId!,
+          userId: memberId!,
+          realm: config.env.realm,
+        })
+      )
+    )
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `Revoked all roles for user.`,
+        });
+      })
+      .catch(() => {
+        P2Toast({
+          error: true,
+          title: `Error revoking all roles for user. Please try again.`,
+        });
+      })
+      .finally(() => {
+        setUpdatingRoles([]);
+        refetchRoles();
+      });
+  };
+
+  const grantFilteredRoles = (filter: "manage" | "view") => {
+    const grantFilterRoles = roleData.filter((rd) =>
+      rd.name.startsWith(filter)
+    );
+    setUpdatingRoles([...grantFilterRoles.map((gr) => gr.name)]);
+    Promise.all(
+      grantFilterRoles.map((ir) =>
+        grantUserOrganizationRole({
+          name: ir.name,
+          orgId: orgId!,
+          userId: memberId!,
+          realm: config.env.realm,
+        })
+      )
+    )
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `Granted ${filter} roles to user.`,
+        });
+      })
+      .catch(() => {
+        P2Toast({
+          error: true,
+          title: `Error granting ${filter} roles to user. Please try again.`,
+        });
+      })
+      .finally(() => {
+        setUpdatingRoles([]);
+        refetchRoles();
+      });
+  };
+
   const isSameUserAndMember = currentMember.id === user?.id;
 
   const doesNotHaveManageRole =
@@ -190,6 +286,51 @@ const Roles = () => {
           </Link>
         }
       />
+      <div className="mt-8 pb-2 space-x-2 border-b flex items-center">
+        <div className="inline-block text-sm text-gray-600">Set roles:</div>
+        <button
+          className={buttonClasses}
+          onClick={grantAllRoles}
+          disabled={
+            roleData.filter((rd) => rd.isChecked).length === roleData.length
+          }
+        >
+          all
+        </button>
+        <button
+          className={buttonClasses}
+          onClick={() => grantFilteredRoles("manage")}
+          disabled={
+            !(
+              roleData.filter(
+                (rd) => rd.name.startsWith("manage") && !rd.isChecked
+              ).length > 0
+            )
+          }
+        >
+          all manage
+        </button>
+        <button
+          className={buttonClasses}
+          onClick={() => grantFilteredRoles("view")}
+          disabled={
+            !(
+              roleData.filter(
+                (rd) => rd.name.startsWith("view") && !rd.isChecked
+              ).length > 0
+            )
+          }
+        >
+          all view
+        </button>
+        <button
+          className={buttonClasses}
+          onClick={revokeAllRoles}
+          disabled={roleData.filter((rd) => rd.isChecked).length === 0}
+        >
+          none
+        </button>
+      </div>
       {isSameUserAndMember && (
         <div className="mt-4">
           <Alert
@@ -208,7 +349,7 @@ const Roles = () => {
           />
         </div>
       )}
-      <div className="mt-8 divide-y">
+      <div className="divide-y">
         {isLoading
           ? Array.from(defaultRoles).map((r) => <Loader />)
           : roleData.map((item) => (
