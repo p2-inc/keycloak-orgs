@@ -164,13 +164,13 @@ const ActivityProfile = () => {
               </div>
             )}
           </div>
-          <div className="w-full rounded border border-gray-200 bg-gray-50">
+          <div className="w-full rounded border border-gray-200 bg-gray-50 dark:border-zinc-600 dark:bg-p2dark-1000">
             {isFetching ? (
               <ActivityLoader />
             ) : (
               devices.map(
                 (device: DeviceRepresentation, deviceIndex: number) => (
-                  <div className="divide-y">
+                  <div className="divide-y dark:divide-zinc-600">
                     {device.sessions!.map(
                       (
                         session: SessionRepresentation,
@@ -184,10 +184,10 @@ const ActivityProfile = () => {
                           <div>
                             <div className="items-center space-y-2 px-4 pt-3 md:flex md:justify-between md:space-y-0">
                               <div className="md:flex md:items-center">
-                                <div className="py-2 md:py-0">
+                                <div className="py-2 dark:text-zinc-200 md:py-0">
                                   {findDeviceTypeIcon(session, device)}
                                 </div>
-                                <div className="space-y-2 text-sm font-semibold text-p2gray-900 md:pl-2">
+                                <div className="space-y-2 text-sm font-semibold text-p2gray-900 dark:text-zinc-200 md:pl-2">
                                   <span
                                     id={elementId("browser", session)}
                                     className="pf-u-mr-md session-title"
@@ -214,7 +214,7 @@ const ActivityProfile = () => {
                               {session.current && (
                                 <span
                                   id={elementId("current-badge", session)}
-                                  className="flex items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700"
+                                  className="flex items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700 dark:text-zinc-200"
                                 >
                                   <span className="relative flex h-2 w-2">
                                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2blue-700 opacity-75"></span>

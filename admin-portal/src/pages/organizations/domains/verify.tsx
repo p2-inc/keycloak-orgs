@@ -1,7 +1,6 @@
 import Button from "components/elements/forms/buttons/button";
 import CopyBlock from "components/elements/organizations/copy-block";
 import RoundedIcon from "components/elements/rounded-icon";
-import { GlobeIcon } from "components/icons";
 import SectionHeader from "components/navs/section-header";
 import P2Toast from "components/utils/toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -10,10 +9,11 @@ import {
   useGetOrganizationDomainsQuery,
   useVerifyDomainMutation,
 } from "store/apis/orgs";
+import { Globe } from "lucide-react";
 
 const addIcon = (
   <RoundedIcon className="my-4">
-    <GlobeIcon />
+    <Globe className="h-5 w-5" />
   </RoundedIcon>
 );
 
@@ -77,7 +77,7 @@ const DomainsVerify = () => {
           rightContent={
             <Link
               to={`/organizations/${orgId}/settings`}
-              className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
+              className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
             >
               Back to Settings
             </Link>

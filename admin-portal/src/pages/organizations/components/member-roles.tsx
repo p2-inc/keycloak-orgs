@@ -33,19 +33,20 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
   orgId,
 }) => {
   const filtered = roles.filter((f) => regexp.test(f.name));
+
   return (
     <Menu as="div" className="relative inline-block w-full text-left md:w-auto">
       <Menu.Button className="w-full" disabled={filtered.length === 0}>
-        <div className="flex w-full items-center justify-center space-x-2 rounded border border-gray-200 py-1 px-4 text-sm transition hover:border-gray-800">
+        <div className="flex w-full items-center justify-center space-x-2 rounded border border-gray-200 py-1 px-4 text-sm transition hover:border-gray-800 dark:border-zinc-800 dark:hover:border-zinc-600">
           <span
             className={`inline-block h-2 w-2 rounded-full ${regexpClassName}`}
           ></span>
-          <span className="inline-block">
+          <span className="inline-block dark:text-zinc-200">
             {filtered.length} {regexpName}
           </span>
         </div>
       </Menu.Button>
-      <Menu.Items className="absolute right-0 z-10 mt-2 w-60 origin-top-right rounded-md bg-white p-4 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+      <Menu.Items className="absolute right-0 z-10 mt-2 w-60 origin-top-right rounded-md bg-white p-4 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border dark:border-zinc-600 dark:bg-p2dark-900">
         {filtered.map((filteredRole) => (
           <Menu.Item key={filteredRole.name}>
             <div>
@@ -55,7 +56,7 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
         ))}
         <Menu.Item>
           <Link to={`/organizations/${orgId}/members/${member.id}/roles`}>
-            <Button isCompact className="w-full mt-4">
+            <Button isCompact className="mt-4 w-full">
               Edit roles
             </Button>
           </Link>

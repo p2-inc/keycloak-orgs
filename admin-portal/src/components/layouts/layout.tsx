@@ -35,7 +35,7 @@ export default function Layout({ children }: { children: React.ReactElement }) {
 
   return (
     <>
-      <div className="flex h-screen">
+      <div className="flex h-screen dark:bg-p2dark-900">
         <div className="">
           {/* Static sidebar for desktop */}
           <DesktopSidebarNav

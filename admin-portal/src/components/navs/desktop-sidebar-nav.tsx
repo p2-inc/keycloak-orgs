@@ -1,13 +1,14 @@
-import { Popover } from "@headlessui/react";
+import { Listbox, Popover } from "@headlessui/react";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
 import { config } from "config";
 import useUser from "components/utils/useUser";
 import { keycloakService } from "keycloak";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Monitor, Moon, Sun } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import { ChevronIcon, DoubleSlashBrandIcon, FullBrandIcon } from "../icons";
 import { NavigationItem } from "../layouts/layout";
+import { useEffect, useState } from "react";
 
 type Props = {
   menuCollapsed: boolean;
@@ -15,12 +16,48 @@ type Props = {
   navigation: NavigationItem[];
 };
 
+const themes = [
+  {
+    key: "system",
+    name: "System",
+    icon: <Monitor className="h-4 w-4" />,
+  },
+  {
+    key: "light",
+    name: "Light",
+    icon: <Sun className="h-4 w-4" />,
+  },
+  {
+    key: "dark",
+    name: "Dark",
+    icon: <Moon className="h-4 w-4" />,
+  },
+];
+
 const DesktopSidebarNav: React.FC<Props> = ({
   menuCollapsed,
   setMenuCollapsed,
   navigation,
 }) => {
   const { user, fullName } = useUser();
+  const [theme, setTheme] = useState(themes[0]);
+
+  useEffect(() => {
+    if (theme.key === "system") {
+      localStorage.removeItem("theme");
+    } else {
+      localStorage.theme = theme.key;
+    }
+    if (
+      localStorage.theme === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   return (
     <>
@@ -28,13 +65,13 @@ const DesktopSidebarNav: React.FC<Props> = ({
       <div className="flex h-full flex-shrink-0">
         <div
           className={cs(
-            "flex w-[70px] flex-col border-r border-r-gray-100 transition-[width] duration-150 ease-in-out",
+            "flex w-[70px] flex-col border-r border-r-gray-100 transition-[width] duration-150 ease-in-out dark:border-r-zinc-800",
             {
               "w-64": !menuCollapsed,
             }
           )}
         >
-          <div className="flex min-h-0 flex-1 flex-col bg-gray-50">
+          <div className="flex min-h-0 flex-1 flex-col bg-gray-50 dark:bg-p2dark-1000">
             <div className="flex-1">
               {menuCollapsed ? (
                 <div
@@ -81,22 +118,19 @@ const DesktopSidebarNav: React.FC<Props> = ({
                       to={item.href}
                       className={({ isActive }) =>
                         cs(
-                          "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 hover:bg-white",
+                          "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 hover:bg-white dark:hover:border-zinc-600 dark:hover:bg-p2dark-900",
                           {
-                            "group:text-p2blue-700 border-p2blue-700 bg-white text-p2blue-700":
+                            "dark:border-zinc-600 dark:text-white": !isActive,
+                            "group:text-p2blue-700 border-p2blue-700 bg-white text-p2blue-700 dark:bg-p2dark-900":
                               isActive,
                             "w-full border-0": !menuCollapsed,
-                            "border-p2blue-700 text-p2blue-700 hover:border-p2blue-700":
+                            "border-p2blue-700 text-p2blue-700 hover:border-p2blue-700 dark:hover:border-p2blue-700 dark:hover:bg-p2dark-900":
                               menuCollapsed && isActive,
                           }
                         )
                       }
                     >
-                      <item.icon
-                        className="h-5 w-5"
-                        // className={cs("h-[18] w-[18]", item.iconClass)}
-                        // aria-hidden="true"
-                      />
+                      <item.icon className="h-5 w-5" />
                       <span className="sr-only">{item.name}</span>
                       {!menuCollapsed && (
                         <span className="pl-2">{item.name}</span>
@@ -115,27 +149,52 @@ const DesktopSidebarNav: React.FC<Props> = ({
               <Popover className="relative">
                 <Popover.Button className="outline-none">
                   <div className="flex items-center">
-                    <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm font-semibold">
+                    <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm font-semibold dark:bg-zinc-400">
                       {fullName().substring(0, 1)}
                     </div>
                     {!menuCollapsed && (
-                      <p className="ml-2 text-sm font-semibold">{fullName()}</p>
+                      <p className="ml-2 text-sm font-semibold dark:text-white">
+                        {fullName()}
+                      </p>
                     )}
                   </div>
                 </Popover.Button>
-                <Popover.Panel className="absolute bottom-10 left-0 z-[100] w-72 divide-y bg-white px-5 shadow-lg">
+                <Popover.Panel className="absolute bottom-10 left-0 z-[100] w-72 divide-y rounded-lg border bg-white px-5 shadow-lg dark:divide-zinc-700 dark:border-zinc-700 dark:bg-p2dark-900">
                   <div className="py-5">
-                    <div className="font-semibold">{fullName()}</div>
+                    <div className="font-semibold dark:text-gray-200">
+                      {fullName()}
+                    </div>
                     <div className="text-sm text-gray-500">{user?.email}</div>
                   </div>
                   <div className="py-1">
                     <Link
                       to="/"
-                      className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900"
+                      className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-zinc-800 dark:hover:text-gray-100"
                     >
                       <div>Return to homepage</div>
                       <ExternalLink className="h-4 w-4" />
                     </Link>
+                  </div>
+                  <div className="relative flex items-center justify-between py-2">
+                    <div className="text-sm dark:text-zinc-200">Theme</div>
+                    <Listbox value={theme} onChange={setTheme}>
+                      <Listbox.Button className="flex items-center space-x-2 rounded border px-2 py-1 text-sm hover:border-gray-500 dark:border-zinc-600 dark:text-zinc-200 dark:hover:border-zinc-400">
+                        <div>{theme.icon}</div>
+                        <div>{theme.name}</div>
+                      </Listbox.Button>
+                      <Listbox.Options className="absolute bottom-0 right-0 rounded border bg-white shadow-md dark:border-zinc-600 dark:bg-p2dark-900">
+                        {themes.map((item) => (
+                          <Listbox.Option
+                            key={item.key}
+                            value={item}
+                            className="flex cursor-pointer items-center space-x-2 px-2 py-1 text-sm hover:bg-gray-100 dark:text-zinc-200 dark:hover:bg-zinc-600"
+                          >
+                            <div>{item.icon}</div>
+                            <div>{item.name}</div>
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </Listbox>
                   </div>
                   <div className="py-5">
                     <Button

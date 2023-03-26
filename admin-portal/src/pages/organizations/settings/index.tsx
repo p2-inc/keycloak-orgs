@@ -66,9 +66,9 @@ export default function OrganizationSettings() {
         {/* Primary content */}
         <PrimaryContentArea>
           <SettingsGeneral />
-          <hr className="my-10" />
+          <hr className="my-10 dark:border-zinc-600" />
           <SettingsDomain />
-          <hr className="my-10" />
+          <hr className="my-10 dark:border-zinc-600" />
           <SettingsSSO />
         </PrimaryContentArea>
       </FixedWidthMainContent>

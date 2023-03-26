@@ -14,7 +14,7 @@ import P2Toast from "components/utils/toast";
 import { Listbox } from "@headlessui/react";
 import { ChevronIcon } from "components/icons";
 import RoleBadge from "components/elements/badges/role-badge";
-import { User } from "lucide-react";
+import { ChevronDown, User } from "lucide-react";
 
 export const defaultRoles = [
   "view-organization",
@@ -36,7 +36,7 @@ const loadingIcon = (
   <div>
     <div className={cs("relative h-12 w-12 overflow-hidden rounded-md")}>
       <div className="absolute -inset-10 z-10 bg-gradient-to-tr from-[#C7DFF0] to-[#1476B7]"></div>
-      <div className="absolute inset-[2px] z-20 flex items-center justify-center rounded bg-white">
+      <div className="absolute inset-[2px] z-20 flex items-center justify-center rounded bg-white dark:bg-p2dark-1000 dark:text-zinc-200">
         <User />
       </div>
     </div>
@@ -103,7 +103,7 @@ const NewInvitation = () => {
         rightContent={
           <Link
             to={`/organizations/${orgId}/details`}
-            className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
+            className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
           >
             Cancel
           </Link>
@@ -113,20 +113,22 @@ const NewInvitation = () => {
         <div className="mt-8 space-y-4">
           <Listbox value={selectedRole} onChange={setSelectedRole}>
             <div className="relative z-50">
-              <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white">
+              <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white dark:border-zinc-600 dark:bg-p2dark-1000 dark:text-zinc-200 dark:hover:bg-p2dark-1000">
                 <div>{selectedRole.name}</div>
-                <ChevronIcon className="rotate-90 stroke-gray-800" />
+                <ChevronDown className="dark:text-zinc-600" />
               </Listbox.Button>
               <Listbox.Options className="absolute w-full">
                 <div className="pb-10">
-                  <div className="relative bottom-0 z-30 max-h-96 divide-y overflow-auto rounded border border-neutral-300 bg-white">
+                  <div className="relative bottom-0 z-30 max-h-96 divide-y overflow-auto rounded border border-neutral-300 bg-white dark:divide-zinc-600 dark:border-zinc-600 dark:bg-p2dark-900">
                     {roles.map((role) => (
                       <Listbox.Option
                         key={role.id}
                         value={role}
-                        className="cursor-pointer space-y-2 p-4 hover:bg-neutral-50"
+                        className="cursor-pointer space-y-2 p-4 hover:bg-neutral-50 dark:hover:bg-p2dark-1000"
                       >
-                        <div className="font-semibold">{role.name}</div>
+                        <div className="font-semibold dark:text-zinc-200">
+                          {role.name}
+                        </div>
                         <div className="flex flex-wrap">
                           {role.items.sort().map((ar) => (
                             <RoleBadge name={ar} />

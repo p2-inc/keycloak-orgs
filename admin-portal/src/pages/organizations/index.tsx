@@ -51,7 +51,7 @@ export default function Organizations() {
                 className={cs({
                   "grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3":
                     viewType === ViewLayoutOptions.GRID,
-                  "divide-y rounded-md border border-gray-200 bg-gray-50":
+                  "divide-y rounded-md border border-gray-200 bg-gray-50 dark:divide-zinc-600 dark:border-zinc-600 dark:bg-p2dark-1000":
                     viewType === ViewLayoutOptions.LIST,
                 })}
               >

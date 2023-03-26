@@ -13,9 +13,11 @@ type Props = {
   viewType: ViewLayoutOptions;
 };
 
-const Title = ({ children }) => <div className="font-semibold">{children}</div>;
+const Title = ({ children }) => (
+  <div className="font-semibold dark:text-zinc-200">{children}</div>
+);
 const SubTitle = ({ children }) => (
-  <div className="text-[14px]">{children}</div>
+  <div className="text-[14px] dark:text-zinc-400">{children}</div>
 );
 
 const InnerItem = ({ children, title, subTitle, viewType }) => {
@@ -25,11 +27,11 @@ const InnerItem = ({ children, title, subTitle, viewType }) => {
         <div
           className={cs(
             "col-span-1 flex",
-            "group-hover:border-gray-300 group-hover:bg-white",
+            "group-hover:border-gray-300 group-hover:bg-white dark:group-hover:border-zinc-500 dark:group-hover:bg-p2dark-900",
             {
-              "flex-col space-y-5 rounded-md border border-gray-200 bg-gray-50 px-10 py-9":
+              "flex-col space-y-5 rounded-md border border-gray-200 bg-gray-50 px-10 py-9 dark:border-zinc-600 dark:bg-p2dark-1000":
                 viewType === ViewLayoutOptions.GRID,
-              "flex-row justify-between px-4 py-2":
+              "flex-row justify-between px-5 py-4":
                 viewType === ViewLayoutOptions.LIST,
             }
           )}
@@ -67,13 +69,9 @@ const OrganizationItem: FC<Props> = ({
       {featureFlags.orgDetailsEnabled && (
         <Link
           to={link}
-          className={cs(
-            "group block",
-            "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
-            {
-              "md:pb-3": viewType === ViewLayoutOptions.GRID,
-            }
-          )}
+          className={cs("group block", "focus:outline-none focus:ring-0", {
+            "md:pb-3": viewType === ViewLayoutOptions.GRID,
+          })}
         >
           <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
             {children}
