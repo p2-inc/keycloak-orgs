@@ -107,7 +107,7 @@ const router = createBrowserRouter(
         },
         {
           path: "/profile-delete",
-          element: <ProfileDelete />
+          element: <ProfileDelete />,
         },
         {
           path: "/profile/*",

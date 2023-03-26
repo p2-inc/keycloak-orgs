@@ -40,7 +40,7 @@ const ViewSwitch: FC<ViewSwitchProps> = ({ onChange }) => {
   };
 
   return (
-    <div className="flex w-full rounded-md border border-gray-200 bg-gray-50 p-[2px] transition hover:border-gray-300 md:w-auto dark:bg-p2dark-1000 dark:border-zinc-600">
+    <div className="flex w-full rounded-md border border-gray-200 bg-gray-50 p-[2px] transition hover:border-gray-300 dark:border-zinc-600 dark:bg-p2dark-1000 md:w-auto">
       <ViewSwitchBtn
         isActive={selectValue === ViewLayoutOptions.GRID}
         onClick={() => handleSelect(ViewLayoutOptions.GRID)}

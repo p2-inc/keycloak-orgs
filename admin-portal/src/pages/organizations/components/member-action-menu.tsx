@@ -69,7 +69,10 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
         <div className="flex h-[40px] items-center">
           <Menu.Button className="w-full">
             <div className="flex w-full items-center justify-center space-x-2 rounded border border-gray-200 py-1 px-4 text-sm transition hover:border-gray-800 md:border-transparent md:px-1 dark:md:border-zinc-800 dark:md:hover:border-zinc-600">
-              <EllipsisVerticalIcon className="h-5 w-5 dark:fill-zinc-200" aria-hidden="true" />
+              <EllipsisVerticalIcon
+                className="h-5 w-5 dark:fill-zinc-200"
+                aria-hidden="true"
+              />
               <span className="md:hidden">Open options</span>
             </div>
           </Menu.Button>
@@ -84,7 +87,7 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-p2dark-900 dark:border dark:border-zinc-600">
+          <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border dark:border-zinc-600 dark:bg-p2dark-900">
             <div className="py-1">
               <Menu.Item disabled={isEditDisabled}>
                 {({ active, disabled }) => {

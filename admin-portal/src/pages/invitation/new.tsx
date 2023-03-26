@@ -113,20 +113,22 @@ const NewInvitation = () => {
         <div className="mt-8 space-y-4">
           <Listbox value={selectedRole} onChange={setSelectedRole}>
             <div className="relative z-50">
-              <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white dark:bg-p2dark-1000 dark:text-zinc-200 dark:border-zinc-600 dark:hover:bg-p2dark-1000">
+              <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white dark:border-zinc-600 dark:bg-p2dark-1000 dark:text-zinc-200 dark:hover:bg-p2dark-1000">
                 <div>{selectedRole.name}</div>
                 <ChevronDown className="dark:text-zinc-600" />
               </Listbox.Button>
               <Listbox.Options className="absolute w-full">
                 <div className="pb-10">
-                  <div className="relative bottom-0 z-30 max-h-96 divide-y dark:divide-zinc-600 overflow-auto rounded border border-neutral-300 bg-white dark:bg-p2dark-900 dark:border-zinc-600">
+                  <div className="relative bottom-0 z-30 max-h-96 divide-y overflow-auto rounded border border-neutral-300 bg-white dark:divide-zinc-600 dark:border-zinc-600 dark:bg-p2dark-900">
                     {roles.map((role) => (
                       <Listbox.Option
                         key={role.id}
                         value={role}
                         className="cursor-pointer space-y-2 p-4 hover:bg-neutral-50 dark:hover:bg-p2dark-1000"
                       >
-                        <div className="font-semibold dark:text-zinc-200">{role.name}</div>
+                        <div className="font-semibold dark:text-zinc-200">
+                          {role.name}
+                        </div>
                         <div className="flex flex-wrap">
                           {role.items.sort().map((ar) => (
                             <RoleBadge name={ar} />

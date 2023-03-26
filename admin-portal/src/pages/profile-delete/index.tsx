@@ -50,9 +50,7 @@ const ProfileDelete = () => {
             autoFocus: true,
           }}
         />
-        <Button isBlackButton>
-          Confirm profile delete
-        </Button>
+        <Button isBlackButton>Confirm profile delete</Button>
       </div>
     </div>
   );

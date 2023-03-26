@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class',
+  darkMode: "class",
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
@@ -21,9 +21,9 @@ module.exports = {
           200: "#295398",
         },
         p2dark: {
-          900: '#111111',
-          1000: '#000000',
-        }
+          900: "#111111",
+          1000: "#000000",
+        },
       },
       dropShadow: {
         "btn-dark": "0px 1px 8px rgba(11, 25, 35, 0.4)",

@@ -33,7 +33,10 @@ const RHFFormTextInputWithLabel: FC<Props> = ({
 }) => {
   return (
     <div className="sm:col-span-3">
-      <label htmlFor={slug} className="block text-sm font-medium text-gray-700 dark:text-zinc-200">
+      <label
+        htmlFor={slug}
+        className="block text-sm font-medium text-gray-700 dark:text-zinc-200"
+      >
         {label}
       </label>
       <div className="mt-1">

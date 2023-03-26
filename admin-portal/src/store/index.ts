@@ -7,9 +7,7 @@ export const store = configureStore({
     [emptySplitApi.reducerPath]: emptySplitApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(
-      emptySplitApi.middleware
-    ),
+    getDefaultMiddleware().concat(emptySplitApi.middleware),
 });
 
 setupListeners(store.dispatch);

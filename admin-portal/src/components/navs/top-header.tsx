@@ -22,7 +22,9 @@ const TopHeader: FC<Props> = ({
       leftAreaItems={
         <>
           {leftAreaItems}
-          <h1 className="text-xl font-medium leading-[38px] dark:text-zinc-200">{header}</h1>
+          <h1 className="text-xl font-medium leading-[38px] dark:text-zinc-200">
+            {header}
+          </h1>
           {badgeVal && (
             <div className="ml-2">
               <RoundBadge>{badgeVal}</RoundBadge>

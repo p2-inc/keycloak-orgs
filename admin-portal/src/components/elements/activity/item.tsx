@@ -11,7 +11,9 @@ const ActivityItem: FC<Props> = ({ children, title }) => {
       <div className="text-xs font-medium leading-3 text-p2gray-800 dark:text-zinc-200">
         {children}
       </div>
-      <div className="text-xs leading-3 text-p2gray-800/50 dark:text-zinc-500">{title}</div>
+      <div className="text-xs leading-3 text-p2gray-800/50 dark:text-zinc-500">
+        {title}
+      </div>
     </div>
   );
 };

@@ -62,7 +62,7 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
               cs(
                 "group flex items-center rounded-md px-3 py-2 text-sm transition",
                 {
-                  "bg-gray-100 text-gray-900 dark:text-zinc-200 dark:bg-zinc-800":
+                  "bg-gray-100 text-gray-900 dark:bg-zinc-800 dark:text-zinc-200":
                     isActive && !item.href.startsWith("#"),
                   "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-200":
                     !isActive,

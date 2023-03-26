@@ -182,9 +182,13 @@ const DesktopSidebarNav: React.FC<Props> = ({
                         <div>{theme.icon}</div>
                         <div>{theme.name}</div>
                       </Listbox.Button>
-                      <Listbox.Options className="absolute bg-white bottom-0 right-0 border rounded shadow-md dark:bg-p2dark-900 dark:border-zinc-600">
+                      <Listbox.Options className="absolute bottom-0 right-0 rounded border bg-white shadow-md dark:border-zinc-600 dark:bg-p2dark-900">
                         {themes.map((item) => (
-                          <Listbox.Option key={item.key} value={item} className="flex items-center space-x-2 px-2 py-1 text-sm hover:bg-gray-100 cursor-pointer dark:text-zinc-200 dark:hover:bg-zinc-600">
+                          <Listbox.Option
+                            key={item.key}
+                            value={item}
+                            className="flex cursor-pointer items-center space-x-2 px-2 py-1 text-sm hover:bg-gray-100 dark:text-zinc-200 dark:hover:bg-zinc-600"
+                          >
                             <div>{item.icon}</div>
                             <div>{item.name}</div>
                           </Listbox.Option>
