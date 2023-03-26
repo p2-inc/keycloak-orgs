@@ -1,13 +1,14 @@
-import { Popover } from "@headlessui/react";
+import { Listbox, Popover } from "@headlessui/react";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
 import { config } from "config";
 import useUser from "components/utils/useUser";
 import { keycloakService } from "keycloak";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Monitor, Moon, Sun } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import { ChevronIcon, DoubleSlashBrandIcon, FullBrandIcon } from "../icons";
 import { NavigationItem } from "../layouts/layout";
+import { useEffect, useState } from "react";
 
 type Props = {
   menuCollapsed: boolean;
@@ -15,12 +16,48 @@ type Props = {
   navigation: NavigationItem[];
 };
 
+const themes = [
+  {
+    key: "system",
+    name: "System",
+    icon: <Monitor className="h-4 w-4" />,
+  },
+  {
+    key: "light",
+    name: "Light",
+    icon: <Sun className="h-4 w-4" />,
+  },
+  {
+    key: "dark",
+    name: "Dark",
+    icon: <Moon className="h-4 w-4" />,
+  },
+];
+
 const DesktopSidebarNav: React.FC<Props> = ({
   menuCollapsed,
   setMenuCollapsed,
   navigation,
 }) => {
   const { user, fullName } = useUser();
+  const [theme, setTheme] = useState(themes[0]);
+
+  useEffect(() => {
+    if (theme.key === "system") {
+      localStorage.removeItem("theme");
+    } else {
+      localStorage.theme = theme.key;
+    }
+    if (
+      localStorage.theme === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   return (
     <>
@@ -81,7 +118,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
                       to={item.href}
                       className={({ isActive }) =>
                         cs(
-                          "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 dark:hover:border-zinc-600 hover:bg-white dark:hover:bg-p2dark-900",
+                          "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 hover:bg-white dark:hover:border-zinc-600 dark:hover:bg-p2dark-900",
                           {
                             "dark:border-zinc-600 dark:text-white": !isActive,
                             "group:text-p2blue-700 border-p2blue-700 bg-white text-p2blue-700 dark:bg-p2dark-900":
@@ -93,9 +130,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
                         )
                       }
                     >
-                      <item.icon
-                        className="h-5 w-5"
-                      />
+                      <item.icon className="h-5 w-5" />
                       <span className="sr-only">{item.name}</span>
                       {!menuCollapsed && (
                         <span className="pl-2">{item.name}</span>
@@ -114,27 +149,48 @@ const DesktopSidebarNav: React.FC<Props> = ({
               <Popover className="relative">
                 <Popover.Button className="outline-none">
                   <div className="flex items-center">
-                    <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm font-semibold">
-                    {fullName().substring(0, 1)}
+                    <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm font-semibold dark:bg-zinc-400">
+                      {fullName().substring(0, 1)}
                     </div>
                     {!menuCollapsed && (
-                      <p className="ml-2 text-sm font-semibold dark:text-white">{fullName()}</p>
+                      <p className="ml-2 text-sm font-semibold dark:text-white">
+                        {fullName()}
+                      </p>
                     )}
                   </div>
                 </Popover.Button>
-                <Popover.Panel className="absolute bottom-10 left-0 z-[100] w-72 divide-y dark:divide-zinc-700 bg-white dark:bg-p2dark-900 border dark:border-zinc-700 px-5 shadow-lg rounded-lg">
+                <Popover.Panel className="absolute bottom-10 left-0 z-[100] w-72 divide-y rounded-lg border bg-white px-5 shadow-lg dark:divide-zinc-700 dark:border-zinc-700 dark:bg-p2dark-900">
                   <div className="py-5">
-                    <div className="font-semibold dark:text-gray-200">{fullName()}</div>
+                    <div className="font-semibold dark:text-gray-200">
+                      {fullName()}
+                    </div>
                     <div className="text-sm text-gray-500">{user?.email}</div>
                   </div>
                   <div className="py-1">
                     <Link
                       to="/"
-                      className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 dark:text-gray-200 transition hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-gray-100"
+                      className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-zinc-800 dark:hover:text-gray-100"
                     >
                       <div>Return to homepage</div>
                       <ExternalLink className="h-4 w-4" />
                     </Link>
+                  </div>
+                  <div className="relative flex items-center justify-between py-2">
+                    <div className="text-sm dark:text-zinc-200">Theme</div>
+                    <Listbox value={theme} onChange={setTheme}>
+                      <Listbox.Button className="flex items-center space-x-2 rounded border px-2 py-1 text-sm hover:border-gray-500 dark:border-zinc-600 dark:text-zinc-200 dark:hover:border-zinc-400">
+                        <div>{theme.icon}</div>
+                        <div>{theme.name}</div>
+                      </Listbox.Button>
+                      <Listbox.Options className="absolute bg-white bottom-0 right-0 border rounded shadow-md dark:bg-p2dark-900 dark:border-zinc-600">
+                        {themes.map((item) => (
+                          <Listbox.Option key={item.key} value={item} className="flex items-center space-x-2 px-2 py-1 text-sm hover:bg-gray-100 cursor-pointer dark:text-zinc-200 dark:hover:bg-zinc-600">
+                            <div>{item.icon}</div>
+                            <div>{item.name}</div>
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </Listbox>
                   </div>
                   <div className="py-5">
                     <Button

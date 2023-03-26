@@ -7,8 +7,8 @@ type Props = {
 
 const loading = (
   <div className="space-y-2 p-4">
-    <div className="h-4 w-20 rounded-md bg-gray-300"></div>
-    <div className="h-4 w-40 rounded-md bg-gray-300"></div>
+    <div className="h-4 w-20 rounded-md bg-gray-300 dark:bg-zinc-600"></div>
+    <div className="h-4 w-40 rounded-md bg-gray-300 dark:bg-zinc-600"></div>
   </div>
 );
 
