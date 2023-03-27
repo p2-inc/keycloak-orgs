@@ -28,6 +28,10 @@ import org.junit.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.broker.provider.util.SimpleHttp;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -61,6 +65,25 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       assertThat(r.getRealm(), is(REALM));
       assertThat(r.getId(), not(REALM));
     }
+  }
+
+  @Test
+  public void testGetMe() throws Exception {
+    CloseableHttpClient httpClient = HttpClients.createDefault();
+    String baseUrl = server.getAuthUrl() + "/realms/master/orgs";
+
+    PhaseTwo client = phaseTwo();
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
+    OrganizationResource orgResource = orgsResource.organization(id);
+
+    SimpleHttp.Response response =
+        SimpleHttp.doGet(baseUrl + "/me", httpClient)
+        .auth(server.client().tokenManager().getAccessTokenString())
+        .asResponse();
+    assertThat(response.getStatus(), is(200));
+
+    orgResource.delete();
   }
   
   @Test

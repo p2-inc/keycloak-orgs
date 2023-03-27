@@ -3,8 +3,12 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.Organization;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -33,6 +37,31 @@ public class OrganizationsResource extends OrganizationAdminResource {
       throw new NotAuthorizedException(
           String.format("Insufficient permission to access %s", orgId));
     }
+  }
+
+  @GET
+  @Path("me")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response me() {
+    Map<String, Object> claim = Maps.newHashMap();
+    orgs.getUserOrganizationsStream(realm, user)
+        .forEach(
+            o -> {
+              List<String> roles = Lists.newArrayList();
+              o.getRolesStream()
+                  .forEach(
+                      r -> {
+                        if (r.hasRole(user)) roles.add(r.getName());
+                      });
+              Map<String, Object> org = Maps.newHashMap();
+              org.put("name", o.getName());
+              if (o.getDisplayName() != null) org.put("displayName", o.getDisplayName());
+              if (o.getUrl() != null) org.put("url", o.getUrl());
+              org.put("attributes", o.getAttributes());
+              org.put("roles", roles);
+              claim.put(o.getId(), org);
+            });
+    return Response.ok(claim).build();
   }
 
   @GET
