@@ -3,7 +3,6 @@ import SectionHeader from "components/navs/section-header";
 import {
   useGetCredentialsQuery,
   useDeleteCredentialMutation,
-  useUpdateCredentialLabelMutation,
   UserCredentialMetadataRepresentation,
   CredentialRepresentation,
   CredentialMetadataRepresentation,
@@ -18,7 +17,7 @@ import { keycloakService } from "keycloak";
 import { t } from "i18next";
 import { AIACommand } from "services/aia-command";
 import P2Toast from "components/utils/toast";
-import { Key, Link2, Lock, Smartphone } from "lucide-react";
+import { Key, Lock, Smartphone } from "lucide-react";
 
 type CredContainer = {
   credential: CredentialRepresentation;

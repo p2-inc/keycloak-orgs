@@ -10,7 +10,7 @@ export const addTagTypes = [
   "Events",
   "Attributes",
 ] as const;
-const injectedRtkApi = api
+export const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
   })
@@ -1114,4 +1114,5 @@ export const {
   useUpdateWebhookMutation,
   useDeleteWebhookMutation,
   useCreateMagicLinkMutation,
+  endpoints,
 } = injectedRtkApi;

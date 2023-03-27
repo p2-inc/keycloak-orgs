@@ -6,10 +6,14 @@ import P2Toast from "components/utils/toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { config } from "config";
 import {
+  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetOrganizationDomainsQuery,
   useVerifyDomainMutation,
 } from "store/apis/orgs";
 import { Globe } from "lucide-react";
+import useUser from "components/utils/useUser";
+import { checkOrgForRole } from "components/utils/check-org-for-role";
+import { Roles } from "services/role";
 
 const addIcon = (
   <RoundedIcon className="my-4">
@@ -19,12 +23,27 @@ const addIcon = (
 
 const DomainsVerify = () => {
   let { orgId, domainRecord } = useParams();
+  const { realm } = config.env;
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const { data: domains = [] } = useGetOrganizationDomainsQuery({
-    realm: config.env.realm,
+    realm,
     orgId: orgId!,
   });
+  const { data: userRolesForOrg = [] } =
+    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
+      {
+        orgId: orgId!,
+        realm,
+        userId: user?.id!,
+      },
+      { skip: !user?.id }
+    );
+  const hasManageOrganizationRole = checkOrgForRole(
+    userRolesForOrg,
+    Roles.ManageOrganization
+  );
 
   const domain = domains.find((domain) => domain.record_value === domainRecord);
 
@@ -33,37 +52,34 @@ const DomainsVerify = () => {
 
   const checkVerification = async () => {
     if (domain && domain.domain_name) {
-      const resp = await verifyDomain({
+      await verifyDomain({
         domainName: domain.domain_name,
         orgId: orgId!,
-        realm: config.env.realm,
-      });
-
-      //@ts-ignore
-      if (resp.error) {
-        return P2Toast({
-          error: true,
+        realm,
+      })
+        .unwrap()
+        .then((r) => {
+          console.log("🚀 ~ file: verify.tsx:62 ~ .then ~ r:", r);
           //@ts-ignore
-          title: `${domain.domain_name} failed to verify. ${resp.error?.data?.error}`,
-        });
-      }
-
-      //@ts-ignore
-      if (resp.data) {
-        //@ts-ignore
-        if (resp.data.verified) {
-          P2Toast({
-            success: true,
-            title: `${domain.domain_name} has been verified.`,
-          });
-          navigate(`/organizations/${orgId}/settings`);
-        } else {
-          P2Toast({
+          if (r.verified) {
+            P2Toast({
+              success: true,
+              title: `${domain.domain_name} has been verified.`,
+            });
+            navigate(`/organizations/${orgId}/settings`);
+          } else {
+            P2Toast({
+              error: true,
+              title: `${domain.domain_name} failed to verify. Please check DNS records and try again.`,
+            });
+          }
+        })
+        .catch((e) => {
+          return P2Toast({
             error: true,
-            title: `${domain.domain_name} failed to verify. Please check DNS records and try again.`,
+            title: `${domain.domain_name} failed to verify. ${e.data.error}`,
           });
-        }
-      }
+        });
     }
   };
 
@@ -71,7 +87,7 @@ const DomainsVerify = () => {
     <div className="space-y-10 md:py-20">
       <div>
         <SectionHeader
-          title="Verify domain"
+          title={`Verify ${domain?.domain_name || "domain"}`}
           description="Use the following details to verify your domain."
           icon={addIcon}
           rightContent={
@@ -98,7 +114,7 @@ const DomainsVerify = () => {
         <Button
           isBlackButton={true}
           onClick={checkVerification}
-          disabled={isVerifyDomainLoading}
+          disabled={isVerifyDomainLoading || !hasManageOrganizationRole}
         >
           Verify
         </Button>

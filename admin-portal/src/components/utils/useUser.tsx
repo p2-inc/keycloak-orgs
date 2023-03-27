@@ -4,6 +4,7 @@ import { keycloak } from "keycloak";
 
 export default function useUser() {
   const [user, setUser] = useState<KeycloakProfile>();
+  //TODO: move roles check functions into this hook to remove duplication
 
   async function loadUser() {
     const u = await keycloak.loadUserProfile();

@@ -32,7 +32,7 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
               </div>
             ))}
           </div>
-          <table className="hidden w-full md:table">
+          <table className="hidden w-full table-auto md:table">
             <tbody className="divide-y dark:divide-zinc-600">
               {rows.map((item) => (
                 <tr key={item["email"]}>
@@ -47,7 +47,9 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
                   <td className="space-x-2 px-5 py-4 text-right align-middle">
                     {item["roles"]}
                   </td>
-                  <td className="px-1 py-4 align-middle">{item["action"]}</td>
+                  <td className="px-1 py-4 text-right align-middle">
+                    {item["action"]}
+                  </td>
                 </tr>
               ))}
             </tbody>

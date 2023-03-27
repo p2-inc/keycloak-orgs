@@ -1,36 +1,27 @@
-import { UserIcon } from "@heroicons/react/20/solid";
 import SectionHeader from "components/navs/section-header";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
-import { useAddOrganizationInvitationMutation } from "store/apis/orgs";
+import {
+  useAddOrganizationInvitationMutation,
+  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
+  useGetOrganizationByIdQuery,
+} from "store/apis/orgs";
 import { useState } from "react";
 import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
 import { useForm } from "react-hook-form";
 import { config } from "config";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
-import SquareBadge from "components/elements/badges/square-badge";
 import P2Toast from "components/utils/toast";
 import { Listbox } from "@headlessui/react";
-import { ChevronIcon } from "components/icons";
 import RoleBadge from "components/elements/badges/role-badge";
-import { ChevronDown, User } from "lucide-react";
+import { User, ChevronDown } from "lucide-react";
+import { Roles, viewRoles } from "services/role";
+import { checkOrgForRole } from "components/utils/check-org-for-role";
+import useUser from "components/utils/useUser";
+import Alert from "components/elements/alerts/alert";
 
-export const defaultRoles = [
-  "view-organization",
-  "manage-organization",
-  "view-members",
-  "manage-members",
-  "view-roles",
-  "manage-roles",
-  "view-invitations",
-  "manage-invitations",
-  "view-identity-providers",
-  "manage-identity-providers",
-] as const;
-
-const adminRoles = [...defaultRoles];
-const memberRoles = defaultRoles.filter((r) => r.includes("view"));
+const { realm } = config.env;
 
 const loadingIcon = (
   <div>
@@ -44,15 +35,21 @@ const loadingIcon = (
 );
 
 const roles = [
-  { id: 1, name: "Admin", items: adminRoles },
-  { id: 2, name: "Member", items: memberRoles },
+  { id: 1, name: "Admin", items: Roles },
+  { id: 2, name: "Member", items: viewRoles },
 ];
 
 const NewInvitation = () => {
   const { keycloak } = useKeycloak();
   const navigate = useNavigate();
-
   let { orgId } = useParams();
+
+  const { user } = useUser();
+  const { data: org } = useGetOrganizationByIdQuery({
+    orgId: orgId!,
+    realm: config.env.realm,
+  });
+
   const {
     register,
     handleSubmit,
@@ -60,44 +57,63 @@ const NewInvitation = () => {
     reset,
   } = useForm();
 
+  const { data: userRolesForOrg = [], isFetching: isFetchingRoles } =
+    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
+      {
+        orgId: orgId!,
+        realm,
+        userId: user?.id!,
+      },
+      { skip: !user?.id }
+    );
+
   const [addOrganizationInvitation] = useAddOrganizationInvitationMutation();
   const [selectedRole, setSelectedRole] = useState(roles[0]);
 
   const onSubmit = async (data) => {
-    console.log("🚀 ~ file: new.tsx:79 ~ onSubmit ~ onSubmit:", data);
     if (selectedRole && data.email) {
-      const resp = await addOrganizationInvitation({
+      const roleItems = roles.find((r) => selectedRole.name === r.name);
+      await addOrganizationInvitation({
         orgId: orgId!,
-        realm: config.env.realm,
+        realm,
         invitationRequestRepresentation: {
           email: data.email,
           inviterId: keycloak.tokenParsed?.sub,
-          roles: [selectedRole.name],
+          roles: Object.values(roleItems!.items),
         },
-      });
-      //@ts-ignore
-      if (resp.error) {
-        return P2Toast({
-          error: true,
-          //@ts-ignore
-          title: resp.error?.data?.error,
+      })
+        .unwrap()
+        .then(() => {
+          reset();
+          P2Toast({
+            success: true,
+            title: `${data.email} has been sent an invitation.`,
+          });
+          return navigate(`/organizations/${orgId}/details`);
+        })
+        .catch((e) => {
+          return P2Toast({
+            error: true,
+            title:
+              e.status === 401
+                ? "Insufficient roles to perform action."
+                : e.data.error,
+          });
         });
-      }
-
-      reset();
-      P2Toast({
-        success: true,
-        title: `${data.email} has been sent an invitation.`,
-      });
-      navigate(`/organizations/${orgId}/details`);
     }
   };
 
-  const isSendButtonDisabled = !selectedRole;
+  const hasManageInvitationsRole = checkOrgForRole(
+    userRolesForOrg,
+    Roles.ManageInvitations
+  );
+
+  const isSendButtonDisabled = !hasManageInvitationsRole || !selectedRole;
+
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title="Invite new member"
+        title={`Invite new member to ${org?.displayName || "Organization"}`}
         description="Add a new member to the organization by entering their email and assigning them a role within the organization. An email will be sent to them with instructions on how to join."
         icon={loadingIcon}
         rightContent={
@@ -109,11 +125,24 @@ const NewInvitation = () => {
           </Link>
         }
       />
+      {!hasManageInvitationsRole && (
+        <div className="mt-4">
+          <Alert
+            title='You lack the "manage-invitations" role.'
+            body="Speak to an admin in order to be granted this role."
+            type="info"
+          />
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mt-8 space-y-4">
-          <Listbox value={selectedRole} onChange={setSelectedRole}>
+          <Listbox
+            value={selectedRole}
+            onChange={setSelectedRole}
+            disabled={!hasManageInvitationsRole}
+          >
             <div className="relative z-50">
-              <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white dark:border-zinc-600 dark:bg-p2dark-1000 dark:text-zinc-200 dark:hover:bg-p2dark-1000">
+              <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white disabled:opacity-50 dark:border-zinc-600 dark:bg-p2dark-1000 dark:text-zinc-200 dark:hover:bg-p2dark-1000">
                 <div>{selectedRole.name}</div>
                 <ChevronDown className="dark:text-zinc-600" />
               </Listbox.Button>
@@ -130,9 +159,11 @@ const NewInvitation = () => {
                           {role.name}
                         </div>
                         <div className="flex flex-wrap">
-                          {role.items.sort().map((ar) => (
-                            <RoleBadge name={ar} />
-                          ))}
+                          {Object.values(role.items)
+                            .sort()
+                            .map((ar) => (
+                              <RoleBadge name={ar} key={ar} />
+                            ))}
                         </div>
                       </Listbox.Option>
                     ))}
@@ -159,6 +190,7 @@ const NewInvitation = () => {
               type: "email",
               placeholder: "you@email.com",
               required: true,
+              disabled: !hasManageInvitationsRole,
             }}
           />
 

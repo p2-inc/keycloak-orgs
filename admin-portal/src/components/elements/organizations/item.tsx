@@ -1,16 +1,23 @@
 import cs from "classnames";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ViewLayoutOptions } from "../forms/switches/view-switch";
 import { config } from "config";
-const { features: featureFlags } = config.env;
+import {
+  OrganizationRepresentation,
+  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
+} from "store/apis/orgs";
+import useUser from "components/utils/useUser";
+import { Roles } from "services/role";
+import OrganizationsLoader from "components/loaders/organizations";
+import { checkOrgForRole } from "components/utils/check-org-for-role";
+const { features: featureFlags, realm } = config.env;
 
 type Props = {
   children: React.ReactNode;
-  link: string;
-  title?: string;
-  subTitle?: string;
   viewType: ViewLayoutOptions;
+  org: OrganizationRepresentation;
+  setVisibility: () => void;
 };
 
 const Title = ({ children }) => (
@@ -22,11 +29,11 @@ const SubTitle = ({ children }) => (
 
 const InnerItem = ({ children, title, subTitle, viewType }) => {
   return (
-    <div className="relative">
-      <div className="relative z-20">
+    <div className="relative h-full">
+      <div className="relative z-20 h-full">
         <div
           className={cs(
-            "col-span-1 flex",
+            "col-span-1 flex h-full",
             "group-hover:border-gray-300 group-hover:bg-white dark:group-hover:border-zinc-500 dark:group-hover:bg-p2dark-900",
             {
               "flex-col space-y-5 rounded-md border border-gray-200 bg-gray-50 px-10 py-9 dark:border-zinc-600 dark:bg-p2dark-1000":
@@ -59,41 +66,62 @@ const InnerItem = ({ children, title, subTitle, viewType }) => {
 
 const OrganizationItem: FC<Props> = ({
   children,
-  link,
-  title,
-  subTitle,
+  org,
   viewType,
+  setVisibility,
 }) => {
-  return (
-    <>
-      {featureFlags.orgDetailsEnabled && (
-        <Link
-          to={link}
-          className={cs("group block", "focus:outline-none focus:ring-0", {
-            "md:pb-3": viewType === ViewLayoutOptions.GRID,
-          })}
-        >
-          <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
-            {children}
-          </InnerItem>
-        </Link>
+  const { user } = useUser();
+  const { displayName: title, name: subTitle } = org;
+  const link = `/organizations/${org.id}/details`;
+
+  const { data: userRolesForOrg = [], isFetching: isFetchingRole } =
+    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
+      {
+        orgId: org.id!,
+        realm,
+        userId: user?.id!,
+      },
+      { skip: !user?.id }
+    );
+
+  const hasViewRole = checkOrgForRole(userRolesForOrg, Roles.ViewOrganization);
+
+  useEffect(() => {
+    if (hasViewRole) setVisibility();
+  }, [hasViewRole]);
+
+  if (isFetchingRole) {
+    return <OrganizationsLoader />;
+  }
+
+  if (!hasViewRole) {
+    return <></>;
+  }
+  return featureFlags.orgDetailsEnabled ? (
+    <Link
+      to={link}
+      className={cs("group block", "focus:outline-none focus:ring-0", {
+        "md:pb-3": viewType === ViewLayoutOptions.GRID,
+      })}
+    >
+      <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
+        {children}
+      </InnerItem>
+    </Link>
+  ) : (
+    <div
+      className={cs(
+        "block",
+        "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
+        {
+          "md:pb-3": viewType === ViewLayoutOptions.GRID,
+        }
       )}
-      {!featureFlags.orgDetailsEnabled && (
-        <div
-          className={cs(
-            " block",
-            "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
-            {
-              "md:pb-3": viewType === ViewLayoutOptions.GRID,
-            }
-          )}
-        >
-          <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
-            {children}
-          </InnerItem>
-        </div>
-      )}
-    </>
+    >
+      <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
+        {children}
+      </InnerItem>
+    </div>
   );
 };
 

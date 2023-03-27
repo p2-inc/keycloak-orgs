@@ -1,38 +1,52 @@
 import Button from "components/elements/forms/buttons/button";
 import TopHeader from "components/navs/top-header";
-import SecondaryMainContentMenuArea from "components/layouts/secondary-main-content-menu-area";
 import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
 import PrimaryContentArea from "components/layouts/primary-content-area";
-import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
 import { config } from "config";
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Breadcrumbs from "components/navs/breadcrumbs";
-import { useGetOrganizationByIdQuery } from "store/apis/orgs";
+import {
+  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
+  useGetOrganizationByIdQuery,
+} from "store/apis/orgs";
 import SettingsGeneral from "./general";
 import SettingsDomain from "./domains";
 import SettingsSSO from "./sso";
 
-const navigation = [
-  {
-    name: "General",
-    href: "#general",
-  },
-  {
-    name: "Domains",
-    href: "#domains",
-  },
-  {
-    name: "SSO",
-    href: "#sso",
-  },
-];
+import { checkOrgForRole } from "components/utils/check-org-for-role";
+import { Roles } from "services/role";
+import useUser from "components/utils/useUser";
+
+export type SettingsProps = {
+  hasManageOrganizationRole?: boolean;
+  hasManageIDPRole?: boolean;
+};
 
 export default function OrganizationSettings() {
   let { orgId } = useParams();
+  const { realm } = config.env;
+  const { user } = useUser();
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
     realm: config.env.realm,
   });
+  const { data: userRolesForOrg = [] } =
+    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
+      {
+        orgId: orgId!,
+        realm,
+        userId: user?.id!,
+      },
+      { skip: !user?.id }
+    );
+  const hasManageOrganizationRole = checkOrgForRole(
+    userRolesForOrg,
+    Roles.ManageOrganization
+  );
+  const hasManageIDPRole = checkOrgForRole(
+    userRolesForOrg,
+    Roles.ManageIdentityProviders
+  );
   return (
     <>
       <TopHeader
@@ -58,18 +72,16 @@ export default function OrganizationSettings() {
         }
       />
       <FixedWidthMainContent>
-        {/* Secondary menu */}
-        {/* <SecondaryMainContentMenuArea>
-          <SecondaryMainContentNav navigation={navigation} />
-        </SecondaryMainContentMenuArea> */}
-
-        {/* Primary content */}
         <PrimaryContentArea>
-          <SettingsGeneral />
+          <SettingsGeneral
+            hasManageOrganizationRole={hasManageOrganizationRole}
+          />
           <hr className="my-10 dark:border-zinc-600" />
-          <SettingsDomain />
+          <SettingsDomain
+            hasManageOrganizationRole={hasManageOrganizationRole}
+          />
           <hr className="my-10 dark:border-zinc-600" />
-          <SettingsSSO />
+          <SettingsSSO hasManageIDPRole={hasManageIDPRole} />
         </PrimaryContentArea>
       </FixedWidthMainContent>
     </>

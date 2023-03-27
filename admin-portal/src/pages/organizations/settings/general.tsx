@@ -1,25 +1,26 @@
 import Button from "components/elements/forms/buttons/button";
 import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
-import FormTextInputWithLabel from "components/elements/forms/inputs/text-input-with-label";
 import SectionHeader from "components/navs/section-header";
 import P2Toast from "components/utils/toast";
+import { config } from "config";
 import { P2Params } from "index";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { config } from "config";
 import {
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
 } from "store/apis/orgs";
+import { SettingsProps } from ".";
 
-const SettingsGeneral = () => {
+const SettingsGeneral = ({ hasManageOrganizationRole }: SettingsProps) => {
   const { orgId } = useParams<keyof P2Params>() as P2Params;
+  const { realm } = config.env;
 
   const { data: org, isLoading: isLoadingOrganization } =
     useGetOrganizationByIdQuery({
       orgId: orgId!,
-      realm: config.env.realm,
+      realm,
     });
 
   const {
@@ -38,35 +39,30 @@ const SettingsGeneral = () => {
   const [updateOrg, { isLoading }] = useUpdateOrganizationMutation();
 
   async function onSubmit(data) {
-    console.log("🚀 ~ file: general.tsx:26 ~ onSubmit ~ data:", data);
-
     const updatedOrg = { ...org, ...data };
 
-    const resp = await updateOrg({
+    await updateOrg({
       orgId,
-      realm: config.env.realm,
+      realm,
       organizationRepresentation: updatedOrg,
-    });
-
-    //@ts-ignore
-    if (resp.error) {
-      console.log("🚀 ~ file: general.tsx:54 ~ onSubmit ~ resp:", resp);
-      //@ts-ignore
-      let errorMsg = resp.error?.data?.error;
-      //@ts-ignore
-      if (resp.error?.status === 401) {
-        errorMsg = "Missing correct role to perform this action.";
-      }
-      return P2Toast({
-        error: true,
-        title: `Error during Organization update. ${errorMsg}`,
+    })
+      .unwrap()
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `Organization updated successfully.`,
+        });
+      })
+      .catch((e) => {
+        let errorMsg = e.data.error;
+        if (e.status === 401) {
+          errorMsg = "Missing correct role to perform this action.";
+        }
+        return P2Toast({
+          error: true,
+          title: `Error during Organization update. ${errorMsg}`,
+        });
       });
-    }
-
-    P2Toast({
-      success: true,
-      title: `Organization updated successfully.`,
-    });
   }
 
   return (
@@ -107,7 +103,9 @@ const SettingsGeneral = () => {
         <Button
           isBlackButton
           type="submit"
-          disabled={isLoading || isLoadingOrganization}
+          disabled={
+            isLoading || isLoadingOrganization || !hasManageOrganizationRole
+          }
         >
           Update Organization
         </Button>

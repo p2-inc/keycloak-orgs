@@ -2,7 +2,7 @@ import FormTextInputWithIcon from "components/elements/forms/inputs/text-input-w
 import MainContentArea from "components/layouts/main-content-area";
 import TopHeader from "components/navs/top-header";
 import PrimaryContentArea from "components/layouts/primary-content-area";
-import { useGetOrganizationsQuery } from "store/apis/orgs";
+import { useGetByRealmUsersAndUserIdOrgsQuery } from "store/apis/orgs";
 import { config } from "config";
 import OrganizationsLoader from "components/loaders/organizations";
 import OrganizationItem from "components/elements/organizations/item";
@@ -13,20 +13,30 @@ import { useState } from "react";
 import cs from "classnames";
 import DomainStat from "./components/domain-stat";
 import MembersStat from "./components/members-stat";
+import useUser from "components/utils/useUser";
+
+const { realm } = config.env;
 
 export default function Organizations() {
+  const { user } = useUser();
+  const [viewOrgs, setViewOrgs] = useState<string[]>([]);
   const [viewType, setViewType] = useState<ViewLayoutOptions>(
     ViewLayoutOptions.GRID
   );
-  const { data: orgs = [], isFetching } = useGetOrganizationsQuery({
-    realm: config.env.realm,
-  });
+  const { data: userOrgs = [], isFetching } =
+    useGetByRealmUsersAndUserIdOrgsQuery(
+      {
+        realm,
+        userId: user?.id!,
+      },
+      { skip: !user?.id }
+    );
 
   return (
     <>
       <TopHeader
         header="Organizations"
-        badgeVal={orgs.length}
+        badgeVal={viewOrgs.length}
         rightAreaItems={
           <>
             <FormTextInputWithIcon
@@ -42,26 +52,27 @@ export default function Organizations() {
         <PrimaryContentArea>
           <div>
             {isFetching && (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 justify-items-stretch gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                <OrganizationsLoader />
+                <OrganizationsLoader />
                 <OrganizationsLoader />
               </div>
             )}
             {!isFetching && (
               <div
                 className={cs({
-                  "grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3":
+                  "grid grid-cols-1 justify-items-stretch gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3":
                     viewType === ViewLayoutOptions.GRID,
                   "divide-y rounded-md border border-gray-200 bg-gray-50 dark:divide-zinc-600 dark:border-zinc-600 dark:bg-p2dark-1000":
                     viewType === ViewLayoutOptions.LIST,
                 })}
               >
-                {orgs.map((org) => (
+                {userOrgs.map((org) => (
                   <OrganizationItem
                     key={org.id}
-                    link={`/organizations/${org.id}/details`}
-                    title={org.displayName}
-                    subTitle={org.name}
+                    org={org}
                     viewType={viewType}
+                    setVisibility={() => setViewOrgs([...viewOrgs, org.id!])}
                   >
                     <MembersStat org={org} realm={config.env.realm} />
                     <DomainStat org={org} realm={config.env.realm} />

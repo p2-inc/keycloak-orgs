@@ -2,6 +2,7 @@ import { Fragment, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/20/solid";
 import {
+  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useRemoveOrganizationMemberMutation,
   UserRepresentation,
 } from "store/apis/orgs";
@@ -12,6 +13,8 @@ import useUser from "components/utils/useUser";
 import fullName from "components/utils/fullName";
 import { Link } from "react-router-dom";
 import MenuItemButton from "components/elements/menu/button";
+import { Roles } from "services/role";
+import { checkOrgForRole } from "components/utils/check-org-for-role";
 
 type Props = {
   member: UserRepresentation;
@@ -21,11 +24,18 @@ type Props = {
 };
 
 export default function MembersActionMenu({ member, orgId, realm }: Props) {
-  // TODO: check roles here
   const { user } = useUser();
   const isRemoveDisabled = !user || member.id === user?.id;
-  const isEditDisabled = false;
   const [isRemoveConfOpen, setRemoveConfOpen] = useState(false);
+  const { data: userRolesForOrg = [], isFetching: isFetchingRoles } =
+    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
+      {
+        orgId: orgId,
+        realm,
+        userId: user?.id!,
+      },
+      { skip: !user?.id }
+    );
 
   const [removeOrganizationMember, { isLoading }] =
     useRemoveOrganizationMemberMutation();
@@ -50,6 +60,19 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
         });
         console.error(e);
       });
+  }
+
+  const hasManageMembersRole = checkOrgForRole(
+    userRolesForOrg,
+    Roles.ManageMembers
+  );
+  const hasManageRolesRole = checkOrgForRole(
+    userRolesForOrg,
+    Roles.ManageRoles
+  );
+
+  if (isFetchingRoles) {
+    return <></>;
   }
 
   return (
@@ -89,9 +112,13 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
         >
           <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border dark:border-zinc-600 dark:bg-p2dark-900">
             <div className="py-1">
-              <Menu.Item disabled={isEditDisabled}>
+              <Menu.Item disabled={!hasManageRolesRole}>
                 {({ active, disabled }) => {
-                  return (
+                  return disabled ? (
+                    <MenuItemButton active={active} disabled={disabled}>
+                      Edit roles
+                    </MenuItemButton>
+                  ) : (
                     <Link
                       to={`/organizations/${orgId}/members/${member.id}/roles`}
                     >
@@ -102,7 +129,7 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
                   );
                 }}
               </Menu.Item>
-              <Menu.Item disabled={isRemoveDisabled}>
+              <Menu.Item disabled={isRemoveDisabled || !hasManageMembersRole}>
                 {({ active, disabled }) => {
                   return (
                     <MenuItemButton

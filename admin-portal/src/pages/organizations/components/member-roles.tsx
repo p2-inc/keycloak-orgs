@@ -3,11 +3,12 @@ import {
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   UserRepresentation,
 } from "store/apis/orgs";
-import { roleSettings } from "services/role";
+import { Roles, roleSettings } from "services/role";
 import RoleBadge from "components/elements/badges/role-badge";
 import cs from "classnames";
 import { Link } from "react-router-dom";
 import Button from "components/elements/forms/buttons/button";
+import { checkOrgForRole } from "components/utils/check-org-for-role";
 
 type Props = {
   member: UserRepresentation;
@@ -33,6 +34,7 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
   orgId,
 }) => {
   const filtered = roles.filter((f) => regexp.test(f.name));
+  const hasManageRolesRole = checkOrgForRole(roles, Roles.ManageRoles);
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left md:w-auto">
@@ -54,13 +56,15 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
             </div>
           </Menu.Item>
         ))}
-        <Menu.Item>
-          <Link to={`/organizations/${orgId}/members/${member.id}/roles`}>
-            <Button isCompact className="mt-4 w-full">
-              Edit roles
-            </Button>
-          </Link>
-        </Menu.Item>
+        {hasManageRolesRole && (
+          <Menu.Item>
+            <Link to={`/organizations/${orgId}/members/${member.id}/roles`}>
+              <Button isCompact className="mt-4 w-full">
+                Edit roles
+              </Button>
+            </Link>
+          </Menu.Item>
+        )}
       </Menu.Items>
     </Menu>
   );
@@ -74,11 +78,14 @@ const MemberRoles: React.FC<Props> = ({ member, orgId, realm }) => {
       userId: member.id!,
     });
 
+  const hasViewRolesRole = checkOrgForRole(roles, Roles.ViewRoles);
+
   return (
     <>
       {isLoading ? (
         <div className="inline-block h-[30px] w-32 animate-pulse rounded bg-gray-200"></div>
       ) : (
+        hasViewRolesRole &&
         roleSettings.map((f) => (
           <FilteredRole
             regexp={f.regexp}

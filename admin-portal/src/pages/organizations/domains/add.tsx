@@ -7,11 +7,15 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { config } from "config";
 import {
+  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
 } from "store/apis/orgs";
 import isValidDomain from "is-valid-domain";
 import { Globe } from "lucide-react";
+import useUser from "components/utils/useUser";
+import { checkOrgForRole } from "components/utils/check-org-for-role";
+import { Roles } from "services/role";
 
 const addIcon = (
   <RoundedIcon className="my-4">
@@ -19,14 +23,30 @@ const addIcon = (
   </RoundedIcon>
 );
 
+const { realm } = config.env;
+
 const DomainsAdd = () => {
+  const { user } = useUser();
   let { orgId } = useParams();
   const navigate = useNavigate();
 
   const { data: org = {} } = useGetOrganizationByIdQuery({
     orgId: orgId!,
-    realm: config.env.realm,
+    realm,
   });
+  const { data: userRolesForOrg = [] } =
+    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
+      {
+        orgId: orgId!,
+        realm,
+        userId: user?.id!,
+      },
+      { skip: !user?.id }
+    );
+  const hasManageOrganizationRole = checkOrgForRole(
+    userRolesForOrg,
+    Roles.ManageOrganization
+  );
 
   const [updateOrg] = useUpdateOrganizationMutation();
   const {
@@ -63,27 +83,26 @@ const DomainsAdd = () => {
         orgCopy.domains = [domain];
       }
 
-      const resp = await updateOrg({
+      await updateOrg({
         orgId: orgId!,
-        realm: config.env.realm,
+        realm,
         organizationRepresentation: orgCopy,
-      });
-
-      //@ts-ignore
-      if (resp.error) {
-        return P2Toast({
-          error: true,
-          //@ts-ignore
-          title: resp.error?.data?.error,
+      })
+        .unwrap()
+        .then(() => {
+          reset();
+          P2Toast({
+            success: true,
+            title: `${domain} has been added to organization. Please verify domain.`,
+          });
+          return navigate(`/organizations/${orgId}/settings`);
+        })
+        .catch((e) => {
+          P2Toast({
+            error: true,
+            title: e.data.error,
+          });
         });
-      }
-
-      reset();
-      P2Toast({
-        success: true,
-        title: `${domain} has been added to organization. Please verify domain.`,
-      });
-      navigate(`/organizations/${orgId}/settings`);
     }
   };
 
@@ -134,10 +153,15 @@ const DomainsAdd = () => {
               type: "text",
               placeholder: "www.your-domain.com",
               required: true,
+              disabled: !hasManageOrganizationRole,
             }}
           />
           <div className="pt-3">
-            <Button isBlackButton={true} type="submit">
+            <Button
+              isBlackButton={true}
+              type="submit"
+              disabled={!hasManageOrganizationRole}
+            >
               Add domain
             </Button>
           </div>

@@ -1,5 +1,4 @@
 import Keycloak, { KeycloakLoginOptions } from "keycloak-js";
-import { config } from "config";
 
 export class KeycloakService {
   private keycloakAuth: Keycloak;
