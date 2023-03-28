@@ -115,43 +115,51 @@ const DomainsAdd = () => {
           </div>
         }
       />
-      {org.domains && org.domains?.length > 0 && (
-        <div className="space-y-2 py-5">
-          <div className="text-md">Current registered domains</div>
-          {org.domains.map((domain) => (
-            <div key={domain}>{domain}</div>
-          ))}
-        </div>
-      )}
-
       <div className="space-y-5 py-10">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <RHFFormTextInputWithLabel
-            slug="domain"
-            label="Domain name"
-            register={register}
-            registerArgs={{
-              pattern:
-                /^(?!-)[A-Za-z0-9-]+([\-\.]{1}[a-z0-9]+)*\.[A-Za-z]{2,6}$/,
-            }}
-            error={errors.domain}
-            inputArgs={{
-              type: "text",
-              placeholder: "www.your-domain.com",
-              required: true,
-              disabled: !hasManageOrganizationRole,
-            }}
-          />
-          <div className="pt-3">
-            <Button
-              isBlackButton={true}
-              type="submit"
-              disabled={!hasManageOrganizationRole}
-            >
-              Add domain
-            </Button>
+        {org.domains && org.domains?.length > 0 && (
+          <div className="divide-y rounded-md border border-gray-200 dark:border-zinc-600 dark:divide-zinc-600">
+            <div className="rounded-t-md bg-gray-50 px-3 py-2 text-sm font-semibold dark:bg-zinc-900 dark:text-zinc-200">
+              Current registered domains
+            </div>
+            <div className="divide-y dark:divide-zinc-600">
+              {org.domains.map((domain) => (
+                <div key={domain} className="px-3 py-2 text-sm flex items-center space-x-2 dark:text-zinc-200">
+                  <div>{domain}</div>
+                </div>
+              ))}
+            </div>
           </div>
-        </form>
+        )}
+
+        <div className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <RHFFormTextInputWithLabel
+              slug="domain"
+              label="Domain name"
+              register={register}
+              registerArgs={{
+                pattern:
+                  /^(?!-)[A-Za-z0-9-]+([\-\.]{1}[a-z0-9]+)*\.[A-Za-z]{2,6}$/,
+              }}
+              error={errors.domain}
+              inputArgs={{
+                type: "text",
+                placeholder: "www.your-domain.com",
+                required: true,
+                disabled: !hasManageOrganizationRole,
+              }}
+            />
+            <div className="pt-3">
+              <Button
+                isBlackButton={true}
+                type="submit"
+                disabled={!hasManageOrganizationRole}
+              >
+                Add domain
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
