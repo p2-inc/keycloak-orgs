@@ -5,16 +5,10 @@ import PrimaryContentArea from "components/layouts/primary-content-area";
 import { config } from "config";
 import { Link, useParams } from "react-router-dom";
 import Breadcrumbs from "components/navs/breadcrumbs";
-import {
-  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
-  useGetOrganizationByIdQuery,
-} from "store/apis/orgs";
+import { useGetOrganizationByIdQuery } from "store/apis/orgs";
 import SettingsGeneral from "./general";
 import SettingsDomain from "./domains";
 import SettingsSSO from "./sso";
-
-import { checkOrgForRole } from "components/utils/check-org-for-role";
-import { Roles } from "services/role";
 import useUser from "components/utils/useUser";
 
 export type SettingsProps = {
@@ -24,29 +18,16 @@ export type SettingsProps = {
 
 export default function OrganizationSettings() {
   let { orgId } = useParams();
-  const { realm } = config.env;
-  const { user } = useUser();
+  const {
+    hasManageOrganizationRole: hasManageOrganizationRoleCheck,
+    hasManageIdentityProvidersRole,
+  } = useUser();
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
     realm: config.env.realm,
   });
-  const { data: userRolesForOrg = [] } =
-    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
-      {
-        orgId: orgId!,
-        realm,
-        userId: user?.id!,
-      },
-      { skip: !user?.id }
-    );
-  const hasManageOrganizationRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageOrganization
-  );
-  const hasManageIDPRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageIdentityProviders
-  );
+  const hasManageOrganizationRole = hasManageOrganizationRoleCheck(orgId);
+  const hasManageIDPRole = hasManageIdentityProvidersRole(orgId);
   return (
     <>
       <TopHeader

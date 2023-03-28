@@ -3,7 +3,6 @@ import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
 import {
   useAddOrganizationInvitationMutation,
-  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetOrganizationByIdQuery,
 } from "store/apis/orgs";
 import { useState } from "react";
@@ -17,7 +16,6 @@ import { Listbox } from "@headlessui/react";
 import RoleBadge from "components/elements/badges/role-badge";
 import { User, ChevronDown } from "lucide-react";
 import { Roles, viewRoles } from "services/role";
-import { checkOrgForRole } from "components/utils/check-org-for-role";
 import useUser from "components/utils/useUser";
 import Alert from "components/elements/alerts/alert";
 
@@ -44,7 +42,7 @@ const NewInvitation = () => {
   const navigate = useNavigate();
   let { orgId } = useParams();
 
-  const { user } = useUser();
+  const { hasManageInvitationsRole: hasManageInvitationsRoleCheck } = useUser();
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
     realm: config.env.realm,
@@ -56,17 +54,6 @@ const NewInvitation = () => {
     formState: { errors },
     reset,
   } = useForm();
-
-  const { data: userRolesForOrg = [], isFetching: isFetchingRoles } =
-    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
-      {
-        orgId: orgId!,
-        realm,
-        userId: user?.id!,
-      },
-      { skip: !user?.id }
-    );
-
   const [addOrganizationInvitation] = useAddOrganizationInvitationMutation();
   const [selectedRole, setSelectedRole] = useState(roles[0]);
 
@@ -103,10 +90,7 @@ const NewInvitation = () => {
     }
   };
 
-  const hasManageInvitationsRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageInvitations
-  );
+  const hasManageInvitationsRole = hasManageInvitationsRoleCheck(orgId!);
 
   const isSendButtonDisabled = !hasManageInvitationsRole || !selectedRole;
 

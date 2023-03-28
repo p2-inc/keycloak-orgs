@@ -19,7 +19,6 @@ const { realm } = config.env;
 
 export default function Organizations() {
   const { user } = useUser();
-  const [viewOrgs, setViewOrgs] = useState<string[]>([]);
   const [viewType, setViewType] = useState<ViewLayoutOptions>(
     ViewLayoutOptions.GRID
   );
@@ -36,7 +35,7 @@ export default function Organizations() {
     <>
       <TopHeader
         header="Organizations"
-        badgeVal={viewOrgs.length}
+        badgeVal={userOrgs.length}
         rightAreaItems={
           <>
             <FormTextInputWithIcon
@@ -56,6 +55,9 @@ export default function Organizations() {
                 <OrganizationsLoader />
                 <OrganizationsLoader />
                 <OrganizationsLoader />
+                <OrganizationsLoader />
+                <OrganizationsLoader />
+                <OrganizationsLoader />
               </div>
             )}
             {!isFetching && (
@@ -67,17 +69,18 @@ export default function Organizations() {
                     viewType === ViewLayoutOptions.LIST,
                 })}
               >
-                {userOrgs.map((org) => (
-                  <OrganizationItem
-                    key={org.id}
-                    org={org}
-                    viewType={viewType}
-                    setVisibility={() => setViewOrgs([...viewOrgs, org.id!])}
-                  >
-                    <MembersStat org={org} realm={config.env.realm} />
-                    <DomainStat org={org} realm={config.env.realm} />
-                  </OrganizationItem>
-                ))}
+                {userOrgs.map((org) => {
+                  return (
+                    <OrganizationItem
+                      key={org.id}
+                      org={org}
+                      viewType={viewType}
+                    >
+                      <MembersStat org={org} realm={config.env.realm} />
+                      <DomainStat org={org} realm={config.env.realm} />
+                    </OrganizationItem>
+                  );
+                })}
               </div>
             )}
           </div>

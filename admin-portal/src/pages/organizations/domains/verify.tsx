@@ -6,14 +6,11 @@ import P2Toast from "components/utils/toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { config } from "config";
 import {
-  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetOrganizationDomainsQuery,
   useVerifyDomainMutation,
 } from "store/apis/orgs";
 import { Globe } from "lucide-react";
 import useUser from "components/utils/useUser";
-import { checkOrgForRole } from "components/utils/check-org-for-role";
-import { Roles } from "services/role";
 
 const addIcon = (
   <RoundedIcon className="my-4">
@@ -25,25 +22,14 @@ const DomainsVerify = () => {
   let { orgId, domainRecord } = useParams();
   const { realm } = config.env;
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { hasManageOrganizationRole: hasManageOrganizationRoleCheck } =
+    useUser();
 
   const { data: domains = [] } = useGetOrganizationDomainsQuery({
     realm,
     orgId: orgId!,
   });
-  const { data: userRolesForOrg = [] } =
-    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
-      {
-        orgId: orgId!,
-        realm,
-        userId: user?.id!,
-      },
-      { skip: !user?.id }
-    );
-  const hasManageOrganizationRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageOrganization
-  );
+  const hasManageOrganizationRole = hasManageOrganizationRoleCheck(orgId);
 
   const domain = domains.find((domain) => domain.record_value === domainRecord);
 
@@ -59,7 +45,6 @@ const DomainsVerify = () => {
       })
         .unwrap()
         .then((r) => {
-          console.log("🚀 ~ file: verify.tsx:62 ~ .then ~ r:", r);
           //@ts-ignore
           if (r.verified) {
             P2Toast({

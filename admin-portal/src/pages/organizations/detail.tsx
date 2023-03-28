@@ -5,7 +5,6 @@ import SectionHeader from "components/navs/section-header";
 import { Link, useParams } from "react-router-dom";
 import { config } from "config";
 import {
-  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetIdpsQuery,
   useGetOrganizationByIdQuery,
   useGetOrganizationDomainsQuery,
@@ -29,13 +28,16 @@ import OpenSSOLink from "components/utils/ssoLink";
 import MembersTable from "components/elements/table/members-table";
 import { Globe, Network, Plus, User } from "lucide-react";
 import useUser from "components/utils/useUser";
-import { checkOrgForRole } from "components/utils/check-org-for-role";
-import { Roles } from "services/role";
 
 export default function OrganizationDetail() {
   let { orgId } = useParams();
   const { features: featureFlags, realm } = config.env;
-  const { user } = useUser();
+  const {
+    hasManageInvitationsRole: hasManageInvitationsRoleCheck,
+    hasManageOrganizationRole: hasManageOrganizationRoleCheck,
+    hasManageIdentityProvidersRole,
+    hasViewIdentityProvidersRole,
+  } = useUser();
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
     realm,
@@ -58,36 +60,11 @@ export default function OrganizationDetail() {
     orgId: org?.id!,
     realm,
   });
-  const { data: userRolesForOrg = [] } =
-    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
-      {
-        orgId: orgId!,
-        realm,
-        userId: user?.id!,
-      },
-      { skip: !user?.id }
-    );
 
-  const hasViewMembersRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ViewMembers
-  );
-  const hasManageInvitationsRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageInvitations
-  );
-  const hasManageOrganizationRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageOrganization
-  );
-  const hasManageIDPRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageIdentityProviders
-  );
-  const hasViewIDPRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ViewIdentityProviders
-  );
+  const hasManageInvitationsRole = hasManageInvitationsRoleCheck(orgId);
+  const hasManageOrganizationRole = hasManageOrganizationRoleCheck(orgId);
+  const hasManageIDPRole = hasManageIdentityProvidersRole(orgId);
+  const hasViewIDPRole = hasViewIdentityProvidersRole(orgId);
   // const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
 
   const filteredMembers = members.filter(
@@ -127,7 +104,7 @@ export default function OrganizationDetail() {
         <PrimaryContentArea>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {/* Invite new members */}
-            {hasViewMembersRole && featureFlags.orgInvitationsEnabled && (
+            {featureFlags.orgInvitationsEnabled && (
               <OrganizationActionCard>
                 <OACTopRow>
                   <RoundedIcon>
@@ -140,46 +117,55 @@ export default function OrganizationDetail() {
                   Invite new members or remove members from the organization.
                 </div>
                 <div>
-                  <Link to={`/organizations/${orgId}/invitation/new`}>
+                  {hasManageInvitationsRole ? (
+                    <Link to={`/organizations/${orgId}/invitation/new`}>
+                      <Button
+                        isBlackButton
+                        disabled={!hasManageInvitationsRole}
+                      >
+                        <Plus className="mr-2 w-5" />
+                        Invite new members
+                      </Button>
+                    </Link>
+                  ) : (
                     <Button isBlackButton disabled={!hasManageInvitationsRole}>
                       <Plus className="mr-2 w-5" />
                       Invite new members
                     </Button>
-                  </Link>
+                  )}
                 </div>
               </OrganizationActionCard>
             )}
 
             {/* Setup SSO */}
-            {hasManageIDPRole &&
-              hasViewIDPRole &&
-              featureFlags.orgSsoEnabled && (
-                <OrganizationActionCard>
-                  <OACTopRow>
-                    <RoundedIcon>
-                      <Network className="h-5 w-5" />
-                    </RoundedIcon>
-                    <Stat
-                      label="active SSO connections"
-                      value={idps.length}
-                    ></Stat>
-                  </OACTopRow>
-                  <div className="text-sm leading-relaxed text-gray-600">
-                    Setup SSO connections as necessary for this organization.
-                  </div>
-                  <div>
-                    <Button
-                      isBlackButton
-                      onClick={() => OpenSSOLink({ orgId: orgId! })}
-                    >
-                      Setup SSO
-                    </Button>
-                  </div>
-                </OrganizationActionCard>
-              )}
+            {featureFlags.orgSsoEnabled && (
+              <OrganizationActionCard>
+                <OACTopRow>
+                  <RoundedIcon>
+                    <Network className="h-5 w-5" />
+                  </RoundedIcon>
+                  <Stat
+                    label="active SSO connections"
+                    value={idps.length}
+                  ></Stat>
+                </OACTopRow>
+                <div className="text-sm leading-relaxed text-gray-600">
+                  Setup SSO connections as necessary for this organization.
+                </div>
+                <div>
+                  <Button
+                    isBlackButton
+                    onClick={() => OpenSSOLink({ orgId: orgId! })}
+                    disabled={!hasManageIDPRole || !hasViewIDPRole}
+                  >
+                    Setup SSO
+                  </Button>
+                </div>
+              </OrganizationActionCard>
+            )}
 
             {/* Setup domains */}
-            {hasManageOrganizationRole && featureFlags.orgDomainsEnabled && (
+            {featureFlags.orgDomainsEnabled && (
               <OrganizationActionCard>
                 <OACTopRow>
                   <RoundedIcon>
@@ -193,9 +179,15 @@ export default function OrganizationDetail() {
                   security.
                 </div>
                 <div>
-                  <Link to={`/organizations/${org?.id}/domains/add`}>
-                    <Button isBlackButton>Setup domains</Button>
-                  </Link>
+                  {hasManageOrganizationRole ? (
+                    <Link to={`/organizations/${org?.id}/domains/add`}>
+                      <Button isBlackButton>Setup domains</Button>
+                    </Link>
+                  ) : (
+                    <Button isBlackButton disabled>
+                      Setup domains
+                    </Button>
+                  )}
                 </div>
               </OrganizationActionCard>
             )}

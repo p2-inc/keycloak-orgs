@@ -2,7 +2,6 @@ import { Fragment, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/20/solid";
 import {
-  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useRemoveOrganizationMemberMutation,
   UserRepresentation,
 } from "store/apis/orgs";
@@ -13,8 +12,6 @@ import useUser from "components/utils/useUser";
 import fullName from "components/utils/fullName";
 import { Link } from "react-router-dom";
 import MenuItemButton from "components/elements/menu/button";
-import { Roles } from "services/role";
-import { checkOrgForRole } from "components/utils/check-org-for-role";
 
 type Props = {
   member: UserRepresentation;
@@ -24,18 +21,13 @@ type Props = {
 };
 
 export default function MembersActionMenu({ member, orgId, realm }: Props) {
-  const { user } = useUser();
+  const {
+    user,
+    hasManageMembersRole: hasManageMembersRoleCheck,
+    hasManageRolesRole: hasManageRolesRoleCheck,
+  } = useUser();
   const isRemoveDisabled = !user || member.id === user?.id;
   const [isRemoveConfOpen, setRemoveConfOpen] = useState(false);
-  const { data: userRolesForOrg = [], isFetching: isFetchingRoles } =
-    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
-      {
-        orgId: orgId,
-        realm,
-        userId: user?.id!,
-      },
-      { skip: !user?.id }
-    );
 
   const [removeOrganizationMember, { isLoading }] =
     useRemoveOrganizationMemberMutation();
@@ -62,18 +54,8 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
       });
   }
 
-  const hasManageMembersRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageMembers
-  );
-  const hasManageRolesRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageRoles
-  );
-
-  if (isFetchingRoles) {
-    return <></>;
-  }
+  const hasManageMembersRole = hasManageMembersRoleCheck(orgId);
+  const hasManageRolesRole = hasManageRolesRoleCheck(orgId);
 
   return (
     <>

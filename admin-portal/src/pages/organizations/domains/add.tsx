@@ -7,15 +7,12 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { config } from "config";
 import {
-  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
 } from "store/apis/orgs";
 import isValidDomain from "is-valid-domain";
 import { Globe } from "lucide-react";
 import useUser from "components/utils/useUser";
-import { checkOrgForRole } from "components/utils/check-org-for-role";
-import { Roles } from "services/role";
 
 const addIcon = (
   <RoundedIcon className="my-4">
@@ -26,7 +23,8 @@ const addIcon = (
 const { realm } = config.env;
 
 const DomainsAdd = () => {
-  const { user } = useUser();
+  const { hasManageOrganizationRole: hasManageOrganizationRoleCheck } =
+    useUser();
   let { orgId } = useParams();
   const navigate = useNavigate();
 
@@ -34,19 +32,7 @@ const DomainsAdd = () => {
     orgId: orgId!,
     realm,
   });
-  const { data: userRolesForOrg = [] } =
-    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
-      {
-        orgId: orgId!,
-        realm,
-        userId: user?.id!,
-      },
-      { skip: !user?.id }
-    );
-  const hasManageOrganizationRole = checkOrgForRole(
-    userRolesForOrg,
-    Roles.ManageOrganization
-  );
+  const hasManageOrganizationRole = hasManageOrganizationRoleCheck(orgId);
 
   const [updateOrg] = useUpdateOrganizationMutation();
   const {

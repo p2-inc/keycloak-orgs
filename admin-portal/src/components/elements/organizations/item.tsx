@@ -1,23 +1,16 @@
 import cs from "classnames";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { Link } from "react-router-dom";
 import { ViewLayoutOptions } from "../forms/switches/view-switch";
 import { config } from "config";
-import {
-  OrganizationRepresentation,
-  useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
-} from "store/apis/orgs";
+import { OrganizationRepresentation } from "store/apis/orgs";
 import useUser from "components/utils/useUser";
-import { Roles } from "services/role";
-import OrganizationsLoader from "components/loaders/organizations";
-import { checkOrgForRole } from "components/utils/check-org-for-role";
-const { features: featureFlags, realm } = config.env;
+const { features: featureFlags } = config.env;
 
 type Props = {
   children: React.ReactNode;
   viewType: ViewLayoutOptions;
   org: OrganizationRepresentation;
-  setVisibility: () => void;
 };
 
 const Title = ({ children }) => (
@@ -64,40 +57,30 @@ const InnerItem = ({ children, title, subTitle, viewType }) => {
   );
 };
 
-const OrganizationItem: FC<Props> = ({
-  children,
-  org,
-  viewType,
-  setVisibility,
-}) => {
-  const { user } = useUser();
+const OrganizationItem: FC<Props> = ({ children, org, viewType }) => {
   const { displayName: title, name: subTitle } = org;
   const link = `/organizations/${org.id}/details`;
+  const { hasViewOrganizationRole: hasViewOrganizationRoleCheck } = useUser();
+  const hasViewOrganizationRole = hasViewOrganizationRoleCheck(org.id);
 
-  const { data: userRolesForOrg = [], isFetching: isFetchingRole } =
-    useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery(
-      {
-        orgId: org.id!,
-        realm,
-        userId: user?.id!,
-      },
-      { skip: !user?.id }
-    );
+  const ViewCard = () => (
+    <div
+      className={cs(
+        "block",
+        "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
+        {
+          "md:pb-3": viewType === ViewLayoutOptions.GRID,
+        }
+      )}
+      title="Insufficient permissions to view organization."
+    >
+      <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
+        {children}
+      </InnerItem>
+    </div>
+  );
 
-  const hasViewRole = checkOrgForRole(userRolesForOrg, Roles.ViewOrganization);
-
-  useEffect(() => {
-    if (hasViewRole) setVisibility();
-  }, [hasViewRole]);
-
-  if (isFetchingRole) {
-    return <OrganizationsLoader />;
-  }
-
-  if (!hasViewRole) {
-    return <></>;
-  }
-  return featureFlags.orgDetailsEnabled ? (
+  const LinkCard = () => (
     <Link
       to={link}
       className={cs("group block", "focus:outline-none focus:ring-0", {
@@ -108,21 +91,13 @@ const OrganizationItem: FC<Props> = ({
         {children}
       </InnerItem>
     </Link>
-  ) : (
-    <div
-      className={cs(
-        "block",
-        "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
-        {
-          "md:pb-3": viewType === ViewLayoutOptions.GRID,
-        }
-      )}
-    >
-      <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
-        {children}
-      </InnerItem>
-    </div>
   );
+
+  if (hasViewOrganizationRole && featureFlags.orgDetailsEnabled) {
+    return <LinkCard />;
+  } else {
+    return <ViewCard />;
+  }
 };
 
 export default OrganizationItem;
