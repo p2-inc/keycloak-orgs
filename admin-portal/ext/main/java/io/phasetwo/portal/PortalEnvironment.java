@@ -3,6 +3,7 @@ package io.phasetwo.portal;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.Map;
 import javax.annotation.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,6 +20,7 @@ import javax.annotation.Generated;
   "resourceUrl",
   "refererUrl",
   "isRunningAsTheme",
+  "supportedLocales",
   "features"
 })
 @Generated("jsonschema2pojo")
@@ -59,6 +61,9 @@ public class PortalEnvironment {
 
   @JsonProperty("isRunningAsTheme")
   private Boolean isRunningAsTheme;
+
+  @JsonProperty("supportedLocales")
+  private Map<String, String> supportedLocales;
 
   @JsonProperty("features")
   private PortalFeatures features;
@@ -240,6 +245,21 @@ public class PortalEnvironment {
 
   public PortalEnvironment isRunningAsTheme(Boolean isRunningAsTheme) {
     this.isRunningAsTheme = isRunningAsTheme;
+    return this;
+  }
+
+  @JsonProperty("supportedLocales")
+  public Map<String, String> getSupportedLocales() {
+    return supportedLocales;
+  }
+
+  @JsonProperty("supportedLocales")
+  public void setSupportedLocales(Map<String, String> supportedLocales) {
+    this.supportedLocales = supportedLocales;
+  }
+
+  public PortalEnvironment supportedLocales(Map<String, String> supportedLocales) {
+    this.supportedLocales = supportedLocales;
     return this;
   }
 

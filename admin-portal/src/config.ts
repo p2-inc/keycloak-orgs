@@ -13,6 +13,7 @@ export interface Environment {
   resourceUrl: string;
   refererUrl: string;
   isRunningAsTheme: boolean;
+  supportedLocales: {};
   features: Features;
 }
 
@@ -83,8 +84,10 @@ const initialEnvironment: Environment = {
   resourceUrl: ".",
   refererUrl: "",
   isRunningAsTheme: false,
+  supportedLocales: { "en": "English" },
   features: initialFeatures,
 };
+
 
 var env: Environment = isEmpty(environment) ? initialEnvironment : environment;
 

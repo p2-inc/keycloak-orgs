@@ -2,6 +2,7 @@ package io.phasetwo.portal;
 
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.*;
 import javax.ws.rs.WebApplicationException;
@@ -143,7 +147,8 @@ public class PortalResourceProvider implements RealmResourceProvider {
               .baseUrl(portalBaseUrl.toString())
               .resourceUrl(portalResources)
               .refererUrl(referer)
-              .isRunningAsTheme(true);
+              .isRunningAsTheme(true)
+              .supportedLocales(getSupportedLocales(realm, locale));
       Optional.ofNullable(realm.getName()).ifPresent(a -> env.name(a));
       Optional.ofNullable(realm.getDisplayName()).ifPresent(a -> env.displayName(a));
       Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.logo.url")))
@@ -178,6 +183,20 @@ public class PortalResourceProvider implements RealmResourceProvider {
       log.warn("Could not call processTemplate on FreeMarkerLoginFormsProvider", e);
     }
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+  }
+
+  Map<String, String> getSupportedLocales(RealmModel realm, Locale locale) {
+    Properties messages = new Properties();
+    if (!Strings.isNullOrEmpty(realm.getDefaultLocale())) {
+      messages.putAll(realm.getRealmLocalizationTextsByLocale(realm.getDefaultLocale()));
+    }
+    if (locale != null) {
+      messages.putAll(realm.getRealmLocalizationTextsByLocale(locale.toLanguageTag()));
+    }
+    return realm
+        .getSupportedLocalesStream()
+        .collect(
+            Collectors.toMap(Function.identity(), l -> messages.getProperty("locale_" + l, l)));
   }
 
   @GET
