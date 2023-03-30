@@ -30,8 +30,8 @@ const loadingState = (columns) => {
       <table className="min-w-full divide-y divide-gray-200 bg-gray-50 text-sm font-medium text-black dark:divide-zinc-600 dark:bg-p2dark-1000 dark:text-zinc-600">
         <thead className="animate-pulse">
           <tr>
-            {columns.map(() => (
-              <th className="p-4">
+            {columns.map((c, i) => (
+              <th className="p-4" key={i}>
                 <div className="h-4 w-1/4 rounded-md bg-gray-300 dark:bg-zinc-600"></div>
               </th>
             ))}
@@ -39,8 +39,8 @@ const loadingState = (columns) => {
         </thead>
         <tbody className="animate-pulse">
           <tr>
-            {columns.map(() => (
-              <td className="p-4">
+            {columns.map((c, i) => (
+              <td className="p-4" key={i}>
                 <div className="h-4 w-1/2 rounded-md bg-gray-300 dark:bg-zinc-600"></div>
               </td>
             ))}

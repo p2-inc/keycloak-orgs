@@ -5,6 +5,11 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
+import { toLower } from "lodash";
+import { AIACommand } from "services/aia-command";
+import { keycloakService } from "keycloak";
+
+const deleteAccount = new AIACommand(keycloakService, "delete_account");
 
 const loadingIcon = (
   <div>
@@ -18,13 +23,16 @@ const loadingIcon = (
 );
 
 const ProfileDelete = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isDirty },
-    setValue,
-    reset,
-  } = useForm();
+  const { register, watch, handleSubmit } = useForm();
+  const watchConfirmDelete = watch("delete");
+  const confirmDelete = toLower(watchConfirmDelete) !== "delete";
+
+  const onSubmit = () => {
+    if (confirmDelete) {
+      deleteAccount.execute();
+    }
+  };
+
   return (
     <div className="my-16 rounded-md border border-red-500 p-6 md:mx-auto md:max-w-prose">
       <div className="space-y-4">
@@ -41,16 +49,22 @@ const ProfileDelete = () => {
             </Link>
           }
         />
-        <RHFFormTextInputWithLabel
-          slug="delete"
-          label="Write `delete` to confirm"
-          register={register}
-          inputArgs={{
-            placeholder: "",
-            autoFocus: true,
-          }}
-        />
-        <Button isBlackButton>Confirm profile delete</Button>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            <RHFFormTextInputWithLabel
+              slug="delete"
+              label="Write `delete` to confirm"
+              register={register}
+              inputArgs={{
+                placeholder: "",
+                autoFocus: true,
+              }}
+            />
+            <Button isBlackButton disabled={confirmDelete} type="submit">
+              Confirm profile delete
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

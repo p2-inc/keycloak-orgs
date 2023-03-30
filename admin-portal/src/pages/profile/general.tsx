@@ -182,7 +182,7 @@ const GeneralProfile = () => {
         </>
       </form>
       <div className="pt-10">
-        <div className="space-y-4 rounded border border-red-500 p-6">
+        <div className="space-y-4 rounded border p-6">
           <SectionHeader
             variant="medium"
             title="Delete your profile"
