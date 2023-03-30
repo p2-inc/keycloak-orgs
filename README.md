@@ -164,6 +164,8 @@ A custom Authenticator and Required Action must be installed and configured corr
 
 ![Install Invitation Authenticator in Browser Flow](docs/assets/install-invitation-authenticator.png)
 
+Additionally you need to ensure the "invitation" required action is enabled. Go to `Realm -> Authentication -> Required Actions -> Invitation` and enable it. 
+
 #### IdP Discovery
 
 Organizations may optionally be given permission to manage their own IdP. The custom resources that allow this write a configuration in the IdP entities that is compatible with a 3rd party extension that allows for IdP discovery based on email domain configured for the Organization. It works by writing the `home.idp.discovery.domains` value into the `config` map for the IdP. Information on further configuration is available at [sventorben/keycloak-home-idp-discovery](https://github.com/sventorben/keycloak-home-idp-discovery).
