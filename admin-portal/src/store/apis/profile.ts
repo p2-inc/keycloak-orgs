@@ -312,6 +312,9 @@ export type UserProfileMetadataAttributeRepresentation = {
 export type UserProfileMetadataRepresentation = {
   attributes?: UserProfileMetadataAttributeRepresentation[];
 };
+export type UserProfileAttributesRepresentation = {
+  locale?: string[];
+};
 export type AccountRepresentation = {
   id?: string;
   username?: string;
@@ -320,6 +323,7 @@ export type AccountRepresentation = {
   email?: string;
   emailVerified?: boolean;
   userProfileMetadata?: UserProfileMetadataRepresentation;
+  attributes?: UserProfileAttributesRepresentation;
 };
 export type ConsentScopeRepresentation = {
   id?: string;
