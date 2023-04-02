@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import cs from "classnames";
 import { useState } from "react";
 import { ChevronIcon } from "components/icons";
+import { useTranslation } from "react-i18next";
 
 export type NavigationItem = {
   name: string;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
+  const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
   const location = useLocation();
   const activeItem = navigation.find(
@@ -45,7 +47,7 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
                   aria-hidden="true"
                 />
               )}
-              {activeItem?.name}
+              {t(activeItem?.name)}
             </div>
             <div className="flex-shrink-0">
               <ChevronIcon className="rotate-90 stroke-gray-600" />
@@ -78,7 +80,7 @@ const SecondaryMainContentNav: React.FC<Props> = ({ navigation }) => {
                   aria-hidden="true"
                 />
               )}
-              <span className="truncate">{item.name}</span>
+              <span className="truncate">{t(item.name)}</span>
             </>
           </NavLink>
         ))}

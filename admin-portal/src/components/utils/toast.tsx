@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/20/solid";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   success?: boolean;
@@ -17,13 +18,14 @@ export default function P2Toast({
   message,
   duration,
 }: Props) {
-  return toast.custom((t) => {
-    if (duration) t.duration = duration;
+  const { t } = useTranslation();
+  return toast.custom((to) => {
+    if (duration) to.duration = duration;
 
     return (
       <div
         className={`${
-          t.visible ? "animate-enter" : "animate-leave"
+          to.visible ? "animate-enter" : "animate-leave"
         } pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5`}
       >
         <div className="p-4">
@@ -55,10 +57,10 @@ export default function P2Toast({
                 type="button"
                 className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 onClick={() => {
-                  toast.dismiss(t.id);
+                  toast.dismiss(to.id);
                 }}
               >
-                <span className="sr-only">Close</span>
+                <span className="sr-only">{t("close")}</span>
                 <XMarkIcon className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>

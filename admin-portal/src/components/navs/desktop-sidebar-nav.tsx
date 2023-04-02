@@ -9,6 +9,7 @@ import { NavLink, Link } from "react-router-dom";
 import { ChevronIcon, DoubleSlashBrandIcon, FullBrandIcon } from "../icons";
 import { NavigationItem } from "../layouts/layout";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   menuCollapsed: boolean;
@@ -19,17 +20,17 @@ type Props = {
 const themes = [
   {
     key: "system",
-    name: "System",
+    name: "system",
     icon: <Monitor className="h-4 w-4" />,
   },
   {
     key: "light",
-    name: "Light",
+    name: "light",
     icon: <Sun className="h-4 w-4" />,
   },
   {
     key: "dark",
-    name: "Dark",
+    name: "dark",
     icon: <Moon className="h-4 w-4" />,
   },
 ];
@@ -41,6 +42,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
 }) => {
   const { user, fullName } = useUser();
   const [theme, setTheme] = useState(themes[0]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (theme.key === "system") {
@@ -131,9 +133,9 @@ const DesktopSidebarNav: React.FC<Props> = ({
                       }
                     >
                       <item.icon className="h-5 w-5" />
-                      <span className="sr-only">{item.name}</span>
+                      <span className="sr-only">{t(item.name)}</span>
                       {!menuCollapsed && (
-                        <span className="pl-2">{item.name}</span>
+                        <span className="pl-2">{t(item.name)}</span>
                       )}
                     </NavLink>
                   );
@@ -171,16 +173,16 @@ const DesktopSidebarNav: React.FC<Props> = ({
                       to="/"
                       className="group -mx-3 flex items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-zinc-800 dark:hover:text-gray-100"
                     >
-                      <div>Return to homepage</div>
+                      <div>{t("returnToHomepage")}</div>
                       <ExternalLink className="h-4 w-4" />
                     </Link>
                   </div>
                   <div className="relative flex items-center justify-between py-2">
-                    <div className="text-sm dark:text-zinc-200">Theme</div>
+                    <div className="text-sm dark:text-zinc-200">{t("theme")}</div>
                     <Listbox value={theme} onChange={setTheme}>
                       <Listbox.Button className="flex items-center space-x-2 rounded border px-2 py-1 text-sm hover:border-gray-500 dark:border-zinc-600 dark:text-zinc-200 dark:hover:border-zinc-400">
                         <div>{theme.icon}</div>
-                        <div>{theme.name}</div>
+                        <div>{t(theme.name)}</div>
                       </Listbox.Button>
                       <Listbox.Options className="absolute bottom-0 right-0 rounded border bg-white shadow-md dark:border-zinc-600 dark:bg-p2dark-900">
                         {themes.map((item) => (
@@ -190,7 +192,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
                             className="flex cursor-pointer items-center space-x-2 px-2 py-1 text-sm hover:bg-gray-100 dark:text-zinc-200 dark:hover:bg-zinc-600"
                           >
                             <div>{item.icon}</div>
-                            <div>{item.name}</div>
+                            <div>{t(item.name)}</div>
                           </Listbox.Option>
                         ))}
                       </Listbox.Options>
@@ -201,7 +203,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
                       className="w-full"
                       onClick={() => keycloakService.logout()}
                     >
-                      Log Out
+                      {t("logOut")}
                     </Button>
                   </div>
                 </Popover.Panel>

@@ -2,6 +2,7 @@ import { FC, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import Button from "components/elements/forms/buttons/button";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 
 type ConfirmationModalProps = {
   children?: React.ReactNode;
@@ -22,13 +23,20 @@ const ConfirmationModal: FC<ConfirmationModalProps> = ({
   children,
   modalTitle,
   modalMessage,
-  modalCancelButtonLabel = "Cancel",
-  modalContinueButtonLabel = "Confirm",
+  modalCancelButtonLabel,
+  modalContinueButtonLabel,
   onContinue,
   onClose,
   open,
   close,
 }) => {
+  const { t } = useTranslation();
+  if (!modalCancelButtonLabel) {
+    modalCancelButtonLabel = t("cancel");
+  }
+  if (!modalContinueButtonLabel) {
+    modalContinueButtonLabel = t("confirm");
+  }
   const handleModalToggle = () => {
     close();
     if (onClose) onClose();

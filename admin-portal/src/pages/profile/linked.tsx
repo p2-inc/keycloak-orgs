@@ -16,8 +16,10 @@ import Table, {
 } from "components/elements/table/table";
 import * as icons from "components/icons/providers";
 import P2Toast from "components/utils/toast";
+import { useTranslation } from "react-i18next";
 
 const LinkedProfile = () => {
+  const { t } = useTranslation();
   const { features: featureFlags } = config.env;
   const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
     realm: config.env.realm,
@@ -68,13 +70,13 @@ const LinkedProfile = () => {
     if (account.social) {
       return (
         <label className="inline-block items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700">
-          Social login
+          {t("socialLogin")}
         </label>
       );
     }
     return (
       <label className="inline-block items-center space-x-2 rounded border border-green-700/30 bg-green-700/10 px-3 py-1 text-xs font-medium text-green-700">
-        System defined
+        {t("systemDefined")}
       </label>
     );
   };
@@ -90,10 +92,10 @@ const LinkedProfile = () => {
 
   const linkedColumns: TableColumns = [
     { key: "icon", data: "" },
-    { key: "providerAlias", data: "Provider" },
-    { key: "displayName", data: "Name" },
-    { key: "label", data: "Label" },
-    { key: "username", data: "Username" },
+    { key: "providerAlias", data: t("provider") },
+    { key: "displayName", data: t("name") },
+    { key: "label", data: t("label") },
+    { key: "username", data: t("username") },
     { key: "action", data: "", columnClasses: "flex justify-end" },
   ];
 
@@ -111,16 +113,16 @@ const LinkedProfile = () => {
           className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
           onClick={() => unlinkAccount(account)}
         >
-          Unlink account
+          {t("unlinkAccount")}
         </Button>
       ),
     }));
 
   const unlinkedColumns: TableColumns = [
     { key: "icon", data: "" },
-    { key: "providerAlias", data: "Provider" },
-    { key: "displayName", data: "Name" },
-    { key: "label", data: "Label" },
+    { key: "providerAlias", data: t("provider") },
+    { key: "displayName", data: t("name") },
+    { key: "label", data: t("label") },
     { key: "action", data: "", columnClasses: "flex justify-end" },
   ];
 
@@ -137,7 +139,7 @@ const LinkedProfile = () => {
           className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
           onClick={() => linkAccount(account)}
         >
-          Link account
+          {t("linkAccount")}
         </Button>
       ),
     }));
@@ -148,13 +150,13 @@ const LinkedProfile = () => {
         <div>
           <div className="mb-12">
             <SectionHeader
-              title="Linked accounts"
-              description="Manage logins through third-party accounts."
+              title={t("linkedAccounts")}
+              description={t("manageLoginsThroughThirdPartyAccounts")}
             />
           </div>
           <div className="space-y-8">
             <div className="space-y-4">
-              <SectionHeader title="Linked login providers" variant="medium" />
+              <SectionHeader title={t("linkedLoginProviders")} variant="medium" />
               <Table
                 columns={linkedColumns}
                 rows={linkedRows}
@@ -163,7 +165,7 @@ const LinkedProfile = () => {
             </div>
             <div className="space-y-4">
               <SectionHeader
-                title="Unlinked login providers"
+                title={t("unlinkedLoginProviders")}
                 variant="medium"
               />
               <Table

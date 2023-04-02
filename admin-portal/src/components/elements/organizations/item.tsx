@@ -5,7 +5,9 @@ import { ViewLayoutOptions } from "../forms/switches/view-switch";
 import { config } from "config";
 import { OrganizationRepresentation } from "store/apis/orgs";
 import useUser from "components/utils/useUser";
+import { useTranslation } from "react-i18next";
 const { features: featureFlags } = config.env;
+
 
 type Props = {
   children: React.ReactNode;
@@ -58,6 +60,7 @@ const InnerItem = ({ children, title, subTitle, viewType }) => {
 };
 
 const OrganizationItem: FC<Props> = ({ children, org, viewType }) => {
+  const { t } = useTranslation();
   const { displayName: title, name: subTitle } = org;
   const link = `/organizations/${org.id}/details`;
   const { hasViewOrganizationRole: hasViewOrganizationRoleCheck } = useUser();
@@ -72,7 +75,7 @@ const OrganizationItem: FC<Props> = ({ children, org, viewType }) => {
           "md:pb-3": viewType === ViewLayoutOptions.GRID,
         }
       )}
-      title="Insufficient permissions to view organization."
+      title={t("insufficientPermissionsToViewOrganization")}
     >
       <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
         {children}

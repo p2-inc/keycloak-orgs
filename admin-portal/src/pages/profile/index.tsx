@@ -13,29 +13,30 @@ import SecondaryMainContentNav, {
 } from "components/navs/secondary-main-content-nav";
 import { Outlet } from "react-router-dom";
 import { config } from "config";
+import { useTranslation } from "react-i18next";
 const { features: featureFlags } = config.env;
 
 const navigation: NavigationItem[] = [
   {
-    name: "General",
+    name: "general",
     href: "/profile/general",
     icon: UserCircleIcon,
     isActive: true,
   },
   {
-    name: "Signing in",
+    name: "signingIn",
     href: "/profile/signin",
     icon: KeyIcon,
     isActive: true,
   },
   {
-    name: "Device activity",
+    name: "deviceActivity",
     href: "/profile/activity",
     icon: DevicePhoneMobileIcon,
     isActive: featureFlags.deviceActivityEnabled,
   },
   {
-    name: "Linked accounts",
+    name: "linkedAccounts",
     href: "/profile/linked",
     icon: SquaresPlusIcon,
     isActive: featureFlags.linkedAccountsEnabled,
@@ -43,9 +44,10 @@ const navigation: NavigationItem[] = [
 ];
 
 export default function Profile() {
+  const { t } = useTranslation();
   return (
     <>
-      <TopHeader header="Profile" />
+      <TopHeader header={t("profile")} />
       <FixedWidthMainContent>
         {/* Secondary menu */}
         <SecondaryMainContentMenuArea>

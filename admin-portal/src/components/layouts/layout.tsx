@@ -15,14 +15,14 @@ export type NavigationItem = {
 
 const navigation: NavigationItem[] = [
   {
-    name: "Profile",
+    name: "profile",
     href: "/profile",
     icon: User,
     iconClass: "stroke-current",
     isActive: true,
   },
   {
-    name: "Organizations",
+    name: "organizations",
     href: "/organizations",
     icon: Building2,
     iconClass: "fill-current",

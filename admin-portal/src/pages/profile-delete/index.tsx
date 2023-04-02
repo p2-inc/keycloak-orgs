@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
+import { useTranslation } from "react-i18next";
 import { toLower } from "lodash";
 import { AIACommand } from "services/aia-command";
 import { keycloakService } from "keycloak";
@@ -23,6 +24,7 @@ const loadingIcon = (
 );
 
 const ProfileDelete = () => {
+  const { t } = useTranslation();
   const { register, watch, handleSubmit } = useForm();
   const watchConfirmDelete = watch("delete");
   const confirmDelete = toLower(watchConfirmDelete) !== "delete";
@@ -37,15 +39,15 @@ const ProfileDelete = () => {
     <div className="my-16 rounded-md border border-red-500 p-6 md:mx-auto md:max-w-prose">
       <div className="space-y-4">
         <SectionHeader
-          title="Delete your profile"
-          description="Permanently remove your profile and all of its contents. This action is not reversible, so please continue with caution."
+          title={t("deleteYourProfile")}
+          description={t("permanentlyRemoveYourProfileAndAllOfItsContentsThisActionIsNotReversibleSoPleaseContinueWithCaution")}
           icon={loadingIcon}
           rightContent={
             <Link
               to={`/profile/general`}
               className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100"
             >
-              Cancel
+              {t("cancel")}
             </Link>
           }
         />
@@ -53,7 +55,7 @@ const ProfileDelete = () => {
           <div className="space-y-4">
             <RHFFormTextInputWithLabel
               slug="delete"
-              label="Write `delete` to confirm"
+              label={t("Write `delete` to confirm")}
               register={register}
               inputArgs={{
                 placeholder: "",
@@ -61,7 +63,7 @@ const ProfileDelete = () => {
               }}
             />
             <Button isBlackButton disabled={confirmDelete} type="submit">
-              Confirm profile delete
+              {t("Confirm profile delete")}
             </Button>
           </div>
         </form>

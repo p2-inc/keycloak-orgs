@@ -11,6 +11,7 @@ import {
 } from "store/apis/orgs";
 import { Globe } from "lucide-react";
 import useUser from "components/utils/useUser";
+import { t } from "i18next";
 
 const addIcon = (
   <RoundedIcon className="my-4">
@@ -72,15 +73,15 @@ const DomainsVerify = () => {
     <div className="space-y-10 md:py-20">
       <div>
         <SectionHeader
-          title={`Verify ${domain?.domain_name || "domain"}`}
-          description="Use the following details to verify your domain."
+          title={t(`Verify ${domain?.domain_name || "domain"}`)}
+          description={t("useTheFollowingDetailsToVerifyYourDomain")}
           icon={addIcon}
           rightContent={
             <Link
               to={`/organizations/${orgId}/settings`}
               className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
             >
-              Back to Settings
+              {t("backToSettings")}
             </Link>
           }
         />
@@ -88,12 +89,12 @@ const DomainsVerify = () => {
       <div className="space-y-8">
         <CopyBlock
           labelNumber={1}
-          label="Create a TXT record in your DNS configuration for the following hostname"
+          label={t("createATxtRecordInYourDnsConfigurationForTheFollowingHostname")}
           value={domain?.record_key}
         />
         <CopyBlock
           labelNumber={2}
-          label="Use this code for the value of the TXT record"
+          label={t("useThisCodeForTheValueOfTheTxtRecord")}
           value={domain?.record_value}
         />
         <Button
@@ -101,7 +102,7 @@ const DomainsVerify = () => {
           onClick={checkVerification}
           disabled={isVerifyDomainLoading || !hasManageOrganizationRole}
         >
-          Verify
+          {t("verify")}
         </Button>
       </div>
     </div>

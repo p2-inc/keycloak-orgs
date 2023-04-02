@@ -17,6 +17,7 @@ import fullName from "components/utils/fullName";
 import useUser from "components/utils/useUser";
 import Alert from "components/elements/alerts/alert";
 import { OrgRoles } from "services/role";
+import { useTranslation } from "react-i18next";
 
 const loadingIcon = (
   <div>
@@ -87,6 +88,7 @@ const buttonClasses =
   "rounded bg-indigo-50 py-1 px-2 text-xs font-semibold text-p2blue-700 shadow-sm enabled:hover:bg-indigo-100 disabled:opacity-50";
 
 const Roles = () => {
+  const { t } = useTranslation();
   let { orgId, memberId } = useParams();
   const { user, hasManageRolesRole: hasManageRolesRoleCheck } = useUser();
   const [updatingRoles, setUpdatingRoles] = useState<string[]>([]);
@@ -346,8 +348,8 @@ const Roles = () => {
       {isSameUserAndMember && (
         <div className="mt-4">
           <Alert
-            title="You are the same user as this user."
-            body="Any changes you make will have immediate effect."
+            title={t("youAreTheSameUserAsThisUser")}
+            body={t("anyChangesYouMakeWillHaveImmediateEffect")}
             type="danger"
           />
         </div>
@@ -355,8 +357,8 @@ const Roles = () => {
       {isSameUserAndMember && !hasManageRolesRole && (
         <div className="mt-4">
           <Alert
-            title='You lack the "manage-roles" role.'
-            body="Speak to an admin in order to be granted this role."
+            title={t("youLackTheManageRolesRole")}
+            body={t("speakToAnAdminInOrderToBeGrantedThisRole")}
             type="info"
           />
         </div>

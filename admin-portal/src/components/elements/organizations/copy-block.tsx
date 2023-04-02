@@ -1,4 +1,5 @@
 import { FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Button from "../forms/buttons/button";
 
 type Props = {
@@ -8,16 +9,17 @@ type Props = {
 };
 
 const CopyBlock: FC<Props> = ({ label, value, labelNumber }) => {
-  const [copySuccess, setCopySuccess] = useState("Copy");
+  const { t } = useTranslation();
+  const [copySuccess, setCopySuccess] = useState(t("copy"));
 
   const copyToClipBoard = async (copyMe) => {
     try {
       await navigator.clipboard.writeText(copyMe);
-      setCopySuccess("Copied!");
+      setCopySuccess(t("copied"));
     } catch (err) {
-      setCopySuccess("Failed to copy!");
+      setCopySuccess(t("failedToCopy"));
     } finally {
-      setTimeout(() => setCopySuccess("Copy"), 5000);
+      setTimeout(() => setCopySuccess(t("copy")), 5000);
     }
   };
 

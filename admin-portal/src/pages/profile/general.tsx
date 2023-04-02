@@ -100,8 +100,8 @@ const GeneralProfile = () => {
     <div>
       <div className="mb-12">
         <SectionHeader
-          title="Personal information"
-          description="Manage your user profile information."
+          title={t("personalInformation")}
+          description={t("manageYourUserProfileInformation")}
         />
       </div>
       <form className="max-w-xl space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -142,19 +142,22 @@ const GeneralProfile = () => {
           )}
           <RHFFormTextInputWithLabel
             slug="firstName"
-            label="First Name"
+            label={t("firstName")}
             register={register}
             inputArgs={{
               disabled: isLoadingAccount,
-              placeholder: "First name",
+              placeholder: t("firstName"),
             }}
             error={errors.firstName}
           />
           <RHFFormTextInputWithLabel
             slug="lastName"
-            label="Last Name"
+            label={t("lastName")}
             register={register}
-            inputArgs={{ disabled: isLoadingAccount, placeholder: "Last name" }}
+            inputArgs={{
+              disabled: isLoadingAccount,
+              placeholder: t("lastName"),
+            }}
             error={errors.lastName}
           />
           <div className="space-x-2">
@@ -163,7 +166,7 @@ const GeneralProfile = () => {
               type="submit"
               disabled={isUpdatingAccount || isLoadingAccount || !isDirty}
             >
-              Save
+              {t("save")}
             </Button>
             <Button
               type="button"
@@ -176,7 +179,7 @@ const GeneralProfile = () => {
               }
               disabled={isUpdatingAccount || !isDirty}
             >
-              Reset
+              {t("reset")}
             </Button>
           </div>
         </>
@@ -185,12 +188,14 @@ const GeneralProfile = () => {
         <div className="space-y-4 rounded border p-6">
           <SectionHeader
             variant="medium"
-            title="Delete your profile"
-            description="Permanently remove your profile and all of its contents. This action is not reversible, so please continue with caution."
+            title={t("deleteYourProfile")}
+            description={t(
+              "permanentlyRemoveYourProfileAndAllOfItsContentsThisActionIsNotReversibleSoPleaseContinueWithCaution"
+            )}
           />
           <div>
             <Link to={`/profile-delete`}>
-              <Button isBlackButton>Delete your profile</Button>
+              <Button isBlackButton>{t("deleteYourProfile")}</Button>
             </Link>
           </div>
         </div>

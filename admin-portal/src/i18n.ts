@@ -10,6 +10,7 @@ i18n
   .use(HttpBackend)
   .use(initReactI18next)
   .init({
+    returnNull: false,
     defaultNS: DEFAULT_NAMESPACE,
     fallbackLng: DEFAULT_LOCALE,
     ns: [DEFAULT_NAMESPACE],

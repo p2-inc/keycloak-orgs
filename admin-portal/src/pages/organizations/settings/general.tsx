@@ -3,6 +3,7 @@ import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text
 import SectionHeader from "components/navs/section-header";
 import P2Toast from "components/utils/toast";
 import { config } from "config";
+import { t } from "i18next";
 import { P2Params } from "index";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -69,25 +70,25 @@ const SettingsGeneral = ({ hasManageOrganizationRole }: SettingsProps) => {
     <div className="space-y-4">
       <div>
         <SectionHeader
-          title="General"
-          description="View organization information. Change display name."
+          title={t("general")}
+          description={t("viewOrganizationInformationChangeDisplayName")}
         />
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl space-y-4">
         <RHFFormTextInputWithLabel
-          label="Id"
+          label={t("id")}
           slug="id"
           register={register}
           inputArgs={{ defaultValue: org?.id, disabled: true }}
         />
         <RHFFormTextInputWithLabel
-          label="Name"
+          label={t("name")}
           slug="name"
           register={register}
           inputArgs={{ defaultValue: org?.name, disabled: true }}
         />
         <RHFFormTextInputWithLabel
-          label="Display Name"
+          label={t("displayName")}
           slug="displayName"
           register={register}
           registerArgs={{
@@ -107,7 +108,7 @@ const SettingsGeneral = ({ hasManageOrganizationRole }: SettingsProps) => {
             isLoading || isLoadingOrganization || !hasManageOrganizationRole
           }
         >
-          Update Organization
+          {t("updateOrganization")}
         </Button>
       </form>
     </div>

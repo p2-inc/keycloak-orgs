@@ -48,15 +48,15 @@ const SigninProfile = () => {
       .then(() => {
         P2Toast({
           success: true,
-          title: `${credential.userLabel ?? ""} removed.`,
+          title: t(`credentialsSuccessfullyRemoved`, [
+            credential.userLabel ?? "",
+          ]),
         });
       })
       .catch((e) => {
         P2Toast({
           error: true,
-          title: `Error removing ${
-            credential.userLabel ?? ""
-          } . Please try again.`,
+          title: t(`credentialsRemovingError`, [credential.userLabel ?? ""]),
         });
         console.error(e);
       });
@@ -71,8 +71,8 @@ const SigninProfile = () => {
   };
 
   const cols: TableColumns = [
-    { key: "name", data: "Name" },
-    { key: "created", data: "Created" },
+    { key: "name", data: t("name") },
+    { key: "created", data: t("created") },
     { key: "action", data: "", columnClasses: "flex justify-end" },
   ];
 
@@ -105,7 +105,7 @@ const SigninProfile = () => {
                 }
               }}
             >
-              Remove
+              {t("remove")}
             </Button>
           )}
         </>
@@ -117,8 +117,8 @@ const SigninProfile = () => {
     <div className="space-y-10">
       <div>
         <SectionHeader
-          title="Signing in"
-          description="Configure ways to sign in."
+          title={t("signingIn")}
+          description={t("configureWaysToSignIn")}
         />
       </div>
       <div className="space-y-16">
@@ -129,13 +129,13 @@ const SigninProfile = () => {
                 <Lock className="h-5 w-5" />
               </div>
               <SectionHeader
-                title={t("basic-authentication")}
+                title={t("basicAuthentication")}
                 variant="medium"
               />
             </div>
             <SectionHeader
-              title="Password"
-              description="Sign in by entering your password."
+              title={t("password")}
+              description={t("signInByEnteringYourPassword")}
               variant="small"
             />
             <Table
@@ -153,15 +153,17 @@ const SigninProfile = () => {
                   <Smartphone className="h-5 w-5" />
                 </div>
                 <SectionHeader
-                  title="Two-factor authentication"
+                  title={t("twoFactorAuthentication")}
                   variant="medium"
                 />
               </div>
 
               <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
                 <SectionHeader
-                  title="Authenticator application"
-                  description="Enter a verification code from authenticator application."
+                  title={t("authenticatorApplication")}
+                  description={t(
+                    "enterAVerificationCodeFromAuthenticatorApplication"
+                  )}
                   variant="small"
                 />
 
@@ -169,7 +171,7 @@ const SigninProfile = () => {
                   isBlackButton
                   onClick={() => setUpCredential("CONFIGURE_TOTP")}
                 >
-                  Set up authenticator
+                  {t("setUpAuthenticator")}
                 </Button>
               </div>
 
@@ -181,15 +183,15 @@ const SigninProfile = () => {
 
               <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
                 <SectionHeader
-                  title="Security key"
-                  description="Use your security key to sign in."
+                  title={t("securityKey")}
+                  description={t("useYourSecurityKeyToSignIn")}
                   variant="small"
                 />
                 <Button
                   isBlackButton
                   onClick={() => setUpCredential("webauthn-register")}
                 >
-                  Set up security key
+                  {t("setUpSecurityKey")}
                 </Button>
               </div>
               <Table
@@ -207,12 +209,12 @@ const SigninProfile = () => {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700 dark:text-zinc-200">
                   <Key className="h-5 w-5" />
                 </div>
-                <SectionHeader title="Passwordless" variant="medium" />
+                <SectionHeader title={t("passwordless")} variant="medium" />
               </div>
               <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
                 <SectionHeader
-                  title="Security key"
-                  description="Use your security key for passwordless sign in."
+                  title={t("securityKey")}
+                  description={t("useYourSecurityKeyForPasswordlessSignIn")}
                   variant="small"
                 />
                 <Button
@@ -221,7 +223,7 @@ const SigninProfile = () => {
                     setUpCredential("webauthn-register-passwordless")
                   }
                 >
-                  Set up security key
+                  {t("setUpSecurityKey")}
                 </Button>
               </div>
               <Table
