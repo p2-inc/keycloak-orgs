@@ -97,7 +97,7 @@ public class PortalFeatures {
     // deviceActivityEnabled
     config.deviceActivityEnabled(CONFIG_ENABLED(realm, "profile.activity.enabled", true));
     // linkedAccountsEnabled
-    config.linkedAccountsEnabled(realm.isIdentityFederationEnabled());
+    config.linkedAccountsEnabled(realm.isIdentityFederationEnabled() && CONFIG_ENABLED(realm, "profile.linked.enabled", true));
     // eventsEnabled
     EventStoreProvider eventStore = session.getProvider(EventStoreProvider.class);
     config.eventsEnabled(eventStore != null && realm.isEventsEnabled());

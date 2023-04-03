@@ -55,6 +55,7 @@ const GeneralProfile = () => {
     setValue("firstName", account?.firstName);
     setValue("lastName", account?.lastName);
     setValue("email", account?.email);
+    setValue("username", account?.username)
   }, [account, setValue]);
 
   const onSubmit = async (formData) => {
@@ -123,23 +124,21 @@ const GeneralProfile = () => {
               error={errors.username}
             />
           )}
-          {featureFlags.updateEmailFeatureEnabled && (
-            <RHFFormTextInputWithLabel
-              slug="email"
-              label={t("email")}
-              register={register}
-              registerArgs={{
-                required: true,
-                pattern: /\S+@\S+\.\S+/,
-              }}
-              inputArgs={{
-                disabled: isLoadingAccount,
-                placeholder: "your@email.com",
-                type: "email",
-              }}
-              error={errors.email}
-            />
-          )}
+          <RHFFormTextInputWithLabel
+            slug="email"
+            label={t("email")}
+            register={register}
+            registerArgs={{
+              required: true,
+              pattern: /\S+@\S+\.\S+/,
+            }}
+            inputArgs={{
+              disabled: isLoadingAccount || !featureFlags.updateEmailFeatureEnabled,
+              placeholder: "your@email.com",
+              type: "email",
+            }}
+            error={errors.email}
+          />
           <RHFFormTextInputWithLabel
             slug="firstName"
             label={t("firstName")}
@@ -172,7 +171,7 @@ const GeneralProfile = () => {
               type="button"
               onClick={() =>
                 reset({
-                  email: account?.username,
+                  email: account?.email,
                   firstName: account?.firstName,
                   lastName: account?.lastName,
                 })
@@ -184,6 +183,7 @@ const GeneralProfile = () => {
           </div>
         </>
       </form>
+      {featureFlags.deleteAccountAllowed && (
       <div className="pt-10">
         <div className="space-y-4 rounded border p-6">
           <SectionHeader
@@ -200,6 +200,7 @@ const GeneralProfile = () => {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
