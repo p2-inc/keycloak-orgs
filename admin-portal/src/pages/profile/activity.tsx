@@ -103,8 +103,7 @@ const ActivityProfile = () => {
         client.clientName !== undefined &&
         client.clientName !== ""
       ) {
-        //clientName = Msg.localize(client.clientName);
-        clientName = client.clientName;
+        clientName = t(client.clientName);
       } else {
         clientName = client.clientId ?? "";
       }
