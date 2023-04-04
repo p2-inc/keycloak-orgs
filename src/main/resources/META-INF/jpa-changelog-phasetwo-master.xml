@@ -6,7 +6,9 @@
   <include file="META-INF/jpa-changelog-phasetwo-20200528.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20200611.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20200611-1.xml"/>
+  <include file="META-INF/jpa-changelog-phasetwo-20211206.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20211207.xml"/>
+  <include file="META-INF/jpa-changelog-phasetwo-20211207-1.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20211208.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20211211.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20220131.xml"/>
@@ -15,5 +17,6 @@
   <include file="META-INF/jpa-changelog-phasetwo-20220628.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20220824.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20220911.xml"/>
+  <include file="META-INF/jpa-changelog-phasetwo-20230404.xml"/>
 
 </databaseChangeLog>
