@@ -15,7 +15,7 @@ const MembersStat: React.FC<Props> = ({ org, realm }) => {
     orgId: org.id!,
   });
 
-  return <Stat value={members.length} label="members" />;
+  return <Stat value={members.length - 1} label="members" />;
 };
 
 export default MembersStat;

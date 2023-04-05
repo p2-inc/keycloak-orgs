@@ -376,7 +376,7 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/${queryArg.realm}/users/${queryArg.userId}/orgs`,
         }),
-        providesTags: ["Users"],
+        providesTags: ["Users", "Organizations"],
       }),
       getByRealmUsersAndUserIdOrgsOrgIdRoles: build.query<
         GetByRealmUsersAndUserIdOrgsOrgIdRolesApiResponse,

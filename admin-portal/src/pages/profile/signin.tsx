@@ -209,7 +209,10 @@ const SigninProfile = () => {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-p2blue-700 dark:text-zinc-200">
                   <Key className="h-5 w-5" />
                 </div>
-                <SectionHeader title={t("passwordless")} variant="medium" />
+                <SectionHeader
+                  title={t("password-less-title")}
+                  variant="medium"
+                />
               </div>
               <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
                 <SectionHeader

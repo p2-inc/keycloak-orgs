@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { config } from "config";
 import {
   useGetOrganizationByIdQuery,
+  useGetOrganizationDomainsQuery,
   useUpdateOrganizationMutation,
 } from "store/apis/orgs";
 import isValidDomain from "is-valid-domain";
@@ -34,6 +35,11 @@ const DomainsAdd = () => {
     orgId: orgId!,
     realm,
   });
+  const { data: domains = [], refetch: refetchDomains } =
+    useGetOrganizationDomainsQuery({
+      realm,
+      orgId: orgId!,
+    });
   const hasManageOrganizationRole = hasManageOrganizationRoleCheck(orgId);
 
   const [updateOrg] = useUpdateOrganizationMutation();
@@ -83,6 +89,7 @@ const DomainsAdd = () => {
             success: true,
             title: `${domain} has been added to organization. Please verify domain.`,
           });
+          refetchDomains();
           return navigate(`/organizations/${orgId}/settings`);
         })
         .catch((e) => {
@@ -119,13 +126,16 @@ const DomainsAdd = () => {
       />
       <div className="space-y-5 py-10">
         {org.domains && org.domains?.length > 0 && (
-          <div className="divide-y rounded-md border border-gray-200 dark:border-zinc-600 dark:divide-zinc-600">
+          <div className="divide-y rounded-md border border-gray-200 dark:divide-zinc-600 dark:border-zinc-600">
             <div className="rounded-t-md bg-gray-50 px-3 py-2 text-sm font-semibold dark:bg-zinc-900 dark:text-zinc-200">
               Current registered domains
             </div>
             <div className="divide-y dark:divide-zinc-600">
               {org.domains.map((domain) => (
-                <div key={domain} className="px-3 py-2 text-sm flex items-center space-x-2 dark:text-zinc-200">
+                <div
+                  key={domain}
+                  className="flex items-center space-x-2 px-3 py-2 text-sm dark:text-zinc-200"
+                >
                   <div>{domain}</div>
                 </div>
               ))}

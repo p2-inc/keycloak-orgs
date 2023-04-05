@@ -76,8 +76,8 @@ export default function Organizations() {
                       org={org}
                       viewType={viewType}
                     >
-                      <MembersStat org={org} realm={config.env.realm} />
-                      <DomainStat org={org} realm={config.env.realm} />
+                      <MembersStat org={org} realm={realm} />
+                      <DomainStat org={org} realm={realm} />
                     </OrganizationItem>
                   );
                 })}

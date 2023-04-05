@@ -5,17 +5,19 @@ import Table, {
 } from "components/elements/table/table";
 import { PlusIcon } from "components/icons";
 import SectionHeader from "components/navs/section-header";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { config } from "config";
 import { useGetOrganizationDomainsQuery } from "store/apis/orgs";
 import { SettingsProps } from ".";
 import { useTranslation } from "react-i18next";
 
+const { realm } = config.env;
+
 const SettingsDomain = ({ hasManageOrganizationRole }: SettingsProps) => {
   const { t } = useTranslation();
   let { orgId } = useParams();
   const { data: domains = [], isLoading } = useGetOrganizationDomainsQuery({
-    realm: config.env.realm,
+    realm: realm,
     orgId: orgId!,
   });
 

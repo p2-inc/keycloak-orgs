@@ -129,7 +129,8 @@
   "password": "My password",
   "password-display-name": "Password",
   "password-help-text": "Sign in by entering your password.",
-  "passwordless": "passwordless",
+  "password-less-title": "Sign in with security key",
+  "passwordless": "no password",
   "path": "Path",
   "permanentlyRemoveYourProfileAndAllOfItsContentsThisActionIsNotReversibleSoPleaseContinueWithCaution": "Permanently remove your profile and all of its contents this action is not reversible so please continue with caution",
   "permissionRequest": "Permission requests - {{0}}",
@@ -231,7 +232,7 @@
   "usernamePlaceholder": "Username or email",
   "useTheFollowingDetailsToVerifyYourDomain": "Use the following details to verify your domain",
   "useThisCodeForTheValueOfTheTxtRecord": "Use this code for the value of the txt record",
-  "useYourSecurityKeyForPasswordlessSignIn": "Use your security key for passwordless sign in",
+  "useYourSecurityKeyForPasswordlessSignIn": "Use your security key for password-less sign in",
   "useYourSecurityKeyToSignIn": "Use your security key to sign in",
   "validated": "Validated",
   "verificationPending": "Verification pending",
@@ -242,6 +243,6 @@
   "viewOrganizationInformationChangeDisplayName": "View organization information change display name",
   "welcomeMessage": "Welcome to keycloak account management",
   "writeDeleteToConfirm": "Write delete to confirm",
-  "youAreTheSameUserAsThisUser": "You are the same user as this user",
+  "youAreTheSameUserAsThisUser": "This is your account! This is you!",
   "youLackTheManageRolesRole": "You lack the manage roles role"
 }

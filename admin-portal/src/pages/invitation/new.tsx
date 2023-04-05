@@ -71,11 +71,11 @@ const NewInvitation = () => {
       })
         .unwrap()
         .then(() => {
-          reset();
           P2Toast({
             success: true,
             title: `${data.email} has been sent an invitation.`,
           });
+          reset();
           return navigate(`/organizations/${orgId}/details`);
         })
         .catch((e) => {

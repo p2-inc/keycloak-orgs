@@ -11,6 +11,11 @@ type Props = {
   duration?: number;
 };
 
+const CloseButton = () => {
+  const { t } = useTranslation();
+  return <span className="sr-only">{t("close")}</span>;
+};
+
 export default function P2Toast({
   success,
   error,
@@ -18,7 +23,6 @@ export default function P2Toast({
   message,
   duration,
 }: Props) {
-  const { t } = useTranslation();
   return toast.custom((to) => {
     if (duration) to.duration = duration;
 
@@ -60,7 +64,7 @@ export default function P2Toast({
                   toast.dismiss(to.id);
                 }}
               >
-                <span className="sr-only">{t("close")}</span>
+                <CloseButton />
                 <XMarkIcon className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>

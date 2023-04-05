@@ -3,6 +3,7 @@ import DesktopSidebarNav from "../navs/desktop-sidebar-nav";
 import { IconType } from "../icons";
 import { Building2, User } from "lucide-react";
 import { config } from "config";
+import useUser from "components/utils/useUser";
 const { features: featureFlags } = config.env;
 
 export type NavigationItem = {
@@ -13,25 +14,27 @@ export type NavigationItem = {
   isActive: boolean;
 };
 
-const navigation: NavigationItem[] = [
-  {
-    name: "profile",
-    href: "/profile",
-    icon: User,
-    iconClass: "stroke-current",
-    isActive: true,
-  },
-  {
-    name: "organizations",
-    href: "/organizations",
-    icon: Building2,
-    iconClass: "fill-current",
-    isActive: featureFlags.organizationsEnabled,
-  },
-];
-
 export default function Layout({ children }: { children: React.ReactElement }) {
   const [menuCollapsed, setMenuCollapsed] = useState(true);
+  const { userOrgs } = useUser();
+
+  const navigation: NavigationItem[] = [
+    {
+      name: "profile",
+      href: "/profile",
+      icon: User,
+      iconClass: "stroke-current",
+      isActive: true,
+    },
+    {
+      name: "organizations",
+      href: "/organizations",
+      icon: Building2,
+      iconClass: "fill-current",
+      isActive:
+        featureFlags.organizationsEnabled && Object.keys(userOrgs).length > 0,
+    },
+  ];
 
   return (
     <>
