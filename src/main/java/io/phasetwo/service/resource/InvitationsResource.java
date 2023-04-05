@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.validation.Valid;
-import javax.validation.constraints.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -83,7 +82,14 @@ public class InvitationsResource extends OrganizationAdminResource {
     }
 
     try {
-      InvitationModel i = organization.addInvitation(email, auth.getUser());
+      UserModel inviter = null;
+      if (invitation.getInviterId() == null || invitation.getInviterId().equals("")) {
+        inviter = auth.getUser();
+      } else {
+        inviter = session.users().getUserById(realm, invitation.getInviterId());
+      }
+
+      InvitationModel i = organization.addInvitation(email, inviter);
       if (invitation.getRoles() != null) i.setRoles(invitation.getRoles());
       Invitation o = convertInvitationModelToInvitation(i);
 
@@ -99,7 +105,7 @@ public class InvitationsResource extends OrganizationAdminResource {
       if (invitation.isSend()) {
         // TODO use inviter
         try {
-          sendInvitationEmail(email, session, realm, auth.getUser(), link);
+          sendInvitationEmail(email, session, realm, inviter, link);
         } catch (Exception e) {
           log.warn("Unable to send invitation email", e);
         }
