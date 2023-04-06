@@ -56,8 +56,8 @@ export default function OrganizationDetail() {
     orgId: org?.id!,
     realm,
   });
-  const verifiedDomains =
-    domains.length > 0 ? domains.filter((d) => d.verified).length : 0;
+  const unverifiedDomains =
+    domains.length > 0 ? domains.filter((d) => !d.verified).length : 0;
   const { data: idps = [] } = useGetIdpsQuery({
     orgId: org?.id!,
     realm,
@@ -116,9 +116,7 @@ export default function OrganizationDetail() {
                   <Stat label="pending" value={invites.length}></Stat>
                 </OACTopRow>
                 <div className="text-sm leading-relaxed text-gray-600">
-                  {t(
-                    "inviteNewMembersOrRemoveMembersFromTheOrganization"
-                  )}
+                  {t("inviteNewMembersOrRemoveMembersFromTheOrganization")}
                 </div>
                 <div>
                   {hasManageInvitationsRole ? (
@@ -154,9 +152,7 @@ export default function OrganizationDetail() {
                   ></Stat>
                 </OACTopRow>
                 <div className="text-sm leading-relaxed text-gray-600">
-                  {t(
-                    "setupSsoConnectionsAsNecessaryForThisOrganization"
-                  )}
+                  {t("setupSsoConnectionsAsNecessaryForThisOrganization")}
                 </div>
                 <div>
                   <Button
@@ -178,12 +174,10 @@ export default function OrganizationDetail() {
                     <Globe className="h-5 w-5" />
                   </RoundedIcon>
                   <Stat label="Domains" value={domains.length}></Stat>
-                  <Stat label="Pending" value={verifiedDomains}></Stat>
+                  <Stat label="Pending" value={unverifiedDomains}></Stat>
                 </OACTopRow>
                 <div className="text-sm leading-relaxed text-gray-600">
-                  {t(
-                    "setupAssociatedDomainsAndVerifyThemToEnsureFullSecurity"
-                  )}
+                  {t("setupAssociatedDomainsAndVerifyThemToEnsureFullSecurity")}
                 </div>
                 <div>
                   {hasManageOrganizationRole ? (

@@ -43,6 +43,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
   const { user, fullName } = useUser();
   const [theme, setTheme] = useState(themes[0]);
   const { t } = useTranslation();
+  const { appiconUrl, logoUrl } = config.env;
 
   useEffect(() => {
     if (theme.key === "system") {
@@ -80,24 +81,28 @@ const DesktopSidebarNav: React.FC<Props> = ({
                   className="group flex items-center justify-center py-4 pt-8 hover:cursor-pointer "
                   onClick={() => setMenuCollapsed(!menuCollapsed)}
                 >
-                  {config.env.appiconUrl ? (
+                  {appiconUrl ? (
                     <img
-                      src={config.env.appiconUrl}
-                      className="h-full w-full max-w-[50]"
+                      src={appiconUrl}
+                      className="h-full w-full max-w-[50px]"
                       alt="App Icon"
                     />
                   ) : (
                     <DoubleSlashBrandIcon />
                   )}
-                  <ChevronIcon className="stroke-gray-400 group-hover:stroke-gray-600" />
+                  <ChevronIcon className="ml-[1px] stroke-gray-400 group-hover:stroke-gray-600" />
                 </div>
               ) : (
                 <div
                   className="group flex items-center justify-between py-4 pr-4 pl-8 pt-8 hover:cursor-pointer"
                   onClick={() => setMenuCollapsed(!menuCollapsed)}
                 >
-                  {config.env.logoUrl ? (
-                    <img src={config.env.appiconUrl} alt="App Icon" />
+                  {logoUrl ? (
+                    <img
+                      src={logoUrl}
+                      alt="App Icon"
+                      className="w-auto max-w-[185px]"
+                    />
                   ) : (
                     <FullBrandIcon />
                   )}
@@ -178,7 +183,9 @@ const DesktopSidebarNav: React.FC<Props> = ({
                     </Link>
                   </div>
                   <div className="relative flex items-center justify-between py-2">
-                    <div className="text-sm dark:text-zinc-200">{t("theme")}</div>
+                    <div className="text-sm dark:text-zinc-200">
+                      {t("theme")}
+                    </div>
                     <Listbox value={theme} onChange={setTheme}>
                       <Listbox.Button className="flex items-center space-x-2 rounded border px-2 py-1 text-sm hover:border-gray-500 dark:border-zinc-600 dark:text-zinc-200 dark:hover:border-zinc-400">
                         <div>{theme.icon}</div>

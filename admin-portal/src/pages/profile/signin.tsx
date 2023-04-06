@@ -24,6 +24,12 @@ type CredContainer = {
   metadata: CredentialMetadataRepresentation;
 };
 
+const WEB_AUTH_N = "webauthn";
+const WEB_AUTH_N_REGISTER = "webauthn-register";
+const WEB_AUTH_N_PASSWORDLESS = "webauthn-passwordless";
+const WEB_AUTH_N_PASSWORDLESS_REGISTER = "webauthn-register-passwordless";
+const OTP = "otp";
+
 const time = (time: string | undefined): string => {
   if (time === undefined) return "unknown";
   let t: number = Number(time);
@@ -31,18 +37,24 @@ const time = (time: string | undefined): string => {
 };
 
 const SigninProfile = () => {
-  const { features: featureFlags } = config.env;
+  const { features: featureFlags, realm } = config.env;
   const { data: credentials = [], isLoading } = useGetCredentialsQuery({
-    realm: config.env.realm,
+    realm,
   });
   const [deleteCredential] = useDeleteCredentialMutation();
+
+  const hasWebAuthN = credentials.find((cred) => cred.type === WEB_AUTH_N);
+  const hasWebAuthNPasswordLess = credentials.find(
+    (cred) => cred.type === WEB_AUTH_N_PASSWORDLESS
+  );
+  const hasOTP = credentials.find((cred) => cred.type === OTP);
 
   const removeCredential = (
     credential: CredentialMetadataRepresentation
   ): void => {
     if (credential === undefined) return;
     deleteCredential({
-      realm: config.env.realm,
+      realm,
       credentialId: credential.id!,
     })
       .then(() => {
@@ -158,51 +170,66 @@ const SigninProfile = () => {
                 />
               </div>
 
-              <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
-                <SectionHeader
-                  title={t("authenticatorApplication")}
-                  description={t(
-                    "enterAVerificationCodeFromAuthenticatorApplication"
-                  )}
-                  variant="small"
+              {isLoading && (
+                <Table
+                  columns={cols}
+                  rows={rowsForType("password", credentials)}
+                  isLoading={isLoading}
                 />
+              )}
 
-                <Button
-                  isBlackButton
-                  onClick={() => setUpCredential("CONFIGURE_TOTP")}
-                >
-                  {t("setUpAuthenticator")}
-                </Button>
-              </div>
+              {hasOTP && (
+                <>
+                  <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
+                    <SectionHeader
+                      title={t("authenticatorApplication")}
+                      description={t(
+                        "enterAVerificationCodeFromAuthenticatorApplication"
+                      )}
+                      variant="small"
+                    />
 
-              <Table
-                columns={cols}
-                rows={rowsForType("otp", credentials)}
-                isLoading={isLoading}
-              />
+                    <Button
+                      isBlackButton
+                      onClick={() => setUpCredential("CONFIGURE_TOTP")}
+                    >
+                      {t("setUpAuthenticator")}
+                    </Button>
+                  </div>
+                  <Table
+                    columns={cols}
+                    rows={rowsForType(OTP, credentials)}
+                    isLoading={isLoading}
+                  />
+                </>
+              )}
 
-              <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
-                <SectionHeader
-                  title={t("securityKey")}
-                  description={t("useYourSecurityKeyToSignIn")}
-                  variant="small"
-                />
-                <Button
-                  isBlackButton
-                  onClick={() => setUpCredential("webauthn-register")}
-                >
-                  {t("setUpSecurityKey")}
-                </Button>
-              </div>
-              <Table
-                columns={cols}
-                rows={rowsForType("webauthn", credentials)}
-                isLoading={isLoading}
-              />
+              {hasWebAuthN && (
+                <>
+                  <div className="items-center justify-between space-y-4 md:flex md:space-y-0">
+                    <SectionHeader
+                      title={t("securityKey")}
+                      description={t("useYourSecurityKeyToSignIn")}
+                      variant="small"
+                    />
+                    <Button
+                      isBlackButton
+                      onClick={() => setUpCredential(WEB_AUTH_N_REGISTER)}
+                    >
+                      {t("setUpSecurityKey")}
+                    </Button>
+                  </div>
+                  <Table
+                    columns={cols}
+                    rows={rowsForType("webauthn", credentials)}
+                    isLoading={isLoading}
+                  />
+                </>
+              )}
             </div>
           </div>
         )}
-        {featureFlags.passwordlessUpdateAllowed && (
+        {featureFlags.passwordlessUpdateAllowed && hasWebAuthNPasswordLess && (
           <div>
             <div className="space-y-5">
               <div className="flex items-center space-x-4">
@@ -223,7 +250,7 @@ const SigninProfile = () => {
                 <Button
                   isBlackButton
                   onClick={() =>
-                    setUpCredential("webauthn-register-passwordless")
+                    setUpCredential(WEB_AUTH_N_PASSWORDLESS_REGISTER)
                   }
                 >
                   {t("setUpSecurityKey")}
@@ -231,7 +258,7 @@ const SigninProfile = () => {
               </div>
               <Table
                 columns={cols}
-                rows={rowsForType("webauthn-passwordless", credentials)}
+                rows={rowsForType(WEB_AUTH_N_PASSWORDLESS, credentials)}
                 isLoading={isLoading}
               />
             </div>

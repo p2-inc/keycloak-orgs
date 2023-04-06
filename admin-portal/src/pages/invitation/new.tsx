@@ -67,6 +67,7 @@ const NewInvitation = () => {
           email: data.email,
           inviterId: keycloak.tokenParsed?.sub,
           roles: Object.values(roleItems!.items),
+          send: true,
         },
       })
         .unwrap()
