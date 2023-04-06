@@ -61,7 +61,12 @@ const MainNav: React.FC<Props> = ({ title }) => {
         </Flex>
       </FlexItem>
       <FlexItem style={{ textAlign: "end" }}>
-        {featureFlags?.logoUrl && <img src={featureFlags.logoUrl} />}
+        {featureFlags?.logoUrl && (
+          <img
+            src={featureFlags.logoUrl}
+            style={{ maxHeight: "50px", width: "auto" }}
+          />
+        )}
       </FlexItem>
     </Flex>
   );
