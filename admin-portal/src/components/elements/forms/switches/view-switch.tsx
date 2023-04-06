@@ -1,5 +1,4 @@
 import { FC, useState } from "react";
-import { GridIcon, ListIcon } from "../../../icons";
 import cs from "classnames";
 import { Grid, List } from "lucide-react";
 

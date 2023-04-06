@@ -19,11 +19,6 @@ import { AIACommand } from "services/aia-command";
 import P2Toast from "components/utils/toast";
 import { Key, Lock, Smartphone } from "lucide-react";
 
-type CredContainer = {
-  credential: CredentialRepresentation;
-  metadata: CredentialMetadataRepresentation;
-};
-
 const WEB_AUTH_N = "webauthn";
 const WEB_AUTH_N_REGISTER = "webauthn-register";
 const WEB_AUTH_N_PASSWORDLESS = "webauthn-passwordless";

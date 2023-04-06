@@ -17,6 +17,8 @@ import TimeUtil from "services/time-util";
 import Button from "components/elements/forms/buttons/button";
 import { Smartphone, Monitor } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { TFuncKey } from "i18next";
+
 
 type SignOutSessionState = {
   device: DeviceRepresentation;
@@ -103,7 +105,7 @@ const ActivityProfile = () => {
         client.clientName !== undefined &&
         client.clientName !== ""
       ) {
-        clientName = t(client.clientName);
+        clientName = t(client.clientName as TFuncKey);
       } else {
         clientName = client.clientId ?? "";
       }

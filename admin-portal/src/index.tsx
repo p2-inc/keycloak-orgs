@@ -30,7 +30,6 @@ import DomainsAdd from "pages/organizations/domains/add";
 import DomainsVerify from "pages/organizations/domains/verify";
 import DomainContainer from "pages/organizations/domains";
 import { Toaster } from "react-hot-toast";
-import { basename } from "path";
 import Roles from "pages/member/roles";
 import Member from "pages/member";
 import ProfileDelete from "pages/profile-delete";

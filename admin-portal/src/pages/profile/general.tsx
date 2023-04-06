@@ -12,14 +12,6 @@ import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text
 import P2Toast from "components/utils/toast";
 import { Link } from "react-router-dom";
 
-const ROOT_ATTRIBUTES = ["username", "firstName", "lastName", "email"];
-const isRootAttribute = (attr?: string) =>
-  attr && ROOT_ATTRIBUTES.includes(attr);
-const fieldName = (name: string) =>
-  `${isRootAttribute(name) ? "" : "attributes."}${name}`;
-const unWrap = (key: string) => key.substring(2, key.length - 1);
-const isBundleKey = (key?: string) => key?.includes("${");
-
 const GeneralProfile = () => {
   const { t } = useTranslation();
   const { features: featureFlags } = config.env;

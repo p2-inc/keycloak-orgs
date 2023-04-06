@@ -5,7 +5,6 @@ import {
 } from "store/apis/orgs";
 import { Roles, roleSettings } from "services/role";
 import RoleBadge from "components/elements/badges/role-badge";
-import cs from "classnames";
 import { Link } from "react-router-dom";
 import Button from "components/elements/forms/buttons/button";
 import { checkOrgForRole } from "components/utils/check-org-for-role";

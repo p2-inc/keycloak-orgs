@@ -35,7 +35,7 @@ const DomainsAdd = () => {
     orgId: orgId!,
     realm,
   });
-  const { data: domains = [], refetch: refetchDomains } =
+  const { refetch: refetchDomains } =
     useGetOrganizationDomainsQuery({
       realm,
       orgId: orgId!,
