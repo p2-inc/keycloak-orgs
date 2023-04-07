@@ -23,18 +23,6 @@ const GeneralProfile = () => {
   const [updateAccount, { isLoading: isUpdatingAccount }] =
     useUpdateAccountMutation();
 
-  /*
-  //setState(DEFAULT_STATE);
-  console.log(data);
-  const handleSubmit = (): void => {
-    //updateAccount()
-  };
-
-  const handleCancel = (): void => {
-    //how do i refresh the data
-    refetch();
-  };
-  */
   const {
     register,
     handleSubmit,
