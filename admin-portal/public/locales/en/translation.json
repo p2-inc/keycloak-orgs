@@ -244,5 +244,10 @@
   "welcomeMessage": "Welcome to keycloak account management",
   "writeDeleteToConfirm": "Write delete to confirm",
   "youAreTheSameUserAsThisUser": "This is your account! This is you!",
-  "youLackTheManageRolesRole": "You lack the manage roles role"
+  "youLackTheManageRolesRole": "You lack the manage roles role",
+  "selectLocale": "Select Locale",
+  "updateLocale": "Update Locale",
+  "localization": "Localization",
+  "localeUpdatedSuccessfully": "Locale updated successfully",
+  "localeUpdateFailed": "Error during locale update."
 }
