@@ -21,6 +21,8 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 public class WizardResourceProviderFactory implements RealmResourceProviderFactory {
 
   public static final String ID = "wizard";
+  public static final String NAME = "IdP Config Wizard";
+  public static final String DESCRIPTION = "Wizards for configuring various vendor IdPs.";
 
   public static final String AUTH_REALM_OVERRIDE_CONFIG_KEY =
       "_providerConfig.wizard.auth-realm-override";
@@ -92,11 +94,14 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
     setClientScopeDefaults(realm, session, idpWizard);
   }
 
+  private String getRedirectPath(RealmModel realm) {
+    return String.format("/realms/%s/%s/", realm.getName(), ID);
+  }
+
   private ClientModel createClientForRealm(RealmModel realm, KeycloakSession session) {
-    String path = String.format("/realms/%s/wizard/", realm.getName());
+    String path = getRedirectPath(realm);
     ClientModel idpWizard = session.clients().addClient(realm, "idp-wizard");
-    setDefaults(idpWizard);
-    idpWizard.setBaseUrl(path);
+    setDefaults(realm, idpWizard);
     idpWizard.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
     idpWizard.setWebOrigins(ImmutableSet.of("/*"));
     idpWizard.setAttribute("post.logout.redirect.uris", "+");
@@ -105,17 +110,20 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
 
   private ClientModel createClientForMaster(RealmModel realm, KeycloakSession session) {
     ClientModel idpWizard = session.clients().addClient(realm, "idp-wizard");
-    setDefaults(idpWizard);
+    setDefaults(realm, idpWizard);
     idpWizard.setRedirectUris(ImmutableSet.of("/*"));
     idpWizard.setWebOrigins(ImmutableSet.of("/*"));
     idpWizard.setAttribute("post.logout.redirect.uris", "+");
     return idpWizard;
   }
 
-  private void setDefaults(ClientModel idpWizard) {
+  private void setDefaults(RealmModel realm, ClientModel idpWizard) {
     idpWizard.setProtocol("openid-connect");
     idpWizard.setPublicClient(true);
     idpWizard.setRootUrl("${authBaseUrl}");
+    idpWizard.setName(NAME);
+    idpWizard.setDescription(DESCRIPTION);
+    idpWizard.setBaseUrl(getRedirectPath(realm));
   }
 
   private void setOrganizationRoleMapper(ClientModel idpWizard) {
