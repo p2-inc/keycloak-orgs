@@ -20,6 +20,9 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 public class PortalResourceProviderFactory implements RealmResourceProviderFactory {
 
   public static final String ID = "portal";
+  public static final String NAME = "Admin portal";
+  public static final String DESCRIPTION =
+      "Portal for self-administration of profile and organizations.";
 
   @Override
   public String getId() {
@@ -87,14 +90,13 @@ public class PortalResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private String getRedirectPath(RealmModel realm) {
-    return String.format("/realms/%s/portal/", realm.getName());
+    return String.format("/realms/%s/%s/", realm.getName(), ID);
   }
 
   private ClientModel createClientForRealm(RealmModel realm, KeycloakSession session) {
     String path = getRedirectPath(realm);
     ClientModel adminPortal = session.clients().addClient(realm, "admin-portal");
-    setDefaults(adminPortal);
-    adminPortal.setBaseUrl(path);
+    setDefaults(realm, adminPortal);
     adminPortal.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
     adminPortal.setWebOrigins(ImmutableSet.of("/*"));
     adminPortal.setAttribute("post.logout.redirect.uris", "+");
@@ -108,17 +110,20 @@ public class PortalResourceProviderFactory implements RealmResourceProviderFacto
 
   private ClientModel createClientForMaster(RealmModel realm, KeycloakSession session) {
     ClientModel adminPortal = session.clients().addClient(realm, "admin-portal");
-    setDefaults(adminPortal);
+    setDefaults(realm, adminPortal);
     adminPortal.setRedirectUris(ImmutableSet.of("/*"));
     adminPortal.setWebOrigins(ImmutableSet.of("/*"));
     adminPortal.setAttribute("post.logout.redirect.uris", "+");
     return adminPortal;
   }
 
-  private void setDefaults(ClientModel adminPortal) {
+  private void setDefaults(RealmModel realm, ClientModel adminPortal) {
     adminPortal.setProtocol("openid-connect");
     adminPortal.setPublicClient(true);
     adminPortal.setRootUrl("${authBaseUrl}");
+    adminPortal.setName(NAME);
+    adminPortal.setDescription(DESCRIPTION);
+    adminPortal.setBaseUrl(getRedirectPath(realm));
   }
 
   private void setOrganizationRoleMapper(ClientModel adminPortal) {
