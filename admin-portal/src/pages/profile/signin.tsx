@@ -184,17 +184,29 @@ const SigninProfile = () => {
                       variant="small"
                     />
 
-                    <Button
-                      isBlackButton
-                      onClick={() => setUpCredential("CONFIGURE_TOTP")}
-                    >
-                      {t("setUpAuthenticator")}
-                    </Button>
+                    {rowsForType(OTP, credentials).length !== 0 && (
+                      <Button
+                        isBlackButton
+                        onClick={() => setUpCredential("CONFIGURE_TOTP")}
+                      >
+                        {t("setUpAuthenticator")}
+                      </Button>
+                    )}
                   </div>
                   <Table
                     columns={cols}
                     rows={rowsForType(OTP, credentials)}
                     isLoading={isLoading}
+                    emptyState={
+                      <div>
+                        <Button
+                          isBlackButton
+                          onClick={() => setUpCredential("CONFIGURE_TOTP")}
+                        >
+                          {t("setUpAuthenticator")}
+                        </Button>
+                      </div>
+                    }
                   />
                 </>
               )}
@@ -207,17 +219,29 @@ const SigninProfile = () => {
                       description={t("useYourSecurityKeyToSignIn")}
                       variant="small"
                     />
-                    <Button
-                      isBlackButton
-                      onClick={() => setUpCredential(WEB_AUTH_N_REGISTER)}
-                    >
-                      {t("setUpSecurityKey")}
-                    </Button>
+                    {rowsForType("webauthn", credentials).length !== 0 && (
+                      <Button
+                        isBlackButton
+                        onClick={() => setUpCredential(WEB_AUTH_N_REGISTER)}
+                      >
+                        {t("setUpSecurityKey")}
+                      </Button>
+                    )}
                   </div>
                   <Table
                     columns={cols}
                     rows={rowsForType("webauthn", credentials)}
                     isLoading={isLoading}
+                    emptyState={
+                      <div>
+                        <Button
+                          isBlackButton
+                          onClick={() => setUpCredential(WEB_AUTH_N_REGISTER)}
+                        >
+                          {t("setUpSecurityKey")}
+                        </Button>
+                      </div>
+                    }
                   />
                 </>
               )}
@@ -242,19 +266,34 @@ const SigninProfile = () => {
                   description={t("useYourSecurityKeyForPasswordlessSignIn")}
                   variant="small"
                 />
-                <Button
-                  isBlackButton
-                  onClick={() =>
-                    setUpCredential(WEB_AUTH_N_PASSWORDLESS_REGISTER)
-                  }
-                >
-                  {t("setUpSecurityKey")}
-                </Button>
+                {rowsForType(WEB_AUTH_N_PASSWORDLESS, credentials).length !==
+                  0 && (
+                  <Button
+                    isBlackButton
+                    onClick={() =>
+                      setUpCredential(WEB_AUTH_N_PASSWORDLESS_REGISTER)
+                    }
+                  >
+                    {t("setUpSecurityKey")}
+                  </Button>
+                )}
               </div>
               <Table
                 columns={cols}
                 rows={rowsForType(WEB_AUTH_N_PASSWORDLESS, credentials)}
                 isLoading={isLoading}
+                emptyState={
+                  <div>
+                    <Button
+                      isBlackButton
+                      onClick={() =>
+                        setUpCredential(WEB_AUTH_N_PASSWORDLESS_REGISTER)
+                      }
+                    >
+                      {t("setUpSecurityKey")}
+                    </Button>
+                  </div>
+                }
               />
             </div>
           </div>
