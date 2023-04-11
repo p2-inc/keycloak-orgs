@@ -101,7 +101,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     if (!search.endsWith("%")) search = search + "%";
     return search;
   }
-    
+
   @Override
   public Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user) {
     TypedQuery<OrganizationMemberEntity> query =
