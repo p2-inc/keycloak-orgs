@@ -36,6 +36,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +46,7 @@ import static io.phasetwo.service.Helpers.deleteUser;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -84,6 +86,42 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(response.getStatus(), is(200));
 
     orgResource.delete();
+  }
+
+  @Test
+  public void testSearchOrganizations() throws Exception {
+    PhaseTwo client = phaseTwo();
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    //create some orgs
+    List<String> ids = new ArrayList<String>(); 
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("example").domains(List.of("example.com"))));
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))));
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))));
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
+
+    List<OrganizationRepresentation> orgs = orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.empty());
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(2));
+    for (OrganizationRepresentation org : orgs) {
+      assertThat(org.getName(), containsString("foo"));
+      assertThat(org.getDomains(), hasSize(1));
+    }
+
+    orgs = orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.of(1));
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(1));
+
+    orgs = orgsResource.get(Optional.of("none"), Optional.empty(), Optional.empty());
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(0));
+
+    orgs = orgsResource.get(Optional.of("a"), Optional.empty(), Optional.empty());
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(3));
+
+    for (String id : ids) {
+      orgsResource.organization(id).delete();
+    }
   }
   
   @Test

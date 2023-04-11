@@ -1,5 +1,6 @@
 package io.phasetwo.service.model.jpa;
 
+import com.google.common.base.Strings;
 import com.google.common.net.InternetDomainName;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
@@ -87,13 +88,20 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     TypedQuery<OrganizationEntity> query =
         em.createNamedQuery("getOrganizationsByRealmIdAndName", OrganizationEntity.class);
     query.setParameter("realmId", realm.getId());
-    if (search == null) search = "%";
+    search = createSearchString(search);
     query.setParameter("search", search);
     if (firstResult != null) query.setFirstResult(firstResult);
     if (maxResults != null) query.setMaxResults(maxResults);
     return query.getResultStream().map(e -> new OrganizationAdapter(session, realm, em, e));
   }
 
+  private String createSearchString(String search) {
+    if (Strings.isNullOrEmpty(search)) return "%";
+    if (!search.startsWith("%")) search = "%" + search;
+    if (!search.endsWith("%")) search = search + "%";
+    return search;
+  }
+    
   @Override
   public Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user) {
     TypedQuery<OrganizationMemberEntity> query =
