@@ -255,6 +255,43 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(organizations, empty());
   }
 
+
+
+  @Test
+  public void testMembershipsCount() {
+    Keycloak keycloak = server.client();
+    PhaseTwo client = phaseTwo(keycloak);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
+
+    OrganizationResource orgResource = orgsResource.organization(id);
+    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
+
+    assertThat(getMembershipCount(orgResource), is(1l)); // org admin default
+    org.keycloak.representations.idm.UserRepresentation user = createUser(keycloak, REALM, "johndoe");
+    membershipsResource.add(user.getId());
+    assertThat(getMembershipCount(orgResource), is(2l));
+
+    // delete org
+    orgResource.delete();
+  }
+
+  Long getMembershipCount(OrganizationResource orgResource) {
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/members/count";
+      log.debugf("using %s to getMembershipCount", url);
+      SimpleHttp.Response response =
+          SimpleHttp.doGet(url, httpClient)
+          .auth(server.client().tokenManager().getAccessTokenString())
+          .asResponse();
+      assertThat(response.getStatus(), is(200));
+      return response.asJson(Long.class);
+    } catch (Exception e) {
+      log.warn("Error getMembershipCount", e);
+      return 0l;
+    }
+  }
+  
   @Test
   public void testAddGetDeleteMemberships() {
     Keycloak keycloak = server.client();

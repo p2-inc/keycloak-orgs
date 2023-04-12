@@ -68,6 +68,8 @@ public interface OrganizationModel {
     setAttribute(name, ImmutableList.of(value));
   }
 
+  Long getMembersCount();
+
   Stream<UserModel> getMembersStream();
 
   Stream<UserModel> searchForMembersStream(String search, Integer firstResult, Integer maxResults);

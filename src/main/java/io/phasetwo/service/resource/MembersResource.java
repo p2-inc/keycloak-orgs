@@ -41,6 +41,14 @@ public class MembersResource extends OrganizationAdminResource {
         .map(m -> toRepresentation(session, realm, m));
   }
 
+  @GET
+  @Path("count")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Long getMembersCount() {
+    log.debugf("Get members count for %s %s", realm.getName(), organization.getId());
+    return organization.getMembersCount();
+  }
+
   @DELETE
   @Path("{userId}")
   public Response removeMember(@PathParam("userId") String userId) {
