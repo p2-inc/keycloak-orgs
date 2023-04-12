@@ -21,6 +21,10 @@ import javax.persistence.UniqueConstraint;
 /** */
 @NamedQueries({
   @NamedQuery(
+      name = "getOrganizationMembersCount",
+      query =
+          "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization"),
+  @NamedQuery(
       name = "getOrganizationMembers",
       query =
           "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization ORDER BY m.createdAt"),

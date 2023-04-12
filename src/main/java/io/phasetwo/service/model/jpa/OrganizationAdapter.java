@@ -180,6 +180,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   }
 
   @Override
+  public Long getMembersCount() {
+    TypedQuery<Long> query = em.createNamedQuery("getOrganizationMembersCount", Long.class);
+    query.setParameter("organization", org);
+    return query.getSingleResult();
+  }
+
+  @Override
   public Stream<UserModel> getMembersStream() {
     return org.getMembers().stream()
         .map(m -> m.getUserId())
