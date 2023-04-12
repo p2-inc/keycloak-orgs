@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet author="grinay" id="drop-UK-S5FNFVSRU9I4QPH9GB8V4FXFM-unique-constraint">
+    <preConditions onFail="MARK_RAN">
+      <dbms type="mssql"/>
+    </preConditions>
+    <sql>
+      ALTER TABLE USER_ORGANIZATION_ROLE_MAPPING
+      DROP CONSTRAINT UK_S5FNFVSRU9I4QPH9GB8V4FXFM
+    </sql>
+  </changeSet>
+
+  <changeSet author="grinay" id="update-ROLE_ID-to-VARCHAR-36">
+    <preConditions onFail="MARK_RAN">
+      <dbms type="mssql"/>
+    </preConditions>
+    <sql>
+      ALTER TABLE USER_ORGANIZATION_ROLE_MAPPING
+      ALTER COLUMN ROLE_ID VARCHAR(36)
+    </sql>
+  </changeSet>
+
+  <changeSet author="grinay" id="add-UK-S5FNFVSRU9I4QPH9GB8V4FXFM-unique-constraint">
+    <preConditions onFail="MARK_RAN">
+      <dbms type="mssql"/>
+    </preConditions>
+    <sql>
+      ALTER TABLE USER_ORGANIZATION_ROLE_MAPPING
+        ADD CONSTRAINT UK_S5FNFVSRU9I4QPH9GB8V4FXFM UNIQUE ([ORGANIZATION_ID], [USER_ID], [ROLE_ID])
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>
