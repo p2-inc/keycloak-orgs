@@ -249,5 +249,10 @@
   "updateLocale": "Update Locale",
   "localization": "Localization",
   "localeUpdatedSuccessfully": "Locale updated successfully",
-  "localeUpdateFailed": "Error during locale update."
+  "localeUpdateFailed": "Error during locale update.",
+  "removeDomain": "Remove",
+  "removeDomainTitle": "Remove {{0}} from this organization.",
+  "removeDomainQuestion": "Removing this domain from the organization cannot be undone and will require manually adding back.",
+  "removeDomainSuccess": "{{0}} was successfully removed from this organization.",
+  "removeDomainError": "{{0}} was not removed from this organization. ({{1}})"
 }
