@@ -15,7 +15,7 @@ const MembersStat: React.FC<Props> = ({ org, realm }) => {
     orgId: org.id!,
   });
 
-  const totalMembers = members.length === 0 ? 0 : members.length;
+  const totalMembers = members.length === 0 ? 0 : members.length - 1;
 
   return <Stat value={totalMembers} label="members" />;
 };

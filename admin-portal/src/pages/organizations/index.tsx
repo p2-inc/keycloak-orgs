@@ -9,11 +9,12 @@ import OrganizationItem from "components/elements/organizations/item";
 import ViewSwitch, {
   ViewLayoutOptions,
 } from "components/elements/forms/switches/view-switch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import cs from "classnames";
 import DomainStat from "./components/domain-stat";
 import MembersStat from "./components/members-stat";
 import useUser from "components/utils/useUser";
+import Fuse from "fuse.js";
 
 const { realm } = config.env;
 
@@ -22,6 +23,7 @@ export default function Organizations() {
   const [viewType, setViewType] = useState<ViewLayoutOptions>(
     ViewLayoutOptions.GRID
   );
+  const [searchString, setSearchString] = useState("");
   const { data: userOrgs = [], isFetching } =
     useGetByRealmUsersAndUserIdOrgsQuery(
       {
@@ -31,6 +33,19 @@ export default function Organizations() {
       { skip: !user?.id }
     );
 
+  const fuse = new Fuse(userOrgs, {
+    keys: ["displayName", "name", "domains"],
+  });
+
+  useEffect(() => {
+    fuse.setCollection(userOrgs);
+  }, [userOrgs]);
+
+  const searchOrgs =
+    searchString === ""
+      ? userOrgs.map((org) => ({ item: org }))
+      : fuse.search(searchString);
+
   return (
     <>
       <TopHeader
@@ -39,7 +54,10 @@ export default function Organizations() {
         rightAreaItems={
           <>
             <FormTextInputWithIcon
-              inputArgs={{ placeholder: "Search Organizations" }}
+              inputArgs={{
+                placeholder: "Search Organizations",
+                onChange: (e) => setSearchString(e.target.value),
+              }}
               className="w-full md:w-auto"
             />
             <ViewSwitch onChange={(value) => setViewType(value)} />
@@ -69,7 +87,7 @@ export default function Organizations() {
                     viewType === ViewLayoutOptions.LIST,
                 })}
               >
-                {userOrgs.map((org) => {
+                {searchOrgs.map(({ item: org }) => {
                   return (
                     <OrganizationItem
                       key={org.id}

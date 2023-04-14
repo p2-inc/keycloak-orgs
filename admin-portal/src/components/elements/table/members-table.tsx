@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { TableRows } from "./table";
 
 type Props = {
@@ -13,6 +14,7 @@ const loading = (
 );
 
 const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
+  const { t } = useTranslation();
   return (
     <div className="rounded border border-gray-200 dark:border-zinc-600">
       {isLoading && loading}
@@ -34,24 +36,44 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
           </div>
           <table className="hidden w-full table-auto md:table">
             <tbody className="divide-y dark:divide-zinc-600">
-              {rows.map((item) => (
-                <tr key={item["email"]}>
-                  <td className="px-5 py-4 align-middle">
-                    <div className="text-sm font-semibold dark:text-zinc-200">
-                      {item["name"]}
-                    </div>
-                    <div className="text-sm text-gray-500 dark:text-zinc-500">
-                      {item["email"]}
-                    </div>
-                  </td>
-                  <td className="space-x-2 px-5 py-4 text-right align-middle">
-                    {item["roles"]}
-                  </td>
-                  <td className="px-1 py-4 text-right align-middle">
-                    {item["action"]}
-                  </td>
-                </tr>
-              ))}
+              {rows.map((item) => {
+                const isOrgAdmin = item.email?.startsWith("org-admin");
+                if (isOrgAdmin) {
+                  return (
+                    <tr key={item["email"]}>
+                      <td className="px-5 py-4 align-middle">
+                        <div className="text-sm text-gray-500 dark:text-zinc-500">
+                          {t("admin")}
+                        </div>
+                      </td>
+                      <td className="space-x-2 px-5 py-4 text-right align-middle"></td>
+                      <td className="px-1 py-4 text-right align-middle"></td>
+                      <td className="px-1 py-4 text-right align-middle">
+                        <div className="h-[40px]"></div>
+                      </td>
+                    </tr>
+                  );
+                }
+
+                return (
+                  <tr key={item["email"]}>
+                    <td className="px-5 py-4 align-middle">
+                      <div className="text-sm font-semibold dark:text-zinc-200">
+                        {item["name"]}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-zinc-500">
+                        {item["email"]}
+                      </div>
+                    </td>
+                    <td className="space-x-2 px-5 py-4 text-right align-middle">
+                      {item["roles"]}
+                    </td>
+                    <td className="px-1 py-4 text-right align-middle">
+                      {item["action"]}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </>
