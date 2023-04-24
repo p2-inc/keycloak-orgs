@@ -6,7 +6,7 @@ More self-serve. More better.
 
 The Phase Two Admin Portal ties together functionality from the Keycloak Account Console and [Phase Two Organizations](https://github.com/p2-inc/keycloak-orgs) to allow your customers' users to self-manage as much of their account and organization functionality as is possible.
 
-The Portal is deployed as a Keycloak extension, much like the Account Console, and is available at https://{host}/{relative-path}/realms/{realm}/portal/
+The Portal is deployed as a Keycloak extension, much like the Account Console, and is available at `https://{host}/{relative-path}/realms/{realm}/portal/`
 
 ## Quick start
 
@@ -20,10 +20,10 @@ Because this extension relies on the APIs provided by the [keycloak-orgs](https:
 
 ### Visibility
 
-Most of the visibilty of functionality in the Portal is controlled by user permissions. However, it is also possible to control visibility through Realm Attributes. These attributes may be set manually, or by using the [Phase Two extensions to the Keycloak Admin UI](https://github.com/p2-inc/keycloak-ui/), which must also be installed in the same container. 
+Most of the visibilty of functionality in the Portal is controlled by user permissions. However, it is also possible to control visibility through Realm Attributes. These attributes may be set manually, or by using the [Phase Two extensions to the Keycloak Admin UI](https://github.com/p2-inc/keycloak-ui/) (**Styles**->*Portal* tab), which must also be installed in the same Keycloak. 
 
 When setting the attributes manually, the values are:
-| Key | Default | Description |
+| Key | Description | Default |
 |---|---|---|
 | `_providerConfig.portal.profile.enabled` | Profile section (whole) | `true` |
 | `_providerConfig.portal.profile.password.enabled` | Password update | `true` |
@@ -37,10 +37,18 @@ When setting the attributes manually, the values are:
 | `_providerConfig.portal.org.domains.enabled` | Domains | `true` |
 | `_providerConfig.portal.org.sso.enabled` | SSO | `true` |
 | `_providerConfig.portal.org.events.enabled` | Events | `true` |
-| `_providerConfig.assets.portal.primaryColor` | Primary color |  |
-| `_providerConfig.assets.portal.secondaryColor` | Accent color |  |
-| `_providerConfig.assets.portal.backgroundColor` | Background color |  |
-| `_providerConfig.assets.portal.` | CSS override |  |
+
+### Style
+
+It is also possible to add branding to the portal. It is recommended these, along with logos, are set through the [Phase Two extensions to the Keycloak Admin UI](https://github.com/p2-inc/keycloak-ui/), as there are other options there that are reused in Login forms styling, and the UI extensions also ensure that the attributes are set with appropriate values. 
+
+The keys specific to the Portal are:
+| Key | Description | Default |
+|---|---|---|
+| `_providerConfig.assets.portal.primaryColor` | Primary color | `[empty]` |
+| `_providerConfig.assets.portal.secondaryColor` | Accent color | `[empty]` |
+| `_providerConfig.assets.portal.backgroundColor` | Background color | `[empty]` |
+| `_providerConfig.assets.portal.` | CSS override | `[empty]` |
 
 
 ## Developers
@@ -53,7 +61,9 @@ First, setup:
 yarn
 ```
 
-Then, run the development server:
+Then, start a Keycloak, create a public OIDC client with `http://localhost:3000` Root URL, and update the `public/keycloak.json` file with the client config.
+
+Finally, run the development server:
 
 ```bash
 yarn start
