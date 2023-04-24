@@ -3,13 +3,20 @@
   <groupId>io.phasetwo</groupId>
   <artifactId>admin-portal</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
     <artifactId>oss-parent</artifactId>
     <version>0.7</version>
   </parent>
+
+  <developers>
+    <developer>
+      <name>Phase Two, Inc.</name>
+      <url>https://github.com/p2-inc</url>
+    </developer>
+  </developers>
 
   <licenses>
     <license>
@@ -27,6 +34,7 @@
     <commons-lang3.version>3.11</commons-lang3.version>
     <lombok.version>1.18.22</lombok.version>
     <auto-service.version>1.0.1</auto-service.version>
+    <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
   </properties>
 
   <scm>

@@ -78,3 +78,7 @@ mvn clean package
 ```
 
 Put the jar in `target/admin-portal-{version}.jar` in the `providers/` directory of your Keycloak distribution.
+
+-----
+
+All documentation, source code and other files in this repository are Copyright 2023 Phase Two, Inc.
