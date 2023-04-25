@@ -56,7 +56,7 @@ The easiest way to get started is our [Docker image](https://quay.io/repository/
 The build uses `keycloak-testsuite-utils` for the unit tests. You'll need to install Keycloak from source locally, as the test utility never gets published to maven central by the Keycloak team. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
 
 ```bash
-KC_VERSION=21.0.1
+KC_VERSION=21.0.2
 git clone https://github.com/keycloak/keycloak
 git fetch origin --tags
 git checkout $KC_VERSION
@@ -71,7 +71,7 @@ The maven build uses the shade plugin to package a fat-jar with all dependencies
 
 During the first run, some initial migrations steps will occur:
 
-- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with MySQL, H2, and Postgres. Other database types may fail.
+- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with SQL Server, MySQL, H2, and Postgres. Other database types may fail.
 - Initial `realm-management` client roles (`view-organizations` and `manage-organizations`) will be be added to each realm.
 
 ### Admin UI
