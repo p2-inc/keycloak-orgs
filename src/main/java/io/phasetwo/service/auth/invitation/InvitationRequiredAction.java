@@ -83,7 +83,7 @@ public class InvitationRequiredAction implements RequiredActionProvider {
     orgs.getUserInvitationsStream(realm, user)
         .forEach(
             i -> {
-              if (selected.contains(i.getOrganization().getId())) {
+              if (selected != null && selected.contains(i.getOrganization().getId())) {
                 // add membership
                 log.infof("selected %s", i.getOrganization().getId());
                 memberFromInvitation(i, user);
