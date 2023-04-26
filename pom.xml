@@ -30,7 +30,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>4.13.2</junit.version>
-    <keycloak.version>21.0.2</keycloak.version>
+    <keycloak.version>21.1.1</keycloak.version>
     <lombok.version>1.18.22</lombok.version>
     <auto-service.version>1.0.1</auto-service.version>
     <jackson.version>2.13.4</jackson.version>
@@ -281,6 +281,12 @@
 	  <groupId>org.hamcrest</groupId>
 	  <artifactId>hamcrest-core</artifactId>
 	  <version>2.2</version>
+	  <scope>test</scope>
+	</dependency>
+	<dependency>
+	  <groupId>org.keycloak</groupId>
+	  <artifactId>keycloak-saml-adapter-core</artifactId>
+	  <version>${keycloak.version}</version>
 	  <scope>test</scope>
 	</dependency>
 	<dependency> <!-- if you're getting a missing dependency error here, you need to install keycloak from source locally, as this never hits maven central -->

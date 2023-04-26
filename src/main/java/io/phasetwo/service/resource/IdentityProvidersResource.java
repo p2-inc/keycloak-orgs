@@ -19,7 +19,6 @@ import org.keycloak.models.utils.StripSecretsUtils;
 import org.keycloak.representations.idm.ComponentRepresentation;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.representations.idm.TestLdapConnectionRepresentation;
-import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.managers.LDAPServerCapabilitiesManager;
 
 @JBossLog
@@ -141,9 +140,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response testLDAPConnection(TestLdapConnectionRepresentation config) {
     boolean result = LDAPServerCapabilitiesManager.testLDAP(config, session, realm);
-    return result
-        ? Response.noContent().build()
-        : ErrorResponse.error("LDAP test error", Response.Status.BAD_REQUEST);
+    if (result) return Response.noContent().build();
+    else throw new BadRequestException("LDAP test error");
   }
 
   @POST
