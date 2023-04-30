@@ -1,4 +1,4 @@
-> :rocket: **Try it for free** in the Phase Two [Keycloak managed service](https://phasetwo.io/dashboard/?utm_source=github&utm_medium=readme&utm_campaign=admin-portal).
+> :rocket: **Try it for free** in Phase Two's [Keycloak as a service](https://phasetwo.io/dashboard/?utm_source=github&utm_medium=readme&utm_campaign=admin-portal).
 
 # Phase Two Admin Portal
 
@@ -12,6 +12,13 @@ The Portal is deployed as a Keycloak extension, much like the Account Console, a
 
 The easiest way to get started is our [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags). Documentation and examples for using it are in the [phasetwo-containers](https://github.com/p2-inc/phasetwo-containers) repo. The most recent version of this extension is included.
 
+```bash
+docker run --name phasetwo_test --rm -p 8080:8080 \
+    -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin -e KC_HTTP_RELATIVE_PATH=/auth \
+    quay.io/phasetwo/phasetwo-keycloak:$VERSION \
+    start-dev --spi-email-template-provider=freemarker-plus-mustache --spi-email-template-freemarker-plus-mustache-enabled=true
+```
+
 ## Configuration
 
 ### Requirements
@@ -21,6 +28,8 @@ Because this extension relies on the APIs provided by the [keycloak-orgs](https:
 ### Visibility
 
 Most of the visibilty of functionality in the Portal is controlled by user permissions. However, it is also possible to control visibility through Realm Attributes. These attributes may be set manually, or by using the [Phase Two extensions to the Keycloak Admin UI](https://github.com/p2-inc/keycloak-ui/) (**Styles**->*Portal* tab), which must also be installed in the same Keycloak. 
+
+![image](https://user-images.githubusercontent.com/244253/235350498-9e51fbcf-e158-4675-9791-42968c9908cb.png)
 
 When setting the attributes manually, the values are:
 | Key | Description | Default |
@@ -35,7 +44,7 @@ When setting the attributes manually, the values are:
 | `_providerConfig.portal.org.members.enabled` | Members list | `true` |
 | `_providerConfig.portal.org.invitations.enabled` | Invitations | `true` |
 | `_providerConfig.portal.org.domains.enabled` | Domains | `true` |
-| `_providerConfig.portal.org.sso.enabled` | SSO | `true` |
+| `_providerConfig.portal.org.sso.enabled` | SSO (requires idp-wizard extension) | `true` |
 | `_providerConfig.portal.org.events.enabled` | Events | `true` |
 
 ### Style
