@@ -8,6 +8,8 @@ The Phase Two Admin Portal ties together functionality from the Keycloak Account
 
 The Portal is deployed as a Keycloak extension, much like the Account Console, and is available at `https://{host}/{relative-path}/realms/{realm}/portal/`
 
+![ezgif-4-811bfaae78](https://user-images.githubusercontent.com/244253/235351276-85504b5a-a669-4dc1-950d-5881dd20c926.gif)
+
 ## Quick start
 
 The easiest way to get started is our [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags). Documentation and examples for using it are in the [phasetwo-containers](https://github.com/p2-inc/phasetwo-containers) repo. The most recent version of this extension is included.
