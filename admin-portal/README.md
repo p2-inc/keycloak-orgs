@@ -57,7 +57,7 @@ The keys specific to the Portal are:
 | `_providerConfig.assets.portal.primaryColor` | Primary color | `[empty]` |
 | `_providerConfig.assets.portal.secondaryColor` | Accent color | `[empty]` |
 | `_providerConfig.assets.portal.backgroundColor` | Background color | `[empty]` |
-| `_providerConfig.assets.portal.` | CSS override | `[empty]` |
+| `_providerConfig.assets.portal.css` | CSS override | `[empty]` |
 
 
 ## Developers
