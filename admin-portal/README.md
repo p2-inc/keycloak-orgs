@@ -6,7 +6,7 @@ More self-serve. More better.
 
 The Phase Two Admin Portal ties together functionality from the Keycloak Account Console and [Phase Two Organizations](https://github.com/p2-inc/keycloak-orgs) to allow your customers' users to self-manage as much of their account and organization functionality as is possible.
 
-The Portal is deployed as a Keycloak extension, much like the Account Console, and is available at `https://{host}/{relative-path}/realms/{realm}/portal/`
+The Portal is deployed as a Keycloak extension, much like the Account Console, and is available at `https://{host}/{relative-path}/realms/{realm}/portal/`. Note that we are considering making this a drop-in replacement for the Account Console that can be selected simply in *Realm Settings*->*Themes*, but this would make it impossible to use both at the same time.
 
 ![ezgif-4-811bfaae78](https://user-images.githubusercontent.com/244253/235351276-85504b5a-a669-4dc1-950d-5881dd20c926.gif)
 
