@@ -26,7 +26,7 @@
   </licenses>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>4.13.2</junit.version>

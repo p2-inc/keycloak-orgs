@@ -49,6 +49,12 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
       OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
       OrganizationModel org =
           orgs.getOrganizationById(context.getRealm(), idpConfig.get(ORG_OWNER_CONFIG_KEY));
+      if (org == null) {
+        log.infof(
+            "idpConfig contained %s = %s, but org not found",
+            ORG_OWNER_CONFIG_KEY, idpConfig.get(ORG_OWNER_CONFIG_KEY));
+        return;
+      }
       if (!org.hasMembership(context.getUser())) {
         log.infof(
             "granting membership to %s for user %s",
