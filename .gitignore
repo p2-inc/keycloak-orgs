@@ -1,3 +1,5 @@
+providers
+*-compose.yml
 data/
 target/
 *~
