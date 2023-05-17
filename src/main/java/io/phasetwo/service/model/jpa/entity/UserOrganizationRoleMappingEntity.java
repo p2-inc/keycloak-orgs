@@ -61,7 +61,7 @@ public class UserOrganizationRoleMappingEntity {
   protected String userId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "ROLE_ID")
+  @JoinColumn(name = "ROLE_ID", length = 36)
   protected OrganizationRoleEntity role;
 
   @Temporal(TemporalType.TIMESTAMP)

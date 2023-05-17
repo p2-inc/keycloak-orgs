@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet author="panickev" id="modify-user-organization-role-mapping-columns" >
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mssql"/>
+        </preConditions>
+        <modifyDataType
+                tableName="USER_ORGANIZATION_ROLE_MAPPING"
+                columnName="ROLE_ID"
+                newDataType="VARCHAR(36)" />
+    </changeSet>
+
+</databaseChangeLog>
