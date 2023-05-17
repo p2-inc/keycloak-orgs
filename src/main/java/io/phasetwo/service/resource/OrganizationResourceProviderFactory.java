@@ -6,6 +6,7 @@ import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORG
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_VIEW_ORGANIZATION;
 
 import com.google.auto.service.AutoService;
+import io.phasetwo.service.Orgs;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -199,8 +200,15 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
   }
 
   private void organizationRemoved(OrganizationModel.OrganizationRemovedEvent event) {
-    // anything to do? does cascade take care of it?
-    // todo remove the idps owned by this org?
+    // TODO anything else to do? does cascade take care of it?
+
+    // remove the idp associations for this org
+    OrganizationModel org = event.getOrganization();
+    org.getIdentityProvidersStream()
+        .forEach(
+            idp -> {
+              idp.getConfig().remove(Orgs.ORG_OWNER_CONFIG_KEY);
+            });
 
     // delete default admin user
     UserModel user =
