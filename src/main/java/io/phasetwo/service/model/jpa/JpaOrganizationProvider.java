@@ -41,8 +41,8 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     OrganizationModel org = new OrganizationAdapter(session, realm, em, e);
     session.getKeycloakSessionFactory().publish(orgCreationEvent(realm, org));
 
-    // creator if admin
-    if (admin) {
+    // creator if admin, but not a service account
+    if (admin && createdBy.getServiceAccountClientLink() == null) {
       org.grantMembership(createdBy);
       for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
         org.getRoleByName(role).grantRole(createdBy);
@@ -95,7 +95,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     return query.getResultStream().map(e -> new OrganizationAdapter(session, realm, em, e));
   }
 
-  private String createSearchString(String search) {
+  public static String createSearchString(String search) {
     if (Strings.isNullOrEmpty(search)) return "%";
     if (!search.startsWith("%")) search = "%" + search;
     if (!search.endsWith("%")) search = search + "%";
