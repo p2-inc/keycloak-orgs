@@ -22,6 +22,10 @@ import org.hibernate.annotations.Nationalized;
       query =
           "SELECT o FROM OrganizationEntity o WHERE o.realmId = :realmId AND lower(o.name) LIKE lower(:search) ORDER BY o.name"),
   @NamedQuery(
+      name = "countOrganizationsByRealmIdAndName",
+      query =
+          "SELECT count(o) FROM OrganizationEntity o WHERE o.realmId = :realmId AND lower(o.name) LIKE lower(:search)"),
+  @NamedQuery(
       name = "getOrganizationCount",
       query = "select count(o) from OrganizationEntity o where o.realmId = :realmId"),
   @NamedQuery(
