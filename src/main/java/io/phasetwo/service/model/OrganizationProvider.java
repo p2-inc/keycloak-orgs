@@ -27,6 +27,8 @@ public interface OrganizationProvider extends Provider {
 
   Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user);
 
+  Long getOrganizationsCount(RealmModel realm, String search);
+
   boolean removeOrganization(RealmModel realm, String id);
 
   void removeOrganizations(RealmModel realm);

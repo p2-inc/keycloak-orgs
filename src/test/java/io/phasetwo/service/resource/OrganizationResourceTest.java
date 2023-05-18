@@ -119,6 +119,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(3));
 
+    //orgs count
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      String url = server.getAuthUrl() + "/realms/master/orgs/count";
+      SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
+          .auth(server.client().tokenManager().getAccessTokenString())
+          .asResponse();
+      assertThat(response.getStatus(), is(200));
+      Long cnt = response.asJson(Long.class);
+      assertThat(cnt, is(4l));
+    }
+
     for (String id : ids) {
       orgsResource.organization(id).delete();
     }

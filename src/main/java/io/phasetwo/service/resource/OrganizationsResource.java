@@ -79,6 +79,17 @@ public class OrganizationsResource extends OrganizationAdminResource {
         .map(m -> convertOrganizationModelToOrganization(m));
   }
 
+  @GET
+  @Path("count")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Long countOrgs(@QueryParam("search") String searchQuery) {
+    log.debugf("countOrgs %s %s", realm.getName(), searchQuery);
+    if (!auth.hasViewOrgs()) {
+      throw new NotAuthorizedException("Insufficient permission to count organizations.");
+    }
+    return orgs.getOrganizationsCount(realm, searchQuery);
+  }
+
   @POST
   @Path("")
   @Consumes(MediaType.APPLICATION_JSON)

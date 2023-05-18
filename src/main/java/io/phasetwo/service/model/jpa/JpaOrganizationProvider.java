@@ -113,6 +113,15 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
+  public Long getOrganizationsCount(RealmModel realm, String search) {
+    TypedQuery<Long> query = em.createNamedQuery("countOrganizationsByRealmIdAndName", Long.class);
+    query.setParameter("realmId", realm.getId());
+    search = createSearchString(search);
+    query.setParameter("search", search);
+    return query.getSingleResult();
+  }
+
+  @Override
   public boolean removeOrganization(RealmModel realm, String id) {
     OrganizationModel org = getOrganizationById(realm, id);
     OrganizationEntity e = em.find(OrganizationEntity.class, id);
