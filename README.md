@@ -28,6 +28,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
     - [Authentication](#authentication)
       - [Invitations](#invitations)
       - [IdP Discovery](#idp-discovery)
+  - [License](#license)
 
 ## Overview
 
@@ -171,6 +172,13 @@ Additionally you need to ensure the "invitation" required action is enabled. Go 
 Organizations may optionally be given permission to manage their own IdP. The custom resources that allow this write a configuration in the IdP entities that is compatible with a 3rd party extension that allows for IdP discovery based on email domain configured for the Organization. It works by writing the `home.idp.discovery.domains` value into the `config` map for the IdP. Information on further configuration is available at [sventorben/keycloak-home-idp-discovery](https://github.com/sventorben/keycloak-home-idp-discovery).
 
 tbd screenshot of installing in flow
+
+## License
+
+We’ve changed the license of our core extensions from the AGPL v3 to the [Elastic License v2](https://github.com/elastic/elasticsearch/blob/main/licenses/ELASTIC-LICENSE-2.0.txt). 
+
+- Our blog post on the subject https://phasetwo.io/blog/licensing-change/
+- An attempt at a clarification https://github.com/p2-inc/keycloak-orgs/issues/81#issuecomment-1554683102
 
 -----
 
