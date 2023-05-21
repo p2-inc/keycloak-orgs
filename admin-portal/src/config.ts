@@ -96,7 +96,7 @@ export const windowBaseUrl: string =
   "//" +
   window.location.hostname +
   (window.location.port ? ":" + window.location.port : "") +
-  "/auth/realms";
+  (window.location.pathname.includes("/auth/") ? "/auth/realms" : "/realms");
 
 export const windowRealm: string = (function (): string {
   let segments = window.location.pathname.split("/");
