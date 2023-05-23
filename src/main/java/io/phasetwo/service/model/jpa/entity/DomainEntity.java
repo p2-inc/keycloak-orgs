@@ -6,10 +6,12 @@ import javax.persistence.*;
 @NamedQueries({
   @NamedQuery(
       name = "getDomainsByName",
-      query = "SELECT t FROM DomainEntity t WHERE t.domain = :domain"),
+      query =
+          "SELECT t FROM DomainEntity t WHERE t.domain = :domain AND t.organization.realmId = :realmId"),
   @NamedQuery(
       name = "getVerifiedDomainsByName",
-      query = "SELECT t FROM DomainEntity t WHERE t.domain = :domain AND t.verified = :verified"),
+      query =
+          "SELECT t FROM DomainEntity t WHERE t.domain = :domain AND t.verified = :verified AND t.organization.realmId = :realmId"),
   @NamedQuery(
       name = "getDomainsByOrganization",
       query = "SELECT t FROM DomainEntity t WHERE t.organization = :organization"),
