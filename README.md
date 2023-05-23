@@ -161,11 +161,11 @@ You can configure the mapper, by going to **Clients** > ***your-client-name*** >
 
 #### Invitations
 
-A custom Authenticator and Required Action must be installed and configured correctly in the browser authentication flow in order to properly process invitations. Assuming you are using the standard Keycloak browser flow, you must add the "Invitation" authenticator as a "REQUIRED" execution following the "Username Password Form" as a child of the forms group. This authenticator checks to see if the authenticated user has outstanding Invitations to Organizations, and then adds the Required Action that they must complete to accept or reject their Invitations following a successful authentication.
+For most use cases, set the `Invitation` required action to `Enabled` in *Authentication*->*Required Actions*. It does not need to be set as a default. It will automatically check on each login if the user has outstanding Invitations to Organizations, and enable itself.
 
-![Install Invitation Authenticator in Browser Flow](docs/assets/install-invitation-authenticator.png)
+![Install and enable Invitation Required Action](https://github.com/p2-inc/keycloak-orgs/assets/244253/c454cfaa-e50f-4a3c-94b4-87e9e85801d6)
 
-Additionally you need to ensure the "invitation" required action is enabled. Go to `Realm -> Authentication -> Required Actions -> Invitation` and enable it. 
+There are some non-standard flows where the required action does not do this detection. For these cases, there is a custom Authenticator you can add to a copy of the standard browser flow. Add the `Invitation` authenticator as a "REQUIRED" execution following the "Username Password Form" as a child of the forms group. This authenticator checks to see if the authenticated user has outstanding Invitations to Organizations, and then adds the Required Action that they must complete to accept or reject their Invitations following a successful authentication.
 
 #### IdP Discovery
 
