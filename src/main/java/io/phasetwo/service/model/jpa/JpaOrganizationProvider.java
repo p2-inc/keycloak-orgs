@@ -76,7 +76,10 @@ public class JpaOrganizationProvider implements OrganizationProvider {
         em.createNamedQuery(
             verified ? "getVerifiedDomainsByName" : "getDomainsByName", DomainEntity.class);
     query.setParameter("domain", domain);
-    if (verified) query.setParameter("verified", verified);
+    query.setParameter("realmId", realm.getId());
+    if (verified) {
+      query.setParameter("verified", verified);
+    }
     return query
         .getResultStream()
         .map(de -> new OrganizationAdapter(session, realm, em, de.getOrganization()));
