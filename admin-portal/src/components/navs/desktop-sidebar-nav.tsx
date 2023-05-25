@@ -41,7 +41,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
   navigation,
 }) => {
   const { user, fullName } = useUser();
-  const [theme, setTheme] = useState(themes[0]);
+  const [theme, setTheme] = useState(("theme" in localStorage)? localStorage.theme : themes[0]);
   const { t } = useTranslation();
   const { appiconUrl, logoUrl } = config.env;
 
