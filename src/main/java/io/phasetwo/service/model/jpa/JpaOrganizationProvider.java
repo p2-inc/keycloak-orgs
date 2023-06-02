@@ -1,5 +1,8 @@
 package io.phasetwo.service.model.jpa;
 
+import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
+import static org.keycloak.utils.StreamsUtil.closing;
+
 import com.google.common.base.Strings;
 import com.google.common.net.InternetDomainName;
 import io.phasetwo.service.model.InvitationModel;
@@ -7,12 +10,23 @@ import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.jpa.entity.DomainEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
+import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.resource.OrganizationAdminAuth;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -69,6 +83,12 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
+  public Stream<OrganizationModel> getOrganizationsStream(
+      RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults) {
+    return searchForOrganizationByAttributesStream(realm, attributes, firstResult, maxResults);
+  }
+
+  @Override
   public Stream<OrganizationModel> getOrganizationsStreamForDomain(
       RealmModel realm, String domain, boolean verified) {
     domain = InternetDomainName.from(domain).toString();
@@ -113,6 +133,27 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     return query
         .getResultStream()
         .map(e -> new OrganizationAdapter(session, realm, em, e.getOrganization()));
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Stream<OrganizationModel> searchForOrganizationByAttributesStream(
+      RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults) {
+    CriteriaBuilder builder = em.getCriteriaBuilder();
+    CriteriaQuery<OrganizationEntity> queryBuilder = builder.createQuery(OrganizationEntity.class);
+    Root<OrganizationEntity> root = queryBuilder.from(OrganizationEntity.class);
+
+    List<Predicate> predicates = predicates(attributes, root);
+
+    predicates.add(builder.equal(root.get("realmId"), realm.getId()));
+
+    queryBuilder.where(predicates.toArray(new Predicate[0])).orderBy(builder.asc(root.get("name")));
+
+    TypedQuery<OrganizationEntity> query = em.createQuery(queryBuilder);
+
+    return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
+        .map(orgEntity -> getOrganizationById(realm, orgEntity.getId()))
+        .filter(Objects::nonNull);
   }
 
   @Override
@@ -189,5 +230,36 @@ public class JpaOrganizationProvider implements OrganizationProvider {
         return realm;
       }
     };
+  }
+
+  private List<Predicate> predicates(
+      Map<String, String> attributes, Root<OrganizationEntity> root) {
+    CriteriaBuilder builder = em.getCriteriaBuilder();
+
+    List<Predicate> predicates = new ArrayList<>();
+    List<Predicate> attributePredicates = new ArrayList<>();
+
+    for (Map.Entry<String, String> entry : attributes.entrySet()) {
+      String key = entry.getKey();
+      String value = entry.getValue();
+
+      if (value == null) {
+        continue;
+      }
+
+      Join<OrganizationEntity, OrganizationAttributeEntity> attributesJoin =
+          root.join("attributes", JoinType.LEFT);
+
+      attributePredicates.add(
+          builder.and(
+              builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
+              builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
+    }
+
+    if (!attributePredicates.isEmpty()) {
+      predicates.add(builder.and(attributePredicates.toArray(new Predicate[0])));
+    }
+
+    return predicates;
   }
 }
