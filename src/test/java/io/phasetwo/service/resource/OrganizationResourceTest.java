@@ -99,6 +99,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     ids.add(orgsResource.create(new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))));
     ids.add(orgsResource.create(new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
     ids.add(orgsResource.create(new OrganizationRepresentation().name("baz").domains(List.of("baz.com")).attributes(Map.of("foo", List.of("bar")))));
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("qux").domains(List.of("baz.com")).attributes(Map.of("foo", List.of("bar")))));
 
     List<OrganizationRepresentation> orgs = orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.empty());
     assertThat(orgs, notNullValue());
@@ -122,7 +123,19 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     //orgs attribute search
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      // Search attributes
       String url = server.getAuthUrl() + "/realms/master/orgs?q=foo:bar";
+      SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
+          .auth(server.client().tokenManager().getAccessTokenString())
+          .asResponse();
+      assertThat(response.getStatus(), is(200));
+      List<OrganizationRepresentation> res = response.asJson(List.class);
+      assertThat(res.size(), is(2));
+    }
+
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      // Search attributes and name
+      String url = server.getAuthUrl() + "/realms/master/orgs?search=qu&q=foo:bar";
       SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
           .auth(server.client().tokenManager().getAccessTokenString())
           .asResponse();
@@ -139,7 +152,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
           .asResponse();
       assertThat(response.getStatus(), is(200));
       Long cnt = response.asJson(Long.class);
-      assertThat(cnt, is(5l));
+      assertThat(cnt, is(6l));
     }
 
     for (String id : ids) {

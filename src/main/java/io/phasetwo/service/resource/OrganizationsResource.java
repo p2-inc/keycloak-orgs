@@ -77,15 +77,16 @@ public class OrganizationsResource extends OrganizationAdminResource {
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
 
-    if (search != null && searchQuery != null) {
-      throw new BadRequestException("Only one of search or q can be provided.");
-    }
+    log.debugf(
+        "listOrgs %s %s %s %d %d", realm.getName(), search, searchQuery, firstResult, maxResults);
 
     if (searchQuery != null) {
-      log.debugf("listOrgs %s %s %d %d", realm.getName(), searchQuery, firstResult, maxResults);
-
       Map<String, String> searchAttributes =
           searchQuery == null ? Collections.emptyMap() : SearchQueryUtils.getFields(searchQuery);
+
+      if (search != null) {
+        searchAttributes.put("name", search.trim());
+      }
 
       return orgs.searchForOrganizationByAttributesStream(
               realm, searchAttributes, firstResult, maxResults)
@@ -93,7 +94,6 @@ public class OrganizationsResource extends OrganizationAdminResource {
           .map(m -> convertOrganizationModelToOrganization(m));
     }
 
-    log.debugf("listOrgs %s %s %d %d", realm.getName(), search, firstResult, maxResults);
     return orgs.searchForOrganizationByNameStream(realm, search, firstResult, maxResults)
         .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
         .map(m -> convertOrganizationModelToOrganization(m));

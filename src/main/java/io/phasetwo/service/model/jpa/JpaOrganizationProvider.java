@@ -247,13 +247,21 @@ public class JpaOrganizationProvider implements OrganizationProvider {
         continue;
       }
 
-      Join<OrganizationEntity, OrganizationAttributeEntity> attributesJoin =
-          root.join("attributes", JoinType.LEFT);
+      switch (key) {
+        case "name":
+          predicates.add(builder.like(root.get(key), "%" + value.toLowerCase() + "%"));
+          break;
+          // All unknown attributes will be assumed as custom attributes.
+        default:
+          Join<OrganizationEntity, OrganizationAttributeEntity> attributesJoin =
+              root.join("attributes", JoinType.LEFT);
 
-      attributePredicates.add(
-          builder.and(
-              builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
-              builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
+          attributePredicates.add(
+              builder.and(
+                  builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
+                  builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
+          break;
+      }
     }
 
     if (!attributePredicates.isEmpty()) {
