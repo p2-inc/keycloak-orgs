@@ -93,11 +93,13 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     PhaseTwo client = phaseTwo();
     OrganizationsResource orgsResource = client.organizations(REALM);
     //create some orgs
-    List<String> ids = new ArrayList<String>(); 
+    List<String> ids = new ArrayList<String>();
     ids.add(orgsResource.create(new OrganizationRepresentation().name("example").domains(List.of("example.com"))));
     ids.add(orgsResource.create(new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))));
     ids.add(orgsResource.create(new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))));
     ids.add(orgsResource.create(new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("baz").domains(List.of("baz.com")).attributes(Map.of("foo", List.of("bar")))));
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("qux").domains(List.of("baz.com")).attributes(Map.of("foo", List.of("bar")))));
 
     List<OrganizationRepresentation> orgs = orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.empty());
     assertThat(orgs, notNullValue());
@@ -117,7 +119,30 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     orgs = orgsResource.get(Optional.of("a"), Optional.empty(), Optional.empty());
     assertThat(orgs, notNullValue());
-    assertThat(orgs, hasSize(3));
+    assertThat(orgs, hasSize(4));
+
+    //orgs attribute search
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      // Search attributes
+      String url = server.getAuthUrl() + "/realms/master/orgs?q=foo:bar";
+      SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
+          .auth(server.client().tokenManager().getAccessTokenString())
+          .asResponse();
+      assertThat(response.getStatus(), is(200));
+      List<OrganizationRepresentation> res = response.asJson(List.class);
+      assertThat(res.size(), is(2));
+    }
+
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      // Search attributes and name
+      String url = server.getAuthUrl() + "/realms/master/orgs?search=qu&q=foo:bar";
+      SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
+          .auth(server.client().tokenManager().getAccessTokenString())
+          .asResponse();
+      assertThat(response.getStatus(), is(200));
+      List<OrganizationRepresentation> res = response.asJson(List.class);
+      assertThat(res.size(), is(1));
+    }
 
     //orgs count
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
@@ -127,14 +152,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
           .asResponse();
       assertThat(response.getStatus(), is(200));
       Long cnt = response.asJson(Long.class);
-      assertThat(cnt, is(4l));
+      assertThat(cnt, is(6l));
     }
 
     for (String id : ids) {
       orgsResource.organization(id).delete();
     }
   }
-  
+
   @Test
   public void testGetDomains() {
     PhaseTwo client = phaseTwo();
@@ -160,7 +185,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     domains = domainsResource.get();
     assertThat(domains, notNullValue());
     assertThat(domains, hasSize(2));
-    
+
     for (OrganizationDomainRepresentation d : domains) {
       assertThat(d.getDomainName(), oneOf("foo.com", "bar.net"));
       assertThat(d.getVerified(), is(false));
@@ -266,8 +291,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(organizations, empty());
   }
 
-
-
   @Test
   public void testMembershipsCount() {
     Keycloak keycloak = server.client();
@@ -302,7 +325,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       return 0l;
     }
   }
-  
+
   @Test
   public void testAddGetDeleteMemberships() {
     Keycloak keycloak = server.client();
@@ -585,7 +608,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // create idp
     String alias1 = idpResource.create(idp);;
     assertThat(alias1, notNullValue());
-    
+
     // get idps
     List<IdentityProviderRepresentation> idps = idpResource.get();
     assertThat(idps, notNullValue());

@@ -1,5 +1,6 @@
 package io.phasetwo.service.model;
 
+import java.util.Map;
 import java.util.stream.Stream;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -15,6 +16,9 @@ public interface OrganizationProvider extends Provider {
   Stream<OrganizationModel> getOrganizationsStream(
       RealmModel realm, Integer firstResult, Integer maxResults);
 
+  Stream<OrganizationModel> getOrganizationsStream(
+      RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults);
+
   default Stream<OrganizationModel> getOrganizationsStream(RealmModel realm) {
     return getOrganizationsStream(realm, null, null);
   }
@@ -24,6 +28,9 @@ public interface OrganizationProvider extends Provider {
 
   Stream<OrganizationModel> searchForOrganizationByNameStream(
       RealmModel realm, String search, Integer firstResult, Integer maxResults);
+
+  Stream<OrganizationModel> searchForOrganizationByAttributesStream(
+      RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults);
 
   Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user);
 

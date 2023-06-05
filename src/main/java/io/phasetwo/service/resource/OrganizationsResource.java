@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.Organization;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -19,6 +20,7 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.utils.SearchQueryUtils;
 
 @JBossLog
 public class OrganizationsResource extends OrganizationAdminResource {
@@ -68,13 +70,31 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Path("")
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<Organization> listOrgs(
-      @QueryParam("search") String searchQuery,
+      @QueryParam("search") String search,
       @QueryParam("first") Integer firstResult,
-      @QueryParam("max") Integer maxResults) {
-    log.debugf("listOrgs %s %s %d %d", realm.getName(), searchQuery, firstResult, maxResults);
+      @QueryParam("max") Integer maxResults,
+      @QueryParam("q") String searchQuery) {
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
-    return orgs.searchForOrganizationByNameStream(realm, searchQuery, firstResult, maxResults)
+
+    log.debugf(
+        "listOrgs %s %s %s %d %d", realm.getName(), search, searchQuery, firstResult, maxResults);
+
+    if (searchQuery != null) {
+      Map<String, String> searchAttributes =
+          searchQuery == null ? Collections.emptyMap() : SearchQueryUtils.getFields(searchQuery);
+
+      if (search != null) {
+        searchAttributes.put("name", search.trim());
+      }
+
+      return orgs.searchForOrganizationByAttributesStream(
+              realm, searchAttributes, firstResult, maxResults)
+          .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
+          .map(m -> convertOrganizationModelToOrganization(m));
+    }
+
+    return orgs.searchForOrganizationByNameStream(realm, search, firstResult, maxResults)
         .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
         .map(m -> convertOrganizationModelToOrganization(m));
   }
