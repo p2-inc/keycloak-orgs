@@ -66,17 +66,17 @@ export default function OrganizationDetail() {
     realm,
   });
   const { data: invites = [] } = useGetOrganizationInvitationsQuery({
-    orgId: org?.id!,
+    orgId: orgId!,
     realm,
   });
   const { data: domains = [] } = useGetOrganizationDomainsQuery({
-    orgId: org?.id!,
+    orgId: orgId!,
     realm,
   });
   const unverifiedDomains =
     domains.length > 0 ? domains.filter((d) => !d.verified).length : 0;
   const { data: idps = [] } = useGetIdpsQuery({
-    orgId: org?.id!,
+    orgId: orgId!,
     realm,
   });
 
