@@ -31,6 +31,8 @@ import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.broker.provider.util.SimpleHttp;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.jetbrains.annotations.TestOnly;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import javax.ws.rs.ClientErrorException;
@@ -570,6 +572,56 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // delete org
     orgResource.delete();
+  }
+
+  @Test
+  public void testListOrgsByMember() {
+    Keycloak keycloak = server.client();
+    PhaseTwo client = phaseTwo(keycloak);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
+
+    //create some others too
+    List<String> ids = new ArrayList<String>();
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))));
+    ids.add(orgsResource.create(new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
+    
+    OrganizationResource orgResource = orgsResource.organization(id);
+    
+    // create user and give membership
+    CredentialRepresentation pass = new CredentialRepresentation();
+    pass.setType("password");
+    pass.setValue("pass");
+    pass.setTemporary(false);
+    org.keycloak.representations.idm.UserRepresentation user1 =
+            new org.keycloak.representations.idm.UserRepresentation();
+    user1.setEnabled(true);
+    user1.setUsername("user1");
+    user1.setEmail("johndoe@example.com");
+    user1.setCredentials(ImmutableList.of(pass));
+    user1 = createUser(keycloak, REALM, user1);
+    // grant membership to org
+    orgResource.memberships().add(user1.getId());
+
+    Keycloak userKeycloak = server.client(REALM, "admin-cli", "user1", "pass");
+    PhaseTwo userClient = phaseTwo(userKeycloak);
+    OrganizationsResource userOrgsResource = userClient.organizations(REALM);
+
+    //xxxxx
+    List<OrganizationRepresentation> orgs = orgsResource.get(Optional.empty(), Optional.empty(), Optional.empty());
+    assertThat(orgs.size(), is(3));
+
+    List<OrganizationRepresentation> userOrgs = userOrgsResource.get(Optional.empty(), Optional.empty(), Optional.empty());
+    assertThat(userOrgs.size(), is(1));
+    
+    // delete user
+    deleteUser(keycloak, REALM, user1.getId());
+
+    // delete orgs
+    orgResource.delete();
+    for (String i : ids) {
+      orgsResource.organization(i).delete();
+    }
   }
 
   @Test

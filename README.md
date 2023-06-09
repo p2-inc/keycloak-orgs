@@ -47,6 +47,7 @@ But each of these approaches had tradeoffs of scale or frailty we found undesira
 - **Memberships** are the relationship of Users to Organizations. Users may be members of multiple Organizations.
 - **Roles** are mechanisms of role-based security specific to an Organization, much like Keycloak Realm Roles and Client Roles. In addition to a set of standard roles related to Organization data visibilty and management, administrators can create Roles unique to an organization. Users who are Members of Organizations can be granted that Organization's Roles.
 - **Invitations** allow Users and non-Users to be invited to join an Organization. Invitations can be created by administrators or Organization members with permission.
+- **Domains** are email domains that are used to automatically select Organization IdPs using the optional authenticators. Included is a facility to validate customer domain ownership using DNS records.
 
 ## Quick start
 
@@ -54,17 +55,23 @@ The easiest way to get started is our [Docker image](https://quay.io/repository/
 
 ## Building
 
-The build uses `keycloak-testsuite-utils` for the unit tests. You'll need to install Keycloak from source locally, as the test utility never gets published to maven central by the Keycloak team. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
+Checkout this project and run `mvn package`, which will produce a jar in the `target/` directory.
+
+The build uses `keycloak-testsuite-utils` for the unit tests. If you want to run the tests, you'll need to install Keycloak from source locally, as the test utility never gets published to maven central by the Keycloak team. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
 
 ```bash
-KC_VERSION=21.0.2
+KC_VERSION=21.1.1
 git clone https://github.com/keycloak/keycloak
 git fetch origin --tags
 git checkout $KC_VERSION
 mvn clean install -DskipTests
 ```
 
-Then, checkout this project and run `mvn package`, which will produce a jar in the `target/` directory.
+And then run the build with the tests using the `test` profile:
+
+```bash
+mvn clean install -Ptest
+```
 
 ## Installation
 
@@ -91,23 +98,27 @@ We've adopted a similar model that Keycloak uses for making the Organization dat
 
 ```java
   OrganizationModel createOrganization(
-      RealmModel realm, String name, UserModel createdBy);
+      RealmModel realm, String name, UserModel createdBy, boolean admin);
 
   OrganizationModel getOrganizationById(RealmModel realm, String id);
 
-  Stream<OrganizationModel> getOrganizationsStream(
-      RealmModel realm, Integer firstResult, Integer maxResults);
+  Stream<OrganizationModel> searchForOrganizationStream(
+      RealmModel realm,
+      Map<String, String> attributes,
+      Integer firstResult,
+      Integer maxResults,
+      Optional<UserModel> member);
 
-  Stream<OrganizationModel> getOrganizationsStream(RealmModel realm);
-
-  Stream<OrganizationModel> searchForOrganizationByNameStream(
-      RealmModel realm, String search, Integer firstResult, Integer maxResults);
-
-  Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user);
+  Long getOrganizationsCount(RealmModel realm, String search);
 
   boolean removeOrganization(RealmModel realm, String id);
 
   void removeOrganizations(RealmModel realm);
+
+  Stream<OrganizationModel> getOrganizationsStreamForDomain(
+      RealmModel realm, String domain, boolean verified);
+
+  Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user);
 
   Stream<InvitationModel> getUserInvitationsStream(RealmModel realm, UserModel user);
 ```
@@ -119,6 +130,7 @@ The OrganizationProvider returns model delegates that wrap the underlying entiti
 - [OrganizationModel](src/main/java/io/phasetwo/service/model/OrganizationModel.java)
 - [OrganizationRoleModel](src/main/java/io/phasetwo/service/model/OrganizationRoleModel.java)
 - [InvitationModel](src/main/java/io/phasetwo/service/model/InvitationModel.java)
+- [DomainModel](src/main/java/io/phasetwo/service/model/DomainModel.java)
 
 #### Entities
 
@@ -130,6 +142,7 @@ There are JPA entities that represent the underlying tables that are available i
 - [OrganizationRoleEntity](src/main/java/io/phasetwo/service/model/jpa/entity/OrganizationRoleEntity.java)
 - [UserOrganizationRoleMappingEntity](src/main/java/io/phasetwo/service/model/jpa/entity/UserOrganizationRoleMapping.java)
 - [InvitationEntity](src/main/java/io/phasetwo/service/model/jpa/entity/InvitationEntity.java)
+- [DomainEntity](src/main/java/io/phasetwo/service/model/jpa/entity/DomainEntity.java)
 
 ### Resources
 

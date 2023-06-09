@@ -4,6 +4,7 @@ import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
 import static org.keycloak.utils.StreamsUtil.closing;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.net.InternetDomainName;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -77,18 +79,6 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public Stream<OrganizationModel> getOrganizationsStream(
-      RealmModel realm, Integer firstResult, Integer maxResults) {
-    return searchForOrganizationByNameStream(realm, "%", firstResult, maxResults);
-  }
-
-  @Override
-  public Stream<OrganizationModel> getOrganizationsStream(
-      RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults) {
-    return searchForOrganizationByAttributesStream(realm, attributes, firstResult, maxResults);
-  }
-
-  @Override
   public Stream<OrganizationModel> getOrganizationsStreamForDomain(
       RealmModel realm, String domain, boolean verified) {
     domain = InternetDomainName.from(domain).toString();
@@ -103,19 +93,6 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     return query
         .getResultStream()
         .map(de -> new OrganizationAdapter(session, realm, em, de.getOrganization()));
-  }
-
-  @Override
-  public Stream<OrganizationModel> searchForOrganizationByNameStream(
-      RealmModel realm, String search, Integer firstResult, Integer maxResults) {
-    TypedQuery<OrganizationEntity> query =
-        em.createNamedQuery("getOrganizationsByRealmIdAndName", OrganizationEntity.class);
-    query.setParameter("realmId", realm.getId());
-    search = createSearchString(search);
-    query.setParameter("search", search);
-    if (firstResult != null) query.setFirstResult(firstResult);
-    if (maxResults != null) query.setMaxResults(maxResults);
-    return query.getResultStream().map(e -> new OrganizationAdapter(session, realm, em, e));
   }
 
   public static String createSearchString(String search) {
@@ -137,15 +114,24 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
   @Override
   @SuppressWarnings("unchecked")
-  public Stream<OrganizationModel> searchForOrganizationByAttributesStream(
-      RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults) {
+  public Stream<OrganizationModel> searchForOrganizationStream(
+      RealmModel realm,
+      Map<String, String> attributes,
+      Integer firstResult,
+      Integer maxResults,
+      Optional<UserModel> member) {
+    if (attributes == null) {
+      attributes = ImmutableMap.of();
+    }
     CriteriaBuilder builder = em.getCriteriaBuilder();
     CriteriaQuery<OrganizationEntity> queryBuilder = builder.createQuery(OrganizationEntity.class);
     Root<OrganizationEntity> root = queryBuilder.from(OrganizationEntity.class);
 
-    List<Predicate> predicates = predicates(attributes, root);
+    List<Predicate> predicates = attributePredicates(attributes, root);
 
     predicates.add(builder.equal(root.get("realmId"), realm.getId()));
+
+    member.ifPresent(u -> predicates.add(memberPredicate(u, root)));
 
     queryBuilder.where(predicates.toArray(new Predicate[0])).orderBy(builder.asc(root.get("name")));
 
@@ -177,7 +163,8 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
   @Override
   public void removeOrganizations(RealmModel realm) {
-    getOrganizationsStream(realm).forEach(o -> removeOrganization(realm, o.getId()));
+    searchForOrganizationStream(realm, null, null, null, Optional.empty())
+        .forEach(o -> removeOrganization(realm, o.getId()));
   }
 
   @Override
@@ -232,7 +219,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     };
   }
 
-  private List<Predicate> predicates(
+  private List<Predicate> attributePredicates(
       Map<String, String> attributes, Root<OrganizationEntity> root) {
     CriteriaBuilder builder = em.getCriteriaBuilder();
 
@@ -249,9 +236,11 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
       switch (key) {
         case "name":
-          predicates.add(builder.like(root.get(key), "%" + value.toLowerCase() + "%"));
+          predicates.add(
+              builder.or(
+                  builder.like(root.get("name"), "%" + value.toLowerCase() + "%"),
+                  builder.like(root.get("displayName"), "%" + value.toLowerCase() + "%")));
           break;
-          // All unknown attributes will be assumed as custom attributes.
         default:
           Join<OrganizationEntity, OrganizationAttributeEntity> attributesJoin =
               root.join("attributes", JoinType.LEFT);
@@ -269,5 +258,14 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     }
 
     return predicates;
+  }
+
+  private Predicate memberPredicate(UserModel member, Root<OrganizationEntity> root) {
+    CriteriaBuilder builder = em.getCriteriaBuilder();
+
+    Join<OrganizationEntity, OrganizationMemberEntity> membersJoin =
+        root.join("members", JoinType.LEFT);
+
+    return builder.equal(membersJoin.get("userId"), member.getId());
   }
 }
