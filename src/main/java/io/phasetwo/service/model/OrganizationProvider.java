@@ -39,7 +39,7 @@ public interface OrganizationProvider extends Provider {
   // deprecated methods
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream() searchForOrganizationStream} method
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
    *     instead
    */
   @Deprecated(forRemoval = true)
@@ -54,7 +54,7 @@ public interface OrganizationProvider extends Provider {
   }
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream() searchForOrganizationStream} method
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
    *     instead
    */
   @Deprecated(forRemoval = true)
@@ -65,7 +65,7 @@ public interface OrganizationProvider extends Provider {
   }
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream() searchForOrganizationStream} method
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
    *     instead
    */
   @Deprecated(forRemoval = true)
@@ -75,7 +75,7 @@ public interface OrganizationProvider extends Provider {
   }
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream() searchForOrganizationStream} method
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
    *     instead
    */
   @Deprecated(forRemoval = true)
@@ -86,7 +86,7 @@ public interface OrganizationProvider extends Provider {
   }
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream() searchForOrganizationStream} method
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
    *     instead
    */
   @Deprecated(forRemoval = true)
