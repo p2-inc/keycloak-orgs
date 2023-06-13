@@ -168,6 +168,10 @@ public class PortalResourceProvider implements RealmResourceProvider {
           session
               .getProvider(LoginFormsProvider.class)
               .setAttribute("environment", envStr)
+              .setAttribute("authUrl", authUrl.getPath().endsWith("/") ? authUrl.toString().substring(0, authUrl.toString().length() - 1) : authUrl.toString())
+              .setAttribute("faviconUrl", Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.favicon.url"))).orElse("${authUrl}/realms/${realmName}/portal/favicon.ico"))
+              .setAttribute("appiconUrl", Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.appicon.url"))).orElse("${authUrl}/realms/${realmName}/portal/logo192.png"))
+              .setAttribute("displayName", Optional.ofNullable(realm.getDisplayName()).orElse(realm.getName()))
               .setAttribute("realmName", realm.getName());
       FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
       Method processTemplateMethod =
