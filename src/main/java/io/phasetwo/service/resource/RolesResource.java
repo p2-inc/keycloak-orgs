@@ -6,6 +6,9 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.OrganizationRole;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 import javax.validation.constraints.*;
 import javax.ws.rs.*;
@@ -41,12 +44,52 @@ public class RolesResource extends OrganizationAdminResource {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response createRole(OrganizationRole representation) {
-    if (!auth.hasManageOrgs() && !auth.hasOrgManageRoles(organization)) {
-      throw new NotAuthorizedException(
-          String.format(
-              "User %s doesn't have permission to manage roles in org %s",
-              auth.getUser().getId(), organization.getName()));
-    }
+    canManage();
+
+    OrganizationRole or = createOrganizationRole(representation);
+
+    return Response.created(
+            session.getContext().getUri().getAbsolutePathBuilder().path(or.getName()).build())
+        .build();
+  }
+
+  @PUT
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response createRoles(List<OrganizationRole> representation) {
+    canManage();
+
+    representation.forEach(this::createOrganizationRole);
+
+    return Response.created(session.getContext().getUri().getAbsolutePathBuilder().build())
+            .build();
+  }
+
+  @DELETE
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response deleteRoles(List<OrganizationRole> representation) {
+    canManage();
+
+    representation.forEach(r->{
+      String name = r.getName();
+
+      if (Arrays.asList(OrganizationAdminAuth.DEFAULT_ORG_ROLES).contains(name)) {
+        throw new BadRequestException(
+                String.format("Default organization role %s cannot be deleted.", name));
+      }
+
+      organization.removeRole(name);
+
+      adminEvent
+              .resource(ORGANIZATION_ROLE.name())
+              .operation(OperationType.DELETE)
+              .resourcePath(session.getContext().getUri(), name)
+              .success();
+    });
+
+    return Response.noContent().build();
+  }
+
+  private OrganizationRole createOrganizationRole(OrganizationRole representation) {
     OrganizationRoleModel r = organization.getRoleByName(representation.getName());
     if (r != null) {
       log.debug("duplicate role");
@@ -57,14 +100,21 @@ public class RolesResource extends OrganizationAdminResource {
 
     OrganizationRole or = convertOrganizationRole(r);
     adminEvent
-        .resource(ORGANIZATION_ROLE.name())
-        .operation(OperationType.CREATE)
-        .resourcePath(session.getContext().getUri(), or.getName())
-        .representation(or)
-        .success();
-
-    return Response.created(
-            session.getContext().getUri().getAbsolutePathBuilder().path(or.getName()).build())
-        .build();
+            .resource(ORGANIZATION_ROLE.name())
+            .operation(OperationType.CREATE)
+            .resourcePath(session.getContext().getUri(), or.getName())
+            .representation(or)
+            .success();
+    return or;
   }
+
+  private void canManage() {
+    if (!auth.hasManageOrgs() && !auth.hasOrgManageRoles(organization)) {
+      throw new NotAuthorizedException(
+              String.format(
+                      "User %s doesn't have permission to manage roles in org %s",
+                      auth.getUser().getId(), organization.getName()));
+    }
+  }
+
 }

@@ -5,11 +5,15 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import io.phasetwo.service.model.OrganizationModel;
+
+import java.util.List;
 import java.util.stream.Stream;
-import javax.validation.constraints.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import io.phasetwo.service.representation.OrganizationRole;
+import io.phasetwo.service.representation.UserRepresentationWithRoles;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
@@ -39,6 +43,29 @@ public class MembersResource extends OrganizationAdminResource {
     return organization
         .searchForMembersStream(searchQuery, firstResult, maxResults)
         .map(m -> toRepresentation(session, realm, m));
+  }
+  @GET
+  @Path("/with-roles")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Stream<UserRepresentationWithRoles> getMembersWithRoles(
+          @QueryParam("search") String searchQuery,
+          @QueryParam("first") Integer firstResult,
+          @QueryParam("max") Integer maxResults) {
+    log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
+    firstResult = firstResult != null ? firstResult : 0;
+    maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
+    return organization
+            .searchForMembersStream(searchQuery, firstResult, maxResults)
+            .map(m -> {
+              UserRepresentation user = toRepresentation(session, realm, m);
+              List<OrganizationRole> roles = organization.getRolesStream()
+                      .filter(r -> r.hasRole(m))
+                      .map(r -> convertOrganizationRole(r))
+                      .toList();
+              return new UserRepresentationWithRoles()
+                      .user(user)
+                      .organizationRoles(roles);
+            });
   }
 
   @GET
