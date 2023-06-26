@@ -39,8 +39,7 @@ public interface OrganizationProvider extends Provider {
   // deprecated methods
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
-   *     instead
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method instead
    */
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> searchForOrganizationByNameStream(
@@ -54,8 +53,7 @@ public interface OrganizationProvider extends Provider {
   }
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
-   *     instead
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method instead
    */
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> searchForOrganizationByAttributesStream(
@@ -65,8 +63,7 @@ public interface OrganizationProvider extends Provider {
   }
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
-   *     instead
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method instead
    */
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> getOrganizationsStream(
@@ -75,8 +72,7 @@ public interface OrganizationProvider extends Provider {
   }
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
-   *     instead
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method instead
    */
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> getOrganizationsStream(
@@ -86,8 +82,7 @@ public interface OrganizationProvider extends Provider {
   }
 
   /**
-   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method
-   *     instead
+   * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method instead
    */
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> getOrganizationsStream(RealmModel realm) {
