@@ -61,6 +61,22 @@ import static org.junit.Assert.assertThrows;
 @JBossLog
 public class OrganizationResourceTest extends AbstractResourceTest {
 
+
+  @Test
+  public void testRealmRemove() {
+    try (Keycloak keycloak = server.client()) {
+      String realm = "foo";
+      RealmRepresentation r = new RealmRepresentation();
+      r.setEnabled(true);
+      r.setRealm(realm);
+      keycloak.realms().create(r);
+      PhaseTwo client = phaseTwo();
+      OrganizationsResource orgsResource = client.organizations(realm);
+      String id = createDefaultOrg(orgsResource);
+      keycloak.realms().realm(realm).remove();
+    }
+  }
+  
   @Test
   public void testRealmId() {
     try(Keycloak keycloak = server.client()) {
