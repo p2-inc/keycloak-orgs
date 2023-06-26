@@ -12,12 +12,11 @@ import { config } from "config";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
 import P2Toast from "components/utils/toast";
-import { Listbox } from "@headlessui/react";
-import RoleBadge from "components/elements/badges/role-badge";
-import { User, ChevronDown } from "lucide-react";
-import { Roles, viewRoles } from "services/role";
+import { User } from "lucide-react";
 import useUser from "components/utils/useUser";
 import Alert from "components/elements/alerts/alert";
+import { useTranslation } from "react-i18next";
+import { DecoratedRole, RolesList } from "pages/member/components";
 
 const { realm } = config.env;
 
@@ -32,17 +31,14 @@ const loadingIcon = (
   </div>
 );
 
-const roles = [
-  { id: 1, name: "Admin", items: Roles },
-  { id: 2, name: "Member", items: viewRoles },
-];
-
 const NewInvitation = () => {
   const { keycloak } = useKeycloak();
   const navigate = useNavigate();
   let { orgId } = useParams();
+  const { t } = useTranslation();
 
   const { hasManageInvitationsRole: hasManageInvitationsRoleCheck } = useUser();
+
   const { data: org } = useGetOrganizationByIdQuery({
     orgId: orgId!,
     realm: config.env.realm,
@@ -51,22 +47,26 @@ const NewInvitation = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     reset,
   } = useForm();
+
   const [addOrganizationInvitation] = useAddOrganizationInvitationMutation();
-  const [selectedRole, setSelectedRole] = useState(roles[0]);
+  const [selectedRoles, setSelectedRoles] = useState<DecoratedRole[]>();
 
   const onSubmit = async (data) => {
-    if (selectedRole && data.email) {
-      const roleItems = roles.find((r) => selectedRole.name === r.name);
+    if (data.email) {
+      P2Toast({
+        title: `${data.email} is being sent an invitation.`,
+        information: true,
+      });
       await addOrganizationInvitation({
         orgId: orgId!,
         realm,
         invitationRequestRepresentation: {
           email: data.email,
           inviterId: keycloak.tokenParsed?.sub,
-          roles: Object.values(roleItems!.items),
+          roles: selectedRoles?.filter((r) => r.isChecked).map((r) => r.name),
           send: true,
         },
       })
@@ -93,20 +93,20 @@ const NewInvitation = () => {
 
   const hasManageInvitationsRole = hasManageInvitationsRoleCheck(orgId!);
 
-  const isSendButtonDisabled = !hasManageInvitationsRole || !selectedRole;
+  const isSendButtonDisabled = !hasManageInvitationsRole || isSubmitting;
 
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title={`Invite new member to ${org?.displayName || "Organization"}`}
-        description="Add a new member to the organization by entering their email and assigning them a role within the organization. An email will be sent to them with instructions on how to join."
+        title={t("invitationTitle", [org?.displayName || "Organization"])}
+        description={t("invitationInstructionsDescription")}
         icon={loadingIcon}
         rightContent={
           <Link
             to={`/organizations/${orgId}/details`}
             className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
           >
-            Cancel
+            {t("cancel")}
           </Link>
         }
       />
@@ -119,49 +119,9 @@ const NewInvitation = () => {
           />
         </div>
       )}
+      <RolesList orgId={orgId!} setSelectedRoles={setSelectedRoles} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mt-8 space-y-4">
-          <Listbox
-            value={selectedRole}
-            onChange={setSelectedRole}
-            disabled={!hasManageInvitationsRole}
-          >
-            <div className="relative z-50">
-              <Listbox.Button className="flex w-full items-center justify-between space-x-3 rounded border border-neutral-300 bg-neutral-50 py-2 px-4 text-left hover:border-p2blue-700 hover:bg-white disabled:opacity-50 dark:border-zinc-600 dark:bg-p2dark-1000 dark:text-zinc-200 dark:hover:bg-p2dark-1000">
-                <div>{selectedRole.name}</div>
-                <ChevronDown className="dark:text-zinc-600" />
-              </Listbox.Button>
-              <Listbox.Options className="absolute w-full">
-                <div className="pb-10">
-                  <div className="relative bottom-0 z-30 max-h-96 divide-y overflow-auto rounded border border-neutral-300 bg-white dark:divide-zinc-600 dark:border-zinc-600 dark:bg-p2dark-900">
-                    {roles.map((role) => (
-                      <Listbox.Option
-                        key={role.id}
-                        value={role}
-                        className="cursor-pointer space-y-2 p-4 hover:bg-neutral-50 dark:hover:bg-p2dark-1000"
-                      >
-                        <div className="font-semibold dark:text-zinc-200">
-                          {role.name}
-                        </div>
-                        <div className="flex flex-wrap">
-                          {Object.values(role.items)
-                            .sort()
-                            .map((ar) => (
-                              <RoleBadge name={ar} key={ar} />
-                            ))}
-                        </div>
-                      </Listbox.Option>
-                    ))}
-                  </div>
-                  <div
-                    className={cs(
-                      "absolute inset-x-3 bottom-10 z-10 h-1/2 rounded-full bg-white drop-shadow-btn-light"
-                    )}
-                  ></div>
-                </div>
-              </Listbox.Options>
-            </div>
-          </Listbox>
           <RHFFormTextInputWithLabel
             slug="email"
             label="Email"
@@ -181,7 +141,7 @@ const NewInvitation = () => {
 
           <div className="mt-4">
             <Button isBlackButton disabled={isSendButtonDisabled} type="submit">
-              Send invitation
+              {t("sendInvitation")}
             </Button>
           </div>
         </div>

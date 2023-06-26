@@ -1,101 +1,38 @@
 import SectionHeader from "components/navs/section-header";
-import cs from "classnames";
 import {
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetOrganizationMembershipsQuery,
+  useGetOrganizationRolesQuery,
   useGrantUserOrganizationRoleMutation,
   useRevokeUserOrganizationRoleMutation,
 } from "store/apis/orgs";
 import { useState } from "react";
 import { config } from "config";
 import { Link, useParams } from "react-router-dom";
-import { User } from "lucide-react";
-import RoleBadge from "components/elements/badges/role-badge";
-import { Switch } from "@headlessui/react";
 import P2Toast from "components/utils/toast";
 import fullName from "components/utils/fullName";
 import useUser from "components/utils/useUser";
 import Alert from "components/elements/alerts/alert";
-import { OrgRoles } from "services/role";
+import {
+  Roles as StandardRoles,
+  OrgRoles as StandardOrgRoles,
+} from "services/role";
 import { useTranslation } from "react-i18next";
-
-const loadingIcon = (
-  <div>
-    <div className={cs("relative h-12 w-12 overflow-hidden rounded-md")}>
-      <div className="absolute -inset-10 z-10 bg-gradient-to-tr from-[#C7DFF0] to-[#1476B7]"></div>
-      <div className="absolute inset-[2px] z-20 flex items-center justify-center rounded bg-white dark:bg-p2dark-1000 dark:text-zinc-200">
-        <User />
-      </div>
-    </div>
-  </div>
-);
-
-const Loader = () => {
-  return (
-    <div className="flex justify-between space-x-2 py-3">
-      <div className="flex space-x-2">
-        <div className="animate-pulse">
-          <div className="h-4 w-4 rounded-md bg-gray-300"></div>
-        </div>
-        <div className="animate-pulse">
-          <div className="h-4 w-20 rounded-md bg-gray-300"></div>
-        </div>
-      </div>
-      <div className="animate-pulse">
-        <div className="h-4 w-10 rounded-md bg-gray-300"></div>
-      </div>
-    </div>
-  );
-};
-
-const SwitchItem = ({
-  name,
-  isChecked,
-  onChange,
-  isDisabled,
-}: {
-  name: string;
-  isChecked: boolean;
-  onChange: (roleName, checked) => void;
-  isDisabled: boolean;
-}) => {
-  return (
-    <Switch.Group>
-      <div className="flex items-center justify-between py-2">
-        <Switch.Label className="mr-4">
-          <RoleBadge name={name} />
-        </Switch.Label>
-        <Switch
-          checked={isChecked}
-          disabled={isDisabled}
-          onChange={(checked) => onChange(name, checked)}
-          className={`${
-            isChecked ? "bg-p2blue-500" : "bg-gray-200"
-          } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-p2blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
-        >
-          <span
-            className={`${
-              isChecked ? "translate-x-6" : "translate-x-1"
-            } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-          />
-        </Switch>
-      </div>
-    </Switch.Group>
-  );
-};
-
-const buttonClasses =
-  "rounded bg-indigo-50 py-1 px-2 text-xs font-semibold text-p2blue-700 shadow-sm enabled:hover:bg-indigo-100 disabled:opacity-50";
+import { union } from "lodash";
+import { Loader, LoadingIcon, SwitchItem, Button } from "./components";
 
 const Roles = () => {
   const { t } = useTranslation();
+  const {
+    env: { realm },
+  } = config;
   let { orgId, memberId } = useParams();
   const { user, hasManageRolesRole: hasManageRolesRoleCheck } = useUser();
   const [updatingRoles, setUpdatingRoles] = useState<string[]>([]);
 
   const { data: members = [] } = useGetOrganizationMembershipsQuery({
     orgId: orgId!,
-    realm: config.env.realm,
+    realm,
   });
   const currentMember = members.find((member) => member.id === memberId) || {};
 
@@ -105,12 +42,34 @@ const Roles = () => {
     refetch: refetchRoles,
   } = useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery({
     orgId: orgId!,
-    realm: config.env.realm,
+    realm,
     userId: memberId!,
   });
 
+  const { data: OrgRoles = [] } = useGetOrganizationRolesQuery({
+    orgId: orgId!,
+    realm,
+  });
+
+  const allRoles = union(
+    StandardOrgRoles,
+    OrgRoles?.map((or) => or.name)
+  );
+
   const [grantUserOrganizationRole] = useGrantUserOrganizationRoleMutation();
   const [revokeUserOrganizationRole] = useRevokeUserOrganizationRoleMutation();
+
+  const roleData: {
+    name: string;
+    isChecked: boolean;
+    isApplicationRole: boolean;
+  }[] = allRoles.sort().map((item) => {
+    return {
+      name: item,
+      isChecked: roles.findIndex((f) => f.name === item) >= 0,
+      isApplicationRole: !StandardOrgRoles.includes(item),
+    };
+  });
 
   const onRoleToggle = (roleName: string, checked: boolean) => {
     setUpdatingRoles([...updatingRoles, roleName]);
@@ -119,7 +78,7 @@ const Roles = () => {
         name: roleName,
         orgId: orgId!,
         userId: memberId!,
-        realm: config.env.realm,
+        realm,
       })
         .unwrap()
         .then(() => {
@@ -143,7 +102,7 @@ const Roles = () => {
         name: roleName,
         orgId: orgId!,
         userId: memberId!,
-        realm: config.env.realm,
+        realm,
       })
         .unwrap()
         .then(() => {
@@ -165,13 +124,6 @@ const Roles = () => {
     }
   };
 
-  const roleData = OrgRoles.sort().map((item) => {
-    return {
-      name: item,
-      isChecked: roles.findIndex((f) => f.name === item) >= 0,
-    };
-  });
-
   const grantAllRoles = () => {
     let grantRoles = roleData.filter((rd) => !rd.isChecked);
     setUpdatingRoles([...grantRoles.map((gr) => gr.name)]);
@@ -181,7 +133,7 @@ const Roles = () => {
           name: ir.name,
           orgId: orgId!,
           userId: memberId!,
-          realm: config.env.realm,
+          realm,
         })
       )
     )
@@ -212,7 +164,7 @@ const Roles = () => {
           name: ir.name,
           orgId: orgId!,
           userId: memberId!,
-          realm: config.env.realm,
+          realm,
         })
       )
     )
@@ -234,10 +186,11 @@ const Roles = () => {
       });
   };
 
-  const grantFilteredRoles = (filter: "manage" | "view") => {
-    const grantFilterRoles = roleData.filter((rd) =>
-      rd.name.startsWith(filter)
-    );
+  const grantFilteredRoles = (filter: "manage" | "view" | "application") => {
+    const grantFilterRoles =
+      filter === "application"
+        ? roleData.filter((rd) => rd.isApplicationRole)
+        : roleData.filter((rd) => rd.name.startsWith(filter));
     setUpdatingRoles([...grantFilterRoles.map((gr) => gr.name)]);
     Promise.all(
       grantFilterRoles.map((ir) =>
@@ -245,7 +198,7 @@ const Roles = () => {
           name: ir.name,
           orgId: orgId!,
           userId: memberId!,
-          realm: config.env.realm,
+          realm,
         })
       )
     )
@@ -270,12 +223,15 @@ const Roles = () => {
   const isSameUserAndMember = currentMember.id === user?.id;
 
   const hasManageRolesRole = hasManageRolesRoleCheck(orgId);
+  const hasApplicationRoles = OrgRoles.length > 0;
 
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title={`Edit ${fullName(currentMember) || "member"}'s roles`}
-        icon={loadingIcon}
+        title={`Edit ${
+          fullName(currentMember) || currentMember.email || "member"
+        }'s roles`}
+        icon={LoadingIcon}
         rightContent={
           <Link
             to={`/organizations/${orgId}/details`}
@@ -296,18 +252,15 @@ const Roles = () => {
       )}
       <div className="mt-8 flex items-center space-x-2 border-b pb-2">
         <div className="inline-block text-sm text-gray-600">Set roles:</div>
-        <button
-          className={buttonClasses}
+        <Button
           onClick={grantAllRoles}
           disabled={
             !hasManageRolesRole ||
             roleData.filter((rd) => rd.isChecked).length === roleData.length
           }
-        >
-          all
-        </button>
-        <button
-          className={buttonClasses}
+          text={t("all")}
+        />
+        <Button
           onClick={() => grantFilteredRoles("manage")}
           disabled={
             !hasManageRolesRole ||
@@ -317,11 +270,9 @@ const Roles = () => {
               ).length > 0
             )
           }
-        >
-          all manage
-        </button>
-        <button
-          className={buttonClasses}
+          text={t("allManage")}
+        />
+        <Button
           onClick={() => grantFilteredRoles("view")}
           disabled={
             !hasManageRolesRole ||
@@ -331,19 +282,29 @@ const Roles = () => {
               ).length > 0
             )
           }
-        >
-          all view
-        </button>
-        <button
-          className={buttonClasses}
+          text={t("allView")}
+        />
+        {hasApplicationRoles && (
+          <Button
+            onClick={() => grantFilteredRoles("application")}
+            disabled={
+              !hasManageRolesRole ||
+              !(
+                roleData.filter((rd) => rd.isApplicationRole && !rd.isChecked)
+                  .length > 0
+              )
+            }
+            text={t("allApplication")}
+          />
+        )}
+        <Button
           onClick={revokeAllRoles}
           disabled={
             !hasManageRolesRole ||
             roleData.filter((rd) => rd.isChecked).length === 0
           }
-        >
-          none
-        </button>
+          text={t("none")}
+        />
       </div>
       {isSameUserAndMember && (
         <div className="mt-4">
@@ -365,7 +326,7 @@ const Roles = () => {
       )}
       <div className="divide-y dark:divide-zinc-600">
         {isLoading
-          ? OrgRoles.map((r) => <Loader key={r} />)
+          ? allRoles.map((r) => <Loader key={r} />)
           : roleData.map((item) => (
               <SwitchItem
                 name={item.name}
@@ -377,6 +338,9 @@ const Roles = () => {
                   updatingRoles.includes(item.name)
                 }
                 key={item.name}
+                roleType={
+                  !item.isApplicationRole ? t("organization") : t("application")
+                }
               />
             ))}
       </div>

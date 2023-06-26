@@ -1,11 +1,16 @@
 import toast from "react-hot-toast";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { useTranslation } from "react-i18next";
 
 type Props = {
   success?: boolean;
   error?: boolean;
+  information?: boolean;
   title: string;
   message?: string;
   duration?: number;
@@ -19,6 +24,7 @@ const CloseButton = () => {
 export default function P2Toast({
   success,
   error,
+  information,
   title,
   message,
   duration,
@@ -38,6 +44,12 @@ export default function P2Toast({
               {success && (
                 <CheckCircleIcon
                   className="h-6 w-6 text-green-400"
+                  aria-hidden="true"
+                />
+              )}
+              {information && (
+                <InformationCircleIcon
+                  className="h-6 w-6 text-p2blue-500"
                   aria-hidden="true"
                 />
               )}

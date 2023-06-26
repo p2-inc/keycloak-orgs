@@ -8,6 +8,7 @@ import RoleBadge from "components/elements/badges/role-badge";
 import { Link } from "react-router-dom";
 import Button from "components/elements/forms/buttons/button";
 import { checkOrgForRole } from "components/utils/check-org-for-role";
+import useUser from "components/utils/useUser";
 
 type Props = {
   member: UserRepresentation;
@@ -32,12 +33,13 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
   member,
   orgId,
 }) => {
+  const { hasManageRolesRole: hasManageRolesRoleCheck } = useUser();
   const filtered = roles.filter((f) => regexp.test(f.name));
-  const hasManageRolesRole = checkOrgForRole(roles, Roles.ManageRoles);
+  const hasManageRolesRole = hasManageRolesRoleCheck(orgId);
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left md:w-auto">
-      <Menu.Button className="w-full" disabled={filtered.length === 0}>
+      <Menu.Button className="w-full">
         <div className="flex w-full items-center justify-center space-x-2 rounded border border-gray-200 py-1 px-4 text-sm transition hover:border-gray-800 dark:border-zinc-800 dark:hover:border-zinc-600">
           <span
             className={`inline-block h-2 w-2 rounded-full ${regexpClassName}`}

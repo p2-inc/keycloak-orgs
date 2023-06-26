@@ -8,7 +8,6 @@ import useUser from "components/utils/useUser";
 import { useTranslation } from "react-i18next";
 const { features: featureFlags } = config.env;
 
-
 type Props = {
   children: React.ReactNode;
   viewType: ViewLayoutOptions;
@@ -22,19 +21,32 @@ const SubTitle = ({ children }) => (
   <div className="text-[14px] dark:text-zinc-400">{children}</div>
 );
 
-const InnerItem = ({ children, title, subTitle, viewType }) => {
+const InnerItem = ({
+  children,
+  title,
+  subTitle,
+  viewType,
+  isViewCard,
+}: {
+  children: React.ReactNode;
+  title?: string;
+  subTitle?: string;
+  viewType: ViewLayoutOptions;
+  isViewCard?: boolean;
+}) => {
   return (
     <div className="relative h-full">
       <div className="relative z-20 h-full">
         <div
           className={cs(
             "col-span-1 flex h-full",
-            "group-hover:border-gray-300 group-hover:bg-white dark:group-hover:border-zinc-500 dark:group-hover:bg-p2dark-900",
+            "group-hover:border-gray-400 group-hover:bg-white dark:group-hover:border-zinc-500 dark:group-hover:bg-p2dark-900",
             {
-              "flex-col space-y-5 rounded-md border border-gray-200 bg-gray-50 px-10 py-9 dark:border-zinc-600 dark:bg-p2dark-1000":
+              "flex-col space-y-5 rounded-md border border-gray-300 bg-gray-50 px-10 py-9 dark:border-zinc-600 dark:bg-p2dark-1000":
                 viewType === ViewLayoutOptions.GRID,
               "flex-row justify-between px-5 py-4":
                 viewType === ViewLayoutOptions.LIST,
+              "border-gray-100 dark:border-zinc-800": isViewCard,
             }
           )}
         >
@@ -71,13 +83,19 @@ const OrganizationItem: FC<Props> = ({ children, org, viewType }) => {
       className={cs(
         "block",
         "focus:outline-none focus:ring-1 focus:ring-neutral-50 focus:ring-offset-1",
+        "hover:cursor-not-allowed",
         {
           "md:pb-3": viewType === ViewLayoutOptions.GRID,
         }
       )}
       title={t("insufficientPermissionsToViewOrganization")}
     >
-      <InnerItem title={title} subTitle={subTitle} viewType={viewType}>
+      <InnerItem
+        title={title}
+        subTitle={subTitle}
+        viewType={viewType}
+        isViewCard
+      >
         {children}
       </InnerItem>
     </div>
