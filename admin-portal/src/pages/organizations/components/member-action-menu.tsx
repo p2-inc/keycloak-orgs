@@ -77,10 +77,10 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
           <Menu.Button className="w-full">
             <div className="flex w-full items-center justify-center space-x-2 rounded border border-gray-200 py-1 px-4 text-sm transition hover:border-gray-800 md:border-transparent md:px-1 dark:md:border-zinc-800 dark:md:hover:border-zinc-600">
               <EllipsisVerticalIcon
-                className="h-5 w-5 dark:fill-zinc-200"
+                className="h-5 w-5 dark:fill-zinc-200 max-md:hidden"
                 aria-hidden="true"
               />
-              <span className="md:hidden">{t("openOptions")}</span>
+              <span className="md:hidden">{t("options")}</span>
             </div>
           </Menu.Button>
         </div>
