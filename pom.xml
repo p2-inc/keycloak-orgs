@@ -3,7 +3,7 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.36-SNAPSHOT</version>
+  <version>0.37-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>

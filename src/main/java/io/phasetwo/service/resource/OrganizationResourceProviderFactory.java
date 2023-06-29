@@ -204,26 +204,39 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
 
     // remove the idp associations for this org
     OrganizationModel org = event.getOrganization();
-    org.getIdentityProvidersStream()
-        .forEach(
-            idp -> {
-              idp.getConfig().remove(Orgs.ORG_OWNER_CONFIG_KEY);
-            });
+    try {
+      org.getIdentityProvidersStream()
+          .forEach(
+              idp -> {
+                idp.getConfig().remove(Orgs.ORG_OWNER_CONFIG_KEY);
+              });
+    } catch (Exception e) {
+      log.warnf(
+          "Couldn't remove identity providers on organizationRemoved. Likely because this follows a realmRemoved event. %s",
+          e.getMessage());
+    }
 
     // delete default admin user
-    UserModel user =
-        event
-            .getKeycloakSession()
-            .users()
-            .getUserByUsername(event.getRealm(), getDefaultAdminUsername(event.getOrganization()));
-    if (user != null) {
-      boolean removed = event.getKeycloakSession().users().removeUser(event.getRealm(), user);
-      log.debugf(
-          "User removed on deletion of org %s? %b", event.getOrganization().getId(), removed);
-    } else {
+    try {
+      UserModel user =
+          event
+              .getKeycloakSession()
+              .users()
+              .getUserByUsername(
+                  event.getRealm(), getDefaultAdminUsername(event.getOrganization()));
+      if (user != null) {
+        boolean removed = event.getKeycloakSession().users().removeUser(event.getRealm(), user);
+        log.debugf(
+            "User removed on deletion of org %s? %b", event.getOrganization().getId(), removed);
+      } else {
+        log.warnf(
+            "Default org admin %s for org %s doesn't exist. Skipping deletion on org removal.",
+            getDefaultAdminUsername(event.getOrganization()), event.getOrganization().getId());
+      }
+    } catch (Exception e) {
       log.warnf(
-          "Default org admin %s for org %s doesn't exist. Skipping deletion on org removal.",
-          getDefaultAdminUsername(event.getOrganization()), event.getOrganization().getId());
+          "Couldn't remove default org admin user on organizationRemoved. Likely because this follows a realmRemoved event. %s",
+          e.getMessage());
     }
   }
 
