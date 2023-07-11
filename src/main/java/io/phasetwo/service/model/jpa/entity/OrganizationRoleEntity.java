@@ -2,10 +2,10 @@ package io.phasetwo.service.model.jpa.entity;
 
 import static io.phasetwo.service.model.jpa.entity.Entities.setCollection;
 
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
-import javax.persistence.*;
 
 /** */
 @NamedQueries({

@@ -6,11 +6,11 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.OrganizationRole;
+import jakarta.validation.constraints.*;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.stream.Stream;
-import javax.validation.constraints.*;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
 

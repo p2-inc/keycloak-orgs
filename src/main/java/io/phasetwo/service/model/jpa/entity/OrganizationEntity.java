@@ -2,9 +2,9 @@ package io.phasetwo.service.model.jpa.entity;
 
 import static io.phasetwo.service.model.jpa.entity.Entities.setCollection;
 
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.persistence.*;
 import org.hibernate.annotations.Nationalized;
 
 // import org.hibernate.validator.constraints.URL; todo

@@ -1,12 +1,12 @@
 package io.phasetwo.service.model.jpa.entity;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
-import javax.validation.constraints.Email;
 
 /** */
 @NamedQueries({

@@ -5,13 +5,13 @@ import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
 import io.phasetwo.service.model.OrganizationModel;
+import jakarta.validation.constraints.*;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
-import javax.validation.constraints.*;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.utils.ModelToRepresentation;
@@ -139,9 +139,12 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response testLDAPConnection(TestLdapConnectionRepresentation config) {
-    boolean result = LDAPServerCapabilitiesManager.testLDAP(config, session, realm);
-    if (result) return Response.noContent().build();
-    else throw new BadRequestException("LDAP test error");
+    try {
+      LDAPServerCapabilitiesManager.testLDAP(config, session, realm);
+      return Response.noContent().build();
+    } catch (Exception e) {
+      throw new BadRequestException("LDAP test error");
+    }
   }
 
   @POST

@@ -30,11 +30,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>4.13.2</junit.version>
-    <keycloak.version>21.1.1</keycloak.version>
-    <lombok.version>1.18.22</lombok.version>
-    <auto-service.version>1.0.1</auto-service.version>
-    <jackson.version>2.13.4</jackson.version>
-    <jackson.databind.version>2.13.4.2</jackson.databind.version>
+    <keycloak.version>22.0.0</keycloak.version>
+    <lombok.version>1.18.28</lombok.version>
+    <auto-service.version>1.1.1</auto-service.version>
+    <jackson.version>2.15.2</jackson.version>
+    <jackson.databind.version>2.15.2</jackson.databind.version>
     <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
     <maven.test.skip>true</maven.test.skip>
   </properties>
@@ -130,7 +130,7 @@
       <plugin> <!-- pretty up the code using google java standards `mvn fmt:format` -->
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.19</version>
+        <version>2.20</version>
       </plugin>
     </plugins>      
   </build>
@@ -195,25 +195,29 @@
       <scope>provided</scope>
     </dependency>
     
-    <!-- javax apis -->
+    <!-- javax/jakarta apis -->
     <dependency>
       <groupId>jakarta.persistence</groupId>
       <artifactId>jakarta.persistence-api</artifactId>
-      <version>2.2.3</version>
+      <version>3.1.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.sun.mail</groupId>
-      <artifactId>jakarta.mail</artifactId>
-      <version>1.6.5</version>
+      <groupId>jakarta.mail</groupId>
+      <artifactId>jakarta.mail-api</artifactId>
+      <version>2.1.0</version>
       <scope>provided</scope>
     </dependency>
-    
-    <!-- jax-rs -->
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>2.1.1</version>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.0.2</version>
       <scope>provided</scope>
     </dependency>
 
@@ -237,19 +241,13 @@
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-      <version>1.1.0.Final</version>
-      <scope>provided</scope>
-    </dependency>
+    <!-- 3rd party deps -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>30.1-jre</version>
+      <version>32.0.0-jre</version>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>dnsjava</groupId>
       <artifactId>dnsjava</artifactId>
@@ -274,7 +272,7 @@
 	<dependency>
 	  <groupId>io.phasetwo</groupId>
 	  <artifactId>phasetwo-admin-client</artifactId>
-	  <version>0.1.1</version>
+	  <version>0.1.5</version>
 	  <scope>test</scope>
 	</dependency>
 	<dependency>

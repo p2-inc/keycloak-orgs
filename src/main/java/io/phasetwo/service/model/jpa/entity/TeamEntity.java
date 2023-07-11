@@ -1,8 +1,8 @@
 package io.phasetwo.service.model.jpa.entity;
 
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.persistence.*;
 import org.hibernate.annotations.Nationalized;
 
 /** */

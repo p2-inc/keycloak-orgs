@@ -2,10 +2,10 @@ package io.phasetwo.service.representation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import java.util.List;
 import java.util.Objects;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 public class InvitationRequest {
   private @Email @Valid String email = null;
