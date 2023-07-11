@@ -1,19 +1,15 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import io.phasetwo.service.model.OrganizationModel;
 
-import java.util.List;
 import java.util.stream.Stream;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.phasetwo.service.representation.OrganizationRole;
-import io.phasetwo.service.representation.UserRepresentationWithRoles;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;

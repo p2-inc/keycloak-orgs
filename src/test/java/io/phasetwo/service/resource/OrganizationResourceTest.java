@@ -21,6 +21,8 @@ import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.client.openapi.model.UserRepresentation;
+import io.phasetwo.service.representation.BulkResponseItem;
+import io.phasetwo.service.representation.OrganizationRole;
 import lombok.extern.jbosslog.JBossLog;
 import org.apache.http.HttpStatus;
 import org.junit.Ignore;
@@ -524,6 +526,92 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     for (String roleName : additionalRoles) {
       rolesResource.delete(roleName);
     }
+
+    // delete org
+    orgResource.delete();
+  }
+
+  @Test
+  public void testAddGetDeleteRolesBulk() throws Exception  {
+    Keycloak keycloak = server.client();
+    PhaseTwo client = phaseTwo(keycloak);
+    OrganizationsResource orgsResource = client.organizations(REALM);
+    String id = createDefaultOrg(orgsResource);
+
+    OrganizationResource orgResource = orgsResource.organization(id);
+    OrganizationRolesResource rolesResource = orgResource.roles();
+    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
+
+    // get default roles list
+    List<OrganizationRoleRepresentation> roles = rolesResource.get();
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
+
+    // create 3 bulk roles
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() +"/roles";
+      List<OrganizationRole> roleList = new ArrayList<>(){{
+        add(new OrganizationRole().name("eat-apples"));
+        add(new OrganizationRole().name("bake-pies"));
+        add(new OrganizationRole().name("view-fair"));
+      }};
+      SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+              .auth(server.client().tokenManager().getAccessTokenString())
+              .json(roleList)
+              .asResponse();
+
+      log.infof("response: %s", response.asJson().toPrettyString());
+
+      assertThat(response.getStatus(), is(207));
+      response.asJson().forEach(i ->{
+        assertThat(i.get("status").asInt(), is(201));
+      });
+    }
+
+    // get role list
+    roles = rolesResource.get();
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
+
+    // create 2 already existing roles - everything fails
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() +"/roles";
+      List<OrganizationRole> roleList = new ArrayList<>(){{
+        add(new OrganizationRole().name("eat-apples"));
+        add(new OrganizationRole().name("eat-apples"));
+      }};
+      SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+              .auth(server.client().tokenManager().getAccessTokenString())
+              .json(roleList)
+              .asResponse();
+      log.infof("response: %s", response.asJson().toPrettyString());
+      assertThat(response.getStatus(), is(207));
+      response.asJson().forEach(i ->{
+        assertThat(i.get("status").asInt(), is(400));
+      });
+    }
+    // create 1 already existing role, 1 new role - some fail
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() +"/roles";
+      List<OrganizationRole> roleList = new ArrayList<>(){{
+        add(new OrganizationRole().name("eat-apples"));
+        add(new OrganizationRole().name("drink-coffee"));
+      }};
+      SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+              .auth(server.client().tokenManager().getAccessTokenString())
+              .json(roleList)
+              .asResponse();
+      log.infof("response: %s", response.asJson().toPrettyString());
+      assertThat(response.getStatus(), is(207));
+      assertThat(response.asJson().get(0).get("status").asInt(), is(400));
+      assertThat(response.asJson().get(1).get("status").asInt(), is(201));
+    }
+    // get role list
+    roles = rolesResource.get();
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 4));
+
+    //  no events get emitted??
 
     // delete org
     orgResource.delete();

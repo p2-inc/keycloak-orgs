@@ -5,8 +5,10 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.representation.BulkResponseItem;
 import io.phasetwo.service.representation.OrganizationRole;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -55,12 +57,28 @@ public class RolesResource extends OrganizationAdminResource {
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response createRoles(List<OrganizationRole> representation) {
     canManage();
 
-    representation.forEach(this::createOrganizationRole);
+    List<BulkResponseItem> responseItems = new ArrayList<>();
 
-    return Response.created(session.getContext().getUri().getAbsolutePathBuilder().build())
+    representation.forEach(role -> {
+      int status = Response.Status.CREATED.getStatusCode();
+      String error = null;
+      try {
+        createOrganizationRole(role);
+      } catch (Exception ex){
+        status = Response.Status.BAD_REQUEST.getStatusCode();
+        error = ex.getMessage();
+      }
+      responseItems.add(new BulkResponseItem().status(status).error(error).item(role));
+    });
+
+    return Response
+            .status(207) //<-Multi-Status
+            .location(session.getContext().getUri().getAbsolutePathBuilder().build())
+            .entity(responseItems)
             .build();
   }
 
