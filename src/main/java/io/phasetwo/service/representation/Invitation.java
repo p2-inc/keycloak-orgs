@@ -3,14 +3,14 @@ package io.phasetwo.service.representation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 public class Invitation {
   private @Valid String id = null;

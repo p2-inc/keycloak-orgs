@@ -22,8 +22,8 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.spi.ResteasyClientClassicProvider;
 import org.keycloak.testsuite.KeycloakServer;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 
 public class KeycloakSuite implements TestRule {
 

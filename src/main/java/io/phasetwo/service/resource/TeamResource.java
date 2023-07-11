@@ -3,8 +3,8 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
-import javax.validation.constraints.*;
-import javax.ws.rs.*;
+import jakarta.validation.constraints.*;
+import jakarta.ws.rs.*;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.KeycloakSession;
 

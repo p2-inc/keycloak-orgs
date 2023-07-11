@@ -1,7 +1,7 @@
 package io.phasetwo.service.representation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 public class Domain {
 

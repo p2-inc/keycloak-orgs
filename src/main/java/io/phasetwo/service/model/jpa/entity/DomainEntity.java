@@ -1,6 +1,6 @@
 package io.phasetwo.service.model.jpa.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /** */
 @NamedQueries({
