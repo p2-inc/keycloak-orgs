@@ -4,6 +4,13 @@ import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import jakarta.activation.MimetypesFileTypeMap;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -15,13 +22,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.activation.MimetypesFileTypeMap;
-import javax.ws.rs.*;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
@@ -168,10 +168,24 @@ public class PortalResourceProvider implements RealmResourceProvider {
           session
               .getProvider(LoginFormsProvider.class)
               .setAttribute("environment", envStr)
-              .setAttribute("authUrl", authUrl.getPath().endsWith("/") ? authUrl.toString().substring(0, authUrl.toString().length() - 1) : authUrl.toString())
-              .setAttribute("faviconUrl", Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.favicon.url"))).orElse("${authUrl}/realms/${realmName}/portal/favicon.ico"))
-              .setAttribute("appiconUrl", Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.appicon.url"))).orElse("${authUrl}/realms/${realmName}/portal/logo192.png"))
-              .setAttribute("displayName", Optional.ofNullable(realm.getDisplayName()).orElse(realm.getName()))
+              .setAttribute(
+                  "authUrl",
+                  authUrl.getPath().endsWith("/")
+                      ? authUrl.toString().substring(0, authUrl.toString().length() - 1)
+                      : authUrl.toString())
+              .setAttribute(
+                  "faviconUrl",
+                  Optional.ofNullable(
+                          realm.getAttribute(String.format("_providerConfig.assets.favicon.url")))
+                      .orElse("${authUrl}/realms/${realmName}/portal/favicon.ico"))
+              .setAttribute(
+                  "appiconUrl",
+                  Optional.ofNullable(
+                          realm.getAttribute(String.format("_providerConfig.assets.appicon.url")))
+                      .orElse("${authUrl}/realms/${realmName}/portal/logo192.png"))
+              .setAttribute(
+                  "displayName",
+                  Optional.ofNullable(realm.getDisplayName()).orElse(realm.getName()))
               .setAttribute("realmName", realm.getName());
       FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
       Method processTemplateMethod =
