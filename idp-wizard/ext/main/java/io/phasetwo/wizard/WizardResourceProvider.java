@@ -1,19 +1,19 @@
 package io.phasetwo.wizard;
 
 import com.google.common.collect.ImmutableMap;
+import jakarta.activation.MimetypesFileTypeMap;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.activation.MimetypesFileTypeMap;
-import javax.ws.rs.*;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
