@@ -1,7 +1,7 @@
 package io.phasetwo.service.auth;
 
 import io.phasetwo.service.auth.action.PortalLinkActionTokenHandler;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.TokenVerifier;
 import org.keycloak.authentication.AuthenticationFlowContext;

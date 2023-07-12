@@ -1,9 +1,9 @@
 package io.phasetwo.service.resource;
 
 import io.phasetwo.service.model.OrganizationProvider;
+import jakarta.persistence.EntityManager;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.persistence.EntityManager;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;

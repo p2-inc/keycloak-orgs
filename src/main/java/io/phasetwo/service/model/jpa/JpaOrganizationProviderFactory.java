@@ -3,7 +3,7 @@ package io.phasetwo.service.model.jpa;
 import com.google.auto.service.AutoService;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationProviderFactory;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config.Scope;
 import org.keycloak.connections.jpa.JpaConnectionProvider;

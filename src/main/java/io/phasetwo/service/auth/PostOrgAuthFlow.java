@@ -2,7 +2,7 @@ package io.phasetwo.service.auth;
 
 import static io.phasetwo.service.Orgs.*;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;

@@ -1,11 +1,11 @@
 package io.phasetwo.service.util;
 
 import com.google.common.base.Strings;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.email.freemarker.beans.ProfileBean;

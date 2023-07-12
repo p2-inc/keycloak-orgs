@@ -3,7 +3,7 @@ package io.phasetwo.service.auth.idp;
 
 import static org.keycloak.services.resources.IdentityBrokerService.getIdentityProviderFactory;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.broker.provider.AuthenticationRequest;
