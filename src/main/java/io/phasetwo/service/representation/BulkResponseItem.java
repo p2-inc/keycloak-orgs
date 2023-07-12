@@ -1,10 +1,8 @@
 package io.phasetwo.service.representation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.validation.Valid;
 import java.util.Objects;
+import jakarta.validation.Valid;
 
 public class BulkResponseItem {
     private @Valid int status = 0;
