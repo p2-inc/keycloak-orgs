@@ -234,22 +234,19 @@ public class JpaOrganizationProvider implements OrganizationProvider {
         continue;
       }
 
-      switch (key) {
-        case "name":
-          predicates.add(
-              builder.or(
-                  builder.like(root.get("name"), "%" + value.toLowerCase() + "%"),
-                  builder.like(root.get("displayName"), "%" + value.toLowerCase() + "%")));
-          break;
-        default:
-          Join<OrganizationEntity, OrganizationAttributeEntity> attributesJoin =
-              root.join("attributes", JoinType.LEFT);
+      if (key.equals("name")) {
+        predicates.add(
+                builder.or(
+                        builder.like(builder.lower(root.get("name")), "%" + value.toLowerCase() + "%"),
+                        builder.like(builder.lower(root.get("displayName")), "%" + value.toLowerCase() + "%")));
+      } else {
+        Join<OrganizationEntity, OrganizationAttributeEntity> attributesJoin =
+                root.join("attributes", JoinType.LEFT);
 
-          attributePredicates.add(
-              builder.and(
-                  builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
-                  builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
-          break;
+        attributePredicates.add(
+                builder.and(
+                        builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
+                        builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
       }
     }
 
