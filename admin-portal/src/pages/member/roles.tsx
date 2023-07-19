@@ -228,9 +228,7 @@ const Roles = () => {
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title={`Edit ${
-          fullName(currentMember) || currentMember.email || "member"
-        }'s roles`}
+        title={`Edit ${fullName(currentMember)}'s roles`}
         icon={LoadingIcon}
         rightContent={
           <Link
