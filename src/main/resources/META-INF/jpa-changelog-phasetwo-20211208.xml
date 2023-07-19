@@ -5,7 +5,10 @@
     <validCheckSum>8:7776fbcd4917bc8d6110eedb5a638479</validCheckSum>
     <preConditions onFail="MARK_RAN">
         <not>
+          <or>
             <dbms type="mysql"/>
+            <dbms type="mariadb"/>
+          </or>
         </not>
     </preConditions>
     <dropUniqueConstraint
@@ -14,10 +17,13 @@
             uniqueColumns="ORGANIZATION_ID, USER_ID, ROLE_ID"/>
   </changeSet>
 
-  <!-- mysql specific -->
+  <!-- mysql/mariadb specific -->
   <changeSet author="garth" id="drop-column-user-org-role-org-0-1">
     <preConditions onFail="MARK_RAN">
-      <dbms type="mysql"/>
+      <or>
+        <dbms type="mysql"/>
+        <dbms type="mariadb"/>
+      </or>
     </preConditions>
     <dropForeignKeyConstraint baseTableName="USER_ORGANIZATION_ROLE_MAPPING" constraintName="FK_HGF6S4UUNYWDKP4244YTNGBAD"/>
     <dropUniqueConstraint

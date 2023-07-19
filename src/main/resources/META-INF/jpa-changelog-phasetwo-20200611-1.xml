@@ -3,7 +3,10 @@
     <changeSet author="garth" id="20200611-1-0">
         <preConditions onFail="MARK_RAN">
             <not>
-                <dbms type="mysql"/>
+                <or>
+                    <dbms type="mysql"/>
+                    <dbms type="mariadb"/>
+                </or>
             </not>
         </preConditions>
         <renameColumn columnDataType="VARCHAR(36)"
@@ -12,10 +15,13 @@
             tableName="INVITATION_TEAM"/>
     </changeSet>
 
-    <!-- mysql specific -->
+    <!-- mysql/mariadb specific -->
     <changeSet author="garth" id="20200611-1-">
         <preConditions onFail="MARK_RAN">
-            <dbms type="mysql"/>
+            <or>
+                <dbms type="mysql"/>
+                <dbms type="mariadb"/>
+            </or>
         </preConditions>
         <dropForeignKeyConstraint baseTableName="INVITATION_TEAM" constraintName="FK_lhea5u4vqt3n9694kq7hyl5at"/>
         <dropUniqueConstraint tableName="INVITATION_TEAM" constraintName="UK_lhea5u4vqt3n9694kq7hyl5at"/>
