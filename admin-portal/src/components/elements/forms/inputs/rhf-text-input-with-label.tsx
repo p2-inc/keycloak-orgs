@@ -21,6 +21,7 @@ type Props = {
     HTMLInputElement
   >;
   error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined;
+  helpText?: string;
 };
 
 const RHFFormTextInputWithLabel: FC<Props> = ({
@@ -30,6 +31,7 @@ const RHFFormTextInputWithLabel: FC<Props> = ({
   register,
   registerArgs = {},
   error,
+  helpText,
 }) => {
   return (
     <div className="sm:col-span-3">
@@ -56,6 +58,11 @@ const RHFFormTextInputWithLabel: FC<Props> = ({
           {...inputArgs}
         />
       </div>
+      {helpText && (
+        <p className="mt-2 text-sm text-gray-500" id={`${slug}__help_text`}>
+          {helpText}
+        </p>
+      )}
     </div>
   );
 };
