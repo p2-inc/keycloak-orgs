@@ -122,7 +122,7 @@ public class MembersResource extends OrganizationAdminResource {
   }
 
   private void canDelete(String userId) {
-    if (userId != user.getId()) {
+    if (!userId.equals(user.getId())) {
       canManage();
     }
   }

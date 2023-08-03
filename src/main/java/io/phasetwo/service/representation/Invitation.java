@@ -183,7 +183,7 @@ public class Invitation {
         && Objects.equals(organizationId, invitation.organizationId)
         && Objects.equals(invitationUrl, invitation.invitationUrl)
         && Objects.equals(roles, invitation.roles)
-        && Objects.equals(roles, invitation.roles);
+        && Objects.equals(teamIds, invitation.teamIds);
   }
 
   @Override

@@ -61,7 +61,7 @@ public abstract class AbstractAdminResource<T extends AdminAuth> {
     this.permissions = parent.permissions;
     this.adminEvent = parent.adminEvent;
     this.user = parent.user;
-    this.adminRealm = adminRealm;
+    this.adminRealm = parent.adminRealm;
   }
 
   public final void setup() {
