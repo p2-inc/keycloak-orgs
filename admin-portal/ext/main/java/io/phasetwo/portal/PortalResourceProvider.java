@@ -81,6 +81,14 @@ public class PortalResourceProvider implements RealmResourceProvider {
     Cors.add(request).allowAllOrigins().allowedMethods(METHODS).auth().build(response);
   }
 
+  private String getRealmName(RealmModel realm) {
+    if (!Strings.isNullOrEmpty(realm.getDisplayName())) {
+      return realm.getDisplayName();
+    } else {
+      return realm.getName();
+    }
+  }
+
   public static final String[] METHODS = {
     "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
   };
@@ -159,33 +167,32 @@ public class PortalResourceProvider implements RealmResourceProvider {
           .ifPresent(a -> env.appiconUrl(a));
       env.setFeatures(PortalFeatures.fromSession(session, auth));
 
-      // String envStr = StringEscapeUtils.escapeJson(mapper.writeValueAsString(env));
       String envStr =
           new String(JsonStringEncoder.getInstance().quoteAsString(mapper.writeValueAsString(env)));
-      // String envStr = mapper.writeValueAsString(env);
       log.infof("set environment string to %s", envStr);
+      String authUrlAttribute =
+          authUrl.getPath().endsWith("/")
+              ? authUrl.toString().substring(0, authUrl.toString().length() - 1)
+              : authUrl.toString();
+      String realmName = getRealmName(realm);
       LoginFormsProvider form =
           session
               .getProvider(LoginFormsProvider.class)
               .setAttribute("environment", envStr)
-              .setAttribute(
-                  "authUrl",
-                  authUrl.getPath().endsWith("/")
-                      ? authUrl.toString().substring(0, authUrl.toString().length() - 1)
-                      : authUrl.toString())
+              .setAttribute("authUrl", authUrlAttribute)
               .setAttribute(
                   "faviconUrl",
-                  Optional.ofNullable(
-                          realm.getAttribute(String.format("_providerConfig.assets.favicon.url")))
-                      .orElse("${authUrl}/realms/${realmName}/portal/favicon.ico"))
+                  Optional.ofNullable(realm.getAttribute("_providerConfig.assets.favicon.url"))
+                      .orElse(
+                          String.format(
+                              "%s/realms/%s/portal/favicon.ico", authUrlAttribute, realmName)))
               .setAttribute(
                   "appiconUrl",
-                  Optional.ofNullable(
-                          realm.getAttribute(String.format("_providerConfig.assets.appicon.url")))
-                      .orElse("${authUrl}/realms/${realmName}/portal/logo192.png"))
-              .setAttribute(
-                  "displayName",
-                  Optional.ofNullable(realm.getDisplayName()).orElse(realm.getName()))
+                  Optional.ofNullable(realm.getAttribute("_providerConfig.assets.appicon.url"))
+                      .orElse(
+                          String.format(
+                              "%s/realms/%s/portal/logo192.png", authUrlAttribute, realmName)))
+              .setAttribute("displayName", realmName)
               .setAttribute("realmName", realm.getName());
       FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
       Method processTemplateMethod =
