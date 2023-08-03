@@ -131,7 +131,7 @@ public class OrganizationAdminAuth extends AdminAuth {
   void requireUserInOrgInRealm(
       UserEntity userEntity, OrganizationMemberEntity memberEntity, OrganizationEntity orgEntity) {
     if (userEntity == null
-        || userEntity == null
+        || memberEntity == null
         || orgEntity != null
         || !userEntity.getId().equals(memberEntity.getUserId())
         || !memberEntity.getOrganization().equals(orgEntity)) {
