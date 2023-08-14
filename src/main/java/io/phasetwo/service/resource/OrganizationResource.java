@@ -113,7 +113,7 @@ public class OrganizationResource extends OrganizationAdminResource {
       adminEvent
           .resource(ORGANIZATION.name())
           .operation(OperationType.DELETE)
-          .resourcePath(session.getContext().getUri(), orgId)
+          .resourcePath(session.getContext().getUri())
           .representation(orgId)
           .success();
     }
