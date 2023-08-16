@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MoreCollectors;
 import io.phasetwo.service.KeycloakSuite;
@@ -18,6 +19,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.RealmRepresentation;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @JBossLog
@@ -50,6 +52,7 @@ public class OrganizationProviderTest {
       OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
       OrganizationModel org = provider.createOrganization(realm, "foo", user, false);
       id = org.getId();
+      org.setDisplayName("Foo Corp.");
       org.setDomains(ImmutableSet.of("foo.com"));
       org.setUrl("https://www.foo.com/bar");
       org.setSingleAttribute("single", "one");
@@ -119,6 +122,38 @@ public class OrganizationProviderTest {
     } finally {
       session.close();
     }
+
+    //  search with predicates
+    session = factory.create();
+    session.getTransactionManager().begin();
+    try {
+      RealmModel realm = session.realms().getRealmByName("master");
+      UserModel user = session.users().getUserByUsername(realm, "admin");
+      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
+      Stream<OrganizationModel> orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "FOO"), 0, 50, Optional.empty());
+      OrganizationModel org = orgs.findFirst().get();
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+
+      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "fO"), 0, 50, Optional.empty());
+      org = orgs.findFirst().get();
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+
+      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "Oo cORp"), 0, 50, Optional.empty());
+      org = orgs.findFirst().get();
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+
+      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "foo"), 0, 50, Optional.empty());
+      org = orgs.findFirst().get();
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+      session.getTransactionManager().commit();
+    } finally {
+      session.close();
+    }
+
 
     // check no crossover realm domains
     session = factory.create();

@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static io.phasetwo.service.Helpers.createUser;
 import static io.phasetwo.service.Helpers.deleteUser;
@@ -221,7 +222,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testImportConfig() {
+  public void testImportConfig() throws Exception {
     PhaseTwo client = phaseTwo();
     OrganizationsResource orgsResource = client.organizations(REALM);
     String id = createDefaultOrg(orgsResource);
@@ -242,10 +243,30 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(config, hasEntry("validateSignature", "false"));
     assertThat(config, hasEntry("wantAuthnRequestsSigned", "false"));
 
+    // import-config manually
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      urlConf = ImmutableMap.of(
+            "fromUrl",
+                "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
+            "providerId", "saml",
+            "realm", REALM);
+      String url = server.getAuthUrl() + "/realms/master/orgs/"+id+"/idps/import-config";
+      SimpleHttp.Response response = SimpleHttp.doPost(url, httpClient)
+                                     .json(urlConf)
+                                     .auth(server.client().tokenManager().getAccessTokenString())
+                                     .asResponse();
+      config = response.asJson(new TypeReference<Map<String,Object>>() {});
+      assertThat(config, notNullValue());
+      assertThat(config.keySet(), hasSize(11));
+      assertThat(config, hasEntry("loginHint", "false"));
+      assertThat(config, hasEntry("postBindingLogout", "false"));
+      assertThat(config, hasEntry("validateSignature", "false"));
+      assertThat(config, hasEntry("wantAuthnRequestsSigned", "false"));
+    }
     // delete org
     orgsResource.organization(id).delete();
   }
-
+  
   @Test
   public void testAddGetUpdateDeleteOrg() {
     PhaseTwo client = phaseTwo();

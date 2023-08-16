@@ -79,7 +79,8 @@ The maven build uses the shade plugin to package a fat-jar with all dependencies
 
 During the first run, some initial migrations steps will occur:
 
-- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with SQL Server, MySQL, H2, and Postgres. Other database types may fail.
+- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with SQL Server,
+  MySQL, MariaDB, H2, and Postgres. Other database types may fail.
 - Initial `realm-management` client roles (`view-organizations` and `manage-organizations`) will be be added to each realm.
 
 ### Admin UI

@@ -3,6 +3,7 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
 
+import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
 import jakarta.validation.constraints.*;
 import jakarta.ws.rs.*;
@@ -55,9 +56,10 @@ public class MembersResource extends OrganizationAdminResource {
 
     log.debugf("Remove member %s from %s %s", userId, realm.getName(), organization.getId());
     UserModel member = session.users().getUserById(realm, userId);
-    if (member
-        .getUsername()
-        .equals(OrganizationResourceProviderFactory.getDefaultAdminUsername(organization))) {
+    if (!Strings.isNullOrEmpty(member.getUsername())
+        && member
+            .getUsername()
+            .equals(OrganizationResourceProviderFactory.getDefaultAdminUsername(organization))) {
       throw new ForbiddenException("Cannot remove default organization user.");
     }
     if (member != null && organization.hasMembership(member)) {
@@ -121,7 +123,7 @@ public class MembersResource extends OrganizationAdminResource {
   }
 
   private void canDelete(String userId) {
-    if (userId != user.getId()) {
+    if (!userId.equals(user.getId())) {
       canManage();
     }
   }
