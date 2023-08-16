@@ -254,6 +254,11 @@
       <version>3.5.2</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>com.github.xgp</groupId>
+      <artifactId>kitchen-sink</artifactId>
+      <version>0.1</version>
+    </dependency>
   </dependencies>
 
   <profiles>
