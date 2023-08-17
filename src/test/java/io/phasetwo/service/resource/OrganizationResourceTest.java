@@ -36,7 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static io.phasetwo.service.Helpers.*;
@@ -555,85 +557,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         return server.getAuthUrl() + "/realms/master/events";
     }
 
-//    @Test
-//    public void testWebhookReceivesEvent() throws Exception {
-//        Keycloak keycloak = server.client();
-//        // update a realm with the ext-event-webhook listener
-//        addEventListener(keycloak, REALM, "ext-event-webhook");
-//
-//        AtomicReference<String> body = new AtomicReference<String>();
-//        // create a server on a free port with a handler to listen for the event
-//        int port = nextFreePort(8083, 10000);
-//        CloseableHttpClient httpClient = HttpClients.createDefault();
-//
-////        WebhookRepresentation rep = new WebhookRepresentation();
-////        rep.setEnabled(true);
-////        rep.setUrl("http://127.0.0.1:" + port + "/webhook");
-////        rep.setSecret("qlfwemke");
-////        rep.setEventTypes(List.of("*"));
-//
-//        String url = server.getAuthUrl() + "/realms/master/webhooks";
-//        SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
-//                .auth(server.client().tokenManager().getAccessTokenString())
-//                .asResponse();
-//        log.infof("response webhooks: %s", response.asJson().toPrettyString());
-//        assertThat(response.getStatus(), is(200));
-//
-////        response =
-////                SimpleHttp.doPost(webhookUrl(), httpClient)
-////                        .auth(keycloak.tokenManager().getAccessTokenString())
-////                        .json(rep)
-////                        .asResponse();
-////        assertThat(response.getStatus(), is(201));
-//
-////        createWebhook(
-////                keycloak,
-////                httpClient,
-////                webhookUrl(),
-////                "http://127.0.0.1:" + port + "/webhook",
-////                "qlfwemke",
-////                null);
-//
-//        Server server = new Server(port);
-//        server
-//                .router()
-//                .POST(
-//                        "/webhook",
-//                        (request, resp) -> {
-//                            String r = request.body();
-//                            log.infof("%s", r);
-//                            body.set(r);
-//                            resp.body("OK");
-//                            resp.status(202);
-//                        });
-//        server.start();
-//        Thread.sleep(1000l);
-//
-//        // cause an event to be sent
-//        Map<String, String> ev = ImmutableMap.of("type", "foo.BAR");
-//        sendEvent(httpClient, keycloak, ev);
-//
-//        Thread.sleep(1000l);
-//
-//        // check the handler for the event, after a delay
-//        assertNotNull(body.get());
-//        assertThat(body.get(), containsString("foo.BAR"));
-//
-//        removeEventListener(keycloak, "master", "ext-event-webhook");
-//        server.stop();
-//
-//    }
-
-    SimpleHttp.Response sendEvent(CloseableHttpClient httpClient, Keycloak keycloak, Map<String, String> ev) throws Exception {
-        SimpleHttp.Response resp =
-                SimpleHttp.doPost(eventsUrl(), httpClient)
-                        .auth(keycloak.tokenManager().getAccessTokenString())
-                        .json(ev)
-                        .asResponse();
-        assertThat(resp.getStatus(), is(202));
-        return resp;
-    }
-
     @Test
     public void testAddGetDeleteRolesBulk() throws Exception {
         Keycloak keycloak = server.client();
@@ -646,15 +569,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         OrganizationRolesResource rolesResource = orgResource.roles();
         OrganizationMembershipsResource membershipsResource = orgResource.memberships();
 
-        // get webhooks
-        try(CloseableHttpClient httpClient = HttpClients.createDefault()){
-            String url = server.getAuthUrl() + "/realms/master/webhooks";
-            SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
-                    .auth(server.client().tokenManager().getAccessTokenString())
-                    .asResponse();
-            log.infof("response webhooks: %s", response.asJson().toPrettyString());
-            assertThat(response.getStatus(), is(200));
-        }
+        addEventListener(keycloak, REALM, "ext-event-webhook");
+
+        // create a server on a free port with a handler to listen for the event
+        int port = nextFreePort(8083, 10000);
 
         // get default roles list
         List<OrganizationRoleRepresentation> roles = rolesResource.get();
@@ -663,31 +581,37 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
         // create 3 bulk roles
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
-            List<OrganizationRole> roleList = new ArrayList<>() {{
-                add(new OrganizationRole().name("eat-apples"));
-                add(new OrganizationRole().name("bake-pies"));
-                add(new OrganizationRole().name("view-fair"));
-            }};
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.ORGANIZATION_ROLE-CREATE"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-apples"));
+                            add(new OrganizationRole().name("bake-pies"));
+                            add(new OrganizationRole().name("view-fair"));
+                        }};
 
-            log.infof("adminEvents count: %s", server.client().realm(REALM).getAdminEvents().stream().count());
-            log.infof("Events count: %s", server.client().realm(REALM).getEvents().stream().count());
+                        SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
 
-            SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
-                    .auth(server.client().tokenManager().getAccessTokenString())
-                    .json(roleList)
-                    .asResponse();
-
-
-            log.infof("adminEvents count: %s", server.client().realm(REALM).getAdminEvents().stream().count());
-            log.infof("Events count: %s", server.client().realm(REALM).getEvents().stream().count());
-
-            log.infof("response: %s", response.asJson().toPrettyString());
-
-            assertThat(response.getStatus(), is(207));
-            response.asJson().forEach(i -> {
-                assertThat(i.get("status").asInt(), is(201));
-            });
+                        log.infof("response: %s", response.asJson().toPrettyString());
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(201));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+//                        log.infof("webhook_responses 3 add: %s", String.join(", ", webhook_responses));
+                        assertThat(webhookResponses.size(), is(3));
+                    }
+            );
         }
 
         // get role list
@@ -697,44 +621,107 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
         // create 2 already existing roles - everything fails
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
-            List<OrganizationRole> roleList = new ArrayList<>() {{
-                add(new OrganizationRole().name("eat-apples"));
-                add(new OrganizationRole().name("eat-apples"));
-            }};
-            SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
-                    .auth(server.client().tokenManager().getAccessTokenString())
-                    .json(roleList)
-                    .asResponse();
-            log.infof("response: %s", response.asJson().toPrettyString());
-            assertThat(response.getStatus(), is(207));
-            response.asJson().forEach(i -> {
-                assertThat(i.get("status").asInt(), is(400));
-            });
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.*"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-apples"));
+                            add(new OrganizationRole().name("eat-apples"));
+                        }};
+                        SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(400));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+                        // no events gets emitted
+                        assertThat(webhookResponses.size(), is(0));
+                    }
+            );
         }
         // create 1 already existing role, 1 new role - some fail
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
-            List<OrganizationRole> roleList = new ArrayList<>() {{
-                add(new OrganizationRole().name("eat-apples"));
-                add(new OrganizationRole().name("drink-coffee"));
-            }};
-            SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
-                    .auth(server.client().tokenManager().getAccessTokenString())
-                    .json(roleList)
-                    .asResponse();
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.*"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-apples"));
+                            add(new OrganizationRole().name("drink-coffee"));
+                        }};
+                        SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
 
-            log.infof("response: %s", response.asJson().toPrettyString());
-            assertThat(response.getStatus(), is(207));
-            assertThat(response.asJson().get(0).get("status").asInt(), is(400));
-            assertThat(response.asJson().get(1).get("status").asInt(), is(201));
+                        assertThat(response.getStatus(), is(207));
+                        assertThat(response.asJson().get(0).get("status").asInt(), is(400));
+                        assertThat(response.asJson().get(1).get("status").asInt(), is(201));
+                        return null;
+                    },
+                    webhookResponses -> {
+                        assertThat(webhookResponses.size(), is(1));
+                    }
+            );
         }
         // get role list
         roles = rolesResource.get();
         assertThat(roles, notNullValue());
         assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 4));
 
-        //  no events get emitted??
+        // delete 2 existing roles
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.ORGANIZATION_ROLE-DELETE"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-apples"));
+                            add(new OrganizationRole().name("drink-coffee"));
+                        }};
+                        roleList.forEach(r->{
+                            log.infof("role: %s", r.getName());
+                        });
+                        SimpleHttp.Response response = SimpleHttp.doDelete(url, httpClient)
+                                .header("Content-Type", "application/json")
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+                        log.infof("delete response: %s", response.asJson().toPrettyString());
+
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(204));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+                        assertThat(webhookResponses.size(), is(2));
+                    }
+            );
+        }
+
+
+
+        removeEventListener(keycloak, "master", "ext-event-webhook");
 
         // delete org
         orgResource.delete();

@@ -7,13 +7,21 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import com.github.xgp.http.server.Server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import io.phasetwo.client.openapi.model.WebhookRepresentation;
+import io.phasetwo.service.representation.OrganizationRole;
+import lombok.extern.jbosslog.JBossLog;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -21,6 +29,7 @@ import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.representations.idm.RealmEventsConfigRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
+@JBossLog
 public class Helpers {
 
   public static UserRepresentation createUser(Keycloak keycloak, String realm, String username) {
@@ -70,6 +79,7 @@ public class Helpers {
     return eventsConfig;
   }
 
+
   public static RealmEventsConfigRepresentation removeEventListener(
           Keycloak keycloak, String realm, String name) {
     RealmResource realmResource = keycloak.realm(realm);
@@ -111,6 +121,62 @@ public class Helpers {
     String loc = response.getFirstHeader("Location");
     String id = loc.substring(loc.lastIndexOf("/") + 1);
     return id;
+  }
+
+  public static void deleteWebhook(
+          Keycloak keycloak,
+          CloseableHttpClient httpClient,
+          String baseUrl,
+          String webhookId)
+          throws Exception {
+
+    SimpleHttp.Response response =
+            SimpleHttp.doDelete(baseUrl+"/"+webhookId, httpClient)
+                    .auth(keycloak.tokenManager().getAccessTokenString())
+                    .asResponse();
+    assertThat(response.getStatus(), is(204));
+  }
+
+  public static void webhookTestWrapper(
+          Keycloak keycloak,
+          CloseableHttpClient httpClient,
+          int port,
+          String baseUrl,
+          List<String> types,
+          Callable<Void> sendEvents,
+          Consumer<ArrayList<String>> consumeResult
+          ) throws Exception{
+    ArrayList<String> webhookResponses = new ArrayList<String>();
+
+    String webhookId = createWebhook(
+            keycloak,
+            httpClient,
+            baseUrl,
+            "http://127.0.0.1:" + port + "/webhook",
+            "qlfwemke",
+            types);
+    Server srv = new Server(port);
+    srv
+            .router()
+            .POST(
+                    "/webhook",
+                    (request, resp) -> {
+                      String r = request.body();
+//                      log.infof("server webhook: %s", r);
+                      webhookResponses.add(r);
+                      resp.body("OK");
+                      resp.status(202);
+                    });
+    srv.start();
+    Thread.sleep(1000l);
+
+    sendEvents.call();
+
+    Thread.sleep(1000l);
+
+    deleteWebhook(keycloak, httpClient, baseUrl, webhookId);
+    srv.stop();
+    consumeResult.accept(webhookResponses);
   }
 
   private static boolean isLocalPortFree(int port) {

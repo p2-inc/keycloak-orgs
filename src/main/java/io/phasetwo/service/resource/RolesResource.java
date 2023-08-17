@@ -14,6 +14,8 @@ import jakarta.validation.constraints.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
@@ -33,7 +35,7 @@ public class RolesResource extends OrganizationAdminResource {
     if (organization.getRoleByName(name) == null) {
       throw new NotFoundException();
     }
-    return new RoleResource(this, organization, name);
+    return new RoleResource(this, organization, name, this::deleteOrganizationRole);
   }
 
   @GET
@@ -83,27 +85,29 @@ public class RolesResource extends OrganizationAdminResource {
 
   @DELETE
   @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response deleteRoles(List<OrganizationRole> representation) {
     canManage();
 
-    representation.forEach(r->{
-      String name = r.getName();
+    List<BulkResponseItem> responseItems = new ArrayList<>();
 
-      if (Arrays.asList(OrganizationAdminAuth.DEFAULT_ORG_ROLES).contains(name)) {
-        throw new BadRequestException(
-                String.format("Default organization role %s cannot be deleted.", name));
+    representation.forEach(role->{
+      int status = Response.Status.NO_CONTENT.getStatusCode();
+      String error = null;
+      try {
+        deleteOrganizationRole(role.getName());
+      } catch (Exception ex){
+        status = Response.Status.BAD_REQUEST.getStatusCode();
+        error = ex.getMessage();
       }
-
-      organization.removeRole(name);
-
-      adminEvent
-              .resource(ORGANIZATION_ROLE.name())
-              .operation(OperationType.DELETE)
-              .resourcePath(session.getContext().getUri(), name)
-              .success();
+      responseItems.add(new BulkResponseItem().status(status).error(error).item(role));
     });
 
-    return Response.noContent().build();
+    return Response
+            .status(207) //<-Multi-Status
+            .location(session.getContext().getUri().getAbsolutePathBuilder().build())
+            .entity(responseItems)
+            .build();
   }
 
   private OrganizationRole createOrganizationRole(OrganizationRole representation) {
@@ -123,6 +127,21 @@ public class RolesResource extends OrganizationAdminResource {
             .representation(or)
             .success();
     return or;
+  }
+
+  public void deleteOrganizationRole(String roleName) {
+    if (Arrays.asList(OrganizationAdminAuth.DEFAULT_ORG_ROLES).contains(roleName)) {
+      throw new BadRequestException(
+              String.format("Default organization role %s cannot be deleted.", roleName));
+    }
+
+    organization.removeRole(roleName);
+
+    adminEvent
+            .resource(ORGANIZATION_ROLE.name())
+            .operation(OperationType.DELETE)
+            .resourcePath(session.getContext().getUri(), roleName)
+            .success();
   }
 
   private void canManage() {
