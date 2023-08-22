@@ -1,4 +1,4 @@
-> :rocket: **Try it for free** in the new Phase Two [keycloak managed service](https://phasetwo.io/dashboard/?utm_source=github&utm_medium=readme&utm_campaign=keycloak-orgs). See the [announcement and demo video](https://phasetwo.io/blog/self-service/) for more information.
+> :rocket: **Try it for free** in the new Phase Two [keycloak managed service](https://phasetwo.io/?utm_source=github&utm_medium=readme&utm_campaign=keycloak-orgs). See the [announcement and demo video](https://phasetwo.io/blog/self-service/) for more information.
 
 # Organizations for Keycloak
 
@@ -196,4 +196,6 @@ We’ve changed the license of our core extensions from the AGPL v3 to the [Elas
 
 -----
 
-All documentation, source code and other files in this repository are Copyright 2023 Phase Two, Inc.
+Portions of the [Home IdP Discovery](https://github.com/p2-inc/keycloak-orgs/tree/main/src/main/java/io/phasetwo/service/auth/idp) code are Copyright (c) 2021-2023 Sven-Torben Janus, and are licensed under the [MIT License](https://github.com/p2-inc/keycloak-orgs/blob/main/src/main/java/io/phasetwo/service/auth/idp/LICENSE.md).
+
+All other ocumentation, source code and other files in this repository are Copyright 2023 Phase Two, Inc.
