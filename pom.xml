@@ -30,13 +30,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>5.8.2</junit.version>
-￼   <keycloak.version>22.0.1</keycloak.version>
+    <keycloak.version>22.0.1</keycloak.version>
+    <resteasy.version>6.2.4.Final</resteasy.version>
     <lombok.version>1.18.28</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
     <jackson.version>2.15.2</jackson.version>
     <jackson.databind.version>2.15.2</jackson.databind.version>
     <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
-    <maven.test.skip>true</maven.test.skip>
   </properties>
 
   <scm>
@@ -129,7 +129,7 @@
       </plugin>
       <plugin> <!-- pretty up the code using google java standards `mvn fmt:format` -->
         <groupId>com.spotify.fmt</groupId>
-        <artifactId></artifactId>
+        <artifactId>fmt-maven-plugin</artifactId>
         <version>2.20</version>
       </plugin>
       <plugin>
@@ -202,6 +202,24 @@
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-ldap-federation</artifactId>
       <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.wildfly.client</groupId>
+      <artifactId>wildfly-client-config</artifactId>
+      <version>1.0.1.Final</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>${resteasy.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client-api</artifactId>
+      <version>${resteasy.version}</version>
       <scope>provided</scope>
     </dependency>
     
@@ -333,4 +351,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
 </project>

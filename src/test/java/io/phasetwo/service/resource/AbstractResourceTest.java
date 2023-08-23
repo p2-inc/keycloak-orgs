@@ -3,24 +3,79 @@ package io.phasetwo.service.resource;
 import io.phasetwo.client.OrganizationsResource;
 import io.phasetwo.client.PhaseTwo;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
-import io.phasetwo.service.KeycloakSuite;
-import org.junit.ClassRule;
 import org.keycloak.admin.client.Keycloak;
-
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.testcontainers.junit.jupiter.Container;
+import dasniko.testcontainers.keycloak.KeycloakContainer;
+import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 
 public abstract class AbstractResourceTest {
 
+  static final String[] deps = { "dnsjava:dnsjava",
+    "org.wildfly.client:wildfly-client-config",
+    "org.jboss.resteasy:resteasy-client",
+    "org.jboss.resteasy:resteasy-client-api",
+    "org.keycloak:keycloak-admin-client" };
+
+  static List<File> getDeps() {
+    List<File> dependencies = new ArrayList<File>();
+    for (String dep : deps) {
+      dependencies.addAll(getDep(dep));
+    }
+    return dependencies;
+  }
+
+  static List<File> getDep(String pkg) {
+    List<File> dependencies = Maven.resolver()
+                              .loadPomFromFile("./pom.xml")
+                              .resolve(pkg)
+                              .withoutTransitivity()
+                              .asList(File.class);
+    return dependencies;
+  }
+
+
+  @Container
+  public static final KeycloakContainer container =
+      new KeycloakContainer("quay.io/phasetwo/keycloak-crdb:22.0.1")
+      .withContextPath("/auth")
+      .withReuse(true)
+      .withProviderClassesFrom("target/classes")
+      .withProviderLibsFrom(getDeps());
+
+  @BeforeAll
+  public static void beforeAll() {
+    container.start();
+  }
+
+  @AfterAll
+  public static void afterAll() {
+    container.stop();
+  }
+
+  public static Keycloak getKeycloak() {
+    return container.getKeycloakAdminClient();
+  }
+
+  public static Keycloak getKeycloak(String realm, String clientId, String user, String pass) {
+    return Keycloak.getInstance(getAuthUrl(), realm, user, pass, clientId);
+  }
+  
+  public static String getAuthUrl() {
+    return container.getAuthServerUrl();
+  }
+  
   public static final String REALM = "master";
 
-  @ClassRule
-  public static KeycloakSuite server = KeycloakSuite.SERVER;
-
   public static PhaseTwo phaseTwo() {
-    return phaseTwo(server.client());
+    return phaseTwo(getKeycloak());
   }
   public static PhaseTwo phaseTwo(Keycloak keycloak) {
-    return new PhaseTwo(keycloak, server.getAuthUrl());
+    return new PhaseTwo(keycloak, getAuthUrl());
   }
 
   protected String createDefaultOrg(OrganizationsResource resource) {

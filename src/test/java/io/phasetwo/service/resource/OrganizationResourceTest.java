@@ -23,17 +23,17 @@ import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.client.openapi.model.UserRepresentation;
 import lombok.extern.jbosslog.JBossLog;
 import org.apache.http.HttpStatus;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.broker.provider.util.SimpleHttp;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
@@ -42,15 +42,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import static io.phasetwo.service.Helpers.createUser;
 import static io.phasetwo.service.Helpers.deleteUser;
-import static org.hamcrest.CoreMatchers.is;
+//import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.oneOf;
@@ -62,10 +62,177 @@ import static org.junit.Assert.assertThrows;
 @JBossLog
 public class OrganizationResourceTest extends AbstractResourceTest {
 
+  /////////////////////////////////////
+  // port from OrganizationProviderTest
+  /*
+  @Test
+  public void testCreateOrganization() throws Exception {
+    KeycloakSessionFactory factory = server.getKeycloak().getSessionFactory();
+    KeycloakSession session = factory.create();
+    createRealm("test");
+    String id = null;
+    String barid = null;
+    
+    // org foo in master
+    session = factory.create();
+    session.getTransactionManager().begin();
+    try {
+      RealmModel realm = session.realms().getRealmByName("master");
+      UserModel user = session.users().getUserByUsername(realm, "admin");
+
+      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
+      OrganizationModel org = provider.createOrganization(realm, "foo", user, false);
+      id = org.getId();
+      org.setDisplayName("Foo Corp.");
+      org.setDomains(ImmutableSet.of("foo.com"));
+      org.setUrl("https://www.foo.com/bar");
+      org.setSingleAttribute("single", "one");
+      org.setAttribute("multiple", ImmutableList.of("one", "two", "three"));
+
+      org.addInvitation("bar@foo.com", user);
+      OrganizationRoleModel role = org.addRole("admins");
+      role.grantRole(user);
+
+      session.getTransactionManager().commit();
+    } finally {
+      session.close();
+    }
+
+    // org bar in test
+    session = factory.create();
+    session.getTransactionManager().begin();
+    try {
+      RealmModel realm = session.realms().getRealmByName("test");
+      UserModel user = session.users().addUser(realm, "admin");
+
+      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
+      OrganizationModel org = provider.createOrganization(realm, "bar", user, false);
+      barid = org.getId();
+      org.setDomains(ImmutableSet.of("foo.com"));
+      org.setUrl("https://www.foo.com/bar");
+      org.setSingleAttribute("single", "one");
+      org.setAttribute("multiple", ImmutableList.of("one", "two", "three"));
+
+      org.addInvitation("bar@foo.com", user);
+      OrganizationRoleModel role = org.addRole("admins");
+      role.grantRole(user);
+
+      session.getTransactionManager().commit();
+    } finally {
+      session.close();
+    }
+
+    // check org foo in master
+    session = factory.create();
+    session.getTransactionManager().begin();
+    try {
+      RealmModel realm = session.realms().getRealmByName("master");
+      UserModel user = session.users().getUserByUsername(realm, "admin");
+      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
+      OrganizationModel org = provider.getOrganizationById(realm, id);
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+      assertThat(org.getName(), is("foo"));
+      assertThat(org.getDomains().iterator().next(), is("foo.com"));
+      assertThat(org.getUrl(), is("https://www.foo.com/bar"));
+
+      assertThat(org.getFirstAttribute("single"), is("one"));
+      assertThat(org.getFirstAttribute("multiple"), is("one"));
+      assertTrue(org.getAttributes().get("multiple").contains("two"));
+      assertTrue(org.getAttributes().get("multiple").contains("three"));
+
+      assertThat(
+          org.getInvitationsStream().collect(MoreCollectors.onlyElement()).getEmail(),
+          is("bar@foo.com"));
+
+      OrganizationRoleModel role = org.getRoleByName("admins");
+      assertThat(role.getName(), is("admins"));
+      assertTrue(role.hasRole(user));
+
+      session.getTransactionManager().commit();
+    } finally {
+      session.close();
+    }
+
+    //  search with predicates
+    session = factory.create();
+    session.getTransactionManager().begin();
+    try {
+      RealmModel realm = session.realms().getRealmByName("master");
+      UserModel user = session.users().getUserByUsername(realm, "admin");
+      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
+      Stream<OrganizationModel> orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "FOO"), 0, 50, Optional.empty());
+      OrganizationModel org = orgs.findFirst().get();
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+
+      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "fO"), 0, 50, Optional.empty());
+      org = orgs.findFirst().get();
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+
+      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "Oo cORp"), 0, 50, Optional.empty());
+      org = orgs.findFirst().get();
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+
+      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "foo"), 0, 50, Optional.empty());
+      org = orgs.findFirst().get();
+      assertNotNull(org);
+      assertThat(org.getId(), is(id));
+      session.getTransactionManager().commit();
+    } finally {
+      session.close();
+    }
+
+
+    // check no crossover realm domains
+    session = factory.create();
+    session.getTransactionManager().begin();
+    try {
+      RealmModel realm = session.realms().getRealmByName("master");
+      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
+      Stream<OrganizationModel> orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
+      assertThat(orgs.count(), is(1l));
+      orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
+      assertThat(orgs.collect(MoreCollectors.onlyElement()).getName(), is("foo"));      
+
+      realm = session.realms().getRealmByName("test");
+      orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
+      assertThat(orgs.count(), is(1l));
+      orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
+      assertThat(orgs.collect(MoreCollectors.onlyElement()).getName(), is("bar"));      
+      
+      session.getTransactionManager().commit();
+    } finally {
+      session.close();
+    }
+
+    // remove
+    session = factory.create();
+    session.getTransactionManager().begin();
+    try {
+      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
+
+      RealmModel realm = session.realms().getRealmByName("master");
+      boolean removed = provider.removeOrganization(realm, id);
+      assertTrue(removed);
+
+      realm = session.realms().getRealmByName("test");
+      removed = provider.removeOrganization(realm, barid);
+      assertTrue(removed);
+      
+      session.getTransactionManager().commit();
+    } finally {
+      session.close();
+    }
+  }
+  */
+  /////////////////////////////////////
 
   @Test
   public void testRealmRemove() {
-    try (Keycloak keycloak = server.client()) {
+    try (Keycloak keycloak = getKeycloak()) {
       String realm = "foo";
       RealmRepresentation r = new RealmRepresentation();
       r.setEnabled(true);
@@ -80,7 +247,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   
   @Test
   public void testRealmId() {
-    try(Keycloak keycloak = server.client()) {
+    try(Keycloak keycloak = getKeycloak()) {
       RealmRepresentation r = keycloak.realm(REALM).toRepresentation();
       assertThat(r.getRealm(), is(REALM));
       assertThat(r.getId(), not(REALM));
@@ -90,7 +257,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   @Test
   public void testGetMe() throws Exception {
     CloseableHttpClient httpClient = HttpClients.createDefault();
-    String baseUrl = server.getAuthUrl() + "/realms/master/orgs";
+    String baseUrl = getAuthUrl() + "/realms/master/orgs";
 
     PhaseTwo client = phaseTwo();
     OrganizationsResource orgsResource = client.organizations(REALM);
@@ -99,7 +266,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     SimpleHttp.Response response =
         SimpleHttp.doGet(baseUrl + "/me", httpClient)
-        .auth(server.client().tokenManager().getAccessTokenString())
+        .auth(getKeycloak().tokenManager().getAccessTokenString())
         .asResponse();
     assertThat(response.getStatus(), is(200));
 
@@ -142,9 +309,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     //orgs attribute search
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
       // Search attributes
-      String url = server.getAuthUrl() + "/realms/master/orgs?q=foo:bar";
+      String url = getAuthUrl() + "/realms/master/orgs?q=foo:bar";
       SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
-          .auth(server.client().tokenManager().getAccessTokenString())
+          .auth(getKeycloak().tokenManager().getAccessTokenString())
           .asResponse();
       assertThat(response.getStatus(), is(200));
       List<OrganizationRepresentation> res = response.asJson(List.class);
@@ -153,9 +320,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
       // Search attributes and name
-      String url = server.getAuthUrl() + "/realms/master/orgs?search=qu&q=foo:bar";
+      String url = getAuthUrl() + "/realms/master/orgs?search=qu&q=foo:bar";
       SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
-          .auth(server.client().tokenManager().getAccessTokenString())
+          .auth(getKeycloak().tokenManager().getAccessTokenString())
           .asResponse();
       assertThat(response.getStatus(), is(200));
       List<OrganizationRepresentation> res = response.asJson(List.class);
@@ -164,9 +331,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     //orgs count
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      String url = server.getAuthUrl() + "/realms/master/orgs/count";
+      String url = getAuthUrl() + "/realms/master/orgs/count";
       SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
-          .auth(server.client().tokenManager().getAccessTokenString())
+          .auth(getKeycloak().tokenManager().getAccessTokenString())
           .asResponse();
       assertThat(response.getStatus(), is(200));
       Long cnt = response.asJson(Long.class);
@@ -248,10 +415,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
                 "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
             "providerId", "saml",
             "realm", REALM);
-      String url = server.getAuthUrl() + "/realms/master/orgs/"+id+"/idps/import-config";
+      String url = getAuthUrl() + "/realms/master/orgs/"+id+"/idps/import-config";
       SimpleHttp.Response response = SimpleHttp.doPost(url, httpClient)
                                      .json(urlConf)
-                                     .auth(server.client().tokenManager().getAccessTokenString())
+                                     .auth(getKeycloak().tokenManager().getAccessTokenString())
                                      .asResponse();
       config = response.asJson(new TypeReference<Map<String,Object>>() {});
       assertThat(config, notNullValue());
@@ -331,7 +498,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   @Test
   public void testMembershipsCount() {
-    Keycloak keycloak = server.client();
+    Keycloak keycloak = getKeycloak();
     PhaseTwo client = phaseTwo(keycloak);
     OrganizationsResource orgsResource = client.organizations(REALM);
     String id = createDefaultOrg(orgsResource);
@@ -350,11 +517,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   Long getMembershipCount(OrganizationResource orgResource) {
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/members/count";
+      String url = getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/members/count";
       log.debugf("using %s to getMembershipCount", url);
       SimpleHttp.Response response =
           SimpleHttp.doGet(url, httpClient)
-          .auth(server.client().tokenManager().getAccessTokenString())
+          .auth(getKeycloak().tokenManager().getAccessTokenString())
           .asResponse();
       assertThat(response.getStatus(), is(200));
       return response.asJson(Long.class);
@@ -366,7 +533,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   @Test
   public void testAddGetDeleteMemberships() {
-    Keycloak keycloak = server.client();
+    Keycloak keycloak = getKeycloak();
     PhaseTwo client = phaseTwo(keycloak);
     OrganizationsResource orgsResource = client.organizations(REALM);
     String id = createDefaultOrg(orgsResource);
@@ -447,7 +614,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   @Test
   public void testAddGetDeleteRoles() {
-    Keycloak keycloak = server.client();
+    Keycloak keycloak = getKeycloak();
     PhaseTwo client = phaseTwo(keycloak);
     OrganizationsResource orgsResource = client.organizations(REALM);
     String id = createDefaultOrg(orgsResource);
@@ -552,7 +719,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   @Test
   public void testAddGetDeleteInvitations() {
-    Keycloak keycloak = server.client();
+    Keycloak keycloak = getKeycloak();
     PhaseTwo client = phaseTwo(keycloak);
     OrganizationsResource orgsResource = client.organizations(REALM);
     String id = createDefaultOrg(orgsResource);
@@ -612,7 +779,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   @Test
   public void testListOrgsByMember() {
-    Keycloak keycloak = server.client();
+    Keycloak keycloak = getKeycloak();
     PhaseTwo client = phaseTwo(keycloak);
     OrganizationsResource orgsResource = client.organizations(REALM);
     String id = createDefaultOrg(orgsResource);
@@ -645,7 +812,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     }
     
     // log in as user
-    Keycloak userKeycloak = server.client(REALM, "admin-cli", "user1", "pass");
+    Keycloak userKeycloak = getKeycloak(REALM, "admin-cli", "user1", "pass");
     PhaseTwo userClient = phaseTwo(userKeycloak);
     OrganizationsResource userOrgsResource = userClient.organizations(REALM);
 
@@ -796,7 +963,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void testIdpsOwnedOrgs() {
     PhaseTwo client = phaseTwo();
     OrganizationsResource orgsResource = client.organizations(REALM);
@@ -873,7 +1040,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   @Test
   public void testOrgAdminPermissions() {
-    Keycloak keycloak = server.client();
+    Keycloak keycloak = getKeycloak();
     PhaseTwo client1 = phaseTwo(keycloak);
     OrganizationsResource orgsResource = client1.organizations(REALM);
     String orgId1 = createDefaultOrg(orgsResource);
@@ -900,7 +1067,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       rolesResource.grant(role, user1.getId());
     }
 
-    Keycloak kc1 = server.client(REALM, "admin-cli", "user1", "pass");
+    Keycloak kc1 = getKeycloak(REALM, "admin-cli", "user1", "pass");
     PhaseTwo client2 = phaseTwo(kc1);
     OrganizationsResource secondOrganizationsResource = client2.organizations(REALM);
     OrganizationResource organizationResourceFromSecondClient = secondOrganizationsResource.organization(orgId1);
@@ -996,7 +1163,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void testOrgPortalLink() {
     OrganizationsResource orgsResource = phaseTwo().organizations(REALM);
     String id = createDefaultOrg(orgsResource);
