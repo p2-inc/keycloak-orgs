@@ -600,7 +600,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
                                 .json(roleList)
                                 .asResponse();
 
-                        log.infof("response: %s", response.asJson().toPrettyString());
+//                        log.infof("response: %s", response.asJson().toPrettyString());
                         assertThat(response.getStatus(), is(207));
                         response.asJson().forEach(i -> {
                             assertThat(i.get("status").asInt(), is(201));
@@ -690,18 +690,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
                     httpClient,
                     port,
                     webhookUrl(),
-                    List.of("admin.ORGANIZATION_ROLE-DELETE"),
+                    List.of("admin.*"),
                     () -> {
                         String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
                         List<OrganizationRole> roleList = new ArrayList<>() {{
                             add(new OrganizationRole().name("eat-apples"));
                             add(new OrganizationRole().name("drink-coffee"));
                         }};
-                        roleList.forEach(r->{
-                            log.infof("role: %s", r.getName());
-                        });
-                        SimpleHttp.Response response = SimpleHttp.doDelete(url, httpClient)
-                                .header("Content-Type", "application/json")
+                        SimpleHttp.Response response = SimpleHttp.doPatch(url, httpClient)
                                 .auth(server.client().tokenManager().getAccessTokenString())
                                 .json(roleList)
                                 .asResponse();
@@ -718,8 +714,44 @@ public class OrganizationResourceTest extends AbstractResourceTest {
                     }
             );
         }
+        // delete existing and non-existing roles
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.*"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-apples"));
+                            add(new OrganizationRole().name("drink-coffee"));
+                            add(new OrganizationRole().name("bake-pies"));
+                            add(new OrganizationRole().name("view-fair"));
+                        }};
+                        SimpleHttp.Response response = SimpleHttp.doPatch(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+                        log.infof("delete response: %s", response.asJson().toPrettyString());
 
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(204));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+                        assertThat(webhookResponses.size(), is(4));
+                    }
+            );
+        }
 
+        // ensure we deleted all created roles
+        roles = rolesResource.get();
+        assertThat(roles, notNullValue());
+        assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
         removeEventListener(keycloak, "master", "ext-event-webhook");
 
