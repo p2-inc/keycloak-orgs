@@ -579,6 +579,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         assertThat(roles, notNullValue());
         assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
+        // region CREATE ORG ROLES
         // create 3 bulk roles
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             webhookTestWrapper(
@@ -682,7 +683,224 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         roles = rolesResource.get();
         assertThat(roles, notNullValue());
         assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 4));
+        // endregion
 
+        // region GRANT USER ORG ROLES
+        // create a user
+        org.keycloak.representations.idm.UserRepresentation user = createUser(keycloak, REALM, "johndoe");
+
+        // add membership
+        membershipsResource.add(user.getId());
+
+        // grant 2 exisiting bulk roles
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.ORGANIZATION_ROLE_MAPPING-CREATE"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/users/" + user.getId() +
+                                "/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-apples"));
+                            add(new OrganizationRole().name("bake-pies"));
+                        }};
+
+                        SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+
+//                        log.infof("response: %s", response.asJson().toPrettyString());
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(201));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+//                        log.infof("webhook_responses 2 grant: %s", String.join(", ", webhookResponses));
+                        assertThat(webhookResponses.size(), is(2));
+                    }
+            );
+        }
+        // grant 1 already granted and 1 existing role
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.ORGANIZATION_ROLE_MAPPING-CREATE"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/users/" + user.getId() +
+                                "/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("bake-pies"));
+                            add(new OrganizationRole().name("view-fair"));
+                        }};
+
+                        SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+
+//                        log.infof("response: %s", response.asJson().toPrettyString());
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(201));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+//                        log.infof("webhook_responses 2 grant: %s", String.join(", ", webhookResponses));
+                        // only one new granted role
+                        assertThat(webhookResponses.size(), is(1));
+                    }
+            );
+        }
+        // grant 2 non-existing roles
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.ORGANIZATION_ROLE_MAPPING-CREATE"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/users/" + user.getId() +
+                                "/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-fruits"));
+                            add(new OrganizationRole().name("drink-tea"));
+                        }};
+
+                        SimpleHttp.Response response = SimpleHttp.doPut(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(400));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+                        // no events emitted
+                        assertThat(webhookResponses.size(), is(0));
+                    }
+            );
+        }
+        // endregion
+
+        // region REVOKE USER ORG ROLES
+        // revoke 2 non-existing roles
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.ORGANIZATION_ROLE_MAPPING-DELETE"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/users/" + user.getId() +
+                                "/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-fruits"));
+                            add(new OrganizationRole().name("drink-tea"));
+                        }};
+
+                        SimpleHttp.Response response = SimpleHttp.doPatch(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(400));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+                        // no events emitted
+                        assertThat(webhookResponses.size(), is(0));
+                    }
+            );
+        }
+        // revoke 2 granted roles
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.ORGANIZATION_ROLE_MAPPING-DELETE"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/users/" + user.getId() +
+                                "/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("eat-apples"));
+                            add(new OrganizationRole().name("bake-pies"));
+                        }};
+
+                        SimpleHttp.Response response = SimpleHttp.doPatch(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(204));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+                        assertThat(webhookResponses.size(), is(2));
+                    }
+            );
+        }
+        // revoke 1 already revoked and 1 granted role
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            webhookTestWrapper(
+                    keycloak,
+                    httpClient,
+                    port,
+                    webhookUrl(),
+                    List.of("admin.ORGANIZATION_ROLE_MAPPING-DELETE"),
+                    () -> {
+                        String url = server.getAuthUrl() + "/realms/master/users/" + user.getId() +
+                                "/orgs/" + orgResource.get().getId() + "/roles";
+                        List<OrganizationRole> roleList = new ArrayList<>() {{
+                            add(new OrganizationRole().name("bake-pies"));
+                            add(new OrganizationRole().name("view-fair"));
+                        }};
+
+                        SimpleHttp.Response response = SimpleHttp.doPatch(url, httpClient)
+                                .auth(server.client().tokenManager().getAccessTokenString())
+                                .json(roleList)
+                                .asResponse();
+
+                        assertThat(response.getStatus(), is(207));
+                        response.asJson().forEach(i -> {
+                            assertThat(i.get("status").asInt(), is(204));
+                        });
+                        return null;
+                    },
+                    webhookResponses -> {
+                        // revoke only 1 role
+                        assertThat(webhookResponses.size(), is(1));
+                    }
+            );
+        }
+
+        // delete user
+        deleteUser(keycloak, REALM, user.getId());
+        // endregion
+
+        // region DELETE ORG ROLES
         // delete 2 existing roles
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             webhookTestWrapper(
@@ -701,7 +919,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
                                 .auth(server.client().tokenManager().getAccessTokenString())
                                 .json(roleList)
                                 .asResponse();
-                        log.infof("delete response: %s", response.asJson().toPrettyString());
+//                        log.infof("delete response: %s", response.asJson().toPrettyString());
 
                         assertThat(response.getStatus(), is(207));
                         response.asJson().forEach(i -> {
@@ -734,7 +952,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
                                 .auth(server.client().tokenManager().getAccessTokenString())
                                 .json(roleList)
                                 .asResponse();
-                        log.infof("delete response: %s", response.asJson().toPrettyString());
+//                        log.infof("delete response: %s", response.asJson().toPrettyString());
 
                         assertThat(response.getStatus(), is(207));
                         response.asJson().forEach(i -> {
@@ -747,6 +965,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
                     }
             );
         }
+        // endregion
 
         // ensure we deleted all created roles
         roles = rolesResource.get();
