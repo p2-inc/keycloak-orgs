@@ -1,4 +1,5 @@
-package de.sventorben.keycloak.authentication.hidpd;
+//package de.sventorben.keycloak.authentication.hidpd;
+package io.phasetwo.service.auth.idp;
 
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;

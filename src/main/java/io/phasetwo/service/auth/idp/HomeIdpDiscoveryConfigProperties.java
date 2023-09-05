@@ -1,18 +1,39 @@
-package de.sventorben.keycloak.authentication.hidpd;
+//package de.sventorben.keycloak.authentication.hidpd;
+package io.phasetwo.service.auth.idp;
 
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ProviderConfigurationBuilder;
 
 import java.util.List;
 
-import static de.sventorben.keycloak.authentication.hidpd.HomeIdpDiscoveryConfig.BYPASS_LOGIN_PAGE;
-import static de.sventorben.keycloak.authentication.hidpd.HomeIdpDiscoveryConfig.FORWARD_TO_LINKED_IDP;
-import static de.sventorben.keycloak.authentication.hidpd.HomeIdpDiscoveryConfig.FORWARD_TO_FIRST_MATCH;
-import static de.sventorben.keycloak.authentication.hidpd.HomeIdpDiscoveryConfig.USER_ATTRIBUTE;
+import static io.phasetwo.service.auth.idp.HomeIdpDiscoveryConfig.REQUIRE_VERIFIED_EMAIL;
+import static io.phasetwo.service.auth.idp.HomeIdpDiscoveryConfig.REQUIRE_VERIFIED_DOMAIN;
+import static io.phasetwo.service.auth.idp.HomeIdpDiscoveryConfig.BYPASS_LOGIN_PAGE;
+import static io.phasetwo.service.auth.idp.HomeIdpDiscoveryConfig.FORWARD_TO_LINKED_IDP;
+import static io.phasetwo.service.auth.idp.HomeIdpDiscoveryConfig.FORWARD_TO_FIRST_MATCH;
+import static io.phasetwo.service.auth.idp.HomeIdpDiscoveryConfig.USER_ATTRIBUTE;
 import static org.keycloak.provider.ProviderConfigProperty.BOOLEAN_TYPE;
 import static org.keycloak.provider.ProviderConfigProperty.STRING_TYPE;
 
 final class HomeIdpDiscoveryConfigProperties {
+
+    private static final ProviderConfigProperty REQUIRE_VERIFIED_EMAIL_PROPERTY =
+      new ProviderConfigProperty(
+          REQUIRE_VERIFIED_EMAIL,
+          "Require a verified email",
+          "Whether a verified email address for a user is required to forward to their identity provider.",
+          BOOLEAN_TYPE,
+          false,
+          false);
+
+    private static final ProviderConfigProperty REQUIRE_VERIFIED_DOMAIN_PROPERTY =
+      new ProviderConfigProperty(
+          REQUIRE_VERIFIED_DOMAIN,
+          "Require a verified domain",
+          "Whether a verified domain name for an organization is required to forward to their identity provider.",
+          BOOLEAN_TYPE,
+          false,
+          false);
 
     private static final ProviderConfigProperty FORWARD_TO_LINKED_IDP_PROPERTY = new ProviderConfigProperty(
         FORWARD_TO_LINKED_IDP,
@@ -48,6 +69,8 @@ final class HomeIdpDiscoveryConfigProperties {
 
     static final List<ProviderConfigProperty> CONFIG_PROPERTIES = ProviderConfigurationBuilder.create()
         .property(USER_ATTRIBUTE_PROPERTY)
+        .property(REQUIRE_VERIFIED_EMAIL_PROPERTY)
+        .property(REQUIRE_VERIFIED_DOMAIN_PROPERTY)
         .property(BYPASS_LOGIN_PAGE_PROPERTY)
         .property(FORWARD_TO_LINKED_IDP_PROPERTY)
         .property(FORWARD_TO_FIRST_MATCH_PROPERTY)

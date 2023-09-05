@@ -1,5 +1,7 @@
-package de.sventorben.keycloak.authentication.hidpd;
+//package de.sventorben.keycloak.authentication.hidpd;
+package io.phasetwo.service.auth.idp;
 
+import io.phasetwo.service.model.OrganizationProvider;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.AuthenticatorConfigModel;
@@ -52,6 +54,14 @@ final class HomeIdpDiscoverer {
             emailDomain = domainExtractor.extractFrom(user);
         }
 
+        HomeIdpDiscoveryConfig config = new HomeIdpDiscoveryConfig(authenticatorConfig);
+        if (config.requireVerifiedEmail()
+            && "email".equalsIgnoreCase(config.userAttribute())
+            && !user.isEmailVerified()) {
+            LOG.infof("Email of user %s not verified. Skipping discovery of linked IdPs", user.getId());
+            return homeIdps;
+        }
+
         if (emailDomain.isPresent()) {
             Domain domain = emailDomain.get();
             homeIdps = discoverHomeIdps(domain, user, username);
@@ -86,9 +96,20 @@ final class HomeIdpDiscoverer {
         }
 
         List<IdentityProviderModel> enabledIdps = determineEnabledIdps();
+        // Original; lookup mechanism from https://github.com/sventorben/keycloak-home-idp-discovery
+        /*
         List<IdentityProviderModel> enabledIdpsWithMatchingDomain = filterIdpsWithMatchingDomainFrom(enabledIdps,
             domain,
             config);
+        */
+        // Overidden lookup mechanism to lookup via organization domain
+        OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
+        List<IdentityProviderModel> enabledIdpsWithMatchingDomain =
+            orgs.getOrganizationsStreamForDomain(
+                    context.getRealm(), domain.toString(), config.requireVerifiedDomain())
+                .flatMap(o -> o.getIdentityProvidersStream())
+                .filter(IdentityProviderModel::isEnabled)
+                .collect(Collectors.toList());
 
         // Prefer linked IdP with matching domain first
         List<IdentityProviderModel> homeIdps = getLinkedIdpsFrom(enabledIdpsWithMatchingDomain, linkedIdps);

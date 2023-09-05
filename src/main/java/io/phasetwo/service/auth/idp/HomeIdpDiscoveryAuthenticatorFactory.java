@@ -1,4 +1,5 @@
-package de.sventorben.keycloak.authentication.hidpd;
+//package de.sventorben.keycloak.authentication.hidpd;
+package io.phasetwo.service.auth.idp;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
@@ -22,7 +23,7 @@ public final class HomeIdpDiscoveryAuthenticatorFactory implements Authenticator
 
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = new AuthenticationExecutionModel.Requirement[]{REQUIRED, ALTERNATIVE, DISABLED};
 
-    private static final String PROVIDER_ID = "home-idp-discovery";
+    private static final String PROVIDER_ID = "ext-auth-home-idp-discovery";
 
     private Config.Scope config;
 

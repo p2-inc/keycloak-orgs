@@ -1,4 +1,5 @@
-package de.sventorben.keycloak.authentication.hidpd;
+//package de.sventorben.keycloak.authentication.hidpd;
+package io.phasetwo.service.auth.idp;
 
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.FederatedIdentityModel;

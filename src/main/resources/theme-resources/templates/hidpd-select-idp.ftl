@@ -6,7 +6,7 @@
         <#if realm.password && hidpd.providers??>
             <div id="kc-social-providers" class="${properties.kcFormSocialAccountSectionClass!}">
                 <hr/>
-                <h4>${msg("home-idp-discovery-identity-provider-login-label")}</h4>
+                <h4>${msg("ext-auth-home-idp-discovery-identity-provider-login-label")}</h4>
 
                 <ul class="${properties.kcFormSocialAccountListClass!} <#if hidpd.providers?size gt 3>${properties.kcFormSocialAccountListGridClass!}</#if>">
                     <#list hidpd.providers as p>

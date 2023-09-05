@@ -1,4 +1,5 @@
-package de.sventorben.keycloak.authentication.hidpd;
+//package de.sventorben.keycloak.authentication.hidpd;
+package io.phasetwo.service.auth.idp;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -20,7 +21,6 @@ final class LoginForm {
         this.context = context;
         this.loginFormsProvider = loginFormsProvider;
     }
-
 
     Response create(MultivaluedMap<String, String> formData) {
         LoginFormsProvider forms = context.form();
