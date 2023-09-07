@@ -33,7 +33,7 @@ const App: React.FC = () => {
 
   // Organization setup and selection
   const kcTPOrgId = keycloak?.tokenParsed?.org_id;
-  const orgsObj = keycloak?.tokenParsed?.organizations;
+  const orgsObj = keycloak?.tokenParsed?.organizations || {};
   const orgsArr = Object.keys(orgsObj)
     .map((orgId) => {
       const hasRealmRoles = hasOrganizationRoles("admin", orgId);

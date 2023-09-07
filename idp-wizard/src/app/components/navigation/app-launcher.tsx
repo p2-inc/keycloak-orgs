@@ -45,7 +45,7 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
     window.location.assign(keycloak.createLogoutUrl());
   };
 
-  const orgs = keycloak?.tokenParsed?.organizations;
+  const orgs = keycloak?.tokenParsed?.organizations || {};
   const orgsToPick = Object.keys(orgs).map((orgId) => {
     const hasAdminRole = hasOrganizationRoles("admin", orgId);
     if (hasAdminRole) return orgId;

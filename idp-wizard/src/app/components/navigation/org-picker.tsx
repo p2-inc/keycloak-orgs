@@ -26,8 +26,7 @@ const OrgPicker: React.FC<Props> = ({
   const dispatch = useAppDispatch();
   const currentOrg = useAppSelector((state) => state.settings.currentOrg);
   const { keycloak } = useKeycloak();
-  const orgs = keycloak?.tokenParsed?.organizations;
-  // console.log("[orgs]", orgs, currentOrg);
+  const orgs = keycloak?.tokenParsed?.organizations || {};
 
   const [selectedOrg, setSelectedOrg] = useState<string>();
 
