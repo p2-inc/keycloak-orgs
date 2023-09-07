@@ -40,10 +40,6 @@ const OrgPicker: React.FC<Props> = ({
 
   const handleModalConfirm = () => {
     dispatch(setOrganization(selectedOrg || currentOrg!));
-    dispatch(
-      selectedOrg === "global" ? setApiMode("onprem") : setApiMode("cloud")
-    );
-
     handleModalToggle();
   };
 

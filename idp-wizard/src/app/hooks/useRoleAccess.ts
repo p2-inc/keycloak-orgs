@@ -53,8 +53,8 @@ export function useRoleAccess() {
 
     if (realmAccessRoles === null || realmAccessRoles === undefined)
       return false;
-    if (realmAccessRoles["realm-management"]?.roles.indexOf(role) > -1)
-      return true;
+    if (realmAccessRoles[`${realm}-realm`]?.roles.includes(role)) return true;
+    if (realmAccessRoles["realm-management"]?.roles.includes(role)) return true;
     else return false;
   }
 

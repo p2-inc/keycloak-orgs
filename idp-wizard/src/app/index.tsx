@@ -55,11 +55,12 @@ const App: React.FC = () => {
     }
     // Naively grab the first orgId that has the right permissions
     if (orgsArr.length > 0) {
-      dispatch(setOrganization(first(orgsArr)!));
-    }
-    // No org available, must pick org.
-    if (orgsArr.length === 0) {
       dispatch(setMustPickOrg(true));
+      return;
+    }
+    // No org available but has Realm admin role
+    if (orgsArr.length === 0 && hasRealmRoles()) {
+      dispatch(setOrganization("global"));
     }
   }, []);
 
