@@ -78,7 +78,7 @@ public class IdpSelectorAuthenticator implements Authenticator {
               .getAuthenticationSession()
               .setAuthNote(AuthenticationProcessor.FORWARDED_PASSIVE_LOGIN, "true");
         }
-        
+
         log.debugf("Redirecting to %s", providerId);
         context.forceChallenge(response);
         */
