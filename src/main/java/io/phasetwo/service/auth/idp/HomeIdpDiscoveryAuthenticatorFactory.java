@@ -1,6 +1,7 @@
 //package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
+import com.google.auto.service.AutoService;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 import static org.keycloak.models.AuthenticationExecutionModel.Requirement.*;
 
+@AutoService(AuthenticatorFactory.class)
 public final class HomeIdpDiscoveryAuthenticatorFactory implements AuthenticatorFactory, ServerInfoAwareProviderFactory {
 
     private static final Logger LOG = Logger.getLogger(HomeIdpDiscoveryAuthenticatorFactory.class);
