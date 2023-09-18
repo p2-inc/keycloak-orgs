@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import io.phasetwo.keycloak.ext.resource.BaseRealmResourceProvider;
 import org.keycloak.models.KeycloakSession;
 
 public class TeamResourceProvider extends BaseRealmResourceProvider {

@@ -1,6 +1,7 @@
 package io.phasetwo.service.auth;
 
 import com.google.auto.service.AutoService;
+import io.phasetwo.keycloak.ext.auth.BaseAuthenticatorFactory;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.models.KeycloakSession;

@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import io.phasetwo.keycloak.ext.resource.AbstractAdminResource;
 import io.phasetwo.service.model.OrganizationProvider;
 import jakarta.persistence.EntityManager;
 import java.net.URI;

@@ -1,6 +1,6 @@
 package io.phasetwo.service.model.jpa.entity;
 
-import static io.phasetwo.service.model.jpa.entity.Entities.setCollection;
+import static io.phasetwo.keycloak.ext.model.jpa.entity.Entities.setCollection;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;

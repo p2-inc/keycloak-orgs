@@ -3,6 +3,8 @@ package io.phasetwo.service.auth;
 import static io.phasetwo.service.Orgs.*;
 
 import com.google.auto.service.AutoService;
+import io.phasetwo.keycloak.ext.auth.BaseAuthenticatorFactory;
+import io.phasetwo.keycloak.ext.auth.DefaultAuthenticator;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import java.util.Map;

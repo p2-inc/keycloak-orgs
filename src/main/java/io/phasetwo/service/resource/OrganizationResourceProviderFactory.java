@@ -6,10 +6,14 @@ import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORG
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_VIEW_ORGANIZATION;
 
 import com.google.auto.service.AutoService;
+import com.google.common.collect.ImmutableMap;
+import io.phasetwo.keycloak.ext.util.Stats;
 import io.phasetwo.service.Orgs;
+import io.phasetwo.service.Version;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
 import org.keycloak.models.AdminRoles;
@@ -22,13 +26,15 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.models.utils.PostMigrationEvent;
 import org.keycloak.provider.ProviderEvent;
+import org.keycloak.provider.ServerInfoAwareProviderFactory;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 /** */
 @JBossLog
 @AutoService(RealmResourceProviderFactory.class)
-public class OrganizationResourceProviderFactory implements RealmResourceProviderFactory {
+public class OrganizationResourceProviderFactory
+    implements RealmResourceProviderFactory, ServerInfoAwareProviderFactory {
 
   private static final String ID = "orgs";
 
@@ -47,7 +53,9 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
   }
 
   @Override
-  public void init(Config.Scope config) {}
+  public void init(Config.Scope config) {
+    Stats.collect(Version.getName(), Version.getVersion(), Version.getCommit());
+  }
 
   @Override
   public void postInit(KeycloakSessionFactory factory) {
@@ -242,5 +250,13 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
 
   public static String getDefaultAdminUsername(OrganizationModel org) {
     return String.format("org-admin-%s", org.getId());
+  }
+
+  @Override
+  public Map<String, String> getOperationalInfo() {
+    return ImmutableMap.of(
+        "name", Version.getName(),
+        "version", Version.getVersion(),
+        "commit", Version.getCommit());
   }
 }
