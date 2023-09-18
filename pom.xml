@@ -30,7 +30,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>4.13.2</junit.version>
-    <keycloak.version>22.0.1</keycloak.version>
+    <keycloak.version>22.0.3</keycloak.version>
     <lombok.version>1.18.28</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
     <jackson.version>2.15.2</jackson.version>
@@ -51,18 +51,24 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-	<version>3.2.0</version>
-        <configuration>
-          <archive>
-            <!-- This is required since we need to add the jboss module references
-                 to the resulting jar -->
-            <manifestEntries>
-              <!-- Adding explicit dependencies to avoid class-loading issues at runtime -->
-              <Dependencies>
-              <![CDATA[org.keycloak.keycloak-common,org.keycloak.keycloak-core,org.keycloak.keycloak-server-spi,org.keycloak.keycloak-server-spi-private,org.keycloak.keycloak-admin-client,org.apache.httpcomponents,org.keycloak.keycloak-services,org.keycloak.keycloak-saml-core,org.keycloak.keycloak-saml-core-public,org.jboss.logging,javax.api,javax.jms.api,javax.transaction.api,com.google.guava,com.fasterxml.jackson.core.jackson-core,com.fasterxml.jackson.core.jackson-annotations,com.fasterxml.jackson.core.jackson-databind,com.googlecode.owasp-java-html-sanitizer,org.apache.commons.io,org.bouncycastle,org.jboss.resteasy.resteasy-jaxrs]]></Dependencies>
-            </manifestEntries>
-          </archive>
-        </configuration>
+	<version>3.3.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>bundle</shadedClassifierName>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -241,12 +247,19 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- 3rd party deps -->
+    <!-- 3rd party provided deps -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>32.0.0-jre</version>
       <scope>provided</scope>
+    </dependency>
+
+    <!-- 3rd party deps -->
+    <dependency>
+      <groupId>io.phasetwo.keycloak</groupId>
+      <artifactId>keycloak-extensions</artifactId>
+      <version>0.1</version>
     </dependency>
     <dependency>
       <groupId>dnsjava</groupId>

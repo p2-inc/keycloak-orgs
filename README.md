@@ -19,6 +19,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
   - [Installation](#installation)
     - [Admin UI](#admin-ui)
     - [Compatibility](#compatibility)
+  - [Related Tools](#related-tools)
   - [Extensions](#extensions)
     - [Data](#data)
       - [Models](#models)
@@ -51,7 +52,7 @@ But each of these approaches had tradeoffs of scale or frailty we found undesira
 
 ## Quick start
 
-The easiest way to get started is our [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags). Documentation and examples for using it are in the [phasetwo-containers](https://github.com/p2-inc/phasetwo-containers) repo. The most recent version of this extension is included.
+The easiest way to get started is our [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=info). Documentation and examples for using it are in the [phasetwo-containers](https://github.com/p2-inc/phasetwo-containers) repo. The most recent version of this extension is included.
 
 ## Building
 
@@ -60,7 +61,7 @@ Checkout this project and run `mvn package`, which will produce a jar in the `ta
 The build uses `keycloak-testsuite-utils` for the unit tests. If you want to run the tests, you'll need to install Keycloak from source locally, as the test utility never gets published to maven central by the Keycloak team. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
 
 ```bash
-KC_VERSION=21.1.1
+KC_VERSION=22.0.3
 git clone https://github.com/keycloak/keycloak
 git fetch origin --tags
 git checkout $KC_VERSION
@@ -75,21 +76,26 @@ mvn clean install -Ptest
 
 ## Installation
 
-The maven build uses the shade plugin to package a fat-jar with all dependencies, except for the [`keycloak-admin-client`](https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client). Put the `keycloak-orgs` jar and `keycloak-admin-client` jar (that corresponds to your Keycloak version) in your `provider` (for Quarkus-based distribution) or in `standalone/deployments` (for Wildfly, legacy distribution) directory and restart Keycloak. It is unknown if these extensions will work with hot reloading using the legacy distribution.
+The jars that are distributed with the `bundle` classifier have the 3rd party dependencies bundled (via the Maven shade plugin), except for the [`keycloak-admin-client`](https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client). Put the `keycloak-orgs-{version}-bundle` jar and `keycloak-admin-client` jar (that corresponds to your Keycloak version) and its dependencies in the `providers/` directory of your Keycloak distribution and restart Keycloak. If you are installing several extensions that may have overlapping dependencies, it is recommended that you use the standalone jar, and manually install the dependencies, as you may run into version conflicts with the class files in the shaded jar.
 
 During the first run, some initial migrations steps will occur:
 
-- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with SQL Server,
-  MySQL, MariaDB, H2, and Postgres. Other database types may fail.
+- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with SQL Server, MySQL, MariaDB, H2, and Postgres. Other database types may fail.
 - Initial `realm-management` client roles (`view-organizations` and `manage-organizations`) will be be added to each realm.
 
 ### Admin UI
 
-If you are using the extension as bundled in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags) or by building our [Admin UI theme](https://github.com/p2-inc/keycloak-ui), you must take an additional step in order to show that theme. In the Admin Console UI, go to the *Realm Settings* -> *Themes* page and select `phasetwo.v2`. Then, the "Organizations" section will be available in the left navigation. Because of a quirk in Keycloak, if you are logging in to the `master` realm, the theme must be set in *that* realm, rather than the realm you wish to administer.  
+If you are using the extension as bundled in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags) or by building our [Admin UI theme](https://github.com/p2-inc/keycloak), you must take an additional step in order to show that theme. In the Admin Console UI, go to the *Realm Settings* -> *Themes* page and select `phasetwo.v2`. Then, the "Organizations" section will be available in the left navigation. Because of a quirk in Keycloak, if you are logging in to the `master` realm, the theme must be set in *that* realm, rather than the realm you wish to administer.
 
 ### Compatibility
 
-Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Please file an issue if you have successfully installed it with prior versions. Additionally, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags).
+Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. However, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags).
+
+## Related tools
+
+This extension serves as the base for a growing set of tools, each which rely on the API and model exposed by this extension.
+- [Admin Portal](https://github.com/p2-inc/phasetwo-admin-portal). Account and Organization self-management portal for your users.
+- [IdP Wizard](https://github.com/p2-inc/phasetwo-idp-wizard). Setup wizards for Identity Providers and User Federation / Directory Sync for many popular vendors.
 
 ## Extensions
 
@@ -189,7 +195,7 @@ tbd screenshot of installing in flow
 
 ## License
 
-We’ve changed the license of our core extensions from the AGPL v3 to the [Elastic License v2](https://github.com/elastic/elasticsearch/blob/main/licenses/ELASTIC-LICENSE-2.0.txt). 
+We’ve changed the license of our core extensions from the AGPL v3 to the [Elastic License v2](COPYING). 
 
 - Our blog post on the subject https://phasetwo.io/blog/licensing-change/
 - An attempt at a clarification https://github.com/p2-inc/keycloak-orgs/issues/81#issuecomment-1554683102
