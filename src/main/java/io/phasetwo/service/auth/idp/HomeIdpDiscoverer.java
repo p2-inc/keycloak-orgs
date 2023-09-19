@@ -112,10 +112,25 @@ final class HomeIdpDiscoverer {
                 .filter(IdentityProviderModel::isEnabled)
                 .collect(Collectors.toList()); */
 
+        // Custom Fastly lookup mechanism.
+        //
+        // 1. Get all Orgs linked to the user
+        // 3. Filter orgs based on inbound client (i.e. only return Sig-Sci orgs for sig-sci client etc)
+        // 2. Filter for enabled
+        // 4. Sort by users default_cid
+        String clientID = context.getAuthenticationSession().getClient().getClientId();
         OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
         List<IdentityProviderModel> enabledIdpsWithMatchingDomain =
             orgs.getUserOrganizationsStream(
                     context.getRealm(), user)
+                .filter(o -> {
+                    if(clientID.equals("sigsci-dashboard")) {
+                        String corp = o.getFirstAttribute("corp_id");
+                        return corp != null && !corp.isEmpty();
+                    }
+                    String cid = o.getFirstAttribute("customer_id");
+                    return cid != null && !cid.isEmpty();
+                })
                 .flatMap(o -> o.getIdentityProvidersStream())
                 .filter(IdentityProviderModel::isEnabled)
                 .collect(Collectors.toList());
