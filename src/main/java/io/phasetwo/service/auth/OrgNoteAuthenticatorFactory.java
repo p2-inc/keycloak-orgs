@@ -3,6 +3,8 @@ package io.phasetwo.service.auth;
 import static io.phasetwo.service.Orgs.*;
 
 import com.google.auto.service.AutoService;
+import io.phasetwo.keycloak.ext.auth.BaseAuthenticatorFactory;
+import io.phasetwo.keycloak.ext.auth.DefaultAuthenticator;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;

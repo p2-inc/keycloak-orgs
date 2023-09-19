@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
+import jakarta.ws.rs.client.Client;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
@@ -19,11 +20,7 @@ import org.keycloak.admin.client.ClientBuilderWrapper;
 import org.keycloak.admin.client.JacksonProvider;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.admin.client.spi.ResteasyClientClassicProvider;
 import org.keycloak.testsuite.KeycloakServer;
-
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
 
 public class KeycloakSuite implements TestRule {
 
@@ -138,12 +135,10 @@ public class KeycloakSuite implements TestRule {
       String url, String realm, String clientId, String username, String password) {
 
     JacksonProvider resteasyJacksonProvider = new JacksonProvider();
-    resteasyJacksonProvider.setMapper(new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
-    Client client = ClientBuilderWrapper
-            .create(null, false)
-            .register(resteasyJacksonProvider, 100)
-            .build();
+    resteasyJacksonProvider.setMapper(
+        new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
+    Client client =
+        ClientBuilderWrapper.create(null, false).register(resteasyJacksonProvider, 100).build();
 
     return KeycloakBuilder.builder()
         .serverUrl(url)

@@ -2,7 +2,8 @@ package io.phasetwo.service.auth;
 
 import static org.keycloak.services.validation.Validation.FIELD_USERNAME;
 
-import io.phasetwo.service.util.Emails;
+import io.phasetwo.keycloak.ext.auth.DefaultAuthenticator;
+import io.phasetwo.keycloak.ext.util.Emails;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;

@@ -1,5 +1,6 @@
 package io.phasetwo.service.auth;
 
+import io.phasetwo.keycloak.ext.auth.DefaultAuthenticator;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
