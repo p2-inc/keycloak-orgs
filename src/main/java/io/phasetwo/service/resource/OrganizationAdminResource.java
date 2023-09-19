@@ -9,7 +9,11 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.services.managers.AppAuthManager;
 
 /** */
@@ -27,6 +31,12 @@ public class OrganizationAdminResource extends AbstractAdminResource<Organizatio
   protected OrganizationAdminResource(OrganizationAdminResource parent) {
     super(parent);
     init();
+  }
+
+  @Override
+  public OrganizationAdminAuth createAdminAuth(
+      RealmModel realm, AccessToken token, UserModel user, ClientModel client) {
+    return new OrganizationAdminAuth(realm, token, user, client);
   }
 
   protected final Keycloak getKeycloakForUser() {
