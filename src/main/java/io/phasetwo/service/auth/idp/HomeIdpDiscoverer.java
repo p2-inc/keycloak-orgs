@@ -116,8 +116,8 @@ final class HomeIdpDiscoverer {
         //
         // 1. Get all Orgs linked to the user
         // 3. Filter orgs based on inbound client (i.e. only return Sig-Sci orgs for sig-sci client etc)
-        // 2. Filter for enabled
-        // 4. Sort by users default_cid
+        // 4. Filter orgs to only those with force_sso
+        // 2. Filter to only enabled IdPs
         String clientID = context.getAuthenticationSession().getClient().getClientId();
         OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
         List<IdentityProviderModel> enabledIdpsWithMatchingDomain =
@@ -126,10 +126,14 @@ final class HomeIdpDiscoverer {
                 .filter(o -> {
                     if(clientID.equals("sigsci-dashboard")) {
                         String corp = o.getFirstAttribute("corp_id");
-                        return corp != null && !corp.isEmpty();
+                        boolean hasCorpID = corp != null && !corp.isEmpty();
+                        return hasCorpID;
                     }
                     String cid = o.getFirstAttribute("customer_id");
-                    return cid != null && !cid.isEmpty();
+                    boolean hasCID = cid != null && !cid.isEmpty();
+                    String forceSSO = o.getFirstAttribute("force_sso");
+                    boolean hasForceSSO = forceSSO != null && forceSSO.equals("1");
+                    return hasCID && hasForceSSO;
                 })
                 .flatMap(o -> o.getIdentityProvidersStream())
                 .filter(IdentityProviderModel::isEnabled)
