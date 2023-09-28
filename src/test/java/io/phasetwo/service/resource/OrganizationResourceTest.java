@@ -1,5 +1,23 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Helpers.createUser;
+import static io.phasetwo.service.Helpers.deleteUser;
+// import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.oneOf;
+import static org.junit.Assert.assertThrows;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.client.OrganizationDomainsResource;
@@ -21,19 +39,6 @@ import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.client.openapi.model.UserRepresentation;
-import lombok.extern.jbosslog.JBossLog;
-import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RealmRepresentation;
-import org.keycloak.broker.provider.util.SimpleHttp;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
@@ -41,23 +46,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import static io.phasetwo.service.Helpers.createUser;
-import static io.phasetwo.service.Helpers.deleteUser;
-//import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.oneOf;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertThrows;
+import lombok.extern.jbosslog.JBossLog;
+import org.apache.http.HttpStatus;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.broker.provider.util.SimpleHttp;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RealmRepresentation;
 
 @JBossLog
 public class OrganizationResourceTest extends AbstractResourceTest {
@@ -72,7 +70,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createRealm("test");
     String id = null;
     String barid = null;
-    
+
     // org foo in master
     session = factory.create();
     session.getTransactionManager().begin();
@@ -195,14 +193,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       Stream<OrganizationModel> orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
       assertThat(orgs.count(), is(1l));
       orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
-      assertThat(orgs.collect(MoreCollectors.onlyElement()).getName(), is("foo"));      
+      assertThat(orgs.collect(MoreCollectors.onlyElement()).getName(), is("foo"));
 
       realm = session.realms().getRealmByName("test");
       orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
       assertThat(orgs.count(), is(1l));
       orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
-      assertThat(orgs.collect(MoreCollectors.onlyElement()).getName(), is("bar"));      
-      
+      assertThat(orgs.collect(MoreCollectors.onlyElement()).getName(), is("bar"));
+
       session.getTransactionManager().commit();
     } finally {
       session.close();
@@ -221,7 +219,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       realm = session.realms().getRealmByName("test");
       removed = provider.removeOrganization(realm, barid);
       assertTrue(removed);
-      
+
       session.getTransactionManager().commit();
     } finally {
       session.close();
@@ -244,10 +242,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       keycloak.realms().realm(realm).remove();
     }
   }
-  
+
   @Test
   public void testRealmId() {
-    try(Keycloak keycloak = getKeycloak()) {
+    try (Keycloak keycloak = getKeycloak()) {
       RealmRepresentation r = keycloak.realm(REALM).toRepresentation();
       assertThat(r.getRealm(), is(REALM));
       assertThat(r.getId(), not(REALM));
@@ -266,8 +264,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     SimpleHttp.Response response =
         SimpleHttp.doGet(baseUrl + "/me", httpClient)
-        .auth(getKeycloak().tokenManager().getAccessTokenString())
-        .asResponse();
+            .auth(getKeycloak().tokenManager().getAccessTokenString())
+            .asResponse();
     assertThat(response.getStatus(), is(200));
 
     orgResource.delete();
@@ -277,16 +275,35 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   public void testSearchOrganizations() throws Exception {
     PhaseTwo client = phaseTwo();
     OrganizationsResource orgsResource = client.organizations(REALM);
-    //create some orgs
+    // create some orgs
     List<String> ids = new ArrayList<String>();
-    ids.add(orgsResource.create(new OrganizationRepresentation().name("example").domains(List.of("example.com"))));
-    ids.add(orgsResource.create(new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))));
-    ids.add(orgsResource.create(new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))));
-    ids.add(orgsResource.create(new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
-    ids.add(orgsResource.create(new OrganizationRepresentation().name("baz").domains(List.of("baz.com")).attributes(Map.of("foo", List.of("bar")))));
-    ids.add(orgsResource.create(new OrganizationRepresentation().name("qux").domains(List.of("baz.com")).attributes(Map.of("foo", List.of("bar")))));
+    ids.add(
+        orgsResource.create(
+            new OrganizationRepresentation().name("example").domains(List.of("example.com"))));
+    ids.add(
+        orgsResource.create(
+            new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))));
+    ids.add(
+        orgsResource.create(
+            new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))));
+    ids.add(
+        orgsResource.create(
+            new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
+    ids.add(
+        orgsResource.create(
+            new OrganizationRepresentation()
+                .name("baz")
+                .domains(List.of("baz.com"))
+                .attributes(Map.of("foo", List.of("bar")))));
+    ids.add(
+        orgsResource.create(
+            new OrganizationRepresentation()
+                .name("qux")
+                .domains(List.of("baz.com"))
+                .attributes(Map.of("foo", List.of("bar")))));
 
-    List<OrganizationRepresentation> orgs = orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.empty());
+    List<OrganizationRepresentation> orgs =
+        orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.empty());
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(2));
     for (OrganizationRepresentation org : orgs) {
@@ -306,13 +323,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(4));
 
-    //orgs attribute search
+    // orgs attribute search
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
       // Search attributes
       String url = getAuthUrl() + "/realms/master/orgs?q=foo:bar";
-      SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
-          .auth(getKeycloak().tokenManager().getAccessTokenString())
-          .asResponse();
+      SimpleHttp.Response response =
+          SimpleHttp.doGet(url, httpClient)
+              .auth(getKeycloak().tokenManager().getAccessTokenString())
+              .asResponse();
       assertThat(response.getStatus(), is(200));
       List<OrganizationRepresentation> res = response.asJson(List.class);
       assertThat(res.size(), is(2));
@@ -321,20 +339,22 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
       // Search attributes and name
       String url = getAuthUrl() + "/realms/master/orgs?search=qu&q=foo:bar";
-      SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
-          .auth(getKeycloak().tokenManager().getAccessTokenString())
-          .asResponse();
+      SimpleHttp.Response response =
+          SimpleHttp.doGet(url, httpClient)
+              .auth(getKeycloak().tokenManager().getAccessTokenString())
+              .asResponse();
       assertThat(response.getStatus(), is(200));
       List<OrganizationRepresentation> res = response.asJson(List.class);
       assertThat(res.size(), is(1));
     }
 
-    //orgs count
+    // orgs count
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
       String url = getAuthUrl() + "/realms/master/orgs/count";
-      SimpleHttp.Response response = SimpleHttp.doGet(url, httpClient)
-          .auth(getKeycloak().tokenManager().getAccessTokenString())
-          .asResponse();
+      SimpleHttp.Response response =
+          SimpleHttp.doGet(url, httpClient)
+              .auth(getKeycloak().tokenManager().getAccessTokenString())
+              .asResponse();
       assertThat(response.getStatus(), is(200));
       Long cnt = response.asJson(Long.class);
       assertThat(cnt, is(6l));
@@ -410,17 +430,19 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // import-config manually
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      urlConf = ImmutableMap.of(
-            "fromUrl",
-                "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
-            "providerId", "saml",
-            "realm", REALM);
-      String url = getAuthUrl() + "/realms/master/orgs/"+id+"/idps/import-config";
-      SimpleHttp.Response response = SimpleHttp.doPost(url, httpClient)
-                                     .json(urlConf)
-                                     .auth(getKeycloak().tokenManager().getAccessTokenString())
-                                     .asResponse();
-      config = response.asJson(new TypeReference<Map<String,Object>>() {});
+      urlConf =
+          ImmutableMap.of(
+              "fromUrl",
+                  "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
+              "providerId", "saml",
+              "realm", REALM);
+      String url = getAuthUrl() + "/realms/master/orgs/" + id + "/idps/import-config";
+      SimpleHttp.Response response =
+          SimpleHttp.doPost(url, httpClient)
+              .json(urlConf)
+              .auth(getKeycloak().tokenManager().getAccessTokenString())
+              .asResponse();
+      config = response.asJson(new TypeReference<Map<String, Object>>() {});
       assertThat(config, notNullValue());
       assertThat(config.keySet(), hasSize(11));
       assertThat(config, hasEntry("loginHint", "false"));
@@ -431,14 +453,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // delete org
     orgsResource.organization(id).delete();
   }
-  
+
   @Test
   public void testAddGetUpdateDeleteOrg() {
     PhaseTwo client = phaseTwo();
     OrganizationsResource orgsResource = client.organizations(REALM);
-    String id = orgsResource.create(
-            new OrganizationRepresentation().name("example").domains(List.of("example.com"))
-    );
+    String id =
+        orgsResource.create(
+            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
     OrganizationResource orgResource = orgsResource.organization(id);
 
     // get single
@@ -466,7 +488,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(rep.getId(), is(id));
 
     // update
-    rep.url("https://www.example.com/").displayName("Example company").attributes(ImmutableMap.of("foo", List.of("bar")));
+    rep.url("https://www.example.com/")
+        .displayName("Example company")
+        .attributes(ImmutableMap.of("foo", List.of("bar")));
     orgResource.update(rep);
 
     // get single
@@ -507,7 +531,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     OrganizationMembershipsResource membershipsResource = orgResource.memberships();
 
     assertThat(getMembershipCount(orgResource), is(1l)); // org admin default
-    org.keycloak.representations.idm.UserRepresentation user = createUser(keycloak, REALM, "johndoe");
+    org.keycloak.representations.idm.UserRepresentation user =
+        createUser(keycloak, REALM, "johndoe");
     membershipsResource.add(user.getId());
     assertThat(getMembershipCount(orgResource), is(2l));
 
@@ -517,12 +542,13 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
   Long getMembershipCount(OrganizationResource orgResource) {
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      String url = getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/members/count";
+      String url =
+          getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/members/count";
       log.debugf("using %s to getMembershipCount", url);
       SimpleHttp.Response response =
           SimpleHttp.doGet(url, httpClient)
-          .auth(getKeycloak().tokenManager().getAccessTokenString())
-          .asResponse();
+              .auth(getKeycloak().tokenManager().getAccessTokenString())
+              .asResponse();
       assertThat(response.getStatus(), is(200));
       return response.asJson(Long.class);
     } catch (Exception e) {
@@ -547,7 +573,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(members, hasSize(1)); // org admin default
 
     // create a user
-    org.keycloak.representations.idm.UserRepresentation user = createUser(keycloak, REALM, "johndoe");
+    org.keycloak.representations.idm.UserRepresentation user =
+        createUser(keycloak, REALM, "johndoe");
 
     // check membership before add
     assertThat(membershipsResource.isMember(user.getId()), is(false));
@@ -570,7 +597,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     membershipsResource.add(user.getId());
 
     UsersApi usersApi = client.getUsersApi();
-    List<OrganizationRepresentation> representations = usersApi.realmUsersUserIdOrgsGet(REALM, user.getId());
+    List<OrganizationRepresentation> representations =
+        usersApi.realmUsersUserIdOrgsGet(REALM, user.getId());
     assertThat(representations, notNullValue());
     assertThat(representations, hasSize(1));
     assertThat(representations.get(0).getName(), is("example"));
@@ -604,8 +632,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(rolesResource.create(roleRep), notNullValue());
 
     // attempt to create same name role
-    ClientErrorException ex = assertThrows(ClientErrorException.class, () -> rolesResource.create(
-            new OrganizationRoleRepresentation().name(name)));
+    ClientErrorException ex =
+        assertThrows(
+            ClientErrorException.class,
+            () -> rolesResource.create(new OrganizationRoleRepresentation().name(name)));
     assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_CONFLICT));
 
     // delete org
@@ -660,7 +690,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
 
     // create a user
-    org.keycloak.representations.idm.UserRepresentation user = createUser(keycloak, REALM, "johndoe");
+    org.keycloak.representations.idm.UserRepresentation user =
+        createUser(keycloak, REALM, "johndoe");
 
     // add membership
     membershipsResource.add(user.getId());
@@ -728,7 +759,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     OrganizationInvitationsResource invitationsResource = orgResource.invitations();
 
     // create invitation
-    InvitationRequestRepresentation inv = new InvitationRequestRepresentation().email("johndoe@example.com");
+    InvitationRequestRepresentation inv =
+        new InvitationRequestRepresentation().email("johndoe@example.com");
     String inviteId = invitationsResource.add(inv);
     assertThat(inviteId, notNullValue());
 
@@ -740,7 +772,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     String invId = invites.get(0).getId();
 
     // try a conflicting invitation
-    ClientErrorException ex = assertThrows(ClientErrorException.class, () -> invitationsResource.add(inv));
+    ClientErrorException ex =
+        assertThrows(ClientErrorException.class, () -> invitationsResource.add(inv));
     assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_CONFLICT));
 
     // remove pending invitation
@@ -752,7 +785,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     pass.setValue("pass");
     pass.setTemporary(false);
     org.keycloak.representations.idm.UserRepresentation user1 =
-            new org.keycloak.representations.idm.UserRepresentation();
+        new org.keycloak.representations.idm.UserRepresentation();
     user1.setEnabled(true);
     user1.setUsername("user1");
     user1.setEmail("johndoe@example.com");
@@ -784,21 +817,23 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     OrganizationsResource orgsResource = client.organizations(REALM);
     String id = createDefaultOrg(orgsResource);
 
-    //create some others too
+    // create some others too
     List<String> ids = new ArrayList<String>();
     for (int n = 0; n < 150; n++) {
-      ids.add(orgsResource.create(new OrganizationRepresentation().name("foo" + n).domains(List.of("foo.com"))));
+      ids.add(
+          orgsResource.create(
+              new OrganizationRepresentation().name("foo" + n).domains(List.of("foo.com"))));
     }
-    
+
     OrganizationResource orgResource = orgsResource.organization(id);
-    
+
     // create user and give membership
     CredentialRepresentation pass = new CredentialRepresentation();
     pass.setType("password");
     pass.setValue("pass");
     pass.setTemporary(false);
     org.keycloak.representations.idm.UserRepresentation user1 =
-            new org.keycloak.representations.idm.UserRepresentation();
+        new org.keycloak.representations.idm.UserRepresentation();
     user1.setEnabled(true);
     user1.setUsername("user1");
     user1.setEmail("johndoe@example.com");
@@ -806,18 +841,19 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     user1 = createUser(keycloak, REALM, user1);
     // grant membership to orgs
     orgResource.memberships().add(user1.getId());
-    String [] toJoin = { ids.get(11), ids.get(99), ids.get(100), ids.get(115), ids.get(149) }; 
+    String[] toJoin = {ids.get(11), ids.get(99), ids.get(100), ids.get(115), ids.get(149)};
     for (String i : toJoin) {
       orgsResource.organization(i).memberships().add(user1.getId());
     }
-    
+
     // log in as user
     Keycloak userKeycloak = getKeycloak(REALM, "admin-cli", "user1", "pass");
     PhaseTwo userClient = phaseTwo(userKeycloak);
     OrganizationsResource userOrgsResource = userClient.organizations(REALM);
 
     // list orgs by admin
-    List<OrganizationRepresentation> orgs = orgsResource.get(Optional.empty(), Optional.empty(), Optional.empty());
+    List<OrganizationRepresentation> orgs =
+        orgsResource.get(Optional.empty(), Optional.empty(), Optional.empty());
     assertThat(orgs.size(), is(100));
     orgs = orgsResource.get(Optional.empty(), Optional.of(100), Optional.empty());
     assertThat(orgs.size(), is(51));
@@ -825,7 +861,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // list orgs by user
     orgs = userOrgsResource.get(Optional.empty(), Optional.empty(), Optional.empty());
     assertThat(orgs.size(), is(6));
-    
+
     // delete user
     deleteUser(keycloak, REALM, user1.getId());
 
@@ -870,7 +906,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .build());
 
     // create idp
-    String alias1 = idpResource.create(idp);;
+    String alias1 = idpResource.create(idp);
+    ;
     assertThat(alias1, notNullValue());
 
     // get idps
@@ -968,17 +1005,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     PhaseTwo client = phaseTwo();
     OrganizationsResource orgsResource = client.organizations(REALM);
 
-    String orgId1 = orgsResource.create(new OrganizationRepresentation()
-            .name("example")
-            .domains(List.of("example.com")));
-    String orgId2 = orgsResource.create(new OrganizationRepresentation()
-            .name("sample")
-            .domains(List.of("sample.com")));
+    String orgId1 =
+        orgsResource.create(
+            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
+    String orgId2 =
+        orgsResource.create(
+            new OrganizationRepresentation().name("sample").domains(List.of("sample.com")));
 
     OrganizationIdentityProvidersResource firstIdpResource =
-            orgsResource.organization(orgId1).identityProviders();
+        orgsResource.organization(orgId1).identityProviders();
     OrganizationIdentityProvidersResource secondIdpResource =
-            orgsResource.organization(orgId2).identityProviders();
+        orgsResource.organization(orgId2).identityProviders();
 
     // create idp for org 1
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
@@ -1054,7 +1091,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     pass.setType("password");
     pass.setValue("pass");
     pass.setTemporary(false);
-    org.keycloak.representations.idm.UserRepresentation user1 = new org.keycloak.representations.idm.UserRepresentation();
+    org.keycloak.representations.idm.UserRepresentation user1 =
+        new org.keycloak.representations.idm.UserRepresentation();
     user1.setEnabled(true);
     user1.setUsername("user1");
     user1.setCredentials(ImmutableList.of(pass));
@@ -1070,7 +1108,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     Keycloak kc1 = getKeycloak(REALM, "admin-cli", "user1", "pass");
     PhaseTwo client2 = phaseTwo(kc1);
     OrganizationsResource secondOrganizationsResource = client2.organizations(REALM);
-    OrganizationResource organizationResourceFromSecondClient = secondOrganizationsResource.organization(orgId1);
+    OrganizationResource organizationResourceFromSecondClient =
+        secondOrganizationsResource.organization(orgId1);
 
     // check that user has permissions to update org
     OrganizationRepresentation rep = organizationResourceFromSecondClient.get();
@@ -1120,7 +1159,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .put("clientSecret", "112233")
             .build());
 
-    OrganizationIdentityProvidersResource idpResource = organizationResourceFromSecondClient.identityProviders();
+    OrganizationIdentityProvidersResource idpResource =
+        organizationResourceFromSecondClient.identityProviders();
     String alias1 = idpResource.create(idp);
     assertThat(alias1, notNullValue());
 
@@ -1142,7 +1182,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // check that user does not have permission to update org
     rep.url("https://www.sample.com/").displayName("Sample company");
-    assertThrows(NotAuthorizedException.class, () -> secondOrganizationsResource.organization(orgId2).get());
+    assertThrows(
+        NotAuthorizedException.class, () -> secondOrganizationsResource.organization(orgId2).get());
 
     //  get memberships
     //  add memberships
