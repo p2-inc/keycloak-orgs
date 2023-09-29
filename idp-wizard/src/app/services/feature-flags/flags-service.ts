@@ -9,6 +9,7 @@ import keycloak from "../../../keycloak";
 import keycloakJson from "../../../keycloak.json";
 
 export interface FeatureFlagsState {
+  usernameMapperImport: boolean;
   enableGroupMapping: boolean;
   apiMode: "cloud" | "onprem" | "";
   enableLdap: boolean;
@@ -24,6 +25,7 @@ export interface FeatureFlagsState {
 type FlagsResponse = FeatureFlagsState;
 
 enum Flags {
+  UsernameMapperImport = "usernameMapperImport",
   EnableGroupMapping = "enableGroupMapping",
   ApiMode = "apiMode",
   EnableLdap = "enableLdap",
@@ -33,6 +35,7 @@ enum Flags {
 }
 
 const initialState: FeatureFlagsState = {
+  usernameMapperImport: true,
   enableGroupMapping: false,
   apiMode: "",
   enableLdap: false,
@@ -45,11 +48,6 @@ const initialState: FeatureFlagsState = {
   name: null,
 };
 
-// export const featureFlagSlice = createSlice({
-//   name: "featureFlags",
-//   initialState,
-//   reducers: {},
-// });
 const baseUrl = () => {
   // console.log("[keycloak.authServerUrl]", keycloak.authServerUrl);
   if (keycloak.authServerUrl) {

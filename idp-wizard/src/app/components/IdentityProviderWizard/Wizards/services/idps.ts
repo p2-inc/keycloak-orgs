@@ -27,6 +27,7 @@ type AttributesConfig = {
   attributeName: string;
   userAttribute: string;
   friendlyName: string;
+  syncMode: string;
 };
   
 type AttributesProps = {
@@ -67,6 +68,7 @@ export const SamlAttributeMapper = async ({
       attributeName: usernameAttribute.attributeName,
       friendlyName: usernameAttribute.friendlyName,
       userAttribute: idpUsernameAttributeName,
+      syncMode: 'INHERIT',
     });
     // update the usernameAttribute with the emailAttribute attributeName and friendlyName
     usernameAttribute.attributeName = emailAttribute.attributeName;
@@ -76,21 +78,25 @@ export const SamlAttributeMapper = async ({
     attributeName: usernameAttribute.attributeName,
     friendlyName: usernameAttribute.friendlyName,
     userAttribute: usernameAttributeName,
+    syncMode: featureFlags?.usernameMapperImport ? "IMPORT" : "INHERIT",
   });
   attributes.push({
     attributeName: emailAttribute.attributeName,
     friendlyName: emailAttribute.friendlyName,
     userAttribute: emailAttributeName,
+    syncMode: 'INHERIT',
   });
   attributes.push({
     attributeName: firstNameAttribute.attributeName,
     friendlyName: firstNameAttribute.friendlyName,
     userAttribute: firstNameAttributeName,
+    syncMode: 'INHERIT',
   });
   attributes.push({
     attributeName: lastNameAttribute.attributeName,
     friendlyName: lastNameAttribute.friendlyName,
     userAttribute: lastNameAttributeName,
+    syncMode: 'INHERIT',
   });
 
   return SamlUserAttributeMapper({
@@ -109,16 +115,18 @@ export const SamlUserAttributeMapper = async ({
     attributeName,
     friendlyName,
     userAttribute,
+    syncMode,
   }: AttributesConfig) => {
     let endpoint = `${createIdPUrl}/${alias}/mappers`;
     /*
       ? `${createIdpUrl}/${alias}/mappers`
       : `${serverUrl}/${realm}/identity-provider/instances/${alias}/mappers`;
     */
+    if (!syncMode) syncMode = "INHERIT";
     return await Axios.post(endpoint, {
       identityProviderAlias: alias,
       config: {
-        syncMode: "INHERIT",
+        syncMode: syncMode,
         attributes: "[]",
         "attribute.name": attributeName,
         "attribute.friendly.name": friendlyName,

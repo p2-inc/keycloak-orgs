@@ -18,7 +18,8 @@ import org.keycloak.models.RealmModel;
   "enableLdap",
   "enableDashboard",
   "emailAsUsername",
-  "trustEmail"
+  "trustEmail",
+  "usernameMapperImport"
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WizardConfig {
@@ -43,6 +44,8 @@ public class WizardConfig {
         .ifPresent(a -> config.emailAsUsername(a.toLowerCase().equals("true")));
     Optional.ofNullable(realm.getAttribute(CONFIG_KEY("trustEmail")))
         .ifPresent(a -> config.trustEmail(a.toLowerCase().equals("true")));
+    Optional.ofNullable(realm.getAttribute(CONFIG_KEY("usernameMapperImport")))
+        .ifPresent(a -> config.usernameMapperImport(a.toLowerCase().equals("true")));
     Optional.ofNullable(
             realm.getAttribute(
                 String.format("_providerConfig.assets.logo.url"))) // from keycloak-orgs override
@@ -82,6 +85,9 @@ public class WizardConfig {
 
   @JsonProperty("trustEmail")
   private boolean trustEmail = false;
+
+  @JsonProperty("usernameMapperImport")
+  private boolean usernameMapperImport = true;
 
   @JsonProperty("domain")
   public String getDomain() {
@@ -230,6 +236,21 @@ public class WizardConfig {
 
   public WizardConfig trustEmail(boolean trustEmail) {
     this.trustEmail = trustEmail;
+    return this;
+  }
+
+  @JsonProperty("usernameMapperImport")
+  public boolean getUsernameMapperImport() {
+    return usernameMapperImport;
+  }
+
+  @JsonProperty("usernameMapperImport")
+  public void setUsernameMapperImport(boolean usernameMapperImport) {
+    this.usernameMapperImport = usernameMapperImport;
+  }
+
+  public WizardConfig usernameMapperImport(boolean usernameMapperImport) {
+    this.usernameMapperImport = usernameMapperImport;
     return this;
   }
 }
