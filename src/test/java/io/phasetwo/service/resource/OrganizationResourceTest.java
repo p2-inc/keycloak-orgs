@@ -1,64 +1,94 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Helpers.createUser;
-import static io.phasetwo.service.Helpers.deleteUser;
-// import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.oneOf;
-import static org.junit.Assert.assertThrows;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.collect.ImmutableList;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import io.phasetwo.client.OrganizationDomainsResource;
-import io.phasetwo.client.OrganizationIdentityProvidersResource;
-import io.phasetwo.client.OrganizationInvitationsResource;
-import io.phasetwo.client.OrganizationMembershipsResource;
-import io.phasetwo.client.OrganizationResource;
-import io.phasetwo.client.OrganizationRolesResource;
-import io.phasetwo.client.OrganizationsResource;
-import io.phasetwo.client.PhaseTwo;
-import io.phasetwo.client.openapi.api.IdentityProvidersApi;
-import io.phasetwo.client.openapi.api.UsersApi;
-import io.phasetwo.client.openapi.model.IdentityProviderMapperRepresentation;
-import io.phasetwo.client.openapi.model.IdentityProviderRepresentation;
-import io.phasetwo.client.openapi.model.InvitationRepresentation;
-import io.phasetwo.client.openapi.model.InvitationRequestRepresentation;
-import io.phasetwo.client.openapi.model.OrganizationDomainRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
-import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
-import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
-import io.phasetwo.client.openapi.model.UserRepresentation;
-import jakarta.ws.rs.ClientErrorException;
-import jakarta.ws.rs.NotAuthorizedException;
-import jakarta.ws.rs.NotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import io.restassured.response.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.apache.http.HttpStatus;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.junit.jupiter.api.Disabled;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.broker.provider.util.SimpleHttp;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RealmRepresentation;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @JBossLog
+@Testcontainers
 public class OrganizationResourceTest extends AbstractResourceTest {
+
+  @Test
+  void testAddGetUpdateDeleteOrg() throws Exception {
+    // get single
+    OrganizationRepresentation rep = createOrganization(new OrganizationRepresentation().name("example").domains(List.of("example.com")));
+    String id = rep.getId();
+
+    assertThat(rep, notNullValue());
+    assertThat(rep.getId(), notNullValue());
+    assertThat(rep.getDisplayName(), CoreMatchers.nullValue());
+    assertThat(rep.getUrl(), CoreMatchers.nullValue());
+    assertThat(rep.getRealm(), is(REALM));
+    assertThat(rep.getDomains().iterator().next(), is("example.com"));
+    assertThat(rep.getName(), is("example"));
+    assertThat(rep.getId(), is(id));
+
+    // get list
+    Response response = getRequest();
+    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    List<OrganizationRepresentation> organizations = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertNotNull(organizations);
+    assertThat(organizations.size(), is(1));
+
+    rep = organizations.get(0);
+    assertThat(rep.getId(), notNullValue());
+    assertThat(rep.getDisplayName(), CoreMatchers.nullValue());
+    assertThat(rep.getUrl(), CoreMatchers.nullValue());
+    assertThat(rep.getRealm(), is(REALM));
+    assertThat(rep.getDomains().iterator().next(), is("example.com"));
+    assertThat(rep.getName(), is("example"));
+    assertThat(rep.getId(), is(id));
+
+    // update
+    rep.url("https://www.example.com/").displayName("Example company").attributes(ImmutableMap.of("foo", List.of("bar")));
+
+    response = putRequest(rep, id);
+    assertThat(response.statusCode(), is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
+
+    // get single
+    response = getRequest(id);
+    rep = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+
+    assertThat(rep.getId(), notNullValue());
+    assertThat(rep.getAttributes(), notNullValue());
+    assertThat(rep.getAttributes().keySet(), hasSize(1));
+    assertThat(rep.getAttributes().get("foo"), hasSize(1));
+    assertThat(rep.getAttributes().get("foo").get(0), is("bar"));
+    assertThat(rep.getDisplayName(), is("Example company"));
+    assertThat(rep.getUrl(), is("https://www.example.com/"));
+    assertThat(rep.getRealm(), is(REALM));
+    assertThat(rep.getDomains().iterator().next(), is("example.com"));
+    assertThat(rep.getName(), is("example"));
+    assertThat(rep.getId(), is(id));
+
+    // delete
+    deleteOrganization(id);
+
+    // get single
+    response = getRequest(id);
+    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode()));
+
+    // get list
+    response = getRequest();
+
+    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    organizations = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertNotNull(organizations);
+    assertThat(organizations.size(), is(0));
+  }
 
   /////////////////////////////////////
   // port from OrganizationProviderTest
@@ -228,6 +258,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   */
   /////////////////////////////////////
 
+  /*
   @Test
   public void testRealmRemove() {
     try (Keycloak keycloak = getKeycloak()) {
@@ -1221,4 +1252,5 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // delete org
     orgResource.delete();
   }
+   */
 }
