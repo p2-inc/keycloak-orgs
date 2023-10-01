@@ -30,7 +30,7 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 @AutoService(RealmResourceProviderFactory.class)
 public class OrganizationResourceProviderFactory implements RealmResourceProviderFactory {
 
-  private static final String ID = "orgs";
+  public static final String ID = "orgs";
 
   @Override
   public String getId() {
