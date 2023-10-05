@@ -3,15 +3,26 @@ package io.phasetwo.service.resource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import io.phasetwo.client.PhaseTwo;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.restassured.response.Response;
+import jakarta.ws.rs.core.Response.Status;
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,7 +48,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // get list
     Response response = getRequest();
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<OrganizationRepresentation> organizations = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertNotNull(organizations);
     assertThat(organizations.size(), is(1));
@@ -55,12 +66,12 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     rep.url("https://www.example.com/").displayName("Example company").attributes(ImmutableMap.of("foo", List.of("bar")));
 
     response = putRequest(rep, id);
-    assertThat(response.statusCode(), is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
+    assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get single
     response = getRequest(id);
     rep = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     assertThat(rep.getId(), notNullValue());
     assertThat(rep.getAttributes(), notNullValue());
@@ -79,12 +90,12 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // get single
     response = getRequest(id);
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // get list
     response = getRequest();
 
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     organizations = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertNotNull(organizations);
     assertThat(organizations.size(), is(0));
@@ -274,6 +285,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     }
   }
 
+
+
   @Test
   public void testRealmId() {
     try (Keycloak keycloak = getKeycloak()) {
@@ -282,26 +295,37 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       assertThat(r.getId(), not(REALM));
     }
   }
+  */
 
   @Test
-  public void testGetMe() throws Exception {
-    CloseableHttpClient httpClient = HttpClients.createDefault();
-    String baseUrl = getAuthUrl() + "/realms/master/orgs";
+  void testGetMe() throws Exception {
+    OrganizationRepresentation org = createDefaultOrg();
 
-    PhaseTwo client = phaseTwo();
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    String id = createDefaultOrg(orgsResource);
-    OrganizationResource orgResource = orgsResource.organization(id);
+    // for some reason the admin user can add
+    // add admin user membership
+    UserRepresentation admin = keycloak.realm(REALM).users().search(container.getAdminUsername()).get(0);
 
-    SimpleHttp.Response response =
-        SimpleHttp.doGet(baseUrl + "/me", httpClient)
-            .auth(getKeycloak().tokenManager().getAccessTokenString())
-            .asResponse();
-    assertThat(response.getStatus(), is(200));
+    Response response = putRequest("foo", org.getId(), "members", admin.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
-    orgResource.delete();
+
+    response = getRequest("me");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    Map<String, Object> claim = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+
+    assertThat(claim.keySet().size(), is(1));
+    assertThat(claim.containsKey(org.getId()), is(true));
+    Map<String, String> valueMap = (Map<String, String>) claim.values().stream().toList().get(0);
+    assertThat(valueMap, hasEntry("name", "example"));
+    assertThat(claim, hasKey(org.getId()));
+    assertThat(valueMap, hasEntry("roles", newArrayList()));
+    assertThat(valueMap, hasKey("attributes"));
+
+    deleteOrganization(org.getId());
   }
 
+    /*
   @Test
   public void testSearchOrganizations() throws Exception {
     PhaseTwo client = phaseTwo();

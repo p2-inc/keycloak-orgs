@@ -108,10 +108,10 @@ public abstract class AbstractResourceTest {
     return new PhaseTwo(keycloak, getAuthUrl());
   }
 
-  protected String createDefaultOrg(OrganizationsResource resource) {
+  protected OrganizationRepresentation createDefaultOrg() throws IOException {
     OrganizationRepresentation rep =
         new OrganizationRepresentation().name("example").domains(List.of("example.com"));
-    return resource.create(rep);
+    return createOrganization(rep);
   }
   protected Response getRequest(String ...paths) {
     return getRequest(String.join("/", paths), keycloak);
