@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -17,12 +18,14 @@ import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.phasetwo.service.Helpers.createUser;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -506,110 +509,31 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(org.getId());
   }
 
-  /*
-
   @Test
-  public void testAddGetUpdateDeleteOrg() {
-    PhaseTwo client = phaseTwo();
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    String id =
-        orgsResource.create(
-            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
-    OrganizationResource orgResource = orgsResource.organization(id);
+  void testMembershipsCount() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
 
-    // get single
-    OrganizationRepresentation rep = orgResource.get();
-    assertThat(rep, notNullValue());
-    assertThat(rep.getId(), notNullValue());
-    assertThat(rep.getDisplayName(), nullValue());
-    assertThat(rep.getUrl(), nullValue());
-    assertThat(rep.getRealm(), is(REALM));
-    assertThat(rep.getDomains().iterator().next(), is("example.com"));
-    assertThat(rep.getName(), is("example"));
-    assertThat(rep.getId(), is(id));
+    Response response = getRequest(org.getId(), "members", "count");
+    Long memberCount = new ObjectMapper().readValue(response.getBody().asString(), Long.class);
 
-    // get list
-    List<OrganizationRepresentation> organizations = orgsResource.get();
-    assertThat(organizations, notNullValue());
-    assertThat(organizations, hasSize(1));
-    rep = organizations.get(0);
-    assertThat(rep.getId(), notNullValue());
-    assertThat(rep.getDisplayName(), nullValue());
-    assertThat(rep.getUrl(), nullValue());
-    assertThat(rep.getRealm(), is(REALM));
-    assertThat(rep.getDomains().iterator().next(), is("example.com"));
-    assertThat(rep.getName(), is("example"));
-    assertThat(rep.getId(), is(id));
+    assertThat(memberCount, is(1L)); // org admin default
 
-    // update
-    rep.url("https://www.example.com/")
-        .displayName("Example company")
-        .attributes(ImmutableMap.of("foo", List.of("bar")));
-    orgResource.update(rep);
+    UserRepresentation user = createUser(keycloak, REALM, "johndoe");
 
-    // get single
-    rep = orgResource.get();
-    assertThat(rep.getId(), notNullValue());
-    assertThat(rep.getAttributes(), notNullValue());
-    assertThat(rep.getAttributes().keySet(), hasSize(1));
-    assertThat(rep.getAttributes().get("foo"), hasSize(1));
-    assertThat(rep.getAttributes().get("foo").get(0), is("bar"));
-    assertThat(rep.getDisplayName(), is("Example company"));
-    assertThat(rep.getUrl(), is("https://www.example.com/"));
-    assertThat(rep.getRealm(), is(REALM));
-    assertThat(rep.getDomains().iterator().next(), is("example.com"));
-    assertThat(rep.getName(), is("example"));
-    assertThat(rep.getId(), is(id));
+    // add membership
+    response = putRequest("foo", org.getId(), "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
-    // delete
-    orgResource.delete();
+    response = getRequest(org.getId(), "members", "count");
+    memberCount = new ObjectMapper().readValue(response.getBody().asString(), Long.class);
 
-    // get single
-    ClientErrorException ex = assertThrows(ClientErrorException.class, orgResource::get);
-    assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_NOT_FOUND));
-
-    // get list
-    organizations = orgsResource.get();
-    assertThat(organizations, notNullValue());
-    assertThat(organizations, empty());
-  }
-
-  @Test
-  public void testMembershipsCount() {
-    Keycloak keycloak = getKeycloak();
-    PhaseTwo client = phaseTwo(keycloak);
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    String id = createDefaultOrg(orgsResource);
-
-    OrganizationResource orgResource = orgsResource.organization(id);
-    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
-
-    assertThat(getMembershipCount(orgResource), is(1l)); // org admin default
-    org.keycloak.representations.idm.UserRepresentation user =
-        createUser(keycloak, REALM, "johndoe");
-    membershipsResource.add(user.getId());
-    assertThat(getMembershipCount(orgResource), is(2l));
+    assertThat(memberCount, is(2L));
 
     // delete org
-    orgResource.delete();
+    deleteOrganization(org.getId());
   }
 
-  Long getMembershipCount(OrganizationResource orgResource) {
-    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      String url =
-          getAuthUrl() + "/realms/master/orgs/" + orgResource.get().getId() + "/members/count";
-      log.debugf("using %s to getMembershipCount", url);
-      SimpleHttp.Response response =
-          SimpleHttp.doGet(url, httpClient)
-              .auth(getKeycloak().tokenManager().getAccessTokenString())
-              .asResponse();
-      assertThat(response.getStatus(), is(200));
-      return response.asJson(Long.class);
-    } catch (Exception e) {
-      log.warn("Error getMembershipCount", e);
-      return 0l;
-    }
-  }
+  /*
 
   @Test
   public void testAddGetDeleteMemberships() {
