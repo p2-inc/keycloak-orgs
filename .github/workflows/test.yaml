@@ -18,4 +18,4 @@ jobs:
           distribution: 'temurin'
       - name: Test Organization Extension
         run: |
-          mvn clean install
+          mvn clean install -B
