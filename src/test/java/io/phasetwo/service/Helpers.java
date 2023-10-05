@@ -2,18 +2,21 @@ package io.phasetwo.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.representations.idm.UserRepresentation;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URLEncoder;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
 
 public class Helpers {
 
   public static String toJsonString(Object representation) throws JsonProcessingException {
-    return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(representation);
+    return new ObjectMapper()
+        .writer()
+        .withDefaultPrettyPrinter()
+        .writeValueAsString(representation);
   }
+
   public static UserRepresentation createUser(Keycloak keycloak, String realm, String username) {
     UserRepresentation user = new UserRepresentation();
     user.setEnabled(true);

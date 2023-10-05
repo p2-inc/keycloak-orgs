@@ -1,34 +1,26 @@
 package io.phasetwo.service.resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import io.phasetwo.client.PhaseTwo;
-import io.phasetwo.client.openapi.model.OrganizationRepresentation;
-import io.restassured.response.Response;
-import jakarta.ws.rs.core.Response.Status;
-import lombok.extern.jbosslog.JBossLog;
-import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.keycloak.representations.idm.RealmRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static io.phasetwo.service.Helpers.createUser;
+import static io.phasetwo.service.Helpers.deleteUser;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import io.phasetwo.client.openapi.model.OrganizationRepresentation;
+import io.restassured.response.Response;
+import jakarta.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.jbosslog.JBossLog;
+import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.Test;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @JBossLog
 @Testcontainers
@@ -37,7 +29,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   @Test
   void testAddGetUpdateDeleteOrg() throws Exception {
     // get single
-    OrganizationRepresentation rep = createOrganization(new OrganizationRepresentation().name("example").domains(List.of("example.com")));
+    OrganizationRepresentation rep =
+        createOrganization(
+            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
     String id = rep.getId();
 
     assertThat(rep, notNullValue());
@@ -52,7 +46,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // get list
     Response response = getRequest();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRepresentation> organizations = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRepresentation> organizations =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertNotNull(organizations);
     assertThat(organizations.size(), is(1));
 
@@ -66,7 +61,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(rep.getId(), is(id));
 
     // update
-    rep.url("https://www.example.com/").displayName("Example company").attributes(ImmutableMap.of("foo", List.of("bar")));
+    rep.url("https://www.example.com/")
+        .displayName("Example company")
+        .attributes(ImmutableMap.of("foo", List.of("bar")));
 
     response = putRequest(rep, id);
     assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
@@ -99,7 +96,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     response = getRequest();
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    organizations = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    organizations =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertNotNull(organizations);
     assertThat(organizations.size(), is(0));
   }
@@ -306,16 +304,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // for some reason the admin user can add
     // add admin user membership
-    UserRepresentation admin = keycloak.realm(REALM).users().search(container.getAdminUsername()).get(0);
+    UserRepresentation admin =
+        keycloak.realm(REALM).users().search(container.getAdminUsername()).get(0);
 
     Response response = putRequest("foo", org.getId(), "members", admin.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
-
     response = getRequest("me");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    Map<String, Object> claim = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    Map<String, Object> claim =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
 
     assertThat(claim.keySet().size(), is(1));
     assertThat(claim.containsKey(org.getId()), is(true));
@@ -328,143 +327,143 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(org.getId());
   }
 
-    /*
-  @Test
-  public void testSearchOrganizations() throws Exception {
-    PhaseTwo client = phaseTwo();
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    // create some orgs
-    List<String> ids = new ArrayList<String>();
-    ids.add(
-        orgsResource.create(
-            new OrganizationRepresentation().name("example").domains(List.of("example.com"))));
-    ids.add(
-        orgsResource.create(
-            new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))));
-    ids.add(
-        orgsResource.create(
-            new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))));
-    ids.add(
-        orgsResource.create(
-            new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
-    ids.add(
-        orgsResource.create(
-            new OrganizationRepresentation()
-                .name("baz")
-                .domains(List.of("baz.com"))
-                .attributes(Map.of("foo", List.of("bar")))));
-    ids.add(
-        orgsResource.create(
-            new OrganizationRepresentation()
-                .name("qux")
-                .domains(List.of("baz.com"))
-                .attributes(Map.of("foo", List.of("bar")))));
+  /*
+    @Test
+    public void testSearchOrganizations() throws Exception {
+      PhaseTwo client = phaseTwo();
+      OrganizationsResource orgsResource = client.organizations(REALM);
+      // create some orgs
+      List<String> ids = new ArrayList<String>();
+      ids.add(
+          orgsResource.create(
+              new OrganizationRepresentation().name("example").domains(List.of("example.com"))));
+      ids.add(
+          orgsResource.create(
+              new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))));
+      ids.add(
+          orgsResource.create(
+              new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))));
+      ids.add(
+          orgsResource.create(
+              new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
+      ids.add(
+          orgsResource.create(
+              new OrganizationRepresentation()
+                  .name("baz")
+                  .domains(List.of("baz.com"))
+                  .attributes(Map.of("foo", List.of("bar")))));
+      ids.add(
+          orgsResource.create(
+              new OrganizationRepresentation()
+                  .name("qux")
+                  .domains(List.of("baz.com"))
+                  .attributes(Map.of("foo", List.of("bar")))));
 
-    List<OrganizationRepresentation> orgs =
-        orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.empty());
-    assertThat(orgs, notNullValue());
-    assertThat(orgs, hasSize(2));
-    for (OrganizationRepresentation org : orgs) {
-      assertThat(org.getName(), containsString("foo"));
-      assertThat(org.getDomains(), hasSize(1));
+      List<OrganizationRepresentation> orgs =
+          orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.empty());
+      assertThat(orgs, notNullValue());
+      assertThat(orgs, hasSize(2));
+      for (OrganizationRepresentation org : orgs) {
+        assertThat(org.getName(), containsString("foo"));
+        assertThat(org.getDomains(), hasSize(1));
+      }
+
+      orgs = orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.of(1));
+      assertThat(orgs, notNullValue());
+      assertThat(orgs, hasSize(1));
+
+      orgs = orgsResource.get(Optional.of("none"), Optional.empty(), Optional.empty());
+      assertThat(orgs, notNullValue());
+      assertThat(orgs, hasSize(0));
+
+      orgs = orgsResource.get(Optional.of("a"), Optional.empty(), Optional.empty());
+      assertThat(orgs, notNullValue());
+      assertThat(orgs, hasSize(4));
+
+      // orgs attribute search
+      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        // Search attributes
+        String url = getAuthUrl() + "/realms/master/orgs?q=foo:bar";
+        SimpleHttp.Response response =
+            SimpleHttp.doGet(url, httpClient)
+                .auth(getKeycloak().tokenManager().getAccessTokenString())
+                .asResponse();
+        assertThat(response.getStatus(), is(200));
+        List<OrganizationRepresentation> res = response.asJson(List.class);
+        assertThat(res.size(), is(2));
+      }
+
+      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        // Search attributes and name
+        String url = getAuthUrl() + "/realms/master/orgs?search=qu&q=foo:bar";
+        SimpleHttp.Response response =
+            SimpleHttp.doGet(url, httpClient)
+                .auth(getKeycloak().tokenManager().getAccessTokenString())
+                .asResponse();
+        assertThat(response.getStatus(), is(200));
+        List<OrganizationRepresentation> res = response.asJson(List.class);
+        assertThat(res.size(), is(1));
+      }
+
+      // orgs count
+      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        String url = getAuthUrl() + "/realms/master/orgs/count";
+        SimpleHttp.Response response =
+            SimpleHttp.doGet(url, httpClient)
+                .auth(getKeycloak().tokenManager().getAccessTokenString())
+                .asResponse();
+        assertThat(response.getStatus(), is(200));
+        Long cnt = response.asJson(Long.class);
+        assertThat(cnt, is(6l));
+      }
+
+      for (String id : ids) {
+        orgsResource.organization(id).delete();
+      }
     }
 
-    orgs = orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.of(1));
-    assertThat(orgs, notNullValue());
-    assertThat(orgs, hasSize(1));
+    @Test
+    public void testGetDomains() {
+      PhaseTwo client = phaseTwo();
+      OrganizationsResource orgsResource = client.organizations(REALM);
+      String id = createDefaultOrg(orgsResource);
+      OrganizationResource orgResource = orgsResource.organization(id);
+      OrganizationDomainsResource domainsResource = orgResource.domains();
 
-    orgs = orgsResource.get(Optional.of("none"), Optional.empty(), Optional.empty());
-    assertThat(orgs, notNullValue());
-    assertThat(orgs, hasSize(0));
+      List<OrganizationDomainRepresentation> domains = domainsResource.get();
+      assertThat(domains, notNullValue());
+      assertThat(domains, hasSize(1));
+      OrganizationDomainRepresentation domain = domains.get(0);
+      assertThat(domain.getDomainName(), is("example.com"));
+      assertThat(domain.getVerified(), is(false));
+      assertThat(domain.getRecordKey(), notNullValue());
+      assertThat(domain.getRecordValue(), notNullValue());
+      log.infof(
+          "domain %s %s %s", domain.getDomainName(), domain.getRecordKey(), domain.getRecordValue());
 
-    orgs = orgsResource.get(Optional.of("a"), Optional.empty(), Optional.empty());
-    assertThat(orgs, notNullValue());
-    assertThat(orgs, hasSize(4));
+      // update
+      orgResource.update(orgResource.get().domains(List.of("foo.com", "bar.net")));
 
-    // orgs attribute search
-    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      // Search attributes
-      String url = getAuthUrl() + "/realms/master/orgs?q=foo:bar";
-      SimpleHttp.Response response =
-          SimpleHttp.doGet(url, httpClient)
-              .auth(getKeycloak().tokenManager().getAccessTokenString())
-              .asResponse();
-      assertThat(response.getStatus(), is(200));
-      List<OrganizationRepresentation> res = response.asJson(List.class);
-      assertThat(res.size(), is(2));
+      domains = domainsResource.get();
+      assertThat(domains, notNullValue());
+      assertThat(domains, hasSize(2));
+
+      for (OrganizationDomainRepresentation d : domains) {
+        assertThat(d.getDomainName(), oneOf("foo.com", "bar.net"));
+        assertThat(d.getVerified(), is(false));
+        assertThat(d.getRecordKey(), notNullValue());
+        assertThat(d.getRecordValue(), notNullValue());
+        log.infof("domain %s %s %s", d.getDomainName(), d.getRecordKey(), d.getRecordValue());
+      }
+
+      // verify
+      domainsResource.verify("foo.com");
+
+      // delete org
+      orgResource.delete();
     }
 
-    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      // Search attributes and name
-      String url = getAuthUrl() + "/realms/master/orgs?search=qu&q=foo:bar";
-      SimpleHttp.Response response =
-          SimpleHttp.doGet(url, httpClient)
-              .auth(getKeycloak().tokenManager().getAccessTokenString())
-              .asResponse();
-      assertThat(response.getStatus(), is(200));
-      List<OrganizationRepresentation> res = response.asJson(List.class);
-      assertThat(res.size(), is(1));
-    }
-
-    // orgs count
-    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      String url = getAuthUrl() + "/realms/master/orgs/count";
-      SimpleHttp.Response response =
-          SimpleHttp.doGet(url, httpClient)
-              .auth(getKeycloak().tokenManager().getAccessTokenString())
-              .asResponse();
-      assertThat(response.getStatus(), is(200));
-      Long cnt = response.asJson(Long.class);
-      assertThat(cnt, is(6l));
-    }
-
-    for (String id : ids) {
-      orgsResource.organization(id).delete();
-    }
-  }
-
-  @Test
-  public void testGetDomains() {
-    PhaseTwo client = phaseTwo();
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    String id = createDefaultOrg(orgsResource);
-    OrganizationResource orgResource = orgsResource.organization(id);
-    OrganizationDomainsResource domainsResource = orgResource.domains();
-
-    List<OrganizationDomainRepresentation> domains = domainsResource.get();
-    assertThat(domains, notNullValue());
-    assertThat(domains, hasSize(1));
-    OrganizationDomainRepresentation domain = domains.get(0);
-    assertThat(domain.getDomainName(), is("example.com"));
-    assertThat(domain.getVerified(), is(false));
-    assertThat(domain.getRecordKey(), notNullValue());
-    assertThat(domain.getRecordValue(), notNullValue());
-    log.infof(
-        "domain %s %s %s", domain.getDomainName(), domain.getRecordKey(), domain.getRecordValue());
-
-    // update
-    orgResource.update(orgResource.get().domains(List.of("foo.com", "bar.net")));
-
-    domains = domainsResource.get();
-    assertThat(domains, notNullValue());
-    assertThat(domains, hasSize(2));
-
-    for (OrganizationDomainRepresentation d : domains) {
-      assertThat(d.getDomainName(), oneOf("foo.com", "bar.net"));
-      assertThat(d.getVerified(), is(false));
-      assertThat(d.getRecordKey(), notNullValue());
-      assertThat(d.getRecordValue(), notNullValue());
-      log.infof("domain %s %s %s", d.getDomainName(), d.getRecordKey(), d.getRecordValue());
-    }
-
-    // verify
-    domainsResource.verify("foo.com");
-
-    // delete org
-    orgResource.delete();
-  }
-
-*/
+  */
   @Test
   void testImportConfig() throws Exception {
     OrganizationRepresentation org = createDefaultOrg();
@@ -480,7 +479,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    Map<String, Object> config = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    Map<String, Object> config =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(config, notNullValue());
     assertThat(config.keySet(), hasSize(11));
     assertThat(config, hasEntry("loginHint", "false"));
@@ -489,22 +489,22 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(config, hasEntry("wantAuthnRequestsSigned", "false"));
 
     // import-config manually
-      urlConf =
-          ImmutableMap.of(
-              "fromUrl",
-                  "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
-              "providerId", "saml",
-              "realm", REALM);
+    urlConf =
+        ImmutableMap.of(
+            "fromUrl",
+                "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
+            "providerId", "saml",
+            "realm", REALM);
     response = postRequest(urlConf, org.getId(), "idps", "import-config");
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-      config = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-      assertThat(config, notNullValue());
-      assertThat(config.keySet(), hasSize(11));
-      assertThat(config, hasEntry("loginHint", "false"));
-      assertThat(config, hasEntry("postBindingLogout", "false"));
-      assertThat(config, hasEntry("validateSignature", "false"));
-      assertThat(config, hasEntry("wantAuthnRequestsSigned", "false"));
+    config = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(config, notNullValue());
+    assertThat(config.keySet(), hasSize(11));
+    assertThat(config, hasEntry("loginHint", "false"));
+    assertThat(config, hasEntry("postBindingLogout", "false"));
+    assertThat(config, hasEntry("validateSignature", "false"));
+    assertThat(config, hasEntry("wantAuthnRequestsSigned", "false"));
     // delete org
     deleteOrganization(org.getId());
   }
@@ -533,63 +533,65 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(org.getId());
   }
 
-  /*
-
   @Test
-  public void testAddGetDeleteMemberships() {
-    Keycloak keycloak = getKeycloak();
-    PhaseTwo client = phaseTwo(keycloak);
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    String id = createDefaultOrg(orgsResource);
+  void testAddGetDeleteMemberships() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
 
-    OrganizationResource orgResource = orgsResource.organization(id);
-    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
+    Response response = getRequest(id, "members");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
 
     // get empty members list
-    List<UserRepresentation> members = membershipsResource.members();
+    List<UserRepresentation> members =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(members, notNullValue());
     assertThat(members, hasSize(1)); // org admin default
 
     // create a user
-    org.keycloak.representations.idm.UserRepresentation user =
-        createUser(keycloak, REALM, "johndoe");
+    UserRepresentation user = createUser(keycloak, REALM, "johndoe");
 
     // check membership before add
-    assertThat(membershipsResource.isMember(user.getId()), is(false));
+    response = getRequest(id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // add membership and check
-    membershipsResource.add(user.getId());
-    assertThat(membershipsResource.isMember(user.getId()), is(true));
+    response = putRequest("foo", org.getId(), "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = getRequest(id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get members list
-    members = membershipsResource.members();
+    response = getRequest(id, "members");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(members, notNullValue());
     assertThat(members, hasSize(2)); // +default org admin
     assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
 
-    // delete membership and check
-    membershipsResource.remove(user.getId());
-    assertThat(membershipsResource.isMember(user.getId()), is(false));
+    // get user orgs
+    response = givenSpec("users", user.getId(), "orgs").when().get().then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    // add membership
-    membershipsResource.add(user.getId());
-
-    UsersApi usersApi = client.getUsersApi();
     List<OrganizationRepresentation> representations =
-        usersApi.realmUsersUserIdOrgsGet(REALM, user.getId());
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(representations, notNullValue());
     assertThat(representations, hasSize(1));
     assertThat(representations.get(0).getName(), is("example"));
 
+    // delete membership and check
+    response = deleteRequest(id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+    response = getRequest(id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
+
     // delete user
     deleteUser(keycloak, REALM, user.getId());
 
-    // check membership after delete user
-    assertThat(membershipsResource.isMember(user.getId()), is(false));
-
     // delete org
-    orgResource.delete();
+    deleteOrganization(id);
   }
+
+  /*
 
   @Test
   public void testDuplicateRoles() {
