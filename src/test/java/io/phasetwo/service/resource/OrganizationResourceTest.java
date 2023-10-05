@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
+import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
@@ -591,37 +592,38 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(id);
   }
 
-  /*
+
 
   @Test
-  public void testDuplicateRoles() {
-    PhaseTwo client = phaseTwo();
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    String id = createDefaultOrg(orgsResource);
+  void testDuplicateRoles() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
 
-    OrganizationRolesResource rolesResource = orgsResource.organization(id).roles();
+    Response response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
 
     // get default roles list
-    List<OrganizationRoleRepresentation> roles = rolesResource.get();
+    List<OrganizationRoleRepresentation> roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
     // create a role
     String name = "eat-apples";
     OrganizationRoleRepresentation roleRep = new OrganizationRoleRepresentation().name(name);
-    assertThat(rolesResource.create(roleRep), notNullValue());
+    response = postRequest(roleRep, id, "roles");
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    assertNotNull(response.getHeader("Location"));
 
     // attempt to create same name role
-    ClientErrorException ex =
-        assertThrows(
-            ClientErrorException.class,
-            () -> rolesResource.create(new OrganizationRoleRepresentation().name(name)));
-    assertThat(ex.getResponse().getStatus(), is(HttpStatus.SC_CONFLICT));
+    response = postRequest(roleRep, id, "roles");
+    assertThat(response.getStatusCode(), is(Status.CONFLICT.getStatusCode()));
 
     // delete org
-    orgsResource.organization(id).delete();
+    deleteOrganization(id);
   }
 
+   /*
   @Test
   public void testAddGetDeleteRoles() {
     Keycloak keycloak = getKeycloak();
