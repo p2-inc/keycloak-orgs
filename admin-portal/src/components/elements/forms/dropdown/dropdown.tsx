@@ -4,7 +4,7 @@ import cs from "classnames";
 
 type DropdownItem = {
   content: ReactElement;
-  value: string;
+  value: string | string[];
   id: number;
 };
 

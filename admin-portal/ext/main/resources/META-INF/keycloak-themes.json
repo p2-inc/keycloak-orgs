@@ -1,0 +1,8 @@
+{
+  "themes": [
+    {
+      "name": "portal",
+      "types": ["login"]
+    }
+  ]
+}

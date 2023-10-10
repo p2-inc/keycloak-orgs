@@ -1,5 +1,4 @@
 import { keycloak } from "keycloak";
-import config from "config";
 
 export const getAccessToken = () => {
   if (keycloak.isTokenExpired(10)) {
@@ -7,5 +6,3 @@ export const getAccessToken = () => {
   }
   return keycloak.token || "";
 };
-
-export const apiRealm = config.realm;

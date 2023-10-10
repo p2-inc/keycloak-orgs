@@ -143,6 +143,16 @@ const injectedRtkApi = api
         }),
         providesTags: ["Account"],
       }),
+      buildLinkingUri: build.query<
+        BuildLinkingUriApiResponse,
+        BuildLinkingUriApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/account/linked-accounts/${queryArg.providerId}`,
+          params: { redirectUri: queryArg.redirectUri },
+        }),
+        providesTags: ["Account"],
+      }),
       deleteLinkedProvider: build.mutation<
         DeleteLinkedProviderApiResponse,
         DeleteLinkedProviderApiArg
@@ -268,6 +278,16 @@ export type GetLinkedAccountsApiArg = {
   /** realm name (not id!) */
   realm: string;
 };
+export type BuildLinkingUriApiResponse =
+  /** status 200 success */ AccountLinkUriRepresentation;
+export type BuildLinkingUriApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** Provider ID */
+  providerId: string;
+  /** Redirect URI to return to after account linking */
+  redirectUri: string;
+};
 export type DeleteLinkedProviderApiResponse = unknown;
 export type DeleteLinkedProviderApiArg = {
   /** realm name (not id!) */
@@ -292,6 +312,9 @@ export type UserProfileMetadataAttributeRepresentation = {
 export type UserProfileMetadataRepresentation = {
   attributes?: UserProfileMetadataAttributeRepresentation[];
 };
+export type UserProfileAttributesRepresentation = {
+  locale?: string[];
+};
 export type AccountRepresentation = {
   id?: string;
   username?: string;
@@ -300,6 +323,7 @@ export type AccountRepresentation = {
   email?: string;
   emailVerified?: boolean;
   userProfileMetadata?: UserProfileMetadataRepresentation;
+  attributes?: UserProfileAttributesRepresentation;
 };
 export type ConsentScopeRepresentation = {
   id?: string;
@@ -307,7 +331,7 @@ export type ConsentScopeRepresentation = {
   displayText?: string;
 };
 export type ConsentRepresentation = {
-  createDate?: number;
+  createdDate?: number;
   lastUpdatedDate?: number;
   grantedScopes?: ConsentScopeRepresentation[];
 };
@@ -330,7 +354,7 @@ export type CredentialMetadataRepresentation = {
   id?: string;
   type?: string;
   userLabel?: string;
-  createDate?: string;
+  createdDate?: string;
   credentialData?: object;
 };
 export type UserCredentialMetadataRepresentation = {
@@ -344,7 +368,7 @@ export type CredentialRepresentation = {
   iconCssClass?: string;
   updateAction?: string;
   removeable?: boolean;
-  userCredentialsMetadatas?: UserCredentialMetadataRepresentation[];
+  userCredentialMetadatas?: UserCredentialMetadataRepresentation[];
 };
 export type SessionRepresentation = {
   id?: string;
@@ -370,11 +394,16 @@ export type DeviceRepresentation = {
 };
 export type LinkedAccountRepresentation = {
   connected?: boolean;
-  isSocial?: boolean;
+  social?: boolean;
   providerAlias?: string;
   providerName?: string;
   displayName?: string;
   linkedUsername?: string;
+};
+export type AccountLinkUriRepresentation = {
+  accountLinkUri?: string;
+  nonce?: string;
+  hash?: string;
 };
 export type GroupRepresentation = {
   access?: {
@@ -408,6 +437,7 @@ export const {
   useGetDevicesQuery,
   useDeleteSessionMutation,
   useGetLinkedAccountsQuery,
+  useBuildLinkingUriQuery,
   useDeleteLinkedProviderMutation,
   useGetGroupsQuery,
 } = injectedRtkApi;

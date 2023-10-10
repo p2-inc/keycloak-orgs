@@ -1,10 +1,13 @@
+import { isNil } from "lodash";
+
 type Props = {
-  value: string;
+  value: string | number;
   label: string;
   percent?: number;
+  hoverPercentText?: string;
 };
 
-const ProgressBar = ({ percent = 20 }) => {
+const ProgressBar = ({ percent = 0 }) => {
   const radius = 10;
   const circumference = radius * 2 * Math.PI;
   return (
@@ -34,17 +37,19 @@ const ProgressBar = ({ percent = 20 }) => {
   );
 };
 
-const Stat: React.FC<Props> = ({ percent, value, label }) => {
+const Stat: React.FC<Props> = ({ percent, hoverPercentText, value, label }) => {
   return (
     <div className="flex flex-row">
-      {percent && (
-        <div className="place-content-end pr-2 pt-1">
-          <ProgressBar percent={50} />
+      {!isNil(percent) && (
+        <div className="place-content-end pr-2 pt-1" title={hoverPercentText}>
+          <ProgressBar percent={percent} />
         </div>
       )}
       <div>
-        <div className="font-semibold">{value}</div>
-        <div className="text-xs font-semibold text-gray-500">{label}</div>
+        <div className="font-semibold dark:text-zinc-200">{value}</div>
+        <div className="text-sm font-medium capitalize text-gray-600 dark:text-zinc-500">
+          {label}
+        </div>
       </div>
     </div>
   );

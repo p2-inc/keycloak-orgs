@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 
-
 const Invitation = () => {
   return (
     <div>

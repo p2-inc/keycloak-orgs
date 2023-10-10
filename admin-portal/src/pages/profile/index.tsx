@@ -8,45 +8,52 @@ import {
 } from "@heroicons/react/24/outline";
 import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
 import PrimaryContentArea from "components/layouts/primary-content-area";
-import SecondaryMainContentNav from "components/navs/secondary-main-content-nav";
+import SecondaryMainContentNav, {
+  NavigationItem,
+} from "components/navs/secondary-main-content-nav";
 import { Outlet } from "react-router-dom";
+import { config } from "config";
+import { useTranslation } from "react-i18next";
+const { features: featureFlags } = config.env;
 
-const navigation = [
+const navigation: NavigationItem[] = [
   {
-    name: "General",
+    name: "general",
     href: "/profile/general",
     icon: UserCircleIcon,
+    isActive: true,
   },
   {
-    name: "Role",
-    href: "/profile/role",
-    icon: KeyIcon,
-  },
-  {
-    name: "Signing in",
+    name: "signingIn",
     href: "/profile/signin",
     icon: KeyIcon,
+    isActive: true,
   },
   {
-    name: "Device activity",
+    name: "deviceActivity",
     href: "/profile/activity",
     icon: DevicePhoneMobileIcon,
+    isActive: featureFlags.deviceActivityEnabled,
   },
   {
-    name: "Linked accounts",
+    name: "linkedAccounts",
     href: "/profile/linked",
     icon: SquaresPlusIcon,
+    isActive: featureFlags.linkedAccountsEnabled,
   },
 ];
 
 export default function Profile() {
+  const { t } = useTranslation();
   return (
     <>
-      <TopHeader header="Profile" />
+      <TopHeader header={t("profile")} />
       <FixedWidthMainContent>
         {/* Secondary menu */}
         <SecondaryMainContentMenuArea>
-          <SecondaryMainContentNav navigation={navigation} />
+          <SecondaryMainContentNav
+            navigation={navigation.filter((n) => n.isActive)}
+          />
         </SecondaryMainContentMenuArea>
 
         {/* Primary content */}

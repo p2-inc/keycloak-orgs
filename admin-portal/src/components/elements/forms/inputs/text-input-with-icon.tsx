@@ -8,11 +8,12 @@ type Props = {
     InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   >;
+  className?: string;
 };
 
-const FormTextInputWithIcon: FC<Props> = ({ inputArgs = {} }) => {
+const FormTextInputWithIcon: FC<Props> = ({ inputArgs = {}, className }) => {
   return (
-    <div className="relative rounded-md shadow-sm">
+    <div className={cs("relative rounded-md", className)}>
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
         <MagnifyingGlassIcon
           className="h-5 w-5 text-p2blue-900"
@@ -23,7 +24,7 @@ const FormTextInputWithIcon: FC<Props> = ({ inputArgs = {} }) => {
         type="email"
         name="email"
         id="email"
-        className={cs(BasicFormClasses, "pl-10")}
+        className={cs(BasicFormClasses, "w-full pl-10")}
         placeholder="you@example.com"
         {...inputArgs}
       />

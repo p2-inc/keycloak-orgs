@@ -18,7 +18,10 @@ const FormTextInputWithLabel: FC<Props> = ({
 }) => {
   return (
     <div className="sm:col-span-3">
-      <label htmlFor={slug} className="block text-sm font-medium text-gray-700">
+      <label
+        htmlFor={slug}
+        className="block text-sm font-medium text-gray-700 dark:text-zinc-200"
+      >
         {label}
       </label>
       <div className="mt-1">
@@ -28,7 +31,7 @@ const FormTextInputWithLabel: FC<Props> = ({
           id={slug}
           className={cs(
             BasicFormClasses,
-            "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            "block w-full rounded-md border-gray-300 focus:border-transparent focus:ring-[#134FC2] sm:text-sm"
           )}
           placeholder="placeholder"
           {...inputArgs}

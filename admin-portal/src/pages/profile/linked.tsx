@@ -1,56 +1,183 @@
 import Button from "components/elements/forms/buttons/button";
 import SectionHeader from "components/navs/section-header";
-import { apiRealm } from "store/apis/helpers";
-import { keycloakService } from "keycloak";
-import { useGetLinkedAccountsQuery, useDeleteLinkedProviderMutation, LinkedAccountRepresentation } from "store/apis/profile";
+import { config } from "config";
+import {
+  useBuildLinkingUriQuery,
+  useGetLinkedAccountsQuery,
+  useDeleteLinkedProviderMutation,
+  LinkedAccountRepresentation,
+  BuildLinkingUriApiArg,
+} from "store/apis/profile";
+import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { useState, useEffect } from "react";
+import Table, {
+  TableColumns,
+  TableRows,
+} from "components/elements/table/table";
+import * as icons from "components/icons/providers";
+import P2Toast from "components/utils/toast";
+import { useTranslation } from "react-i18next";
 
 const LinkedProfile = () => {
-  const { data: accounts = [] } = useGetLinkedAccountsQuery({ realm: apiRealm });
-  const [ deleteAccount, { isSuccess }] = useDeleteLinkedProviderMutation();
+  const { t } = useTranslation();
+  const { features: featureFlags } = config.env;
+  const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
+    realm: config.env.realm,
+  });
+  const [deleteAccount] = useDeleteLinkedProviderMutation();
+  const [buildLinkState, setBuildLinkState] = useState<
+    typeof skipToken | BuildLinkingUriApiArg
+  >(skipToken);
+  const { data: buildLinker } = useBuildLinkingUriQuery(buildLinkState);
 
-  const unLinkAccount = (account: LinkedAccountRepresentation): void => {
+  const unlinkAccount = (account: LinkedAccountRepresentation): void => {
     deleteAccount({
-      realm: apiRealm,
-      providerId: account.providerName!
-    }).then( () => {
-      //refresh accoutns? automatic?
-      //ContentAlert.
+      realm: config.env.realm,
+      providerId: account.providerName!,
+    })
+      .then(() => {
+        P2Toast({
+          success: true,
+          title: `${account.providerName} unlinked.`,
+        });
+      })
+      .catch((e) => {
+        P2Toast({
+          error: true,
+          title: `Error during unlinking from ${account.providerName} . Please try again.`,
+        });
+      });
+  };
+
+  const linkAccount = (account: LinkedAccountRepresentation) => {
+    setBuildLinkState({
+      realm: config.env.realm,
+      providerId: account.providerAlias ?? "",
+      redirectUri: window.location.href,
     });
   };
 
-  /*
-  private linkAccount(account: LinkedAccount): void {
-    const url = '/linked-accounts/' + account.providerName;
+  useEffect(() => {
+    if (buildLinker && buildLinker.accountLinkUri) {
+      console.log(buildLinker.accountLinkUri);
+      //todo change the client_id in the requests params
+      //https://www.keycloak.org/docs/latest/server_development/index.html#client-initiated-account-linking
+      window.location.href = buildLinker.accountLinkUri;
+    }
+  }, [buildLinker]);
 
-    const redirectUri: string = createRedirect(this.props.location.pathname);
+  const label = (account: LinkedAccountRepresentation): React.ReactNode => {
+    if (account.social) {
+      return (
+        <label className="inline-block items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700">
+          {t("socialLogin")}
+        </label>
+      );
+    }
+    return (
+      <label className="inline-block items-center space-x-2 rounded border border-green-700/30 bg-green-700/10 px-3 py-1 text-xs font-medium text-green-700">
+        {t("systemDefined")}
+      </label>
+    );
+  };
 
-    this.context!.doGet<{accountLinkUri: string}>(url, { params: {providerId: account.providerName, redirectUri}})
-        .then((response: HttpResponse<{accountLinkUri: string}>) => {
-            console.log({response});
-            window.location.href = response.data!.accountLinkUri;
-        });
-  }
-  */
+  const icon = (account: LinkedAccountRepresentation): React.ReactNode => {
+    const k = Object.keys(icons);
+    const f = k.find(
+      (t) => t.toLowerCase() === account.providerAlias?.toLowerCase()
+    );
+    const LucideIcon = icons[f || "Key"];
+    return <LucideIcon />;
+  };
+
+  const linkedColumns: TableColumns = [
+    { key: "icon", data: "" },
+    { key: "providerAlias", data: t("provider") },
+    { key: "displayName", data: t("name") },
+    { key: "label", data: t("label") },
+    { key: "username", data: t("username") },
+    { key: "action", data: "", columnClasses: "flex justify-end" },
+  ];
+
+  const linkedRows: TableRows = accounts
+    .filter((account) => account.connected)
+    .map((account) => ({
+      icon: icon(account),
+      providerAlias: account.providerAlias,
+      displayName: account.displayName,
+      label: label(account),
+      username: account.linkedUsername,
+      action: (
+        <Button
+          isBlackButton
+          className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
+          onClick={() => unlinkAccount(account)}
+        >
+          {t("unlinkAccount")}
+        </Button>
+      ),
+    }));
+
+  const unlinkedColumns: TableColumns = [
+    { key: "icon", data: "" },
+    { key: "providerAlias", data: t("provider") },
+    { key: "displayName", data: t("name") },
+    { key: "label", data: t("label") },
+    { key: "action", data: "", columnClasses: "flex justify-end" },
+  ];
+
+  const unlinkedRows: TableRows = accounts
+    .filter((account) => !account.connected)
+    .map((account) => ({
+      icon: icon(account),
+      providerAlias: account.providerAlias,
+      displayName: account.displayName,
+      label: label(account),
+      action: (
+        <Button
+          isBlackButton
+          className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
+          onClick={() => linkAccount(account)}
+        >
+          {t("linkAccount")}
+        </Button>
+      ),
+    }));
 
   return (
-    <div>
-      <div className="mb-12">
-        <SectionHeader
-          title="Linked accounts"
-          description="Manage logins through third-party accounts."
-        />
-      </div>
-      <div className="w-full rounded border border-gray-200 bg-gray-50 divide-y">
-        {accounts.map( (account: LinkedAccountRepresentation) => (
-          <div className="flex items-center justify-between p-2">
-            <div className="px-2">
-              <span className="font-medium">{account.displayName}</span>
-            </div>
-            <div><Button isBlackButton>Link account</Button></div>
+    <>
+      {featureFlags.linkedAccountsEnabled && (
+        <div>
+          <div className="mb-12">
+            <SectionHeader
+              title={t("linkedAccounts")}
+              description={t("manageLoginsThroughThirdPartyAccounts")}
+            />
           </div>
-        ))}
-      </div>
-    </div>
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <SectionHeader title={t("linkedLoginProviders")} variant="medium" />
+              <Table
+                columns={linkedColumns}
+                rows={linkedRows}
+                isLoading={isLoading}
+              />
+            </div>
+            <div className="space-y-4">
+              <SectionHeader
+                title={t("unlinkedLoginProviders")}
+                variant="medium"
+              />
+              <Table
+                columns={unlinkedColumns}
+                rows={unlinkedRows}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

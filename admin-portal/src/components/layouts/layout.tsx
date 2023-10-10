@@ -1,59 +1,55 @@
 import React, { useState } from "react";
 import DesktopSidebarNav from "../navs/desktop-sidebar-nav";
-import { IconType, PeopleIcon, PersonIcon } from "../icons";
-
-export type User = {
-  name: string;
-  email: string;
-};
-
-const user = {
-  name: "Garth Patil",
-  email: "garth@phasetwo.io",
-};
+import { IconType } from "../icons";
+import { Building2, User } from "lucide-react";
+import { config } from "config";
+import useUser from "components/utils/useUser";
+const { features: featureFlags } = config.env;
 
 export type NavigationItem = {
   name: string;
   href: string;
   icon: IconType;
   iconClass?: string;
+  isActive: boolean;
 };
-
-const navigation: NavigationItem[] = [
-  {
-    name: "Profile",
-    href: "/profile",
-    icon: PersonIcon,
-    iconClass: "stroke-current",
-  },
-  {
-    name: "Organizations",
-    href: "/organizations",
-    icon: PeopleIcon,
-    iconClass: "fill-current",
-  },
-];
 
 export default function Layout({ children }: { children: React.ReactElement }) {
   const [menuCollapsed, setMenuCollapsed] = useState(true);
+  const { userOrgs } = useUser();
+
+  const navigation: NavigationItem[] = [
+    {
+      name: "profile",
+      href: "/profile",
+      icon: User,
+      iconClass: "stroke-current",
+      isActive: true,
+    },
+    {
+      name: "organizations",
+      href: "/organizations",
+      icon: Building2,
+      iconClass: "fill-current",
+      isActive:
+        featureFlags.organizationsEnabled && Object.keys(userOrgs).length > 0,
+    },
+  ];
 
   return (
     <>
-      <div className="flex h-screen">
+      <div className="flex h-screen dark:bg-p2dark-900">
         <div className="">
           {/* Static sidebar for desktop */}
           <DesktopSidebarNav
-            navigation={navigation}
-            user={user}
+            navigation={navigation.filter((n) => n.isActive)}
             setMenuCollapsed={setMenuCollapsed}
             menuCollapsed={menuCollapsed}
           />
         </div>
         <div className="flex-1 overflow-y-auto pb-20">
           <div className="">
-            <main className="">
-              {children}
-            </main>
+            <main className="m-auto max-w-7xl">{children}</main>
           </div>
         </div>
       </div>

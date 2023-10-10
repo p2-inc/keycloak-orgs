@@ -41,6 +41,10 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Organizations"],
       }),
+      getMe: build.query<GetMeApiResponse, GetMeApiArg>({
+        query: (queryArg) => ({ url: `/${queryArg.realm}/orgs/me` }),
+        providesTags: ["Organizations"],
+      }),
       getOrganizationById: build.query<
         GetOrganizationByIdApiResponse,
         GetOrganizationByIdApiArg
@@ -88,7 +92,11 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({
           url: `/${queryArg.realm}/orgs/${queryArg.orgId}/members`,
-          params: { first: queryArg.first, max: queryArg.max },
+          params: {
+            search: queryArg.search,
+            first: queryArg.first,
+            max: queryArg.max,
+          },
         }),
         providesTags: ["Organization Memberships"],
       }),
@@ -368,7 +376,7 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/${queryArg.realm}/users/${queryArg.userId}/orgs`,
         }),
-        providesTags: ["Users"],
+        providesTags: ["Users", "Organizations"],
       }),
       getByRealmUsersAndUserIdOrgsOrgIdRoles: build.query<
         GetByRealmUsersAndUserIdOrgsOrgIdRolesApiResponse,
@@ -510,6 +518,12 @@ export type CreateOrganizationApiArg = {
   realm: string;
   organizationRepresentation: OrganizationRepresentation;
 };
+export type GetMeApiResponse =
+  /** status 200 success */ MyOrganizationsRepresentation;
+export type GetMeApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+};
 export type GetOrganizationByIdApiResponse =
   /** status 200 success */ OrganizationRepresentation;
 export type GetOrganizationByIdApiArg = {
@@ -551,6 +565,7 @@ export type GetOrganizationMembershipsApiArg = {
   realm: string;
   /** organization id */
   orgId: string;
+  search?: string;
   first?: number;
   max?: number;
 };
@@ -942,6 +957,10 @@ export type OrganizationRepresentation = {
     [key: string]: string[];
   };
 };
+export type MyOrganizationRepresentation = object;
+export type MyOrganizationsRepresentation = {
+  [key: string]: MyOrganizationRepresentation;
+};
 export type PortalLinkRepresentation = {
   user?: string;
   link?: string;
@@ -1066,6 +1085,7 @@ export type MagicLinkRepresentation = {
 export const {
   useGetOrganizationsQuery,
   useCreateOrganizationMutation,
+  useGetMeQuery,
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
   useDeleteOrganizationMutation,
