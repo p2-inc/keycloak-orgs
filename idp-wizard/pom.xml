@@ -22,9 +22,9 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.wizard</main.java.package>
-    <keycloak.version>22.0.3</keycloak.version>
+    <keycloak.version>22.0.4</keycloak.version>
     <guava.version>32.0.0-jre</guava.version>
-    <lombok.version>1.18.28</lombok.version>
+    <lombok.version>1.18.30</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
   </properties>
 
