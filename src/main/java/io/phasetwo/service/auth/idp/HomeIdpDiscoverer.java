@@ -142,7 +142,7 @@ final class HomeIdpDiscoverer {
         // Prefer linked IdP with matching domain first
         List<IdentityProviderModel> homeIdps = getLinkedIdpsFrom(enabledIdpsWithMatchingDomain, linkedIdps);
 
-        if (homeIdps.isEmpty()) {
+        /* if (homeIdps.isEmpty()) {
             if (!linkedIdps.isEmpty()) {
                 // Prefer linked and enabled IdPs without matching domain in favor of not linked IdPs with matching domain
                 homeIdps = getLinkedIdpsFrom(enabledIdps, linkedIdps);
@@ -156,7 +156,9 @@ final class HomeIdpDiscoverer {
             }
         } else {
             logFoundIdps("linked", "matching", homeIdps, domain, username);
-        }
+        } */
+
+        logFoundIdps("linked", "matching", homeIdps, domain, username);
 
         return homeIdps;
     }
