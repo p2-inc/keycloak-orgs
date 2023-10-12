@@ -10,6 +10,7 @@ import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAu
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
@@ -34,11 +35,19 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     public void authenticate(AuthenticationFlowContext authenticationFlowContext) {
         HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
 
+        //backwards compatibilty with original keycloak-orgs port
+        String attemptedUsername = getAttemptedUsername(authenticationFlowContext);
+        if (attemptedUsername != null) {
+            if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
+                action(authenticationFlowContext);
+            } else {
+                authenticationFlowContext.attempted();
+            }
+            return;
+        }
+
         if (context.loginPage().shouldByPass()) {
             String loginHint = trimToNull(context.loginHint().getFromSession());
-            if (loginHint == null) {
-                loginHint = trimToNull(authenticationFlowContext.getAuthenticationSession().getAuthNote(ATTEMPTED_USERNAME));
-            }
             if (loginHint != null) {
                 String username = setUserInContext(authenticationFlowContext, loginHint);
                 final List<IdentityProviderModel> homeIdps = context.discoverer().discoverForUser(username);
@@ -50,6 +59,10 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
             }
         }
         context.authenticationChallenge().forceChallenge();
+    }
+
+    private String getAttemptedUsername(AuthenticationFlowContext context) {
+        return trimToNull(context.getAuthenticationSession().getAuthNote(ATTEMPTED_USERNAME));
     }
 
     private void redirectOrChallenge(HomeIdpAuthenticationFlowContext context, String username, List<IdentityProviderModel> homeIdps) {
@@ -81,7 +94,11 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
 
         final List<IdentityProviderModel> homeIdps = context.discoverer().discoverForUser(username);
         if (homeIdps.isEmpty()) {
-            authenticationFlowContext.attempted();
+            if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
+              authenticationFlowContext.success();
+            } else {
+              authenticationFlowContext.attempted();
+            }
         } else {
             RememberMe rememberMe = context.rememberMe();
             rememberMe.handleAction(formData);
@@ -94,6 +111,12 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         context.clearUser();
 
         username = trimToNull(username);
+
+        if (username == null) {
+          LOG.debug(
+              "Could not find username in request. Trying attempted username from previous authenticator");
+          username = getAttemptedUsername(context);
+        }
 
         if (username == null) {
             LOG.warn("No or empty username found in request");
