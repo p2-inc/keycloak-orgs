@@ -680,7 +680,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
 
     // create a user
-    org.keycloak.representations.idm.UserRepresentation user =
+    UserRepresentation user =
         createUser(keycloak, REALM, "johndoe");
 
     // add membership
@@ -1107,49 +1107,33 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(orgId2);
   }
 
-   /*
-  @Test
-  public void testOrgAdminPermissions() {
-    Keycloak keycloak = getKeycloak();
-    PhaseTwo client1 = phaseTwo(keycloak);
-    OrganizationsResource orgsResource = client1.organizations(REALM);
-    String orgId1 = createDefaultOrg(orgsResource);
 
-    OrganizationResource orgResource = orgsResource.organization(orgId1);
-    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
-    OrganizationRolesResource rolesResource = orgResource.roles();
+  @Test
+  void testOrgAdminPermissions() throws IOException {
+    OrganizationRepresentation rep = createDefaultOrg();
+    String orgId1 = rep.getId();
 
     // create a normal user
-    CredentialRepresentation pass = new CredentialRepresentation();
-    pass.setType("password");
-    pass.setValue("pass");
-    pass.setTemporary(false);
-    org.keycloak.representations.idm.UserRepresentation user1 =
-        new org.keycloak.representations.idm.UserRepresentation();
-    user1.setEnabled(true);
-    user1.setUsername("user1");
-    user1.setCredentials(ImmutableList.of(pass));
-    user1 = createUser(keycloak, REALM, user1);
-    // grant membership to org
-    membershipsResource.add(user1.getId());
+    UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "user1", "pass");
+    // grant membership to rep
+    Response response = putRequest("foo", orgId1, "members", user1.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
-    // grant org admin permissions
+    // grant rep admin permissions
     for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
-      rolesResource.grant(role, user1.getId());
+      grantUserRole(orgId1, role, user1.getId());
     }
 
     Keycloak kc1 = getKeycloak(REALM, "admin-cli", "user1", "pass");
-    PhaseTwo client2 = phaseTwo(kc1);
-    OrganizationsResource secondOrganizationsResource = client2.organizations(REALM);
-    OrganizationResource organizationResourceFromSecondClient =
-        secondOrganizationsResource.organization(orgId1);
 
-    // check that user has permissions to update org
-    OrganizationRepresentation rep = organizationResourceFromSecondClient.get();
+    // check that user has permissions to update rep
     rep.url("https://www.example.com/").displayName("Example company");
-    organizationResourceFromSecondClient.update(rep);
+    response = putRequest(rep, orgId1, kc1);
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
-    rep = organizationResourceFromSecondClient.get();
+    response = getRequest(orgId1, kc1);
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    rep = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rep.getId(), notNullValue());
     assertThat(rep.getAttributes().keySet(), empty());
     assertThat(rep.getDisplayName(), is("Example company"));
@@ -1159,17 +1143,40 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(orgId1));
     //  get memberships
+    response = getRequest("/%s/members".formatted(orgId1), kc1);
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     //  add memberships
+    UserRepresentation user2  = createUserWithCredentials(keycloak, REALM, "user2", "pass");
+    response = putRequest("foo", "/%s/members/%s".formatted(orgId1, user2.getId()), kc1);
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     //  remove memberships
+    response = deleteRequest(kc1, "/%s/members/%s".formatted(orgId1, user2.getId()));
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
     //  get invitations
+    response = getRequest("/%s/invitations".formatted(orgId1), kc1);
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     //  add invitations
+    InvitationRequestRepresentation inv =
+            new InvitationRequestRepresentation().email("johndoe@example.com");
+    response = postRequest(inv, "/%s/invitations".formatted(orgId1), kc1);
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    String loc = response.getHeader("Location");
+    String inviteId = loc.substring(loc.lastIndexOf("/") + 1);
     //  remove invitations
+    response = deleteRequest(kc1, "/%s/invitations/%s".formatted(orgId1, inviteId));
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
     //  get roles
+    response = getRequest("/%s/roles".formatted(orgId1), kc1);
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     //  add roles
+    createOrgRole(orgId1, "test-role", kc1);
     //  remove roles
+    response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId1, "test-role"));
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
     //  add idp
+    String alias1 = "org-admin-test";
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
-    idp.setAlias("org-admin-test");
+    idp.setAlias(alias1);
     idp.setProviderId("oidc");
     idp.setEnabled(true);
     idp.setFirstBrokerLoginFlowAlias("first broker login");
@@ -1192,13 +1199,13 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .put("clientSecret", "112233")
             .build());
 
-    OrganizationIdentityProvidersResource idpResource =
-        organizationResourceFromSecondClient.identityProviders();
-    String alias1 = idpResource.create(idp);
-    assertThat(alias1, notNullValue());
+    response = postRequest(idp, "/%s/idps".formatted(orgId1), kc1);
+    assertThat(response.statusCode(), is(Status.CREATED.getStatusCode()));
 
     //  get idp xxx
-    IdentityProviderRepresentation idp1 = idpResource.get(alias1);
+    response = getRequest("/%s/idps/%s".formatted(orgId1, alias1));
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    IdentityProviderRepresentation idp1 = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idp1, notNullValue());
     assertThat(idp1.getAlias(), is(alias1));
     assertThat(idp1.getProviderId(), is(idp.getProviderId()));
@@ -1207,35 +1214,56 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(idp1.getConfig().get("clientId"), is(idp.getConfig().get("clientId")));
 
     //  remove idp
-    idpResource.delete(alias1);
+    response = deleteRequest(kc1, "/%s/idps/%s".formatted(orgId1, alias1));
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // create another org
     rep = new OrganizationRepresentation().name("sample").domains(List.of("sample.com"));
-    String orgId2 = orgsResource.create(rep);
+    OrganizationRepresentation org = createOrganization(rep);
+    String orgId2 = org.getId();
 
-    // check that user does not have permission to update org
+    // check that user does not have permission to update rep
     rep.url("https://www.sample.com/").displayName("Sample company");
-    assertThrows(
-        NotAuthorizedException.class, () -> secondOrganizationsResource.organization(orgId2).get());
+    response = putRequest(rep, orgId2, kc1);
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
     //  get memberships
+    response = getRequest("/%s/members".formatted(orgId2), kc1);
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  add memberships
+    response = putRequest("foo", "/%s/members/%s".formatted(orgId2, user2.getId()), kc1);
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  remove memberships
+    response = deleteRequest(kc1, "/%s/members/%s".formatted(orgId2, user2.getId()));
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  get invitations
+    response = getRequest("/%s/invitations".formatted(orgId2), kc1);
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  add invitations
+    response = postRequest(inv, "/%s/invitations".formatted(orgId2), kc1);
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  remove invitations
+    response = deleteRequest(kc1, "/%s/invitations/%s".formatted(orgId2, inviteId));
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  get roles
+    response = getRequest("/%s/roles".formatted(orgId2), kc1);
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  add roles
+    response = postRequest(new OrganizationRoleRepresentation().name("test-role"), "/%s/roles".formatted(orgId2), kc1);
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  remove roles
+    response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId2, "test-role"));
+    assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
     // delete user
     deleteUser(keycloak, REALM, user1.getId());
 
     // delete orgs
-    orgResource.delete();
-    orgsResource.organization(orgId2).delete();
+    deleteOrganization(orgId2);
+    deleteOrganization(orgId1);
   }
 
+   /*
   @Test
   @Disabled
   public void testOrgPortalLink() {

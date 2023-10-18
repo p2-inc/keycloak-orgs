@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URLEncoder;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class Helpers {
 
@@ -28,6 +30,25 @@ public class Helpers {
       Keycloak keycloak, String realm, UserRepresentation user) {
     keycloak.realm(realm).users().create(user);
     return keycloak.realm(realm).users().search(user.getUsername()).get(0);
+  }
+
+  public static UserRepresentation createUserWithCredentials(Keycloak keycloak, String realm, String username, String password) {
+    return createUserWithCredentials(keycloak, realm, username, password, null);
+  }
+
+  public static UserRepresentation createUserWithCredentials(Keycloak keycloak, String realm, String username, String password, String email) {
+    CredentialRepresentation pass = new CredentialRepresentation();
+    pass.setType(CredentialRepresentation.PASSWORD);
+    pass.setValue(password);
+    pass.setTemporary(false);
+    UserRepresentation user = new UserRepresentation();
+    user.setEnabled(true);
+    user.setUsername(username);
+    if (email != null) {
+      user.setEmail(email);
+    }
+    user.setCredentials(ImmutableList.of(pass));
+    return createUser(keycloak, realm, user);
   }
 
   public static void deleteUser(Keycloak keycloak, String realm, String id) {
