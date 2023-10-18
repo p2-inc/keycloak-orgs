@@ -73,8 +73,10 @@ public class Converters {
         .createdAt(e.getCreatedAt())
         .inviterId(e.getInviterId())
         .organizationId(e.getOrganization().getId())
-        .roles(Lists.newArrayList(e.getRoles()))
-        .teamIds(e.getTeams().stream().map(t -> t.getId()).collect(Collectors.toList()));
+        .roles(Lists.newArrayList(e.getRoles()));
+
+//        .teamIds(e.getTeams().stream().map(t -> t.getId())
+//                .collect(Collectors.toList()));
     // todo url?
   }
 
