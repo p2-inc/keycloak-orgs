@@ -17,12 +17,14 @@ import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -816,23 +818,18 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(id);
   }
 
-   /*
+
   @Test
-  public void testListOrgsByMember() {
-    Keycloak keycloak = getKeycloak();
-    PhaseTwo client = phaseTwo(keycloak);
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    String id = createDefaultOrg(orgsResource);
+  void testListOrgsByMember() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
 
     // create some others too
-    List<String> ids = new ArrayList<String>();
+    List<String> ids = new ArrayList<>();
     for (int n = 0; n < 150; n++) {
-      ids.add(
-          orgsResource.create(
-              new OrganizationRepresentation().name("foo" + n).domains(List.of("foo.com"))));
+      OrganizationRepresentation organization = createOrganization(new OrganizationRepresentation().name("foo" + n).domains(List.of("foo.com")));
+      ids.add(organization.getId());
     }
-
-    OrganizationResource orgResource = orgsResource.organization(id);
 
     // create user and give membership
     CredentialRepresentation pass = new CredentialRepresentation();
@@ -847,37 +844,45 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     user1.setCredentials(ImmutableList.of(pass));
     user1 = createUser(keycloak, REALM, user1);
     // grant membership to orgs
-    orgResource.memberships().add(user1.getId());
+    Response response = putRequest("foo", id, "members", user1.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     String[] toJoin = {ids.get(11), ids.get(99), ids.get(100), ids.get(115), ids.get(149)};
     for (String i : toJoin) {
-      orgsResource.organization(i).memberships().add(user1.getId());
+      response = putRequest("foo", i, "members", user1.getId());
+      assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     }
 
     // log in as user
     Keycloak userKeycloak = getKeycloak(REALM, "admin-cli", "user1", "pass");
-    PhaseTwo userClient = phaseTwo(userKeycloak);
-    OrganizationsResource userOrgsResource = userClient.organizations(REALM);
 
     // list orgs by admin
-    List<OrganizationRepresentation> orgs =
-        orgsResource.get(Optional.empty(), Optional.empty(), Optional.empty());
+    response = getRequest();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationRepresentation> orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs.size(), is(100));
-    orgs = orgsResource.get(Optional.empty(), Optional.of(100), Optional.empty());
+    response = givenSpec().when().queryParam("first", 100).get().then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs.size(), is(51));
 
     // list orgs by user
-    orgs = userOrgsResource.get(Optional.empty(), Optional.empty(), Optional.empty());
+    response = getRequest("", userKeycloak);
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs.size(), is(6));
 
     // delete user
     deleteUser(keycloak, REALM, user1.getId());
 
     // delete orgs
-    orgResource.delete();
+    deleteOrganization(id);
+
     for (String i : ids) {
-      orgsResource.organization(i).delete();
+      deleteOrganization(i);
     }
   }
+
+  /*
 
   @Test
   public void testAddGetDeleteIdps() {
