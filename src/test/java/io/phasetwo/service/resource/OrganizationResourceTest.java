@@ -332,40 +332,38 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(org.getId());
   }
 
-  /*
     @Test
-    public void testSearchOrganizations() throws Exception {
-      PhaseTwo client = phaseTwo();
-      OrganizationsResource orgsResource = client.organizations(REALM);
+    void testSearchOrganizations() throws IOException {
       // create some orgs
-      List<String> ids = new ArrayList<String>();
+      List<String> ids = new ArrayList<>();
       ids.add(
-          orgsResource.create(
-              new OrganizationRepresentation().name("example").domains(List.of("example.com"))));
+          createOrganization(
+              new OrganizationRepresentation().name("example").domains(List.of("example.com"))).getId());
       ids.add(
-          orgsResource.create(
-              new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))));
+          createOrganization(
+              new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))).getId());
       ids.add(
-          orgsResource.create(
-              new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))));
+          createOrganization(
+              new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))).getId());
       ids.add(
-          orgsResource.create(
-              new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))));
+          createOrganization(
+              new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))).getId());
       ids.add(
-          orgsResource.create(
+          createOrganization(
               new OrganizationRepresentation()
                   .name("baz")
                   .domains(List.of("baz.com"))
-                  .attributes(Map.of("foo", List.of("bar")))));
+                  .attributes(Map.of("foo", List.of("bar")))).getId());
       ids.add(
-          orgsResource.create(
+          createOrganization(
               new OrganizationRepresentation()
                   .name("qux")
                   .domains(List.of("baz.com"))
-                  .attributes(Map.of("foo", List.of("bar")))));
+                  .attributes(Map.of("foo", List.of("bar")))).getId());
 
-      List<OrganizationRepresentation> orgs =
-          orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.empty());
+      Response response = givenSpec().when().queryParam("search", "foo").get().andReturn();
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      List<OrganizationRepresentation> orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
       assertThat(orgs, notNullValue());
       assertThat(orgs, hasSize(2));
       for (OrganizationRepresentation org : orgs) {
@@ -373,61 +371,50 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         assertThat(org.getDomains(), hasSize(1));
       }
 
-      orgs = orgsResource.get(Optional.of("foo"), Optional.empty(), Optional.of(1));
+      response = givenSpec().when().queryParam("search", "foo").queryParam("max", 1).get().andReturn();
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
       assertThat(orgs, notNullValue());
       assertThat(orgs, hasSize(1));
 
-      orgs = orgsResource.get(Optional.of("none"), Optional.empty(), Optional.empty());
+      response = givenSpec().when().queryParam("search", "none").get().andReturn();
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
       assertThat(orgs, notNullValue());
       assertThat(orgs, hasSize(0));
 
-      orgs = orgsResource.get(Optional.of("a"), Optional.empty(), Optional.empty());
+      response = givenSpec().when().queryParam("search", "a").get().andReturn();
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
       assertThat(orgs, notNullValue());
       assertThat(orgs, hasSize(4));
 
       // orgs attribute search
-      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-        // Search attributes
-        String url = getAuthUrl() + "/realms/master/orgs?q=foo:bar";
-        SimpleHttp.Response response =
-            SimpleHttp.doGet(url, httpClient)
-                .auth(getKeycloak().tokenManager().getAccessTokenString())
-                .asResponse();
-        assertThat(response.getStatus(), is(200));
-        List<OrganizationRepresentation> res = response.asJson(List.class);
-        assertThat(res.size(), is(2));
-      }
+      response = givenSpec().when().queryParam("q", "foo:bar").get().andReturn();
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
+      assertThat(orgs, notNullValue());
+      assertThat(orgs, hasSize(2));
 
-      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-        // Search attributes and name
-        String url = getAuthUrl() + "/realms/master/orgs?search=qu&q=foo:bar";
-        SimpleHttp.Response response =
-            SimpleHttp.doGet(url, httpClient)
-                .auth(getKeycloak().tokenManager().getAccessTokenString())
-                .asResponse();
-        assertThat(response.getStatus(), is(200));
-        List<OrganizationRepresentation> res = response.asJson(List.class);
-        assertThat(res.size(), is(1));
-      }
+      // Search attributes and name
+      response = givenSpec().when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
+      assertThat(orgs, notNullValue());
+      assertThat(orgs, hasSize(1));
 
       // orgs count
-      try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-        String url = getAuthUrl() + "/realms/master/orgs/count";
-        SimpleHttp.Response response =
-            SimpleHttp.doGet(url, httpClient)
-                .auth(getKeycloak().tokenManager().getAccessTokenString())
-                .asResponse();
-        assertThat(response.getStatus(), is(200));
-        Long cnt = response.asJson(Long.class);
-        assertThat(cnt, is(6l));
-      }
+      response = getRequest("count");
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      Long cnt = new ObjectMapper().readValue(response.getBody().asString(), Long.class);;
+      assertThat(orgs, notNullValue());
+      assertThat(cnt, is(6L));
 
       for (String id : ids) {
-        orgsResource.organization(id).delete();
+        deleteOrganization(id);
       }
     }
 
-   */
 
     @Test
     void testGetDomains() throws IOException {
