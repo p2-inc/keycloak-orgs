@@ -427,15 +427,17 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       }
     }
 
-    @Test
-    public void testGetDomains() {
-      PhaseTwo client = phaseTwo();
-      OrganizationsResource orgsResource = client.organizations(REALM);
-      String id = createDefaultOrg(orgsResource);
-      OrganizationResource orgResource = orgsResource.organization(id);
-      OrganizationDomainsResource domainsResource = orgResource.domains();
+   */
 
-      List<OrganizationDomainRepresentation> domains = domainsResource.get();
+    @Test
+    void testGetDomains() throws IOException {
+
+      OrganizationRepresentation org = createDefaultOrg();
+      String id = org.getId();
+
+      Response response = getRequest(id, "domains");
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      List<OrganizationDomainRepresentation> domains =  new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
       assertThat(domains, notNullValue());
       assertThat(domains, hasSize(1));
       OrganizationDomainRepresentation domain = domains.get(0);
@@ -447,9 +449,13 @@ public class OrganizationResourceTest extends AbstractResourceTest {
           "domain %s %s %s", domain.getDomainName(), domain.getRecordKey(), domain.getRecordValue());
 
       // update
-      orgResource.update(orgResource.get().domains(List.of("foo.com", "bar.net")));
+      org.domains(List.of("foo.com", "bar.net"));
+      response = putRequest(org, id);
+      assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
-      domains = domainsResource.get();
+      response = getRequest(id, "domains");
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      domains = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
       assertThat(domains, notNullValue());
       assertThat(domains, hasSize(2));
 
@@ -462,13 +468,14 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       }
 
       // verify
-      domainsResource.verify("foo.com");
+      response = postRequest("foo", id, "domains", "foo.com", "verify");
+      assertThat(response.statusCode(), is(Status.ACCEPTED.getStatusCode()));
 
       // delete org
-      orgResource.delete();
+      deleteOrganization(id);
     }
 
-  */
+
   @Test
   void testImportConfig() throws Exception {
     OrganizationRepresentation org = createDefaultOrg();
