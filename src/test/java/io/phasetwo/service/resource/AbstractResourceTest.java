@@ -1,25 +1,12 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Helpers.toJsonString;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
-import io.phasetwo.client.PhaseTwo;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import jakarta.ws.rs.core.Response.Status;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -29,6 +16,18 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.junit.jupiter.Container;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static io.phasetwo.service.Helpers.toJsonString;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class AbstractResourceTest {
 
@@ -88,9 +87,6 @@ public abstract class AbstractResourceTest {
     container.stop();
   }
 
-  public static Keycloak getKeycloak() {
-    return container.getKeycloakAdminClient();
-  }
 
   public static Keycloak getKeycloak(String realm, String clientId, String user, String pass) {
     return Keycloak.getInstance(getAuthUrl(), realm, user, pass, clientId);
@@ -102,13 +98,6 @@ public abstract class AbstractResourceTest {
 
   public static final String REALM = "master";
 
-  public static PhaseTwo phaseTwo() {
-    return phaseTwo(getKeycloak());
-  }
-
-  public static PhaseTwo phaseTwo(Keycloak keycloak) {
-    return new PhaseTwo(keycloak, getAuthUrl());
-  }
 
   protected OrganizationRepresentation createDefaultOrg() throws IOException {
     OrganizationRepresentation rep =
@@ -117,18 +106,18 @@ public abstract class AbstractResourceTest {
   }
 
   protected Response getRequest(String... paths) {
-    return getRequest(String.join("/", paths), keycloak);
+    return getRequest(keycloak, String.join("/", paths));
   }
 
-  protected Response getRequest(String path, Keycloak keycloak) {
-    return givenSpec(keycloak).when().get(path).then().extract().response();
+  protected Response getRequest(Keycloak keycloak, String path) {
+    return givenSpec(keycloak).when().get(path).andReturn();
   }
 
   protected Response postRequest(Object body, String... paths) throws JsonProcessingException {
-    return postRequest(body, String.join("/", paths), keycloak);
+    return postRequest(keycloak, body, String.join("/", paths));
   }
 
-  protected Response postRequest(Object body, String path, Keycloak keycloak)
+  protected Response postRequest(Keycloak keycloak, Object body, String path)
       throws JsonProcessingException {
     return givenSpec(keycloak)
         .and()
@@ -140,10 +129,10 @@ public abstract class AbstractResourceTest {
   }
 
   protected Response putRequest(Object body, String... paths) throws JsonProcessingException {
-    return putRequest(body, String.join("/", paths), keycloak);
+    return putRequest(keycloak, body, String.join("/", paths));
   }
 
-  protected Response putRequest(Object body, String path, Keycloak keycloak)
+  protected Response putRequest( Keycloak keycloak, Object body, String path)
       throws JsonProcessingException {
     return givenSpec(keycloak).and().body(toJsonString(body)).put(path).then().extract().response();
   }
@@ -158,21 +147,19 @@ public abstract class AbstractResourceTest {
 
   protected OrganizationRepresentation createOrganization(OrganizationRepresentation representation)
       throws IOException {
-    return createOrganization(representation, keycloak);
+    return createOrganization(keycloak, representation);
   }
 
   // create an organization, fet the created organization and returns it
-  protected OrganizationRepresentation createOrganization(
-      OrganizationRepresentation representation, Keycloak keycloak) throws IOException {
+  protected OrganizationRepresentation createOrganization(Keycloak keycloak,
+      OrganizationRepresentation representation) throws IOException {
     Response response =
         givenSpec(keycloak)
             .and()
             .body(toJsonString(representation))
             .when()
             .post()
-            .then()
-            .extract()
-            .response();
+                .andReturn();
 
     assertThat(
         response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -190,13 +177,11 @@ public abstract class AbstractResourceTest {
     return orgRep;
   }
 
-  protected OrganizationRoleRepresentation createOrgRole(String orgId, String name)
-      throws IOException {
-    return createOrgRole(orgId, name, keycloak);
+  protected OrganizationRoleRepresentation createOrgRole(String orgId, String name) throws IOException {
+    return createOrgRole(keycloak, orgId, name);
   }
 
-  protected OrganizationRoleRepresentation createOrgRole(
-      String orgId, String name, Keycloak keycloak) throws IOException {
+  protected OrganizationRoleRepresentation createOrgRole(Keycloak keycloak, String orgId, String name) throws IOException {
     OrganizationRoleRepresentation rep = new OrganizationRoleRepresentation().name(name);
     Response response =
         givenSpec(keycloak)
@@ -204,9 +189,7 @@ public abstract class AbstractResourceTest {
             .body(toJsonString(rep))
             .when()
             .post(String.join("/", orgId, "roles"))
-            .then()
-            .extract()
-            .response();
+            .andReturn();
     assertThat(
         response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     assertNotNull(response.getHeader("Location"));
@@ -225,10 +208,10 @@ public abstract class AbstractResourceTest {
   }
 
   protected void grantUserRole(String orgId, String role, String userId) {
-    grantUserRole(orgId, role, userId, keycloak);
+    grantUserRole(keycloak, orgId, role, userId);
   }
 
-  protected void grantUserRole(String orgId, String role, String userId, Keycloak keycloak) {
+  protected void grantUserRole(Keycloak keycloak, String orgId, String role, String userId) {
     // PUT /:realm/orgs/:orgId/roles/:name/users/:userId
     Response response =
         givenSpec(keycloak)
@@ -244,10 +227,10 @@ public abstract class AbstractResourceTest {
   }
 
   protected void deleteOrganization(String id) {
-    deleteOrganization(id, keycloak);
+    deleteOrganization(keycloak, id);
   }
 
-  protected void deleteOrganization(String id, Keycloak keycloak) {
+  protected void deleteOrganization(Keycloak keycloak, String id) {
     Response response = givenSpec(keycloak).when().delete(id).then().extract().response();
     assertThat(
         response.getStatusCode(),
@@ -277,7 +260,7 @@ public abstract class AbstractResourceTest {
 
   protected void checkUserRole(String orgId, String role, String userId, int status) {
     // check if user has role
-    Response response = givenSpec().when().get(String.join("/", orgId, "roles", role, "users", userId)).then().extract().response();
+    Response response = givenSpec().when().get(String.join("/", orgId, "roles", role, "users", userId)).andReturn();
     assertThat(response.getStatusCode(), is(status));
   }
 }

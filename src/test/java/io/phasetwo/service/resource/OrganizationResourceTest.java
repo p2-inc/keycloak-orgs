@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @JBossLog
 @Testcontainers
-public class OrganizationResourceTest extends AbstractResourceTest {
+class OrganizationResourceTest extends AbstractResourceTest {
 
   @Test
   void testAddGetUpdateDeleteOrg() throws Exception {
@@ -106,202 +106,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertNotNull(organizations);
     assertThat(organizations.size(), is(0));
   }
-
-  /////////////////////////////////////
-  // port from OrganizationProviderTest
-  /*
-  @Test
-  public void testCreateOrganization() throws Exception {
-    KeycloakSessionFactory factory = server.getKeycloak().getSessionFactory();
-    KeycloakSession session = factory.create();
-    createRealm("test");
-    String id = null;
-    String barid = null;
-
-    // org foo in master
-    session = factory.create();
-    session.getTransactionManager().begin();
-    try {
-      RealmModel realm = session.realms().getRealmByName("master");
-      UserModel user = session.users().getUserByUsername(realm, "admin");
-
-      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
-      OrganizationModel org = provider.createOrganization(realm, "foo", user, false);
-      id = org.getId();
-      org.setDisplayName("Foo Corp.");
-      org.setDomains(ImmutableSet.of("foo.com"));
-      org.setUrl("https://www.foo.com/bar");
-      org.setSingleAttribute("single", "one");
-      org.setAttribute("multiple", ImmutableList.of("one", "two", "three"));
-
-      org.addInvitation("bar@foo.com", user);
-      OrganizationRoleModel role = org.addRole("admins");
-      role.grantRole(user);
-
-      session.getTransactionManager().commit();
-    } finally {
-      session.close();
-    }
-
-    // org bar in test
-    session = factory.create();
-    session.getTransactionManager().begin();
-    try {
-      RealmModel realm = session.realms().getRealmByName("test");
-      UserModel user = session.users().addUser(realm, "admin");
-
-      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
-      OrganizationModel org = provider.createOrganization(realm, "bar", user, false);
-      barid = org.getId();
-      org.setDomains(ImmutableSet.of("foo.com"));
-      org.setUrl("https://www.foo.com/bar");
-      org.setSingleAttribute("single", "one");
-      org.setAttribute("multiple", ImmutableList.of("one", "two", "three"));
-
-      org.addInvitation("bar@foo.com", user);
-      OrganizationRoleModel role = org.addRole("admins");
-      role.grantRole(user);
-
-      session.getTransactionManager().commit();
-    } finally {
-      session.close();
-    }
-
-    // check org foo in master
-    session = factory.create();
-    session.getTransactionManager().begin();
-    try {
-      RealmModel realm = session.realms().getRealmByName("master");
-      UserModel user = session.users().getUserByUsername(realm, "admin");
-      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
-      OrganizationModel org = provider.getOrganizationById(realm, id);
-      assertNotNull(org);
-      assertThat(org.getId(), is(id));
-      assertThat(org.getName(), is("foo"));
-      assertThat(org.getDomains().iterator().next(), is("foo.com"));
-      assertThat(org.getUrl(), is("https://www.foo.com/bar"));
-
-      assertThat(org.getFirstAttribute("single"), is("one"));
-      assertThat(org.getFirstAttribute("multiple"), is("one"));
-      assertTrue(org.getAttributes().get("multiple").contains("two"));
-      assertTrue(org.getAttributes().get("multiple").contains("three"));
-
-      assertThat(
-          org.getInvitationsStream().collect(MoreCollectors.onlyElement()).getEmail(),
-          is("bar@foo.com"));
-
-      OrganizationRoleModel role = org.getRoleByName("admins");
-      assertThat(role.getName(), is("admins"));
-      assertTrue(role.hasRole(user));
-
-      session.getTransactionManager().commit();
-    } finally {
-      session.close();
-    }
-
-    //  search with predicates
-    session = factory.create();
-    session.getTransactionManager().begin();
-    try {
-      RealmModel realm = session.realms().getRealmByName("master");
-      UserModel user = session.users().getUserByUsername(realm, "admin");
-      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
-      Stream<OrganizationModel> orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "FOO"), 0, 50, Optional.empty());
-      OrganizationModel org = orgs.findFirst().get();
-      assertNotNull(org);
-      assertThat(org.getId(), is(id));
-
-      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "fO"), 0, 50, Optional.empty());
-      org = orgs.findFirst().get();
-      assertNotNull(org);
-      assertThat(org.getId(), is(id));
-
-      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "Oo cORp"), 0, 50, Optional.empty());
-      org = orgs.findFirst().get();
-      assertNotNull(org);
-      assertThat(org.getId(), is(id));
-
-      orgs = provider.searchForOrganizationStream(realm, ImmutableMap.of("name", "foo"), 0, 50, Optional.empty());
-      org = orgs.findFirst().get();
-      assertNotNull(org);
-      assertThat(org.getId(), is(id));
-      session.getTransactionManager().commit();
-    } finally {
-      session.close();
-    }
-
-
-    // check no crossover realm domains
-    session = factory.create();
-    session.getTransactionManager().begin();
-    try {
-      RealmModel realm = session.realms().getRealmByName("master");
-      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
-      Stream<OrganizationModel> orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
-      assertThat(orgs.count(), is(1l));
-      orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
-      assertThat(orgs.collect(MoreCollectors.onlyElement()).getName(), is("foo"));
-
-      realm = session.realms().getRealmByName("test");
-      orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
-      assertThat(orgs.count(), is(1l));
-      orgs = provider.getOrganizationsStreamForDomain(realm, "foo.com", false);
-      assertThat(orgs.collect(MoreCollectors.onlyElement()).getName(), is("bar"));
-
-      session.getTransactionManager().commit();
-    } finally {
-      session.close();
-    }
-
-    // remove
-    session = factory.create();
-    session.getTransactionManager().begin();
-    try {
-      OrganizationProvider provider = session.getProvider(OrganizationProvider.class);
-
-      RealmModel realm = session.realms().getRealmByName("master");
-      boolean removed = provider.removeOrganization(realm, id);
-      assertTrue(removed);
-
-      realm = session.realms().getRealmByName("test");
-      removed = provider.removeOrganization(realm, barid);
-      assertTrue(removed);
-
-      session.getTransactionManager().commit();
-    } finally {
-      session.close();
-    }
-  }
-  */
-  /////////////////////////////////////
-
-  /*
-  @Test
-  public void testRealmRemove() {
-    try (Keycloak keycloak = getKeycloak()) {
-      String realm = "foo";
-      RealmRepresentation r = new RealmRepresentation();
-      r.setEnabled(true);
-      r.setRealm(realm);
-      keycloak.realms().create(r);
-      PhaseTwo client = phaseTwo();
-      OrganizationsResource orgsResource = client.organizations(realm);
-      String id = createDefaultOrg(orgsResource);
-      keycloak.realms().realm(realm).remove();
-    }
-  }
-
-
-
-  @Test
-  public void testRealmId() {
-    try (Keycloak keycloak = getKeycloak()) {
-      RealmRepresentation r = keycloak.realm(REALM).toRepresentation();
-      assertThat(r.getRealm(), is(REALM));
-      assertThat(r.getId(), not(REALM));
-    }
-  }
-  */
 
   @Test
   void testGetMe() throws Exception {
@@ -679,7 +483,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         createUser(keycloak, REALM, "johndoe");
 
     // add membership
-    response = postRequest("foo", id, "members", user.getId());
+    response = putRequest("foo", id, "members", user.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
     // grant role to user
@@ -838,7 +642,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(orgs.size(), is(51));
 
     // list orgs by user
-    response = getRequest("", userKeycloak);
+    response = getRequest(userKeycloak, "");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs.size(), is(6));
@@ -1103,10 +907,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // check that user has permissions to update rep
     rep.url("https://www.example.com/").displayName("Example company");
-    response = putRequest(rep, orgId1, kc1);
+    response = putRequest(kc1, rep, orgId1);
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
-    response = getRequest(orgId1, kc1);
+    response = getRequest(kc1, orgId1);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     rep = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rep.getId(), notNullValue());
@@ -1118,22 +922,22 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(orgId1));
     //  get memberships
-    response = getRequest("/%s/members".formatted(orgId1), kc1);
+    response = getRequest(kc1, "/%s/members".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     //  add memberships
     UserRepresentation user2  = createUserWithCredentials(keycloak, REALM, "user2", "pass");
-    response = putRequest("foo", "/%s/members/%s".formatted(orgId1, user2.getId()), kc1);
+    response = putRequest(kc1, "foo", "/%s/members/%s".formatted(orgId1, user2.getId()));
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     //  remove memberships
     response = deleteRequest(kc1, "/%s/members/%s".formatted(orgId1, user2.getId()));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
     //  get invitations
-    response = getRequest("/%s/invitations".formatted(orgId1), kc1);
+    response = getRequest(kc1, "/%s/invitations".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     //  add invitations
     InvitationRequestRepresentation inv =
             new InvitationRequestRepresentation().email("johndoe@example.com");
-    response = postRequest(inv, "/%s/invitations".formatted(orgId1), kc1);
+    response = postRequest(kc1, inv, "/%s/invitations".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     String loc = response.getHeader("Location");
     String inviteId = loc.substring(loc.lastIndexOf("/") + 1);
@@ -1141,10 +945,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     response = deleteRequest(kc1, "/%s/invitations/%s".formatted(orgId1, inviteId));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
     //  get roles
-    response = getRequest("/%s/roles".formatted(orgId1), kc1);
+    response = getRequest(kc1, "/%s/roles".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     //  add roles
-    createOrgRole(orgId1, "test-role", kc1);
+    createOrgRole(kc1, orgId1, "test-role");
     //  remove roles
     response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId1, "test-role"));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
@@ -1174,7 +978,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .put("clientSecret", "112233")
             .build());
 
-    response = postRequest(idp, "/%s/idps".formatted(orgId1), kc1);
+    response = postRequest(kc1, idp, "/%s/idps".formatted(orgId1));
     assertThat(response.statusCode(), is(Status.CREATED.getStatusCode()));
 
     //  get idp xxx
@@ -1199,32 +1003,32 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // check that user does not have permission to update rep
     rep.url("https://www.sample.com/").displayName("Sample company");
-    response = putRequest(rep, orgId2, kc1);
+    response = putRequest(kc1, rep, orgId2);
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
     //  get memberships
-    response = getRequest("/%s/members".formatted(orgId2), kc1);
+    response = getRequest(kc1, "/%s/members".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  add memberships
-    response = putRequest("foo", "/%s/members/%s".formatted(orgId2, user2.getId()), kc1);
+    response = putRequest(kc1, "foo", "/%s/members/%s".formatted(orgId2, user2.getId()));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  remove memberships
     response = deleteRequest(kc1, "/%s/members/%s".formatted(orgId2, user2.getId()));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  get invitations
-    response = getRequest("/%s/invitations".formatted(orgId2), kc1);
+    response = getRequest(kc1, "/%s/invitations".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  add invitations
-    response = postRequest(inv, "/%s/invitations".formatted(orgId2), kc1);
+    response = postRequest(kc1, inv, "/%s/invitations".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  remove invitations
     response = deleteRequest(kc1, "/%s/invitations/%s".formatted(orgId2, inviteId));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  get roles
-    response = getRequest("/%s/roles".formatted(orgId2), kc1);
+    response = getRequest(kc1, "/%s/roles".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  add roles
-    response = postRequest(new OrganizationRoleRepresentation().name("test-role"), "/%s/roles".formatted(orgId2), kc1);
+    response = postRequest(kc1, new OrganizationRoleRepresentation().name("test-role"), "/%s/roles".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  remove roles
     response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId2, "test-role"));
