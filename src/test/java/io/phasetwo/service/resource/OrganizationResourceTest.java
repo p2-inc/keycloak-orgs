@@ -623,51 +623,56 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(id);
   }
 
-   /*
-  @Test
-  public void testAddGetDeleteRoles() {
-    Keycloak keycloak = getKeycloak();
-    PhaseTwo client = phaseTwo(keycloak);
-    OrganizationsResource orgsResource = client.organizations(REALM);
-    String id = createDefaultOrg(orgsResource);
 
-    OrganizationResource orgResource = orgsResource.organization(id);
-    OrganizationRolesResource rolesResource = orgResource.roles();
-    OrganizationMembershipsResource membershipsResource = orgResource.memberships();
+  @Test
+  void testAddGetDeleteRoles() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
 
     // get default roles list
-    List<OrganizationRoleRepresentation> roles = rolesResource.get();
+    Response response = givenSpec().when().get(String.join("/", id, "roles")).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationRoleRepresentation> roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
     // create a role
-    String name = rolesResource.create(new OrganizationRoleRepresentation().name("eat-apples"));
+    String orgRoleName = "eat-apples";
+    OrganizationRoleRepresentation orgRole = createOrgRole(id, orgRoleName);
 
     // get single role
-    OrganizationRoleRepresentation role = rolesResource.get(name);
+    response = givenSpec().when().get(String.join("/", id, "roles", orgRoleName)).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    OrganizationRoleRepresentation role = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(role, notNullValue());
     assertThat(role.getId(), notNullValue());
-    assertThat(role.getName(), is("eat-apples"));
+    assertThat(role.getName(), is(orgRoleName));
 
     // get role list
-    roles = rolesResource.get();
+    response = givenSpec().when().get(String.join("/", id, "roles")).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 1));
 
     // delete role
-    rolesResource.delete(name);
+    response = givenSpec().when().delete(String.join("/", id, "roles", orgRoleName)).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get single role 404
-    assertThrows(NotFoundException.class, () -> rolesResource.get(name));
+    response = givenSpec().when().get(String.join("/", id, "roles", orgRoleName)).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // create 3 roles
-    String[] additionalRoles = {"eat-apples", "bake-pies", "view-fair"};
+    String[] additionalRoles = {orgRoleName, "bake-pies", "view-fair"};
     for (String roleName : additionalRoles) {
-      rolesResource.create(new OrganizationRoleRepresentation().name(roleName));
+      createOrgRole(id, roleName);
     }
 
     // get role list
-    roles = rolesResource.get();
+    response = givenSpec().when().get(String.join("/", id, "roles")).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
 
@@ -676,39 +681,52 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         createUser(keycloak, REALM, "johndoe");
 
     // add membership
-    membershipsResource.add(user.getId());
+    response =
+            givenSpec()
+                    .and()
+                    .body("foo") // hack b/c restassured doesn't like body-less puts
+                    .put(String.join("/", id, "members", user.getId()))
+                    .then()
+                    .extract()
+                    .response();
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
     // grant role to user
-    rolesResource.grant(name, user.getId());
+    grantUserRole(id, orgRoleName, user.getId());
 
     // get users with role
-    List<UserRepresentation> rs = rolesResource.users(name);
+    response = givenSpec().when().get(String.join("/", id, "roles", orgRoleName, "users")).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<UserRepresentation> rs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rs, notNullValue());
     assertThat(rs, hasSize(1));
     assertThat(rs.get(0).getUsername(), is("johndoe"));
 
     // check if user has role
-    assertThat(rolesResource.hasRole(name, user.getId()), is(true));
+    checkUserRole(id, orgRoleName, user.getId(), Status.NO_CONTENT.getStatusCode());
 
     // revoke role from user
-    rolesResource.revoke(name, user.getId());
+    response = givenSpec().when().delete(String.join("/", id, "roles", orgRoleName, "users", user.getId())).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get users with role
-    rs = rolesResource.users(name);
+    response = givenSpec().when().get(String.join("/", id, "roles", orgRoleName, "users")).then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    rs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rs, notNullValue());
     assertThat(rs, empty());
 
     // check if user has role
-    assertThat(rolesResource.hasRole(name, user.getId()), is(false));
+    checkUserRole(id, orgRoleName, user.getId(), Status.NOT_FOUND.getStatusCode());
 
     // grant more roles
     for (String roleName : additionalRoles) {
-      rolesResource.grant(roleName, user.getId());
+      grantUserRole(id, roleName, user.getId());
     }
 
     // check if user has role
     for (String roleName : additionalRoles) {
-      assertThat(rolesResource.hasRole(roleName, user.getId()), is(true));
+      checkUserRole(id, roleName, user.getId(), Status.NO_CONTENT.getStatusCode());
     }
 
     // delete user
@@ -716,20 +734,24 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
     // get users with role
     for (String roleName : additionalRoles) {
-      rs = rolesResource.users(roleName);
+      response = givenSpec().when().get(String.join("/", id, "roles", roleName, "users")).then().extract().response();
+      assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+      rs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
       assertThat(rs, notNullValue());
       assertThat(rs, empty());
     }
 
     // delete roles
     for (String roleName : additionalRoles) {
-      rolesResource.delete(roleName);
+      response = givenSpec().when().delete(String.join("/", id, "roles", roleName)).then().extract().response();
+      assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
     }
 
     // delete org
-    orgResource.delete();
+    deleteOrganization(id);
   }
 
+   /*
   @Test
   public void testAddGetDeleteInvitations() {
     Keycloak keycloak = getKeycloak();

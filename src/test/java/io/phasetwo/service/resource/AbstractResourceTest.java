@@ -191,12 +191,12 @@ public abstract class AbstractResourceTest {
   }
 
   protected OrganizationRoleRepresentation createOrgRole(String orgId, String name)
-      throws Exception {
+      throws IOException {
     return createOrgRole(orgId, name, keycloak);
   }
 
   protected OrganizationRoleRepresentation createOrgRole(
-      String orgId, String name, Keycloak keycloak) throws Exception {
+      String orgId, String name, Keycloak keycloak) throws IOException {
     OrganizationRoleRepresentation rep = new OrganizationRoleRepresentation().name(name);
     Response response =
         givenSpec(keycloak)
@@ -273,5 +273,11 @@ public abstract class AbstractResourceTest {
         .contentType("application/json")
         .auth()
         .oauth2(keycloak.tokenManager().getAccessTokenString());
+  }
+
+  protected void checkUserRole(String orgId, String role, String userId, int status) {
+    // check if user has role
+    Response response = givenSpec().when().get(String.join("/", orgId, "roles", role, "users", userId)).then().extract().response();
+    assertThat(response.getStatusCode(), is(status));
   }
 }
