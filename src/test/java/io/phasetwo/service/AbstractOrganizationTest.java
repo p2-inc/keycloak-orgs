@@ -1,10 +1,11 @@
-package io.phasetwo.service.resource;
+package io.phasetwo.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
+import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import jakarta.ws.rs.core.Response.Status;
@@ -29,7 +30,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public abstract class AbstractResourceTest {
+public abstract class AbstractOrganizationTest {
 
   public static final String ADMIN_CLI = "admin-cli";
   static final String[] deps = {

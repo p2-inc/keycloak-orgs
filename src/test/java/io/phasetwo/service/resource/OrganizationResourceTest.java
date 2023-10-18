@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.client.openapi.model.*;
+import io.phasetwo.service.AbstractOrganizationTest;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -29,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @JBossLog
 @Testcontainers
-class OrganizationResourceTest extends AbstractResourceTest {
+class OrganizationResourceTest extends AbstractOrganizationTest {
 
   @Test
   void testAddGetUpdateDeleteOrg() throws Exception {
