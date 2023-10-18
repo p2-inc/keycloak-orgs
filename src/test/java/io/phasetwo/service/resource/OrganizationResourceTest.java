@@ -1029,28 +1029,21 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(id);
   }
 
-   /*
+
   @Test
-  @Disabled
-  public void testIdpsOwnedOrgs() {
-    PhaseTwo client = phaseTwo();
-    OrganizationsResource orgsResource = client.organizations(REALM);
+  void testIdpsOwnedOrgs() throws IOException {
 
-    String orgId1 =
-        orgsResource.create(
-            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
-    String orgId2 =
-        orgsResource.create(
-            new OrganizationRepresentation().name("sample").domains(List.of("sample.com")));
+    OrganizationRepresentation org = createOrganization(new OrganizationRepresentation().name("example").domains(List.of("example.com")));
+    String orgId1 = org.getId();
 
-    OrganizationIdentityProvidersResource firstIdpResource =
-        orgsResource.organization(orgId1).identityProviders();
-    OrganizationIdentityProvidersResource secondIdpResource =
-        orgsResource.organization(orgId2).identityProviders();
+    org = createOrganization(new OrganizationRepresentation().name("sample").domains(List.of("sample.com")));
+    String orgId2 = org.getId();
+
 
     // create idp for org 1
+    String alias1 = "vendor-protocol-A1";
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
-    idp.setAlias("vendor-protocol-A1");
+    idp.setAlias(alias1);
     idp.setProviderId("oidc");
     idp.setEnabled(true);
     idp.setFirstBrokerLoginFlowAlias("first broker login");
@@ -1074,38 +1067,47 @@ public class OrganizationResourceTest extends AbstractResourceTest {
             .build());
 
     // create idp for org1
-    String alias1 = firstIdpResource.create(idp);
-    assertThat(alias1, notNullValue());
+    Response response = postRequest(idp, orgId1, "idps");
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
     // create idp for org 2
-    idp.setAlias("vendor-protocol-B1");
-    String alias2 = secondIdpResource.create(idp);
-    assertThat(alias2, notNullValue());
+    String alias2 = "vendor-protocol-B1";
+    idp.setAlias(alias2);
+    response = postRequest(idp, orgId2, "idps");
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
     // check that org 1 can only see idp 1
-    List<IdentityProviderRepresentation> idps = firstIdpResource.get();
+    response = getRequest(orgId1, "idps");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<IdentityProviderRepresentation> idps = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
     assertThat(idps.get(0).getAlias(), is(alias1));
 
     // check that org 2 can only see idp 2
-    idps = secondIdpResource.get();
+    response = getRequest(orgId2, "idps");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    idps = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
     assertThat(idps.get(0).getAlias(), is(alias2));
 
     // check that org 1 cannot delete/update idp 2
-    firstIdpResource.delete(alias2);
+    response = deleteRequest(orgId1, "idps", alias2);
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // delete idps 1 & 2
-    firstIdpResource.delete(alias1);
-    secondIdpResource.delete(alias2);
+    response = deleteRequest(orgId1, "idps", alias1);
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+    response = deleteRequest(orgId2, "idps", alias2);
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // delete orgs
-    orgsResource.organization(orgId1).delete();
-    orgsResource.organization(orgId2).delete();
+    deleteOrganization(orgId1);
+    deleteOrganization(orgId2);
   }
 
+   /*
   @Test
   public void testOrgAdminPermissions() {
     Keycloak keycloak = getKeycloak();
