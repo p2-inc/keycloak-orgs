@@ -1,30 +1,31 @@
 package io.phasetwo.service.resource;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import io.phasetwo.client.openapi.model.*;
+import io.restassured.http.Header;
+import io.restassured.response.Response;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response.Status;
+import lombok.extern.jbosslog.JBossLog;
+import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.Test;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import static com.google.common.collect.Lists.newArrayList;
 import static io.phasetwo.service.Helpers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import io.phasetwo.client.openapi.model.*;
-import io.restassured.response.Response;
-import jakarta.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import lombok.extern.jbosslog.JBossLog;
-import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @JBossLog
 @Testcontainers
@@ -782,17 +783,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
 
     // create user and give membership
-    CredentialRepresentation pass = new CredentialRepresentation();
-    pass.setType("password");
-    pass.setValue("pass");
-    pass.setTemporary(false);
-    org.keycloak.representations.idm.UserRepresentation user1 =
-        new org.keycloak.representations.idm.UserRepresentation();
-    user1.setEnabled(true);
-    user1.setUsername("user1");
-    user1.setEmail("johndoe@example.com");
-    user1.setCredentials(ImmutableList.of(pass));
-    user1 = createUser(keycloak, REALM, user1);
+   UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
     // grant membership to org
     response = putRequest("foo", id, "members", user1.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -829,17 +820,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     }
 
     // create user and give membership
-    CredentialRepresentation pass = new CredentialRepresentation();
-    pass.setType("password");
-    pass.setValue("pass");
-    pass.setTemporary(false);
-    org.keycloak.representations.idm.UserRepresentation user1 =
-        new org.keycloak.representations.idm.UserRepresentation();
-    user1.setEnabled(true);
-    user1.setUsername("user1");
-    user1.setEmail("johndoe@example.com");
-    user1.setCredentials(ImmutableList.of(pass));
-    user1 = createUser(keycloak, REALM, user1);
+   UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
     // grant membership to orgs
     Response response = putRequest("foo", id, "members", user1.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -1263,24 +1244,51 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     deleteOrganization(orgId1);
   }
 
-   /*
+
   @Test
-  @Disabled
-  public void testOrgPortalLink() {
-    OrganizationsResource orgsResource = phaseTwo().organizations(REALM);
-    String id = createDefaultOrg(orgsResource);
+  void testOrgPortalLink() throws IOException {
 
-    OrganizationResource orgResource = orgsResource.organization(id);
-    PortalLinkRepresentation link = orgResource.portalLink(Optional.of("foobar"));
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    Response response = givenSpec()
+            .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
+            .formParam("baseUri", "foobar")
+            .when()
+            .post("/%s/portal-link".formatted(id))
+            .then()
+            .extract()
+            .response();
+
+    assertThat(response.getStatusCode(), is(Status.BAD_REQUEST.getStatusCode()));
+
+    // create wizard client
+    ClientRepresentation clientRepresentation = new ClientRepresentation();
+    clientRepresentation.setName("idp-wizard");
+    clientRepresentation.setId("idp-wizard");
+    keycloak.realm(REALM).clients().create(clientRepresentation);
+    response = givenSpec()
+            .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
+            .formParam("baseUri", "foobar")
+            .when()
+            .post("/%s/portal-link".formatted(id))
+            .then()
+            .extract()
+            .response();
+    
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    UserRepresentation orgAdmin = keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).get(0);
+
+    PortalLinkRepresentation link = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+
     assertThat(link, notNullValue());
-    assertThat(link.getUser(), notNullValue());
+    assertThat(link.getUser(), is(orgAdmin.getId()));
     assertThat(link.getLink(), notNullValue());
-    assertThat(link.getRedirect(), notNullValue());
-
-    System.err.println(String.format("portal-link %s", link));
+    assertThat(link.getRedirect(), containsString("foobar"));
 
     // delete org
-    orgResource.delete();
+    deleteOrganization(id);
   }
-   */
+
 }
