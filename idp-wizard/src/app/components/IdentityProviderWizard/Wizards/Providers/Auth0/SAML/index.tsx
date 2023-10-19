@@ -13,7 +13,10 @@ import authoLogo from "@app/images/auth0/auth0-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { CreateIdp, SamlAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
+import {
+  CreateIdp,
+  SamlAttributeMapper,
+} from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
@@ -114,16 +117,32 @@ export const Auth0WizardSAML: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-      
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
+
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
-        usernameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/username", friendlyName: "" },
-        emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" },
-        firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", friendlyName: "" },
-        lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", friendlyName: "" },
-	featureFlags,
+        usernameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/username",
+          friendlyName: "",
+        },
+        emailAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+          friendlyName: "",
+        },
+        firstNameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+          friendlyName: "",
+        },
+        lastNameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+          friendlyName: "",
+        },
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);

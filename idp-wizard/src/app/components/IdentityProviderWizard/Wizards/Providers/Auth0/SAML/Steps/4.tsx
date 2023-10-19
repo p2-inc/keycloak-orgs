@@ -14,7 +14,6 @@ type Props = {
 
 export const Auth0StepFour: React.FC<Props> = ({ loginRedirectURL }) => {
   const instructions: InstructionProps[] = [
-    
     {
       component: (
         <ClipboardCopyComponent
@@ -24,12 +23,36 @@ export const Auth0StepFour: React.FC<Props> = ({ loginRedirectURL }) => {
       ),
     },
     {
-      text: "In the “Settings” section of the popup, enter the Application Callback URL.",
+      component: (
+        <div>
+          In the “Settings” tab of the popup, enter the Application Callback URL
+          in the provided input field.
+        </div>
+      ),
+    },
+    {
+      component: (
+        <ClipboardCopyComponent
+          label="Copy this Callback JSON"
+          initialValue={`"logout": { "callback": "${loginRedirectURL}", "slo_enabled": true },`}
+        />
+      ),
+    },
+    {
+      component: (
+        <div>
+          In the "Settings" tab of the popup, paste the Callback JSON into the
+          "Settings" JSON field at the bottom, just below the final curly brace
+          "{"}"}".
+        </div>
+      ),
+    },
+    {
       component: <StepImage src={Auth0Step5Image} alt="Step 4.1" />,
     },
     {
       text: "Scroll all the way to the bottom of this popup and click “Enable”.",
-      component: <StepImage src={Auth0Step6Image} alt="Step 4.2" />,
+      component: <StepImage src={Auth0Step6Image} alt="Step 4.3" />,
     },
   ];
 
