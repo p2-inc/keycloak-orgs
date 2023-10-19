@@ -64,7 +64,7 @@ public abstract class AbstractOrganizationTest {
 
   @Container
   public static final KeycloakContainer container =
-      new KeycloakContainer("quay.io/phasetwo/keycloak-crdb:22.0.3")
+      new KeycloakContainer("quay.io/phasetwo/keycloak-crdb:22.0.4")
           .withContextPath("/auth")
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
