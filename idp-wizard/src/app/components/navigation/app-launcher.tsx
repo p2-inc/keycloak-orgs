@@ -67,8 +67,7 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
         </Link>
       }
       className={cs({
-        "pf-u-display-none":
-          featureFlags?.enableDashboard !== false || !hasOrgAccess,
+        "pf-u-display-none": !featureFlags?.enableDashboard || !hasOrgAccess,
       })}
     />,
     <ApplicationLauncherItem
