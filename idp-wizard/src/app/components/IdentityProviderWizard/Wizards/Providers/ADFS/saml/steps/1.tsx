@@ -1,75 +1,49 @@
 import React, { FC } from "react";
 import {
-  ClipboardCopyComponent,
   InstructionProps,
   Step,
   StepImage,
+  UrlForm,
+  UrlCard,
 } from "@wizardComponents";
 import * as Images from "@app/images/adfs/saml";
+import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
-interface Props {
-  federationMetadataAddress: string;
-}
+type Props = {
+  url: string;
+  handleFormSubmit: ({ url }: { url: string }) => API_RETURN_PROMISE;
+};
 
-export const Step1: FC<Props> = ({ federationMetadataAddress }) => {
+export const Step1: FC<Props> = ({ url, handleFormSubmit }) => {
   const instructions: InstructionProps[] = [
     {
       text: (
         <div>
-          Login to the ADFS server and open the ADFS management console, and
-          right-click on <b>Relying Party Trust</b>. Select{" "}
-          <b>Add Relying Party Trust</b> from the submenu.
+          In the ADFS management console, navigate to{" "}
+          <b>
+            AD FS -{">"} Service -{">"} Endpoints
+          </b>
+          , and note the path from the Metadata section. The Identity provider
+          metadata URL will be constructed by combining your server's
+          fully-qualified domain name with this path.
         </div>
       ),
-      component: <StepImage src={Images.ADFS_SAML_0} alt="Step 1.1" />,
-    },
-    {
-      text: (
-        <div>
-          In the window that appears, select <b>Claims Aware</b> and click
-          Start.
-        </div>
-      ),
-      component: <StepImage src={Images.ADFS_SAML_1} alt="Step 1.2" />,
+      component: <StepImage src={Images.ADFS_SAML_13} alt="Step 1.1" />,
     },
     {
       component: (
-        <ClipboardCopyComponent
-          label="Copy the Federation metadata address"
-          initialValue={federationMetadataAddress}
-        />
+        <UrlCard>
+          <UrlForm
+            url={url}
+            urlLabel="Identity Provider Metadata"
+            handleFormSubmit={handleFormSubmit}
+          />
+        </UrlCard>
       ),
-    },
-    {
-      text: (
-        <div>
-          In the <b>Select Data Source</b> step in the ADFS wizard, select the
-          option labeled{" "}
-          <b>
-            Import data about the relying party published online or on a local
-            network
-          </b>
-          , input the following link into the <b>Federation metadata address</b>{" "}
-          input field, and click <b>Next</b>.
-        </div>
-      ),
-      component: <StepImage src={Images.ADFS_SAML_2} alt="Step 1.3" />,
-    },
-    {
-      text: (
-        <div>
-          In the <b>Select Data Source</b> step in the ADFS wizard, enter the{" "}
-          <b>Display Name</b> and click <b>Next</b>.
-        </div>
-      ),
-      component: <StepImage src={Images.ADFS_SAML_3} alt="Step 1.4" />,
     },
   ];
 
   return (
-    <Step
-      title="Step 1: Setup Relying Party Trust"
-      instructionList={instructions}
-    />
+    <Step title="Step 1: Import ADFS Metadata" instructionList={instructions} />
   );
 };

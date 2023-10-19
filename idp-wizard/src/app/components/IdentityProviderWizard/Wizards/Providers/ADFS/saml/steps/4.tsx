@@ -3,47 +3,101 @@ import {
   InstructionProps,
   Step,
   StepImage,
-  UrlForm,
-  UrlCard,
+  DoubleItemClipboardCopy,
 } from "@wizardComponents";
 import * as Images from "@app/images/adfs/saml";
-import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 
-type Props = {
-  url: string;
-  handleFormSubmit: ({ url }: { url: string }) => API_RETURN_PROMISE;
-};
-
-export const Step4: FC<Props> = ({ url, handleFormSubmit }) => {
+export const Step4: FC = () => {
   const instructions: InstructionProps[] = [
     {
       text: (
         <div>
-          In the ADFS management console, navigate to{" "}
-          <b>
-            AD FS -{">"} Service -{">"} Endpoints
-          </b>
-          , and note the path from the Metadata section. The Identity provider
-          metadata URL will be constructed by combining your server's
-          fully-qualified domain name with this path.
+          Select <b>Add Rule</b> in the <b>Edit Claims Issuance Policy</b>{" "}
+          window.
         </div>
       ),
-      component: <StepImage src={Images.ADFS_SAML_13} alt="Step 4.1" />,
+      component: <StepImage src={Images.ADFS_SAML_7} alt="Step 4.1" />,
+    },
+    {
+      text: (
+        <div>
+          Select <b>Transform an Incoming Claim</b> and click <b>Next</b>.
+        </div>
+      ),
+      component: <StepImage src={Images.ADFS_SAML_8} alt="Step 4.2" />,
+    },
+    {
+      text: (
+        <div>
+          In the following <b>Add Transform Claim Rule Wizard</b>, name the{" "}
+          <b>Claim rule name</b> “Name ID”. For <b>Incoming claim type</b>,
+          select UPN. For <b>Outgoing claim type</b>, select “Name ID”. For the{" "}
+          <b>Outgoing name ID format</b>, select “Persistent Identifier”. Click{" "}
+          <b>Finish</b> to save and continue.
+        </div>
+      ),
+      component: <StepImage src={Images.ADFS_SAML_9} alt="Step 4.3" />,
+    },
+    {
+      text: (
+        <div>
+          Again, select <b>Add Rule</b> in the{" "}
+          <b>Edit Claims Issuance Policy</b> window.
+        </div>
+      ),
+      component: <StepImage src={Images.ADFS_SAML_10} alt="Step 4.4" />,
+    },
+    {
+      text: (
+        <div>
+          Select <b>Send LDAP Attributes as Claims</b> and click <b>Next</b>.
+        </div>
+      ),
+      component: <StepImage src={Images.ADFS_SAML_11} alt="Step 4.5" />,
+    },
+    {
+      text: (
+        <div>
+          Submit <b>Attributes</b> as <b>Claim rule name</b>, select{" "}
+          <b>Active Directory</b> as <b>Attribute Store</b>, and create the
+          following attribute mappings.
+        </div>
+      ),
+      component: <StepImage src={Images.ADFS_SAML_12} alt="Step 4.6" />,
     },
     {
       component: (
-        <UrlCard>
-          <UrlForm
-            url={url}
-            urlLabel="Identity Provider Metadata"
-            handleFormSubmit={handleFormSubmit}
+        <div>
+          <DoubleItemClipboardCopy
+            leftValue="E-Mail-Addresses"
+            rightValue="E-Mail Address"
           />
-        </UrlCard>
+          <DoubleItemClipboardCopy
+            leftValue="Given-Name"
+            rightValue="Given Name"
+          />
+          <DoubleItemClipboardCopy leftValue="Surname" rightValue="Surname" />
+          <DoubleItemClipboardCopy
+            leftValue="SAM-Account-Name"
+            rightValue="Subject Name"
+          />
+        </div>
+      ),
+    },
+    {
+      component: (
+        <div>
+          Click OK in the <b>Edit Claims issuance Policy</b> window to complete
+          this step.
+        </div>
       ),
     },
   ];
 
   return (
-    <Step title="Step 4: Import ADFS Metadata" instructionList={instructions} />
+    <Step
+      title="Step 3: Configure Attribute Mapping"
+      instructionList={instructions}
+    />
   );
 };

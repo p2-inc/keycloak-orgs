@@ -15,7 +15,11 @@ import {
   METADATA_CONFIG,
 } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { Axios, CreateIdp, SamlAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
+import {
+  Axios,
+  CreateIdp,
+  SamlAttributeMapper,
+} from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
@@ -42,7 +46,6 @@ export const ADFSWizard: FC = () => {
     identifierURL,
     createIdPUrl,
     updateIdPUrl,
-    baseServerRealmsUrl,
   } = useApi();
 
   const [issuerUrl, setIssuerUrl] = useState(
@@ -68,41 +71,6 @@ export const ADFSWizard: FC = () => {
     stepIdReached < finishStep
   );
 
-  const idpStartConfig = {
-    alias: alias,
-    providerId: "saml",
-    enabled: false,
-    updateProfileFirstLoginMode: "on",
-    trustEmail: false,
-    storeToken: false,
-    addReadTokenRoleOnCreate: false,
-    authenticateByDefault: false,
-    linkOnly: false,
-    firstBrokerLoginFlowAlias: "first broker login",
-    config: {
-      addExtensionsElementWithKeyInfo: "false",
-      allowCreate: "true",
-      authnContextComparisonType: "exact",
-      entityId: entityId,
-      hideOnLoginPage: "",
-      nameIDPolicyFormat:
-        "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
-      postBindingAuthnRequest: "true",
-      postBindingLogout: "true",
-      postBindingResponse: "true",
-      principalType: "SUBJECT",
-      signatureAlgorithm: "RSA_SHA256",
-      singleSignOnServiceUrl: "https://example.com",
-      syncMode: "FORCE",
-      useJwksUrl: "true",
-      validateSignature: "true",
-      wantAssertionsEncrypted: "false",
-      wantAssertionsSigned: "true",
-      wantAuthnRequestsSigned: "true",
-      xmlSigKeyInfoKeyNameTransformer: "NONE",
-    },
-  };
-
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
       clearAlias({
@@ -127,30 +95,36 @@ export const ADFSWizard: FC = () => {
     setIssuerUrl(url);
 
     try {
-      // Create the IDP first
-      const payload: IdentityProviderRepresentation = {
-        ...idpStartConfig,
-        alias,
-        displayName: `ADFS Single Sign-on`,
-        providerId: "saml",
-      };
-      // create the idp with the start config
-
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-
       const urlPayload = {
         fromUrl: url,
         providerId: "saml",
         realm: getRealm(),
       };
+      // Validate the configuration
       const resp = await Axios.post(identifierURL, urlPayload);
 
       if (resp.status === 200) {
-        setMetadata({
+        const newMetadata = {
           ...SamlIDPDefaults,
           ...resp.data,
-        });
+        };
+        setMetadata(newMetadata);
         setIsFormValid(true);
+
+        // Create the IDP
+        const payload: IdentityProviderRepresentation = {
+          alias,
+          displayName: `ADFS Single Sign-on`,
+          providerId: "saml",
+          config: newMetadata,
+          enabled: false,
+        };
+        // create the idp with the start config
+        await CreateIdp({
+          createIdPUrl,
+          payload,
+          featureFlags,
+        });
 
         return {
           status: API_STATUS.SUCCESS,
@@ -173,11 +147,11 @@ export const ADFSWizard: FC = () => {
     setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
-      ...idpStartConfig,
-      config: {
-        ...idpStartConfig.config,
-        ...metadata!,
-      },
+      alias,
+      displayName: `ADFS Single Sign-on`,
+      providerId: "saml",
+      config: metadata,
+      enabled: true,
     };
 
     try {
@@ -187,11 +161,27 @@ export const ADFSWizard: FC = () => {
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
-        usernameAttribute: { attributeName: "http://schemas.microsoft.com/2012/12/certificatecontext/field/subjectname", friendlyName: "" },
-        emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" },
-        firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", friendlyName: "" },
-        lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", friendlyName: "" },
-	featureFlags,
+        usernameAttribute: {
+          attributeName:
+            "http://schemas.microsoft.com/2012/12/certificatecontext/field/subjectname",
+          friendlyName: "",
+        },
+        emailAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+          friendlyName: "",
+        },
+        firstNameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+          friendlyName: "",
+        },
+        lastNameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+          friendlyName: "",
+        },
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
@@ -212,17 +202,17 @@ export const ADFSWizard: FC = () => {
     {
       id: 1,
       name: "Setup Relying Party Trust",
-      component: (
-        <Step1 federationMetadataAddress={federationMetadataAddressUrl} />
-      ),
+      component: <Step1 url={issuerUrl} handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
-      enableNext: true,
+      enableNext: isFormValid,
       canJumpTo: stepIdReached >= 1,
     },
     {
       id: 2,
       name: "Assign People and Groups",
-      component: <Step2 />,
+      component: (
+        <Step2 federationMetadataAddress={federationMetadataAddressUrl} />
+      ),
       hideCancelButton: true,
       enableNext: true,
       canJumpTo: stepIdReached >= 2,
@@ -238,9 +228,8 @@ export const ADFSWizard: FC = () => {
     {
       id: 4,
       name: `Import ADFS Metadata`,
-      component: <Step4 url={issuerUrl} handleFormSubmit={handleFormSubmit} />,
+      component: <Step4 />,
       hideCancelButton: true,
-      enableNext: isFormValid,
       canJumpTo: stepIdReached >= 4,
     },
     {
