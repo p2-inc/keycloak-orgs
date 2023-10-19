@@ -9,7 +9,7 @@ import { setOrganization, setMustPickOrg, setApiMode } from "@app/services";
 import { useAppDispatch, useAppSelector } from "@app/hooks";
 import { useKeycloak } from "@react-keycloak/web";
 import { useRoleAccess } from "@app/hooks";
-import { first, has } from "lodash";
+import { has } from "lodash";
 import { useGetFeatureFlagsQuery } from "@app/services";
 
 const App: React.FC = () => {

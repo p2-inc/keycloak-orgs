@@ -26,13 +26,13 @@ type endpoint = {
 export const useApi = () => {
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const apiMode = useAppSelector((state) => state.settings.apiMode);
-  const { getRealm, keycloakToken, getServerUrl, getAuthRealm } =
-    useKeycloakAdminApi();
+  const { getRealm, getServerUrl, getAuthRealm } = useKeycloakAdminApi();
+
   const realm = getRealm();
   const authRealm = getAuthRealm();
   const serverUrl = getServerUrl();
   const [alias, setAlias] = useState("");
-  const [orgId, setOrgId] = useState("SET_ORG_ID");
+  const orgId = useAppSelector((state) => state.settings.currentOrg);
 
   const baseOPUrl = `${realm}/identity-provider`;
   const baseOPUrlInstances = `${baseOPUrl}/instances`;
@@ -40,12 +40,6 @@ export const useApi = () => {
 
   let serverUrlSuffix = "/admin";
   const aliasId = isString(alias) ? last(alias.split("-")) : "";
-
-  useEffect(() => {
-    if (keycloakToken?.org_id) {
-      setOrgId(keycloakToken.org_id);
-    }
-  }, [keycloakToken]);
 
   // onprem endpoint
   const onPremEndpoints: Record<apiEndpointNames, endpoint> = {
