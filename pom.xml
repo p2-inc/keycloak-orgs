@@ -3,7 +3,7 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.43-SNAPSHOT</version>
+  <version>0.44-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
@@ -30,9 +30,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>5.8.2</junit.version>
-    <keycloak.version>22.0.3</keycloak.version>
+    <keycloak.version>22.0.4</keycloak.version>
     <resteasy.version>6.2.4.Final</resteasy.version>
-    <lombok.version>1.18.28</lombok.version>
+    <lombok.version>1.18.30</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
     <jackson.version>2.15.2</jackson.version>
     <jackson.databind.version>2.15.2</jackson.databind.version>
@@ -217,7 +217,7 @@
       <version>${resteasy.version}</version>
       <scope>provided</scope>
     </dependency>
-    
+
     <!-- javax/jakarta apis -->
     <dependency>
       <groupId>jakarta.persistence</groupId>
