@@ -307,6 +307,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
             builder.and(
                 builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
                 builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
+        break;
       }
     }
 
