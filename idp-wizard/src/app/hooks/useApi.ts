@@ -110,8 +110,8 @@ export const useApi = () => {
   let baseServerUrl = `${serverUrl}${serverUrlSuffix}`;
   let baseServerRealmsUrl = `${baseServerUrl}/realms`;
 
-  let adminLinkSaml = `${baseServerUrl}/${authRealm}/console/#/realms/${realm}/identity-provider-settings/provider/saml/${alias}`;
-  let adminLinkOidc = `${baseServerUrl}/${authRealm}/console/#/realms/${realm}/identity-provider-settings/provider/oidc/${alias}`;
+  let adminLinkSaml = `${baseServerUrl}/${authRealm}/console/#/${realm}/identity-provider-settings/provider/saml/${alias}/settings`;
+  let adminLinkOidc = `${baseServerUrl}/${authRealm}/console/#/${realm}/identity-provider-settings/provider/oidc/${alias}/settings`;
 
   let identifierURL = `${baseServerRealmsUrl}/${endpoints?.importConfig.endpoint}`;
   let createIdPUrl = `${baseServerRealmsUrl}/${endpoints?.createIdP.endpoint!}`;
