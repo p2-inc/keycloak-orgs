@@ -77,6 +77,12 @@ final class HomeIdpDiscoverer {
         return homeIdps;
     }
 
+    // Note(fastly):
+    //
+    // Original upstream implementation of discoverHomeIdps
+    // See next function for Fastly implementation.
+    //
+    /*
     private List<IdentityProviderModel> discoverHomeIdps(Domain domain, UserModel user, String username) {
         final Map<String, String> linkedIdps;
 
@@ -102,15 +108,63 @@ final class HomeIdpDiscoverer {
         List<IdentityProviderModel> enabledIdpsWithMatchingDomain = filterIdpsWithMatchingDomainFrom(enabledIdps,
             domain,
             config);
-        */
+        *//*
         // Overidden lookup mechanism to lookup via organization domain
-        /* OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
+        OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
         List<IdentityProviderModel> enabledIdpsWithMatchingDomain =
             orgs.getOrganizationsStreamForDomain(
                     context.getRealm(), domain.toString(), config.requireVerifiedDomain())
                 .flatMap(OrganizationModel::getIdentityProvidersStream)
                 .filter(IdentityProviderModel::isEnabled)
-                .collect(Collectors.toList()); */
+                .collect(Collectors.toList());
+
+        // Prefer linked IdP with matching domain first
+        List<IdentityProviderModel> homeIdps = getLinkedIdpsFrom(enabledIdpsWithMatchingDomain, linkedIdps);
+
+        if (homeIdps.isEmpty()) {
+            if (!linkedIdps.isEmpty()) {
+                // Prefer linked and enabled IdPs without matching domain in favor of not linked IdPs with matching domain
+                homeIdps = getLinkedIdpsFrom(enabledIdps, linkedIdps);
+            }
+            if (homeIdps.isEmpty()) {
+                // Fallback to not linked IdPs with matching domain (general case if user logs in for the first time)
+                homeIdps = enabledIdpsWithMatchingDomain;
+                logFoundIdps("non-linked", "matching", homeIdps, domain, username);
+            } else {
+                logFoundIdps("non-linked", "non-matching", homeIdps, domain, username);
+            }
+        } else {
+            logFoundIdps("linked", "matching", homeIdps, domain, username);
+        }
+
+        return homeIdps;
+    }
+    */
+
+    // Note(fastly):
+    //
+    // Fastly implementation of discoverHomeIdps
+    // See above function for original implementation.
+    //
+    private List<IdentityProviderModel> discoverHomeIdps(Domain domain, UserModel user, String username) {
+        final Map<String, String> linkedIdps;
+
+        HomeIdpDiscoveryConfig config = new HomeIdpDiscoveryConfig(context.getAuthenticatorConfig());
+        if (user == null || !config.forwardToLinkedIdp()) {
+            LOG.tracef(
+                "User '%s' is not stored locally or forwarding to linked IdP is disabled. Skipping discovery of linked IdPs.",
+                username);
+            return Collections.emptyList();
+        }
+
+        LOG.tracef(
+            "Found local user '%s' and forwarding to linked IdP is enabled. Discovering linked IdPs.",
+            username);
+
+        linkedIdps = context.getSession().users()
+                .getFederatedIdentitiesStream(context.getRealm(), user)
+                .collect(
+                    Collectors.toMap(FederatedIdentityModel::getIdentityProvider, FederatedIdentityModel::getUserName));
 
         // Custom Fastly lookup mechanism.
         //
@@ -120,7 +174,7 @@ final class HomeIdpDiscoverer {
         // 2. Filter to only enabled IdPs
         String clientID = context.getAuthenticationSession().getClient().getClientId();
         OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
-        List<IdentityProviderModel> enabledIdpsWithMatchingDomain =
+        List<IdentityProviderModel> enabledIdpsForUserOrgs =
             orgs.getUserOrganizationsStream(
                     context.getRealm(), user)
                 .filter(o -> {
@@ -139,24 +193,7 @@ final class HomeIdpDiscoverer {
                 .filter(IdentityProviderModel::isEnabled)
                 .collect(Collectors.toList());
 
-        // Prefer linked IdP with matching domain first
-        List<IdentityProviderModel> homeIdps = getLinkedIdpsFrom(enabledIdpsWithMatchingDomain, linkedIdps);
-
-        /* if (homeIdps.isEmpty()) {
-            if (!linkedIdps.isEmpty()) {
-                // Prefer linked and enabled IdPs without matching domain in favor of not linked IdPs with matching domain
-                homeIdps = getLinkedIdpsFrom(enabledIdps, linkedIdps);
-            }
-            if (homeIdps.isEmpty()) {
-                // Fallback to not linked IdPs with matching domain (general case if user logs in for the first time)
-                homeIdps = enabledIdpsWithMatchingDomain;
-                logFoundIdps("non-linked", "matching", homeIdps, domain, username);
-            } else {
-                logFoundIdps("non-linked", "non-matching", homeIdps, domain, username);
-            }
-        } else {
-            logFoundIdps("linked", "matching", homeIdps, domain, username);
-        } */
+        List<IdentityProviderModel> homeIdps = getLinkedIdpsFrom(enabledIdpsForUserOrgs, linkedIdps);
 
         logFoundIdps("linked", "matching", homeIdps, domain, username);
 
