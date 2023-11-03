@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 final class HomeIdpDiscoverer {
 
@@ -174,6 +175,10 @@ final class HomeIdpDiscoverer {
         // 2. Filter to only enabled IdPs
         String clientID = context.getAuthenticationSession().getClient().getClientId();
         OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
+        String userDefaultCID = Objects.toString(
+                user.getFirstAttribute("default_cid"),
+            "");
+
         List<IdentityProviderModel> enabledIdpsForUserOrgs =
             orgs.getUserOrganizationsStream(
                     context.getRealm(), user)
@@ -188,6 +193,10 @@ final class HomeIdpDiscoverer {
                     String forceSSO = o.getFirstAttribute("force_sso");
                     boolean hasForceSSO = forceSSO != null && forceSSO.equals("1");
                     return hasCID && hasForceSSO;
+                })
+                .sorted((o1, o2) -> {
+                    if(o1.getFirstAttribute("customer_id") == userDefaultCID) return -1;
+                    else return 1;
                 })
                 .flatMap(o -> o.getIdentityProvidersStream())
                 .filter(IdentityProviderModel::isEnabled)
