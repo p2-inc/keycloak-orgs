@@ -1,7 +1,6 @@
 package io.phasetwo.service.protocol.oidc.mappers;
 
 import java.util.List;
-import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.ClientSessionContext;
 import org.keycloak.models.KeycloakSession;
@@ -66,7 +65,7 @@ public abstract class AbstractOrganizationMapper extends AbstractOIDCProtocolMap
     return helpText;
   }
 
-  protected abstract Map<String, Object> getOrganizationClaim(
+  protected abstract Object getOrganizationClaim(
       KeycloakSession session, RealmModel realm, UserModel user);
 
   @Override
@@ -91,7 +90,6 @@ public abstract class AbstractOrganizationMapper extends AbstractOIDCProtocolMap
       KeycloakSession keycloakSession,
       ClientSessionContext clientSessionCtx) {
     log.debugf("adding org claim to accessToken for %s", userSession.getUser().getUsername());
-    UserModel user = userSession.getUser();
     Object claim =
         getOrganizationClaim(keycloakSession, userSession.getRealm(), userSession.getUser());
     if (claim == null) return;
