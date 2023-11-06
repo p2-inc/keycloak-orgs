@@ -18,7 +18,7 @@ public class Invitation {
   private @Valid String inviterId = null;
   private @Valid String invitationUrl = null;
   private @Valid String organizationId = null;
-//  private @Valid List<String> teamIds = Lists.newArrayList();
+  private @Valid List<String> teamIds = Lists.newArrayList();
   private @Valid List<String> roles = Lists.newArrayList();
 
   public Invitation id(String id) {
@@ -121,27 +121,28 @@ public class Invitation {
     this.organizationId = organizationId;
   }
 
-//  public Invitation teamId(String teamId) {
-//    if (teamIds == null) {
-//      teamIds = Lists.newArrayList();
-//    }
-//    if (!teamIds.contains(teamId)) teamIds.add(teamId);
-//    return this;
-//  }
-//
-//  public Invitation teamIds(List<String> teamIds) {
-//    this.teamIds = teamIds;
-//    return this;
-//  }
+  public Invitation teamId(String teamId) {
+    if (teamIds == null) {
+      teamIds = Lists.newArrayList();
+    }
+    if (!teamIds.contains(teamId)) teamIds.add(teamId);
+    return this;
+  }
 
-//  @JsonProperty("teams")
-//  public List<String> getTeamIds() {
-//    return teamIds;
-//  }
-//
-//  public void setTeamIds(List<String> teamIds) {
-//    this.teamIds = teamIds;
-//  }
+  public Invitation teamIds(List<String> teamIds) {
+    this.teamIds = teamIds;
+    return this;
+  }
+
+  @JsonProperty("teams")
+  @JsonIgnore // ignore field "teams" because it is not present in InvitationRepresentation (class io.phasetwo.client.openapi.model.InvitationRepresentation)
+  public List<String> getTeamIds() {
+    return teamIds;
+  }
+
+  public void setTeamIds(List<String> teamIds) {
+    this.teamIds = teamIds;
+  }
 
   public Invitation role(String role) {
     if (roles == null) {
@@ -181,8 +182,8 @@ public class Invitation {
         && Objects.equals(inviterId, invitation.inviterId)
         && Objects.equals(organizationId, invitation.organizationId)
         && Objects.equals(invitationUrl, invitation.invitationUrl)
-        && Objects.equals(roles, invitation.roles);
-//        && Objects.equals(teamIds, invitation.teamIds);
+        && Objects.equals(roles, invitation.roles)
+        && Objects.equals(teamIds, invitation.teamIds);
   }
 
   @Override
@@ -202,7 +203,7 @@ public class Invitation {
     sb.append("    inviterId: ").append(toIndentedString(inviterId)).append("\n");
     sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
     sb.append("    invitationUrl: ").append(toIndentedString(invitationUrl)).append("\n");
-//    sb.append("    teamIds: ").append(toIndentedString(teamIds)).append("\n");
+    sb.append("    teamIds: ").append(toIndentedString(teamIds)).append("\n");
     sb.append("    roles: ").append(toIndentedString(roles)).append("\n");
     sb.append("}");
     return sb.toString();

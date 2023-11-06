@@ -50,13 +50,11 @@ public abstract class AbstractOrganizationTest {
   }
 
   static List<File> getDep(String pkg) {
-    List<File> dependencies =
-        Maven.resolver()
+    return Maven.resolver()
             .loadPomFromFile("./pom.xml")
             .resolve(pkg)
             .withoutTransitivity()
             .asList(File.class);
-    return dependencies;
   }
 
   public static Keycloak keycloak;
@@ -64,7 +62,7 @@ public abstract class AbstractOrganizationTest {
 
   @Container
   public static final KeycloakContainer container =
-      new KeycloakContainer("quay.io/phasetwo/keycloak-crdb:22.0.4")
+      new KeycloakContainer("quay.io/phasetwo/keycloak-crdb:22.0.5")
           .withContextPath("/auth")
           .withReuse(true)
           .withProviderClassesFrom("target/classes")

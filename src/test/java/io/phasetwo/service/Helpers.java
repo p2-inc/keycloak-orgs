@@ -2,9 +2,6 @@ package io.phasetwo.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.URLEncoder;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -55,29 +52,4 @@ public class Helpers {
     keycloak.realm(realm).users().delete(id);
   }
 
-  public static String urlencode(String u) {
-    try {
-      return URLEncoder.encode(u, "UTF-8");
-    } catch (Exception e) {
-      return "";
-    }
-  }
-
-  public static int nextFreePort(int from, int to) {
-    for (int port = from; port <= to; port++) {
-      if (isLocalPortFree(port)) {
-        return port;
-      }
-    }
-    throw new IllegalStateException("No free port found");
-  }
-
-  private static boolean isLocalPortFree(int port) {
-    try {
-      new ServerSocket(port).close();
-      return true;
-    } catch (IOException e) {
-      return false;
-    }
-  }
 }
