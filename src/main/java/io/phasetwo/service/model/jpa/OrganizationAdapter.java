@@ -191,7 +191,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
     return org.getMembers().stream()
         .map(m -> m.getUserId())
         .map(uid -> session.users().getUserById(realm, uid))
-        .filter(u -> u.getServiceAccountClientLink() == null);
+        .filter(u -> u != null && u.getServiceAccountClientLink() == null);
   }
 
   @Override
