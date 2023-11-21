@@ -14,7 +14,7 @@ export default function useUser() {
 
   function fullName() {
     if (!user) return "member";
-    return user.firstName || user.lastName
+    return user.firstName && user.lastName
       ? `${user.firstName} ${user.lastName}`.trim()
       : user.username || user.email || "member";
   }

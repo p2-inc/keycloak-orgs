@@ -127,7 +127,13 @@ public class PortalResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private void setOrganizationRoleMapper(ClientModel adminPortal) {
-    ProtocolMapperModel pro = new ProtocolMapperModel();
+    ProtocolMapperModel pro =
+        adminPortal.getProtocolMapperByName("openid-connect", "organizations");
+    if (pro != null) {
+      return;
+    } else {
+      pro = new ProtocolMapperModel();
+    }
     pro.setProtocolMapper("oidc-organization-role-mapper");
     pro.setProtocol("openid-connect");
     pro.setName("organizations");
@@ -145,7 +151,12 @@ public class PortalResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private void setOrganizationIdMapper(ClientModel adminPortal) {
-    ProtocolMapperModel pro = new ProtocolMapperModel();
+    ProtocolMapperModel pro = adminPortal.getProtocolMapperByName("openid-connect", "org_id");
+    if (pro != null) {
+      return;
+    } else {
+      pro = new ProtocolMapperModel();
+    }
     pro.setProtocolMapper("oidc-usersessionmodel-note-mapper");
     pro.setProtocol("openid-connect");
     pro.setName("org_id");

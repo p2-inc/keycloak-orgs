@@ -43,6 +43,10 @@ const router = createBrowserRouter(
   [
     {
       path: "/",
+      element: <Navigate to="organizations" />,
+    },
+    {
+      path: "/",
       element: <App />,
       errorElement: <ErrorPage />,
       children: [
