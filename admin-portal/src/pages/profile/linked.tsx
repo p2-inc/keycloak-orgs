@@ -156,11 +156,15 @@ const LinkedProfile = () => {
           </div>
           <div className="space-y-8">
             <div className="space-y-4">
-              <SectionHeader title={t("linkedLoginProviders")} variant="medium" />
+              <SectionHeader
+                title={t("linkedLoginProviders")}
+                variant="medium"
+              />
               <Table
                 columns={linkedColumns}
                 rows={linkedRows}
                 isLoading={isLoading}
+                emptyState={t("linkedEmpty")}
               />
             </div>
             <div className="space-y-4">
@@ -172,6 +176,7 @@ const LinkedProfile = () => {
                 columns={unlinkedColumns}
                 rows={unlinkedRows}
                 isLoading={isLoading}
+                emptyState={t("unlinkedEmpty")}
               />
             </div>
           </div>
