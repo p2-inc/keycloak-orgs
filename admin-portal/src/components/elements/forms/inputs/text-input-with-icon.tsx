@@ -16,7 +16,7 @@ const FormTextInputWithIcon: FC<Props> = ({ inputArgs = {}, className }) => {
     <div className={cs("relative rounded-md", className)}>
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
         <MagnifyingGlassIcon
-          className="h-5 w-5 text-p2blue-900"
+          className="h-5 w-5 text-p2primary-900"
           aria-hidden="true"
         />
       </div>

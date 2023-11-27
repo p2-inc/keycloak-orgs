@@ -33,6 +33,7 @@ import { Toaster } from "react-hot-toast";
 import Roles from "pages/member/roles";
 import Member from "pages/member";
 import ProfileDelete from "pages/profile-delete";
+import InjectStyles from "components/utils/injectStyles";
 
 export type P2Params = {
   orgId: string;
@@ -154,6 +155,7 @@ root.render(
     initOptions={{ onLoad: "login-required", checkLoginIframe: false }}
     LoadingComponent={<Loading />}
   >
+    <InjectStyles />
     <Provider store={store}>
       <React.StrictMode>
         <RouterProvider router={router} />

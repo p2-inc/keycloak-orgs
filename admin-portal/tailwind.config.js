@@ -5,20 +5,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        p2blue: {
+        p2primary: {
           100: "#F9FCFE",
           200: "#EDF5FB",
+          400: "#739FE5",
           500: "#5B9FDD",
+          600: "#295398",
           700: "#1570C2",
           900: "#3C474E",
         },
-        p2gray: {
+        p2secondary: {
           800: "#1C1D1E",
           900: "#252627",
-        },
-        p2grad: {
-          100: "#739FE5",
-          200: "#295398",
         },
         p2dark: {
           900: "#111111",

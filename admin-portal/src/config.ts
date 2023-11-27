@@ -15,6 +15,18 @@ export interface Environment {
   isRunningAsTheme: boolean;
   supportedLocales: {};
   features: Features;
+  styles: {
+    primary100?: string;
+    primary200?: string;
+    primary400?: string;
+    primary500?: string;
+    primary600?: string;
+    primary700?: string;
+    primary900?: string;
+    secondary800?: string;
+    secondary900?: string;
+    customCSS?: string;
+  };
 }
 
 export interface Features {
@@ -79,15 +91,15 @@ const initialEnvironment: Environment = {
   appiconUrl: "",
   realm: "test",
   locale: "en",
-  authServerUrl: "https://app.phasetwo.io/auth/",
+  authServerUrl: "https://localhost:8080/auth/",
   baseUrl: "http://localhost:3000/",
   resourceUrl: ".",
   refererUrl: "",
   isRunningAsTheme: false,
-  supportedLocales: { "en": "English" },
+  supportedLocales: { en: "English" },
   features: initialFeatures,
+  styles: {},
 };
-
 
 var env: Environment = isEmpty(environment) ? initialEnvironment : environment;
 

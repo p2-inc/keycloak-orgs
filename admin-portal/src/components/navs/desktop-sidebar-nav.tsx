@@ -1,15 +1,16 @@
-import { Listbox, Popover } from "@headlessui/react";
+import { Popover } from "@headlessui/react";
 import cs from "classnames";
 import Button from "components/elements/forms/buttons/button";
 import { config } from "config";
 import useUser from "components/utils/useUser";
 import { keycloakService } from "keycloak";
-import { ExternalLink, Monitor, Moon, Sun } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import { ChevronIcon, DoubleSlashBrandIcon, FullBrandIcon } from "../icons";
 import { NavigationItem } from "../layouts/layout";
-import { useEffect, useState } from "react";
+
 import { useTranslation } from "react-i18next";
+import ThemePicker from "./components/theme-picker";
 
 type Props = {
   menuCollapsed: boolean;
@@ -17,54 +18,18 @@ type Props = {
   navigation: NavigationItem[];
 };
 
-const themes = [
-  {
-    key: "system",
-    name: "system",
-    icon: <Monitor className="h-4 w-4" />,
-  },
-  {
-    key: "light",
-    name: "light",
-    icon: <Sun className="h-4 w-4" />,
-  },
-  {
-    key: "dark",
-    name: "dark",
-    icon: <Moon className="h-4 w-4" />,
-  },
-];
-
 const DesktopSidebarNav: React.FC<Props> = ({
   menuCollapsed,
   setMenuCollapsed,
   navigation,
 }) => {
   const { user, fullName } = useUser();
-  const [theme, setTheme] = useState(("theme" in localStorage)? localStorage.theme : themes[0]);
+
   const { t } = useTranslation();
   const { appiconUrl, logoUrl } = config.env;
 
-  useEffect(() => {
-    if (theme.key === "system") {
-      localStorage.removeItem("theme");
-    } else {
-      localStorage.theme = theme.key;
-    }
-    if (
-      localStorage.theme === "dark" ||
-      (!("theme" in localStorage) &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches)
-    ) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [theme]);
-
   return (
     <>
-      {/* If using a mobile view: <div className="hidden lg:flex lg:flex-shrink-0"> */}
       <div className="flex h-full flex-shrink-0">
         <div
           className={cs(
@@ -128,10 +93,10 @@ const DesktopSidebarNav: React.FC<Props> = ({
                           "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 hover:bg-white dark:hover:border-zinc-600 dark:hover:bg-p2dark-900",
                           {
                             "dark:border-zinc-600 dark:text-white": !isActive,
-                            "group:text-p2blue-700 border-p2blue-700 bg-white text-p2blue-700 dark:bg-p2dark-900":
+                            "group:text-p2primary-700 border-p2primary-700 bg-white text-p2primary-700 dark:bg-p2dark-900":
                               isActive,
                             "w-full border-0": !menuCollapsed,
-                            "border-p2blue-700 text-p2blue-700 hover:border-p2blue-700 dark:hover:border-p2blue-700 dark:hover:bg-p2dark-900":
+                            "border-p2primary-700 text-p2primary-700 hover:border-p2primary-700 dark:hover:border-p2primary-700 dark:hover:bg-p2dark-900":
                               menuCollapsed && isActive,
                           }
                         )
@@ -183,27 +148,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
                     </Link>
                   </div>
                   <div className="relative flex items-center justify-between py-2">
-                    <div className="text-sm dark:text-zinc-200">
-                      {t("theme")}
-                    </div>
-                    <Listbox value={theme} onChange={setTheme}>
-                      <Listbox.Button className="flex items-center space-x-2 rounded border px-2 py-1 text-sm hover:border-gray-500 dark:border-zinc-600 dark:text-zinc-200 dark:hover:border-zinc-400">
-                        <div>{theme.icon}</div>
-                        <div>{t(theme.name)}</div>
-                      </Listbox.Button>
-                      <Listbox.Options className="absolute bottom-0 right-0 rounded border bg-white shadow-md dark:border-zinc-600 dark:bg-p2dark-900">
-                        {themes.map((item) => (
-                          <Listbox.Option
-                            key={item.key}
-                            value={item}
-                            className="flex cursor-pointer items-center space-x-2 px-2 py-1 text-sm hover:bg-gray-100 dark:text-zinc-200 dark:hover:bg-zinc-600"
-                          >
-                            <div>{item.icon}</div>
-                            <div>{t(item.name)}</div>
-                          </Listbox.Option>
-                        ))}
-                      </Listbox.Options>
-                    </Listbox>
+                    <ThemePicker />
                   </div>
                   <div className="py-5">
                     <Button

@@ -29,8 +29,8 @@ export const SwitchItem = ({
           disabled={isDisabled}
           onChange={(checked) => onChange(name, checked)}
           className={`${
-            isChecked ? "bg-p2blue-500" : "bg-gray-200"
-          } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-p2blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
+            isChecked ? "bg-p2primary-500" : "bg-gray-200"
+          } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-p2primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
         >
           <span
             className={`${

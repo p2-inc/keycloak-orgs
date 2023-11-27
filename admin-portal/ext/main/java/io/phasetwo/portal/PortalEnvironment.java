@@ -3,25 +3,27 @@ package io.phasetwo.portal;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import jakarta.annotation.Generated;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-  "name",
-  "displayName",
-  "logoUrl",
-  "faviconUrl",
-  "appiconUrl",
-  "realm",
-  "locale",
-  "authServerUrl",
-  "baseUrl",
-  "resourceUrl",
-  "refererUrl",
-  "isRunningAsTheme",
-  "supportedLocales",
-  "features"
+    "name",
+    "displayName",
+    "logoUrl",
+    "faviconUrl",
+    "appiconUrl",
+    "realm",
+    "locale",
+    "authServerUrl",
+    "baseUrl",
+    "resourceUrl",
+    "refererUrl",
+    "isRunningAsTheme",
+    "supportedLocales",
+    "features",
+    "styles"
 })
 @Generated("jsonschema2pojo")
 public class PortalEnvironment {
@@ -276,5 +278,136 @@ public class PortalEnvironment {
   public PortalEnvironment features(PortalFeatures features) {
     this.features = features;
     return this;
+  }
+
+  @JsonProperty("styles")
+  private CustomTheme styles;
+
+  public CustomTheme getStyles() {
+    return styles;
+  }
+
+  public void setStyles(CustomTheme styles) {
+    this.styles = styles;
+  }
+
+  public PortalEnvironment styles(CustomTheme styles) {
+    this.styles = styles;
+    return this;
+  }
+
+  @JsonInclude(Include.NON_NULL)
+  public static class CustomTheme {
+    @JsonProperty("primary100")
+    private String primary100;
+
+    @JsonProperty("primary200")
+    private String primary200;
+
+    @JsonProperty("primary400")
+    private String primary400;
+
+    @JsonProperty("primary500")
+    private String primary500;
+
+    @JsonProperty("primary600")
+    private String primary600;
+
+    @JsonProperty("primary700")
+    private String primary700;
+
+    @JsonProperty("primary900")
+    private String primary900;
+
+    @JsonProperty("secondary800")
+    private String secondary800;
+
+    @JsonProperty("secondary900")
+    private String secondary900;
+
+    @JsonProperty("customCSS")
+    private String customCSS;
+
+    // getters and setters
+
+    public String getPrimary100() {
+      return primary100;
+    }
+
+    public void setPrimary100(String primary100) {
+      this.primary100 = primary100;
+    }
+
+    public String getPrimary200() {
+      return primary200;
+    }
+
+    public void setPrimary200(String primary200) {
+      this.primary200 = primary200;
+    }
+
+    public String getPrimary400() {
+      return primary400;
+    }
+
+    public void setPrimary400(String primary400) {
+      this.primary400 = primary400;
+    }
+
+    public String getPrimary500() {
+      return primary500;
+    }
+
+    public void setPrimary500(String primary500) {
+      this.primary500 = primary500;
+    }
+
+    public String getPrimary600() {
+      return primary600;
+    }
+
+    public void setPrimary600(String primary600) {
+      this.primary600 = primary600;
+    }
+
+    public String getPrimary700() {
+      return primary700;
+    }
+
+    public void setPrimary700(String primary700) {
+      this.primary700 = primary700;
+    }
+
+    public String getPrimary900() {
+      return primary900;
+    }
+
+    public void setPrimary900(String primary900) {
+      this.primary900 = primary900;
+    }
+
+    public String getSecondary800() {
+      return secondary800;
+    }
+
+    public void setSecondary800(String secondary800) {
+      this.secondary800 = secondary800;
+    }
+
+    public String getSecondary900() {
+      return secondary900;
+    }
+
+    public void setSecondary900(String secondary900) {
+      this.secondary900 = secondary900;
+    }
+
+    public String getCustomCSS() {
+      return customCSS;
+    }
+
+    public void setCustomCSS(String customCSS) {
+      this.customCSS = customCSS;
+    }
   }
 }

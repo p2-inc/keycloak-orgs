@@ -19,7 +19,6 @@ import { Smartphone, Monitor } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TFuncKey } from "i18next";
 
-
 type SignOutSessionState = {
   device: DeviceRepresentation;
   session: SessionRepresentation;
@@ -133,7 +132,9 @@ const ActivityProfile = () => {
               buttonTitle={t("signOutAllDevices")}
               buttonId="sign-out-all"
               modalTitle={t("signOutAllDevices")}
-              modalMessage={t("thisActionWillSignOutAllTheDevicesThatHaveSignedInToYourAccountIncludingTheCurrentDeviceYouAreUsing")}
+              modalMessage={t(
+                "thisActionWillSignOutAllTheDevicesThatHaveSignedInToYourAccountIncludingTheCurrentDeviceYouAreUsing"
+              )}
               onContinue={() => signOutAll()}
             />
           )}
@@ -217,11 +218,11 @@ const ActivityProfile = () => {
                               {session.current && (
                                 <span
                                   id={elementId("current-badge", session)}
-                                  className="flex items-center space-x-2 rounded border border-p2blue-700/30 bg-p2blue-700/10 px-3 py-1 text-xs font-medium text-p2blue-700 dark:text-zinc-200"
+                                  className="flex items-center space-x-2 rounded border border-p2primary-700/30 bg-p2primary-700/10 px-3 py-1 text-xs font-medium text-p2primary-700 dark:text-zinc-200"
                                 >
                                   <span className="relative flex h-2 w-2">
-                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2blue-700 opacity-75"></span>
-                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-p2blue-700"></span>
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2primary-700 opacity-75"></span>
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-p2primary-700"></span>
                                   </span>
                                   <span>{t("currentSession")}</span>
                                 </span>

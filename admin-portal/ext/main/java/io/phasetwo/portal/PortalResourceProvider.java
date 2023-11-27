@@ -6,7 +6,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.activation.MimetypesFileTypeMap;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.Response;
@@ -55,17 +54,16 @@ public class PortalResourceProvider implements RealmResourceProvider {
   }
 
   public void init() {
-    AuthenticationManager.AuthResult authResult =
-        authManager.authenticateIdentityCookie(session, session.getContext().getRealm());
+    AuthenticationManager.AuthResult authResult = authManager.authenticateIdentityCookie(session,
+        session.getContext().getRealm());
     if (authResult != null) {
-      auth =
-          new Auth(
-              session.getContext().getRealm(),
-              authResult.getToken(),
-              authResult.getUser(),
-              session.getContext().getClient(),
-              authResult.getSession(),
-              true);
+      auth = new Auth(
+          session.getContext().getRealm(),
+          authResult.getToken(),
+          authResult.getUser(),
+          session.getContext().getClient(),
+          authResult.getSession(),
+          true);
     }
   }
 
@@ -90,7 +88,7 @@ public class PortalResourceProvider implements RealmResourceProvider {
   }
 
   public static final String[] METHODS = {
-    "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+      "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
   };
 
   @OPTIONS
@@ -116,16 +114,14 @@ public class PortalResourceProvider implements RealmResourceProvider {
     Theme theme = getTheme("portal");
     UriInfo uriInfo = session.getContext().getUri();
     URI authUrl = uriInfo.getBaseUri();
-    URI portalBaseUrl =
-        uriInfo
-            .getBaseUriBuilder()
-            .path(RealmsResource.class)
-            .path(realm.getName())
-            .path("portal")
-            .path("/")
-            .build(realm);
-    String portalResources =
-        Urls.themeRoot(authUrl).getPath() + "/" + "admin-portal" + "/" + theme.getName();
+    URI portalBaseUrl = uriInfo
+        .getBaseUriBuilder()
+        .path(RealmsResource.class)
+        .path(realm.getName())
+        .path("portal")
+        .path("/")
+        .build(realm);
+    String portalResources = Urls.themeRoot(authUrl).getPath() + "/" + "admin-portal" + "/" + theme.getName();
 
     Locale locale = new Locale("en");
     try {
@@ -139,24 +135,23 @@ public class PortalResourceProvider implements RealmResourceProvider {
     }
 
     try {
-      String referer =
-          session
-              .getContext()
-              .getHttpRequest()
-              .getHttpHeaders()
-              .getRequestHeaders()
-              .getFirst("Referer");
-      PortalEnvironment env =
-          new PortalEnvironment()
-              .realm(realm.getName())
-              .locale(locale.toLanguageTag())
-              .authServerUrl(
-                  authUrl.getPath().endsWith("/") ? authUrl.toString() : authUrl.toString() + "/")
-              .baseUrl(portalBaseUrl.toString())
-              .resourceUrl(portalResources)
-              .refererUrl(referer)
-              .isRunningAsTheme(true)
-              .supportedLocales(getSupportedLocales(realm, locale));
+      String referer = session
+          .getContext()
+          .getHttpRequest()
+          .getHttpHeaders()
+          .getRequestHeaders()
+          .getFirst("Referer");
+      PortalEnvironment env = new PortalEnvironment()
+          .realm(realm.getName())
+          .locale(locale.toLanguageTag())
+          .authServerUrl(
+              authUrl.getPath().endsWith("/") ? authUrl.toString() : authUrl.toString() + "/")
+          .baseUrl(portalBaseUrl.toString())
+          .resourceUrl(portalResources)
+          .refererUrl(referer)
+          .isRunningAsTheme(true)
+          .supportedLocales(getSupportedLocales(realm, locale))
+          .styles(new PortalEnvironment.CustomTheme());
       Optional.ofNullable(realm.getName()).ifPresent(a -> env.name(a));
       Optional.ofNullable(realm.getDisplayName()).ifPresent(a -> env.displayName(a));
       Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.logo.url")))
@@ -165,44 +160,58 @@ public class PortalResourceProvider implements RealmResourceProvider {
           .ifPresent(a -> env.faviconUrl(a));
       Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.appicon.url")))
           .ifPresent(a -> env.appiconUrl(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.primaryColor100")))
+          .ifPresent(a -> env.getStyles().setPrimary100(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.primaryColor200")))
+          .ifPresent(a -> env.getStyles().setPrimary200(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.primaryColor400")))
+          .ifPresent(a -> env.getStyles().setPrimary400(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.primaryColor500")))
+          .ifPresent(a -> env.getStyles().setPrimary500(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.primaryColor600")))
+          .ifPresent(a -> env.getStyles().setPrimary600(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.primaryColor700")))
+          .ifPresent(a -> env.getStyles().setPrimary700(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.primaryColor900")))
+          .ifPresent(a -> env.getStyles().setPrimary900(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.secondaryColor800")))
+          .ifPresent(a -> env.getStyles().setSecondary800(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.secondaryColor900")))
+          .ifPresent(a -> env.getStyles().setSecondary900(a));
+      Optional.ofNullable(realm.getAttribute(String.format("_providerConfig.assets.portal.css")))
+          .ifPresent(a -> env.getStyles().setCustomCSS(a));
       env.setFeatures(PortalFeatures.fromSession(session, auth));
 
-      String envStr =
-          new String(JsonStringEncoder.getInstance().quoteAsString(mapper.writeValueAsString(env)));
+      String envStr = new String(JsonStringEncoder.getInstance().quoteAsString(mapper.writeValueAsString(env)));
       log.infof("set environment string to %s", envStr);
-      String authUrlAttribute =
-          authUrl.getPath().endsWith("/")
-              ? authUrl.toString().substring(0, authUrl.toString().length() - 1)
-              : authUrl.toString();
+      String authUrlAttribute = authUrl.getPath().endsWith("/")
+          ? authUrl.toString().substring(0, authUrl.toString().length() - 1)
+          : authUrl.toString();
       String realmName = getRealmName(realm);
-      LoginFormsProvider form =
-          session
-              .getProvider(LoginFormsProvider.class)
-              .setAttribute("environment", envStr)
-              .setAttribute("authUrl", authUrlAttribute)
-              .setAttribute(
-                  "faviconUrl",
-                  Optional.ofNullable(realm.getAttribute("_providerConfig.assets.favicon.url"))
-                      .orElse(
-                          String.format(
-                              "%s/realms/%s/portal/favicon.ico", authUrlAttribute, realmName)))
-              .setAttribute(
-                  "appiconUrl",
-                  Optional.ofNullable(realm.getAttribute("_providerConfig.assets.appicon.url"))
-                      .orElse(
-                          String.format(
-                              "%s/realms/%s/portal/logo192.png", authUrlAttribute, realmName)))
-              .setAttribute("displayName", realmName)
-              .setAttribute("realmName", realm.getName());
+      LoginFormsProvider form = session
+          .getProvider(LoginFormsProvider.class)
+          .setAttribute("environment", envStr)
+          .setAttribute("authUrl", authUrlAttribute)
+          .setAttribute(
+              "faviconUrl",
+              Optional.ofNullable(realm.getAttribute("_providerConfig.assets.favicon.url"))
+                  .orElse(
+                      String.format(
+                          "%s/realms/%s/portal/favicon.ico", authUrlAttribute, realmName)))
+          .setAttribute(
+              "appiconUrl",
+              Optional.ofNullable(realm.getAttribute("_providerConfig.assets.appicon.url"))
+                  .orElse(
+                      String.format(
+                          "%s/realms/%s/portal/logo192.png", authUrlAttribute, realmName)))
+          .setAttribute("displayName", realmName)
+          .setAttribute("realmName", realm.getName());
       FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
-      Method processTemplateMethod =
-          fm.getClass()
-              .getDeclaredMethod("processTemplate", Theme.class, String.class, Locale.class);
+      Method processTemplateMethod = fm.getClass()
+          .getDeclaredMethod("processTemplate", Theme.class, String.class, Locale.class);
       processTemplateMethod.setAccessible(true);
-      Response resp =
-          (Response)
-              processTemplateMethod.invoke(
-                  fm, theme, "portal.ftl", session.getContext().resolveLocale(null));
+      Response resp = (Response) processTemplateMethod.invoke(
+          fm, theme, "portal.ftl", session.getContext().resolveLocale(null));
       return resp;
     } catch (Exception e) {
       log.warn("Could not call processTemplate on FreeMarkerLoginFormsProvider", e);
@@ -244,20 +253,20 @@ public class PortalResourceProvider implements RealmResourceProvider {
     setupCors();
     RealmModel realm = session.getContext().getRealm();
     UriInfo uriInfo = session.getContext().getUri();
-    Map json =
-        ImmutableMap.of(
-            "realm",
-            authRealmOverride,
-            "auth-server-url",
-            getBaseUrl(uriInfo),
-            "resource",
-            "admin-portal");
+    Map json = ImmutableMap.of(
+        "realm",
+        authRealmOverride,
+        "auth-server-url",
+        getBaseUrl(uriInfo),
+        "resource",
+        "admin-portal");
     return Response.ok(json).build();
   }
 
   private static String getBaseUrl(UriInfo uriInfo) {
     String u = uriInfo.getBaseUri().toString();
-    if (u != null && u.endsWith("/")) u = u.substring(0, u.length() - 1);
+    if (u != null && u.endsWith("/"))
+      u = u.substring(0, u.length() - 1);
     return u;
   }
 
@@ -281,13 +290,12 @@ public class PortalResourceProvider implements RealmResourceProvider {
     return null;
   }
 
-  private static final String MIME_TYPES =
-      "text/javascript js\n"
-          + "text/css css\n"
-          + "font/woff woff\n"
-          + "font/woff2 woff2\n"
-          + "application/json json webmanifest map\n"
-          + "image/svg+xml svg\n";
+  private static final String MIME_TYPES = "text/javascript js\n"
+      + "text/css css\n"
+      + "font/woff woff\n"
+      + "font/woff2 woff2\n"
+      + "application/json json webmanifest map\n"
+      + "image/svg+xml svg\n";
 
   private String getMimeType(String fileName) {
     MimetypesFileTypeMap map = new MimetypesFileTypeMap();
@@ -296,5 +304,6 @@ public class PortalResourceProvider implements RealmResourceProvider {
   }
 
   @Override
-  public void close() {}
+  public void close() {
+  }
 }
