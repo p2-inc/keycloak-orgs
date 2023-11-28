@@ -1,5 +1,11 @@
 package io.phasetwo.service.resource;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static io.phasetwo.service.Helpers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -9,6 +15,10 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
@@ -16,17 +26,6 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static io.phasetwo.service.Helpers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @JBossLog
 @Testcontainers
@@ -137,136 +136,149 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(org.getId());
   }
 
-    @Test
-    void testSearchOrganizations() throws IOException {
-      // create some orgs
-      List<String> ids = new ArrayList<>();
-      ids.add(
-          createOrganization(
-              new OrganizationRepresentation().name("example").domains(List.of("example.com"))).getId());
-      ids.add(
-          createOrganization(
-              new OrganizationRepresentation().name("foo").domains(List.of("foo.com"))).getId());
-      ids.add(
-          createOrganization(
-              new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com"))).getId());
-      ids.add(
-          createOrganization(
-              new OrganizationRepresentation().name("bar").domains(List.of("bar.com"))).getId());
-      ids.add(
-          createOrganization(
-              new OrganizationRepresentation()
-                  .name("baz")
-                  .domains(List.of("baz.com"))
-                  .attributes(Map.of("foo", List.of("bar")))).getId());
-      ids.add(
-          createOrganization(
-              new OrganizationRepresentation()
-                  .name("qux")
-                  .domains(List.of("baz.com"))
-                  .attributes(Map.of("foo", List.of("bar")))).getId());
+  @Test
+  void testSearchOrganizations() throws IOException {
+    // create some orgs
+    List<String> ids = new ArrayList<>();
+    ids.add(
+        createOrganization(
+                new OrganizationRepresentation().name("example").domains(List.of("example.com")))
+            .getId());
+    ids.add(
+        createOrganization(new OrganizationRepresentation().name("foo").domains(List.of("foo.com")))
+            .getId());
+    ids.add(
+        createOrganization(
+                new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com")))
+            .getId());
+    ids.add(
+        createOrganization(new OrganizationRepresentation().name("bar").domains(List.of("bar.com")))
+            .getId());
+    ids.add(
+        createOrganization(
+                new OrganizationRepresentation()
+                    .name("baz")
+                    .domains(List.of("baz.com"))
+                    .attributes(Map.of("foo", List.of("bar"))))
+            .getId());
+    ids.add(
+        createOrganization(
+                new OrganizationRepresentation()
+                    .name("qux")
+                    .domains(List.of("baz.com"))
+                    .attributes(Map.of("foo", List.of("bar"))))
+            .getId());
 
-      Response response = givenSpec().when().queryParam("search", "foo").get().andReturn();
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      List<OrganizationRepresentation> orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
-      assertThat(orgs, notNullValue());
-      assertThat(orgs, hasSize(2));
-      for (OrganizationRepresentation org : orgs) {
-        assertThat(org.getName(), containsString("foo"));
-        assertThat(org.getDomains(), hasSize(1));
-      }
-
-      response = givenSpec().when().queryParam("search", "foo").queryParam("max", 1).get().andReturn();
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
-      assertThat(orgs, notNullValue());
-      assertThat(orgs, hasSize(1));
-
-      response = givenSpec().when().queryParam("search", "none").get().andReturn();
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
-      assertThat(orgs, notNullValue());
-      assertThat(orgs, hasSize(0));
-
-      response = givenSpec().when().queryParam("search", "a").get().andReturn();
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
-      assertThat(orgs, notNullValue());
-      assertThat(orgs, hasSize(4));
-
-      // orgs attribute search
-      response = givenSpec().when().queryParam("q", "foo:bar").get().andReturn();
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
-      assertThat(orgs, notNullValue());
-      assertThat(orgs, hasSize(2));
-
-      // Search attributes and name
-      response = givenSpec().when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
-      assertThat(orgs, notNullValue());
-      assertThat(orgs, hasSize(1));
-
-      // orgs count
-      response = getRequest("count");
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      Long cnt = new ObjectMapper().readValue(response.getBody().asString(), Long.class);;
-      assertThat(orgs, notNullValue());
-      assertThat(cnt, is(6L));
-
-      for (String id : ids) {
-        deleteOrganization(id);
-      }
+    Response response = givenSpec().when().queryParam("search", "foo").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationRepresentation> orgs =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    ;
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(2));
+    for (OrganizationRepresentation org : orgs) {
+      assertThat(org.getName(), containsString("foo"));
+      assertThat(org.getDomains(), hasSize(1));
     }
 
+    response =
+        givenSpec().when().queryParam("search", "foo").queryParam("max", 1).get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    ;
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(1));
 
-    @Test
-    void testGetDomains() throws IOException {
+    response = givenSpec().when().queryParam("search", "none").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    ;
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(0));
 
-      OrganizationRepresentation org = createDefaultOrg();
-      String id = org.getId();
+    response = givenSpec().when().queryParam("search", "a").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    ;
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(4));
 
-      Response response = getRequest(id, "domains");
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      List<OrganizationDomainRepresentation> domains =  new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-      assertThat(domains, notNullValue());
-      assertThat(domains, hasSize(1));
-      OrganizationDomainRepresentation domain = domains.get(0);
-      assertThat(domain.getDomainName(), is("example.com"));
-      assertThat(domain.getVerified(), is(false));
-      assertThat(domain.getRecordKey(), notNullValue());
-      assertThat(domain.getRecordValue(), notNullValue());
-      log.infof(
-          "domain %s %s %s", domain.getDomainName(), domain.getRecordKey(), domain.getRecordValue());
+    // orgs attribute search
+    response = givenSpec().when().queryParam("q", "foo:bar").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    ;
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(2));
 
-      // update
-      org.domains(List.of("foo.com", "bar.net"));
-      response = putRequest(org, id);
-      assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
+    // Search attributes and name
+    response =
+        givenSpec().when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    ;
+    assertThat(orgs, notNullValue());
+    assertThat(orgs, hasSize(1));
 
-      response = getRequest(id, "domains");
-      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-      domains = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-      assertThat(domains, notNullValue());
-      assertThat(domains, hasSize(2));
+    // orgs count
+    response = getRequest("count");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    Long cnt = new ObjectMapper().readValue(response.getBody().asString(), Long.class);
+    ;
+    assertThat(orgs, notNullValue());
+    assertThat(cnt, is(6L));
 
-      for (OrganizationDomainRepresentation d : domains) {
-        assertThat(d.getDomainName(), oneOf("foo.com", "bar.net"));
-        assertThat(d.getVerified(), is(false));
-        assertThat(d.getRecordKey(), notNullValue());
-        assertThat(d.getRecordValue(), notNullValue());
-        log.infof("domain %s %s %s", d.getDomainName(), d.getRecordKey(), d.getRecordValue());
-      }
-
-      // verify
-      response = postRequest("foo", id, "domains", "foo.com", "verify");
-      assertThat(response.statusCode(), is(Status.ACCEPTED.getStatusCode()));
-
-      // delete org
+    for (String id : ids) {
       deleteOrganization(id);
     }
+  }
 
+  @Test
+  void testGetDomains() throws IOException {
+
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    Response response = getRequest(id, "domains");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationDomainRepresentation> domains =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(domains, notNullValue());
+    assertThat(domains, hasSize(1));
+    OrganizationDomainRepresentation domain = domains.get(0);
+    assertThat(domain.getDomainName(), is("example.com"));
+    assertThat(domain.getVerified(), is(false));
+    assertThat(domain.getRecordKey(), notNullValue());
+    assertThat(domain.getRecordValue(), notNullValue());
+    log.infof(
+        "domain %s %s %s", domain.getDomainName(), domain.getRecordKey(), domain.getRecordValue());
+
+    // update
+    org.domains(List.of("foo.com", "bar.net"));
+    response = putRequest(org, id);
+    assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+    response = getRequest(id, "domains");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    domains = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(domains, notNullValue());
+    assertThat(domains, hasSize(2));
+
+    for (OrganizationDomainRepresentation d : domains) {
+      assertThat(d.getDomainName(), oneOf("foo.com", "bar.net"));
+      assertThat(d.getVerified(), is(false));
+      assertThat(d.getRecordKey(), notNullValue());
+      assertThat(d.getRecordValue(), notNullValue());
+      log.infof("domain %s %s %s", d.getDomainName(), d.getRecordKey(), d.getRecordValue());
+    }
+
+    // verify
+    response = postRequest("foo", id, "domains", "foo.com", "verify");
+    assertThat(response.statusCode(), is(Status.ACCEPTED.getStatusCode()));
+
+    // delete org
+    deleteOrganization(id);
+  }
 
   @Test
   void testImportConfig() throws Exception {
@@ -395,8 +407,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(id);
   }
 
-
-
   @Test
   void testDuplicateRoles() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
@@ -405,9 +415,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     Response response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-
     // get default roles list
-    List<OrganizationRoleRepresentation> roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRoleRepresentation> roles =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
@@ -426,7 +436,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(id);
   }
 
-
   @Test
   void testAddGetDeleteRoles() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
@@ -435,7 +444,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get default roles list
     Response response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRoleRepresentation> roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});;
+    List<OrganizationRoleRepresentation> roles =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    ;
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
@@ -444,15 +455,16 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     OrganizationRoleRepresentation orgRole = createOrgRole(id, orgRoleName);
 
     // get single role
-    response = getRequest( id, "roles", orgRoleName);
+    response = getRequest(id, "roles", orgRoleName);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    OrganizationRoleRepresentation role = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    OrganizationRoleRepresentation role =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(role, notNullValue());
     assertThat(role.getId(), notNullValue());
     assertThat(role.getName(), is(orgRoleName));
 
     // get role list
-    response = getRequest( id, "roles");
+    response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(roles, notNullValue());
@@ -463,7 +475,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get single role 404
-    response = getRequest( id, "roles", orgRoleName);
+    response = getRequest(id, "roles", orgRoleName);
     assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // create 3 roles
@@ -480,8 +492,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
 
     // create a user
-    UserRepresentation user =
-        createUser(keycloak, REALM, "johndoe");
+    UserRepresentation user = createUser(keycloak, REALM, "johndoe");
 
     // add membership
     response = putRequest("foo", id, "members", user.getId());
@@ -491,9 +502,10 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     grantUserRole(id, orgRoleName, user.getId());
 
     // get users with role
-    response = getRequest( id, "roles", orgRoleName, "users");
+    response = getRequest(id, "roles", orgRoleName, "users");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<UserRepresentation> rs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<UserRepresentation> rs =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rs, notNullValue());
     assertThat(rs, hasSize(1));
     assertThat(rs.get(0).getUsername(), is("johndoe"));
@@ -547,7 +559,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(id);
   }
 
-
   @Test
   void testAddGetDeleteInvitations() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
@@ -566,7 +577,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get invitations
     response = getRequest(id, "invitations");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    List<InvitationRepresentation> invites = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<InvitationRepresentation> invites =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(invites, notNullValue());
     assertThat(invites, hasSize(1));
     assertThat(invites.get(0).getEmail(), is("johndoe@example.com"));
@@ -580,9 +592,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = deleteRequest(id, "invitations", invId);
     assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
-
     // create user and give membership
-   UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
+    UserRepresentation user1 =
+        createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
     // grant membership to org
     response = putRequest("foo", id, "members", user1.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -605,7 +617,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(id);
   }
 
-
   @Test
   void testListOrgsByMember() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
@@ -614,12 +625,15 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // create some others too
     List<String> ids = new ArrayList<>();
     for (int n = 0; n < 150; n++) {
-      OrganizationRepresentation organization = createOrganization(new OrganizationRepresentation().name("foo" + n).domains(List.of("foo.com")));
+      OrganizationRepresentation organization =
+          createOrganization(
+              new OrganizationRepresentation().name("foo" + n).domains(List.of("foo.com")));
       ids.add(organization.getId());
     }
 
     // create user and give membership
-   UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
+    UserRepresentation user1 =
+        createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
     // grant membership to orgs
     Response response = putRequest("foo", id, "members", user1.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -635,7 +649,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // list orgs by admin
     response = getRequest();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRepresentation> orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRepresentation> orgs =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs.size(), is(100));
     response = givenSpec().when().queryParam("first", 100).get().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
@@ -658,8 +673,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       deleteOrganization(i);
     }
   }
-
-
 
   @Test
   void testAddGetDeleteIdps() throws IOException {
@@ -698,7 +711,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get idps
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<IdentityProviderRepresentation> idps = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<IdentityProviderRepresentation> idps =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
 
@@ -712,7 +726,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     representation.setAlias(alias2);
     representation.setInternalId(null);
     response = postRequest(representation, id, "idps");
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));;
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    ;
 
     // get idps
     response = getRequest(id, "idps");
@@ -727,7 +742,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get mappers for idp
     response = getRequest(id, "idps", alias1, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<IdentityProviderMapperRepresentation> mappers = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<IdentityProviderMapperRepresentation> mappers =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, empty());
 
     // add a mapper to the idp
@@ -809,16 +825,18 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(id);
   }
 
-
   @Test
   void testIdpsOwnedOrgs() throws IOException {
 
-    OrganizationRepresentation org = createOrganization(new OrganizationRepresentation().name("example").domains(List.of("example.com")));
+    OrganizationRepresentation org =
+        createOrganization(
+            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
     String orgId1 = org.getId();
 
-    org = createOrganization(new OrganizationRepresentation().name("sample").domains(List.of("sample.com")));
+    org =
+        createOrganization(
+            new OrganizationRepresentation().name("sample").domains(List.of("sample.com")));
     String orgId2 = org.getId();
-
 
     // create idp for org 1
     String alias1 = "vendor-protocol-A1";
@@ -859,7 +877,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // check that org 1 can only see idp 1
     response = getRequest(orgId1, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<IdentityProviderRepresentation> idps = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<IdentityProviderRepresentation> idps =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
     assertThat(idps.get(0).getAlias(), is(alias1));
@@ -886,7 +905,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(orgId1);
     deleteOrganization(orgId2);
   }
-
 
   @Test
   void testOrgAdminPermissions() throws IOException {
@@ -926,7 +944,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(kc1, "/%s/members".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     //  add memberships
-    UserRepresentation user2  = createUserWithCredentials(keycloak, REALM, "user2", "pass");
+    UserRepresentation user2 = createUserWithCredentials(keycloak, REALM, "user2", "pass");
     response = putRequest(kc1, "foo", "/%s/members/%s".formatted(orgId1, user2.getId()));
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     //  remove memberships
@@ -937,7 +955,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     //  add invitations
     InvitationRequestRepresentation inv =
-            new InvitationRequestRepresentation().email("johndoe@example.com");
+        new InvitationRequestRepresentation().email("johndoe@example.com");
     response = postRequest(kc1, inv, "/%s/invitations".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     String loc = response.getHeader("Location");
@@ -985,7 +1003,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     //  get idp xxx
     response = getRequest("/%s/idps/%s".formatted(orgId1, alias1));
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    IdentityProviderRepresentation idp1 = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    IdentityProviderRepresentation idp1 =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idp1, notNullValue());
     assertThat(idp1.getAlias(), is(alias1));
     assertThat(idp1.getProviderId(), is(idp.getProviderId()));
@@ -1029,7 +1048,11 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(kc1, "/%s/roles".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  add roles
-    response = postRequest(kc1, new OrganizationRoleRepresentation().name("test-role"), "/%s/roles".formatted(orgId2));
+    response =
+        postRequest(
+            kc1,
+            new OrganizationRoleRepresentation().name("test-role"),
+            "/%s/roles".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
     //  remove roles
     response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId2, "test-role"));
@@ -1043,14 +1066,14 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(orgId1);
   }
 
-
   @Test
   void testOrgPortalLink() throws IOException {
 
     OrganizationRepresentation org = createDefaultOrg();
     String id = org.getId();
 
-    Response response = givenSpec()
+    Response response =
+        givenSpec()
             .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
             .formParam("baseUri", "foobar")
             .when()
@@ -1066,7 +1089,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     clientRepresentation.setName("idp-wizard");
     clientRepresentation.setId("idp-wizard");
     keycloak.realm(REALM).clients().create(clientRepresentation);
-    response = givenSpec()
+    response =
+        givenSpec()
             .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
             .formParam("baseUri", "foobar")
             .when()
@@ -1074,12 +1098,14 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
             .then()
             .extract()
             .response();
-    
+
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    UserRepresentation orgAdmin = keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).get(0);
+    UserRepresentation orgAdmin =
+        keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).get(0);
 
-    PortalLinkRepresentation link = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    PortalLinkRepresentation link =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
 
     assertThat(link, notNullValue());
     assertThat(link.getUser(), is(orgAdmin.getId()));
@@ -1089,5 +1115,4 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // delete org
     deleteOrganization(id);
   }
-
 }

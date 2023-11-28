@@ -135,7 +135,8 @@ public class Invitation {
   }
 
   @JsonProperty("teams")
-  @JsonIgnore // ignore field "teams" because it is not present in InvitationRepresentation (class io.phasetwo.client.openapi.model.InvitationRepresentation)
+  @JsonIgnore // ignore field "teams" because it is not present in InvitationRepresentation (class
+              // io.phasetwo.client.openapi.model.InvitationRepresentation)
   public List<String> getTeamIds() {
     return teamIds;
   }
@@ -188,8 +189,7 @@ public class Invitation {
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        id, email, createdAt, inviterId, organizationId, invitationUrl, roles);
+    return Objects.hash(id, email, createdAt, inviterId, organizationId, invitationUrl, roles);
   }
 
   @Override
