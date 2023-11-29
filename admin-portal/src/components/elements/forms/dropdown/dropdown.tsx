@@ -39,7 +39,7 @@ const Dropdown: FC<DropdownProps> = ({
           "transition",
           "hover:bg-white",
           {
-            "border-p2primary-700": isOpen,
+            "border-primary-700": isOpen,
             "border-neutral-300": !isOpen,
           }
         )}

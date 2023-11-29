@@ -22,7 +22,7 @@ const ProgressBar = ({ percent = 0 }) => {
         cy="12"
       />
       <circle
-        className=" text-p2primary-700"
+        className=" text-primary-700"
         strokeWidth="3"
         strokeDasharray={circumference}
         strokeDashoffset={circumference - (percent / 100) * circumference}

@@ -191,7 +191,7 @@ const ActivityProfile = () => {
                                 <div className="py-2 dark:text-zinc-200 md:py-0">
                                   {findDeviceTypeIcon(session, device)}
                                 </div>
-                                <div className="space-y-2 text-sm font-semibold text-p2gray-900 dark:text-zinc-200 md:pl-2">
+                                <div className="space-y-2 text-sm font-semibold text-secondary-900 dark:text-zinc-200 md:pl-2">
                                   <span
                                     id={elementId("browser", session)}
                                     className="pf-u-mr-md session-title"
@@ -218,11 +218,11 @@ const ActivityProfile = () => {
                               {session.current && (
                                 <span
                                   id={elementId("current-badge", session)}
-                                  className="flex items-center space-x-2 rounded border border-p2primary-700/30 bg-p2primary-700/10 px-3 py-1 text-xs font-medium text-p2primary-700 dark:text-zinc-200"
+                                  className="flex items-center space-x-2 rounded border border-primary-700/30 bg-primary-700/10 px-3 py-1 text-xs font-medium text-primary-700 dark:text-zinc-200"
                                 >
                                   <span className="relative flex h-2 w-2">
-                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2primary-700 opacity-75"></span>
-                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-p2primary-700"></span>
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-700 opacity-75"></span>
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary-700"></span>
                                   </span>
                                   <span>{t("currentSession")}</span>
                                 </span>

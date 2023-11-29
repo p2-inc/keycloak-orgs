@@ -30,7 +30,7 @@ const SectionHeader: FC<Props> = ({
         </div>
       )}
       <h2
-        className={cs("font-semibold text-p2gray-900 dark:text-zinc-200", {
+        className={cs("font-semibold text-secondary-900 dark:text-zinc-200", {
           "text-2xl": variant === "large",
           "text-xl": variant === "medium",
           "text-l": variant === "small",

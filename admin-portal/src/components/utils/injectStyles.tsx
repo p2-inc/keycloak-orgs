@@ -10,7 +10,7 @@ function generateColorStyles(colorName: string, colorValue?: string) {
 
 const InjectStyles = () => {
   useEffect(() => {
-    const { styles } = config.env;
+    const { styles = { customCSS: "" } } = config.env;
     const styleElement = document.createElement("style");
 
     const primaryColor = `

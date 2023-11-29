@@ -49,7 +49,7 @@ export default function P2Toast({
               )}
               {information && (
                 <InformationCircleIcon
-                  className="h-6 w-6 text-p2primary-500"
+                  className="h-6 w-6 text-primary-500"
                   aria-hidden="true"
                 />
               )}

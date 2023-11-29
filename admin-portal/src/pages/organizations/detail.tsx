@@ -255,8 +255,8 @@ export default function OrganizationDetail() {
                 {isFetching && (
                   <div className="absolute left-[-5px] top-[-5px]">
                     <span className="relative flex h-3 w-3">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-p2primary-500 opacity-75"></span>
-                      <span className="relative inline-flex h-3 w-3 rounded-full bg-p2primary-700"></span>
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-500 opacity-75"></span>
+                      <span className="relative inline-flex h-3 w-3 rounded-full bg-primary-700"></span>
                     </span>
                   </div>
                 )}

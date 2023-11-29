@@ -31,7 +31,7 @@ const DropDown: React.FC<Props> = ({
       {...listBoxProps}
     >
       <div className="relative mt-1">
-        <Listbox.Button className="relative w-full cursor-default rounded border bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-p2primary-100 sm:text-sm">
+        <Listbox.Button className="relative w-full cursor-default rounded border bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-100 sm:text-sm">
           <span className="block truncate">{selectedItem?.name}</span>
           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
             <ChevronUpDownIcon
@@ -52,9 +52,7 @@ const DropDown: React.FC<Props> = ({
                 key={itemIdx}
                 className={({ active, disabled }) =>
                   `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                    active
-                      ? "bg-p2primary-200 text-p2primary-700"
-                      : "text-gray-900"
+                    active ? "bg-primary-200 text-primary-700" : "text-gray-900"
                   } ${disabled && "bg-gray-100 opacity-50"}`
                 }
                 value={item}
@@ -70,7 +68,7 @@ const DropDown: React.FC<Props> = ({
                       {item.name}
                     </span>
                     {selected ? (
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-p2primary-500">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-500">
                         <CheckIcon className="h-5 w-5" aria-hidden="true" />
                       </span>
                     ) : null}

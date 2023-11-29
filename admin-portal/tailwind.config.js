@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        p2primary: {
+        primary: {
           100: "#F9FCFE",
           200: "#EDF5FB",
           400: "#739FE5",
@@ -14,7 +14,7 @@ module.exports = {
           700: "#1570C2",
           900: "#3C474E",
         },
-        p2secondary: {
+        secondary: {
           800: "#1C1D1E",
           900: "#252627",
         },

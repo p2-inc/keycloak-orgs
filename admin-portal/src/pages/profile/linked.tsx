@@ -69,7 +69,7 @@ const LinkedProfile = () => {
   const label = (account: LinkedAccountRepresentation): React.ReactNode => {
     if (account.social) {
       return (
-        <label className="inline-block items-center space-x-2 rounded border border-p2primary-700/30 bg-p2primary-700/10 px-3 py-1 text-xs font-medium text-p2primary-700">
+        <label className="inline-block items-center space-x-2 rounded border border-primary-700/30 bg-primary-700/10 px-3 py-1 text-xs font-medium text-primary-700">
           {t("socialLogin")}
         </label>
       );
