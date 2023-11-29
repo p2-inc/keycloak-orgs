@@ -1,29 +1,29 @@
 package io.phasetwo.portal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import jakarta.annotation.Generated;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "name",
-    "displayName",
-    "logoUrl",
-    "faviconUrl",
-    "appiconUrl",
-    "realm",
-    "locale",
-    "authServerUrl",
-    "baseUrl",
-    "resourceUrl",
-    "refererUrl",
-    "isRunningAsTheme",
-    "supportedLocales",
-    "features",
-    "styles"
+  "name",
+  "displayName",
+  "logoUrl",
+  "faviconUrl",
+  "appiconUrl",
+  "realm",
+  "locale",
+  "authServerUrl",
+  "baseUrl",
+  "resourceUrl",
+  "refererUrl",
+  "isRunningAsTheme",
+  "supportedLocales",
+  "features",
+  "styles"
 })
 @Generated("jsonschema2pojo")
 public class PortalEnvironment {
