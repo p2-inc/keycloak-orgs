@@ -3,7 +3,7 @@
   <groupId>io.phasetwo</groupId>
   <artifactId>phasetwo-admin-portal</artifactId>
   <packaging>jar</packaging>
-  <version>0.17-SNAPSHOT</version>
+  <version>0.15-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
