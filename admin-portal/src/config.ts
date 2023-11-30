@@ -120,8 +120,16 @@ export const windowRealm: string = (function (): string {
   return "";
 })();
 
+function getPathname(url) {
+  let pathname = new URL(url).pathname;
+  if (pathname.endsWith("/")) {
+    pathname = pathname.slice(0, -1);
+  }
+  return pathname;
+}
+
 export const config = {
-  basename: new URL(env.baseUrl).pathname,
+  basename: getPathname(env.baseUrl),
   realm: "test" ?? windowRealm,
   env: env,
 };

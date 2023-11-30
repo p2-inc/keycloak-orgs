@@ -35,3 +35,4 @@ yarn-error.log*
 .factorypath
 .project
 .settings/
+.vscode/settings.json
