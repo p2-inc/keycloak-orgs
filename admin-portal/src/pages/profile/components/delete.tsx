@@ -17,7 +17,7 @@ const DeleteProfile = () => {
           )}
         />
         <div>
-          <Link to={`/profile-delete`}>
+          <Link to={`/profile/delete`}>
             <Button isBlackButton>{t("deleteYourProfile")}</Button>
           </Link>
         </div>
