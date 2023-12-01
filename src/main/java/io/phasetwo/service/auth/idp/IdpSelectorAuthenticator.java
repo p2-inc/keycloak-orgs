@@ -39,7 +39,7 @@ public class IdpSelectorAuthenticator implements Authenticator {
   }
 
   private void redirect(AuthenticationFlowContext context, String providerId) {
-    IdentityProviderModel identityProvider = context.getRealm().getIdentityProviderByAlias​(providerId);
+    IdentityProviderModel identityProvider = context.getRealm().getIdentityProviderByAlias(providerId);
     if (identityProvider != null && identityProvider.isEnabled()) {
       new Redirector(context).redirectTo(identityProvider);
         /*
