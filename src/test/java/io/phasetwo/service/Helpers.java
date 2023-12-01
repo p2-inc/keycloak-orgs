@@ -29,11 +29,13 @@ public class Helpers {
     return keycloak.realm(realm).users().search(user.getUsername()).get(0);
   }
 
-  public static UserRepresentation createUserWithCredentials(Keycloak keycloak, String realm, String username, String password) {
+  public static UserRepresentation createUserWithCredentials(
+      Keycloak keycloak, String realm, String username, String password) {
     return createUserWithCredentials(keycloak, realm, username, password, null);
   }
 
-  public static UserRepresentation createUserWithCredentials(Keycloak keycloak, String realm, String username, String password, String email) {
+  public static UserRepresentation createUserWithCredentials(
+      Keycloak keycloak, String realm, String username, String password, String email) {
     CredentialRepresentation pass = new CredentialRepresentation();
     pass.setType(CredentialRepresentation.PASSWORD);
     pass.setValue(password);
@@ -51,5 +53,4 @@ public class Helpers {
   public static void deleteUser(Keycloak keycloak, String realm, String id) {
     keycloak.realm(realm).users().delete(id);
   }
-
 }

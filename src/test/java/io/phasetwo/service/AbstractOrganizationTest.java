@@ -1,5 +1,11 @@
 package io.phasetwo.service;
 
+import static io.phasetwo.service.Helpers.toJsonString;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
@@ -9,6 +15,11 @@ import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import jakarta.ws.rs.core.Response.Status;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
@@ -18,20 +29,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.junit.jupiter.Container;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static io.phasetwo.service.Helpers.toJsonString;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 public abstract class AbstractOrganizationTest {
 
+  public static final String KEYCLOAK_IMAGE =
+      String.format(
+          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "23.0.0"));
   public static final String ADMIN_CLI = "admin-cli";
   static final String[] deps = {
     "dnsjava:dnsjava",
@@ -51,10 +53,10 @@ public abstract class AbstractOrganizationTest {
 
   static List<File> getDep(String pkg) {
     return Maven.resolver()
-            .loadPomFromFile("./pom.xml")
-            .resolve(pkg)
-            .withoutTransitivity()
-            .asList(File.class);
+        .loadPomFromFile("./pom.xml")
+        .resolve(pkg)
+        .withoutTransitivity()
+        .asList(File.class);
   }
 
   public static Keycloak keycloak;
@@ -62,7 +64,7 @@ public abstract class AbstractOrganizationTest {
 
   @Container
   public static final KeycloakContainer container =
-      new KeycloakContainer("quay.io/phasetwo/keycloak-crdb:22.0.5")
+      new KeycloakContainer(KEYCLOAK_IMAGE)
           .withContextPath("/auth")
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
@@ -86,7 +88,6 @@ public abstract class AbstractOrganizationTest {
     container.stop();
   }
 
-
   public static Keycloak getKeycloak(String realm, String clientId, String user, String pass) {
     return Keycloak.getInstance(getAuthUrl(), realm, user, pass, clientId);
   }
@@ -96,7 +97,6 @@ public abstract class AbstractOrganizationTest {
   }
 
   public static final String REALM = "master";
-
 
   protected OrganizationRepresentation createDefaultOrg() throws IOException {
     OrganizationRepresentation rep =
@@ -131,7 +131,7 @@ public abstract class AbstractOrganizationTest {
     return putRequest(keycloak, body, String.join("/", paths));
   }
 
-  protected Response putRequest( Keycloak keycloak, Object body, String path)
+  protected Response putRequest(Keycloak keycloak, Object body, String path)
       throws JsonProcessingException {
     return givenSpec(keycloak).and().body(toJsonString(body)).put(path).then().extract().response();
   }
@@ -150,25 +150,18 @@ public abstract class AbstractOrganizationTest {
   }
 
   // create an organization, fet the created organization and returns it
-  protected OrganizationRepresentation createOrganization(Keycloak keycloak,
-      OrganizationRepresentation representation) throws IOException {
+  protected OrganizationRepresentation createOrganization(
+      Keycloak keycloak, OrganizationRepresentation representation) throws IOException {
     Response response =
-        givenSpec(keycloak)
-            .and()
-            .body(toJsonString(representation))
-            .when()
-            .post()
-                .andReturn();
+        givenSpec(keycloak).and().body(toJsonString(representation)).when().post().andReturn();
 
-    assertThat(
-        response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     assertNotNull(response.getHeader("Location"));
     String loc = response.getHeader("Location");
     String id = loc.substring(loc.lastIndexOf("/") + 1);
 
     response = getRequest(id);
-    assertThat(
-        response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
+    assertThat(response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
     OrganizationRepresentation orgRep =
         new ObjectMapper()
             .readValue(response.getBody().asString(), OrganizationRepresentation.class);
@@ -176,11 +169,13 @@ public abstract class AbstractOrganizationTest {
     return orgRep;
   }
 
-  protected OrganizationRoleRepresentation createOrgRole(String orgId, String name) throws IOException {
+  protected OrganizationRoleRepresentation createOrgRole(String orgId, String name)
+      throws IOException {
     return createOrgRole(keycloak, orgId, name);
   }
 
-  protected OrganizationRoleRepresentation createOrgRole(Keycloak keycloak, String orgId, String name) throws IOException {
+  protected OrganizationRoleRepresentation createOrgRole(
+      Keycloak keycloak, String orgId, String name) throws IOException {
     OrganizationRoleRepresentation rep = new OrganizationRoleRepresentation().name(name);
     Response response =
         givenSpec(keycloak)
@@ -189,16 +184,14 @@ public abstract class AbstractOrganizationTest {
             .when()
             .post(String.join("/", orgId, "roles"))
             .andReturn();
-    assertThat(
-        response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     assertNotNull(response.getHeader("Location"));
     String loc = response.getHeader("Location");
     String id = loc.substring(loc.lastIndexOf("/") + 1);
     assertThat(id, is(name));
 
     response = getRequest("/%s/roles/%s".formatted(orgId, id));
-    assertThat(
-        response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
+    assertThat(response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
     OrganizationRoleRepresentation orgRoleRep =
         new ObjectMapper()
             .readValue(response.getBody().asString(), OrganizationRoleRepresentation.class);
@@ -221,8 +214,7 @@ public abstract class AbstractOrganizationTest {
             .then()
             .extract()
             .response();
-    assertThat(
-        response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
   }
 
   protected void deleteOrganization(String id) {
@@ -231,9 +223,7 @@ public abstract class AbstractOrganizationTest {
 
   protected void deleteOrganization(Keycloak keycloak, String id) {
     Response response = givenSpec(keycloak).when().delete(id).then().extract().response();
-    assertThat(
-        response.getStatusCode(),
-        is(Status.NO_CONTENT.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
   protected RequestSpecification givenSpec(String... paths) {
@@ -259,7 +249,8 @@ public abstract class AbstractOrganizationTest {
 
   protected void checkUserRole(String orgId, String role, String userId, int status) {
     // check if user has role
-    Response response = givenSpec().when().get(String.join("/", orgId, "roles", role, "users", userId)).andReturn();
+    Response response =
+        givenSpec().when().get(String.join("/", orgId, "roles", role, "users", userId)).andReturn();
     assertThat(response.getStatusCode(), is(status));
   }
 }
