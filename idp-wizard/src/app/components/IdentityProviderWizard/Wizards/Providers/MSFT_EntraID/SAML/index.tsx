@@ -6,7 +6,7 @@ import {
   Wizard,
 } from "@patternfly/react-core";
 import * as Steps from "./Steps";
-import azureLogo from "@app/images/provider-logos/azure_logo.svg";
+import entraIDLogo from "@app/images/provider-logos/msft_entraid.svg";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
@@ -27,12 +27,12 @@ import {
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 
-export const AzureWizard: FC = () => {
-  const idpCommonName = "Azure SAML IdP";
+export const EntraIdWizard: FC = () => {
+  const idpCommonName = "EntraId SAML IdP";
   const alias = getAlias({
-    provider: Providers.AZURE,
+    provider: Providers.ENTRAID,
     protocol: Protocols.SAML,
-    preface: "azure-saml",
+    preface: "entraid-saml",
   });
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
@@ -71,7 +71,7 @@ export const AzureWizard: FC = () => {
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
       clearAlias({
-        provider: Providers.AZURE,
+        provider: Providers.ENTRAID,
         protocol: Protocols.SAML,
       });
       navigateToBasePath();
@@ -130,22 +130,38 @@ export const AzureWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `Azure SAML Single Sign-on`,
+      displayName: `EntraId SAML Single Sign-on`,
       providerId: "saml",
       config: metadata!,
     };
     console.log("foo");
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-      
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
+
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
-        usernameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" }, //setting to email
-        emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", friendlyName: "" },
-        firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", friendlyName: "" },
-        lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", friendlyName: "" },
+        usernameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+          friendlyName: "",
+        }, //setting to email
+        emailAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+          friendlyName: "",
+        },
+        firstNameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+          friendlyName: "",
+        },
+        lastNameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+          friendlyName: "",
+        },
         featureFlags,
       });
 
@@ -156,7 +172,7 @@ export const AzureWizard: FC = () => {
     } catch (e) {
       console.error(e);
       setResults(
-        `Error creating ${idpCommonName}. Please confirm there is no Azure SAML configured already.`
+        `Error creating ${idpCommonName}. Please confirm there is no EntraId SAML configured already.`
       );
       setError(true);
     } finally {
@@ -168,21 +184,21 @@ export const AzureWizard: FC = () => {
     {
       id: 1,
       name: "Create Enterprise Application",
-      component: <Steps.AzureStepOne />,
+      component: <Steps.EntraIdStepOne />,
       hideCancelButton: true,
     },
     {
       id: 2,
       name: "Configure Attribute Statements",
-      component: <Steps.AzureStepTwo acsUrl={acsUrl} entityId={entityId} />,
+      component: <Steps.EntraIdStepTwo acsUrl={acsUrl} entityId={entityId} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
     },
     {
       id: 3,
-      name: "Upload Azure SAML Metadata file",
+      name: "Upload EntraId SAML Metadata file",
       component: (
-        <Steps.AzureStepThree
+        <Steps.EntraIdStepThree
           handleFormSubmit={handleFormSubmit}
           url={metadataUrl}
         />
@@ -194,14 +210,14 @@ export const AzureWizard: FC = () => {
     {
       id: 4,
       name: "User Attributes & Claims",
-      component: <Steps.AzureStepFour />,
+      component: <Steps.EntraIdStepFour />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 4,
     },
     {
       id: 5,
       name: "Assign People & Groups",
-      component: <Steps.AzureStepFive />,
+      component: <Steps.EntraIdStepFive />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 5,
     },
@@ -210,7 +226,7 @@ export const AzureWizard: FC = () => {
       component: (
         <WizardConfirmation
           title="SSO Configuration Complete"
-          message="Your users can now sign-in with Azure AD."
+          message="Your users can now sign-in with EntraId AD."
           buttonText={`Create ${idpCommonName} in Keycloak`}
           resultsText={results}
           error={error}
@@ -228,11 +244,11 @@ export const AzureWizard: FC = () => {
     },
   ];
 
-  const title = "Azure wizard";
+  const title = "Microsoft Entra Id Wizard";
 
   return (
     <>
-      <Header logo={azureLogo} />
+      <Header logo={entraIDLogo} />
       <PageSection
         type={PageSectionTypes.wizard}
         variant={PageSectionVariants.light}

@@ -1,5 +1,5 @@
 import awsLogo from "@app/images/provider-logos/aws.jpg";
-import azureLogo from "@app/images/provider-logos/azure_logo.svg";
+import entraIdLogo from "@app/images/provider-logos/msft_entraid.svg";
 import oktaLogo from "@app/images/provider-logos/okta_logo.png";
 import cyberarkLogo from "@app/images/provider-logos/cyberark_logo.svg";
 import adfsLogo from "@app/images/provider-logos/active-directory.svg";
@@ -20,7 +20,7 @@ export enum Providers {
   AWS = "aws",
   ADFS = "adfs",
   AUTH0 = "auth0",
-  AZURE = "azure",
+  ENTRAID = "entraid",
   CYBERARK = "cyberark",
   DUO = "duo",
   GOOGLE_SAML = "googlesaml",
@@ -51,10 +51,10 @@ export const IdentityProviders: IIDPType[] = [
     protocols: [Protocols.SAML],
   },
   {
-    name: "Azure",
-    imageSrc: azureLogo,
+    name: "Entra Id",
+    imageSrc: entraIdLogo,
     active: true,
-    id: Providers.AZURE,
+    id: Providers.ENTRAID,
     protocols: [Protocols.SAML],
   },
   {

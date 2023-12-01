@@ -1,9 +1,9 @@
 import React from "react";
-import * as Images from "@app/images/azure/saml";
+import * as Images from "@app/images/msft_entra_id/saml";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { useHostname } from "@app/hooks/useHostname";
 
-export function AzureStepFive() {
+export function EntraIdStepFive() {
   const hostname = useHostname();
   const instructionList: InstructionProps[] = [
     {

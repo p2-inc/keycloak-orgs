@@ -52,7 +52,7 @@ export const IdentityProviderSelector: FC = () => {
 
                       const linkTo = active ? genLink : "#";
                       return (
-                        <Link to={linkTo} key={provider}>
+                        <Link to={linkTo} key={provider} title={name}>
                           <IdPButton
                             key={name}
                             text={name}

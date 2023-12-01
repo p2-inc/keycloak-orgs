@@ -14,7 +14,7 @@ import {
   Auth0WizardOIDC,
   Auth0WizardSAML,
   AWSSamlWizard,
-  AzureWizard,
+  EntraIdWizard,
   DuoWizard,
   GenericLDAP,
   GenericOIDC,
@@ -40,8 +40,8 @@ const Provider = () => {
     case Providers.OKTA:
       if (protocol === Protocols.LDAP) return <OktaWizardLDAP />;
       if (protocol === Protocols.SAML) return <OktaWizardSaml />;
-    case Providers.AZURE:
-      return <AzureWizard />;
+    case Providers.ENTRAID:
+      return <EntraIdWizard />;
     case Providers.GOOGLE_SAML:
       return <GoogleWizard />;
     case Providers.AUTH0:

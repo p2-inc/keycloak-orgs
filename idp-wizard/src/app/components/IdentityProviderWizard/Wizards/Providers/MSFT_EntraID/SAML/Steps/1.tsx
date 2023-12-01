@@ -1,14 +1,14 @@
 import React from "react";
-import * as Images from "@app/images/azure/saml";
+import * as Images from "@app/images/msft_entra_id/saml";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { useHostname } from "@app/hooks/useHostname";
 
-export function AzureStepOne() {
+export function EntraIdStepOne() {
   const hostname = useHostname();
 
   const instructions: InstructionProps[] = [
     {
-      text: 'Select "Enterprise applications" from your Azure AD dashboard.',
+      text: 'Select "Enterprise applications" from your Entra Id dashboard.',
       component: <StepImage src={Images.AzureSaml1} alt="Step 1.1" />,
     },
     {

@@ -9,3 +9,4 @@ export * from "./select";
 export * from "./step";
 export * from "./url-card";
 export * from "./zoom-image";
+export * from "./triple-item-clipboard-copy";

@@ -1,14 +1,14 @@
 import React, { FC, useState } from "react";
-import * as Images from "@app/images/azure/saml";
+import * as Images from "@app/images/msft_entra_id/saml";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { ClipboardCopyComponent } from "@wizardComponents";
 
 interface Props {
-  acsUrl: string,
-  entityId: string
+  acsUrl: string;
+  entityId: string;
 }
 
-export const AzureStepTwo: FC<Props> = ({ acsUrl, entityId }) => {
+export const EntraIdStepTwo: FC<Props> = ({ acsUrl, entityId }) => {
   const instructionList: InstructionProps[] = [
     {
       text: "Click the Edit icon in the top right of the first step.",
@@ -46,4 +46,4 @@ export const AzureStepTwo: FC<Props> = ({ acsUrl, entityId }) => {
       instructionList={instructionList}
     />
   );
-}
+};

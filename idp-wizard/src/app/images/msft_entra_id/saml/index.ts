@@ -13,6 +13,7 @@ import AzureSaml9 from "./azure-9.png";
 import AzureSaml10 from "./azure-10.png";
 import AzureSaml11 from "./azure-11.png";
 import AzureSaml12 from "./azure-12.png";
+import EntraId1 from "./entraid-1.png";
 
 export {
   AzureSaml1,
@@ -30,4 +31,5 @@ export {
   AzureSaml10,
   AzureSaml11,
   AzureSaml12,
+  EntraId1,
 };
