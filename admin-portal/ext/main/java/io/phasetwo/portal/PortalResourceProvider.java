@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -98,6 +99,47 @@ public class PortalResourceProvider implements RealmResourceProvider {
     log.debug("CORS OPTIONS preflight request");
     HttpRequest request = session.getContext().getContextObject(HttpRequest.class);
     return Cors.add(request, Response.ok()).auth().allowedMethods(METHODS).preflight().build();
+  }
+
+  /**
+   * something is seriously wrong since resteasy reactive upgrade. catch-all and regex paths no
+   * longer work from annotations. This is a hack to get v23 working in the meantime.
+   */
+  @GET
+  @Path("{path:.+}")
+  public Response router(@PathParam("path") String path) throws Exception {
+    UriInfo uriInfo = session.getContext().getUri();
+    log.debugf("param path %s", path);
+    log.debugf("absolutePath %s", uriInfo.getAbsolutePath());
+    log.debugf("path %s", uriInfo.getPath());
+    log.debugf("baseUri %s", uriInfo.getBaseUri());
+    log.debugf("segments %s", uriInfo.getPathSegments());
+    log.debugf("requestUri %s", uriInfo.getRequestUri());
+
+    if (path == null || "".equals(path) || "/".equals(path)) return portal();
+    if (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+
+    // staticResources
+    if (Pattern.matches("^(asset-manifest|logo|manifest|static|locales|favicon).*", path)) {
+      Response response = staticResources(path);
+      if (response != null) {
+        log.debugf("returning response %d for path %s", response.getStatus(), path);
+        return response;
+      }
+    }
+
+    // forward
+    if (Pattern.matches("^(profile|organizations).*", path)) {
+      Response response = forward();
+      if (response != null) {
+        log.debugf("forwarding response %d for path %s", response.getStatus(), path);
+        return response;
+      }
+    }
+
+    return portal();
   }
 
   @GET
