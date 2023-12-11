@@ -127,8 +127,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private void setOrganizationRoleMapper(ClientModel idpWizard) {
-    ProtocolMapperModel pro =
-        idpWizard.getProtocolMapperByName("openid-connect", "organizations");
+    ProtocolMapperModel pro = idpWizard.getProtocolMapperByName("openid-connect", "organizations");
     if (pro != null) {
       return;
     } else {
@@ -151,8 +150,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private void setOrganizationIdMapper(ClientModel idpWizard) {
-    ProtocolMapperModel pro =
-        idpWizard.getProtocolMapperByName("openid-connect", "org_id");
+    ProtocolMapperModel pro = idpWizard.getProtocolMapperByName("openid-connect", "org_id");
     if (pro != null) {
       return;
     } else {

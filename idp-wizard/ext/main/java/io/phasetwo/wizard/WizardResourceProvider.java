@@ -3,7 +3,6 @@ package io.phasetwo.wizard;
 import com.google.common.collect.ImmutableMap;
 import jakarta.activation.MimetypesFileTypeMap;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.Response;
@@ -14,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
@@ -60,10 +60,41 @@ public class WizardResourceProvider implements RealmResourceProvider {
     return Cors.add(request, Response.ok()).auth().allowedMethods(METHODS).preflight().build();
   }
 
-  /** awful hack version for keycloak-x */
+  /**
+   * something is seriously wrong since resteasy reactive upgrade. catch-all and regex paths no
+   * longer work from annotations. This is a hack to get v23 working in the meantime.
+   */
+  @GET
+  @Path("{path:.+}")
+  public Response router(@PathParam("path") String path) throws Exception {
+    UriInfo uriInfo = session.getContext().getUri();
+    log.debugf("param path %s", path);
+    log.debugf("absolutePath %s", uriInfo.getAbsolutePath());
+    log.debugf("path %s", uriInfo.getPath());
+    log.debugf("baseUri %s", uriInfo.getBaseUri());
+    log.debugf("segments %s", uriInfo.getPathSegments());
+    log.debugf("requestUri %s", uriInfo.getRequestUri());
+
+    if (path == null || "".equals(path) || "/".equals(path)) return wizard();
+    if (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+
+    if (Pattern.matches("^(200|fonts|images|main|site).*", path)) {
+      Response response = staticResources(path);
+      if (response != null) {
+        log.debugf("returning response %d for path %s", response.getStatus(), path);
+        return response;
+      }
+    }
+
+    return wizard();
+  }
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   public Response wizard() {
+    log.debug("wizard index file");
     String wizardResources = ".";
     Theme theme = getTheme("wizard");
     RealmModel realm = session.getContext().getRealm();
@@ -89,45 +120,10 @@ public class WizardResourceProvider implements RealmResourceProvider {
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
   }
 
-  /* this version isn't working in Keycloak-X. TODO test with new version
   @GET
-  @Produces(MediaType.TEXT_HTML)
-  public Response wizard() {
-    String wizardResources = ".";
-    log.debugf("wizardResources %s", wizardResources);
-    RealmModel realm = session.getContext().getRealm();
-    return session.getProvider(LoginFormsProvider.class).setAttribute("wizardResources", wizardResources).setAttribute("realmName", realm.getName()).createForm("wizard.ftl");
-  }
-  */
-
-  /*
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  public Response wizard() {
-    Theme theme = getTheme("wizard");
-    UriInfo uriInfo = session.getContext().getUri();
-    log.infof("absolutePath %s", uriInfo.getAbsolutePath());
-    log.infof("path %s", uriInfo.getPath());
-    log.infof("baseUri %s", uriInfo.getBaseUri());
-    UriBuilder uriBuilder =
-        UriBuilder.fromUri(uriInfo.getBaseUri())
-        .path("resources")
-        .path(Version.RESOURCES_VERSION)
-        .path(theme.getType().toString().toLowerCase())
-        .path(theme.getName());
-
-    URI resourcePath = uriBuilder.build();
-    log.infof("resourcePath %s", resourcePath.toString());
-    String wizardResources = uriInfo.relativize(resourcePath).toString();
-    log.infof("wizardResources %s", wizardResources);
-    RealmModel realm = session.getContext().getRealm();
-    return session.getProvider(LoginFormsProvider.class).setAttribute("wizardResources", wizardResources).setAttribute("realmName", realm.getName()).createForm("wizard.ftl");
-  }
-  */
-
-  @GET
-  @Path("{path: ^(200|fonts|images|main|site).*}")
+  @Path("{path:^(200|fonts|images|main|site).*}")
   public Response staticResources(@PathParam("path") final String path) throws IOException {
+    log.debug("static resources");
     String fileName = getLastPathSegment(session.getContext().getUri());
     Theme theme = getTheme("wizard");
     InputStream resource = theme.getResourceAsStream(path);
@@ -139,9 +135,10 @@ public class WizardResourceProvider implements RealmResourceProvider {
   }
 
   @GET
-  @Path("/keycloak.json")
+  @Path("keycloak.json")
   @Produces(MediaType.APPLICATION_JSON)
   public Response keycloakJson() {
+    log.debug("keycloak.json");
     setupCors();
     RealmModel realm = session.getContext().getRealm();
     UriInfo uriInfo = session.getContext().getUri();
@@ -157,9 +154,10 @@ public class WizardResourceProvider implements RealmResourceProvider {
   }
 
   @GET
-  @Path("/config.json")
+  @Path("config.json")
   @Produces(MediaType.APPLICATION_JSON)
   public WizardConfig configJson() {
+    log.debug("config.json");
     setupCors();
     return WizardConfig.createFromAttributes(session);
   }
