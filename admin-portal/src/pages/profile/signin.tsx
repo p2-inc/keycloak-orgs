@@ -112,7 +112,7 @@ const SigninProfile = () => {
                 }
               }}
             >
-              {t("remove")}
+              {t("update")}
             </Button>
           )}
         </>
