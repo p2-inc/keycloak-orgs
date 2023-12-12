@@ -6,7 +6,7 @@ More self-serve. More better.
 
 The Phase Two Admin Portal ties together functionality from the Keycloak Account Console and [Phase Two Organizations](https://github.com/p2-inc/keycloak-orgs) to allow your customers' users to self-manage as much of their account and organization functionality as is possible.
 
-The Portal is deployed as a Keycloak extension, much like the Account Console, and is available at `https://{host}/{relative-path}/realms/{realm}/portal/`. Note that we are considering making this a drop-in replacement for the Account Console that can be selected simply in *Realm Settings*->*Themes*, but this would make it impossible to use both at the same time.
+The Portal is deployed as a Keycloak extension, much like the Account Console, and is available at `https://{host}/{relative-path}/realms/{realm}/portal/`. Note that we are considering making this a drop-in replacement for the Account Console that can be selected simply in _Realm Settings_->_Themes_, but this would make it impossible to use both at the same time.
 
 ![ezgif-4-811bfaae78](https://user-images.githubusercontent.com/244253/235351276-85504b5a-a669-4dc1-950d-5881dd20c926.gif)
 
@@ -29,9 +29,9 @@ Because this extension relies on the APIs provided by the [keycloak-orgs](https:
 
 ### Visibility
 
-Most of the visibilty of functionality in the Portal is controlled by user permissions. However, it is also possible to control visibility through Realm Attributes. These attributes may be set manually, or by using the [Phase Two extensions to the Keycloak Admin UI](https://github.com/p2-inc/keycloak-ui/) (**Styles**->*Portal* tab), which must also be installed in the same Keycloak. 
+Most of the visibility of functionality in the Portal is controlled by user permissions. However, it is also possible to control visibility through Realm Attributes. These attributes may be set manually, or by using the [Phase Two extensions to the Keycloak Admin UI](https://github.com/p2-inc/keycloak-ui/) (**Styles**->_Portal_ tab), which must also be installed in the same Keycloak.
 
-![image](https://user-images.githubusercontent.com/244253/235350498-9e51fbcf-e158-4675-9791-42968c9908cb.png)
+![image](https://github.com/p2-inc/phasetwo-admin-portal/assets/93841792/a4977fe4-40ab-4c33-9e5c-790a60dd1f4a.png)
 
 When setting the attributes manually, the values are:
 | Key | Description | Default |
@@ -51,16 +51,32 @@ When setting the attributes manually, the values are:
 
 ### Style
 
-It is also possible to add branding to the portal. It is recommended these, along with logos, are set through the [Phase Two extensions to the Keycloak Admin UI](https://github.com/p2-inc/keycloak-ui/), as there are other options there that are reused in Login forms styling, and the UI extensions also ensure that the attributes are set with appropriate values. 
+It is also possible to add branding to the portal. It is recommended these, along with logos, are set through the [Phase Two extensions to the Keycloak Admin UI](https://github.com/p2-inc/keycloak-ui/), as there are other options there that are reused in Login forms styling, and the UI extensions also ensure that the attributes are set with appropriate values.
+
+These style keys are built off of the [Tailwind color](https://tailwindcss.com/docs/customizing-colors) formatting. The order of lowest color being lightest and highest color being darkest.
 
 The keys specific to the Portal are:
 | Key | Description | Default |
 |---|---|---|
-| `_providerConfig.assets.portal.primaryColor` | Primary color | `[empty]` |
-| `_providerConfig.assets.portal.secondaryColor` | Accent color | `[empty]` |
-| `_providerConfig.assets.portal.backgroundColor` | Background color | `[empty]` |
+| `_providerConfig.assets.portal.primary100` | Primary color - 100 | `[empty]` |
+| `_providerConfig.assets.portal.primary200` | Primary color - 200 | `[empty]` |
+| `_providerConfig.assets.portal.primary400` | Primary color - 400 | `[empty]` |
+| `_providerConfig.assets.portal.primary500` | Primary color - 500 | `[empty]` |
+| `_providerConfig.assets.portal.primary600` | Primary color - 600 | `[empty]` |
+| `_providerConfig.assets.portal.primary700` | Primary color - 700 | `[empty]` |
+| `_providerConfig.assets.portal.primary900` | Primary color - 900 | `[empty]` |
+| `_providerConfig.assets.portal.secondary800` | Secondary color - 800 | `[empty]` |
+| `_providerConfig.assets.portal.secondary900` | Secondary color - 900 | `[empty]` |
 | `_providerConfig.assets.portal.css` | CSS override | `[empty]` |
 
+If you are looking to generate custom css styles, use the following as a guideline. The UI currently only uses two generated styles from the colors:
+
+```
+    .text-primary-100 { color: ${colorValue}; }
+    .bg-primary-100 { background-color: ${colorValue}; }
+```
+
+where `${colorValue}` is whatever you decide as the value and the suffix can change as needed (i.e. `primary-100` becomes `primary-200` and so on).
 
 ## Developers
 
@@ -90,6 +106,6 @@ mvn clean package
 
 Put the jar in `target/admin-portal-{version}.jar` in the `providers/` directory of your Keycloak distribution.
 
------
+---
 
 All documentation, source code and other files in this repository are Copyright 2023 Phase Two, Inc.
