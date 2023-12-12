@@ -55,7 +55,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @OPTIONS
   @Path("{any:.*}")
   public Response preflight() {
-    log.debug("CORS OPTIONS preflight request");
+    log.trace("CORS OPTIONS preflight request");
     HttpRequest request = session.getContext().getContextObject(HttpRequest.class);
     return Cors.add(request, Response.ok()).auth().allowedMethods(METHODS).preflight().build();
   }
@@ -68,12 +68,12 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @Path("{path:.+}")
   public Response router(@PathParam("path") String path) throws Exception {
     UriInfo uriInfo = session.getContext().getUri();
-    log.debugf("param path %s", path);
-    log.debugf("absolutePath %s", uriInfo.getAbsolutePath());
-    log.debugf("path %s", uriInfo.getPath());
-    log.debugf("baseUri %s", uriInfo.getBaseUri());
-    log.debugf("segments %s", uriInfo.getPathSegments());
-    log.debugf("requestUri %s", uriInfo.getRequestUri());
+    log.tracef("param path %s", path);
+    log.tracef("absolutePath %s", uriInfo.getAbsolutePath());
+    log.tracef("path %s", uriInfo.getPath());
+    log.tracef("baseUri %s", uriInfo.getBaseUri());
+    log.tracef("segments %s", uriInfo.getPathSegments());
+    log.tracef("requestUri %s", uriInfo.getRequestUri());
 
     if (path == null || "".equals(path) || "/".equals(path)) return wizard();
     if (path.startsWith("/")) {
@@ -83,7 +83,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
     if (Pattern.matches("^(200|fonts|images|main|site).*", path)) {
       Response response = staticResources(path);
       if (response != null) {
-        log.debugf("returning response %d for path %s", response.getStatus(), path);
+        log.tracef("returning response %d for path %s", response.getStatus(), path);
         return response;
       }
     }
@@ -94,7 +94,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @GET
   @Produces(MediaType.TEXT_HTML)
   public Response wizard() {
-    log.debug("wizard index file");
+    log.trace("wizard index file");
     String wizardResources = ".";
     Theme theme = getTheme("wizard");
     RealmModel realm = session.getContext().getRealm();
@@ -123,12 +123,12 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @GET
   @Path("{path:^(200|fonts|images|main|site).*}")
   public Response staticResources(@PathParam("path") final String path) throws IOException {
-    log.debug("static resources");
+    log.trace("static resources");
     String fileName = getLastPathSegment(session.getContext().getUri());
     Theme theme = getTheme("wizard");
     InputStream resource = theme.getResourceAsStream(path);
     String mimeType = getMimeType(fileName);
-    log.debugf("%s [%s] (%s)", path, mimeType, null == resource ? "404" : "200");
+    log.tracef("%s [%s] (%s)", path, mimeType, null == resource ? "404" : "200");
     return null == resource
         ? Response.status(Response.Status.NOT_FOUND).build()
         : Response.ok(resource, mimeType).build();
@@ -138,7 +138,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @Path("keycloak.json")
   @Produces(MediaType.APPLICATION_JSON)
   public Response keycloakJson() {
-    log.debug("keycloak.json");
+    log.trace("keycloak.json");
     setupCors();
     RealmModel realm = session.getContext().getRealm();
     UriInfo uriInfo = session.getContext().getUri();
@@ -157,7 +157,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @Path("config.json")
   @Produces(MediaType.APPLICATION_JSON)
   public WizardConfig configJson() {
-    log.debug("config.json");
+    log.trace("config.json");
     setupCors();
     return WizardConfig.createFromAttributes(session);
   }
