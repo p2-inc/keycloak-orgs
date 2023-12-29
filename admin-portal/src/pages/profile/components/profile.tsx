@@ -74,8 +74,8 @@ const ProfileData = () => {
     <>
       <div className="mb-12">
         <SectionHeader
-          title="Personal information"
-          description="Manage your user profile information."
+          title={t("personalInformation")}
+          description={t("manageYourUserProfileInformation")}
         />
       </div>
       <form className="max-w-xl space-y-4" onSubmit={handleSubmit(onSubmit)}>

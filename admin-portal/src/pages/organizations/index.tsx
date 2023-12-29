@@ -15,10 +15,14 @@ import DomainStat from "./components/domain-stat";
 import MembersStat from "./components/members-stat";
 import useUser from "components/utils/useUser";
 import Fuse from "fuse.js";
+import {useTranslation} from "react-i18next";
+import {useGetAccountQuery} from "../../store/apis/profile";
+import {setLanguage} from "../../i18n";
 
-const { realm } = config.env;
+const { realm, supportedLocales } = config.env;
 
 export default function Organizations() {
+  const { t, i18n} = useTranslation();
   const { user } = useUser();
   const [viewType, setViewType] = useState<ViewLayoutOptions>(
     ViewLayoutOptions.GRID
@@ -33,11 +37,22 @@ export default function Organizations() {
       { skip: !user?.id }
     );
 
+  // localization not loaded on login, need to load it from locale attribute
+  const { data: account, isLoading: isLoadingAccount } = useGetAccountQuery({
+    userProfileMetadata: true,
+    realm,
+  });
+  const hasLocale = (locale: string): boolean => locale in supportedLocales;
+
   const fuse = new Fuse(userOrgs, {
     keys: ["displayName", "name", "domains"],
   });
 
   useEffect(() => {
+    // load language on homepage (after login)
+    if (account?.attributes?.locale && hasLocale(account?.attributes?.locale[0])) {
+      setLanguage(account?.attributes?.locale[0]);
+    }
     fuse.setCollection(userOrgs);
   }, [userOrgs]);
 
@@ -49,13 +64,13 @@ export default function Organizations() {
   return (
     <>
       <TopHeader
-        header="Organizations"
+        header={t("organizations")}
         badgeVal={userOrgs.length}
         rightAreaItems={
           <>
             <FormTextInputWithIcon
               inputArgs={{
-                placeholder: "Search Organizations",
+                placeholder: `${t("searchOrganizations")}`,
                 onChange: (e) => setSearchString(e.target.value),
               }}
               className="w-full md:w-auto"

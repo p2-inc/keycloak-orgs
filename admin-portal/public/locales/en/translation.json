@@ -272,5 +272,13 @@
   "welcomeMessage": "Welcome to keycloak account management",
   "writeDeleteToConfirm": "Write delete to confirm",
   "youAreTheSameUserAsThisUser": "This is your account! This is you!",
-  "youLackTheManageRolesRole": "You lack the manage roles role"
+  "youLackTheManageRolesRole": "You lack the manage roles role",
+  "searchOrganizations": "Search Organizations",
+  "newDomainPlaceholder": "www.your-domain.com",
+  "error-domain-invalid": "Domain is not valid",
+  "error-domain-already-present": "${domain} is already present for this org.",
+  "pending": "pending",
+  "org-details-stat-sso-active": "active SSO connections",
+  "view-roles": "view roles",
+  "manage-roles": "manage roles"
 }

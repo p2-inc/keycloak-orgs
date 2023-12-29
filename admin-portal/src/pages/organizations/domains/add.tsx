@@ -57,17 +57,17 @@ const DomainsAdd = () => {
     if (org.domains?.includes(domain)) {
       P2Toast({
         error: true,
-        title: `${domain} is already present for this org.`,
+        title: `${t("error-domain-already-present")}`,
       });
     } else if (!isValidDomain(domain)) {
       setError(
         "domain",
-        { message: "Domain is not valid" },
+        { message: `${t("error-domain-invalid")}`},
         { shouldFocus: true }
       );
       P2Toast({
         error: true,
-        title: `${domain} is not valid.`,
+        title: `${t("error-domain-invalid")}`,
       });
     } else {
       const orgCopy = { ...org };
@@ -87,7 +87,7 @@ const DomainsAdd = () => {
           reset();
           P2Toast({
             success: true,
-            title: `${domain} has been added to organization. Please verify domain.`,
+            title: `${t("success-domain-added")}`,
           });
           refetchDomains();
           return navigate(`/organizations/${orgId}/settings`);
@@ -128,7 +128,7 @@ const DomainsAdd = () => {
         {org.domains && org.domains?.length > 0 && (
           <div className="divide-y rounded-md border border-gray-200 dark:divide-zinc-600 dark:border-zinc-600">
             <div className="rounded-t-md bg-gray-50 px-3 py-2 text-sm font-semibold dark:bg-zinc-900 dark:text-zinc-200">
-              Current registered domains
+              {t("currentRegisteredDomains")}
             </div>
             <div className="divide-y dark:divide-zinc-600">
               {org.domains.map((domain) => (
@@ -156,7 +156,7 @@ const DomainsAdd = () => {
               error={errors.domain}
               inputArgs={{
                 type: "text",
-                placeholder: "www.your-domain.com",
+                placeholder: `${t("newDomainPlaceholder")}`,
                 required: true,
                 disabled: !hasManageOrganizationRole,
               }}

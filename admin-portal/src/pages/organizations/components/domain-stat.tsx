@@ -3,6 +3,7 @@ import {
   OrganizationRepresentation,
   useGetOrganizationDomainsQuery,
 } from "store/apis/orgs";
+import {useTranslation} from "react-i18next";
 
 type Props = {
   org: OrganizationRepresentation;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 const DomainStat: React.FC<Props> = ({ org, realm }) => {
+  const { t } = useTranslation();
   const { data: domains = [] } = useGetOrganizationDomainsQuery({
     realm,
     orgId: org.id!,
@@ -25,7 +27,7 @@ const DomainStat: React.FC<Props> = ({ org, realm }) => {
       percent={verifiedPercentage}
       hoverPercentText="Percentage of domains verified"
       value={org.domains?.length || "0"}
-      label="domains"
+      label={t("domains")}
     />
   );
 };
