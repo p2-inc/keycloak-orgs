@@ -1,12 +1,12 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.resource.Converters.*;
+import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
-import jakarta.validation.constraints.*;
+import io.phasetwo.service.util.ActiveOrganization;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -64,6 +64,13 @@ public class MembersResource extends OrganizationAdminResource {
       throw new ForbiddenException("Cannot remove default organization user.");
     }
     if (member != null && organization.hasMembership(member)) {
+
+      ActiveOrganization activeOrganizationUtil = new ActiveOrganization(session, realm, member);
+      if (activeOrganizationUtil.isValid() &&
+          activeOrganizationUtil.getActiveOrganization().getId().equals(organization.getId())) {
+        member.removeAttribute(ACTIVE_ORGANIZATION);
+      }
+
       organization.revokeMembership(member);
       adminEvent
           .resource(ORGANIZATION_MEMBERSHIP.name())

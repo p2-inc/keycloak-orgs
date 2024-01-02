@@ -1,12 +1,29 @@
 package io.phasetwo.service.resource;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.phasetwo.service.Helpers.*;
+import static io.phasetwo.service.Helpers.createUser;
+import static io.phasetwo.service.Helpers.createUserWithCredentials;
+import static io.phasetwo.service.Helpers.deleteUser;
+import static io.phasetwo.service.Helpers.objectMapper;
+import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
+import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.client.openapi.model.IdentityProviderMapperRepresentation;
 import io.phasetwo.client.openapi.model.IdentityProviderRepresentation;
@@ -19,18 +36,23 @@ import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.InvitationRequest;
 import io.phasetwo.service.representation.LinkIdp;
+import io.phasetwo.service.representation.SwitchOrganization;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
+import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.common.VerificationException;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -38,6 +60,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @JBossLog
 @Testcontainers
 class OrganizationResourceTest extends AbstractOrganizationTest {
+
+  private static String ACTIVE_ORG_CLAIM = "active_organization";
+  private static String ACCESS_TOKEN = "access_token";
 
   @Test
   void testAddGetUpdateDeleteOrg() throws Exception {
@@ -1212,4 +1237,207 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // delete org
     deleteOrganization(id);
   }
+
+  @Test
+  void testOrganizationSwitch() throws IOException, VerificationException {
+    ObjectMapper mapper = objectMapper();
+
+    // Org SETUP
+    // Create first Organization
+    OrganizationRepresentation org1 =
+        createOrganization(
+            new OrganizationRepresentation().name("org-1").domains(List.of("org1.com")));
+    String org1Id = org1.getId();
+    SwitchOrganization switchToOrganization1 = new SwitchOrganization().id(org1Id);
+
+    // Create second Organization
+    OrganizationRepresentation org2 =
+        createOrganization(
+            new OrganizationRepresentation().name("org-2").domains(List.of("org2.com")));
+    String org2Id = org2.getId();
+    SwitchOrganization switchToOrganization2 = new SwitchOrganization().id(org2Id);
+
+    // Create third Organization
+    OrganizationRepresentation org3 =
+        createOrganization(
+            new OrganizationRepresentation().name("org-3").domains(List.of("org3.com")));
+    String org3Id = org3.getId();
+    SwitchOrganization switchToOrganization3 = new SwitchOrganization().id(org3Id);
+
+    // User SETUP
+    // Add standard user
+    UserRepresentation user = createUserWithCredentials(keycloak, REALM, "user", "password");
+    // Assign manage-account role
+    grantClientRoles("account", user.getId(), "manage-account", "view-profile");
+
+    // Client SETUP
+    // Create basic front end client to get a proper user access token
+    createPublicClient("test-ui");
+    createClientScope(ACTIVE_ORG_CLAIM);
+
+
+    Map<String, String> additionalConfig = Map.of(INCLUDED_ORGANIZATION_PROPERTIES,
+        "id, name, role, attribute");
+    addMapperToClientScope(ACTIVE_ORG_CLAIM, ACTIVE_ORG_CLAIM,
+        "JSON", "oidc-active-organization-mapper", additionalConfig);
+    addClientScopeToClient(ACTIVE_ORG_CLAIM, "test-ui");
+
+    // authenticate as standard user
+    Keycloak kc = getKeycloak(REALM, "test-ui", "user", "password");
+
+    // Get active organization with no organization membership
+    Response response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
+
+    // Add user to org1
+    putRequest("pass", org1Id, "members", user.getId());
+
+    // Try to remove membership with no active org attribute
+    response = deleteRequest(org1Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+    // Add again user to org1
+    response = putRequest("pass", org1Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
+      grantUserRole(org1Id, role, user.getId());
+    }
+
+    // Add user to org3
+    response = putRequest("pass", org3Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
+      grantUserRole(org3Id, role, user.getId());
+    }
+
+    // re-authenticate as standard user
+    kc = getKeycloak(REALM, "test-ui", "user", "password");
+
+    // validate that user currently doesn't have an active organization attribute
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+
+    // validate current token claims, should have org-1 by default
+    validateActiveOrganizationFromAccessToken(kc.tokenManager().getAccessTokenString(), true, org1Id);
+
+    // validate get active-organization
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // Try switching to organization 2
+    response = putRequest(kc, switchToOrganization2, "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
+
+    // verify user attributes doesn't contains active organization
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+
+    // Try switching to organization 3
+    response = putRequest(kc, switchToOrganization3, "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // verify we get an access token with the correct organization
+    JsonNode rootNode = mapper.readTree(response.body().asString());
+    assertThat(rootNode.hasNonNull(ACCESS_TOKEN), is(true));
+    validateActiveOrganizationFromAccessToken(rootNode.get(ACCESS_TOKEN).asText(), true, org3Id);
+
+    // verify user attributes contains active organization
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org3Id);
+
+    // validate get active-organization
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // verify for malicious organization switch through user account endpoint
+    // if not restricted with read only attributes
+    createOrReplaceUserAttribute(kc, "user", ACTIVE_ORGANIZATION, org2Id);
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org2Id);
+
+    // re-authenticate user to get new token and validate there is NO active organization in claims
+    kc = getKeycloak(REALM, "test-ui", "user", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), false, null);
+
+    // validate get active-organization after malicious organization switch
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
+
+    // test that active org attribute is removed when membership is revoked
+    // switch back to org-1
+    response = putRequest(kc, switchToOrganization1, "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // verify we get an access token with the correct organization
+    rootNode = mapper.readTree(response.body().asString());
+    assertThat(rootNode.hasNonNull(ACCESS_TOKEN), is(true));
+    validateActiveOrganizationFromAccessToken(rootNode.get(ACCESS_TOKEN).asText(), true, org1Id);
+
+    // verify user attributes contains active organization
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org1Id);
+
+    // validate get active-organization
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // test revoke active organization membership
+    response = deleteRequest(org1Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+    // verify user attributes doesn't have active organization anymore
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+
+    // test that active org attribute is removed after login when organization is deleted
+    // switch to org3
+    response = putRequest(kc, switchToOrganization3, "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // verify attribute
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org3Id);
+
+    // delete organization
+    deleteOrganization(org3Id);
+
+    // re-authenticate
+    kc = getKeycloak(REALM, "test-ui", "user", "password");
+
+    // verify attribute is removed
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+
+    deleteUser(keycloak, REALM, user.getId());
+    deleteClient("test-ui");
+    deleteClientScope(ACTIVE_ORG_CLAIM);
+    deleteOrganization(org1Id);
+    deleteOrganization(org2Id);
+  }
+
+  private void validateActiveOrganizationFromAccessToken(
+      String accessTokenString, boolean shouldContain, String targetActiveOrgId)
+      throws VerificationException {
+    AccessToken decodedToken = TokenVerifier.create(accessTokenString, AccessToken.class).getToken();
+    assertThat(decodedToken.getOtherClaims().isEmpty(), is(false));
+    assertThat(decodedToken.getOtherClaims().containsKey(ACTIVE_ORG_CLAIM), is(true));
+
+    @SuppressWarnings("unchecked")
+    HashMap<String, Object> activeOrganizationClaims = (HashMap<String, Object>) decodedToken.getOtherClaims().get(ACTIVE_ORG_CLAIM);
+
+    if (shouldContain) {
+      assertThat(activeOrganizationClaims.containsKey("id"), is(true));
+      assertThat(activeOrganizationClaims.get("id"), is(targetActiveOrgId));
+    } else {
+      assertThat(activeOrganizationClaims.isEmpty(), is(true));
+    }
+  }
+
+  private void validateActiveOrganizationFromUserAttributes(
+      Response response, boolean shouldContain, String targetOrgId)
+      throws JsonProcessingException {
+    JsonNode rootNode = objectMapper().readTree(response.body().asString());
+    JsonNode attributeNode = rootNode.get("attributes");
+
+    if (shouldContain) {
+      assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(true));
+      assertThat(attributeNode.get(ACTIVE_ORGANIZATION).get(0).asText(), is(targetOrgId));
+    } else {
+      assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(false));
+    }
+  }
+
 }

@@ -8,4 +8,5 @@ public class Orgs {
   public static final String ORG_DEFAULT_POST_BROKER_FLOW_KEY =
       "_providerConfig.orgs.defaults.postBrokerFlow";
   public static final String ORG_DEFAULT_SYNC_MODE_KEY = "_providerConfig.orgs.defaults.syncMode";
+  public static final String ACTIVE_ORGANIZATION = "org.ro.active";
 }
