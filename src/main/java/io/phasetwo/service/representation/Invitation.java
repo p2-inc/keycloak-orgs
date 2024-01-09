@@ -136,7 +136,7 @@ public class Invitation {
 
   @JsonProperty("teams")
   @JsonIgnore // ignore field "teams" because it is not present in InvitationRepresentation (class
-              // io.phasetwo.client.openapi.model.InvitationRepresentation)
+  // io.phasetwo.client.openapi.model.InvitationRepresentation)
   public List<String> getTeamIds() {
     return teamIds;
   }

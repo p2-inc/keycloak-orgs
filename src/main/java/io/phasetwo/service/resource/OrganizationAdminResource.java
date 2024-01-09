@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.managers.AppAuthManager;
 
 /** */
 @JBossLog
