@@ -88,7 +88,7 @@ First, setup:
 yarn
 ```
 
-Then, start a Keycloak, create a public OIDC client with `http://localhost:3000` Root URL, and update the `public/keycloak.json` file with the client config.
+Then, start a Keycloak server (use hosted [Phase Two](https://phasetwo.io/dashboard/) for easy testing), create a public OIDC client with `http://localhost:3000` Root URL, and update the `public/keycloak.json` file with the client config.
 
 Finally, run the development server:
 
@@ -96,7 +96,7 @@ Finally, run the development server:
 yarn start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+You mill most likely need to use the fully qualified portal url [http://localhost:3000/auth/realms/master/portal](http://localhost:3000/auth/realms/master/portal).
 
 ### Build the extension
 

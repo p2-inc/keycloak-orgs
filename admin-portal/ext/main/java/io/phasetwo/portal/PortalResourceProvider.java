@@ -256,13 +256,15 @@ public class PortalResourceProvider implements RealmResourceProvider {
                   Optional.ofNullable(realm.getAttribute("_providerConfig.assets.favicon.url"))
                       .orElse(
                           String.format(
-                              "%s/realms/%s/portal/favicon.ico", authUrlAttribute, realmName)))
+                              "%s/realms/%s/portal/favicon.ico",
+                              authUrlAttribute, realm.getName())))
               .setAttribute(
                   "appiconUrl",
                   Optional.ofNullable(realm.getAttribute("_providerConfig.assets.appicon.url"))
                       .orElse(
                           String.format(
-                              "%s/realms/%s/portal/logo192.png", authUrlAttribute, realmName)))
+                              "%s/realms/%s/portal/logo192.png",
+                              authUrlAttribute, realm.getName())))
               .setAttribute("displayName", realmName)
               .setAttribute("realmName", realm.getName());
       FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
