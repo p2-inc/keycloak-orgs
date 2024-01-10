@@ -96,7 +96,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
                             "group:text-primary-700 border-primary-700 bg-white text-primary-700 dark:bg-p2dark-900":
                               isActive,
                             "w-full border-0": !menuCollapsed,
-                            "border-primary-700 text-primary-700 hover:border-primary-700 dark:hover:border-primary-700 dark:hover:bg-p2dark-900":
+                            "border-primary-700 text-primary-700 hover:border-primary-700 dark:hover:bg-p2dark-900":
                               menuCollapsed && isActive,
                           }
                         )
