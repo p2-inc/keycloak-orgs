@@ -73,7 +73,7 @@ const DomainsVerify = () => {
     <div className="space-y-10 md:py-20">
       <div>
         <SectionHeader
-          title={t(`verifyDomain`) + ` ${domain?.domain_name}`}
+          title={`${t("domains-verify")} ${domain?.domain_name}.`}
           description={t("useTheFollowingDetailsToVerifyYourDomain")}
           icon={addIcon}
           rightContent={

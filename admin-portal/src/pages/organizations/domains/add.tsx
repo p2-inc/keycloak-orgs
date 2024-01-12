@@ -86,7 +86,7 @@ const DomainsAdd = () => {
           reset();
           P2Toast({
             success: true,
-            title: `${domain} ${t("success-domain-added")}`,
+            title: t("domains-add-success", { domain }),
           });
           refetchDomains();
           return navigate(`/organizations/${orgId}/settings`);
@@ -155,7 +155,7 @@ const DomainsAdd = () => {
               error={errors.domain}
               inputArgs={{
                 type: "text",
-                placeholder: t("newDomainPlaceholder"),
+                placeholder: t("domains-add-placeholder"),
                 required: true,
                 disabled: !hasManageOrganizationRole,
               }}

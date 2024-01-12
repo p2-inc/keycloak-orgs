@@ -228,7 +228,7 @@ const Roles = () => {
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title={`${t('role-section-header-title')} ${fullName(currentMember)}`}
+        title={`${t("role-section-header-title")} ${fullName(currentMember)}`}
         icon={LoadingIcon}
         rightContent={
           <Link
@@ -249,7 +249,7 @@ const Roles = () => {
         </div>
       )}
       <div className="mt-8 flex items-center space-x-2 border-b pb-2">
-        <div className="inline-block text-sm text-gray-600">{t('role-set')}</div>
+        <div className="inline-block text-sm text-gray-600">{t("role-set")}</div>
         <Button
           onClick={grantAllRoles}
           disabled={

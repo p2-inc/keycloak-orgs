@@ -80,7 +80,7 @@ const SettingsDomain = ({ hasManageOrganizationRole }: SettingsProps) => {
       <Link
         to={`/organizations/${orgId}/domains/verify/${domain.record_value}`}
       >
-        <Button>{t("verifyDomain")}</Button>
+        <Button>{t("domains-verify")}</Button>
       </Link>
     );
     const removeDomainBtn = (

@@ -113,8 +113,8 @@ const NewInvitation = () => {
       {!hasManageInvitationsRole && (
         <div className="mt-4">
           <Alert
-            title={t('invitation-missing-permission-title')}
-            body={t('invitation-missing-permission-body')}
+            title={t("invitation-missing-permission-title")}
+            body={t("invitation-missing-permission-body")}
             type="info"
           />
         </div>
@@ -133,7 +133,7 @@ const NewInvitation = () => {
             error={errors.email}
             inputArgs={{
               type: "email",
-              placeholder: t('invitation-email-placeholder'),
+              placeholder: t("invitation-email-placeholder"),
               required: true,
               disabled: !hasManageInvitationsRole,
             }}
