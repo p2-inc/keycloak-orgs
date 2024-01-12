@@ -15,10 +15,12 @@ import DomainStat from "./components/domain-stat";
 import MembersStat from "./components/members-stat";
 import useUser from "components/utils/useUser";
 import Fuse from "fuse.js";
+import { useTranslation } from "react-i18next";
 
 const { realm } = config.env;
 
 export default function Organizations() {
+  const { t } = useTranslation();
   const { user } = useUser();
   const [viewType, setViewType] = useState<ViewLayoutOptions>(
     ViewLayoutOptions.GRID
@@ -49,13 +51,13 @@ export default function Organizations() {
   return (
     <>
       <TopHeader
-        header="Organizations"
+        header={t("organizations")}
         badgeVal={userOrgs.length}
         rightAreaItems={
           <>
             <FormTextInputWithIcon
               inputArgs={{
-                placeholder: "Search Organizations",
+                placeholder: t("searchOrganizations"),
                 onChange: (e) => setSearchString(e.target.value),
               }}
               className="w-full md:w-auto"

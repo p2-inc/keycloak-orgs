@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import P2Toast from "components/utils/toast";
 import Dropdown from "components/elements/forms/dropdown/hui-dropdown";
 import { first } from "lodash";
+import { setLanguage } from "../../../i18n";
 
 const { realm, supportedLocales } = config.env;
 
@@ -29,6 +30,7 @@ const Internationalization = () => {
     id: string;
     name: string;
   }>(localeOptions[0]);
+
   const { data: account, isLoading: isLoadingAccount } = useGetAccountQuery({
     userProfileMetadata: true,
     realm,
@@ -39,13 +41,15 @@ const Internationalization = () => {
       (l) => l.id === first(account?.attributes?.locale)
     );
     if (hasLocale) {
-      setSelectedLocale(
+      const locale =
         localeOptions[
           localeOptions.findIndex(
             (l) => l.id === first(account?.attributes?.locale)
           )
-        ]
-      );
+        ];
+
+      setSelectedLocale(locale);
+      setLanguage(locale.id);
     }
   }, [account]);
 
@@ -93,7 +97,7 @@ const Internationalization = () => {
       <div className="mb-6 mt-12">
         <SectionHeader
           title={t("localization")}
-          description={t("manageYourUserProfileInformation")}
+          description={t("profile-localization-description")}
         />
       </div>
       <form className="mb-6 max-w-xl space-y-4" onSubmit={onSubmit}>
