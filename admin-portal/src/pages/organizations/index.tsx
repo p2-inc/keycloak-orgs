@@ -16,10 +16,8 @@ import MembersStat from "./components/members-stat";
 import useUser from "components/utils/useUser";
 import Fuse from "fuse.js";
 import { useTranslation } from "react-i18next";
-import { useGetAccountQuery } from "../../store/apis/profile";
-import { setLanguage } from "../../i18n";
 
-const { realm, supportedLocales } = config.env;
+const { realm } = config.env;
 
 export default function Organizations() {
   const { t } = useTranslation();
@@ -37,25 +35,11 @@ export default function Organizations() {
       { skip: !user?.id }
     );
 
-  // localization not loaded on login, need to load it from locale attribute
-  const { data: account, isLoading: isLoadingAccount } = useGetAccountQuery({
-    userProfileMetadata: true,
-    realm,
-  });
-  const hasLocale = (locale: string): boolean => locale in supportedLocales;
-
   const fuse = new Fuse(userOrgs, {
     keys: ["displayName", "name", "domains"],
   });
 
   useEffect(() => {
-    // load language on homepage (after login)
-    if (
-      account?.attributes?.locale &&
-      hasLocale(account?.attributes?.locale[0])
-    ) {
-      setLanguage(account?.attributes?.locale[0]);
-    }
     fuse.setCollection(userOrgs);
   }, [userOrgs]);
 
