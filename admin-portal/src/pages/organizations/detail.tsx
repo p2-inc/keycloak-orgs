@@ -118,7 +118,7 @@ export default function OrganizationDetail() {
         collapseOnMobile={true}
         leftAreaItems={
           <Breadcrumbs
-            items={[{ title: `${t("organizations")}`, link: "/organizations" }]}
+            items={[{ title: t("organizations"), link: "/organizations" }]}
           />
         }
         rightAreaItems={

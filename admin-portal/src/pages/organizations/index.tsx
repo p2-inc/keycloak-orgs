@@ -15,14 +15,14 @@ import DomainStat from "./components/domain-stat";
 import MembersStat from "./components/members-stat";
 import useUser from "components/utils/useUser";
 import Fuse from "fuse.js";
-import {useTranslation} from "react-i18next";
-import {useGetAccountQuery} from "../../store/apis/profile";
-import {setLanguage} from "../../i18n";
+import { useTranslation } from "react-i18next";
+import { useGetAccountQuery } from "../../store/apis/profile";
+import { setLanguage } from "../../i18n";
 
 const { realm, supportedLocales } = config.env;
 
 export default function Organizations() {
-  const { t, i18n} = useTranslation();
+  const { t } = useTranslation();
   const { user } = useUser();
   const [viewType, setViewType] = useState<ViewLayoutOptions>(
     ViewLayoutOptions.GRID
@@ -50,7 +50,10 @@ export default function Organizations() {
 
   useEffect(() => {
     // load language on homepage (after login)
-    if (account?.attributes?.locale && hasLocale(account?.attributes?.locale[0])) {
+    if (
+      account?.attributes?.locale &&
+      hasLocale(account?.attributes?.locale[0])
+    ) {
       setLanguage(account?.attributes?.locale[0]);
     }
     fuse.setCollection(userOrgs);
@@ -70,7 +73,7 @@ export default function Organizations() {
           <>
             <FormTextInputWithIcon
               inputArgs={{
-                placeholder: `${t("searchOrganizations")}`,
+                placeholder: t("searchOrganizations"),
                 onChange: (e) => setSearchString(e.target.value),
               }}
               className="w-full md:w-auto"

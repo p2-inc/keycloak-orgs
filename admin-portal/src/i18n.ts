@@ -4,7 +4,7 @@ import { initReactI18next } from "react-i18next";
 import { joinPath } from "services/join-path";
 
 const ENGLISH_LOCALE = "en";
-const FRENCH_LOCAL = "fr"
+const FRENCH_LOCAL = "fr";
 const DEFAULT_NAMESPACE = "translation";
 
 i18n
@@ -24,17 +24,17 @@ i18n
   });
 
 // use localStorage to avoid losing language on page reload
-if(localStorage.getItem("lng") != undefined) {
+if (localStorage.getItem("lng") != undefined) {
   i18n.changeLanguage(localStorage.getItem("lng")!);
 } else {
-  localStorage.setItem('lng', ENGLISH_LOCALE)
+  localStorage.setItem("lng", ENGLISH_LOCALE);
 }
 
 export const setLanguage = (lang: string) => {
   i18n.changeLanguage(lang).then(() => {
     i18n.options.lng = lang;
-  })
-  localStorage.setItem('lng', lang);
-}
+  });
+  localStorage.setItem("lng", lang);
+};
 
 export default i18n;

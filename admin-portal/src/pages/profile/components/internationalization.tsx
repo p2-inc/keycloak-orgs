@@ -10,12 +10,12 @@ import { useTranslation } from "react-i18next";
 import P2Toast from "components/utils/toast";
 import Dropdown from "components/elements/forms/dropdown/hui-dropdown";
 import { first } from "lodash";
-import {setLanguage} from "../../../i18n";
+import { setLanguage } from "../../../i18n";
 
 const { realm, supportedLocales } = config.env;
 
 const Internationalization = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const noSelection = { id: "none", name: t("selectLocale"), disabled: true };
   const localeOptions = [
@@ -41,9 +41,12 @@ const Internationalization = () => {
       (l) => l.id === first(account?.attributes?.locale)
     );
     if (hasLocale) {
-      const locale = localeOptions[
+      const locale =
+        localeOptions[
           localeOptions.findIndex(
-              (l) => l.id === first(account?.attributes?.locale))]
+            (l) => l.id === first(account?.attributes?.locale)
+          )
+        ];
 
       setSelectedLocale(locale);
       setLanguage(locale.id);
