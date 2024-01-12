@@ -97,7 +97,7 @@ const Internationalization = () => {
       <div className="mb-6 mt-12">
         <SectionHeader
           title={t("localization")}
-          description={t("manageYourUserProfileInformation")}
+          description={t("profile-localization-description")}
         />
       </div>
       <form className="mb-6 max-w-xl space-y-4" onSubmit={onSubmit}>

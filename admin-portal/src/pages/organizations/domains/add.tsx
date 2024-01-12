@@ -56,7 +56,7 @@ const DomainsAdd = () => {
     if (org.domains?.includes(domain)) {
       P2Toast({
         error: true,
-        title: t("error-domain-already-present"),
+        title: `${domain} ${t("error-domain-already-present")}`,
       });
     } else if (!isValidDomain(domain)) {
       setError(
@@ -86,7 +86,7 @@ const DomainsAdd = () => {
           reset();
           P2Toast({
             success: true,
-            title: t("success-domain-added"),
+            title: `${domain} ${t("success-domain-added")}`,
           });
           refetchDomains();
           return navigate(`/organizations/${orgId}/settings`);

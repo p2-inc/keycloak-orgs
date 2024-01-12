@@ -59,13 +59,13 @@ const ProfileData = () => {
       .then(() => {
         P2Toast({
           success: true,
-          title: `Profile updated successfully.`,
+          title: t('profile-toast-success'),
         });
       })
       .catch((err) => {
         return P2Toast({
           error: true,
-          title: `Error during Profile update. ${err.data.error}`,
+          title: `${t('profile-toast-error')} ${err.data.error}`,
         });
       });
   };
@@ -92,9 +92,9 @@ const ProfileData = () => {
               }}
               inputArgs={{
                 disabled: isLoadingAccount || !featureFlags.editUsernameAllowed,
-                placeholder: "your@email.com",
+                placeholder: t('profile-email-placeholder'),
                 type: "email",
-                title: "Username is the same as email.",
+                title: t("usernameEmailSame"),
               }}
               error={errors.username}
               helpText={t("usernameEmailSame")}
@@ -128,7 +128,7 @@ const ProfileData = () => {
                 inputArgs={{
                   disabled:
                     isLoadingAccount || !featureFlags.updateEmailFeatureEnabled,
-                  placeholder: "your@email.com",
+                  placeholder: t('profile-email-placeholder'),
                   type: "email",
                 }}
                 error={errors.email}

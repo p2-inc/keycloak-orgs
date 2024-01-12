@@ -85,13 +85,13 @@ const Roles = () => {
           refetchRoles();
           P2Toast({
             success: true,
-            title: `Granted ${roleName} role to user.`,
+            title: t("role-toast-granted", { roleName }),
           });
         })
         .catch(() =>
           P2Toast({
             error: true,
-            title: `Error granting ${roleName} role to user. Please try again.`,
+            title: t("role-toast-granted-error", { roleName }),
           })
         )
         .finally(() => {
@@ -109,13 +109,13 @@ const Roles = () => {
           refetchRoles();
           P2Toast({
             success: true,
-            title: `Revoked ${roleName} role user.`,
+            title: t("role-toast-revoked", { roleName }),
           });
         })
         .catch(() =>
           P2Toast({
             error: true,
-            title: `Error revoking ${roleName} role to user. Please try again.`,
+            title: t("role-toast-revoked-error", { roleName }),
           })
         )
         .finally(() => {
@@ -140,13 +140,13 @@ const Roles = () => {
       .then(() => {
         P2Toast({
           success: true,
-          title: `Granted all roles to user.`,
+          title: t("role-toast-granted-all"),
         });
       })
       .catch(() => {
         P2Toast({
           error: true,
-          title: `Error granting all roles to user. Please try again.`,
+          title: t("role-toast-granted-all-error"),
         });
       })
       .finally(() => {
@@ -171,13 +171,13 @@ const Roles = () => {
       .then(() => {
         P2Toast({
           success: true,
-          title: `Revoked all roles for user.`,
+          title: t("role-toast-revoked-all"),
         });
       })
       .catch(() => {
         P2Toast({
           error: true,
-          title: `Error revoking all roles for user. Please try again.`,
+          title: t("role-toast-revoked-all-error"),
         });
       })
       .finally(() => {
@@ -205,13 +205,13 @@ const Roles = () => {
       .then(() => {
         P2Toast({
           success: true,
-          title: `Granted ${filter} roles to user.`,
+          title: `${t("role-toast-granted-filter")} ${t(filter)}.`,
         });
       })
       .catch(() => {
         P2Toast({
           error: true,
-          title: `Error granting ${filter} roles to user. Please try again.`,
+          title: t("role-toast-granted-error"),
         });
       })
       .finally(() => {
@@ -228,7 +228,7 @@ const Roles = () => {
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title={`Edit ${fullName(currentMember)}'s roles`}
+        title={`${t('role-section-header-title')} ${fullName(currentMember)}`}
         icon={LoadingIcon}
         rightContent={
           <Link
@@ -242,14 +242,14 @@ const Roles = () => {
       {!hasManageRolesRole && (
         <div className="mt-4">
           <Alert
-            title='You lack the "manage-roles" role.'
-            body="Speak to an admin in order to be granted this role."
+            title={t("member-roles-missing-permission-title")}
+            body={t("member-roles-missing-permission-body")}
             type="info"
           />
         </div>
       )}
       <div className="mt-8 flex items-center space-x-2 border-b pb-2">
-        <div className="inline-block text-sm text-gray-600">Set roles:</div>
+        <div className="inline-block text-sm text-gray-600">{t('role-set')}</div>
         <Button
           onClick={grantAllRoles}
           disabled={
