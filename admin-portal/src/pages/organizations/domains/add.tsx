@@ -150,7 +150,7 @@ const DomainsAdd = () => {
               register={register}
               registerArgs={{
                 pattern:
-                  /^(?!-)[A-Za-z0-9-]+([\-\.]{1}[a-z0-9]+)*\.[A-Za-z]{2,6}$/,
+                  /^(?!-)(?:[a-zA-Z\d-]{0,62}[a-zA-Z\d]\.)+(?:[a-zA-Z]{2,})$/,
               }}
               error={errors.domain}
               inputArgs={{
