@@ -35,11 +35,10 @@ const DomainsAdd = () => {
     orgId: orgId!,
     realm,
   });
-  const { refetch: refetchDomains } =
-    useGetOrganizationDomainsQuery({
-      realm,
-      orgId: orgId!,
-    });
+  const { refetch: refetchDomains } = useGetOrganizationDomainsQuery({
+    realm,
+    orgId: orgId!,
+  });
   const hasManageOrganizationRole = hasManageOrganizationRoleCheck(orgId);
 
   const [updateOrg] = useUpdateOrganizationMutation();
@@ -57,17 +56,17 @@ const DomainsAdd = () => {
     if (org.domains?.includes(domain)) {
       P2Toast({
         error: true,
-        title: `${t("error-domain-already-present")}`,
+        title: t("error-domain-already-present"),
       });
     } else if (!isValidDomain(domain)) {
       setError(
         "domain",
-        { message: `${t("error-domain-invalid")}`},
+        { message: t("error-domain-invalid") },
         { shouldFocus: true }
       );
       P2Toast({
         error: true,
-        title: `${t("error-domain-invalid")}`,
+        title: t("error-domain-invalid"),
       });
     } else {
       const orgCopy = { ...org };
@@ -87,7 +86,7 @@ const DomainsAdd = () => {
           reset();
           P2Toast({
             success: true,
-            title: `${t("success-domain-added")}`,
+            title: t("success-domain-added"),
           });
           refetchDomains();
           return navigate(`/organizations/${orgId}/settings`);
@@ -156,7 +155,7 @@ const DomainsAdd = () => {
               error={errors.domain}
               inputArgs={{
                 type: "text",
-                placeholder: `${t("newDomainPlaceholder")}`,
+                placeholder: t("newDomainPlaceholder"),
                 required: true,
                 disabled: !hasManageOrganizationRole,
               }}
