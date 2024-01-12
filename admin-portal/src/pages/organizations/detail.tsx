@@ -94,7 +94,7 @@ export default function OrganizationDetail() {
   const totalMembers = members.length;
 
   const rows: TableRows = members.map((member) => ({
-    email: member.email,
+    ...member,
     name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
     roles: <MemberRoles member={member} orgId={orgId!} realm={realm} />,
     action: <MembersActionMenu member={member} orgId={orgId!} realm={realm} />,
