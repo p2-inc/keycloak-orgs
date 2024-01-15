@@ -15,7 +15,9 @@ type Props = {
 };
 
 const Title = ({ children }) => (
-  <div className="font-semibold dark:text-zinc-200">{children}</div>
+  <div className="font-semibold text-secondary-900 dark:text-zinc-200">
+    {children}
+  </div>
 );
 const SubTitle = ({ children }) => (
   <div className="text-[14px] dark:text-zinc-400">{children}</div>
@@ -40,13 +42,16 @@ const InnerItem = ({
         <div
           className={cs(
             "col-span-1 flex h-full",
-            "group-hover:border-gray-400 group-hover:bg-white dark:group-hover:border-zinc-500 dark:group-hover:bg-p2dark-900",
+            "group-hover:border-primary-400 group-hover:bg-white dark:group-hover:border-zinc-500 dark:group-hover:bg-p2dark-900",
             {
-              "flex-col space-y-5 rounded-md border border-gray-300 bg-gray-50 px-10 py-9 dark:border-zinc-600 dark:bg-p2dark-1000":
+              "flex-col space-y-5 rounded-md border  bg-gray-50 px-10 py-9 dark:border-zinc-600 dark:bg-p2dark-1000":
                 viewType === ViewLayoutOptions.GRID,
               "flex-row justify-between px-5 py-4":
                 viewType === ViewLayoutOptions.LIST,
-              "border-gray-100 dark:border-zinc-800": isViewCard,
+              "border-gray-100 dark:border-zinc-800":
+                viewType === ViewLayoutOptions.GRID && isViewCard,
+              " border-primary-600":
+                viewType === ViewLayoutOptions.GRID && !isViewCard,
             }
           )}
         >

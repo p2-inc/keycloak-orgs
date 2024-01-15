@@ -48,7 +48,7 @@ function generateColorStyles(colorName: string, colorValue?: string) {
     : "";
 }
 
-function generateButtonStyles(cv1: string, cv2: string) {
+function generateButtonStyles(cv1?: string, cv2?: string) {
   return cv1 && cv2
     ? `.bg-primary-gradient {
         background-image: linear-gradient(to right, ${cv1}, ${cv2});
@@ -58,31 +58,7 @@ function generateButtonStyles(cv1: string, cv2: string) {
 
 const InjectStyles = () => {
   useEffect(() => {
-    // const {
-    //   styles = {
-    //     customCSS: "",
-    //     primary100: "#ff00de",
-    //     primary200: "#bc00a3",
-    //     primary400: "#8b0078",
-    //     primary500: "#810070",
-    //     primary600: "#5c0050",
-    //     primary700: "#46003d",
-    //     primary900: "#30002a",
-    //   },
-    // } = config.env;
-
-    const styles = {
-      customCSS: "",
-      primary100: "#ff00de",
-      primary200: "#bc00a3",
-      primary400: "#8b0078",
-      primary500: "#810070",
-      primary600: "#5c0050",
-      primary700: "#46003d",
-      primary900: "#30002a",
-      secondary800: "#ff1e00",
-      secondary900: "#b81500",
-    };
+    const { styles } = config.env;
     const styleElement = document.createElement("style");
 
     const primaryColor = `
