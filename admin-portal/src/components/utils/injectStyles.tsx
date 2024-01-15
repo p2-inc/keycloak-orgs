@@ -104,14 +104,17 @@ const InjectStyles = () => {
     const customStyles = `
       ${primaryColor}
       ${secondaryColor}
-      ${styles.customCSS}
+      ${styles.customCSS || ""}
     `
       .replace(/\r?\n/g, " ")
       .replace(/\s+/g, " ")
       .trim();
 
     styleElement.innerHTML = customStyles;
-    document.body.appendChild(styleElement);
+
+    if (customStyles) {
+      document.body.appendChild(styleElement);
+    }
 
     return () => {
       document.body.removeChild(styleElement);

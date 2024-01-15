@@ -11,14 +11,14 @@ const DeleteProfile = () => {
       <div className="space-y-4 rounded border border-red-500 p-6">
         <SectionHeader
           variant="medium"
-          title={t("deleteYourProfile")}
+          title={t("profile-delete-title")}
           description={t(
             "permanentlyRemoveYourProfileAndAllOfItsContentsThisActionIsNotReversibleSoPleaseContinueWithCaution"
           )}
         />
         <div>
           <Link to={`/profile/delete`}>
-            <Button isBlackButton>{t("deleteYourProfile")}</Button>
+            <Button isBlackButton>{t("profile-delete-title")}</Button>
           </Link>
         </div>
       </div>

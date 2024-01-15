@@ -3,6 +3,7 @@ import {
   OrganizationRepresentation,
   useGetOrganizationMembershipsQuery,
 } from "store/apis/orgs";
+import {useTranslation} from "react-i18next";
 
 type Props = {
   org: OrganizationRepresentation;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 const MembersStat: React.FC<Props> = ({ org, realm }) => {
+  const { t } = useTranslation();
   const { data: members = [] } = useGetOrganizationMembershipsQuery({
     realm: realm,
     orgId: org.id!,
@@ -17,7 +19,7 @@ const MembersStat: React.FC<Props> = ({ org, realm }) => {
 
   const totalMembers = members.length === 0 ? 0 : members.length - 1;
 
-  return <Stat value={totalMembers} label="members" />;
+  return <Stat value={totalMembers} label={t("members")} />;
 };
 
 export default MembersStat;

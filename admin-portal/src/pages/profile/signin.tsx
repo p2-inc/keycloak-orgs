@@ -112,7 +112,7 @@ const SigninProfile = () => {
                 }
               }}
             >
-              {t("update")}
+              {credentialType === "password" ? t("update") : t("remove")}
             </Button>
           )}
         </>

@@ -27,7 +27,7 @@ const ProfileDelete = () => {
   const { t } = useTranslation();
   const { register, watch, handleSubmit } = useForm();
   const watchConfirmDelete = watch("delete");
-  const confirmDelete = toLower(watchConfirmDelete) !== "delete";
+  const confirmDelete = ["delete", "supprimer"].includes(toLower(watchConfirmDelete));
 
   const onSubmit = () => {
     if (confirmDelete) {
@@ -39,7 +39,7 @@ const ProfileDelete = () => {
     <div className="my-16 rounded-md border border-red-500 p-6 md:mx-auto md:max-w-prose">
       <div className="space-y-4">
         <SectionHeader
-          title={t("deleteYourProfile")}
+          title={t("profile-delete-title")}
           description={t("permanentlyRemoveYourProfileAndAllOfItsContentsThisActionIsNotReversibleSoPleaseContinueWithCaution")}
           icon={loadingIcon}
           rightContent={
@@ -55,15 +55,15 @@ const ProfileDelete = () => {
           <div className="space-y-4">
             <RHFFormTextInputWithLabel
               slug="delete"
-              label={t("Write `delete` to confirm")}
+              label={t("profile-delete-write-to-confirm")}
               register={register}
               inputArgs={{
                 placeholder: "",
                 autoFocus: true,
               }}
             />
-            <Button isBlackButton disabled={confirmDelete} type="submit">
-              {t("Confirm profile delete")}
+            <Button isBlackButton disabled={!confirmDelete} type="submit">
+              {t("profile-delete-confirm")}
             </Button>
           </div>
         </form>

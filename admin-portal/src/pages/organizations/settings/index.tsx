@@ -40,7 +40,9 @@ export default function OrganizationSettings() {
             items={[
               { title: t("organizations"), link: `/organizations` },
               {
-                title: `${org?.displayName || t("organization")}`.trim(),
+                title: `${
+                  org?.displayName || org?.name || t("organization")
+                }`.trim(),
                 link: `/organizations/${orgId}/details`,
               },
             ]}

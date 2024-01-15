@@ -57,7 +57,7 @@ const NewInvitation = () => {
   const onSubmit = async (data) => {
     if (data.email) {
       P2Toast({
-        title: `${data.email} is being sent an invitation.`,
+        title: t("invitation-toast-submit", { data }),
         information: true,
       });
       await addOrganizationInvitation({
@@ -74,7 +74,7 @@ const NewInvitation = () => {
         .then(() => {
           P2Toast({
             success: true,
-            title: `${data.email} has been sent an invitation.`,
+            title: t("invitation-toast-submit-success", { data }),
           });
           reset();
           return navigate(`/organizations/${orgId}/details`);
@@ -84,7 +84,7 @@ const NewInvitation = () => {
             error: true,
             title:
               e.status === 401
-                ? "Insufficient roles to perform action."
+                ? t("insufficient-permissions")
                 : e.data.error,
           });
         });
@@ -98,8 +98,8 @@ const NewInvitation = () => {
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title={t("invitationTitle", [org?.displayName || "Organization"])}
-        description={t("invitationInstructionsDescription")}
+        title={t("invitation-title", [org?.displayName || "Organization"])}
+        description={t("invitation-instructions-description")}
         icon={loadingIcon}
         rightContent={
           <Link
@@ -113,8 +113,8 @@ const NewInvitation = () => {
       {!hasManageInvitationsRole && (
         <div className="mt-4">
           <Alert
-            title='You lack the "manage-invitations" role.'
-            body="Speak to an admin in order to be granted this role."
+            title={t("invitation-missing-permission-title")}
+            body={t("invitation-missing-permission-body")}
             type="info"
           />
         </div>
@@ -133,7 +133,7 @@ const NewInvitation = () => {
             error={errors.email}
             inputArgs={{
               type: "email",
-              placeholder: "you@email.com",
+              placeholder: t("invitation-email-placeholder"),
               required: true,
               disabled: !hasManageInvitationsRole,
             }}

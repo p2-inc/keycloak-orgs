@@ -94,7 +94,7 @@ export default function OrganizationDetail() {
   const totalMembers = members.length;
 
   const rows: TableRows = members.map((member) => ({
-    email: member.email,
+    ...member,
     name: `${member.firstName || ""} ${member.lastName || ""}`.trim(),
     roles: <MemberRoles member={member} orgId={orgId!} realm={realm} />,
     action: <MembersActionMenu member={member} orgId={orgId!} realm={realm} />,
@@ -118,7 +118,7 @@ export default function OrganizationDetail() {
         collapseOnMobile={true}
         leftAreaItems={
           <Breadcrumbs
-            items={[{ title: "Organizations", link: "/organizations" }]}
+            items={[{ title: t("organizations"), link: "/organizations" }]}
           />
         }
         rightAreaItems={
@@ -142,8 +142,8 @@ export default function OrganizationDetail() {
                   <RoundedIcon>
                     <User className="h-5 w-5" />
                   </RoundedIcon>
-                  <Stat label="members" value={allMembersCount}></Stat>
-                  <Stat label="pending" value={invites.length}></Stat>
+                  <Stat label={t("members")} value={allMembersCount}></Stat>
+                  <Stat label={t("pending")} value={invites.length}></Stat>
                 </OACTopRow>
                 <div className="text-sm leading-relaxed text-gray-600">
                   {t("inviteNewMembersOrRemoveMembersFromTheOrganization")}
@@ -177,7 +177,7 @@ export default function OrganizationDetail() {
                     <Network className="h-5 w-5" />
                   </RoundedIcon>
                   <Stat
-                    label="active SSO connections"
+                    label={t("org-details-stat-sso-active")}
                     value={idps.length}
                   ></Stat>
                 </OACTopRow>
@@ -203,8 +203,8 @@ export default function OrganizationDetail() {
                   <RoundedIcon>
                     <Globe className="h-5 w-5" />
                   </RoundedIcon>
-                  <Stat label="Domains" value={domains.length}></Stat>
-                  <Stat label="Pending" value={unverifiedDomains}></Stat>
+                  <Stat label={t("domains")} value={domains.length}></Stat>
+                  <Stat label={t("pending")} value={unverifiedDomains}></Stat>
                 </OACTopRow>
                 <div className="text-sm leading-relaxed text-gray-600">
                   {t("setupAssociatedDomainsAndVerifyThemToEnsureFullSecurity")}
