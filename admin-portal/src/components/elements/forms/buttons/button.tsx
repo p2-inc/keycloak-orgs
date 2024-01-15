@@ -31,7 +31,7 @@ const Button: FC<ButtonProps> = ({
       <div className="relative w-full">
         <div
           className={cs(
-            "relative z-20 rounded p-px",
+            "relative z-20 rounded",
             "transition duration-200",
             "group-enabled:group-hover:bg-gradient-to-tl group-enabled:group-hover:from-primary-600 group-enabled:group-hover:via-primary-400 group-enabled:group-hover:to-primary-600",
             {

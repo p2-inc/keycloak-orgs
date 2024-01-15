@@ -57,7 +57,11 @@ const Table: React.FC<Props> = ({ columns, rows, isLoading, emptyState }) => {
     return loadingState(columns);
   }
   if (rows.length === 0 && emptyState) {
-    return <div className="rounded-md border border-gray-200 dark:border-zinc-600 p-4 bg-gray-50 dark:bg-p2dark-1000 dark:text-zinc-200">{emptyState}</div>;
+    return (
+      <div className="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-zinc-600 dark:bg-p2dark-1000 dark:text-zinc-200">
+        {emptyState}
+      </div>
+    );
   }
   return (
     <div className="overflow-auto rounded-md border border-gray-200 dark:border-zinc-600 md:overflow-visible">

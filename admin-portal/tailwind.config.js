@@ -27,6 +27,14 @@ module.exports = {
         "btn-dark": "0px 1px 8px rgba(11, 25, 35, 0.4)",
         "btn-light": "0px 1px 8px rgba(11, 25, 35, 0.1)",
       },
+      gradients: (theme) => ({
+        "primary-gradient": `linear-gradient(to right, ${theme(
+          "colors.primary.200"
+        )}, ${theme("colors.primary.700")})`,
+      }),
+      backgroundImage: (theme) => ({
+        "primary-gradient": theme("gradients.primary-gradient"),
+      }),
     },
   },
   plugins: [require("@tailwindcss/forms")],

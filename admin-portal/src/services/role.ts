@@ -25,12 +25,12 @@ export const roleSettings = [
   {
     regexp: new RegExp("^view-"),
     name: "view roles",
-    className: "bg-[#7CE0C3]",
+    className: "bg-primary-400",
   },
   {
     regexp: new RegExp("^manage-"),
     name: "manage roles",
-    className: "bg-[#C07CE0]",
+    className: "bg-primary-600",
   },
 ];
 

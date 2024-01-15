@@ -93,10 +93,12 @@ const DesktopSidebarNav: React.FC<Props> = ({
                           "group flex items-center rounded-lg border-2 border-gray-200 p-[14px] text-sm transition-colors hover:border-gray-300 hover:bg-white dark:hover:border-zinc-600 dark:hover:bg-p2dark-900",
                           {
                             "dark:border-zinc-600 dark:text-white": !isActive,
-                            "group:text-primary-700 border-primary-700 bg-white text-primary-700 dark:bg-p2dark-900":
+                            "group:text-primary-700 border-primary-700 bg-white text-primary-700":
+                              isActive,
+                            "dark:border-zinc-400 dark:bg-p2dark-900 dark:text-white":
                               isActive,
                             "w-full border-0": !menuCollapsed,
-                            "border-primary-700 text-primary-700 hover:border-primary-700 dark:hover:border-primary-700 dark:hover:bg-p2dark-900":
+                            "border-primary-700 text-primary-700 hover:border-primary-700 dark:hover:bg-p2dark-900":
                               menuCollapsed && isActive,
                           }
                         )
@@ -121,7 +123,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
               <Popover className="relative">
                 <Popover.Button className="outline-none">
                   <div className="flex items-center">
-                    <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-white text-sm font-semibold dark:bg-zinc-400">
+                    <div className="mx-auto grid h-8 w-8 place-items-center rounded-full border border-primary-700 bg-white text-sm font-semibold dark:bg-zinc-400">
                       {fullName().substring(0, 1)}
                     </div>
                     {!menuCollapsed && (
