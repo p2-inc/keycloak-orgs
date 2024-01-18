@@ -107,6 +107,7 @@ export const ADFSWizard: FC = () => {
         const newMetadata = {
           ...SamlIDPDefaults,
           ...resp.data,
+	  nameIDPolicyFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
         };
         setMetadata(newMetadata);
         setIsFormValid(true);
