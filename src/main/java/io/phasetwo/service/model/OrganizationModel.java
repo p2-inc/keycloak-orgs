@@ -1,9 +1,6 @@
 package io.phasetwo.service.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MoreCollectors;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.keycloak.models.IdentityProviderModel;
@@ -55,6 +52,8 @@ public interface OrganizationModel extends WithAttributes {
   default Stream<InvitationModel> getInvitationsByEmail(String email) {
     return getInvitationsStream().filter(i -> i.getEmail().equals(email));
   }
+
+  InvitationModel getInvitation(String id);
 
   void revokeInvitation(String id);
 

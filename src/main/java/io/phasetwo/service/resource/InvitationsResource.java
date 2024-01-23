@@ -207,6 +207,17 @@ public class InvitationsResource extends OrganizationAdminResource {
         .map(i -> convertInvitationModelToInvitation(i));
   }
 
+  @GET
+  @Path("{invitationId}")
+  public Invitation getInvitation(@PathParam("invitationId") String invitationId) {
+    log.debugf("Get invitations for %s %s %s", realm.getName(), organization.getId(), invitationId);
+    InvitationModel invitation = organization.getInvitation(invitationId);
+    if (invitation == null) {
+      throw new NotFoundException(String.format("No invitation with id %s", invitationId));
+    }
+    return convertInvitationModelToInvitation(invitation);
+  }
+
   @DELETE
   @Path("{invitationId}")
   public Response removeInvitation(@PathParam("invitationId") String invitationId) {
