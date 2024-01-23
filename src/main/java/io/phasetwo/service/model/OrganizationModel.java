@@ -12,7 +12,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderEvent;
 
-public interface OrganizationModel {
+public interface OrganizationModel extends WithAttributes {
 
   String getId();
 
@@ -37,36 +37,6 @@ public interface OrganizationModel {
   RealmModel getRealm();
 
   UserModel getCreatedBy();
-
-  Map<String, List<String>> getAttributes();
-
-  default Stream<String> getAttributesStream(String name) {
-    List<String> attrs = getAttributes().get(name);
-    if (attrs != null && attrs.size() > 0) {
-      return attrs.stream();
-    } else {
-      return Stream.empty();
-    }
-  }
-
-  default String getFirstAttribute(String name) {
-    List<String> attrs = getAttributes().get(name);
-    if (attrs != null && attrs.size() > 0) {
-      return attrs.get(0);
-    } else {
-      return null;
-    }
-  }
-
-  void removeAttributes();
-
-  void removeAttribute(String name);
-
-  void setAttribute(String name, List<String> values);
-
-  default void setSingleAttribute(String name, String value) {
-    setAttribute(name, ImmutableList.of(value));
-  }
 
   Long getMembersCount();
 

@@ -99,4 +99,38 @@ public class InvitationAdapter implements InvitationModel, JpaModel<InvitationEn
   public void setRoles(Collection<String> roles) {
     invitation.setRoles(Sets.newHashSet(roles));
   }
+
+  @Override
+  public Map<String, List<String>> getAttributes() {
+    MultivaluedHashMap<String, String> result = new MultivaluedHashMap<>();
+    for (InvitationAttributeEntity attr : invitation.getAttributes()) {
+      result.add(attr.getName(), attr.getValue());
+    }
+    return result;
+  }
+
+  @Override
+  public void removeAttribute(String name) {
+    invitation.getAttributes().removeIf(attribute -> attribute.getName().equals(name));
+  }
+
+  @Override
+  public void removeAttributes() {
+    invitation.getAttributes().clear();
+  }
+
+  @Override
+  public void setAttribute(String name, List<String> values) {
+    removeAttribute(name);
+    for (String value : values) {
+      InvitationAttributeEntity a = new InvitationAttributeEntity();
+      a.setId(KeycloakModelUtils.generateId());
+      a.setName(name);
+      a.setValue(value);
+      a.setInvitation(invitation);
+      em.persist(a);
+      invitation.getAttributes().add(a);
+    }
+  }
+
 }

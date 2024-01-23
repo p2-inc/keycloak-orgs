@@ -18,5 +18,6 @@
   <include file="META-INF/jpa-changelog-phasetwo-20220824.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20220911.xml"/>
   <include file="META-INF/jpa-changelog-phasetwo-20230404.xml"/>
+  <include file="META-INF/jpa-changelog-phasetwo-20240123.xml"/>
 
 </databaseChangeLog>
