@@ -3,7 +3,7 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.44-SNAPSHOT</version>
+  <version>0.50-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
@@ -29,14 +29,14 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
-    <junit.version>4.13.2</junit.version>
-    <keycloak.version>22.0.4</keycloak.version>
+    <junit.version>5.8.2</junit.version>
+    <keycloak.version>23.0.3</keycloak.version>
+    <resteasy.version>6.2.4.Final</resteasy.version>
     <lombok.version>1.18.30</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
     <jackson.version>2.15.2</jackson.version>
     <jackson.databind.version>2.15.2</jackson.databind.version>
     <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
-    <maven.test.skip>true</maven.test.skip>
   </properties>
 
   <scm>
@@ -51,23 +51,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-	<version>3.2.0</version>
-        <configuration>
-          <archive>
-            <!-- This is required since we need to add the jboss module references
-                 to the resulting jar -->
-            <manifestEntries>
-              <!-- Adding explicit dependencies to avoid class-loading issues at runtime -->
-              <Dependencies>
-              <![CDATA[org.keycloak.keycloak-common,org.keycloak.keycloak-core,org.keycloak.keycloak-server-spi,org.keycloak.keycloak-server-spi-private,org.keycloak.keycloak-admin-client,org.apache.httpcomponents,org.keycloak.keycloak-services,org.keycloak.keycloak-saml-core,org.keycloak.keycloak-saml-core-public,org.jboss.logging,javax.api,javax.jms.api,javax.transaction.api,com.google.guava,com.fasterxml.jackson.core.jackson-core,com.fasterxml.jackson.core.jackson-annotations,com.fasterxml.jackson.core.jackson-databind,com.googlecode.owasp-java-html-sanitizer,org.apache.commons.io,org.bouncycastle,org.jboss.resteasy.resteasy-jaxrs]]></Dependencies>
-            </manifestEntries>
-          </archive>
-        </configuration>
+	<version>3.3.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
+        <version>3.11.0</version>
         <configuration>
 	  <forceJavacCompilerUse>true</forceJavacCompilerUse>
           <source>${java.version}</source>
@@ -130,7 +119,17 @@
       <plugin> <!-- pretty up the code using google java standards `mvn fmt:format` -->
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.20</version>
+        <version>2.21.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.2</version>
+	<configuration>
+          <systemPropertyVariables>
+	    <keycloak-version>${keycloak.version}</keycloak-version>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
     </plugins>      
   </build>
@@ -178,12 +177,6 @@
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-admin-client</artifactId>
-      <version>${keycloak.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.keycloak</groupId>
       <artifactId>keycloak-saml-core-public</artifactId>
       <version>${keycloak.version}</version>
       <scope>provided</scope>
@@ -194,7 +187,13 @@
       <version>${keycloak.version}</version>
       <scope>provided</scope>
     </dependency>
-    
+    <dependency>
+      <groupId>org.wildfly.client</groupId>
+      <artifactId>wildfly-client-config</artifactId>
+      <version>1.0.1.Final</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- javax/jakarta apis -->
     <dependency>
       <groupId>jakarta.persistence</groupId>
@@ -251,58 +250,101 @@
     <dependency>
       <groupId>dnsjava</groupId>
       <artifactId>dnsjava</artifactId>
-      <version>3.5.2</version>
+      <version>3.5.3</version>
       <optional>true</optional>
+    </dependency>
+
+    <!-- testing -->
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-admin-client</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <version>${resteasy.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client-api</artifactId>
+      <version>${resteasy.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>1.19.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.dasniko</groupId>
+      <artifactId>testcontainers-keycloak</artifactId>
+      <version>3.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.shrinkwrap.resolver</groupId>
+      <artifactId>shrinkwrap-resolver-impl-maven-archive</artifactId>
+      <version>3.2.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.4.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>2.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
+      <version>2.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-saml-adapter-core</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <version>4.5.13</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.phasetwo</groupId>
+      <artifactId>phasetwo-admin-client</artifactId>
+      <version>[0.1.5,)</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>io.rest-assured</groupId>
+        <artifactId>rest-assured</artifactId>
+        <version>5.3.0</version>
+        <scope>test</scope>
     </dependency>
   </dependencies>
 
-  <profiles>
-    <profile>
-      <id>test</id>
-      <properties>
-	<maven.test.skip>false</maven.test.skip>
-      </properties>
-      <dependencies>
-	<dependency>
-	  <groupId>junit</groupId>
-	  <artifactId>junit</artifactId>
-	  <version>${junit.version}</version>
-	  <scope>test</scope>
-	</dependency>
-	<dependency>
-	  <groupId>io.phasetwo</groupId>
-	  <artifactId>phasetwo-admin-client</artifactId>
-	  <version>0.1.5</version>
-	  <scope>test</scope>
-	</dependency>
-	<dependency>
-	  <groupId>org.hamcrest</groupId>
-	  <artifactId>hamcrest-core</artifactId>
-	  <version>2.2</version>
-	  <scope>test</scope>
-	</dependency>
-	<dependency>
-	  <groupId>org.keycloak</groupId>
-	  <artifactId>keycloak-saml-adapter-core</artifactId>
-	  <version>${keycloak.version}</version>
-	  <scope>test</scope>
-	</dependency>
-	<dependency> <!-- if you're getting a missing dependency error here, you need to install keycloak from source locally, as this never hits maven central -->
-	  <groupId>org.keycloak</groupId>
-	  <artifactId>keycloak-testsuite-utils</artifactId>
-	  <version>${keycloak.version}</version>
-	  <scope>test</scope>
-	</dependency>
-      </dependencies>
-      <build>
-        <plugins>
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-surefire-plugin</artifactId>
-	    <version>3.0.0-M7</version>
-	  </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

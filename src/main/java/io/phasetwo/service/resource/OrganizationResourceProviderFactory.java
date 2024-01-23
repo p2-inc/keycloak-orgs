@@ -30,7 +30,7 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 @AutoService(RealmResourceProviderFactory.class)
 public class OrganizationResourceProviderFactory implements RealmResourceProviderFactory {
 
-  private static final String ID = "orgs";
+  public static final String ID = "orgs";
 
   @Override
   public String getId() {
@@ -61,7 +61,10 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
             realmPostCreate((RealmModel.RealmPostCreateEvent) event);
           } else if (event instanceof PostMigrationEvent) {
             log.debug("PostMigrationEvent");
-            KeycloakModelUtils.runJobInTransaction(factory, this::initRoles);
+            if (System.getenv("KC_ORGS_SKIP_MIGRATION") == null) {
+              log.info("initializing organization roles following migration");
+              KeycloakModelUtils.runJobInTransaction(factory, this::initRoles);
+            }
           } else if (event instanceof RealmModel.RealmRemovedEvent) {
             log.debug("RealmRemovedEvent");
             realmRemoved((RealmModel.RealmRemovedEvent) event);
