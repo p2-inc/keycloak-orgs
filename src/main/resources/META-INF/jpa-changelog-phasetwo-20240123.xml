@@ -10,5 +10,8 @@
       <column name="INVITATION_ID" type="VARCHAR(36)"/>
     </createTable>
     <addForeignKeyConstraint baseColumnNames="INVITATION_ID" baseTableName="INVITATION_ATTRIBUTE" constraintName="FK_RA9TUF8D9JRH6MMW9PY7UFL7NBJP0R" deferrable="false" initiallyDeferred="false" referencedColumnNames="ID" referencedTableName="INVITATION" onDelete="CASCADE"/>
+    <createIndex indexName="IDX_INVITATION_ATTRIBUTE" tableName="INVITATION_ATTRIBUTE">
+      <column name="INVITATION_ID" type="VARCHAR(36)"/>
+    </createIndex>
   </changeSet>
 </databaseChangeLog>

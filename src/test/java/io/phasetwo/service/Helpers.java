@@ -1,6 +1,7 @@
 package io.phasetwo.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -9,11 +10,19 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class Helpers {
 
+  private static final ObjectMapper mapper;
+
+  static {
+    mapper = new ObjectMapper();
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
+
+  public static ObjectMapper objectMapper() {
+    return mapper;
+  }
+
   public static String toJsonString(Object representation) throws JsonProcessingException {
-    return new ObjectMapper()
-        .writer()
-        .withDefaultPrettyPrinter()
-        .writeValueAsString(representation);
+    return objectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(representation);
   }
 
   public static UserRepresentation createUser(Keycloak keycloak, String realm, String username) {

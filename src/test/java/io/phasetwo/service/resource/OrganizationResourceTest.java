@@ -7,10 +7,10 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.client.openapi.model.*;
 import io.phasetwo.service.AbstractOrganizationTest;
+import io.phasetwo.service.representation.*;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -52,7 +52,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     Response response = getRequest();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<OrganizationRepresentation> organizations =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertNotNull(organizations);
     assertThat(organizations.size(), is(1));
 
@@ -75,7 +75,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // get single
     response = getRequest(id);
-    rep = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    rep = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     assertThat(rep.getId(), notNullValue());
@@ -102,7 +102,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     organizations =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertNotNull(organizations);
     assertThat(organizations.size(), is(0));
   }
@@ -123,7 +123,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     Map<String, Object> claim =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
 
     assertThat(claim.keySet().size(), is(1));
     assertThat(claim.containsKey(org.getId()), is(true));
@@ -172,7 +172,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     Response response = givenSpec().when().queryParam("search", "foo").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     List<OrganizationRepresentation> orgs =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(2));
@@ -184,21 +184,21 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response =
         givenSpec().when().queryParam("search", "foo").queryParam("max", 1).get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(1));
 
     response = givenSpec().when().queryParam("search", "none").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(0));
 
     response = givenSpec().when().queryParam("search", "a").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(4));
@@ -206,7 +206,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // orgs attribute search
     response = givenSpec().when().queryParam("q", "foo:bar").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(2));
@@ -215,7 +215,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response =
         givenSpec().when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(1));
@@ -223,7 +223,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // orgs count
     response = getRequest("count");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    Long cnt = new ObjectMapper().readValue(response.getBody().asString(), Long.class);
+    Long cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
     ;
     assertThat(orgs, notNullValue());
     assertThat(cnt, is(6L));
@@ -242,7 +242,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     Response response = getRequest(id, "domains");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     List<OrganizationDomainRepresentation> domains =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(domains, notNullValue());
     assertThat(domains, hasSize(1));
     OrganizationDomainRepresentation domain = domains.get(0);
@@ -260,7 +260,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     response = getRequest(id, "domains");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    domains = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    domains = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(domains, notNullValue());
     assertThat(domains, hasSize(2));
 
@@ -296,7 +296,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     Map<String, Object> config =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(config, notNullValue());
     assertThat(config.keySet(), hasSize(11));
     assertThat(config, hasEntry("loginHint", "false"));
@@ -314,7 +314,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = postRequest(urlConf, org.getId(), "idps", "import-config");
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    config = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    config = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(config, notNullValue());
     assertThat(config.keySet(), hasSize(11));
     assertThat(config, hasEntry("loginHint", "false"));
@@ -330,7 +330,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     OrganizationRepresentation org = createDefaultOrg();
 
     Response response = getRequest(org.getId(), "members", "count");
-    Long memberCount = new ObjectMapper().readValue(response.getBody().asString(), Long.class);
+    Long memberCount = objectMapper().readValue(response.getBody().asString(), Long.class);
 
     assertThat(memberCount, is(1L)); // org admin default
 
@@ -341,7 +341,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
     response = getRequest(org.getId(), "members", "count");
-    memberCount = new ObjectMapper().readValue(response.getBody().asString(), Long.class);
+    memberCount = objectMapper().readValue(response.getBody().asString(), Long.class);
 
     assertThat(memberCount, is(2L));
 
@@ -359,7 +359,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // get empty members list
     List<UserRepresentation> members =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(members, notNullValue());
     assertThat(members, hasSize(1)); // org admin default
 
@@ -379,7 +379,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get members list
     response = getRequest(id, "members");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    members = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(members, notNullValue());
     assertThat(members, hasSize(2)); // +default org admin
     assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
@@ -389,7 +389,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     List<OrganizationRepresentation> representations =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(representations, notNullValue());
     assertThat(representations, hasSize(1));
     assertThat(representations.get(0).getName(), is("example"));
@@ -417,7 +417,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // get default roles list
     List<OrganizationRoleRepresentation> roles =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
@@ -445,7 +445,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     Response response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<OrganizationRoleRepresentation> roles =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     ;
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
@@ -458,7 +458,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(id, "roles", orgRoleName);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     OrganizationRoleRepresentation role =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(role, notNullValue());
     assertThat(role.getId(), notNullValue());
     assertThat(role.getName(), is(orgRoleName));
@@ -466,7 +466,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get role list
     response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 1));
 
@@ -487,7 +487,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get role list
     response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    roles = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
 
@@ -505,7 +505,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(id, "roles", orgRoleName, "users");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<UserRepresentation> rs =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rs, notNullValue());
     assertThat(rs, hasSize(1));
     assertThat(rs.get(0).getUsername(), is("johndoe"));
@@ -520,7 +520,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get users with role
     response = getRequest(id, "roles", orgRoleName, "users");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    rs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    rs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rs, notNullValue());
     assertThat(rs, empty());
 
@@ -544,7 +544,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     for (String roleName : additionalRoles) {
       response = getRequest(id, "roles", roleName, "users");
       assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-      rs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+      rs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
       assertThat(rs, notNullValue());
       assertThat(rs, empty());
     }
@@ -565,8 +565,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     String id = org.getId();
 
     // create invitation
-    InvitationRequestRepresentation inv =
-        new InvitationRequestRepresentation().email("johndoe@example.com");
+    InvitationRequest inv =
+        new InvitationRequest()
+            .email("johndoe@example.com")
+            .attribute("foo", "bar")
+            .attribute("humpty", "dumpty");
+    // xxx
     Response response = postRequest(inv, id, "invitations");
     assertThat(response.statusCode(), is(Status.CREATED.getStatusCode()));
     assertNotNull(response.getHeader("Location"));
@@ -577,12 +581,32 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get invitations
     response = getRequest(id, "invitations");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    List<InvitationRepresentation> invites =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<Invitation> invites =
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(invites, notNullValue());
     assertThat(invites, hasSize(1));
     assertThat(invites.get(0).getEmail(), is("johndoe@example.com"));
+    assertThat(invites.get(0).getAttributes().size(), is(2));
+    assertThat(invites.get(0).getAttributes().get("foo"), notNullValue());
+    assertThat(invites.get(0).getAttributes().get("foo").size(), is(1));
+    assertThat(invites.get(0).getAttributes().get("foo").get(0), is("bar"));
+    assertThat(invites.get(0).getAttributes().get("humpty"), notNullValue());
+    assertThat(invites.get(0).getAttributes().get("humpty").size(), is(1));
+    assertThat(invites.get(0).getAttributes().get("humpty").get(0), is("dumpty"));
     String invId = invites.get(0).getId();
+
+    // get a specific innvitation
+    response = getRequest(id, "invitations", invId);
+    Invitation invite =
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(invite.getEmail(), is("johndoe@example.com"));
+    assertThat(invite.getAttributes().size(), is(2));
+    assertThat(invite.getAttributes().get("foo"), notNullValue());
+    assertThat(invite.getAttributes().get("foo").size(), is(1));
+    assertThat(invite.getAttributes().get("foo").get(0), is("bar"));
+    assertThat(invite.getAttributes().get("humpty"), notNullValue());
+    assertThat(invite.getAttributes().get("humpty").size(), is(1));
+    assertThat(invite.getAttributes().get("humpty").get(0), is("dumpty"));
 
     // try a conflicting invitation
     response = postRequest(inv, id, "invitations");
@@ -606,7 +630,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get invitations
     response = getRequest(id, "invitations");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    invites = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    invites = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(invites, notNullValue());
     assertThat(invites, empty());
 
@@ -650,17 +674,17 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<OrganizationRepresentation> orgs =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs.size(), is(100));
     response = givenSpec().when().queryParam("first", 100).get().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs.size(), is(51));
 
     // list orgs by user
     response = getRequest(userKeycloak, "");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    orgs = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs.size(), is(6));
 
     // delete user
@@ -712,7 +736,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
 
@@ -732,7 +756,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get idps
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    idps = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(2));
     for (IdentityProviderRepresentation i : idps) {
@@ -743,7 +767,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(id, "idps", alias1, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<IdentityProviderMapperRepresentation> mappers =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, empty());
 
     // add a mapper to the idp
@@ -765,7 +789,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     response = getRequest(id, "idps", alias1, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    mappers = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, hasSize(1));
     String mapperId = mappers.get(0).getId();
     assertThat(mapperId, notNullValue());
@@ -773,7 +797,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get single mapper for idp
     response = getRequest(id, "idps", alias1, "mappers", mapperId);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    mapper = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    mapper = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mapper, notNullValue());
     assertThat(mapper.getName(), is("name"));
     assertThat(mapper.getIdentityProviderAlias(), is(alias1));
@@ -793,7 +817,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get single mapper for idp
     response = getRequest(id, "idps", alias1, "mappers", mapperId);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    mapper = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    mapper = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mapper, notNullValue());
     assertThat(mapper.getConfig().get("user.attribute"), is("lastName"));
     assertThat(mapper.getConfig().get("claim"), is("familyName"));
@@ -805,7 +829,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get mappers for idp
     response = getRequest(id, "idps", alias1, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    mappers = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, empty());
 
     // delete idps
@@ -817,7 +841,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get idps
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    idps = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, empty());
 
@@ -878,7 +902,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(orgId1, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
     assertThat(idps.get(0).getAlias(), is(alias1));
@@ -886,7 +910,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // check that org 2 can only see idp 2
     response = getRequest(orgId2, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    idps = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
     assertThat(idps.get(0).getAlias(), is(alias2));
@@ -931,7 +955,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     response = getRequest(kc1, orgId1);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    rep = new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    rep = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rep.getId(), notNullValue());
     assertThat(rep.getAttributes().keySet(), empty());
     assertThat(rep.getDisplayName(), is("Example company"));
@@ -1004,7 +1028,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest("/%s/idps/%s".formatted(orgId1, alias1));
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     IdentityProviderRepresentation idp1 =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idp1, notNullValue());
     assertThat(idp1.getAlias(), is(alias1));
     assertThat(idp1.getProviderId(), is(idp.getProviderId()));
@@ -1105,7 +1129,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
         keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).get(0);
 
     PortalLinkRepresentation link =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
 
     assertThat(link, notNullValue());
     assertThat(link.getUser(), is(orgAdmin.getId()));

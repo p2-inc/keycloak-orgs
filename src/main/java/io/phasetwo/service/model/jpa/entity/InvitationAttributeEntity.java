@@ -8,24 +8,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Objects;
 import org.hibernate.annotations.Nationalized;
 
 /** */
-@NamedQueries({
-  @NamedQuery(
-      name = "getInvitationAttributesByNameAndValue",
-      query =
-          "SELECT attr FROM InvitationAttributeEntity attr WHERE attr.invitation = :invitation AND attr.name = :name AND attr.value = :value"),
-  @NamedQuery(
-      name = "getInvitationAttributesByName",
-      query =
-          "SELECT attr FROM InvitationAttributeEntity attr WHERE attr.invitation = :invitation AND attr.name = :name"),
-})
 @Table(
     name = "INVITATION_ATTRIBUTE",
     uniqueConstraints = {@UniqueConstraint(columnNames = {"INVITATION_ID", "NAME"})})
