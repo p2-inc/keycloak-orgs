@@ -569,6 +569,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
         new InvitationRequest()
             .email("johndoe@example.com")
             .attribute("foo", "bar")
+            .attribute("foo", "bar2")
             .attribute("humpty", "dumpty");
     // xxx
     Response response = postRequest(inv, id, "invitations");
@@ -588,8 +589,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(invites.get(0).getEmail(), is("johndoe@example.com"));
     assertThat(invites.get(0).getAttributes().size(), is(2));
     assertThat(invites.get(0).getAttributes().get("foo"), notNullValue());
-    assertThat(invites.get(0).getAttributes().get("foo").size(), is(1));
+    assertThat(invites.get(0).getAttributes().get("foo").size(), is(2));
     assertThat(invites.get(0).getAttributes().get("foo").get(0), is("bar"));
+    assertThat(invites.get(0).getAttributes().get("foo").get(1), is("bar2"));
     assertThat(invites.get(0).getAttributes().get("humpty"), notNullValue());
     assertThat(invites.get(0).getAttributes().get("humpty").size(), is(1));
     assertThat(invites.get(0).getAttributes().get("humpty").get(0), is("dumpty"));
@@ -602,8 +604,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(invite.getEmail(), is("johndoe@example.com"));
     assertThat(invite.getAttributes().size(), is(2));
     assertThat(invite.getAttributes().get("foo"), notNullValue());
-    assertThat(invite.getAttributes().get("foo").size(), is(1));
+    assertThat(invite.getAttributes().get("foo").size(), is(2));
     assertThat(invite.getAttributes().get("foo").get(0), is("bar"));
+    assertThat(invite.getAttributes().get("foo").get(1), is("bar2"));
     assertThat(invite.getAttributes().get("humpty"), notNullValue());
     assertThat(invite.getAttributes().get("humpty").size(), is(1));
     assertThat(invite.getAttributes().get("humpty").get(0), is("dumpty"));
