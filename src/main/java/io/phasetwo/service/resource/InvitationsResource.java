@@ -247,7 +247,6 @@ public class InvitationsResource extends OrganizationAdminResource {
       throw new NotFoundException(String.format("No invitation with id %s", invitationId));
     }
 
-    String link = Optional.ofNullable(invitation.getUrl()).orElse("");
     UserModel inviter = invitation.getInviter();
     if (inviter == null) {
       inviter = auth.getUser();
@@ -259,8 +258,8 @@ public class InvitationsResource extends OrganizationAdminResource {
           session,
           realm,
           inviter,
-          link,
-          convertInvitationModelToInvitation(invitation).getAttributes());
+          Optional.ofNullable(invitation.getUrl()).orElse(""),
+          invitation.getAttributes());
     } catch (Exception e) {
       log.warn("Unable to send invitation email", e);
     }

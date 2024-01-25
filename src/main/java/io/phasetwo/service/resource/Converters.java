@@ -96,6 +96,7 @@ public class Converters {
             .email(e.getEmail())
             .createdAt(e.getCreatedAt())
             .inviterId(e.getInviter().getId())
+            .invitationUrl(e.getUrl())
             .organizationId(e.getOrganization().getId())
             .roles(Lists.newArrayList(e.getRoles()));
     i.setAttributes(Maps.newHashMap(e.getAttributes()));
