@@ -8,9 +8,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableMap;
-import io.phasetwo.client.openapi.model.*;
+import io.phasetwo.client.openapi.model.IdentityProviderMapperRepresentation;
+import io.phasetwo.client.openapi.model.IdentityProviderRepresentation;
+import io.phasetwo.client.openapi.model.InvitationRequestRepresentation;
+import io.phasetwo.client.openapi.model.OrganizationDomainRepresentation;
+import io.phasetwo.client.openapi.model.OrganizationRepresentation;
+import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
+import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
-import io.phasetwo.service.representation.*;
+import io.phasetwo.service.representation.Invitation;
+import io.phasetwo.service.representation.InvitationRequest;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -922,15 +929,17 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = deleteRequest(orgId1, "idps", alias2);
     assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
-    // delete idps 1 & 2
+    // delete idp 1 explicitly
     response = deleteRequest(orgId1, "idps", alias1);
-    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
-    response = deleteRequest(orgId2, "idps", alias2);
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // delete orgs
     deleteOrganization(orgId1);
     deleteOrganization(orgId2);
+
+    // try to delete idp 2
+    response = deleteRequest(orgId2, "idps", alias2);
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
   }
 
   @Test
