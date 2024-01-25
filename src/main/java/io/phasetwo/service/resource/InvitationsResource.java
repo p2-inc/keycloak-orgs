@@ -91,6 +91,7 @@ public class InvitationsResource extends OrganizationAdminResource {
       }
 
       InvitationModel i = organization.addInvitation(email, inviter);
+      i.setUrl(link);
       if (invitation.getRoles() != null) i.setRoles(invitation.getRoles());
       if (invitation.getAttributes() != null && invitation.getAttributes().size() > 0) {
         invitation
@@ -226,13 +227,44 @@ public class InvitationsResource extends OrganizationAdminResource {
 
   @GET
   @Path("{invitationId}")
+  @Produces(MediaType.APPLICATION_JSON)
   public Invitation getInvitation(@PathParam("invitationId") String invitationId) {
-    log.debugf("Get invitations for %s %s %s", realm.getName(), organization.getId(), invitationId);
+    log.debugf("Get invitation for %s %s %s", realm.getName(), organization.getId(), invitationId);
     InvitationModel invitation = organization.getInvitation(invitationId);
     if (invitation == null) {
       throw new NotFoundException(String.format("No invitation with id %s", invitationId));
     }
     return convertInvitationModelToInvitation(invitation);
+  }
+
+  @PUT
+  @Path("{invitationId}/resend-email")
+  public Response resendEmail(@PathParam("invitationId") String invitationId) {
+    log.debugf(
+        "Resend invitation for %s %s %s", realm.getName(), organization.getId(), invitationId);
+    InvitationModel invitation = organization.getInvitation(invitationId);
+    if (invitation == null) {
+      throw new NotFoundException(String.format("No invitation with id %s", invitationId));
+    }
+
+    String link = Optional.ofNullable(invitation.getUrl()).orElse("");
+    UserModel inviter = invitation.getInviter();
+    if (inviter == null) {
+      inviter = auth.getUser();
+    }
+
+    try {
+      sendInvitationEmail(
+          invitation.getEmail(),
+          session,
+          realm,
+          inviter,
+          link,
+          convertInvitationModelToInvitation(invitation).getAttributes());
+    } catch (Exception e) {
+      log.warn("Unable to send invitation email", e);
+    }
+    return Response.noContent().build();
   }
 
   @DELETE
