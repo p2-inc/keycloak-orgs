@@ -114,7 +114,7 @@ export default function OrganizationDetail() {
   return (
     <>
       <TopHeader
-        header={`${org?.displayName || ""}`.trim()}
+        header={`${org?.displayName || org?.name || ""}`.trim()}
         collapseOnMobile={true}
         leftAreaItems={
           <Breadcrumbs

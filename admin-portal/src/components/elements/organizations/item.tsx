@@ -78,7 +78,10 @@ const InnerItem = ({
 
 const OrganizationItem: FC<Props> = ({ children, org, viewType }) => {
   const { t } = useTranslation();
-  const { displayName: title, name: subTitle } = org;
+  let { displayName: title, name: subTitle } = org;
+  if (!title) {
+    title = subTitle;
+  }
   const link = `/organizations/${org.id}/details`;
   const { hasViewOrganizationRole: hasViewOrganizationRoleCheck } = useUser();
   const hasViewOrganizationRole = hasViewOrganizationRoleCheck(org.id);

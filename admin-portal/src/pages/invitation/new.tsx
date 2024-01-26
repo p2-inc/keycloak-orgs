@@ -98,7 +98,7 @@ const NewInvitation = () => {
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title={t("invitation-title", [org?.displayName || "Organization"])}
+        title={t("invitation-title", [org?.displayName || org?.name || "Organization"])}
         description={t("invitation-instructions-description")}
         icon={loadingIcon}
         rightContent={
