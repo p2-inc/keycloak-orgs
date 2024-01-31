@@ -80,7 +80,7 @@ const ProfileData = () => {
       </div>
       <form className="max-w-xl space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <>
-          {!featureFlags.registrationEmailAsUsername ? (
+          {featureFlags.registrationEmailAsUsername ? (
             // Username is email, can edit username but must be a valid email
             <RHFFormTextInputWithLabel
               slug="username"
