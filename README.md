@@ -183,9 +183,11 @@ There are some non-standard flows where the required action does not do this det
 
 #### IdP Discovery
 
-Organizations may optionally be given permission to manage their own IdP. The custom resources that allow this write a configuration in the IdP entities that is compatible with a 3rd party extension that allows for IdP discovery based on email domain configured for the Organization. It works by writing the `home.idp.discovery.domains` value into the `config` map for the IdP. Information on further configuration is available at [sventorben/keycloak-home-idp-discovery](https://github.com/sventorben/keycloak-home-idp-discovery).
+Organizations may optionally be given permission to manage their own IdP. The custom resources that allow this write a configuration in the IdP entities that is compatible with a 3rd party extension that allows for IdP discovery based on email domain configured for the Organization. It works by writing the `home.idp.discovery.orgs` value into the `config` map for the IdP. Information on further configuration is available at [sventorben/keycloak-home-idp-discovery](https://github.com/sventorben/keycloak-home-idp-discovery). However, please note that the internal discovery portion has been *forked* from his version, and does not look up IdPs in the same way.
 
-tbd screenshot of installing in flow
+![mapper](./docs/assets/home-idp-discovery-config.png)
+
+These are the configuration options for the "Home IdP Discovery" Authenticator. It will need to be placed in your flow as a replacement for a "Username form", or after another Authenticator/Form that sets the `ATTEMPTED_USERNAME` note. 
 
 ## License
 
@@ -196,6 +198,6 @@ We’ve changed the license of our core extensions from the AGPL v3 to the [Elas
 
 -----
 
-Portions of the [Home IdP Discovery](https://github.com/p2-inc/keycloak-orgs/tree/main/src/main/java/io/phasetwo/service/auth/idp) code are Copyright (c) 2021-2023 Sven-Torben Janus, and are licensed under the [MIT License](https://github.com/p2-inc/keycloak-orgs/blob/main/src/main/java/io/phasetwo/service/auth/idp/LICENSE.md).
+Portions of the [Home IdP Discovery](https://github.com/p2-inc/keycloak-orgs/tree/main/src/main/java/io/phasetwo/service/auth/idp) code are Copyright (c) 2021-2024 Sven-Torben Janus, and are licensed under the [MIT License](https://github.com/p2-inc/keycloak-orgs/blob/main/src/main/java/io/phasetwo/service/auth/idp/LICENSE.md).
 
-All other ocumentation, source code and other files in this repository are Copyright 2023 Phase Two, Inc.
+All other documentation, source code and other files in this repository are Copyright 2024 Phase Two, Inc.
