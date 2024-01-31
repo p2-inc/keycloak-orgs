@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.*;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
@@ -48,7 +49,8 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   public Response update(IdentityProviderRepresentation providerRep) {
     requireManage();
     // don't allow override of ownership and other conf vars
-    IdentityProvidersResource.idpDefaults(organization, providerRep);
+    providerRep.getConfig().put("hideOnLoginPage", "true");
+    providerRep.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
     // force alias
     providerRep.setAlias(alias);
 
