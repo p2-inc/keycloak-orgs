@@ -67,24 +67,39 @@ public class Converters {
   }
 
   public static Invitation convertInvitationEntityToInvitation(InvitationEntity e) {
-    return new Invitation()
-        .id(e.getId())
-        .email(e.getEmail())
-        .createdAt(e.getCreatedAt())
-        .inviterId(e.getInviterId())
-        .organizationId(e.getOrganization().getId())
-        .roles(Lists.newArrayList(e.getRoles()))
-        .teamIds(e.getTeams().stream().map(t -> t.getId()).collect(Collectors.toList()));
-    // todo url?
+    Invitation i =
+        new Invitation()
+            .id(e.getId())
+            .email(e.getEmail())
+            .createdAt(e.getCreatedAt())
+            .inviterId(e.getInviterId())
+            .organizationId(e.getOrganization().getId())
+            .roles(Lists.newArrayList(e.getRoles()))
+            .teamIds(e.getTeams().stream().map(t -> t.getId()).collect(Collectors.toList()));
+    Map<String, List<String>> attr = Maps.newHashMap();
+    e.getAttributes()
+        .forEach(
+            a -> {
+              List<String> l = attr.get(a.getName());
+              if (l == null) l = Lists.newArrayList();
+              if (!l.contains(a.getValue())) l.add(a.getValue());
+              attr.put(a.getName(), l);
+            });
+    i.setAttributes(attr);
+    return i;
   }
 
   public static Invitation convertInvitationModelToInvitation(InvitationModel e) {
-    return new Invitation()
-        .id(e.getId())
-        .email(e.getEmail())
-        .createdAt(e.getCreatedAt())
-        .inviterId(e.getInviter().getId())
-        .organizationId(e.getOrganization().getId())
-        .roles(Lists.newArrayList(e.getRoles()));
+    Invitation i =
+        new Invitation()
+            .id(e.getId())
+            .email(e.getEmail())
+            .createdAt(e.getCreatedAt())
+            .inviterId(e.getInviter().getId())
+            .invitationUrl(e.getUrl())
+            .organizationId(e.getOrganization().getId())
+            .roles(Lists.newArrayList(e.getRoles()));
+    i.setAttributes(Maps.newHashMap(e.getAttributes()));
+    return i;
   }
 }

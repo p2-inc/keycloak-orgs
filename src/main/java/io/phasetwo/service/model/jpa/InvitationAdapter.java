@@ -4,15 +4,20 @@ import com.google.common.collect.Sets;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.jpa.entity.InvitationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import jakarta.persistence.EntityManager;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class InvitationAdapter implements InvitationModel, JpaModel<InvitationEntity> {
 
@@ -98,5 +103,38 @@ public class InvitationAdapter implements InvitationModel, JpaModel<InvitationEn
   @Override
   public void setRoles(Collection<String> roles) {
     invitation.setRoles(Sets.newHashSet(roles));
+  }
+
+  @Override
+  public Map<String, List<String>> getAttributes() {
+    MultivaluedHashMap<String, String> result = new MultivaluedHashMap<>();
+    for (InvitationAttributeEntity attr : invitation.getAttributes()) {
+      result.add(attr.getName(), attr.getValue());
+    }
+    return result;
+  }
+
+  @Override
+  public void removeAttribute(String name) {
+    invitation.getAttributes().removeIf(attribute -> attribute.getName().equals(name));
+  }
+
+  @Override
+  public void removeAttributes() {
+    invitation.getAttributes().clear();
+  }
+
+  @Override
+  public void setAttribute(String name, List<String> values) {
+    removeAttribute(name);
+    for (String value : values) {
+      InvitationAttributeEntity a = new InvitationAttributeEntity();
+      a.setId(KeycloakModelUtils.generateId());
+      a.setName(name);
+      a.setValue(value);
+      a.setInvitation(invitation);
+      em.persist(a);
+      invitation.getAttributes().add(a);
+    }
   }
 }

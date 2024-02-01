@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
+import org.keycloak.email.freemarker.beans.ProfileBean;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakSession;
@@ -90,8 +91,19 @@ public class InvitationsResource extends OrganizationAdminResource {
       }
 
       InvitationModel i = organization.addInvitation(email, inviter);
+      i.setUrl(link);
       if (invitation.getRoles() != null) i.setRoles(invitation.getRoles());
+      if (invitation.getAttributes() != null && invitation.getAttributes().size() > 0) {
+        invitation
+            .getAttributes()
+            .entrySet()
+            .forEach(
+                e -> {
+                  i.setAttribute(e.getKey(), e.getValue());
+                });
+      }
       Invitation o = convertInvitationModelToInvitation(i);
+      log.debugf("Made invitation %s", o);
 
       adminEvent
           .resource(INVITATION.name())
@@ -103,9 +115,8 @@ public class InvitationsResource extends OrganizationAdminResource {
       URI location = session.getContext().getUri().getAbsolutePathBuilder().path(o.getId()).build();
 
       if (invitation.isSend()) {
-        // TODO use inviter
         try {
-          sendInvitationEmail(email, session, realm, inviter, link);
+          sendInvitationEmail(email, session, realm, inviter, link, o.getAttributes());
         } catch (Exception e) {
           log.warn("Unable to send invitation email", e);
         }
@@ -130,7 +141,12 @@ public class InvitationsResource extends OrganizationAdminResource {
   }
 
   void sendInvitationEmail(
-      String email, KeycloakSession session, RealmModel realm, UserModel inviter, String link)
+      String email,
+      KeycloakSession session,
+      RealmModel realm,
+      UserModel inviter,
+      String link,
+      Map<String, List<String>> attributes)
       throws Exception {
     EmailTemplateProvider emailTemplateProvider = session.getProvider(EmailTemplateProvider.class);
 
@@ -155,7 +171,9 @@ public class InvitationsResource extends OrganizationAdminResource {
     bodyAttributes.put("realmName", realmName);
     bodyAttributes.put("orgName", orgName);
     bodyAttributes.put("inviterName", inviterName);
+    bodyAttributes.put("inviter", new ProfileBean(inviter));
     bodyAttributes.put("link", link);
+    bodyAttributes.put("attributes", attributes);
 
     emailTemplateProvider.setRealm(realm).setUser(user).setAttribute("realmName", realmName);
 
@@ -205,6 +223,47 @@ public class InvitationsResource extends OrganizationAdminResource {
         .skip(firstResult)
         .limit(maxResults)
         .map(i -> convertInvitationModelToInvitation(i));
+  }
+
+  @GET
+  @Path("{invitationId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Invitation getInvitation(@PathParam("invitationId") String invitationId) {
+    log.debugf("Get invitation for %s %s %s", realm.getName(), organization.getId(), invitationId);
+    InvitationModel invitation = organization.getInvitation(invitationId);
+    if (invitation == null) {
+      throw new NotFoundException(String.format("No invitation with id %s", invitationId));
+    }
+    return convertInvitationModelToInvitation(invitation);
+  }
+
+  @PUT
+  @Path("{invitationId}/resend-email")
+  public Response resendEmail(@PathParam("invitationId") String invitationId) {
+    log.debugf(
+        "Resend invitation for %s %s %s", realm.getName(), organization.getId(), invitationId);
+    InvitationModel invitation = organization.getInvitation(invitationId);
+    if (invitation == null) {
+      throw new NotFoundException(String.format("No invitation with id %s", invitationId));
+    }
+
+    UserModel inviter = invitation.getInviter();
+    if (inviter == null) {
+      inviter = auth.getUser();
+    }
+
+    try {
+      sendInvitationEmail(
+          invitation.getEmail(),
+          session,
+          realm,
+          inviter,
+          Optional.ofNullable(invitation.getUrl()).orElse(""),
+          invitation.getAttributes());
+    } catch (Exception e) {
+      log.warn("Unable to send invitation email", e);
+    }
+    return Response.noContent().build();
   }
 
   @DELETE

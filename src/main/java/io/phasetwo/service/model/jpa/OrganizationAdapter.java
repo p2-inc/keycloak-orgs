@@ -233,6 +233,16 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   }
 
   @Override
+  public InvitationModel getInvitation(String id) {
+    InvitationEntity ie = em.find(InvitationEntity.class, id);
+    if (ie != null && ie.getOrganization().equals(org)) {
+      return new InvitationAdapter(session, realm, em, ie);
+    } else {
+      return null;
+    }
+  }
+
+  @Override
   public void revokeInvitation(String id) {
     org.getInvitations().removeIf(inv -> inv.getId().equals(id));
   }

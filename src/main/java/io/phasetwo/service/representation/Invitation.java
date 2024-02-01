@@ -3,11 +3,13 @@ package io.phasetwo.service.representation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import jakarta.validation.Valid;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 
@@ -20,6 +22,7 @@ public class Invitation {
   private @Valid String organizationId = null;
   private @Valid List<String> teamIds = Lists.newArrayList();
   private @Valid List<String> roles = Lists.newArrayList();
+  private @Valid Map<String, List<String>> attributes = Maps.newHashMap();
 
   public Invitation id(String id) {
     this.id = id;
@@ -167,6 +170,25 @@ public class Invitation {
     this.roles = roles;
   }
 
+  public Invitation attribute(String name, String value) {
+    List<String> list = this.attributes.get(name);
+    if (list == null) {
+      list = Lists.newArrayList();
+    }
+    if (!list.contains(value)) list.add(value);
+    this.attributes.put(name, list);
+    return this;
+  }
+
+  @JsonProperty("attributes")
+  public Map<String, List<String>> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(Map<String, List<String>> attributes) {
+    this.attributes = attributes;
+  }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -184,12 +206,14 @@ public class Invitation {
         && Objects.equals(organizationId, invitation.organizationId)
         && Objects.equals(invitationUrl, invitation.invitationUrl)
         && Objects.equals(roles, invitation.roles)
-        && Objects.equals(teamIds, invitation.teamIds);
+        && Objects.equals(teamIds, invitation.teamIds)
+        && Objects.equals(attributes, invitation.attributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, email, createdAt, inviterId, organizationId, invitationUrl, roles);
+    return Objects.hash(
+        id, email, createdAt, inviterId, organizationId, invitationUrl, roles, attributes);
   }
 
   @Override
@@ -205,6 +229,7 @@ public class Invitation {
     sb.append("    invitationUrl: ").append(toIndentedString(invitationUrl)).append("\n");
     sb.append("    teamIds: ").append(toIndentedString(teamIds)).append("\n");
     sb.append("    roles: ").append(toIndentedString(roles)).append("\n");
+    sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

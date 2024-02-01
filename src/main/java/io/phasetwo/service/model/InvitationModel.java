@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.Set;
 import org.keycloak.models.UserModel;
 
-public interface InvitationModel {
+public interface InvitationModel extends WithAttributes {
 
   String getId();
 
