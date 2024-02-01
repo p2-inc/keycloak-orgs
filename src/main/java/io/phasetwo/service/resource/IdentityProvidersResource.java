@@ -4,13 +4,16 @@ import static io.phasetwo.service.Orgs.*;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
+import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.representation.LinkIdp;
 import jakarta.validation.constraints.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
@@ -55,30 +58,32 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
                 StripSecretsUtils.strip(ModelToRepresentation.toRepresentation(realm, provider)));
   }
 
-  public static void idpDefaults(
-      OrganizationModel organization, IdentityProviderRepresentation representation) {
+  protected void idpDefaults(
+      IdentityProviderRepresentation representation, Optional<LinkIdp> linkIdp) {
     // defaults? overrides?
-    representation.getConfig().put("syncMode", "FORCE");
+    String syncMode =
+        linkIdp
+            .map(LinkIdp::getSyncMode)
+            .orElse(
+                Optional.ofNullable(realm.getAttribute(ORG_DEFAULT_SYNC_MODE_KEY)).orElse("FORCE"));
+    String postBrokerFlow =
+        linkIdp
+            .map(LinkIdp::getPostBrokerFlow)
+            .orElse(
+                Optional.ofNullable(realm.getAttribute(ORG_DEFAULT_POST_BROKER_FLOW_KEY))
+                    .orElse(ORG_AUTH_FLOW_ALIAS));
+    log.debugf(
+        "using syncMode %s, postBrokerFlow %s for idp %s",
+        syncMode, postBrokerFlow, representation.getAlias());
+
+    representation.getConfig().put("syncMode", syncMode);
     representation.getConfig().put("hideOnLoginPage", "true");
     representation.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
-    representation.setPostBrokerLoginFlowAlias(ORG_AUTH_FLOW_ALIAS);
-    //  - firstBrokerLoginFlowAlias
+    representation.setPostBrokerLoginFlowAlias(postBrokerFlow);
+    // TODO firstBrokerLoginFlowAlias
   }
 
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response createIdentityProvider(IdentityProviderRepresentation representation) {
-    if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
-      throw new NotAuthorizedException(
-          String.format(
-              "Insufficient permission to create identity providers for %s", organization.getId()));
-    }
-
-    // Override alias to prevent collisions
-    // representation.setAlias(KeycloakModelUtils.generateId());
-
-    idpDefaults(organization, representation);
-
+  private void deactivateOtherIdps(IdentityProviderRepresentation representation) {
     // Organization can have only one active idp
     // Activating an idp deactivates all others
     if (representation.isEnabled()) {
@@ -91,17 +96,79 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
                 realm.updateIdentityProvider(provider); // weird that this is necessary
               });
     }
+  }
+
+  private Response createdResponse(IdentityProviderRepresentation representation) {
+    return Response.created(
+            session
+                .getContext()
+                .getUri()
+                .getAbsolutePathBuilder()
+                .path(representation.getAlias())
+                .build())
+        .build();
+  }
+
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response createIdentityProvider(IdentityProviderRepresentation representation) {
+    if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
+      throw new NotAuthorizedException(
+          String.format(
+              "Insufficient permission to create identity providers for %s", organization.getId()));
+    }
+
+    idpDefaults(representation, Optional.empty());
+    deactivateOtherIdps(representation);
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
-      return Response.created(
-              session
-                  .getContext()
-                  .getUri()
-                  .getAbsolutePathBuilder()
-                  .path(representation.getAlias())
-                  .build())
-          .build();
+      return createdResponse(representation);
+    } else {
+      return resp;
+    }
+  }
+
+  @POST
+  @Path("link")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response linkIdp(LinkIdp linkIdp) {
+    // authz
+    if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
+      throw new NotAuthorizedException(
+          String.format(
+              "Insufficient permission to create identity providers for %s", organization.getId()));
+    }
+
+    // get an idp with the same alias
+    IdentityProviderModel idp = realm.getIdentityProviderByAlias(linkIdp.getAlias());
+    if (idp == null) {
+      throw new NotFoundException(String.format("No IdP found with alias %s", linkIdp.getAlias()));
+    }
+
+    // does it already contain an orgId for a different org?
+    String orgId = idp.getConfig().get(ORG_OWNER_CONFIG_KEY);
+    if (orgId != null && !organization.getId().equals(orgId)) {
+      throw new ClientErrorException(
+          String.format("IdP with alias %s unavailable for linking.", linkIdp.getAlias()),
+          Response.Status.CONFLICT);
+    }
+
+    IdentityProviderRepresentation representation =
+        ModelToRepresentation.toRepresentation(realm, idp);
+    idpDefaults(representation, Optional.of(linkIdp));
+    if (!Strings.isNullOrEmpty(linkIdp.getSyncMode())) {
+      representation.getConfig().put("syncMode", linkIdp.getSyncMode());
+    }
+    if (!Strings.isNullOrEmpty(linkIdp.getPostBrokerFlow())) {
+      representation.setPostBrokerLoginFlowAlias(linkIdp.getPostBrokerFlow());
+    }
+    deactivateOtherIdps(representation);
+
+    Response resp = getIdpResource().getIdentityProvider(linkIdp.getAlias()).update(representation);
+    if (resp.getStatus() == Response.Status.NO_CONTENT.getStatusCode()) {
+      return createdResponse(representation);
     } else {
       return resp;
     }

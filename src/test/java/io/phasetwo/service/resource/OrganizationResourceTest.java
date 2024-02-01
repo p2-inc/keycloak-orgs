@@ -18,6 +18,7 @@ import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.InvitationRequest;
+import io.phasetwo.service.representation.LinkIdp;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -706,6 +707,66 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     for (String i : ids) {
       deleteOrganization(i);
     }
+  }
+
+  @Test
+  void testLinkIdp() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    String alias1 = "linking-provider-1";
+    org.keycloak.representations.idm.IdentityProviderRepresentation idp =
+        new org.keycloak.representations.idm.IdentityProviderRepresentation();
+    idp.setAlias(alias1);
+    idp.setProviderId("oidc");
+    idp.setEnabled(true);
+    idp.setFirstBrokerLoginFlowAlias("first broker login");
+    idp.setConfig(
+        new ImmutableMap.Builder<String, String>()
+            .put("useJwksUrl", "true")
+            .put("syncMode", "FORCE")
+            .put("authorizationUrl", "https://foo.com")
+            .put("hideOnLoginPage", "")
+            .put("loginHint", "")
+            .put("uiLocales", "")
+            .put("backchannelSupported", "")
+            .put("disableUserInfo", "")
+            .put("acceptsPromptNoneForwardFromClient", "")
+            .put("validateSignature", "")
+            .put("pkceEnabled", "")
+            .put("tokenUrl", "https://foo.com")
+            .put("clientAuthMethod", "client_secret_post")
+            .put("clientId", "aabbcc")
+            .put("clientSecret", "112233")
+            .build());
+    keycloak.realm(REALM).identityProviders().create(idp);
+
+    // link it
+    LinkIdp link = new LinkIdp();
+    link.setAlias(alias1);
+    link.setSyncMode("IMPORT");
+    Response response = postRequest(link, org.getId(), "idps", "link");
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+
+    // get it
+    response = getRequest(id, "idps");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<IdentityProviderRepresentation> idps =
+        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(idps, notNullValue());
+    assertThat(idps, hasSize(1));
+
+    IdentityProviderRepresentation representation = idps.get(0);
+    assertThat(representation.getEnabled(), is(true));
+    assertThat(representation.getAlias(), is(alias1));
+    assertThat(representation.getProviderId(), is("oidc"));
+    assertThat(representation.getConfig().get("syncMode"), is("IMPORT"));
+
+    // delete org
+    deleteOrganization(id);
+
+    // delete idp
+    keycloak.realm(REALM).identityProviders().get(alias1).remove();
   }
 
   @Test
