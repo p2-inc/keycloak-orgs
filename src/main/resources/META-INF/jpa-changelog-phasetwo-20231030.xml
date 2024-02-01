@@ -6,7 +6,9 @@
 
   <changeSet author="phamann" id="add-organization-attribute-index" >
     <preConditions onFail="MARK_RAN">
-      <indexExists indexName="IDX_ORGANIZATION_ATTRIBUTE" />
+      <not>
+          <indexExists indexName="IDX_ORGANIZATION_ATTRIBUTE" />
+      </not>
     </preConditions>
     <createIndex indexName="IDX_ORGANIZATION_ATTRIBUTE" tableName="ORGANIZATION_ATTRIBUTE">
       <column name="ORGANIZATION_ID" type="VARCHAR(36)"/>
