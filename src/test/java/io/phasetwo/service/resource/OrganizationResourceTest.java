@@ -752,7 +752,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps =
-        new ObjectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
 
