@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.models.utils.RepresentationToModel;
 import org.keycloak.models.utils.StripSecretsUtils;
 import org.keycloak.representations.idm.ComponentRepresentation;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
@@ -119,10 +120,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     idpDefaults(representation, Optional.empty());
-    deactivateOtherIdps(representation);
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
+      deactivateOtherIdps(representation);
       return createdResponse(representation);
     } else {
       return resp;
@@ -164,13 +165,15 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     if (!Strings.isNullOrEmpty(linkIdp.getPostBrokerFlow())) {
       representation.setPostBrokerLoginFlowAlias(linkIdp.getPostBrokerFlow());
     }
-    deactivateOtherIdps(representation);
 
-    Response resp = getIdpResource().getIdentityProvider(linkIdp.getAlias()).update(representation);
-    if (resp.getStatus() == Response.Status.NO_CONTENT.getStatusCode()) {
+    try {
+      IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
+      realm.updateIdentityProvider(updated);
+      deactivateOtherIdps(representation);
       return createdResponse(representation);
-    } else {
-      return resp;
+    } catch (Exception e) {
+      throw new InternalServerErrorException(
+          String.format("Error updating IdP %s", representation.getAlias()), e);
     }
   }
 
