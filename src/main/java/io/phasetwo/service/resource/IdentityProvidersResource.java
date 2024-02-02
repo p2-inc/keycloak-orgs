@@ -120,10 +120,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     idpDefaults(representation, Optional.empty());
+    deactivateOtherIdps(representation);
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
-      deactivateOtherIdps(representation);
       return createdResponse(representation);
     } else {
       return resp;
@@ -147,7 +147,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     if (idp == null) {
       throw new NotFoundException(String.format("No IdP found with alias %s", linkIdp.getAlias()));
     }
-
+    if (!idp.isEnabled()) {
+      throw new BadRequestException(String.format("Cannot link disabled IdP %s", linkIdp.getAlias()));
+    }
+    
     // does it already contain an orgId for a different org?
     String orgId = idp.getConfig().get(ORG_OWNER_CONFIG_KEY);
     if (orgId != null && !organization.getId().equals(orgId)) {
@@ -166,10 +169,11 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       representation.setPostBrokerLoginFlowAlias(linkIdp.getPostBrokerFlow());
     }
 
+    deactivateOtherIdps(representation);
+    
     try {
       IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
       realm.updateIdentityProvider(updated);
-      deactivateOtherIdps(representation);
       return createdResponse(representation);
     } catch (Exception e) {
       throw new InternalServerErrorException(
