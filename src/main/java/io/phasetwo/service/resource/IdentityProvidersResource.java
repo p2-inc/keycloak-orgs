@@ -61,7 +61,6 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
 
   protected void idpDefaults(
       IdentityProviderRepresentation representation, Optional<LinkIdp> linkIdp) {
-    // defaults? overrides?
     String syncMode =
         linkIdp
             .map(LinkIdp::getSyncMode)
@@ -77,11 +76,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
         "using syncMode %s, postBrokerFlow %s for idp %s",
         syncMode, postBrokerFlow, representation.getAlias());
 
-    representation.getConfig().put("syncMode", syncMode);
-    representation.getConfig().put("hideOnLoginPage", "true");
+    representation.getConfig().put(IdentityProviderModel.SYNC_MODE, syncMode);
+    representation.getConfig().put(IdentityProviderModel.HIDE_ON_LOGIN, "true");
     representation.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
     representation.setPostBrokerLoginFlowAlias(postBrokerFlow);
-    // TODO firstBrokerLoginFlowAlias
   }
 
   private void deactivateOtherIdps(IdentityProviderRepresentation representation) {
@@ -110,6 +108,17 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
         .build();
   }
 
+  private LinkIdp linkFromRep(IdentityProviderRepresentation representation) {
+    LinkIdp link = new LinkIdp();
+    link.setAlias(representation.getAlias());
+    link.setPostBrokerFlow(representation.getPostBrokerLoginFlowAlias());
+    Map<String, String> config = representation.getConfig();
+    if (config != null) {
+      link.setSyncMode(config.get(IdentityProviderModel.SYNC_MODE));
+    }
+    return link;
+  }
+
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response createIdentityProvider(IdentityProviderRepresentation representation) {
@@ -119,7 +128,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
               "Insufficient permission to create identity providers for %s", organization.getId()));
     }
 
-    idpDefaults(representation, Optional.empty());
+    idpDefaults(representation, Optional.of(linkFromRep(representation)));
     deactivateOtherIdps(representation);
 
     Response resp = getIdpResource().create(representation);
@@ -148,9 +157,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       throw new NotFoundException(String.format("No IdP found with alias %s", linkIdp.getAlias()));
     }
     if (!idp.isEnabled()) {
-      throw new BadRequestException(String.format("Cannot link disabled IdP %s", linkIdp.getAlias()));
+      throw new BadRequestException(
+          String.format("Cannot link disabled IdP %s", linkIdp.getAlias()));
     }
-    
+
     // does it already contain an orgId for a different org?
     String orgId = idp.getConfig().get(ORG_OWNER_CONFIG_KEY);
     if (orgId != null && !organization.getId().equals(orgId)) {
@@ -170,7 +180,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     deactivateOtherIdps(representation);
-    
+
     try {
       IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
       realm.updateIdentityProvider(updated);
