@@ -191,6 +191,11 @@ Organizations may optionally be given permission to manage their own IdP. The cu
 
 These are the configuration options for the "Home IdP Discovery" Authenticator. It will need to be placed in your flow as a replacement for a "Username form", or after another Authenticator/Form that sets the `ATTEMPTED_USERNAME` note. 
 
+### Active Organization
+
+It is possible to define an active organization and switch it. It's currently based on user's attribute and the active organization id, name, role or attribute can be mapped into tokens with a configurable mapper.  
+For more information you can refer to [active-organization](./docs/active-organization.md).
+
 ## License
 
 We’ve changed the license of our core extensions from the AGPL v3 to the [Elastic License v2](https://github.com/elastic/elasticsearch/blob/main/licenses/ELASTIC-LICENSE-2.0.txt). 
