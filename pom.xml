@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
@@ -10,7 +12,7 @@
     <artifactId>oss-parent</artifactId>
     <version>0.7</version>
   </parent>
-  
+
   <developers>
     <developer>
       <name>Phase Two, Inc.</name>
@@ -21,7 +23,9 @@
   <licenses>
     <license>
       <name>Elastic License v2</name>
-      <url>https://raw.githubusercontent.com/elastic/elasticsearch/main/licenses/ELASTIC-LICENSE-2.0.txt</url>
+      <url>
+        https://raw.githubusercontent.com/elastic/elasticsearch/main/licenses/ELASTIC-LICENSE-2.0.txt
+      </url>
     </license>
   </licenses>
 
@@ -51,24 +55,24 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-	<version>3.3.0</version>
+        <version>3.3.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
         <configuration>
-	  <forceJavacCompilerUse>true</forceJavacCompilerUse>
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
           <source>${java.version}</source>
           <target>${java.version}</target>
-	  <compilerArgument>-Xlint:unchecked</compilerArgument>
-	  <compilerArgument>-Xlint:deprecation</compilerArgument>
+          <compilerArgument>-Xlint:unchecked</compilerArgument>
+          <compilerArgument>-Xlint:deprecation</compilerArgument>
           <useIncrementalCompilation>false</useIncrementalCompilation>
-	  <annotationProcessorPaths>
+          <annotationProcessorPaths>
             <path>
-	      <groupId>com.google.auto.service</groupId>
-	      <artifactId>auto-service</artifactId>
-	      <version>${auto-service.version}</version>
+              <groupId>com.google.auto.service</groupId>
+              <artifactId>auto-service</artifactId>
+              <version>${auto-service.version}</version>
             </path>
             <path>
               <groupId>org.projectlombok</groupId>
@@ -125,13 +129,22 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.2</version>
-	<configuration>
+        <configuration>
           <systemPropertyVariables>
-	    <keycloak-version>${keycloak.version}</keycloak-version>
+            <keycloak-version>${keycloak.version}</keycloak-version>
           </systemPropertyVariables>
         </configuration>
       </plugin>
-    </plugins>      
+    </plugins>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/e2e</directory>
+        <targetPath>e2e</targetPath>
+      </testResource>
+    </testResources>
   </build>
 
   <dependencies>
@@ -149,7 +162,7 @@
       <version>${auto-service.version}</version>
       <scope>provided</scope>
     </dependency>
-    
+
     <!-- keycloak deps -->
     <dependency>
       <groupId>org.keycloak</groupId>
@@ -352,10 +365,15 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>io.rest-assured</groupId>
-        <artifactId>rest-assured</artifactId>
-        <version>5.3.0</version>
-        <scope>test</scope>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>5.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.github.wimdeblauwe</groupId>
+      <artifactId>testcontainers-cypress</artifactId>
+      <version>1.9.0</version>
     </dependency>
   </dependencies>
 </project>
