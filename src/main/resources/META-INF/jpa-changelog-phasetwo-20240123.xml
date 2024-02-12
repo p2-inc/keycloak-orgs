@@ -1,0 +1,17 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+  <changeSet author="xgp" id="invite-attr-1">
+    <createTable tableName="INVITATION_ATTRIBUTE">
+      <column name="ID" type="VARCHAR(36)">
+        <constraints primaryKey="true" primaryKeyName="INVITATION_ATTRIBUTEPK" nullable="false"/>
+      </column>
+      <column name="NAME" type="VARCHAR(255)"/>
+      <column name="VALUE" type="NVARCHAR(255)"/>
+      <column name="INVITATION_ID" type="VARCHAR(36)"/>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="INVITATION_ID" baseTableName="INVITATION_ATTRIBUTE" constraintName="FK_RA9TUF8D9JRH6MMW9PY7UFL7NBJP0R" deferrable="false" initiallyDeferred="false" referencedColumnNames="ID" referencedTableName="INVITATION" onDelete="CASCADE"/>
+    <createIndex indexName="IDX_INVITATION_ATTRIBUTE" tableName="INVITATION_ATTRIBUTE">
+      <column name="INVITATION_ID" type="VARCHAR(36)"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

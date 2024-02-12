@@ -1,5 +1,7 @@
 package io.phasetwo.service.model.jpa.entity;
 
+import static io.phasetwo.service.model.jpa.entity.Entities.setCollection;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import java.util.ArrayList;
@@ -55,6 +57,10 @@ public class InvitationEntity {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "ORGANIZATION_ID")
   private OrganizationEntity organization;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "invitation")
+  protected Collection<InvitationAttributeEntity> attributes =
+      new ArrayList<InvitationAttributeEntity>();
 
   @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinTable(
@@ -144,6 +150,14 @@ public class InvitationEntity {
 
   public void setRoles(Set<String> roles) {
     this.roles = roles;
+  }
+
+  public Collection<InvitationAttributeEntity> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(Collection<InvitationAttributeEntity> attributes) {
+    setCollection(attributes, this.attributes);
   }
 
   @Override

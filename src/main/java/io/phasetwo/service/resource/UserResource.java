@@ -1,6 +1,8 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.resource.Converters.*;
+import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_ROLE_MAPPING;
 
 import io.phasetwo.service.model.OrganizationModel;
@@ -8,15 +10,17 @@ import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.BulkResponseItem;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationRole;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.validation.constraints.*;
+import io.phasetwo.service.representation.SwitchOrganization;
+import io.phasetwo.service.util.ActiveOrganization;
+import io.phasetwo.service.util.TokenManager;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 import lombok.extern.jbosslog.JBossLog;
@@ -24,9 +28,7 @@ import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 
-/**
- *
- */
+/** */
 @JBossLog
 public class UserResource extends OrganizationAdminResource {
 
@@ -71,6 +73,50 @@ public class UserResource extends OrganizationAdminResource {
             throw new NotAuthorizedException("Insufficient permissions");
         }
     }
+
+  @PUT
+  @Path("/switch-organization")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response switchActiveOrganization(
+      @Valid SwitchOrganization body
+  ) {
+
+    OrganizationModel org = orgs.getOrganizationById(realm, body.getId());
+
+    if (org == null) {
+      throw new NotFoundException(String.format("%s not found", body.getId()));
+    }
+
+    if(!org.hasMembership(user)){
+      throw new NotAuthorizedException("Not a member of this organization.");
+    }
+
+    // attribute based active organization
+    user.setAttribute(ACTIVE_ORGANIZATION, Collections.singletonList(body.getId()));
+    TokenManager tokenManager = new TokenManager(session, auth.getToken(), realm, user);
+
+    return Response.ok(tokenManager.generateTokens()).build();
+  }
+
+  @GET
+  @Path("/active-organization")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Organization getActiveOrganization() {
+
+    ActiveOrganization activeOrganizationUtil = new ActiveOrganization(
+        session, realm, auth.getUser());
+
+    if (!activeOrganizationUtil.hasOrganization()) {
+      throw new NotFoundException("No available organizations.");
+    }
+
+    if(!activeOrganizationUtil.isValid()){
+      throw new NotAuthorizedException("Action not allowed.");
+    }
+
+    return convertOrganizationModelToOrganization(activeOrganizationUtil.getActiveOrganization());
+  }
 
     @PUT
     @Path("/{userId}/orgs/{orgId}/roles")

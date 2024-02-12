@@ -1,36 +1,29 @@
 package io.phasetwo.service;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.junit.Assert.assertNotNull;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import com.github.xgp.http.server.Server;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import io.phasetwo.client.openapi.model.WebhookRepresentation;
-import io.phasetwo.service.representation.OrganizationRole;
-import lombok.extern.jbosslog.JBossLog;
-import org.apache.http.impl.client.CloseableHttpClient;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.broker.provider.util.SimpleHttp;
-import org.keycloak.representations.idm.RealmEventsConfigRepresentation;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
-@JBossLog
 public class Helpers {
+
+  private static final ObjectMapper mapper;
+
+  static {
+    mapper = new ObjectMapper();
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
+
+  public static ObjectMapper objectMapper() {
+    return mapper;
+  }
+
+  public static String toJsonString(Object representation) throws JsonProcessingException {
+    return objectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(representation);
+  }
 
   public static UserRepresentation createUser(Keycloak keycloak, String realm, String username) {
     UserRepresentation user = new UserRepresentation();
@@ -45,26 +38,31 @@ public class Helpers {
     return keycloak.realm(realm).users().search(user.getUsername()).get(0);
   }
 
+  public static UserRepresentation createUserWithCredentials(
+      Keycloak keycloak, String realm, String username, String password) {
+    return createUserWithCredentials(keycloak, realm, username, password, null);
+  }
+
+  public static UserRepresentation createUserWithCredentials(
+      Keycloak keycloak, String realm, String username, String password, String email) {
+    CredentialRepresentation pass = new CredentialRepresentation();
+    pass.setType(CredentialRepresentation.PASSWORD);
+    pass.setValue(password);
+    pass.setTemporary(false);
+    UserRepresentation user = new UserRepresentation();
+    user.setEnabled(true);
+    user.setUsername(username);
+    if (email != null) {
+      user.setEmail(email);
+    }
+    user.setCredentials(ImmutableList.of(pass));
+    return createUser(keycloak, realm, user);
+  }
+
   public static void deleteUser(Keycloak keycloak, String realm, String id) {
     keycloak.realm(realm).users().delete(id);
   }
 
-  public static String urlencode(String u) {
-    try {
-      return URLEncoder.encode(u, "UTF-8");
-    } catch (Exception e) {
-      return "";
-    }
-  }
-
-  public static int nextFreePort(int from, int to) {
-    for (int port = from; port <= to; port++) {
-      if (isLocalPortFree(port)) {
-        return port;
-      }
-    }
-    throw new IllegalStateException("No free port found");
-  }
   public static RealmEventsConfigRepresentation addEventListener(
           Keycloak keycloak, String realm, String name) {
     RealmResource realmResource = keycloak.realm(realm);
@@ -177,14 +175,5 @@ public class Helpers {
     deleteWebhook(keycloak, httpClient, baseUrl, webhookId);
     srv.stop();
     consumeResult.accept(webhookResponses);
-  }
-
-  private static boolean isLocalPortFree(int port) {
-    try {
-      new ServerSocket(port).close();
-      return true;
-    } catch (IOException e) {
-      return false;
-    }
   }
 }

@@ -191,7 +191,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
     return org.getMembers().stream()
         .map(m -> m.getUserId())
         .map(uid -> session.users().getUserById(realm, uid))
-        .filter(u -> u.getServiceAccountClientLink() == null);
+        .filter(u -> u != null && u.getServiceAccountClientLink() == null);
   }
 
   @Override
@@ -230,6 +230,16 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
     }
       */
     return org.getInvitations().stream().map(i -> new InvitationAdapter(session, realm, em, i));
+  }
+
+  @Override
+  public InvitationModel getInvitation(String id) {
+    InvitationEntity ie = em.find(InvitationEntity.class, id);
+    if (ie != null && ie.getOrganization().equals(org)) {
+      return new InvitationAdapter(session, realm, em, ie);
+    } else {
+      return null;
+    }
   }
 
   @Override
