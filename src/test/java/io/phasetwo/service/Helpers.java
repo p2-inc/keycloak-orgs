@@ -3,10 +3,30 @@ package io.phasetwo.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.phasetwo.client.openapi.model.WebhookRepresentation;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RealmEventsConfigRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
+import org.testcontainers.shaded.com.google.common.collect.Lists;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.junit.Assert.assertNotNull;
+
+import com.github.xgp.http.server.Server;
+
 
 public class Helpers {
 
@@ -175,5 +195,23 @@ public class Helpers {
     deleteWebhook(keycloak, httpClient, baseUrl, webhookId);
     srv.stop();
     consumeResult.accept(webhookResponses);
+  }
+
+  public static int nextFreePort(int from, int to) {
+    for (int port = from; port <= to; port++) {
+      if (isLocalPortFree(port)) {
+        return port;
+      }
+    }
+    throw new IllegalStateException("No free port found");
+  }
+
+  private static boolean isLocalPortFree(int port) {
+    try {
+      new ServerSocket(port).close();
+      return true;
+    } catch (IOException e) {
+      return false;
+    }
   }
 }
