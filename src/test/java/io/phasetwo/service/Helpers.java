@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.phasetwo.client.openapi.model.WebhookRepresentation;
+import lombok.extern.jbosslog.JBossLog;
+
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -27,7 +29,7 @@ import static org.junit.Assert.assertNotNull;
 
 import com.github.xgp.http.server.Server;
 
-
+@JBossLog
 public class Helpers {
 
   private static final ObjectMapper mapper;
@@ -158,42 +160,53 @@ public class Helpers {
   public static void webhookTestWrapper(
           Keycloak keycloak,
           CloseableHttpClient httpClient,
-          int port,
           String baseUrl,
+          int port,
           List<String> types,
           Callable<Void> sendEvents,
-          Consumer<ArrayList<String>> consumeResult
-          ) throws Exception{
+          Consumer<ArrayList<String>> consumeResult) throws Exception {
+
+    addEventListener(keycloak, "master", "ext-event-webhook");
+
     ArrayList<String> webhookResponses = new ArrayList<String>();
 
-    String webhookId = createWebhook(
-            keycloak,
-            httpClient,
-            baseUrl,
-            "http://127.0.0.1:" + port + "/webhook",
-            "qlfwemke",
-            types);
     Server srv = new Server(port);
     srv
-            .router()
-            .POST(
-                    "/webhook",
-                    (request, resp) -> {
-                      String r = request.body();
-//                      log.infof("server webhook: %s", r);
-                      webhookResponses.add(r);
-                      resp.body("OK");
-                      resp.status(202);
-                    });
+        .router()
+        .POST(
+            "/webhook",
+            (request, resp) -> {
+              String b = request.body();
+              log.infof("webhook: body %s", b);
+              webhookResponses.add(b);
+              resp.body("OK");
+              resp.status(200);
+            });
+
     srv.start();
+    log.info("webhook: srv.start()");
+
+    String webhookId = createWebhook(
+        keycloak,
+        httpClient,
+        baseUrl,
+        "http://host.testcontainers.internal:" + port + "/webhook",
+        "qlfwemke",
+        types);
+
     Thread.sleep(1000l);
 
     sendEvents.call();
 
-    Thread.sleep(1000l);
+    Thread.sleep(2500l);
+
+    removeEventListener(keycloak, "master", "ext-event-webhook");
+
+    srv.stop();
+    log.info("webhook: srv.stop()");
 
     deleteWebhook(keycloak, httpClient, baseUrl, webhookId);
-    srv.stop();
+
     consumeResult.accept(webhookResponses);
   }
 

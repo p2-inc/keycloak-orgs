@@ -38,6 +38,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
+import org.testcontainers.Testcontainers;
 import org.testcontainers.junit.jupiter.Container;
 
 public abstract class AbstractOrganizationTest {
@@ -47,11 +48,12 @@ public abstract class AbstractOrganizationTest {
           "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "23.0.0"));
   public static final String ADMIN_CLI = "admin-cli";
   static final String[] deps = {
-    "dnsjava:dnsjava",
-    "org.wildfly.client:wildfly-client-config",
-    "org.jboss.resteasy:resteasy-client",
-    "org.jboss.resteasy:resteasy-client-api",
-    "org.keycloak:keycloak-admin-client"
+      "dnsjava:dnsjava",
+      "org.wildfly.client:wildfly-client-config",
+      "org.jboss.resteasy:resteasy-client",
+      "org.jboss.resteasy:resteasy-client-api",
+      "org.keycloak:keycloak-admin-client",
+      "io.phasetwo.keycloak:keycloak-events"
   };
 
   static List<File> getDeps() {
@@ -79,11 +81,15 @@ public abstract class AbstractOrganizationTest {
           .withContextPath("/auth")
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
-          .withProviderLibsFrom(getDeps());
+          .withProviderLibsFrom(getDeps())
+          .withAccessToHost(true);
+
+  protected static final int WEBHOOK_SERVER_PORT = 8083;
 
   @BeforeAll
   public static void beforeAll() {
-    container.start();
+    Testcontainers.exposeHostPorts(WEBHOOK_SERVER_PORT);
+    container.start();  
     resteasyClient =
         new ResteasyClientBuilderImpl()
             .disableTrustManager()
