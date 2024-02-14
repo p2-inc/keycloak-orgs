@@ -17,6 +17,7 @@ import useUser from "components/utils/useUser";
 import Alert from "components/elements/alerts/alert";
 import { useTranslation } from "react-i18next";
 import { DecoratedRole, RolesList } from "pages/member/components";
+import useOrgDisplayName from "components/utils/org-display-name";
 
 const { realm } = config.env;
 
@@ -43,6 +44,8 @@ const NewInvitation = () => {
     orgId: orgId!,
     realm: config.env.realm,
   });
+
+  const { orgName } = useOrgDisplayName(org);
 
   const {
     register,
@@ -83,9 +86,7 @@ const NewInvitation = () => {
           return P2Toast({
             error: true,
             title:
-              e.status === 401
-                ? t("insufficient-permissions")
-                : e.data.error,
+              e.status === 401 ? t("insufficient-permissions") : e.data.error,
           });
         });
     }
@@ -98,7 +99,7 @@ const NewInvitation = () => {
   return (
     <div className="mt-4 md:mt-16">
       <SectionHeader
-        title={t("invitation-title", [org?.displayName || org?.name || "Organization"])}
+        title={t("invitation-title", [orgName])}
         description={t("invitation-instructions-description")}
         icon={loadingIcon}
         rightContent={

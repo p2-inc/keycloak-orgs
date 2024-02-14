@@ -11,6 +11,7 @@ import SettingsDomain from "./domains";
 import SettingsSSO from "./sso";
 import useUser from "components/utils/useUser";
 import { useTranslation } from "react-i18next";
+import useOrgDisplayName from "components/utils/org-display-name";
 
 export type SettingsProps = {
   hasManageOrganizationRole?: boolean;
@@ -28,8 +29,10 @@ export default function OrganizationSettings() {
     orgId: orgId!,
     realm: config.env.realm,
   });
+  const { orgName } = useOrgDisplayName(org);
   const hasManageOrganizationRole = hasManageOrganizationRoleCheck(orgId);
   const hasManageIDPRole = hasManageIdentityProvidersRole(orgId);
+
   return (
     <>
       <TopHeader
@@ -40,9 +43,7 @@ export default function OrganizationSettings() {
             items={[
               { title: t("organizations"), link: `/organizations` },
               {
-                title: `${
-                  org?.displayName || org?.name || t("organization")
-                }`.trim(),
+                title: orgName,
                 link: `/organizations/${orgId}/details`,
               },
             ]}

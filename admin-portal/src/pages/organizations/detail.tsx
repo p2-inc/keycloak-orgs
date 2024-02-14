@@ -32,6 +32,7 @@ import { useTranslation } from "react-i18next";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toNumber } from "lodash";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import useOrgDisplayName from "components/utils/org-display-name";
 
 export default function OrganizationDetail() {
   const { t } = useTranslation();
@@ -50,6 +51,8 @@ export default function OrganizationDetail() {
     orgId: orgId!,
     realm,
   });
+  const { orgName } = useOrgDisplayName(org);
+
   const {
     data: members = [],
     isLoading,
@@ -114,7 +117,7 @@ export default function OrganizationDetail() {
   return (
     <>
       <TopHeader
-        header={`${org?.displayName || org?.name || ""}`.trim()}
+        header={orgName}
         collapseOnMobile={true}
         leftAreaItems={
           <Breadcrumbs
