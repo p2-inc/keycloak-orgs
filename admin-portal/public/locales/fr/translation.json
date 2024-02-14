@@ -108,7 +108,7 @@
   "internalApp": "Interne",
   "inUse": "En cours d'utilisation",
   "insufficient-permissions": "Permissions insuffisante pour réaliser cette action.",
-  "invitation-email-placeholder": "par exemple, Thomas, thomas@domaine.com",
+  "invitation-email-placeholder": "thomas@domaine.com",
   "invitation-instructions-description": "Ajoutez un nouveau membre à l'organisation en entrant son email et en lui attribuant un rôle au sein de l'organisation. Un email leur sera envoyé avec des instructions pour rejoindre.",
   "invitation-missing-permission-title": "Vous ne pouvez pas gérer les invitations.",
   "invitation-missing-permission-body": "Contactez un administrateur pour obtenir les droits nécessaires.",

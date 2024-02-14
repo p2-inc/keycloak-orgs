@@ -109,7 +109,7 @@
   "internalApp": "Internal",
   "inUse": "In use",
   "insufficient-permissions": "Insufficient permissions to perform action.",
-  "invitation-email-placeholder": "for example, Thomas, thomas@domain.com",
+  "invitation-email-placeholder": "thomas@domain.com",
   "invitation-instructions-description": "Add a new member to the organization by entering their email and assigning them a role within the organization. An email will be sent to them with instructions on how to join.",
   "invitation-missing-permission-title": "You lack the 'manage-invitations' role.",
   "invitation-missing-permission-body": "Speak to an admin in order to be granted this role.",
