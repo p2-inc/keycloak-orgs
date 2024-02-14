@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.phasetwo.client.openapi.model.WebhookRepresentation;
-import lombok.extern.jbosslog.JBossLog;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.keycloak.admin.client.Keycloak;
@@ -16,20 +15,13 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 import org.testcontainers.shaded.com.google.common.collect.Lists;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.junit.Assert.assertNotNull;
 
-import com.github.xgp.http.server.Server;
 
-@JBossLog
 public class Helpers {
 
   private static final ObjectMapper mapper;
@@ -155,76 +147,5 @@ public class Helpers {
                     .auth(keycloak.tokenManager().getAccessTokenString())
                     .asResponse();
     assertThat(response.getStatus(), is(204));
-  }
-
-  public static void webhookTestWrapper(
-          Keycloak keycloak,
-          CloseableHttpClient httpClient,
-          String baseUrl,
-          int port,
-          List<String> types,
-          Callable<Void> sendEvents,
-          Consumer<ArrayList<String>> consumeResult) throws Exception {
-
-    addEventListener(keycloak, "master", "ext-event-webhook");
-
-    ArrayList<String> webhookResponses = new ArrayList<String>();
-
-    Server srv = new Server(port);
-    srv
-        .router()
-        .POST(
-            "/webhook",
-            (request, resp) -> {
-              String b = request.body();
-              log.infof("webhook: body %s", b);
-              webhookResponses.add(b);
-              resp.body("OK");
-              resp.status(200);
-            });
-
-    srv.start();
-    log.info("webhook: srv.start()");
-
-    String webhookId = createWebhook(
-        keycloak,
-        httpClient,
-        baseUrl,
-        "http://host.testcontainers.internal:" + port + "/webhook",
-        "qlfwemke",
-        types);
-
-    Thread.sleep(1000l);
-
-    sendEvents.call();
-
-    Thread.sleep(2500l);
-
-    removeEventListener(keycloak, "master", "ext-event-webhook");
-
-    srv.stop();
-    log.info("webhook: srv.stop()");
-
-    deleteWebhook(keycloak, httpClient, baseUrl, webhookId);
-
-    consumeResult.accept(webhookResponses);
-  }
-
-  public static int nextFreePort(int from, int to) {
-    for (int port = from; port <= to; port++) {
-      if (isLocalPortFree(port)) {
-        return port;
-      }
-    }
-    throw new IllegalStateException("No free port found");
-  }
-
-  private static boolean isLocalPortFree(int port) {
-    try {
-      new ServerSocket(port).close();
-      return true;
-    } catch (IOException e) {
-      return false;
-    }
   }
 }
