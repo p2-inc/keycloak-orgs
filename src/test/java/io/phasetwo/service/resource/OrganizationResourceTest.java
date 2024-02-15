@@ -56,6 +56,7 @@ import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.util.JsonSerialization;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.trilead.ssh2.transport.KexState;
 
@@ -676,13 +677,14 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
         add(new OrganizationRole().name("view-fair"));
       }
     };
+    // log.infof("create 3 bulk roles req: %s", JsonSerialization.writeValueAsString(roleList));
 
     SimpleHttp.Response resp = SimpleHttp.doPut(url, httpClient)
         .auth(keycloak.tokenManager().getAccessTokenString())
         .json(roleList)
         .asResponse();
 
-    // log.infof("response: %s", resp.asJson().toPrettyString());
+    // log.infof("create 3 bulk roles: %s", resp.asJson().toPrettyString());
     assertThat(resp.getStatus(), is(207));
     resp.asJson().forEach(i -> {
       assertThat(i.get("status").asInt(), is(201));
@@ -816,6 +818,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       .json(roleList)
       .asResponse();
     
+    // log.infof("grant 1 already granted and 1 existing role resp: %s", resp.asJson().toPrettyString());
     assertThat(resp.getStatus(), is(207));
     resp.asJson().forEach(i -> {
         assertThat(i.get("status").asInt(), is(201));
@@ -967,6 +970,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       add(new OrganizationRole().name("eat-apples"));
       add(new OrganizationRole().name("drink-coffee"));
     }};
+    log.infof("delete 2 existing roles req: %s", JsonSerialization.writeValueAsString(roleList));
     resp = SimpleHttp.doPatch(url, httpClient)
         .auth(keycloak.tokenManager().getAccessTokenString())
         .json(roleList)
@@ -976,7 +980,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     resp.asJson().forEach(i -> {
       assertThat(i.get("status").asInt(), is(204));
     });
-    // log.infof("delete 2 existing roles resp: %s", resp.asJson().toPrettyString());
+    log.infof("delete 2 existing roles resp: %s", resp.asJson().toPrettyString());
 
     Thread.sleep(1000l);
     // webhookEvents.stream().forEach(i -> {

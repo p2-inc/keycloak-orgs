@@ -65,15 +65,15 @@ public class RolesResource extends OrganizationAdminResource {
     List<BulkResponseItem> responseItems = new ArrayList<>();
 
     representation.forEach(role -> {
-      int status = Response.Status.CREATED.getStatusCode();
-      String error = null;
+      BulkResponseItem item = new BulkResponseItem()
+        .status(Response.Status.CREATED.getStatusCode());
       try {
-        createOrganizationRole(role);
+        item.setItem(createOrganizationRole(role));
       } catch (Exception ex){
-        status = Response.Status.BAD_REQUEST.getStatusCode();
-        error = ex.getMessage();
+        item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+        item.setError(ex.getMessage());
       }
-      responseItems.add(new BulkResponseItem().status(status).error(error).item(role));
+      responseItems.add(item);
     });
 
     return Response
@@ -92,15 +92,16 @@ public class RolesResource extends OrganizationAdminResource {
     List<BulkResponseItem> responseItems = new ArrayList<>();
 
     representation.forEach(role->{
-      int status = Response.Status.NO_CONTENT.getStatusCode();
-      String error = null;
+      BulkResponseItem item = new BulkResponseItem()
+        .status(Response.Status.NO_CONTENT.getStatusCode());
       try {
         deleteOrganizationRole(role.getName());
+        item.setItem(role);
       } catch (Exception ex){
-        status = Response.Status.BAD_REQUEST.getStatusCode();
-        error = ex.getMessage();
+        item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+        item.setError(ex.getMessage());
       }
-      responseItems.add(new BulkResponseItem().status(status).error(error).item(role));
+      responseItems.add(item);
     });
 
     return Response

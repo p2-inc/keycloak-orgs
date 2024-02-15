@@ -2,7 +2,6 @@ package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.resource.Converters.*;
-import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_ROLE_MAPPING;
 
 import io.phasetwo.service.model.OrganizationModel;
@@ -132,8 +131,8 @@ public class UserResource extends OrganizationAdminResource {
         List<BulkResponseItem> responseItems = new ArrayList<>();
 
         rolesRep.forEach(roleRep -> {
-            int status = Response.Status.CREATED.getStatusCode();
-            String error = null;
+            BulkResponseItem item = new BulkResponseItem()
+                .status(Response.Status.CREATED.getStatusCode());
             try {
                 OrganizationRoleModel role = org.getRoleByName(roleRep.getName());
                 if (role == null) {
@@ -150,11 +149,12 @@ public class UserResource extends OrganizationAdminResource {
                             .representation(userId)
                             .success();
                 }
+                item.setItem(convertOrganizationRole(role));
             } catch (Exception ex) {
-                status = Response.Status.BAD_REQUEST.getStatusCode();
-                error = ex.getMessage();
+                item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+                item.setError(ex.getMessage());
             }
-            responseItems.add(new BulkResponseItem().status(status).error(error).item(roleRep));
+            responseItems.add(item);
         });
 
         return Response
@@ -178,8 +178,8 @@ public class UserResource extends OrganizationAdminResource {
         List<BulkResponseItem> responseItems = new ArrayList<>();
 
         rolesRep.forEach(roleRep -> {
-            int status = Response.Status.NO_CONTENT.getStatusCode();
-            String error = null;
+            BulkResponseItem item = new BulkResponseItem()
+                .status(Response.Status.NO_CONTENT.getStatusCode());
             OrganizationRoleModel role = org.getRoleByName(roleRep.getName());
             try {
                 if (role == null) {
@@ -194,11 +194,12 @@ public class UserResource extends OrganizationAdminResource {
                             .representation(userId)
                             .success();
                 }
+                item.setItem(convertOrganizationRole(role));
             } catch (Exception ex) {
-                status = Response.Status.BAD_REQUEST.getStatusCode();
-                error = ex.getMessage();
+                item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+                item.setError(ex.getMessage());
             }
-            responseItems.add(new BulkResponseItem().status(status).error(error).item(roleRep));
+            responseItems.add(item);
         });
         return Response
                 .status(207) //<-Multi-Status

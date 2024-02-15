@@ -152,6 +152,7 @@ A group of custom REST resources are made available for administrator and custom
 - Organizations - CRUD Organizations
 - Memberships - CRUD and check User-Organization membership
 - Roles - CRUD Organization Roles and grant/revoke Roles to Users
+- [Bulk Roles](./docs/bulk-roles.md) - support for bulk Roles resources
 - Identity Providers - A subset of the Keycloak IdP APIs that allows Organization administrators to manage their own IdP
 
 ### Mappers
