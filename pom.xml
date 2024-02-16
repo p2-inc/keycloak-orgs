@@ -310,6 +310,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>io.phasetwo.keycloak</groupId>
+      <artifactId>keycloak-events</artifactId>
+      <version>0.26</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
       <version>2.2</version>

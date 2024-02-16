@@ -1,13 +1,11 @@
 package io.phasetwo.service.resource;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.phasetwo.service.Helpers.createUser;
-import static io.phasetwo.service.Helpers.createUserWithCredentials;
-import static io.phasetwo.service.Helpers.deleteUser;
-import static io.phasetwo.service.Helpers.objectMapper;
+import static io.phasetwo.service.Helpers.*;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasEntry;
@@ -25,6 +23,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import io.phasetwo.client.OrganizationsResource;
+import io.phasetwo.client.PhaseTwo;
+import io.phasetwo.client.openapi.model.EventRepresentation;
 import io.phasetwo.client.openapi.model.IdentityProviderMapperRepresentation;
 import io.phasetwo.client.openapi.model.IdentityProviderRepresentation;
 import io.phasetwo.client.openapi.model.InvitationRequestRepresentation;
@@ -33,10 +34,7 @@ import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
-import io.phasetwo.service.representation.Invitation;
-import io.phasetwo.service.representation.InvitationRequest;
-import io.phasetwo.service.representation.LinkIdp;
-import io.phasetwo.service.representation.SwitchOrganization;
+import io.phasetwo.service.representation.*;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -47,15 +45,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.util.JsonSerialization;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.trilead.ssh2.transport.KexState;
+
+import com.github.xgp.http.server.Server;
 
 @JBossLog
 @Testcontainers
@@ -67,9 +72,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   @Test
   void testAddGetUpdateDeleteOrg() throws Exception {
     // get single
-    OrganizationRepresentation rep =
-        createOrganization(
-            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
+    OrganizationRepresentation rep = createOrganization(
+        new OrganizationRepresentation().name("example").domains(List.of("example.com")));
     String id = rep.getId();
 
     assertThat(rep, notNullValue());
@@ -84,8 +88,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get list
     Response response = getRequest();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRepresentation> organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRepresentation> organizations = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertNotNull(organizations);
     assertThat(organizations.size(), is(1));
 
@@ -108,7 +113,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // get single
     response = getRequest(id);
-    rep = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    rep = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     assertThat(rep.getId(), notNullValue());
@@ -134,8 +140,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest();
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    organizations = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertNotNull(organizations);
     assertThat(organizations.size(), is(0));
   }
@@ -146,8 +152,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // for some reason the admin user can add
     // add admin user membership
-    UserRepresentation admin =
-        keycloak.realm(REALM).users().search(container.getAdminUsername()).get(0);
+    UserRepresentation admin = keycloak.realm(REALM).users().search(container.getAdminUsername()).get(0);
 
     Response response = putRequest("foo", org.getId(), "members", admin.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -155,8 +160,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest("me");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    Map<String, Object> claim =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    Map<String, Object> claim = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
 
     assertThat(claim.keySet().size(), is(1));
     assertThat(claim.containsKey(org.getId()), is(true));
@@ -175,37 +180,38 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     List<String> ids = new ArrayList<>();
     ids.add(
         createOrganization(
-                new OrganizationRepresentation().name("example").domains(List.of("example.com")))
+            new OrganizationRepresentation().name("example").domains(List.of("example.com")))
             .getId());
     ids.add(
         createOrganization(new OrganizationRepresentation().name("foo").domains(List.of("foo.com")))
             .getId());
     ids.add(
         createOrganization(
-                new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com")))
+            new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com")))
             .getId());
     ids.add(
         createOrganization(new OrganizationRepresentation().name("bar").domains(List.of("bar.com")))
             .getId());
     ids.add(
         createOrganization(
-                new OrganizationRepresentation()
-                    .name("baz")
-                    .domains(List.of("baz.com"))
-                    .attributes(Map.of("foo", List.of("bar"))))
+            new OrganizationRepresentation()
+                .name("baz")
+                .domains(List.of("baz.com"))
+                .attributes(Map.of("foo", List.of("bar"))))
             .getId());
     ids.add(
         createOrganization(
-                new OrganizationRepresentation()
-                    .name("qux")
-                    .domains(List.of("baz.com"))
-                    .attributes(Map.of("foo", List.of("bar"))))
+            new OrganizationRepresentation()
+                .name("qux")
+                .domains(List.of("baz.com"))
+                .attributes(Map.of("foo", List.of("bar"))))
             .getId());
 
     Response response = givenSpec().when().queryParam("search", "foo").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRepresentation> orgs =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRepresentation> orgs = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(2));
@@ -214,24 +220,26 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       assertThat(org.getDomains(), hasSize(1));
     }
 
-    response =
-        givenSpec().when().queryParam("search", "foo").queryParam("max", 1).get().andReturn();
+    response = givenSpec().when().queryParam("search", "foo").queryParam("max", 1).get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(1));
 
     response = givenSpec().when().queryParam("search", "none").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(0));
 
     response = givenSpec().when().queryParam("search", "a").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(4));
@@ -239,16 +247,17 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // orgs attribute search
     response = givenSpec().when().queryParam("q", "foo:bar").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(2));
 
     // Search attributes and name
-    response =
-        givenSpec().when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
+    response = givenSpec().when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     ;
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(1));
@@ -274,8 +283,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     Response response = getRequest(id, "domains");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationDomainRepresentation> domains =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationDomainRepresentation> domains = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(domains, notNullValue());
     assertThat(domains, hasSize(1));
     OrganizationDomainRepresentation domain = domains.get(0);
@@ -293,7 +303,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     response = getRequest(id, "domains");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    domains = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    domains = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(domains, notNullValue());
     assertThat(domains, hasSize(2));
 
@@ -318,18 +329,17 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     OrganizationRepresentation org = createDefaultOrg();
 
     // import-config
-    Map<String, Object> urlConf =
-        ImmutableMap.of(
-            "fromUrl",
-                "https://login.microsoftonline.com/74df8381-4935-4fa8-8634-8e3413f93086/federationmetadata/2007-06/federationmetadata.xml?appid=ba149e64-4512-440b-a1b4-ae976d85f1ec",
-            "providerId", "saml",
-            "realm", REALM);
+    Map<String, Object> urlConf = ImmutableMap.of(
+        "fromUrl",
+        "https://login.microsoftonline.com/74df8381-4935-4fa8-8634-8e3413f93086/federationmetadata/2007-06/federationmetadata.xml?appid=ba149e64-4512-440b-a1b4-ae976d85f1ec",
+        "providerId", "saml",
+        "realm", REALM);
     Response response = postRequest(urlConf, org.getId(), "idps", "import-config");
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    Map<String, Object> config =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    Map<String, Object> config = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(config, notNullValue());
     assertThat(config.keySet(), hasSize(11));
     assertThat(config, hasEntry("loginHint", "false"));
@@ -338,16 +348,16 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(config, hasEntry("wantAuthnRequestsSigned", "false"));
 
     // import-config manually
-    urlConf =
-        ImmutableMap.of(
-            "fromUrl",
-                "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
-            "providerId", "saml",
-            "realm", REALM);
+    urlConf = ImmutableMap.of(
+        "fromUrl",
+        "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
+        "providerId", "saml",
+        "realm", REALM);
     response = postRequest(urlConf, org.getId(), "idps", "import-config");
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    config = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    config = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(config, notNullValue());
     assertThat(config.keySet(), hasSize(11));
     assertThat(config, hasEntry("loginHint", "false"));
@@ -391,8 +401,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
 
     // get empty members list
-    List<UserRepresentation> members =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<UserRepresentation> members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(members, notNullValue());
     assertThat(members, hasSize(1)); // org admin default
 
@@ -412,7 +422,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get members list
     response = getRequest(id, "members");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(members, notNullValue());
     assertThat(members, hasSize(2)); // +default org admin
     assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
@@ -421,8 +432,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = givenSpec("users", user.getId(), "orgs").when().get().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    List<OrganizationRepresentation> representations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRepresentation> representations = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(representations, notNullValue());
     assertThat(representations, hasSize(1));
     assertThat(representations.get(0).getName(), is("example"));
@@ -449,8 +461,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     // get default roles list
-    List<OrganizationRoleRepresentation> roles =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRoleRepresentation> roles = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
 
@@ -477,8 +490,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get default roles list
     Response response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRoleRepresentation> roles =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRoleRepresentation> roles = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     ;
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
@@ -490,8 +504,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get single role
     response = getRequest(id, "roles", orgRoleName);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    OrganizationRoleRepresentation role =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    OrganizationRoleRepresentation role = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(role, notNullValue());
     assertThat(role.getId(), notNullValue());
     assertThat(role.getName(), is(orgRoleName));
@@ -499,7 +514,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get role list
     response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 1));
 
@@ -512,7 +528,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // create 3 roles
-    String[] additionalRoles = {orgRoleName, "bake-pies", "view-fair"};
+    String[] additionalRoles = { orgRoleName, "bake-pies", "view-fair" };
     for (String roleName : additionalRoles) {
       createOrgRole(id, roleName);
     }
@@ -520,7 +536,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get role list
     response = getRequest(id, "roles");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(roles, notNullValue());
     assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
 
@@ -537,8 +554,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get users with role
     response = getRequest(id, "roles", orgRoleName, "users");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<UserRepresentation> rs =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<UserRepresentation> rs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(rs, notNullValue());
     assertThat(rs, hasSize(1));
     assertThat(rs.get(0).getUsername(), is("johndoe"));
@@ -553,7 +570,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get users with role
     response = getRequest(id, "roles", orgRoleName, "users");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    rs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    rs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(rs, notNullValue());
     assertThat(rs, empty());
 
@@ -577,7 +595,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     for (String roleName : additionalRoles) {
       response = getRequest(id, "roles", roleName, "users");
       assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-      rs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+      rs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+      });
       assertThat(rs, notNullValue());
       assertThat(rs, empty());
     }
@@ -592,18 +611,446 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(id);
   }
 
+  String webhookUrl() {
+    return getAuthUrl() + "/realms/master/webhooks";
+  }
+
+  String eventsUrl() {
+    return getAuthUrl() + "/realms/master/events";
+  }
+
+  @Test
+  public void testAddGetDeleteRolesBulk() throws Exception {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    // get default roles list
+    Response response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationRoleRepresentation> roles = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
+
+    CloseableHttpClient httpClient = HttpClients.createDefault();
+    addEventListener(keycloak, "master", "ext-event-webhook");
+    List<JsonNode> webhookEvents = new ArrayList<JsonNode>();
+    Server webhookServer = new Server(WEBHOOK_SERVER_PORT);
+    webhookServer
+        .router()
+        .POST(
+            "/webhook",
+            (request, resp) -> {
+              String body = request.body();
+              // log.infof("webhook: body %s", body);
+              JsonNode node = objectMapper().readTree(body);
+              webhookEvents.add(node);
+              // log.infof("webhook: rep %s", node.toString());
+              resp.body("OK");
+              resp.status(200);
+            });
+
+    webhookServer.start();
+    log.info("webhookServer: started");
+
+    String webhookId = createWebhook(
+      keycloak,
+      httpClient,
+      webhookUrl(),
+      "http://host.testcontainers.internal:" + WEBHOOK_SERVER_PORT + "/webhook",
+      "qlfwemke",
+      List.of("admin.*"));
+
+
+    // region CREATE ORG ROLES
+    // create 3 bulk roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    String url = getAuthUrl() + "/realms/master/orgs/" + org.getId() + "/roles";
+    List<OrganizationRole> roleList = new ArrayList<>() {
+      {
+        add(new OrganizationRole().name("eat-apples"));
+        add(new OrganizationRole().name("bake-pies"));
+        add(new OrganizationRole().name("view-fair"));
+      }
+    };
+    // log.infof("create 3 bulk roles req: %s", JsonSerialization.writeValueAsString(roleList));
+
+    SimpleHttp.Response resp = SimpleHttp.doPut(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+
+    // log.infof("create 3 bulk roles: %s", resp.asJson().toPrettyString());
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> {
+      assertThat(i.get("status").asInt(), is(201));
+    });
+
+    Thread.sleep(1000l);
+    assertThat(webhookEvents.stream()
+      .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE-CREATE"))
+      .count(), is(3L));
+
+    // get role list
+    response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    roles = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
+    assertThat(roles, notNullValue());
+    assertThat(roles, 
+      hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
+    
+    // create 2 already existing roles - everything fails
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+    
+    url = getAuthUrl() + "/realms/master/orgs/" + org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("eat-apples"));
+      add(new OrganizationRole().name("eat-apples"));
+    }};
+    resp = SimpleHttp.doPut(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+      .forEach(i -> { 
+        assertThat(i.get("status").asInt(), is(400)); 
+      });
+
+    Thread.sleep(1000l);
+
+    assertThat(webhookEvents.size(), is(0));
+
+    // create 1 already existing role, 1 new role - some fail
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/orgs/" + org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("eat-apples"));
+      add(new OrganizationRole().name("drink-coffee"));
+    }};
+    resp = SimpleHttp.doPut(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+      
+    assertThat(resp.getStatus(), is(207));
+    assertThat(resp.asJson().get(0).get("status").asInt(), is(400));
+    assertThat(resp.asJson().get(1).get("status").asInt(), is(201));
+
+    Thread.sleep(1000l);
+
+    assertThat(webhookEvents.size(), is(1));
+
+    // get role list
+    response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    roles = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
+    assertThat(roles, notNullValue());
+    assertThat(roles, 
+      hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 4));
+    // endregion
+    
+    // region GRANT USER ORG ROLES
+    // create a user
+    UserRepresentation user = createUser(keycloak, REALM, "johndoe");
+    
+    // add membership
+    response = putRequest("foo", id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    
+    // grant 2 exisiting bulk roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" + 
+      org.getId() + "/roles";
+
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("eat-apples"));
+      add(new OrganizationRole().name("bake-pies"));
+    }};
+    
+    resp = SimpleHttp.doPut(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+    
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> { 
+      assertThat(i.get("status").asInt(), is(201)); 
+    });
+
+    Thread.sleep(1000l);
+    assertThat(webhookEvents.stream()
+      .filter(i -> i.get("type")
+                    .asText()
+                    .equals("admin.ORGANIZATION_ROLE_MAPPING-CREATE"))
+                    .count(), is(2L));
+
+    // grant 1 already granted and 1 existing role
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+    
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() +
+      "/orgs/" + org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("bake-pies"));
+      add(new OrganizationRole().name("view-fair"));
+    }};
+    
+    resp = SimpleHttp.doPut(url, httpClient)
+      .auth(keycloak.tokenManager().getAccessTokenString())
+      .json(roleList)
+      .asResponse();
+    
+    // log.infof("grant 1 already granted and 1 existing role resp: %s", resp.asJson().toPrettyString());
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> {
+        assertThat(i.get("status").asInt(), is(201));
+      });
+
+    Thread.sleep(1000l);
+    assertThat(webhookEvents.stream()
+      .filter(i -> i.get("type")
+                    .asText()
+                    .equals("admin.ORGANIZATION_ROLE_MAPPING-CREATE"))
+                    .count(), is(1L));
+
+    // grant 2 non-existing roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() +
+      "/orgs/" + org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("eat-fruits"));
+      add(new OrganizationRole().name("drink-tea"));
+    }};
+    
+    resp = SimpleHttp.doPut(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+    
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> {
+        assertThat(i.get("status").asInt(), is(400));
+      });
+    // log.infof("grant 2 non-existing roles resp: %s", resp.asJson().toPrettyString());
+
+    Thread.sleep(1000l);
+    // webhookEvents.stream().forEach(i -> {
+    //   log.infof("grant 2 non-existing roles event: %s", i.toPrettyString());
+    // });
+    assertThat(webhookEvents.stream()
+      .filter(i -> i.get("type")
+                    .asText()
+                    .equals("admin.ORGANIZATION_ROLE_MAPPING-CREATE"))
+                    .count(), is(0L));
+    // endregion
+    
+    // region REVOKE USER ORG ROLES
+    // revoke 2 non-existing roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+    
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() +
+      "/orgs/" + org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("eat-fruits"));
+      add(new OrganizationRole().name("drink-tea"));
+    }};
+    
+    resp= SimpleHttp.doPatch(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+    
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> {
+        assertThat(i.get("status").asInt(), is(400));
+      });
+    // no events emitted
+    Thread.sleep(1000l);
+    assertThat(webhookEvents.stream()
+      .filter(i -> i.get("type")
+                    .asText()
+                    .equals("admin.ORGANIZATION_ROLE_MAPPING-DELETE"))
+                    .count(), is(0L));
+
+    // revoke 2 granted roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() +
+      "/orgs/" + org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("eat-apples"));
+      add(new OrganizationRole().name("bake-pies"));
+    }};
+    
+    resp= SimpleHttp.doPatch(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+    
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> {
+      assertThat(i.get("status").asInt(), is(204));
+    });
+
+    Thread.sleep(1000l);
+    assertThat(webhookEvents.stream()
+      .filter(i -> i.get("type")
+                    .asText()
+                    .equals("admin.ORGANIZATION_ROLE_MAPPING-DELETE"))
+                    .count(), is(2L));
+
+    // revoke 1 already revoked and 1 granted role
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() +
+      "/orgs/" + org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("bake-pies"));
+      add(new OrganizationRole().name("view-fair"));
+    }};
+    
+    resp= SimpleHttp.doPatch(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+    
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> {
+      assertThat(i.get("status").asInt(), is(204));
+    });
+
+    Thread.sleep(1000l);
+    assertThat(webhookEvents.stream()
+      .filter(i -> i.get("type")
+                    .asText()
+                    .equals("admin.ORGANIZATION_ROLE_MAPPING-DELETE"))
+                    .count(), is(1L));
+    
+    // delete user
+    deleteUser(keycloak, REALM, user.getId());
+    Thread.sleep(1000l);
+    // endregion
+    
+    // region DELETE ORG ROLES
+    // delete 2 existing roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/orgs/" +
+      org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("eat-apples"));
+      add(new OrganizationRole().name("drink-coffee"));
+    }};
+    log.infof("delete 2 existing roles req: %s", JsonSerialization.writeValueAsString(roleList));
+    resp = SimpleHttp.doPatch(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+    
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> {
+      assertThat(i.get("status").asInt(), is(204));
+    });
+    log.infof("delete 2 existing roles resp: %s", resp.asJson().toPrettyString());
+
+    Thread.sleep(1000l);
+    // webhookEvents.stream().forEach(i -> {
+    //   log.infof("delete 2 existing roles event: %s", i.toPrettyString());
+    // });
+
+    assertThat(webhookEvents.stream()
+      .filter(i -> i.get("type")
+                    .asText()
+                    .equals("admin.ORGANIZATION_ROLE-DELETE"))
+                    .count(), is(2L));
+
+    // delete existing and non-existing roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/orgs/" +
+      org.getId() + "/roles";
+    roleList = new ArrayList<>() {{
+      add(new OrganizationRole().name("eat-apples"));
+      add(new OrganizationRole().name("drink-coffee"));
+      add(new OrganizationRole().name("bake-pies"));
+      add(new OrganizationRole().name("view-fair"));
+    }};
+    resp = SimpleHttp.doPatch(url, httpClient)
+        .auth(keycloak.tokenManager().getAccessTokenString())
+        .json(roleList)
+        .asResponse();
+    
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson().forEach(i -> {
+      assertThat(i.get("status").asInt(), is(204));
+    });
+
+    Thread.sleep(1000l);
+    assertThat(webhookEvents.stream().count(), is(4L));
+    // endregion
+
+    removeEventListener(keycloak, "master", "ext-event-webhook");
+
+    webhookServer.stop();
+    log.info("webhookServer: stopped");
+
+    deleteWebhook(keycloak, httpClient, webhookUrl(), webhookId);
+
+    // ensure we deleted all created roles
+    response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    roles = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
+
+    // delete org
+    deleteOrganization(org.getId());
+  }
+
   @Test
   void testAddGetDeleteInvitations() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
     String id = org.getId();
 
     // create invitation
-    InvitationRequest inv =
-        new InvitationRequest()
-            .email("johndoe@example.com")
-            .attribute("foo", "bar")
-            .attribute("foo", "bar2")
-            .attribute("humpty", "dumpty");
+    InvitationRequest inv = new InvitationRequest()
+        .email("johndoe@example.com")
+        .attribute("foo", "bar")
+        .attribute("foo", "bar2")
+        .attribute("humpty", "dumpty");
     // xxx
     Response response = postRequest(inv, id, "invitations");
     assertThat(response.statusCode(), is(Status.CREATED.getStatusCode()));
@@ -615,8 +1062,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get invitations
     response = getRequest(id, "invitations");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    List<Invitation> invites =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<Invitation> invites = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(invites, notNullValue());
     assertThat(invites, hasSize(1));
     assertThat(invites.get(0).getEmail(), is("johndoe@example.com"));
@@ -632,8 +1079,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // get a specific innvitation
     response = getRequest(id, "invitations", invId);
-    Invitation invite =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    Invitation invite = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(invite.getEmail(), is("johndoe@example.com"));
     assertThat(invite.getAttributes().size(), is(2));
     assertThat(invite.getAttributes().get("foo"), notNullValue());
@@ -653,8 +1100,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // create user and give membership
-    UserRepresentation user1 =
-        createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
+    UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
     // grant membership to org
     response = putRequest("foo", id, "members", user1.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -666,7 +1112,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get invitations
     response = getRequest(id, "invitations");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    invites = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    invites = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(invites, notNullValue());
     assertThat(invites, empty());
 
@@ -685,19 +1132,17 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // create some others too
     List<String> ids = new ArrayList<>();
     for (int n = 0; n < 150; n++) {
-      OrganizationRepresentation organization =
-          createOrganization(
-              new OrganizationRepresentation().name("foo" + n).domains(List.of("foo.com")));
+      OrganizationRepresentation organization = createOrganization(
+          new OrganizationRepresentation().name("foo" + n).domains(List.of("foo.com")));
       ids.add(organization.getId());
     }
 
     // create user and give membership
-    UserRepresentation user1 =
-        createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
+    UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "user1", "pass", "johndoe@example.com");
     // grant membership to orgs
     Response response = putRequest("foo", id, "members", user1.getId());
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-    String[] toJoin = {ids.get(11), ids.get(99), ids.get(100), ids.get(115), ids.get(149)};
+    String[] toJoin = { ids.get(11), ids.get(99), ids.get(100), ids.get(115), ids.get(149) };
     for (String i : toJoin) {
       response = putRequest("foo", i, "members", user1.getId());
       assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -709,18 +1154,21 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // list orgs by admin
     response = getRequest();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRepresentation> orgs =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<OrganizationRepresentation> orgs = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(orgs.size(), is(100));
     response = givenSpec().when().queryParam("first", 100).get().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(orgs.size(), is(51));
 
     // list orgs by user
     response = getRequest(userKeycloak, "");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(orgs.size(), is(6));
 
     // delete user
@@ -740,8 +1188,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     String id = org.getId();
 
     String alias1 = "linking-provider-1";
-    org.keycloak.representations.idm.IdentityProviderRepresentation idp =
-        new org.keycloak.representations.idm.IdentityProviderRepresentation();
+    org.keycloak.representations.idm.IdentityProviderRepresentation idp = new org.keycloak.representations.idm.IdentityProviderRepresentation();
     idp.setAlias(alias1);
     idp.setProviderId("oidc");
     idp.setEnabled(true);
@@ -776,8 +1223,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get it
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<IdentityProviderRepresentation> idps =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<IdentityProviderRepresentation> idps = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
 
@@ -831,8 +1279,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get idps
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<IdentityProviderRepresentation> idps =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<IdentityProviderRepresentation> idps = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
 
@@ -852,7 +1301,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get idps
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(2));
     for (IdentityProviderRepresentation i : idps) {
@@ -862,12 +1312,13 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get mappers for idp
     response = getRequest(id, "idps", alias1, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<IdentityProviderMapperRepresentation> mappers =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<IdentityProviderMapperRepresentation> mappers = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(mappers, empty());
 
     // add a mapper to the idp
-    //    {"identityProviderAlias":"oidc","config":
+    // {"identityProviderAlias":"oidc","config":
     IdentityProviderMapperRepresentation mapper = new IdentityProviderMapperRepresentation();
     mapper.setIdentityProviderAlias(alias1);
     mapper.setName("name");
@@ -885,7 +1336,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     response = getRequest(id, "idps", alias1, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(mappers, hasSize(1));
     String mapperId = mappers.get(0).getId();
     assertThat(mapperId, notNullValue());
@@ -893,7 +1345,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get single mapper for idp
     response = getRequest(id, "idps", alias1, "mappers", mapperId);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    mapper = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    mapper = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(mapper, notNullValue());
     assertThat(mapper.getName(), is("name"));
     assertThat(mapper.getIdentityProviderAlias(), is(alias1));
@@ -913,7 +1366,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get single mapper for idp
     response = getRequest(id, "idps", alias1, "mappers", mapperId);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    mapper = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    mapper = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(mapper, notNullValue());
     assertThat(mapper.getConfig().get("user.attribute"), is("lastName"));
     assertThat(mapper.getConfig().get("claim"), is("familyName"));
@@ -925,7 +1379,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get mappers for idp
     response = getRequest(id, "idps", alias1, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(mappers, empty());
 
     // delete idps
@@ -937,7 +1392,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // get idps
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(idps, notNullValue());
     assertThat(idps, empty());
 
@@ -948,14 +1404,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   @Test
   void testIdpsOwnedOrgs() throws IOException {
 
-    OrganizationRepresentation org =
-        createOrganization(
-            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
+    OrganizationRepresentation org = createOrganization(
+        new OrganizationRepresentation().name("example").domains(List.of("example.com")));
     String orgId1 = org.getId();
 
-    org =
-        createOrganization(
-            new OrganizationRepresentation().name("sample").domains(List.of("sample.com")));
+    org = createOrganization(
+        new OrganizationRepresentation().name("sample").domains(List.of("sample.com")));
     String orgId2 = org.getId();
 
     // create idp for org 1
@@ -997,8 +1451,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // check that org 1 can only see idp 1
     response = getRequest(orgId1, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<IdentityProviderRepresentation> idps =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<IdentityProviderRepresentation> idps = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
     assertThat(idps.get(0).getAlias(), is(alias1));
@@ -1006,7 +1461,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // check that org 2 can only see idp 2
     response = getRequest(orgId2, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
     assertThat(idps.get(0).getAlias(), is(alias2));
@@ -1053,7 +1509,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     response = getRequest(kc1, orgId1);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    rep = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    rep = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
     assertThat(rep.getId(), notNullValue());
     assertThat(rep.getAttributes().keySet(), empty());
     assertThat(rep.getDisplayName(), is("Example company"));
@@ -1062,38 +1519,37 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(orgId1));
-    //  get memberships
+    // get memberships
     response = getRequest(kc1, "/%s/members".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    //  add memberships
+    // add memberships
     UserRepresentation user2 = createUserWithCredentials(keycloak, REALM, "user2", "pass");
     response = putRequest(kc1, "foo", "/%s/members/%s".formatted(orgId1, user2.getId()));
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-    //  remove memberships
+    // remove memberships
     response = deleteRequest(kc1, "/%s/members/%s".formatted(orgId1, user2.getId()));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
-    //  get invitations
+    // get invitations
     response = getRequest(kc1, "/%s/invitations".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    //  add invitations
-    InvitationRequestRepresentation inv =
-        new InvitationRequestRepresentation().email("johndoe@example.com");
+    // add invitations
+    InvitationRequestRepresentation inv = new InvitationRequestRepresentation().email("johndoe@example.com");
     response = postRequest(kc1, inv, "/%s/invitations".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     String loc = response.getHeader("Location");
     String inviteId = loc.substring(loc.lastIndexOf("/") + 1);
-    //  remove invitations
+    // remove invitations
     response = deleteRequest(kc1, "/%s/invitations/%s".formatted(orgId1, inviteId));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
-    //  get roles
+    // get roles
     response = getRequest(kc1, "/%s/roles".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    //  add roles
+    // add roles
     createOrgRole(kc1, orgId1, "test-role");
-    //  remove roles
+    // remove roles
     response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId1, "test-role"));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
-    //  add idp
+    // add idp
     String alias1 = "org-admin-test";
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
     idp.setAlias(alias1);
@@ -1122,11 +1578,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = postRequest(kc1, idp, "/%s/idps".formatted(orgId1));
     assertThat(response.statusCode(), is(Status.CREATED.getStatusCode()));
 
-    //  get idp xxx
+    // get idp xxx
     response = getRequest("/%s/idps/%s".formatted(orgId1, alias1));
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    IdentityProviderRepresentation idp1 =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    IdentityProviderRepresentation idp1 = objectMapper().readValue(response.getBody().asString(),
+        new TypeReference<>() {
+        });
     assertThat(idp1, notNullValue());
     assertThat(idp1.getAlias(), is(alias1));
     assertThat(idp1.getProviderId(), is(idp.getProviderId()));
@@ -1134,7 +1591,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(idp1.getFirstBrokerLoginFlowAlias(), is(idp.getFirstBrokerLoginFlowAlias()));
     assertThat(idp1.getConfig().get("clientId"), is(idp.getConfig().get("clientId")));
 
-    //  remove idp
+    // remove idp
     response = deleteRequest(kc1, "/%s/idps/%s".formatted(orgId1, alias1));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
@@ -1148,35 +1605,34 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = putRequest(kc1, rep, orgId2);
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
-    //  get memberships
+    // get memberships
     response = getRequest(kc1, "/%s/members".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  add memberships
+    // add memberships
     response = putRequest(kc1, "foo", "/%s/members/%s".formatted(orgId2, user2.getId()));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  remove memberships
+    // remove memberships
     response = deleteRequest(kc1, "/%s/members/%s".formatted(orgId2, user2.getId()));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  get invitations
+    // get invitations
     response = getRequest(kc1, "/%s/invitations".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  add invitations
+    // add invitations
     response = postRequest(kc1, inv, "/%s/invitations".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  remove invitations
+    // remove invitations
     response = deleteRequest(kc1, "/%s/invitations/%s".formatted(orgId2, inviteId));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  get roles
+    // get roles
     response = getRequest(kc1, "/%s/roles".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  add roles
-    response =
-        postRequest(
-            kc1,
-            new OrganizationRoleRepresentation().name("test-role"),
-            "/%s/roles".formatted(orgId2));
+    // add roles
+    response = postRequest(
+        kc1,
+        new OrganizationRoleRepresentation().name("test-role"),
+        "/%s/roles".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  remove roles
+    // remove roles
     response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId2, "test-role"));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
@@ -1194,15 +1650,14 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     OrganizationRepresentation org = createDefaultOrg();
     String id = org.getId();
 
-    Response response =
-        givenSpec()
-            .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
-            .formParam("baseUri", "foobar")
-            .when()
-            .post("/%s/portal-link".formatted(id))
-            .then()
-            .extract()
-            .response();
+    Response response = givenSpec()
+        .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
+        .formParam("baseUri", "foobar")
+        .when()
+        .post("/%s/portal-link".formatted(id))
+        .then()
+        .extract()
+        .response();
 
     assertThat(response.getStatusCode(), is(Status.BAD_REQUEST.getStatusCode()));
 
@@ -1211,23 +1666,21 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     clientRepresentation.setName("idp-wizard");
     clientRepresentation.setId("idp-wizard");
     keycloak.realm(REALM).clients().create(clientRepresentation);
-    response =
-        givenSpec()
-            .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
-            .formParam("baseUri", "foobar")
-            .when()
-            .post("/%s/portal-link".formatted(id))
-            .then()
-            .extract()
-            .response();
+    response = givenSpec()
+        .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
+        .formParam("baseUri", "foobar")
+        .when()
+        .post("/%s/portal-link".formatted(id))
+        .then()
+        .extract()
+        .response();
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    UserRepresentation orgAdmin =
-        keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).get(0);
+    UserRepresentation orgAdmin = keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).get(0);
 
-    PortalLinkRepresentation link =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    PortalLinkRepresentation link = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
+    });
 
     assertThat(link, notNullValue());
     assertThat(link.getUser(), is(orgAdmin.getId()));
@@ -1244,23 +1697,20 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // Org SETUP
     // Create first Organization
-    OrganizationRepresentation org1 =
-        createOrganization(
-            new OrganizationRepresentation().name("org-1").domains(List.of("org1.com")));
+    OrganizationRepresentation org1 = createOrganization(
+        new OrganizationRepresentation().name("org-1").domains(List.of("org1.com")));
     String org1Id = org1.getId();
     SwitchOrganization switchToOrganization1 = new SwitchOrganization().id(org1Id);
 
     // Create second Organization
-    OrganizationRepresentation org2 =
-        createOrganization(
-            new OrganizationRepresentation().name("org-2").domains(List.of("org2.com")));
+    OrganizationRepresentation org2 = createOrganization(
+        new OrganizationRepresentation().name("org-2").domains(List.of("org2.com")));
     String org2Id = org2.getId();
     SwitchOrganization switchToOrganization2 = new SwitchOrganization().id(org2Id);
 
     // Create third Organization
-    OrganizationRepresentation org3 =
-        createOrganization(
-            new OrganizationRepresentation().name("org-3").domains(List.of("org3.com")));
+    OrganizationRepresentation org3 = createOrganization(
+        new OrganizationRepresentation().name("org-3").domains(List.of("org3.com")));
     String org3Id = org3.getId();
     SwitchOrganization switchToOrganization3 = new SwitchOrganization().id(org3Id);
 
@@ -1274,7 +1724,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // Create basic front end client to get a proper user access token
     createPublicClient("test-ui");
     createClientScope(ACTIVE_ORG_CLAIM);
-
 
     Map<String, String> additionalConfig = Map.of(INCLUDED_ORGANIZATION_PROPERTIES,
         "id, name, role, attribute");
@@ -1351,7 +1800,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     createOrReplaceUserAttribute(kc, "user", ACTIVE_ORGANIZATION, org2Id);
     validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org2Id);
 
-    // re-authenticate user to get new token and validate there is NO active organization in claims
+    // re-authenticate user to get new token and validate there is NO active
+    // organization in claims
     kc = getKeycloak(REALM, "test-ui", "user", "password");
     validateActiveOrganizationFromAccessToken(
         kc.tokenManager().getAccessTokenString(), false, null);
@@ -1384,7 +1834,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // verify user attributes doesn't have active organization anymore
     validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
 
-    // test that active org attribute is removed after login when organization is deleted
+    // test that active org attribute is removed after login when organization is
+    // deleted
     // switch to org3
     response = putRequest(kc, switchToOrganization3, "users", "switch-organization");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
@@ -1416,7 +1867,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(decodedToken.getOtherClaims().containsKey(ACTIVE_ORG_CLAIM), is(true));
 
     @SuppressWarnings("unchecked")
-    HashMap<String, Object> activeOrganizationClaims = (HashMap<String, Object>) decodedToken.getOtherClaims().get(ACTIVE_ORG_CLAIM);
+    HashMap<String, Object> activeOrganizationClaims = (HashMap<String, Object>) decodedToken.getOtherClaims()
+        .get(ACTIVE_ORG_CLAIM);
 
     if (shouldContain) {
       assertThat(activeOrganizationClaims.containsKey("id"), is(true));

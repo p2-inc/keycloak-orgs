@@ -2,9 +2,11 @@ package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.resource.Converters.*;
-import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
+import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_ROLE_MAPPING;
 
 import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.representation.BulkResponseItem;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationRole;
 import io.phasetwo.service.representation.SwitchOrganization;
@@ -14,9 +16,14 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
+
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 
@@ -110,6 +117,115 @@ public class UserResource extends OrganizationAdminResource {
     return convertOrganizationModelToOrganization(activeOrganizationUtil.getActiveOrganization());
   }
 
+  @PUT
+  @Path("/{userId}/orgs/{orgId}/roles")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response grantUserOrgRoles(@PathParam("userId") String userId, @PathParam("orgId") String orgId,
+                                    List<OrganizationRole> rolesRep) {
+    log.debugf("Grant user organization roles for %s %s %s", realm.getName(), userId, orgId);
+    UserModel user = session.users().getUserById(realm, userId);
+    OrganizationModel org = orgs.getOrganizationById(realm, orgId);
+    canManage(userId, orgId, user, org);
+
+    List<BulkResponseItem> responseItems = new ArrayList<>();
+
+    rolesRep.forEach(roleRep -> {
+      BulkResponseItem item = new BulkResponseItem()
+        .status(Response.Status.CREATED.getStatusCode());
+      try {
+        OrganizationRoleModel role = org.getRoleByName(roleRep.getName());
+        if (role == null) {
+          throw new NotFoundException(
+            String.format("Organization %s doesn't contain role %s", orgId, roleRep.getName()));
+        }
+        if (!role.hasRole(user)) {
+          role.grantRole(user);
+
+          adminEvent
+            .resource(ORGANIZATION_ROLE_MAPPING.name())
+            .operation(OperationType.CREATE)
+            .resourcePath(session.getContext().getUri())
+            .representation(userId)
+            .success();
+        }
+        item.setItem(convertOrganizationRole(role));
+      } catch (Exception ex) {
+        item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+        item.setError(ex.getMessage());
+      }
+      responseItems.add(item);
+    });
+
+    return Response
+            .status(207) //<-Multi-Status
+            .location(session.getContext().getUri().getAbsolutePathBuilder().build())
+            .entity(responseItems)
+            .build();
+  }
+
+  @PATCH
+  @Path("/{userId}/orgs/{orgId}/roles")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response revokeUserOrgRoles(@PathParam("userId") String userId, @PathParam("orgId") String orgId,
+                                      List<OrganizationRole> rolesRep) {
+    log.debugf("Revoke user organization roles for %s %s %s", realm.getName(), userId, orgId);
+    UserModel user = session.users().getUserById(realm, userId);
+    OrganizationModel org = orgs.getOrganizationById(realm, orgId);
+    canManage(userId, orgId, user, org);
+
+    List<BulkResponseItem> responseItems = new ArrayList<>();
+
+    rolesRep.forEach(roleRep -> {
+      BulkResponseItem item = new BulkResponseItem()
+        .status(Response.Status.NO_CONTENT.getStatusCode());
+      OrganizationRoleModel role = org.getRoleByName(roleRep.getName());
+      try {
+        if (role == null) {
+          throw new NotFoundException(
+            String.format("Organization %s doesn't contain role %s", orgId, roleRep.getName()));
+        }
+        if (role.hasRole(user)) {
+          role.revokeRole(user);
+          adminEvent
+            .resource(ORGANIZATION_ROLE_MAPPING.name())
+            .operation(OperationType.DELETE)
+            .resourcePath(session.getContext().getUri())
+            .representation(userId)
+            .success();
+        }
+        item.setItem(convertOrganizationRole(role));
+      } catch (Exception ex) {
+        item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+        item.setError(ex.getMessage());
+      }
+      responseItems.add(item);
+    });
+    return Response
+            .status(207) //<-Multi-Status
+            .location(session.getContext().getUri().getAbsolutePathBuilder().build())
+            .entity(responseItems)
+            .build();
+  }
+
+  private void canManage(String userId, String orgId, UserModel user, OrganizationModel org) {
+    if (user == null) {
+      throw new NotFoundException(String.format("User %s doesn't exist", userId));
+    }
+    if (org == null) {
+      throw new NotFoundException(String.format("Organization %s doesn't exist", orgId));
+    }
+    if (!org.hasMembership(user)) {
+      throw new BadRequestException(
+              String.format(
+                "User %s must be a member of %s to be granted roles.",
+                userId, org.getName()));
+    }
+    if (!auth.hasManageOrgs() && !auth.hasOrgManageRoles(org)) {
+      throw new NotAuthorizedException("Insufficient permissions");
+    }
+  }
   /*
   teams is on hold for now
 
