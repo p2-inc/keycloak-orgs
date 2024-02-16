@@ -224,6 +224,7 @@ const Roles = () => {
 
   const hasManageRolesRole = hasManageRolesRoleCheck(orgId);
   const hasApplicationRoles = OrgRoles.length > 0;
+  const canEditSetRoleButtons = isSameUserAndMember || !hasManageRolesRole;
 
   return (
     <div className="mt-4 md:mt-16">
@@ -249,11 +250,13 @@ const Roles = () => {
         </div>
       )}
       <div className="mt-8 flex items-center space-x-2 border-b pb-2">
-        <div className="inline-block text-sm text-gray-600">{t("role-set")}</div>
+        <div className="inline-block text-sm text-gray-600">
+          {t("role-set")}
+        </div>
         <Button
           onClick={grantAllRoles}
           disabled={
-            !hasManageRolesRole ||
+            canEditSetRoleButtons ||
             roleData.filter((rd) => rd.isChecked).length === roleData.length
           }
           text={t("all")}
@@ -261,7 +264,7 @@ const Roles = () => {
         <Button
           onClick={() => grantFilteredRoles("manage")}
           disabled={
-            !hasManageRolesRole ||
+            canEditSetRoleButtons ||
             !(
               roleData.filter(
                 (rd) => rd.name.startsWith("manage") && !rd.isChecked
@@ -273,7 +276,7 @@ const Roles = () => {
         <Button
           onClick={() => grantFilteredRoles("view")}
           disabled={
-            !hasManageRolesRole ||
+            canEditSetRoleButtons ||
             !(
               roleData.filter(
                 (rd) => rd.name.startsWith("view") && !rd.isChecked
@@ -286,7 +289,7 @@ const Roles = () => {
           <Button
             onClick={() => grantFilteredRoles("application")}
             disabled={
-              !hasManageRolesRole ||
+              canEditSetRoleButtons ||
               !(
                 roleData.filter((rd) => rd.isApplicationRole && !rd.isChecked)
                   .length > 0
@@ -298,7 +301,7 @@ const Roles = () => {
         <Button
           onClick={revokeAllRoles}
           disabled={
-            !hasManageRolesRole ||
+            canEditSetRoleButtons ||
             roleData.filter((rd) => rd.isChecked).length === 0
           }
           text={t("none")}

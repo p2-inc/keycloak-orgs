@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import Button from "components/elements/forms/buttons/button";
 import { checkOrgForRole } from "components/utils/check-org-for-role";
 import useUser from "components/utils/useUser";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   member: UserRepresentation;
@@ -33,9 +34,11 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
   member,
   orgId,
 }) => {
-  const { hasManageRolesRole: hasManageRolesRoleCheck } = useUser();
+  const { hasManageRolesRole: hasManageRolesRoleCheck, user } = useUser();
   const filtered = roles.filter((f) => regexp.test(f.name));
   const hasManageRolesRole = hasManageRolesRoleCheck(orgId);
+  const isSameUserAndMember = member.id === user?.id;
+  const { t } = useTranslation();
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left md:w-auto">
@@ -57,11 +60,11 @@ const FilteredRole: React.FC<FilteredRoleProp> = ({
             </div>
           </Menu.Item>
         ))}
-        {hasManageRolesRole && (
+        {!isSameUserAndMember && hasManageRolesRole && (
           <Menu.Item>
             <Link to={`/organizations/${orgId}/members/${member.id}/roles`}>
               <Button isCompact className="mt-4 w-full">
-                Edit roles
+                {t("editRoles")}
               </Button>
             </Link>
           </Menu.Item>

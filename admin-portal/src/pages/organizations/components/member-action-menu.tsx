@@ -28,7 +28,9 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
     hasManageMembersRole: hasManageMembersRoleCheck,
     hasManageRolesRole: hasManageRolesRoleCheck,
   } = useUser();
-  const isRemoveDisabled = !user || member.id === user?.id;
+  const isSameUserAndMember = member.id === user?.id;
+  const isRemoveDisabled = !user || isSameUserAndMember;
+
   const [isRemoveConfOpen, setRemoveConfOpen] = useState(false);
 
   const [removeOrganizationMember, { isLoading }] =
@@ -96,7 +98,7 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
         >
           <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border dark:border-zinc-600 dark:bg-p2dark-900">
             <div className="py-1">
-              <Menu.Item disabled={!hasManageRolesRole}>
+              <Menu.Item disabled={isSameUserAndMember || !hasManageRolesRole}>
                 {({ active, disabled }) => {
                   return disabled ? (
                     <MenuItemButton active={active} disabled={disabled}>
