@@ -6,8 +6,10 @@
   * [Contents](#contents)
   * [Overview](#overview)
   * [Endpoints](#endpoints)
-    * [Switch Organization](#switch-organization)
-    * [Active organization](#active-organization)
+    * [Create organization roles](#create-organization-roles)
+    * [Delete organization roles](#delete-organization-roles)
+    * [Grant organization roles for user](#grant-organization-roles-for-user)
+    * [Revoke organization roles for user](#revoke-organization-roles-for-user)
 <!-- TOC -->
 
 ## Overview
