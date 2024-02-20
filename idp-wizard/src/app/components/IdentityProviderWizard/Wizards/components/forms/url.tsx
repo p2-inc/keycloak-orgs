@@ -16,10 +16,13 @@ import {
   API_STATUS,
 } from "@app/configurations/api-status";
 
+const URL_REGEX =
+  /^(https?:\/\/)(localhost|([-\w]+\.)*\w+)(:\d+)?(\/[-\w@:%._\+~#=]+)*(\/[\w\/]*)*(\?.*)?(#.*)?$/;
+
 const UrlSchema = Yup.object().shape({
   url: Yup.string()
-    .url("Url should be a valid Url.")
-    .required("Url is a required field."),
+    .matches(URL_REGEX, "URL should be a valid URL.")
+    .required("URL is a required field."),
 });
 
 type Props = {

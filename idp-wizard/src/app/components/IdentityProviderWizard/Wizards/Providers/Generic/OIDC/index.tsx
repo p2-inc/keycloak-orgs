@@ -126,7 +126,12 @@ export const GenericOIDC: FC = () => {
         };
       }
     } catch (e) {
-      console.log(err);
+      console.log(e);
+      return {
+        status: API_STATUS.ERROR,
+        message:
+          "Configuration validation failed with OIDC. Check URL and try again.",
+      };
     }
 
     return {
@@ -253,9 +258,9 @@ export const GenericOIDC: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
       // TODO emailAsUsername, Mapper?
-      
+
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);

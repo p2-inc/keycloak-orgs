@@ -89,7 +89,7 @@ export const MetadataFile: FC<Props> = ({
           browseButtonText="Select"
           onChange={(val) => setFieldValue("metadataFile", val)}
           dropzoneProps={{
-            accept: "text/xml",
+            accept: "text/xml, application/json",
           }}
           isLoading={isSubmitting}
           isDisabled={!formActive}
