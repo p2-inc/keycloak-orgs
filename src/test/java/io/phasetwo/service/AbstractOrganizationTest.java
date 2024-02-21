@@ -1,13 +1,5 @@
 package io.phasetwo.service;
 
-import static io.phasetwo.service.Helpers.objectMapper;
-import static io.phasetwo.service.Helpers.toJsonString;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,35 +10,41 @@ import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
-import io.restassured.response.ResponseOptions;
 import io.restassured.specification.RequestSpecification;
 import jakarta.ws.rs.core.Response.Status;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.representations.AccessTokenResponse;
 import org.testcontainers.Testcontainers;
-import org.testcontainers.junit.jupiter.Container;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static io.phasetwo.service.Helpers.enableEvents;
+import static io.phasetwo.service.Helpers.objectMapper;
+import static io.phasetwo.service.Helpers.toJsonString;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class AbstractOrganizationTest {
 
   public static final String KEYCLOAK_IMAGE =
       String.format(
           "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "23.0.0"));
+  public static final String REALM = "master";
   public static final String ADMIN_CLI = "admin-cli";
+
   static final String[] deps = {
       "dnsjava:dnsjava",
       "org.wildfly.client:wildfly-client-config",
@@ -75,7 +73,6 @@ public abstract class AbstractOrganizationTest {
   public static Keycloak keycloak;
   public static ResteasyClient resteasyClient;
 
-  @Container
   public static final KeycloakContainer container =
       new KeycloakContainer(KEYCLOAK_IMAGE)
           .withContextPath("/auth")
@@ -86,23 +83,22 @@ public abstract class AbstractOrganizationTest {
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
 
+   static {
+     container.start();
+  }
+
   @BeforeAll
   public static void beforeAll() {
     Testcontainers.exposeHostPorts(WEBHOOK_SERVER_PORT);
-    container.start();  
     resteasyClient =
-        new ResteasyClientBuilderImpl()
-            .disableTrustManager()
-            .readTimeout(60, TimeUnit.SECONDS)
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .build();
+            new ResteasyClientBuilderImpl()
+                    .disableTrustManager()
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .build();
     keycloak =
-        getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
-  }
-
-  @AfterAll
-  public static void afterAll() {
-    container.stop();
+            getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
+    enableEvents(keycloak, "master");
   }
 
   public static Keycloak getKeycloak(String realm, String clientId, String user, String pass) {
@@ -112,8 +108,6 @@ public abstract class AbstractOrganizationTest {
   public static String getAuthUrl() {
     return container.getAuthServerUrl();
   }
-
-  public static final String REALM = "master";
 
   protected OrganizationRepresentation createDefaultOrg() throws IOException {
     OrganizationRepresentation rep =
@@ -163,6 +157,11 @@ public abstract class AbstractOrganizationTest {
     return givenSpec(keycloak).and().body(toJsonString(body)).put(path).then().extract().response();
   }
 
+  protected Response patchRequest(Object body, String path)
+          throws JsonProcessingException {
+    return givenSpec(keycloak).and().body(toJsonString(body)).patch(path).then().extract().response();
+  }
+
   protected Response putRequest(Keycloak keycloak, Object body, String... paths)
       throws JsonProcessingException {
     return givenSpec(keycloak, String.join("/", paths)).and().body(toJsonString(body))
@@ -195,8 +194,8 @@ public abstract class AbstractOrganizationTest {
 
     response = getRequest(id);
     assertThat(response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
-    OrganizationRepresentation orgRep = objectMapper()
-        .readValue(response.getBody().asString(), OrganizationRepresentation.class);
+    OrganizationRepresentation orgRep =
+        objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
     assertThat(orgRep.getId(), is(id));
     return orgRep;
   }
@@ -246,6 +245,20 @@ public abstract class AbstractOrganizationTest {
             .extract()
             .response();
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+  }
+
+  protected void revokeUserRole(String orgId, String role, String userId) {
+    // Delete /:realm/orgs/:orgId/roles/:name/users/:userId
+    Response response =
+            givenSpec(keycloak)
+                    .and()
+                    .body("foo")
+                    .when()
+                    .delete(String.join("/", orgId, "roles", role, "users", userId))
+                    .then()
+                    .extract()
+                    .response();
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
   protected void deleteOrganization(String id) {
