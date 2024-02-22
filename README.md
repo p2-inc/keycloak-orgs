@@ -193,6 +193,7 @@ Description of the events associated with the management of organizations:
 | `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/users/:userId`           | `DELETE` | ORGANIZATION_ROLE_MAPPING | DELETE    |
 | `/auth/realms/:realmId/orgs/:orgId/invitations/:invitationId`               | `POST`   | INVITATION                | CREATE    |
 | `/auth/realms/:realmId/orgs/:orgId/invitations/:invitationId/:invitationId` | `DELETE` | INVITATION                | DELETE    |
+| `/auth/realms/:realmId/orgs/:orgId/domains/:domainName/verify`              | `POST`   | DOMAIN                    | UPDATE    |
 
 ### Authentication
 

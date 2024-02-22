@@ -1,25 +1,31 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.resource.Converters.*;
-import static org.keycloak.models.utils.ModelToRepresentation.*;
-
 import com.google.common.base.Joiner;
 import com.google.common.hash.Hashing;
 import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.Domain;
-import jakarta.validation.constraints.*;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.events.admin.OperationType;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Type;
+
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
+
+import static io.phasetwo.service.resource.OrganizationResourceType.DOMAIN;
 
 @JBossLog
 public class DomainsResource extends OrganizationAdminResource {
@@ -114,6 +120,13 @@ public class DomainsResource extends OrganizationAdminResource {
       DomainModel d = lookupDomain(domainName);
       Domain domain = fromModel(d);
       log.infof("endVerification %s %s %s", domainName, organization.getId(), domain);
+
+      adminEvent
+              .resource(DOMAIN.name())
+              .operation(OperationType.UPDATE)
+              .resourcePath(session.getContext().getUri())
+              .representation(domainName)
+              .success();
       return Response.accepted().entity(domain).build();
     } else {
       throw new NotAuthorizedException(
