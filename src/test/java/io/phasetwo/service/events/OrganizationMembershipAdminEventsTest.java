@@ -24,28 +24,7 @@ class OrganizationMembershipAdminEventsTest extends AbstractOrganizationTest {
     private OrganizationRepresentation organization;
 
     @Test
-    void createOrganizationMembershipEvent() throws IOException {
-        // create a user
-        var user = createUser(keycloak, REALM, "johndoe");
-
-        // add membership and check
-        putRequest("foo", organization.getId(), "members", user.getId());
-
-        //results
-        var createEvents = getOrganizationEvents(keycloak)
-                .filter(adminEventRepresentation ->
-                        adminEventRepresentation.getResourceType().equals(OrganizationResourceType.ORGANIZATION_MEMBERSHIP.toString()))
-                .filter(adminEventRepresentation -> adminEventRepresentation.getOperationType().equals("CREATE"))
-                .toList();
-
-        assertThat(createEvents, hasSize(1));
-
-        // delete user
-        deleteUser(keycloak, REALM, user.getId());
-    }
-
-    @Test
-    void deleteOrganizationMembershipEvent() throws IOException {
+    void organizationMembershipEventsTest() throws IOException {
         // create a user
         var user = createUser(keycloak, REALM, "johndoe");
 

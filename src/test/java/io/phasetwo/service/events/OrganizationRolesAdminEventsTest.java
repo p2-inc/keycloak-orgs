@@ -23,10 +23,14 @@ class OrganizationRolesAdminEventsTest extends AbstractOrganizationTest {
     private OrganizationRepresentation organization;
 
     @Test
-    void createOrganizationRoleEvent() throws IOException {
+    void updateOrganizationRoleEventsTest() throws IOException {
         // create a role
         String orgRoleName = "eat-apples";
-        OrganizationRoleRepresentation orgRole = createOrgRole(organization.getId(), orgRoleName);
+        var organizationRole = createOrgRole(organization.getId(), orgRoleName);
+
+        // update role
+        organizationRole.description("Two");
+        putRequest(organizationRole, organization.getId(), "roles", orgRoleName);
 
         //results
         var createEvents = getOrganizationEvents(keycloak)
@@ -37,15 +41,23 @@ class OrganizationRolesAdminEventsTest extends AbstractOrganizationTest {
 
         assertThat(createEvents, hasSize(1));
 
+        var updateEvents = getOrganizationEvents(keycloak)
+                .filter(adminEventRepresentation ->
+                        adminEventRepresentation.getResourceType().equals(OrganizationResourceType.ORGANIZATION_ROLE.toString()))
+                .filter(adminEventRepresentation -> adminEventRepresentation.getOperationType().equals("UPDATE"))
+                .toList();
+
+        assertThat(updateEvents, hasSize(1));
+
         // delete role
         deleteRequest(organization.getId(), "roles", orgRoleName);
     }
 
     @Test
-    void deleteOrganizationRoleEvent() throws IOException {
+    void deleteOrganizationRoleEventsTest() throws IOException {
         // create a role
         String orgRoleName = "eat-apples";
-        OrganizationRoleRepresentation orgRole = createOrgRole(organization.getId(), orgRoleName);
+        createOrgRole(organization.getId(), orgRoleName);
 
         // delete role
         deleteRequest(organization.getId(), "roles", orgRoleName);

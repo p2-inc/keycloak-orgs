@@ -30,51 +30,7 @@ class OrganizationRolesMappingsAdminEventsTest extends AbstractOrganizationTest 
     private UserRepresentation user;
 
     @Test
-    void addOrganizationRoleMembershipMapping() throws IOException {
-
-        //create role
-        createOrgRole(organization.getId(), "test-role");
-
-        // add membership
-        grantUserRole(organization.getId(), "test-role", user.getId());
-
-        //results
-        var createEvents = getOrganizationEvents(keycloak)
-                .filter(adminEventRepresentation ->
-                        adminEventRepresentation.getResourceType().equals(OrganizationResourceType.ORGANIZATION_ROLE_MAPPING.toString()))
-                .filter(adminEventRepresentation -> adminEventRepresentation.getOperationType().equals("CREATE"))
-                .toList();
-
-        assertThat(createEvents, hasSize(1));
-
-        //remove role
-        deleteRequest(organization.getId(), "roles", "test-role");
-    }
-
-    @Test
-    void addOrganizationRolesMembershipMapping() throws IOException {
-        // add membership
-        var url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" +
-                organization.getId() + "/roles";
-        var roleList = new ArrayList<>() {{
-            add(new OrganizationRole().name(ORG_ROLE_VIEW_ORGANIZATION));
-            add(new OrganizationRole().name(ORG_ROLE_MANAGE_ORGANIZATION));
-        }};
-
-        putRequest(roleList, url);
-
-        //results
-        var createEvents = getOrganizationEvents(keycloak)
-                .filter(adminEventRepresentation ->
-                        adminEventRepresentation.getResourceType().equals(OrganizationResourceType.ORGANIZATION_ROLE_MAPPING.toString()))
-                .filter(adminEventRepresentation -> adminEventRepresentation.getOperationType().equals("CREATE"))
-                .toList();
-
-        assertThat(createEvents, hasSize(2));
-    }
-
-    @Test
-    void removeOrganizationRoleMembershipMapping() throws IOException {
+    void removeOrganizationRoleMembershipMappingEventsTest() throws IOException {
 
         //create role
         createOrgRole(organization.getId(), "test-role");
@@ -108,7 +64,7 @@ class OrganizationRolesMappingsAdminEventsTest extends AbstractOrganizationTest 
 
 
     @Test
-    void revokeOrganizationRoleMembershipMapping() throws IOException {
+    void bulkRevokeOrganizationRoleMembershipMappingEventsTest() throws IOException {
         // add role membership
         var url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" +
                 organization.getId() + "/roles";

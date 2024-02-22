@@ -185,6 +185,7 @@ Description of the events associated with the management of organizations:
 | `/auth/realms/:realmId/orgs/:orgId/members/:userId`                         | `DELETE` | ORGANIZATION_MEMBERSHIP   | DELETE    |
 | `/auth/realms/:realmId/orgs/:orgId/roles/:roleName`                         | `POST`   | ORGANIZATION_ROLE         | CREATE    |
 | `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/:roleName`               | `DELETE` | ORGANIZATION_ROLE         | DELETE    |
+| `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/:roleName`               | `PUT`    | ORGANIZATION_ROLE         | UPDATE    |
 | `/auth/realms/:realmId/orgs/users/:userId/orgs/:orgId/roles`                | `DELETE` | ORGANIZATION_ROLE_MAPPING | DELETE    |
 | `/auth/realms/:realmId/orgs/users/:userId/orgs/:orgId/roles`                | `PATCH`  | ORGANIZATION_ROLE_MAPPING | CREATE    |
 | `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/users/:userId`           | `DELETE` | ORGANIZATION_ROLE_MAPPING | DELETE    |

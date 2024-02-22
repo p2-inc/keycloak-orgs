@@ -23,32 +23,7 @@ class InvitationsAdminEventsTest extends AbstractOrganizationTest {
     private OrganizationRepresentation organization;
 
     @Test
-    void createInvitation() throws IOException {
-        // create invitation
-        InvitationRequest inv = new InvitationRequest()
-                .email("johndoe@example.com")
-                .attribute("foo", "bar")
-                .attribute("foo", "bar2")
-                .attribute("humpty", "dumpty");
-        var response = postRequest(inv, organization.getId(), "invitations");
-        String loc = response.getHeader("Location");
-        String inviteId = loc.substring(loc.lastIndexOf("/") + 1);
-
-        //results
-        var createEvents = getOrganizationEvents(keycloak)
-                .filter(adminEventRepresentation ->
-                        adminEventRepresentation.getResourceType().equals(OrganizationResourceType.INVITATION.toString()))
-                .filter(adminEventRepresentation -> adminEventRepresentation.getOperationType().equals("CREATE"))
-                .toList();
-
-        assertThat(createEvents, hasSize(1));
-
-        //cleanup
-        deleteRequest(organization.getId(), "invitations", inviteId);
-    }
-
-    @Test
-    void deleteInvitation() throws IOException {
+    void invitationEventsTest() throws IOException {
         // create invitation
         InvitationRequest inv = new InvitationRequest()
                 .email("johndoe@example.com")
