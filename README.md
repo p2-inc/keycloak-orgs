@@ -25,6 +25,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
       - [Entities](#entities)
     - [Resources](#resources)
     - [Mappers](#mappers)
+    - [Admin Events](#admin-events)
     - [Authentication](#authentication)
       - [Invitations](#invitations)
       - [IdP Discovery](#idp-discovery)
@@ -172,7 +173,7 @@ You can configure the mapper, by going to **Clients** > ***your-client-name*** >
 
 ![mapper](./docs/assets/mapper.png)
 
-### Events
+### Admin Events
 
 Description of the events associated with the management of organizations:
 
