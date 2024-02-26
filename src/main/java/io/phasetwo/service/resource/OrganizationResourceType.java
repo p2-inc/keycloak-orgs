@@ -7,5 +7,6 @@ public enum OrganizationResourceType {
   ORGANIZATION_ROLE_MAPPING,
   TEAM,
   TEAM_MEMBERSHIP,
-  INVITATION;
+  INVITATION,
+  DOMAIN;
 }

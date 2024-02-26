@@ -4,27 +4,33 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.phasetwo.client.openapi.model.WebhookRepresentation;
-
+import io.phasetwo.service.resource.OrganizationResourceType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.broker.provider.util.SimpleHttp;
+import org.keycloak.representations.idm.AdminEventRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.EventRepresentation;
 import org.keycloak.representations.idm.RealmEventsConfigRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 import org.testcontainers.shaded.com.google.common.collect.Lists;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 
 public class Helpers {
 
   private static final ObjectMapper mapper;
+  private static List<String> orgsTypes =
+            Arrays.stream(OrganizationResourceType.values()).map(Enum::toString).toList();
 
   static {
     mapper = new ObjectMapper();
@@ -91,6 +97,31 @@ public class Helpers {
     return eventsConfig;
   }
 
+    public static RealmEventsConfigRepresentation enableEvents(Keycloak keycloak, String realm) {
+        RealmResource realmResource = keycloak.realm(realm);
+        RealmEventsConfigRepresentation eventsConfig = realmResource.getRealmEventsConfig();
+        eventsConfig.setEventsEnabled(true);
+        eventsConfig.setAdminEventsEnabled(Boolean.TRUE);
+        eventsConfig.setAdminEventsDetailsEnabled(Boolean.TRUE);
+        realmResource.updateRealmEventsConfig(eventsConfig);
+
+        return eventsConfig;
+    }
+
+    public static List<EventRepresentation> getEvents(Keycloak keycloak, String realm) {
+        RealmResource realmResource = keycloak.realm(realm);
+        return realmResource.getEvents();
+    }
+
+    public static List<AdminEventRepresentation> getAdminEvents(Keycloak keycloak, String realm) {
+        RealmResource realmResource = keycloak.realm(realm);
+        return realmResource.getAdminEvents();
+    }
+
+    public static void clearAdminEvents(Keycloak keycloak, String realm) {
+        RealmResource realmResource = keycloak.realm(realm);
+        realmResource.clearAdminEvents();
+    }
 
   public static RealmEventsConfigRepresentation removeEventListener(
           Keycloak keycloak, String realm, String name) {
@@ -148,4 +179,11 @@ public class Helpers {
                     .asResponse();
     assertThat(response.getStatus(), is(204));
   }
+
+    public static Stream<AdminEventRepresentation> getOrganizationEvents(Keycloak keycloak) {
+        return getAdminEvents(keycloak, "master").stream()
+                .filter(
+                        adminEventRepresentation ->
+                                orgsTypes.contains(adminEventRepresentation.getResourceType()));
+    }
 }

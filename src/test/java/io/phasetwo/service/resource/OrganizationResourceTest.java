@@ -1,31 +1,11 @@
 package io.phasetwo.service.resource;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static io.phasetwo.service.Helpers.*;
-import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
-import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.oneOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.xgp.http.server.Server;
 import com.google.common.collect.ImmutableMap;
-import io.phasetwo.client.OrganizationsResource;
-import io.phasetwo.client.PhaseTwo;
-import io.phasetwo.client.openapi.model.EventRepresentation;
 import io.phasetwo.client.openapi.model.IdentityProviderMapperRepresentation;
 import io.phasetwo.client.openapi.model.IdentityProviderRepresentation;
 import io.phasetwo.client.openapi.model.InvitationRequestRepresentation;
@@ -34,16 +14,15 @@ import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
-import io.phasetwo.service.representation.*;
+import io.phasetwo.service.representation.Invitation;
+import io.phasetwo.service.representation.InvitationRequest;
+import io.phasetwo.service.representation.LinkIdp;
+import io.phasetwo.service.representation.OrganizationRole;
+import io.phasetwo.service.representation.SwitchOrganization;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -57,13 +36,38 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.JsonSerialization;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.trilead.ssh2.transport.KexState;
 
-import com.github.xgp.http.server.Server;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static io.phasetwo.service.Helpers.addEventListener;
+import static io.phasetwo.service.Helpers.createUser;
+import static io.phasetwo.service.Helpers.createUserWithCredentials;
+import static io.phasetwo.service.Helpers.createWebhook;
+import static io.phasetwo.service.Helpers.deleteUser;
+import static io.phasetwo.service.Helpers.deleteWebhook;
+import static io.phasetwo.service.Helpers.objectMapper;
+import static io.phasetwo.service.Helpers.removeEventListener;
+import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
+import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.oneOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @JBossLog
-@Testcontainers
 class OrganizationResourceTest extends AbstractOrganizationTest {
 
   private static String ACTIVE_ORG_CLAIM = "active_organization";

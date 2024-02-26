@@ -1,6 +1,7 @@
 package io.phasetwo.service.mapper;
 
 import static io.phasetwo.service.Helpers.createUserWithCredentials;
+import static io.phasetwo.service.Helpers.deleteUser;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,10 +25,8 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.ProtocolMapperRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @JBossLog
-@Testcontainers
 class OrganizationRoleMapperTest extends AbstractOrganizationTest {
 
   public static final String CLAIM = "organizations";
@@ -79,6 +78,13 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
           }
         },
         customClaimValue.get(id));
+
+    //change authorization
+    keycloak = getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
+    //delete user
+    deleteUser(keycloak, REALM, user.getId());
+    //delete organization
+    deleteOrganization(keycloak, id);
   }
 
   private static void configureCustomOidcProtocolMapper(
