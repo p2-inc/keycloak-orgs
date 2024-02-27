@@ -1,11 +1,8 @@
 package io.phasetwo.service.auth;
 
-import static io.phasetwo.service.Orgs.*;
-
 import com.google.auto.service.AutoService;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
-import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -15,6 +12,10 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
 import org.keycloak.provider.ProviderEvent;
+
+import java.util.Map;
+
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 
 /** */
 @JBossLog
@@ -61,6 +62,10 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
             org.getName(), context.getUser().getUsername());
         org.grantMembership(context.getUser());
         // TODO default roles from config??
+        context.getEvent()
+                .user(context.getUser())
+                .detail("joinedOrganization", org.getId())
+                .success();
       }
     } else {
       log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());

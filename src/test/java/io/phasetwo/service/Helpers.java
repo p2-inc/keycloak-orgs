@@ -115,6 +115,10 @@ public class Helpers {
     RealmResource realmResource = keycloak.realm(realm);
     return realmResource.getAdminEvents();
   }
+  public static void clearEvents(Keycloak keycloak, String realm) {
+    RealmResource realmResource = keycloak.realm(realm);
+    realmResource.clearEvents();
+  }
 
   public static void clearAdminEvents(Keycloak keycloak, String realm) {
     RealmResource realmResource = keycloak.realm(realm);

@@ -1,17 +1,18 @@
 package io.phasetwo.service.util;
 
-import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
-
 import com.google.common.collect.Lists;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 
 public class ActiveOrganization {
 
@@ -61,6 +62,8 @@ public class ActiveOrganization {
       if (organization == null) {
         log.warnf("organization doesn't exists anymore.");
         user.removeAttribute(ACTIVE_ORGANIZATION);
+        //TODO: This method has a side effect. In the future it should be removed and the code refactored
+        //Tests failed if the we had event here
       }
 
       return false;

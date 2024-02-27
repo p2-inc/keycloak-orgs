@@ -5,15 +5,19 @@ import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.authentication.RequiredActionContext;
+import org.keycloak.authentication.RequiredActionProvider;
+import org.keycloak.events.EventBuilder;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.authentication.RequiredActionContext;
-import org.keycloak.authentication.RequiredActionProvider;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+
+import static org.keycloak.events.EventType.CUSTOM_REQUIRED_ACTION;
 
 /** */
 @JBossLog
@@ -69,6 +73,8 @@ public class InvitationRequiredAction implements RequiredActionProvider {
 
   @Override
   public void processAction(RequiredActionContext context) {
+    EventBuilder event = context.getEvent();
+
     RealmModel realm = context.getRealm();
     UserModel user = context.getUser();
     log.infof(
@@ -87,11 +93,21 @@ public class InvitationRequiredAction implements RequiredActionProvider {
                 // add membership
                 log.infof("selected %s", i.getOrganization().getId());
                 memberFromInvitation(i, user);
-                // todo future tell the inviter they accepted
+                event.clone()
+                        .event(CUSTOM_REQUIRED_ACTION)
+                        .user(user)
+                        .detail("orgId", i.getOrganization().getId())
+                        .detail("invitationId", i.getId())
+                        .success();
               }
               // revoke invitation
               i.getOrganization().revokeInvitation(i.getId());
-              // todo future tell the inviter they rejected
+              event.clone()
+                      .event(CUSTOM_REQUIRED_ACTION)
+                      .detail("orgId", i.getOrganization().getId())
+                      .detail("invitationId", i.getId())
+                      .user(user)
+                      .error("User invitation revoked.");
             });
 
     context.success();

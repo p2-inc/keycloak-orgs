@@ -26,6 +26,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
     - [Resources](#resources)
     - [Mappers](#mappers)
     - [Admin Events](#admin-events)
+    - [User Events](#user-events)
     - [Authentication](#authentication)
       - [Invitations](#invitations)
       - [IdP Discovery](#idp-discovery)
@@ -195,6 +196,32 @@ Description of the events associated with the management of organizations:
 | `/auth/realms/:realmId/orgs/:orgId/invitations/:invitationId`               | `POST`   | INVITATION                | CREATE    |
 | `/auth/realms/:realmId/orgs/:orgId/invitations/:invitationId/:invitationId` | `DELETE` | INVITATION                | DELETE    |
 | `/auth/realms/:realmId/orgs/:orgId/domains/:domainName/verify`              | `POST`   | DOMAIN                    | UPDATE    |
+
+### User events
+
+Description of the events associated with users in the context of a organization.
+
+Organization management
+
+| Path                                                | Method   | Event type      |
+|-----------------------------------------------------|----------|-----------------|
+| `/auth/realms/:realmId/users/switch-organization`   | `PUT`    | UPDATE_PROFILE  |
+| `/auth/realms/:realmId/orgs/:orgId/members/:userId` | `DELETE` | UPDATE_PROFILE  | 
+
+`Invitations` -  Event type: CUSTOM_REQUIRED_ACTION
+
+![invitation-required-action-success](./docs/assets/events/invitation-required-action-success-event.png)
+
+![invitation-required-action-error](./docs/assets/events/invitation-required-action-error-event.png)
+
+`Post IdP login ("Add user to org" Authenticator)` - Event type: IDENTITY_PROVIDER_POST_LOGIN
+
+![add-to-organization-success](./docs/assets/events/add-to-organization-success-event.png)
+
+
+`PortalLink` - Event type: EXECUTE_ACTION_TOKEN
+
+![portal-link-success](./docs/assets/events/portal-link-success-event.png)
 
 ### Authentication
 

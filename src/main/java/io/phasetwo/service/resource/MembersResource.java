@@ -2,6 +2,7 @@ package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
+import static org.keycloak.events.EventType.UPDATE_PROFILE;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import com.google.common.base.Strings;
@@ -12,6 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.UserModel;
@@ -69,6 +71,13 @@ public class MembersResource extends OrganizationAdminResource {
       if (activeOrganizationUtil.isValid()
           && activeOrganizationUtil.getActiveOrganization().getId().equals(organization.getId())) {
         member.removeAttribute(ACTIVE_ORGANIZATION);
+
+        EventBuilder event = new EventBuilder(realm, session, connection);
+        event
+                .event(UPDATE_PROFILE)
+                .user(user)
+                .detail("removedActiveOrganizationId", activeOrganizationUtil.getActiveOrganization().getId())
+                .success();
       }
 
       organization.revokeMembership(member);

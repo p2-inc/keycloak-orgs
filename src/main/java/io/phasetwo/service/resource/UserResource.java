@@ -3,6 +3,7 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_ROLE_MAPPING;
+import static org.keycloak.events.EventType.UPDATE_PROFILE;
 
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
@@ -88,9 +90,17 @@ public class UserResource extends OrganizationAdminResource {
     }
 
     // attribute based active organization
+    var currentActiveOrganization = user.getFirstAttribute(ACTIVE_ORGANIZATION);
     user.setAttribute(ACTIVE_ORGANIZATION, Collections.singletonList(body.getId()));
     TokenManager tokenManager = new TokenManager(session, auth.getToken(), realm, user);
+    EventBuilder event = new EventBuilder(realm, session, connection);
 
+    event
+            .event(UPDATE_PROFILE)
+            .user(user)
+            .detail("newActiveOrganizationId", body.getId())
+            .detail("previousActiveOrganizationId", currentActiveOrganization)
+            .success();
     return Response.ok(tokenManager.generateTokens()).build();
   }
 
