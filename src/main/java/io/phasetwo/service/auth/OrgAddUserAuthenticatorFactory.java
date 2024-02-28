@@ -1,8 +1,10 @@
 package io.phasetwo.service.auth;
 
 import com.google.auto.service.AutoService;
+import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -11,6 +13,7 @@ import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderEvent;
 
 import java.util.Map;
@@ -58,18 +61,35 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
       }
       if (!org.hasMembership(context.getUser())) {
         log.infof(
-            "granting membership to %s for user %s",
-            org.getName(), context.getUser().getUsername());
+                "granting membership to %s for user %s",
+                org.getName(), context.getUser().getUsername());
         org.grantMembership(context.getUser());
-        // TODO default roles from config??
-        context.getEvent()
-                .user(context.getUser())
-                .detail("joined_organization", org.getId())
-                .success();
+          context.getEvent()
+                  .user(context.getUser())
+                  .detail("joined_organization", org.getId())
+                  .success();
+          orgs
+                  .getUserInvitationsStream(context.getRealm(), context.getUser())
+                  .filter(invitationModel -> invitationModel.getOrganization().getId().equals(org.getId()))
+                  .findFirst()
+                  .ifPresent(invitationModel -> addRolesFromInvitation(invitationModel, context.getUser()));
       }
     } else {
       log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
     }
+  }
+
+  void addRolesFromInvitation(InvitationModel invitation, UserModel user) {
+    invitation
+            .getRoles()
+            .forEach(r -> {
+              OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
+              if (role == null) {
+                log.debugf("No org role found for invitation role %s. Skipping...", r);
+              } else {
+                role.grantRole(user);
+              }
+            });
   }
 
   @Override
