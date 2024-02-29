@@ -1,5 +1,8 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.resource.Converters.convertOrganizationRole;
+import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_ROLE;
+
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.BulkResponseItem;
@@ -18,16 +21,12 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.events.admin.OperationType;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static io.phasetwo.service.resource.Converters.convertOrganizationRole;
-import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_ROLE;
+import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.events.admin.OperationType;
 
 @JBossLog
 public class RolesResource extends OrganizationAdminResource {
@@ -73,23 +72,23 @@ public class RolesResource extends OrganizationAdminResource {
 
     List<BulkResponseItem> responseItems = new ArrayList<>();
 
-    representation.forEach(role -> {
-      BulkResponseItem item = new BulkResponseItem()
-        .status(Response.Status.CREATED.getStatusCode());
-      try {
-        item.setItem(createOrganizationRole(role));
-      } catch (Exception ex){
-        item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
-        item.setError(ex.getMessage());
-      }
-      responseItems.add(item);
-    });
+    representation.forEach(
+        role -> {
+          BulkResponseItem item =
+              new BulkResponseItem().status(Response.Status.CREATED.getStatusCode());
+          try {
+            item.setItem(createOrganizationRole(role));
+          } catch (Exception ex) {
+            item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+            item.setError(ex.getMessage());
+          }
+          responseItems.add(item);
+        });
 
-    return Response
-            .status(207) //<-Multi-Status
-            .location(session.getContext().getUri().getAbsolutePathBuilder().build())
-            .entity(responseItems)
-            .build();
+    return Response.status(207) // <-Multi-Status
+        .location(session.getContext().getUri().getAbsolutePathBuilder().build())
+        .entity(responseItems)
+        .build();
   }
 
   @PATCH
@@ -100,24 +99,24 @@ public class RolesResource extends OrganizationAdminResource {
 
     List<BulkResponseItem> responseItems = new ArrayList<>();
 
-    representation.forEach(role->{
-      BulkResponseItem item = new BulkResponseItem()
-        .status(Response.Status.NO_CONTENT.getStatusCode());
-      try {
-        deleteOrganizationRole(role.getName());
-        item.setItem(role);
-      } catch (Exception ex){
-        item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
-        item.setError(ex.getMessage());
-      }
-      responseItems.add(item);
-    });
+    representation.forEach(
+        role -> {
+          BulkResponseItem item =
+              new BulkResponseItem().status(Response.Status.NO_CONTENT.getStatusCode());
+          try {
+            deleteOrganizationRole(role.getName());
+            item.setItem(role);
+          } catch (Exception ex) {
+            item.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+            item.setError(ex.getMessage());
+          }
+          responseItems.add(item);
+        });
 
-    return Response
-            .status(207) //<-Multi-Status
-            .location(session.getContext().getUri().getAbsolutePathBuilder().build())
-            .entity(responseItems)
-            .build();
+    return Response.status(207) // <-Multi-Status
+        .location(session.getContext().getUri().getAbsolutePathBuilder().build())
+        .entity(responseItems)
+        .build();
   }
 
   private OrganizationRole createOrganizationRole(OrganizationRole representation) {
@@ -131,18 +130,18 @@ public class RolesResource extends OrganizationAdminResource {
 
     OrganizationRole or = convertOrganizationRole(r);
     adminEvent
-            .resource(ORGANIZATION_ROLE.name())
-            .operation(OperationType.CREATE)
-            .resourcePath(session.getContext().getUri(), or.getName())
-            .representation(or)
-            .success();
+        .resource(ORGANIZATION_ROLE.name())
+        .operation(OperationType.CREATE)
+        .resourcePath(session.getContext().getUri(), or.getName())
+        .representation(or)
+        .success();
     return or;
   }
 
   public void deleteOrganizationRole(String roleName) {
     if (Arrays.asList(OrganizationAdminAuth.DEFAULT_ORG_ROLES).contains(roleName)) {
       throw new BadRequestException(
-              String.format("Default organization role %s cannot be deleted.", roleName));
+          String.format("Default organization role %s cannot be deleted.", roleName));
     }
 
     organization.removeRole(roleName);
@@ -158,10 +157,9 @@ public class RolesResource extends OrganizationAdminResource {
   private void canManage() {
     if (!auth.hasManageOrgs() && !auth.hasOrgManageRoles(organization)) {
       throw new NotAuthorizedException(
-              String.format(
-                      "User %s doesn't have permission to manage roles in org %s",
-                      auth.getUser().getId(), organization.getName()));
+          String.format(
+              "User %s doesn't have permission to manage roles in org %s",
+              auth.getUser().getId(), organization.getName()));
     }
   }
-
 }

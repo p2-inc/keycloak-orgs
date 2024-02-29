@@ -66,8 +66,8 @@ public class MembersResource extends OrganizationAdminResource {
     if (member != null && organization.hasMembership(member)) {
 
       ActiveOrganization activeOrganizationUtil = new ActiveOrganization(session, realm, member);
-      if (activeOrganizationUtil.isValid() &&
-          activeOrganizationUtil.getActiveOrganization().getId().equals(organization.getId())) {
+      if (activeOrganizationUtil.isValid()
+          && activeOrganizationUtil.getActiveOrganization().getId().equals(organization.getId())) {
         member.removeAttribute(ACTIVE_ORGANIZATION);
       }
 

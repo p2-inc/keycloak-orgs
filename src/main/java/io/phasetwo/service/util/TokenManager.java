@@ -36,20 +36,22 @@ public class TokenManager {
   private final OIDCAdvancedConfigWrapper targetClientConfig;
   private final UserModel user;
 
-  public TokenManager(KeycloakSession session, AccessToken accessToken, RealmModel realm,
-      UserModel user) {
+  public TokenManager(
+      KeycloakSession session, AccessToken accessToken, RealmModel realm, UserModel user) {
     this.session = session;
     this.accessToken = accessToken;
     this.realm = realm;
-    this.targetClient = session.getProvider(ClientProvider.class)
-        .getClientByClientId(realm, accessToken.getIssuedFor());
+    this.targetClient =
+        session
+            .getProvider(ClientProvider.class)
+            .getClientByClientId(realm, accessToken.getIssuedFor());
     this.targetClientConfig = OIDCAdvancedConfigWrapper.fromClientModel(targetClient);
     this.user = user;
   }
 
   /**
-   * <p> Generate a new access token, refresh token and id token with an
-   * updated state and based on the previous access token.</p>
+   * Generate a new access token, refresh token and id token with an updated state and based on the
+   * previous access token.
    *
    * @return a {@link AccessTokenResponse}
    */
@@ -57,17 +59,21 @@ public class TokenManager {
     // Create new authSession with Default + Optional Scope matching old token
     AuthenticationSessionModel authSession = getAuthSession(getScopeIds());
 
-    EventBuilder event = new EventBuilder(session.getContext().getRealm(), session,
-        session.getContext().getConnection());
-    ClientSessionContext clientSessionCtx = AuthenticationProcessor.attachSession(authSession,
-        null, session, realm, session.getContext().getConnection(), event);
+    EventBuilder event =
+        new EventBuilder(
+            session.getContext().getRealm(), session, session.getContext().getConnection());
+    ClientSessionContext clientSessionCtx =
+        AuthenticationProcessor.attachSession(
+            authSession, null, session, realm, session.getContext().getConnection(), event);
     UserSessionModel userSession = clientSessionCtx.getClientSession().getUserSession();
 
     // Generate new token
-    org.keycloak.protocol.oidc.TokenManager tokenManager = new org.keycloak.protocol.oidc.TokenManager();
-    AccessTokenResponseBuilder responseBuilder = tokenManager
-        .responseBuilder(realm, targetClient, event, session, userSession, clientSessionCtx)
-        .generateAccessToken();
+    org.keycloak.protocol.oidc.TokenManager tokenManager =
+        new org.keycloak.protocol.oidc.TokenManager();
+    AccessTokenResponseBuilder responseBuilder =
+        tokenManager
+            .responseBuilder(realm, targetClient, event, session, userSession, clientSessionCtx)
+            .generateAccessToken();
     // rewrite audience and allowed origin based on previous token
     responseBuilder.getAccessToken().audience(accessToken.getAudience());
     responseBuilder.getAccessToken().setAllowedOrigins(accessToken.getAllowedOrigins());
@@ -88,15 +94,14 @@ public class TokenManager {
   }
 
   // Extracted from Keycloak in TokenEndpoint
-  private void checkAndBindMtlsHoKToken(EventBuilder event,
-      AccessTokenResponseBuilder responseBuilder,
-      boolean useRefreshToken
-  ) {
+  private void checkAndBindMtlsHoKToken(
+      EventBuilder event, AccessTokenResponseBuilder responseBuilder, boolean useRefreshToken) {
     // KEYCLOAK-6771 Certificate Bound Token
     // https://tools.ietf.org/html/draft-ietf-oauth-mtls-08#section-3
     if (targetClientConfig.isUseMtlsHokToken()) {
-      AccessToken.Confirmation confirmation = MtlsHoKTokenUtil.bindTokenWithClientCertificate(
-          session.getContext().getHttpRequest(), session);
+      AccessToken.Confirmation confirmation =
+          MtlsHoKTokenUtil.bindTokenWithClientCertificate(
+              session.getContext().getHttpRequest(), session);
       if (confirmation != null) {
         responseBuilder.getAccessToken().setConfirmation(confirmation);
         if (useRefreshToken) {
@@ -114,31 +119,35 @@ public class TokenManager {
     Map<String, ClientScopeModel> defaultClientScopes = targetClient.getClientScopes(true);
     // Get all optional scopes
     Map<String, ClientScopeModel> optionalClientScopes = targetClient.getClientScopes(false);
-    Set<String> clientScopeIds = defaultClientScopes.values().stream()
-        .map(ClientScopeModel::getId).collect(Collectors.toSet());
+    Set<String> clientScopeIds =
+        defaultClientScopes.values().stream()
+            .map(ClientScopeModel::getId)
+            .collect(Collectors.toSet());
 
     // Add optional scopes only if part of previous token
     Set<String> accessTokenScopes = Set.of(accessToken.getScope().split(" "));
-    optionalClientScopes.values().stream().filter(cs -> accessTokenScopes.contains(cs.getName()))
-        .map(ClientScopeModel::getId).forEach(clientScopeIds::add);
+    optionalClientScopes.values().stream()
+        .filter(cs -> accessTokenScopes.contains(cs.getName()))
+        .map(ClientScopeModel::getId)
+        .forEach(clientScopeIds::add);
 
     return clientScopeIds;
   }
 
   private AuthenticationSessionModel getAuthSession(Set<String> clientScopeIds) {
-    RootAuthenticationSessionModel rootAuthSession = new AuthenticationSessionManager(session)
-        .createAuthenticationSession(realm, false);
-    AuthenticationSessionModel authSession = rootAuthSession.createAuthenticationSession(
-        targetClient);
+    RootAuthenticationSessionModel rootAuthSession =
+        new AuthenticationSessionManager(session).createAuthenticationSession(realm, false);
+    AuthenticationSessionModel authSession =
+        rootAuthSession.createAuthenticationSession(targetClient);
 
     authSession.setAuthenticatedUser(user);
     authSession.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
-    authSession.setClientNote(OIDCLoginProtocol.ISSUER, Urls.realmIssuer(
-        session.getContext().getUri().getBaseUri(), realm.getName()));
+    authSession.setClientNote(
+        OIDCLoginProtocol.ISSUER,
+        Urls.realmIssuer(session.getContext().getUri().getBaseUri(), realm.getName()));
     authSession.setClientNote(OIDCLoginProtocol.SCOPE_PARAM, accessToken.getScope());
     authSession.setClientScopes(clientScopeIds);
 
     return authSession;
   }
-
 }

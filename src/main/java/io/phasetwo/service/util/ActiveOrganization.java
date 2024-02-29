@@ -47,10 +47,12 @@ public class ActiveOrganization {
     }
 
     // security measure
-    // verify that the user belong to the organization (in case he modified through account POST api)
+    // verify that the user belong to the organization (in case he modified through account POST
+    // api)
     // no issue if read-only user attributes is enabled with "org.ro.*"
     // --spi-user-profile-declarative-user-profile-read-only-attributes=org.ro.*
-    if (organizationProvider.getUserOrganizationsStream(realm, user)
+    if (organizationProvider
+        .getUserOrganizationsStream(realm, user)
         .noneMatch(org -> org.getId().equals(activeOrganizationId))) {
       log.warnf("%s doesn't belong to this organization", user.getUsername());
 
@@ -76,8 +78,8 @@ public class ActiveOrganization {
 
   public boolean getDefaultActiveOrganization() {
 
-    Stream<OrganizationModel> userOrganizations = organizationProvider
-        .getUserOrganizationsStream(realm, user);
+    Stream<OrganizationModel> userOrganizations =
+        organizationProvider.getUserOrganizationsStream(realm, user);
     Optional<OrganizationModel> firstOrganization = userOrganizations.findFirst();
 
     if (firstOrganization.isEmpty()) {
@@ -95,7 +97,8 @@ public class ActiveOrganization {
 
   public List<String> getUserActiveOrganizationRoles() {
     List<String> userOrganizationRoles = Lists.newArrayList();
-    organization.getRolesStream()
+    organization
+        .getRolesStream()
         .forEach(
             role -> {
               if (role.hasRole(user)) {

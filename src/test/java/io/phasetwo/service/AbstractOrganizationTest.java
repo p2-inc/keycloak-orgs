@@ -1,5 +1,14 @@
 package io.phasetwo.service;
 
+import static io.phasetwo.service.Helpers.enableEvents;
+import static io.phasetwo.service.Helpers.objectMapper;
+import static io.phasetwo.service.Helpers.toJsonString;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,14 +21,6 @@ import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import jakarta.ws.rs.core.Response.Status;
-import org.hamcrest.Matchers;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.junit.jupiter.api.BeforeAll;
-import org.keycloak.admin.client.Keycloak;
-import org.testcontainers.Testcontainers;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,15 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
-import static io.phasetwo.service.Helpers.enableEvents;
-import static io.phasetwo.service.Helpers.objectMapper;
-import static io.phasetwo.service.Helpers.toJsonString;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.hamcrest.Matchers;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.junit.jupiter.api.BeforeAll;
+import org.keycloak.admin.client.Keycloak;
+import org.testcontainers.Testcontainers;
 
 public abstract class AbstractOrganizationTest {
 
@@ -46,12 +45,12 @@ public abstract class AbstractOrganizationTest {
   public static final String ADMIN_CLI = "admin-cli";
 
   static final String[] deps = {
-      "dnsjava:dnsjava",
-      "org.wildfly.client:wildfly-client-config",
-      "org.jboss.resteasy:resteasy-client",
-      "org.jboss.resteasy:resteasy-client-api",
-      "org.keycloak:keycloak-admin-client",
-      "io.phasetwo.keycloak:keycloak-events"
+    "dnsjava:dnsjava",
+    "org.wildfly.client:wildfly-client-config",
+    "org.jboss.resteasy:resteasy-client",
+    "org.jboss.resteasy:resteasy-client-api",
+    "org.keycloak:keycloak-admin-client",
+    "io.phasetwo.keycloak:keycloak-events"
   };
 
   static List<File> getDeps() {
@@ -83,21 +82,21 @@ public abstract class AbstractOrganizationTest {
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
 
-   static {
-     container.start();
+  static {
+    container.start();
   }
 
   @BeforeAll
   public static void beforeAll() {
     Testcontainers.exposeHostPorts(WEBHOOK_SERVER_PORT);
     resteasyClient =
-            new ResteasyClientBuilderImpl()
-                    .disableTrustManager()
-                    .readTimeout(60, TimeUnit.SECONDS)
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .build();
+        new ResteasyClientBuilderImpl()
+            .disableTrustManager()
+            .readTimeout(60, TimeUnit.SECONDS)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .build();
     keycloak =
-            getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
+        getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
     enableEvents(keycloak, "master");
   }
 
@@ -128,9 +127,7 @@ public abstract class AbstractOrganizationTest {
   }
 
   protected Response getRequestFromRoot(Keycloak keycloak, String... paths) {
-    return getRootRequest(Optional.of(keycloak)).when()
-        .get(String.join("/", paths))
-        .andReturn();
+    return getRootRequest(Optional.of(keycloak)).when().get(String.join("/", paths)).andReturn();
   }
 
   protected Response postRequest(Object body, String... paths) throws JsonProcessingException {
@@ -157,15 +154,25 @@ public abstract class AbstractOrganizationTest {
     return givenSpec(keycloak).and().body(toJsonString(body)).put(path).then().extract().response();
   }
 
-  protected Response patchRequest(Object body, String path)
-          throws JsonProcessingException {
-    return givenSpec(keycloak).and().body(toJsonString(body)).patch(path).then().extract().response();
+  protected Response patchRequest(Object body, String path) throws JsonProcessingException {
+    return givenSpec(keycloak)
+        .and()
+        .body(toJsonString(body))
+        .patch(path)
+        .then()
+        .extract()
+        .response();
   }
 
   protected Response putRequest(Keycloak keycloak, Object body, String... paths)
       throws JsonProcessingException {
-    return givenSpec(keycloak, String.join("/", paths)).and().body(toJsonString(body))
-        .put().then().extract().response();
+    return givenSpec(keycloak, String.join("/", paths))
+        .and()
+        .body(toJsonString(body))
+        .put()
+        .then()
+        .extract()
+        .response();
   }
 
   protected Response deleteRequest(String... paths) {
@@ -223,8 +230,9 @@ public abstract class AbstractOrganizationTest {
 
     response = getRequest("/%s/roles/%s".formatted(orgId, id));
     assertThat(response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
-    OrganizationRoleRepresentation orgRoleRep = objectMapper()
-        .readValue(response.getBody().asString(), OrganizationRoleRepresentation.class);
+    OrganizationRoleRepresentation orgRoleRep =
+        objectMapper()
+            .readValue(response.getBody().asString(), OrganizationRoleRepresentation.class);
     assertThat(orgRoleRep.getName(), is(name));
     return orgRoleRep;
   }
@@ -250,14 +258,14 @@ public abstract class AbstractOrganizationTest {
   protected void revokeUserRole(String orgId, String role, String userId) {
     // Delete /:realm/orgs/:orgId/roles/:name/users/:userId
     Response response =
-            givenSpec(keycloak)
-                    .and()
-                    .body("foo")
-                    .when()
-                    .delete(String.join("/", orgId, "roles", role, "users", userId))
-                    .then()
-                    .extract()
-                    .response();
+        givenSpec(keycloak)
+            .and()
+            .body("foo")
+            .when()
+            .delete(String.join("/", orgId, "roles", role, "users", userId))
+            .then()
+            .extract()
+            .response();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
@@ -309,18 +317,14 @@ public abstract class AbstractOrganizationTest {
     String clientId = getClientId(clientName);
 
     // get client roles
-    Response response = root
-        .when()
-        .get("clients/" + clientId + "/roles")
-        .then()
-        .extract()
-        .response();
+    Response response =
+        root.when().get("clients/" + clientId + "/roles").then().extract().response();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     ArrayNode roleArrayNode = (ArrayNode) mapper.readTree(response.getBody().asString());
     ArrayNode arrayBody = mapper.createArrayNode();
-    for(JsonNode roleJsonNode : roleArrayNode) {
-      for(String roleName : roleNames) {
+    for (JsonNode roleJsonNode : roleArrayNode) {
+      for (String roleName : roleNames) {
         if (roleJsonNode.get("name").asText().equals(roleName)) {
           ObjectNode body = mapper.createObjectNode();
           body.put("id", roleJsonNode.get("id").asText());
@@ -333,14 +337,14 @@ public abstract class AbstractOrganizationTest {
     }
 
     // assign client role to user
-    response = root
-        .and()
-        .body(arrayBody)
-        .when()
-        .post("users/" + userId + "/role-mappings/clients/" + clientId)
-        .then()
-        .extract()
-        .response();
+    response =
+        root.and()
+            .body(arrayBody)
+            .when()
+            .post("users/" + userId + "/role-mappings/clients/" + clientId)
+            .then()
+            .extract()
+            .response();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
@@ -370,18 +374,15 @@ public abstract class AbstractOrganizationTest {
     attributes.put("oidc.ciba.grant.enabled", false);
     body.putIfAbsent("attributes", attributes);
 
-    Response response = getAdminRootRequest(Optional.empty())
-        .body(body)
-        .post("clients")
-        .andReturn();
+    Response response =
+        getAdminRootRequest(Optional.empty()).body(body).post("clients").andReturn();
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
   }
 
   protected void deleteClient(String clientName) throws JsonProcessingException {
     String clientId = getClientId(clientName);
-    Response response = getAdminRootRequest(Optional.empty())
-        .delete("clients/" + clientId)
-        .andReturn();
+    Response response =
+        getAdminRootRequest(Optional.empty()).delete("clients/" + clientId).andReturn();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
@@ -400,23 +401,23 @@ public abstract class AbstractOrganizationTest {
     attributes.put("gui.order", "");
     body.putIfAbsent("attributes", attributes);
 
-    Response response = getAdminRootRequest(Optional.empty())
-        .body(body)
-        .post("client-scopes")
-        .andReturn();
+    Response response =
+        getAdminRootRequest(Optional.empty()).body(body).post("client-scopes").andReturn();
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
   }
 
   protected void deleteClientScope(String clientName) throws JsonProcessingException {
     String clientScopeId = getClientScopeId(clientName);
-    Response response = getAdminRootRequest(Optional.empty())
-        .delete("client-scopes/" + clientScopeId)
-        .andReturn();
+    Response response =
+        getAdminRootRequest(Optional.empty()).delete("client-scopes/" + clientScopeId).andReturn();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
   protected void addMapperToClientScope(
-      String clientScopeName, String claimName, String claimType, String protocolMapperName,
+      String clientScopeName,
+      String claimName,
+      String claimType,
+      String protocolMapperName,
       Map<String, String> additionalConfig)
       throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
@@ -438,10 +439,11 @@ public abstract class AbstractOrganizationTest {
     String clientScopeId = getClientScopeId(clientScopeName);
 
     // Assign mapper to client-scope
-    Response response = getAdminRootRequest(Optional.empty())
-        .body(body)
-        .post("client-scopes/" + clientScopeId + "/protocol-mappers/models")
-        .andReturn();
+    Response response =
+        getAdminRootRequest(Optional.empty())
+            .body(body)
+            .post("client-scopes/" + clientScopeId + "/protocol-mappers/models")
+            .andReturn();
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
   }
 
@@ -453,9 +455,10 @@ public abstract class AbstractOrganizationTest {
     // get client scopes
     String clientScopeId = getClientScopeId(clientScopeName);
 
-    Response response = getAdminRootRequest(Optional.empty())
-        .put("clients/" + clientId + "/default-client-scopes/" + clientScopeId)
-        .andReturn();
+    Response response =
+        getAdminRootRequest(Optional.empty())
+            .put("clients/" + clientId + "/default-client-scopes/" + clientScopeId)
+            .andReturn();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
@@ -478,8 +481,8 @@ public abstract class AbstractOrganizationTest {
       ((ObjectNode) attributeNode).remove(attributeKey);
     }
 
-    ((ObjectNode) attributeNode).set(
-        attributeKey, new ObjectMapper().createArrayNode().add(attributeValue));
+    ((ObjectNode) attributeNode)
+        .set(attributeKey, new ObjectMapper().createArrayNode().add(attributeValue));
 
     ObjectNode body = mapper.createObjectNode();
     body.put("username", username);
@@ -490,9 +493,7 @@ public abstract class AbstractOrganizationTest {
   }
 
   private String getClientScopeId(String clientScopeName) throws JsonProcessingException {
-    Response response = getAdminRootRequest(Optional.empty())
-        .get("client-scopes")
-        .andReturn();
+    Response response = getAdminRootRequest(Optional.empty()).get("client-scopes").andReturn();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     return getElementId(response, "name", clientScopeName);
@@ -500,10 +501,8 @@ public abstract class AbstractOrganizationTest {
 
   private String getClientId(String clientName) throws JsonProcessingException {
     // get clients
-    Response response = getAdminRootRequest(Optional.empty())
-        .when()
-        .get("clients?first=0&max=20")
-        .andReturn();
+    Response response =
+        getAdminRootRequest(Optional.empty()).when().get("clients?first=0&max=20").andReturn();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     return getElementId(response, "clientId", clientName);
@@ -511,9 +510,10 @@ public abstract class AbstractOrganizationTest {
 
   private String getElementId(Response response, String targetKey, String targetValue)
       throws JsonProcessingException {
-    ArrayNode clientArrayNode = (ArrayNode) new ObjectMapper().readTree(response.getBody().asString());
+    ArrayNode clientArrayNode =
+        (ArrayNode) new ObjectMapper().readTree(response.getBody().asString());
     String id = "";
-    for(JsonNode clientJsonNode : clientArrayNode) {
+    for (JsonNode clientJsonNode : clientArrayNode) {
       if (clientJsonNode.get(targetKey).asText().equals(targetValue)) {
         id = clientJsonNode.get("id").asText();
         break;
@@ -525,11 +525,13 @@ public abstract class AbstractOrganizationTest {
   }
 
   private RequestSpecification getAdminRootRequest(Optional<Keycloak> optionalKeycloak) {
-    RequestSpecification requestSpecification = given()
-        .baseUri(container.getAuthServerUrl())
-        .basePath("/admin/realms/" + REALM + "/")
-        .contentType("application/json")
-        .auth().oauth2(keycloak.tokenManager().getAccessTokenString());
+    RequestSpecification requestSpecification =
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath("/admin/realms/" + REALM + "/")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString());
 
     optionalKeycloak.ifPresent(
         value -> requestSpecification.auth().oauth2(value.tokenManager().getAccessTokenString()));
@@ -538,11 +540,13 @@ public abstract class AbstractOrganizationTest {
   }
 
   private RequestSpecification getRootRequest(Optional<Keycloak> optionalKeycloak) {
-    RequestSpecification requestSpecification = given()
-        .baseUri(container.getAuthServerUrl())
-        .basePath("/realms/" + REALM + "/")
-        .contentType("application/json")
-        .auth().oauth2(keycloak.tokenManager().getAccessTokenString());
+    RequestSpecification requestSpecification =
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath("/realms/" + REALM + "/")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString());
 
     optionalKeycloak.ifPresent(
         value -> requestSpecification.auth().oauth2(value.tokenManager().getAccessTokenString()));

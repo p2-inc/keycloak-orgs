@@ -79,11 +79,12 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
         },
         customClaimValue.get(id));
 
-    //change authorization
-    keycloak = getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
-    //delete user
+    // change authorization
+    keycloak =
+        getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
+    // delete user
     deleteUser(keycloak, REALM, user.getId());
-    //delete organization
+    // delete organization
     deleteOrganization(keycloak, id);
   }
 
