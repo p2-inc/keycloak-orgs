@@ -21,7 +21,8 @@ import org.keycloak.provider.ProviderConfigProperty;
 public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
 
   public static final String PROVIDER_ID = "oidc-active-organization-mapper";
-  public static final String INCLUDED_ORGANIZATION_PROPERTIES = "included.active.organization.properties";
+  public static final String INCLUDED_ORGANIZATION_PROPERTIES =
+      "included.active.organization.properties";
   private static final String ID = "id";
   private static final String NAME = "name";
   private static final String ROLE = "role";
@@ -33,9 +34,10 @@ public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
     ProviderConfigProperty property = new ProviderConfigProperty();
     property.setName(INCLUDED_ORGANIZATION_PROPERTIES);
     property.setLabel("Active Organization Properties");
-    property.setHelpText("Properties of the active organization to map into the token claims, "
-        + "it can be multiple, separated by comma. Available properties are: id, name, role and attribute. "
-        + "For example you can write: id or id, role");
+    property.setHelpText(
+        "Properties of the active organization to map into the token claims, "
+            + "it can be multiple, separated by comma. Available properties are: id, name, role and attribute. "
+            + "For example you can write: id or id, role");
     property.setType(ProviderConfigProperty.STRING_TYPE);
     property.setDefaultValue("id, name, role, attribute");
     configProperties.add(property);
@@ -66,8 +68,7 @@ public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
     }
 
     String inputProperties = mappingModel.getConfig().get(INCLUDED_ORGANIZATION_PROPERTIES);
-    List<String> properties = Arrays.asList(inputProperties
-        .replaceAll("\\s", "").split(","));
+    List<String> properties = Arrays.asList(inputProperties.replaceAll("\\s", "").split(","));
 
     Map<String, Object> claim = Maps.newHashMap();
     if (properties.contains(ID)) {

@@ -11,9 +11,7 @@ import jakarta.validation.constraints.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
@@ -30,7 +28,9 @@ public class RoleResource extends OrganizationAdminResource {
   private Consumer<String> deleteOrganizationRole;
 
   public RoleResource(
-      OrganizationAdminResource parent, OrganizationModel organization, String name,
+      OrganizationAdminResource parent,
+      OrganizationModel organization,
+      String name,
       Consumer<String> deleteOrganizationRole) {
     super(parent);
     this.organization = organization;

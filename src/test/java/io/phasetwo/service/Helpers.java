@@ -1,10 +1,17 @@
 package io.phasetwo.service;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.phasetwo.client.openapi.model.WebhookRepresentation;
 import io.phasetwo.service.resource.OrganizationResourceType;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -17,20 +24,11 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 import org.testcontainers.shaded.com.google.common.collect.Lists;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-
-
 public class Helpers {
 
   private static final ObjectMapper mapper;
   private static List<String> orgsTypes =
-            Arrays.stream(OrganizationResourceType.values()).map(Enum::toString).toList();
+      Arrays.stream(OrganizationResourceType.values()).map(Enum::toString).toList();
 
   static {
     mapper = new ObjectMapper();
@@ -84,47 +82,47 @@ public class Helpers {
   }
 
   public static RealmEventsConfigRepresentation addEventListener(
-          Keycloak keycloak, String realm, String name) {
+      Keycloak keycloak, String realm, String name) {
     RealmResource realmResource = keycloak.realm(realm);
     RealmEventsConfigRepresentation eventsConfig = realmResource.getRealmEventsConfig();
     if (eventsConfig.getEventsListeners().contains(name)) return eventsConfig; // disallow dupes
     eventsConfig.setEventsListeners(
-            new ImmutableList.Builder<String>()
-                    .addAll(eventsConfig.getEventsListeners())
-                    .add(name)
-                    .build());
+        new ImmutableList.Builder<String>()
+            .addAll(eventsConfig.getEventsListeners())
+            .add(name)
+            .build());
     realmResource.updateRealmEventsConfig(eventsConfig);
     return eventsConfig;
   }
 
-    public static RealmEventsConfigRepresentation enableEvents(Keycloak keycloak, String realm) {
-        RealmResource realmResource = keycloak.realm(realm);
-        RealmEventsConfigRepresentation eventsConfig = realmResource.getRealmEventsConfig();
-        eventsConfig.setEventsEnabled(true);
-        eventsConfig.setAdminEventsEnabled(Boolean.TRUE);
-        eventsConfig.setAdminEventsDetailsEnabled(Boolean.TRUE);
-        realmResource.updateRealmEventsConfig(eventsConfig);
+  public static RealmEventsConfigRepresentation enableEvents(Keycloak keycloak, String realm) {
+    RealmResource realmResource = keycloak.realm(realm);
+    RealmEventsConfigRepresentation eventsConfig = realmResource.getRealmEventsConfig();
+    eventsConfig.setEventsEnabled(true);
+    eventsConfig.setAdminEventsEnabled(Boolean.TRUE);
+    eventsConfig.setAdminEventsDetailsEnabled(Boolean.TRUE);
+    realmResource.updateRealmEventsConfig(eventsConfig);
 
-        return eventsConfig;
-    }
+    return eventsConfig;
+  }
 
-    public static List<EventRepresentation> getEvents(Keycloak keycloak, String realm) {
-        RealmResource realmResource = keycloak.realm(realm);
-        return realmResource.getEvents();
-    }
+  public static List<EventRepresentation> getEvents(Keycloak keycloak, String realm) {
+    RealmResource realmResource = keycloak.realm(realm);
+    return realmResource.getEvents();
+  }
 
-    public static List<AdminEventRepresentation> getAdminEvents(Keycloak keycloak, String realm) {
-        RealmResource realmResource = keycloak.realm(realm);
-        return realmResource.getAdminEvents();
-    }
+  public static List<AdminEventRepresentation> getAdminEvents(Keycloak keycloak, String realm) {
+    RealmResource realmResource = keycloak.realm(realm);
+    return realmResource.getAdminEvents();
+  }
 
-    public static void clearAdminEvents(Keycloak keycloak, String realm) {
-        RealmResource realmResource = keycloak.realm(realm);
-        realmResource.clearAdminEvents();
-    }
+  public static void clearAdminEvents(Keycloak keycloak, String realm) {
+    RealmResource realmResource = keycloak.realm(realm);
+    realmResource.clearAdminEvents();
+  }
 
   public static RealmEventsConfigRepresentation removeEventListener(
-          Keycloak keycloak, String realm, String name) {
+      Keycloak keycloak, String realm, String name) {
     RealmResource realmResource = keycloak.realm(realm);
     RealmEventsConfigRepresentation eventsConfig = realmResource.getRealmEventsConfig();
     if (eventsConfig.getEventsListeners().contains(name)) {
@@ -137,13 +135,13 @@ public class Helpers {
   }
 
   public static String createWebhook(
-          Keycloak keycloak,
-          CloseableHttpClient httpClient,
-          String baseUrl,
-          String url,
-          String secret,
-          List<String> types)
-          throws Exception {
+      Keycloak keycloak,
+      CloseableHttpClient httpClient,
+      String baseUrl,
+      String url,
+      String secret,
+      List<String> types)
+      throws Exception {
     WebhookRepresentation rep = new WebhookRepresentation();
     rep.setEnabled(true);
     rep.setUrl(url);
@@ -155,10 +153,10 @@ public class Helpers {
     }
 
     SimpleHttp.Response response =
-            SimpleHttp.doPost(baseUrl, httpClient)
-                    .auth(keycloak.tokenManager().getAccessTokenString())
-                    .json(rep)
-                    .asResponse();
+        SimpleHttp.doPost(baseUrl, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(rep)
+            .asResponse();
     assertThat(response.getStatus(), is(201));
     assertNotNull(response.getFirstHeader("Location"));
     String loc = response.getFirstHeader("Location");
@@ -167,23 +165,20 @@ public class Helpers {
   }
 
   public static void deleteWebhook(
-          Keycloak keycloak,
-          CloseableHttpClient httpClient,
-          String baseUrl,
-          String webhookId)
-          throws Exception {
+      Keycloak keycloak, CloseableHttpClient httpClient, String baseUrl, String webhookId)
+      throws Exception {
 
     SimpleHttp.Response response =
-            SimpleHttp.doDelete(baseUrl+"/"+webhookId, httpClient)
-                    .auth(keycloak.tokenManager().getAccessTokenString())
-                    .asResponse();
+        SimpleHttp.doDelete(baseUrl + "/" + webhookId, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .asResponse();
     assertThat(response.getStatus(), is(204));
   }
 
-    public static Stream<AdminEventRepresentation> getOrganizationEvents(Keycloak keycloak) {
-        return getAdminEvents(keycloak, "master").stream()
-                .filter(
-                        adminEventRepresentation ->
-                                orgsTypes.contains(adminEventRepresentation.getResourceType()));
-    }
+  public static Stream<AdminEventRepresentation> getOrganizationEvents(Keycloak keycloak) {
+    return getAdminEvents(keycloak, "master").stream()
+        .filter(
+            adminEventRepresentation ->
+                orgsTypes.contains(adminEventRepresentation.getResourceType()));
+  }
 }
