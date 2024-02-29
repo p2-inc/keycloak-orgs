@@ -107,7 +107,11 @@ export const ADFSWizard: FC = () => {
         const newMetadata = {
           ...SamlIDPDefaults,
           ...resp.data,
-	  nameIDPolicyFormat: "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
+          nameIDPolicyFormat:
+            "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+          wantAuthnRequestsSigned: "true",
+          signatureAlgorithm: "RSA_SHA256",
+          xmlSigKeyInfoKeyNameTransformer: "CERT_SUBJECT",
         };
         setMetadata(newMetadata);
         setIsFormValid(true);
