@@ -74,10 +74,12 @@ public class MembersResource extends OrganizationAdminResource {
 
         EventBuilder event = new EventBuilder(realm, session, connection);
         event
-                .event(UPDATE_PROFILE)
-                .user(user)
-                .detail("removed_active_organization_id", activeOrganizationUtil.getActiveOrganization().getId())
-                .success();
+            .event(UPDATE_PROFILE)
+            .user(user)
+            .detail(
+                "removed_active_organization_id",
+                activeOrganizationUtil.getActiveOrganization().getId())
+            .success();
       }
 
       organization.revokeMembership(member);

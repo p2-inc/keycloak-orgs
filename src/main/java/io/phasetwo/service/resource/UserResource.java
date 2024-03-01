@@ -96,11 +96,11 @@ public class UserResource extends OrganizationAdminResource {
     EventBuilder event = new EventBuilder(realm, session, connection);
 
     event
-            .event(UPDATE_PROFILE)
-            .user(user)
-            .detail("new_active_organization_id", body.getId())
-            .detail("previous_active_organization_id", currentActiveOrganization)
-            .success();
+        .event(UPDATE_PROFILE)
+        .user(user)
+        .detail("new_active_organization_id", body.getId())
+        .detail("previous_active_organization_id", currentActiveOrganization)
+        .success();
     return Response.ok(tokenManager.generateTokens()).build();
   }
 

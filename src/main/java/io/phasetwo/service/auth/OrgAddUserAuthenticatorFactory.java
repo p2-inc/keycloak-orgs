@@ -1,8 +1,14 @@
 package io.phasetwo.service.auth;
 
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
+import static org.keycloak.events.EventType.IDENTITY_PROVIDER_POST_LOGIN;
+
 import com.google.auto.service.AutoService;
+import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
+import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -11,11 +17,8 @@ import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderEvent;
-
-import java.util.Map;
-
-import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 
 /** */
 @JBossLog
@@ -61,15 +64,46 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
             "granting membership to %s for user %s",
             org.getName(), context.getUser().getUsername());
         org.grantMembership(context.getUser());
-        // TODO default roles from config??
-        context.getEvent()
-                .user(context.getUser())
-                .detail("joined_organization", org.getId())
-                .success();
+        context
+            .getEvent()
+            .user(context.getUser())
+            .detail("joined_organization", org.getId())
+            .success();
+        orgs.getUserInvitationsStream(context.getRealm(), context.getUser())
+            .filter(
+                invitationModel -> invitationModel.getOrganization().getId().equals(org.getId()))
+            .forEach(
+                invitationModel -> {
+                  addRolesFromInvitation(invitationModel, context.getUser());
+
+                  invitationModel.getOrganization().revokeInvitation(invitationModel.getId());
+                  context
+                      .getEvent()
+                      .clone()
+                      .event(IDENTITY_PROVIDER_POST_LOGIN)
+                      .detail("org_id", invitationModel.getOrganization().getId())
+                      .detail("invitation_id", invitationModel.getId())
+                      .user(context.getUser())
+                      .error("User invitation revoked.");
+                });
       }
     } else {
       log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
     }
+  }
+
+  void addRolesFromInvitation(InvitationModel invitation, UserModel user) {
+    invitation
+        .getRoles()
+        .forEach(
+            r -> {
+              OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
+              if (role == null) {
+                log.debugf("No org role found for invitation role %s. Skipping...", r);
+              } else {
+                role.grantRole(user);
+              }
+            });
   }
 
   @Override
