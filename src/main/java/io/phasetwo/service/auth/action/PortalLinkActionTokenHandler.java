@@ -86,9 +86,7 @@ public class PortalLinkActionTokenHandler
     // set the orgId to a user session note
     authSession.setUserSessionNote(FIELD_ORG_ID, token.getOrgId());
 
-    event
-            .detail(FIELD_ORG_ID, token.getOrgId())
-            .success();
+    event.detail(FIELD_ORG_ID, token.getOrgId()).success();
 
     String nextAction =
         AuthenticationManager.nextRequiredAction(
