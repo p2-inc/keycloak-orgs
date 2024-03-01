@@ -19,11 +19,15 @@ import { AIACommand } from "services/aia-command";
 import P2Toast from "components/utils/toast";
 import { Key, Lock, Smartphone } from "lucide-react";
 
+const PASSWORD = "password";
+const TWO_FACTOR_AUTH = "2fa";
 const WEB_AUTH_N = "webauthn";
 const WEB_AUTH_N_REGISTER = "webauthn-register";
 const WEB_AUTH_N_PASSWORDLESS = "webauthn-passwordless";
 const WEB_AUTH_N_PASSWORDLESS_REGISTER = "webauthn-register-passwordless";
 const OTP = "otp";
+
+type CredentialType = PASSWORD | TWO_FACTOR_AUTH | WEB_AUTH_N | OTP;
 
 const time = (time: string | undefined): string => {
   if (time === undefined) return "unknown";
@@ -84,7 +88,7 @@ const SigninProfile = () => {
   ];
 
   const rowsForType = (
-    credentialType: string,
+    credentialType: CredentialType,
     credentials: CredentialRepresentation[]
   ): TableRows => {
     const metadatas: UserCredentialMetadataRepresentation[] = [];
@@ -147,7 +151,7 @@ const SigninProfile = () => {
             />
             <Table
               columns={cols}
-              rows={rowsForType("password", credentials)}
+              rows={rowsForType(PASSWORD, credentials)}
               isLoading={isLoading}
             />
           </div>
@@ -168,7 +172,7 @@ const SigninProfile = () => {
               {isLoading && (
                 <Table
                   columns={cols}
-                  rows={rowsForType("password", credentials)}
+                  rows={rowsForType(TWO_FACTOR_AUTH, credentials)}
                   isLoading={isLoading}
                 />
               )}
@@ -219,7 +223,7 @@ const SigninProfile = () => {
                       description={t("useYourSecurityKeyToSignIn")}
                       variant="small"
                     />
-                    {rowsForType("webauthn", credentials).length !== 0 && (
+                    {rowsForType(WEB_AUTH_N, credentials).length !== 0 && (
                       <Button
                         isBlackButton
                         onClick={() => setUpCredential(WEB_AUTH_N_REGISTER)}
@@ -230,7 +234,7 @@ const SigninProfile = () => {
                   </div>
                   <Table
                     columns={cols}
-                    rows={rowsForType("webauthn", credentials)}
+                    rows={rowsForType(WEB_AUTH_N, credentials)}
                     isLoading={isLoading}
                     emptyState={
                       <div>
