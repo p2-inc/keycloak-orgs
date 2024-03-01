@@ -57,6 +57,7 @@ public class PortalLinkActionTokenHandler
   @Override
   public Response handleToken(
       PortalLinkActionToken token, ActionTokenContext<PortalLinkActionToken> tokenContext) {
+    EventBuilder event = tokenContext.getEvent();
     log.infof(
         "handleToken for iss:%s, org:%s, user:%s, rdu:%s",
         token.getIssuedFor(), token.getOrgId(), token.getUserId(), token.getRedirectUri());
@@ -84,6 +85,10 @@ public class PortalLinkActionTokenHandler
 
     // set the orgId to a user session note
     authSession.setUserSessionNote(FIELD_ORG_ID, token.getOrgId());
+
+    event
+            .detail(FIELD_ORG_ID, token.getOrgId())
+            .success();
 
     String nextAction =
         AuthenticationManager.nextRequiredAction(
