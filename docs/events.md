@@ -44,6 +44,8 @@ Organization management
 
 ![add-to-organization-success](./assets/events/add-to-organization-success-event.png)
 
+![remove-organization-invitation-event](./assets/events/remove-organization-invitation-event.png)
+
 
 `PortalLink` - Event type: EXECUTE_ACTION_TOKEN
 
