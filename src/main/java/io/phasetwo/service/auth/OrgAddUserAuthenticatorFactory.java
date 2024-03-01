@@ -64,7 +64,7 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
         // TODO default roles from config??
         context.getEvent()
                 .user(context.getUser())
-                .detail("joinedOrganization", org.getId())
+                .detail("joined_organization", org.getId())
                 .success();
       }
     } else {

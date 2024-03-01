@@ -76,7 +76,7 @@ public class MembersResource extends OrganizationAdminResource {
         event
                 .event(UPDATE_PROFILE)
                 .user(user)
-                .detail("removedActiveOrganizationId", activeOrganizationUtil.getActiveOrganization().getId())
+                .detail("removed_active_organization_id", activeOrganizationUtil.getActiveOrganization().getId())
                 .success();
       }
 

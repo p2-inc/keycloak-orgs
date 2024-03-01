@@ -39,7 +39,7 @@ class OrganizationMembershipUserEventsTest extends AbstractOrganizationTest {
         var userEvents = getEvents(keycloak, "master")
                 .stream()
                 .filter(eventRepresentation -> eventRepresentation.getType().equals("UPDATE_PROFILE"))
-                .filter(eventRepresentation -> eventRepresentation.getDetails().containsKey("removedActiveOrganizationId"))
+                .filter(eventRepresentation -> eventRepresentation.getDetails().containsKey("removed_active_organization_id"))
                 .toList();
 
         assertThat(userEvents, hasSize(1));
@@ -81,8 +81,8 @@ class OrganizationMembershipUserEventsTest extends AbstractOrganizationTest {
         var userEvents = getEvents(keycloak, "master")
                 .stream()
                 .filter(eventRepresentation -> eventRepresentation.getType().equals("UPDATE_PROFILE"))
-                .filter(eventRepresentation -> eventRepresentation.getDetails().containsKey("newActiveOrganizationId"))
-                .filter(eventRepresentation -> eventRepresentation.getDetails().containsKey("previousActiveOrganizationId"))
+                .filter(eventRepresentation -> eventRepresentation.getDetails().containsKey("new_active_organization_id"))
+                .filter(eventRepresentation -> eventRepresentation.getDetails().containsKey("previous_active_organization_id"))
                 .toList();
 
         assertThat(userEvents, hasSize(1));

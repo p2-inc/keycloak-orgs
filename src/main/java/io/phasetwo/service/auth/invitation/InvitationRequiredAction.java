@@ -96,16 +96,16 @@ public class InvitationRequiredAction implements RequiredActionProvider {
                 event.clone()
                         .event(CUSTOM_REQUIRED_ACTION)
                         .user(user)
-                        .detail("orgId", i.getOrganization().getId())
-                        .detail("invitationId", i.getId())
+                        .detail("org_id", i.getOrganization().getId())
+                        .detail("invitation_id", i.getId())
                         .success();
               }
               // revoke invitation
               i.getOrganization().revokeInvitation(i.getId());
               event.clone()
                       .event(CUSTOM_REQUIRED_ACTION)
-                      .detail("orgId", i.getOrganization().getId())
-                      .detail("invitationId", i.getId())
+                      .detail("org_id", i.getOrganization().getId())
+                      .detail("invitation_id", i.getId())
                       .user(user)
                       .error("User invitation revoked.");
             });

@@ -98,8 +98,8 @@ public class UserResource extends OrganizationAdminResource {
     event
             .event(UPDATE_PROFILE)
             .user(user)
-            .detail("newActiveOrganizationId", body.getId())
-            .detail("previousActiveOrganizationId", currentActiveOrganization)
+            .detail("new_active_organization_id", body.getId())
+            .detail("previous_active_organization_id", currentActiveOrganization)
             .success();
     return Response.ok(tokenManager.generateTokens()).build();
   }

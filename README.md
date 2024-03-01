@@ -25,8 +25,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
       - [Entities](#entities)
     - [Resources](#resources)
     - [Mappers](#mappers)
-    - [Admin Events](#admin-events)
-    - [User Events](#user-events)
+    - [Events](#events)
     - [Authentication](#authentication)
       - [Invitations](#invitations)
       - [IdP Discovery](#idp-discovery)
@@ -157,6 +156,10 @@ A group of custom REST resources are made available for administrator and custom
 - [Bulk Roles](./docs/bulk-roles.md) - support for bulk Roles resources
 - Identity Providers - A subset of the Keycloak IdP APIs that allows Organization administrators to manage their own IdP
 
+### Events
+
+For more information you can refer to: [Events](./docs/events.md)
+
 ### Mappers
 
 There is currently a single OIDC mapper that adds Organization membership and roles to the token. The format of the addition to the token is
@@ -173,55 +176,6 @@ There is currently a single OIDC mapper that adds Organization membership and ro
 You can configure the mapper, by going to **Clients** > ***your-client-name*** > **Client scopes** > ***your-client-name*-dedicated** and choosing to add a new mapper **By configuration**. Once selected, choose the **Organization Role** mapper from the list and specify the details like the following:
 
 ![mapper](./docs/assets/mapper.png)
-
-### Admin Events
-
-Description of the events associated with the management of organizations:
-
-| Path                                                                        | Method   | Event type                | Operation |
-|-----------------------------------------------------------------------------|----------|---------------------------|-----------|
-| `/auth/realms/:realmId/orgs`                                                | `POST`   | ORGANIZATION              | CREATE    |
-| `/auth/realms/:realmId/orgs`                                                | `PUT`    | ORGANIZATION              | UPDATE    |
-| `/auth/realms/:realmId/orgs`                                                | `DELETE` | ORGANIZATION              | DELETE    |
-| `/auth/realms/:realmId/orgs/:orgId/members/:userId`                         | `PUT`    | ORGANIZATION_MEMBERSHIP   | CREATE    |
-| `/auth/realms/:realmId/orgs/:orgId/members/:userId`                         | `DELETE` | ORGANIZATION_MEMBERSHIP   | DELETE    |
-| `/auth/realms/:realmId/orgs/:orgId/roles/:roleName`                         | `POST`   | ORGANIZATION_ROLE         | CREATE    |
-| `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/:roleName`               | `DELETE` | ORGANIZATION_ROLE         | DELETE    |
-| `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/:roleName`               | `PUT`    | ORGANIZATION_ROLE         | UPDATE    |
-| `/auth/realms/:realmId/orgs/users/:userId/orgs/:orgId/roles`                | `DELETE` | ORGANIZATION_ROLE_MAPPING | DELETE    |
-| `/auth/realms/:realmId/orgs/users/:userId/orgs/:orgId/roles`                | `PATCH`  | ORGANIZATION_ROLE_MAPPING | CREATE    |
-| `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/users/:userId`           | `DELETE` | ORGANIZATION_ROLE_MAPPING | DELETE    |
-| `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/users/:userId`           | `PUT`    | ORGANIZATION_ROLE_MAPPING | CREATE    |
-| `/auth/realms/:realmId/orgs/:orgId/roles/:roleName/users/:userId`           | `DELETE` | ORGANIZATION_ROLE_MAPPING | DELETE    |
-| `/auth/realms/:realmId/orgs/:orgId/invitations/:invitationId`               | `POST`   | INVITATION                | CREATE    |
-| `/auth/realms/:realmId/orgs/:orgId/invitations/:invitationId/:invitationId` | `DELETE` | INVITATION                | DELETE    |
-| `/auth/realms/:realmId/orgs/:orgId/domains/:domainName/verify`              | `POST`   | DOMAIN                    | UPDATE    |
-
-### User events
-
-Description of the events associated with users in the context of a organization.
-
-Organization management
-
-| Path                                                | Method   | Event type      |
-|-----------------------------------------------------|----------|-----------------|
-| `/auth/realms/:realmId/users/switch-organization`   | `PUT`    | UPDATE_PROFILE  |
-| `/auth/realms/:realmId/orgs/:orgId/members/:userId` | `DELETE` | UPDATE_PROFILE  | 
-
-`Invitations` -  Event type: CUSTOM_REQUIRED_ACTION
-
-![invitation-required-action-success](./docs/assets/events/invitation-required-action-success-event.png)
-
-![invitation-required-action-error](./docs/assets/events/invitation-required-action-error-event.png)
-
-`Post IdP login ("Add user to org" Authenticator)` - Event type: IDENTITY_PROVIDER_POST_LOGIN
-
-![add-to-organization-success](./docs/assets/events/add-to-organization-success-event.png)
-
-
-`PortalLink` - Event type: EXECUTE_ACTION_TOKEN
-
-![portal-link-success](./docs/assets/events/portal-link-success-event.png)
 
 ### Authentication
 
