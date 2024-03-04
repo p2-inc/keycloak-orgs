@@ -2,10 +2,30 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
   <changeSet author="xgp" id="invite-attr-len-1">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <dbms type="cockroachdb"/>
+      </not>
+    </preConditions>
     <modifyDataType tableName="INVITATION_ATTRIBUTE" columnName="VALUE" newDataType="varchar(4000)" />
   </changeSet>
 
   <changeSet author="xgp" id="org-attr-len-1">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <dbms type="cockroachdb"/>
+      </not>
+    </preConditions>
+    <modifyDataType tableName="ORGANIZATION_ATTRIBUTE" columnName="VALUE" newDataType="varchar(4000)" />
+  </changeSet>
+
+  <!-- crdb specific -->
+  <changeSet author="xgp" id="attr-len-crdb">
+    <preConditions onFail="MARK_RAN">
+      <dbms type="cockroachdb"/>
+    </preConditions>
+    <sql dbms="cockroachdb">SET enable_experimental_alter_column_type_general=true;</sql>
+    <modifyDataType tableName="INVITATION_ATTRIBUTE" columnName="VALUE" newDataType="varchar(4000)" />
     <modifyDataType tableName="ORGANIZATION_ATTRIBUTE" columnName="VALUE" newDataType="varchar(4000)" />
   </changeSet>
 
