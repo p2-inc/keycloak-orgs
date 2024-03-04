@@ -19,15 +19,15 @@ import { AIACommand } from "services/aia-command";
 import P2Toast from "components/utils/toast";
 import { Key, Lock, Smartphone } from "lucide-react";
 
-const PASSWORD = "password";
-const TWO_FACTOR_AUTH = "2fa";
-const WEB_AUTH_N = "webauthn";
-const WEB_AUTH_N_REGISTER = "webauthn-register";
-const WEB_AUTH_N_PASSWORDLESS = "webauthn-passwordless";
-const WEB_AUTH_N_PASSWORDLESS_REGISTER = "webauthn-register-passwordless";
-const OTP = "otp";
-
-type CredentialType = PASSWORD | TWO_FACTOR_AUTH | WEB_AUTH_N | OTP;
+enum CredentialType {
+  PASSWORD = "password",
+  TWO_FACTOR_AUTH = "2fa",
+  WEB_AUTH_N = "webauthn",
+  WEB_AUTH_N_REGISTER = "webauthn-register",
+  WEB_AUTH_N_PASSWORDLESS = "webauthn-passwordless",
+  WEB_AUTH_N_PASSWORDLESS_REGISTER = "webauthn-register-passwordless",
+  OTP = "otp",
+}
 
 const time = (time: string | undefined): string => {
   if (time === undefined) return "unknown";
@@ -42,11 +42,13 @@ const SigninProfile = () => {
   });
   const [deleteCredential] = useDeleteCredentialMutation();
 
-  const hasWebAuthN = credentials.find((cred) => cred.type === WEB_AUTH_N);
-  const hasWebAuthNPasswordLess = credentials.find(
-    (cred) => cred.type === WEB_AUTH_N_PASSWORDLESS
+  const hasWebAuthN = credentials.find(
+    (cred) => cred.type === CredentialType.WEB_AUTH_N
   );
-  const hasOTP = credentials.find((cred) => cred.type === OTP);
+  const hasWebAuthNPasswordLess = credentials.find(
+    (cred) => cred.type === CredentialType.WEB_AUTH_N_PASSWORDLESS
+  );
+  const hasOTP = credentials.find((cred) => cred.type === CredentialType.OTP);
 
   const removeCredential = (
     credential: CredentialMetadataRepresentation
@@ -109,14 +111,16 @@ const SigninProfile = () => {
               isCompact
               className="inline-flex w-full justify-center sm:ml-3 sm:w-auto"
               onClick={() => {
-                if (credentialType === "password") {
+                if (credentialType === CredentialType.PASSWORD) {
                   updateAIA("UPDATE_PASSWORD");
                 } else {
                   removeCredential(metadata.credential!);
                 }
               }}
             >
-              {credentialType === "password" ? t("update") : t("remove")}
+              {credentialType === CredentialType.PASSWORD
+                ? t("update")
+                : t("remove")}
             </Button>
           )}
         </>
@@ -151,7 +155,7 @@ const SigninProfile = () => {
             />
             <Table
               columns={cols}
-              rows={rowsForType(PASSWORD, credentials)}
+              rows={rowsForType(CredentialType.PASSWORD, credentials)}
               isLoading={isLoading}
             />
           </div>
@@ -172,7 +176,10 @@ const SigninProfile = () => {
               {isLoading && (
                 <Table
                   columns={cols}
-                  rows={rowsForType(TWO_FACTOR_AUTH, credentials)}
+                  rows={rowsForType(
+                    CredentialType.TWO_FACTOR_AUTH,
+                    credentials
+                  )}
                   isLoading={isLoading}
                 />
               )}
@@ -188,7 +195,8 @@ const SigninProfile = () => {
                       variant="small"
                     />
 
-                    {rowsForType(OTP, credentials).length !== 0 && (
+                    {rowsForType(CredentialType.OTP, credentials).length !==
+                      0 && (
                       <Button
                         isBlackButton
                         onClick={() => setUpCredential("CONFIGURE_TOTP")}
@@ -199,7 +207,7 @@ const SigninProfile = () => {
                   </div>
                   <Table
                     columns={cols}
-                    rows={rowsForType(OTP, credentials)}
+                    rows={rowsForType(CredentialType.OTP, credentials)}
                     isLoading={isLoading}
                     emptyState={
                       <div>
@@ -223,10 +231,13 @@ const SigninProfile = () => {
                       description={t("useYourSecurityKeyToSignIn")}
                       variant="small"
                     />
-                    {rowsForType(WEB_AUTH_N, credentials).length !== 0 && (
+                    {rowsForType(CredentialType.WEB_AUTH_N, credentials)
+                      .length !== 0 && (
                       <Button
                         isBlackButton
-                        onClick={() => setUpCredential(WEB_AUTH_N_REGISTER)}
+                        onClick={() =>
+                          setUpCredential(CredentialType.WEB_AUTH_N_REGISTER)
+                        }
                       >
                         {t("setUpSecurityKey")}
                       </Button>
@@ -234,13 +245,15 @@ const SigninProfile = () => {
                   </div>
                   <Table
                     columns={cols}
-                    rows={rowsForType(WEB_AUTH_N, credentials)}
+                    rows={rowsForType(CredentialType.WEB_AUTH_N, credentials)}
                     isLoading={isLoading}
                     emptyState={
                       <div>
                         <Button
                           isBlackButton
-                          onClick={() => setUpCredential(WEB_AUTH_N_REGISTER)}
+                          onClick={() =>
+                            setUpCredential(CredentialType.WEB_AUTH_N_REGISTER)
+                          }
                         >
                           {t("setUpSecurityKey")}
                         </Button>
@@ -270,12 +283,16 @@ const SigninProfile = () => {
                   description={t("useYourSecurityKeyForPasswordlessSignIn")}
                   variant="small"
                 />
-                {rowsForType(WEB_AUTH_N_PASSWORDLESS, credentials).length !==
-                  0 && (
+                {rowsForType(
+                  CredentialType.WEB_AUTH_N_PASSWORDLESS,
+                  credentials
+                ).length !== 0 && (
                   <Button
                     isBlackButton
                     onClick={() =>
-                      setUpCredential(WEB_AUTH_N_PASSWORDLESS_REGISTER)
+                      setUpCredential(
+                        CredentialType.WEB_AUTH_N_PASSWORDLESS_REGISTER
+                      )
                     }
                   >
                     {t("setUpSecurityKey")}
@@ -284,14 +301,19 @@ const SigninProfile = () => {
               </div>
               <Table
                 columns={cols}
-                rows={rowsForType(WEB_AUTH_N_PASSWORDLESS, credentials)}
+                rows={rowsForType(
+                  CredentialType.WEB_AUTH_N_PASSWORDLESS,
+                  credentials
+                )}
                 isLoading={isLoading}
                 emptyState={
                   <div>
                     <Button
                       isBlackButton
                       onClick={() =>
-                        setUpCredential(WEB_AUTH_N_PASSWORDLESS_REGISTER)
+                        setUpCredential(
+                          CredentialType.WEB_AUTH_N_PASSWORDLESS_REGISTER
+                        )
                       }
                     >
                       {t("setUpSecurityKey")}
