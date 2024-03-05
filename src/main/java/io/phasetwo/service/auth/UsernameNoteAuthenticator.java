@@ -3,10 +3,10 @@ package io.phasetwo.service.auth;
 import static org.keycloak.services.validation.Validation.FIELD_USERNAME;
 
 import io.phasetwo.service.util.Emails;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
@@ -24,13 +24,12 @@ class UsernameNoteAuthenticator extends AbstractUsernameFormAuthenticator
 
   @Override
   public void authenticate(AuthenticationFlowContext context) {
-    MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
+    MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
     String loginHint =
         context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
 
     String rememberMeUsername =
-        AuthenticationManager.getRememberMeUsername(
-            context.getRealm(), context.getHttpRequest().getHttpHeaders());
+        AuthenticationManager.getRememberMeUsername(context.getSession());
 
     if (loginHint != null || rememberMeUsername != null) {
       if (loginHint != null) {
