@@ -1805,7 +1805,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     kc = getKeycloak(REALM, "test-ui", "user", "password");
 
     // validate that user currently doesn't have an active organization attribute
-    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
 
     // validate current token claims, should have org-1 by default
     validateActiveOrganizationFromAccessToken(
@@ -1820,7 +1820,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
     // verify user attributes doesn't contains active organization
-    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
 
     // Try switching to organization 3
     response = putRequest(kc, switchToOrganization3, "users", "switch-organization");
@@ -1831,27 +1831,27 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(rootNode.hasNonNull(ACCESS_TOKEN), is(true));
     validateActiveOrganizationFromAccessToken(rootNode.get(ACCESS_TOKEN).asText(), true, org3Id);
 
+    // verify that user don't see the active organization attribute
+    validateActiveOrganizationNotVisibleFromAccount(getUserAccount(kc));
+
     // verify user attributes contains active organization
-    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org3Id);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), true, org3Id);
 
     // validate get active-organization
     response = getRequest(kc, "users", "active-organization");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
-    // verify for malicious organization switch through user account endpoint
-    // if not restricted with read only attributes
-    createOrReplaceUserAttribute(kc, "user", ACTIVE_ORGANIZATION, org2Id);
-    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org2Id);
+    // verify that standard user can't modify read-only org.ro.active attribute
+    createOrReplaceReadOnlyUserAttribute(kc, "user", ACTIVE_ORGANIZATION, org2Id);
 
-    // re-authenticate user to get new token and validate there is NO active
-    // organization in claims
+    // re-authenticate user to get new token and validate that the active organization didn't change
     kc = getKeycloak(REALM, "test-ui", "user", "password");
     validateActiveOrganizationFromAccessToken(
-        kc.tokenManager().getAccessTokenString(), false, null);
+        kc.tokenManager().getAccessTokenString(), true, org3Id);
 
     // validate get active-organization after malicious organization switch
     response = getRequest(kc, "users", "active-organization");
-    assertThat(response.getStatusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     // test that active org attribute is removed when membership is revoked
     // switch back to org-1
@@ -1864,7 +1864,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     validateActiveOrganizationFromAccessToken(rootNode.get(ACCESS_TOKEN).asText(), true, org1Id);
 
     // verify user attributes contains active organization
-    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org1Id);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), true, org1Id);
 
     // validate get active-organization
     response = getRequest(kc, "users", "active-organization");
@@ -1875,25 +1875,26 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // verify user attributes doesn't have active organization anymore
-    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
 
-    // test that active org attribute is removed after login when organization is
-    // deleted
+    // test that active org attribute is removed after login when organization is deleted
     // switch to org3
     response = putRequest(kc, switchToOrganization3, "users", "switch-organization");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     // verify attribute
-    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org3Id);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), true, org3Id);
 
     // delete organization
     deleteOrganization(org3Id);
 
-    // re-authenticate
+    // re-authenticate for lazy removal
     kc = getKeycloak(REALM, "test-ui", "user", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), false, null);
 
     // verify attribute is removed
-    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
 
     deleteUser(keycloak, REALM, user.getId());
     deleteClient("test-ui");
@@ -1928,9 +1929,21 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     JsonNode attributeNode = rootNode.get("attributes");
 
     if (shouldContain) {
+      assertThat(attributeNode == null, is(false));
       assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(true));
       assertThat(attributeNode.get(ACTIVE_ORGANIZATION).get(0).asText(), is(targetOrgId));
     } else {
+      if (attributeNode != null) {
+        assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(false));
+      }
+    }
+  }
+
+  private void validateActiveOrganizationNotVisibleFromAccount(Response response)
+      throws JsonProcessingException {
+    JsonNode rootNode = objectMapper().readTree(response.body().asString());
+    JsonNode attributeNode = rootNode.get("attributes");
+    if (attributeNode != null) {
       assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(false));
     }
   }
