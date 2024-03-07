@@ -11,8 +11,8 @@ import jakarta.validation.constraints.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
@@ -25,13 +25,18 @@ public class RoleResource extends OrganizationAdminResource {
   private final OrganizationModel organization;
   private final OrganizationRoleModel role;
   private final String name;
+  private Consumer<String> deleteOrganizationRole;
 
   public RoleResource(
-      OrganizationAdminResource parent, OrganizationModel organization, String name) {
+      OrganizationAdminResource parent,
+      OrganizationModel organization,
+      String name,
+      Consumer<String> deleteOrganizationRole) {
     super(parent);
     this.organization = organization;
     this.role = organization.getRoleByName(name);
     this.name = name;
+    this.deleteOrganizationRole = deleteOrganizationRole;
   }
 
   @GET
@@ -64,18 +69,7 @@ public class RoleResource extends OrganizationAdminResource {
   public Response deleteRole() {
     canManage();
 
-    if (Arrays.asList(OrganizationAdminAuth.DEFAULT_ORG_ROLES).contains(name)) {
-      throw new BadRequestException(
-          String.format("Default organization role %s cannot be deleted.", name));
-    }
-
-    organization.removeRole(name);
-
-    adminEvent
-        .resource(ORGANIZATION_ROLE.name())
-        .operation(OperationType.DELETE)
-        .resourcePath(session.getContext().getUri(), name)
-        .success();
+    deleteOrganizationRole.accept(name);
 
     return Response.noContent().build();
   }

@@ -1,12 +1,34 @@
 package io.phasetwo.service.resource;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.phasetwo.service.Helpers.*;
+import static io.phasetwo.service.Helpers.addEventListener;
+import static io.phasetwo.service.Helpers.createUser;
+import static io.phasetwo.service.Helpers.createUserWithCredentials;
+import static io.phasetwo.service.Helpers.createWebhook;
+import static io.phasetwo.service.Helpers.deleteUser;
+import static io.phasetwo.service.Helpers.deleteWebhook;
+import static io.phasetwo.service.Helpers.objectMapper;
+import static io.phasetwo.service.Helpers.removeEventListener;
+import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
+import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.xgp.http.server.Server;
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.client.openapi.model.IdentityProviderMapperRepresentation;
 import io.phasetwo.client.openapi.model.IdentityProviderRepresentation;
@@ -19,25 +41,36 @@ import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.InvitationRequest;
 import io.phasetwo.service.representation.LinkIdp;
+import io.phasetwo.service.representation.OrganizationRole;
+import io.phasetwo.service.representation.SwitchOrganization;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
+import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.broker.provider.util.SimpleHttp;
+import org.keycloak.common.VerificationException;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.keycloak.util.JsonSerialization;
 
 @JBossLog
-@Testcontainers
 class OrganizationResourceTest extends AbstractOrganizationTest {
+
+  private static String ACTIVE_ORG_CLAIM = "active_organization";
+  private static String ACCESS_TOKEN = "access_token";
 
   @Test
   void testAddGetUpdateDeleteOrg() throws Exception {
@@ -296,9 +329,11 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     Map<String, Object> urlConf =
         ImmutableMap.of(
             "fromUrl",
-                "https://login.microsoftonline.com/74df8381-4935-4fa8-8634-8e3413f93086/federationmetadata/2007-06/federationmetadata.xml?appid=ba149e64-4512-440b-a1b4-ae976d85f1ec",
-            "providerId", "saml",
-            "realm", REALM);
+            "https://login.microsoftonline.com/74df8381-4935-4fa8-8634-8e3413f93086/federationmetadata/2007-06/federationmetadata.xml?appid=ba149e64-4512-440b-a1b4-ae976d85f1ec",
+            "providerId",
+            "saml",
+            "realm",
+            REALM);
     Response response = postRequest(urlConf, org.getId(), "idps", "import-config");
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
@@ -316,9 +351,11 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     urlConf =
         ImmutableMap.of(
             "fromUrl",
-                "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
-            "providerId", "saml",
-            "realm", REALM);
+            "https://login.microsoftonline.com/75a21e21-e75f-46cd-81a1-73b0486c7e81/federationmetadata/2007-06/federationmetadata.xml?appid=65032359-8102-4ff8-aed0-005752ce97ff",
+            "providerId",
+            "saml",
+            "realm",
+            REALM);
     response = postRequest(urlConf, org.getId(), "idps", "import-config");
 
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
@@ -565,6 +602,482 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // delete org
     deleteOrganization(id);
+  }
+
+  String webhookUrl() {
+    return getAuthUrl() + "/realms/master/webhooks";
+  }
+
+  String eventsUrl() {
+    return getAuthUrl() + "/realms/master/events";
+  }
+
+  @Test
+  public void testAddGetDeleteRolesBulk() throws Exception {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    // get default roles list
+    Response response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationRoleRepresentation> roles =
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
+
+    CloseableHttpClient httpClient = HttpClients.createDefault();
+    addEventListener(keycloak, "master", "ext-event-webhook");
+    List<JsonNode> webhookEvents = new ArrayList<JsonNode>();
+    Server webhookServer = new Server(WEBHOOK_SERVER_PORT);
+    webhookServer
+        .router()
+        .POST(
+            "/webhook",
+            (request, resp) -> {
+              String body = request.body();
+              // log.infof("webhook: body %s", body);
+              JsonNode node = objectMapper().readTree(body);
+              webhookEvents.add(node);
+              // log.infof("webhook: rep %s", node.toString());
+              resp.body("OK");
+              resp.status(200);
+            });
+
+    webhookServer.start();
+    log.info("webhookServer: started");
+
+    String webhookId =
+        createWebhook(
+            keycloak,
+            httpClient,
+            webhookUrl(),
+            "http://host.testcontainers.internal:" + WEBHOOK_SERVER_PORT + "/webhook",
+            "qlfwemke",
+            List.of("admin.*"));
+
+    // region CREATE ORG ROLES
+    // create 3 bulk roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    String url = getAuthUrl() + "/realms/master/orgs/" + org.getId() + "/roles";
+    List<OrganizationRole> roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-apples"));
+            add(new OrganizationRole().name("bake-pies"));
+            add(new OrganizationRole().name("view-fair"));
+          }
+        };
+    // log.infof("create 3 bulk roles req: %s", JsonSerialization.writeValueAsString(roleList));
+
+    SimpleHttp.Response resp =
+        SimpleHttp.doPut(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    // log.infof("create 3 bulk roles: %s", resp.asJson().toPrettyString());
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(201));
+            });
+
+    Thread.sleep(1000l);
+    assertThat(
+        webhookEvents.stream()
+            .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE-CREATE"))
+            .count(),
+        is(3L));
+
+    // get role list
+    response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 3));
+
+    // create 2 already existing roles - everything fails
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-apples"));
+            add(new OrganizationRole().name("eat-apples"));
+          }
+        };
+    resp =
+        SimpleHttp.doPut(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(400));
+            });
+
+    Thread.sleep(1000l);
+
+    assertThat(webhookEvents.size(), is(0));
+
+    // create 1 already existing role, 1 new role - some fail
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-apples"));
+            add(new OrganizationRole().name("drink-coffee"));
+          }
+        };
+    resp =
+        SimpleHttp.doPut(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    assertThat(resp.getStatus(), is(207));
+    assertThat(resp.asJson().get(0).get("status").asInt(), is(400));
+    assertThat(resp.asJson().get(1).get("status").asInt(), is(201));
+
+    Thread.sleep(1000l);
+
+    assertThat(webhookEvents.size(), is(1));
+
+    // get role list
+    response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length + 4));
+    // endregion
+
+    // region GRANT USER ORG ROLES
+    // create a user
+    UserRepresentation user = createUser(keycloak, REALM, "johndoe");
+
+    // add membership
+    response = putRequest("foo", id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+
+    // grant 2 exisiting bulk roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" + org.getId() + "/roles";
+
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-apples"));
+            add(new OrganizationRole().name("bake-pies"));
+          }
+        };
+
+    resp =
+        SimpleHttp.doPut(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(201));
+            });
+
+    Thread.sleep(1000l);
+    assertThat(
+        webhookEvents.stream()
+            .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE_MAPPING-CREATE"))
+            .count(),
+        is(2L));
+
+    // grant 1 already granted and 1 existing role
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("bake-pies"));
+            add(new OrganizationRole().name("view-fair"));
+          }
+        };
+
+    resp =
+        SimpleHttp.doPut(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    // log.infof("grant 1 already granted and 1 existing role resp: %s",
+    // resp.asJson().toPrettyString());
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(201));
+            });
+
+    Thread.sleep(1000l);
+    assertThat(
+        webhookEvents.stream()
+            .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE_MAPPING-CREATE"))
+            .count(),
+        is(1L));
+
+    // grant 2 non-existing roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-fruits"));
+            add(new OrganizationRole().name("drink-tea"));
+          }
+        };
+
+    resp =
+        SimpleHttp.doPut(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(400));
+            });
+    // log.infof("grant 2 non-existing roles resp: %s", resp.asJson().toPrettyString());
+
+    Thread.sleep(1000l);
+    // webhookEvents.stream().forEach(i -> {
+    //   log.infof("grant 2 non-existing roles event: %s", i.toPrettyString());
+    // });
+    assertThat(
+        webhookEvents.stream()
+            .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE_MAPPING-CREATE"))
+            .count(),
+        is(0L));
+    // endregion
+
+    // region REVOKE USER ORG ROLES
+    // revoke 2 non-existing roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-fruits"));
+            add(new OrganizationRole().name("drink-tea"));
+          }
+        };
+
+    resp =
+        SimpleHttp.doPatch(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(400));
+            });
+    // no events emitted
+    Thread.sleep(1000l);
+    assertThat(
+        webhookEvents.stream()
+            .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE_MAPPING-DELETE"))
+            .count(),
+        is(0L));
+
+    // revoke 2 granted roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-apples"));
+            add(new OrganizationRole().name("bake-pies"));
+          }
+        };
+
+    resp =
+        SimpleHttp.doPatch(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(204));
+            });
+
+    Thread.sleep(1000l);
+    assertThat(
+        webhookEvents.stream()
+            .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE_MAPPING-DELETE"))
+            .count(),
+        is(2L));
+
+    // revoke 1 already revoked and 1 granted role
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/users/" + user.getId() + "/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("bake-pies"));
+            add(new OrganizationRole().name("view-fair"));
+          }
+        };
+
+    resp =
+        SimpleHttp.doPatch(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(204));
+            });
+
+    Thread.sleep(1000l);
+    assertThat(
+        webhookEvents.stream()
+            .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE_MAPPING-DELETE"))
+            .count(),
+        is(1L));
+
+    // delete user
+    deleteUser(keycloak, REALM, user.getId());
+    Thread.sleep(1000l);
+    // endregion
+
+    // region DELETE ORG ROLES
+    // delete 2 existing roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-apples"));
+            add(new OrganizationRole().name("drink-coffee"));
+          }
+        };
+    log.infof("delete 2 existing roles req: %s", JsonSerialization.writeValueAsString(roleList));
+    resp =
+        SimpleHttp.doPatch(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(204));
+            });
+    log.infof("delete 2 existing roles resp: %s", resp.asJson().toPrettyString());
+
+    Thread.sleep(1000l);
+    // webhookEvents.stream().forEach(i -> {
+    //   log.infof("delete 2 existing roles event: %s", i.toPrettyString());
+    // });
+
+    assertThat(
+        webhookEvents.stream()
+            .filter(i -> i.get("type").asText().equals("admin.ORGANIZATION_ROLE-DELETE"))
+            .count(),
+        is(2L));
+
+    // delete existing and non-existing roles
+    webhookEvents.clear();
+
+    Thread.sleep(1000l);
+
+    url = getAuthUrl() + "/realms/master/orgs/" + org.getId() + "/roles";
+    roleList =
+        new ArrayList<>() {
+          {
+            add(new OrganizationRole().name("eat-apples"));
+            add(new OrganizationRole().name("drink-coffee"));
+            add(new OrganizationRole().name("bake-pies"));
+            add(new OrganizationRole().name("view-fair"));
+          }
+        };
+    resp =
+        SimpleHttp.doPatch(url, httpClient)
+            .auth(keycloak.tokenManager().getAccessTokenString())
+            .json(roleList)
+            .asResponse();
+
+    assertThat(resp.getStatus(), is(207));
+    resp.asJson()
+        .forEach(
+            i -> {
+              assertThat(i.get("status").asInt(), is(204));
+            });
+
+    Thread.sleep(1000l);
+    assertThat(webhookEvents.stream().count(), is(4L));
+    // endregion
+
+    removeEventListener(keycloak, "master", "ext-event-webhook");
+
+    webhookServer.stop();
+    log.info("webhookServer: stopped");
+
+    deleteWebhook(keycloak, httpClient, webhookUrl(), webhookId);
+
+    // ensure we deleted all created roles
+    response = getRequest(id, "roles");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    roles = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(roles, notNullValue());
+    assertThat(roles, hasSize(OrganizationAdminAuth.DEFAULT_ORG_ROLES.length));
+
+    // delete org
+    deleteOrganization(org.getId());
   }
 
   @Test
@@ -842,7 +1355,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(mappers, empty());
 
     // add a mapper to the idp
-    //    {"identityProviderAlias":"oidc","config":
+    // {"identityProviderAlias":"oidc","config":
     IdentityProviderMapperRepresentation mapper = new IdentityProviderMapperRepresentation();
     mapper.setIdentityProviderAlias(alias1);
     mapper.setName("name");
@@ -1037,38 +1550,38 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(rep.getDomains().iterator().next(), is("example.com"));
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(orgId1));
-    //  get memberships
+    // get memberships
     response = getRequest(kc1, "/%s/members".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    //  add memberships
+    // add memberships
     UserRepresentation user2 = createUserWithCredentials(keycloak, REALM, "user2", "pass");
     response = putRequest(kc1, "foo", "/%s/members/%s".formatted(orgId1, user2.getId()));
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-    //  remove memberships
+    // remove memberships
     response = deleteRequest(kc1, "/%s/members/%s".formatted(orgId1, user2.getId()));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
-    //  get invitations
+    // get invitations
     response = getRequest(kc1, "/%s/invitations".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    //  add invitations
+    // add invitations
     InvitationRequestRepresentation inv =
         new InvitationRequestRepresentation().email("johndoe@example.com");
     response = postRequest(kc1, inv, "/%s/invitations".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     String loc = response.getHeader("Location");
     String inviteId = loc.substring(loc.lastIndexOf("/") + 1);
-    //  remove invitations
+    // remove invitations
     response = deleteRequest(kc1, "/%s/invitations/%s".formatted(orgId1, inviteId));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
-    //  get roles
+    // get roles
     response = getRequest(kc1, "/%s/roles".formatted(orgId1));
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    //  add roles
+    // add roles
     createOrgRole(kc1, orgId1, "test-role");
-    //  remove roles
+    // remove roles
     response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId1, "test-role"));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
-    //  add idp
+    // add idp
     String alias1 = "org-admin-test";
     IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
     idp.setAlias(alias1);
@@ -1097,7 +1610,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = postRequest(kc1, idp, "/%s/idps".formatted(orgId1));
     assertThat(response.statusCode(), is(Status.CREATED.getStatusCode()));
 
-    //  get idp xxx
+    // get idp xxx
     response = getRequest("/%s/idps/%s".formatted(orgId1, alias1));
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     IdentityProviderRepresentation idp1 =
@@ -1109,7 +1622,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(idp1.getFirstBrokerLoginFlowAlias(), is(idp.getFirstBrokerLoginFlowAlias()));
     assertThat(idp1.getConfig().get("clientId"), is(idp.getConfig().get("clientId")));
 
-    //  remove idp
+    // remove idp
     response = deleteRequest(kc1, "/%s/idps/%s".formatted(orgId1, alias1));
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
@@ -1123,35 +1636,35 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = putRequest(kc1, rep, orgId2);
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
-    //  get memberships
+    // get memberships
     response = getRequest(kc1, "/%s/members".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  add memberships
+    // add memberships
     response = putRequest(kc1, "foo", "/%s/members/%s".formatted(orgId2, user2.getId()));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  remove memberships
+    // remove memberships
     response = deleteRequest(kc1, "/%s/members/%s".formatted(orgId2, user2.getId()));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  get invitations
+    // get invitations
     response = getRequest(kc1, "/%s/invitations".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  add invitations
+    // add invitations
     response = postRequest(kc1, inv, "/%s/invitations".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  remove invitations
+    // remove invitations
     response = deleteRequest(kc1, "/%s/invitations/%s".formatted(orgId2, inviteId));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  get roles
+    // get roles
     response = getRequest(kc1, "/%s/roles".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  add roles
+    // add roles
     response =
         postRequest(
             kc1,
             new OrganizationRoleRepresentation().name("test-role"),
             "/%s/roles".formatted(orgId2));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
-    //  remove roles
+    // remove roles
     response = deleteRequest(kc1, "/%s/roles/%s".formatted(orgId2, "test-role"));
     assertThat(response.statusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
@@ -1211,5 +1724,214 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // delete org
     deleteOrganization(id);
+  }
+
+  @Test
+  void testOrganizationSwitch() throws IOException, VerificationException {
+    ObjectMapper mapper = objectMapper();
+
+    // Org SETUP
+    // Create first Organization
+    OrganizationRepresentation org1 =
+        createOrganization(
+            new OrganizationRepresentation().name("org-1").domains(List.of("org1.com")));
+    String org1Id = org1.getId();
+    SwitchOrganization switchToOrganization1 = new SwitchOrganization().id(org1Id);
+
+    // Create second Organization
+    OrganizationRepresentation org2 =
+        createOrganization(
+            new OrganizationRepresentation().name("org-2").domains(List.of("org2.com")));
+    String org2Id = org2.getId();
+    SwitchOrganization switchToOrganization2 = new SwitchOrganization().id(org2Id);
+
+    // Create third Organization
+    OrganizationRepresentation org3 =
+        createOrganization(
+            new OrganizationRepresentation().name("org-3").domains(List.of("org3.com")));
+    String org3Id = org3.getId();
+    SwitchOrganization switchToOrganization3 = new SwitchOrganization().id(org3Id);
+
+    // User SETUP
+    // Add standard user
+    UserRepresentation user = createUserWithCredentials(keycloak, REALM, "user", "password");
+    // Assign manage-account role
+    grantClientRoles("account", user.getId(), "manage-account", "view-profile");
+
+    // Client SETUP
+    // Create basic front end client to get a proper user access token
+    createPublicClient("test-ui");
+    createClientScope(ACTIVE_ORG_CLAIM);
+
+    Map<String, String> additionalConfig =
+        Map.of(INCLUDED_ORGANIZATION_PROPERTIES, "id, name, role, attribute");
+    addMapperToClientScope(
+        ACTIVE_ORG_CLAIM,
+        ACTIVE_ORG_CLAIM,
+        "JSON",
+        "oidc-active-organization-mapper",
+        additionalConfig);
+    addClientScopeToClient(ACTIVE_ORG_CLAIM, "test-ui");
+
+    // authenticate as standard user
+    Keycloak kc = getKeycloak(REALM, "test-ui", "user", "password");
+
+    // Get active organization with no organization membership
+    Response response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
+
+    // Add user to org1
+    putRequest("pass", org1Id, "members", user.getId());
+
+    // Try to remove membership with no active org attribute
+    response = deleteRequest(org1Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+    // Add again user to org1
+    response = putRequest("pass", org1Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
+      grantUserRole(org1Id, role, user.getId());
+    }
+
+    // Add user to org3
+    response = putRequest("pass", org3Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
+      grantUserRole(org3Id, role, user.getId());
+    }
+
+    // re-authenticate as standard user
+    kc = getKeycloak(REALM, "test-ui", "user", "password");
+
+    // validate that user currently doesn't have an active organization attribute
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+
+    // validate current token claims, should have org-1 by default
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), true, org1Id);
+
+    // validate get active-organization
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // Try switching to organization 2
+    response = putRequest(kc, switchToOrganization2, "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
+
+    // verify user attributes doesn't contains active organization
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+
+    // Try switching to organization 3
+    response = putRequest(kc, switchToOrganization3, "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // verify we get an access token with the correct organization
+    JsonNode rootNode = mapper.readTree(response.body().asString());
+    assertThat(rootNode.hasNonNull(ACCESS_TOKEN), is(true));
+    validateActiveOrganizationFromAccessToken(rootNode.get(ACCESS_TOKEN).asText(), true, org3Id);
+
+    // verify user attributes contains active organization
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org3Id);
+
+    // validate get active-organization
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // verify for malicious organization switch through user account endpoint
+    // if not restricted with read only attributes
+    createOrReplaceUserAttribute(kc, "user", ACTIVE_ORGANIZATION, org2Id);
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org2Id);
+
+    // re-authenticate user to get new token and validate there is NO active
+    // organization in claims
+    kc = getKeycloak(REALM, "test-ui", "user", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), false, null);
+
+    // validate get active-organization after malicious organization switch
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
+
+    // test that active org attribute is removed when membership is revoked
+    // switch back to org-1
+    response = putRequest(kc, switchToOrganization1, "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // verify we get an access token with the correct organization
+    rootNode = mapper.readTree(response.body().asString());
+    assertThat(rootNode.hasNonNull(ACCESS_TOKEN), is(true));
+    validateActiveOrganizationFromAccessToken(rootNode.get(ACCESS_TOKEN).asText(), true, org1Id);
+
+    // verify user attributes contains active organization
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org1Id);
+
+    // validate get active-organization
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // test revoke active organization membership
+    response = deleteRequest(org1Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+    // verify user attributes doesn't have active organization anymore
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+
+    // test that active org attribute is removed after login when organization is
+    // deleted
+    // switch to org3
+    response = putRequest(kc, switchToOrganization3, "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // verify attribute
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), true, org3Id);
+
+    // delete organization
+    deleteOrganization(org3Id);
+
+    // re-authenticate
+    kc = getKeycloak(REALM, "test-ui", "user", "password");
+
+    // verify attribute is removed
+    validateActiveOrganizationFromUserAttributes(getUserAccount(kc), false, null);
+
+    deleteUser(keycloak, REALM, user.getId());
+    deleteClient("test-ui");
+    deleteClientScope(ACTIVE_ORG_CLAIM);
+    deleteOrganization(org1Id);
+    deleteOrganization(org2Id);
+  }
+
+  private void validateActiveOrganizationFromAccessToken(
+      String accessTokenString, boolean shouldContain, String targetActiveOrgId)
+      throws VerificationException {
+    AccessToken decodedToken =
+        TokenVerifier.create(accessTokenString, AccessToken.class).getToken();
+    assertThat(decodedToken.getOtherClaims().isEmpty(), is(false));
+    assertThat(decodedToken.getOtherClaims().containsKey(ACTIVE_ORG_CLAIM), is(true));
+
+    @SuppressWarnings("unchecked")
+    HashMap<String, Object> activeOrganizationClaims =
+        (HashMap<String, Object>) decodedToken.getOtherClaims().get(ACTIVE_ORG_CLAIM);
+
+    if (shouldContain) {
+      assertThat(activeOrganizationClaims.containsKey("id"), is(true));
+      assertThat(activeOrganizationClaims.get("id"), is(targetActiveOrgId));
+    } else {
+      assertThat(activeOrganizationClaims.isEmpty(), is(true));
+    }
+  }
+
+  private void validateActiveOrganizationFromUserAttributes(
+      Response response, boolean shouldContain, String targetOrgId) throws JsonProcessingException {
+    JsonNode rootNode = objectMapper().readTree(response.body().asString());
+    JsonNode attributeNode = rootNode.get("attributes");
+
+    if (shouldContain) {
+      assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(true));
+      assertThat(attributeNode.get(ACTIVE_ORGANIZATION).get(0).asText(), is(targetOrgId));
+    } else {
+      assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(false));
+    }
   }
 }

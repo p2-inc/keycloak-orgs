@@ -25,6 +25,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
       - [Entities](#entities)
     - [Resources](#resources)
     - [Mappers](#mappers)
+    - [Events](#events)
     - [Authentication](#authentication)
       - [Invitations](#invitations)
       - [IdP Discovery](#idp-discovery)
@@ -152,7 +153,12 @@ A group of custom REST resources are made available for administrator and custom
 - Organizations - CRUD Organizations
 - Memberships - CRUD and check User-Organization membership
 - Roles - CRUD Organization Roles and grant/revoke Roles to Users
+- [Bulk Roles](./docs/bulk-roles.md) - support for bulk Roles resources
 - Identity Providers - A subset of the Keycloak IdP APIs that allows Organization administrators to manage their own IdP
+
+### Events
+
+For more information you can refer to: [Events](./docs/events.md)
 
 ### Mappers
 
@@ -179,7 +185,9 @@ For most use cases, set the `Invitation` required action to `Enabled` in *Authen
 
 ![Install and enable Invitation Required Action](https://github.com/p2-inc/keycloak-orgs/assets/244253/c454cfaa-e50f-4a3c-94b4-87e9e85801d6)
 
-There are some non-standard flows where the required action does not do this detection. For these cases, there is a custom Authenticator you can add to a copy of the standard browser flow. Add the `Invitation` authenticator as a "REQUIRED" execution following the "Username Password Form" as a child of the forms group. This authenticator checks to see if the authenticated user has outstanding Invitations to Organizations, and then adds the Required Action that they must complete to accept or reject their Invitations following a successful authentication.
+There are some non-standard flows where the required action does not do this detection. For these cases, there is a custom Authenticator you can add to a copy of the standard browser flow. Add the `Invitation` authenticator as a "REQUIRED" execution following the "Username Password Form" as a child of the forms group. Both the Required Action and the Authenticator check to see if the authenticated user has outstanding Invitations to Organizations, and then adds the Required Action that they must complete to accept or reject their Invitations following a successful authentication.
+
+Note that it is a default to require that an email address be _verified_, as it would present a security issue to allow anyone who uses an email address to register to join an organization without verifying that the user is the owner of that email address. Because of that, it is assumed that you are using invitations in conjunction with setting *Verify Email* as a _default_ Required Action.
 
 #### IdP Discovery
 
@@ -188,6 +196,11 @@ Organizations may optionally be given permission to manage their own IdP. The cu
 ![mapper](./docs/assets/home-idp-discovery-config.png)
 
 These are the configuration options for the "Home IdP Discovery" Authenticator. It will need to be placed in your flow as a replacement for a "Username form", or after another Authenticator/Form that sets the `ATTEMPTED_USERNAME` note. 
+
+### Active Organization
+
+It is possible to define an active organization and switch it. It's currently based on user's attribute and the active organization id, name, role or attribute can be mapped into tokens with a configurable mapper.  
+For more information you can refer to [active-organization](./docs/active-organization.md).
 
 ## License
 

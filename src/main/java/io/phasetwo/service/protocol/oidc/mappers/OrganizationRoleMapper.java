@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ProtocolMapperModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.protocol.ProtocolMapper;
@@ -46,7 +47,7 @@ public class OrganizationRoleMapper extends AbstractOrganizationMapper {
   */
   @Override
   protected Map<String, Object> getOrganizationClaim(
-      KeycloakSession session, RealmModel realm, UserModel user) {
+      KeycloakSession session, RealmModel realm, UserModel user, ProtocolMapperModel mappingModel) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
     Map<String, Object> claim = Maps.newHashMap();
     orgs.getUserOrganizationsStream(realm, user)

@@ -1,5 +1,7 @@
 package io.phasetwo.service.auth.invitation;
 
+import static org.keycloak.events.EventType.CUSTOM_REQUIRED_ACTION;
+
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -12,6 +14,7 @@ import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
+import org.keycloak.events.EventBuilder;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
@@ -69,6 +72,8 @@ public class InvitationRequiredAction implements RequiredActionProvider {
 
   @Override
   public void processAction(RequiredActionContext context) {
+    EventBuilder event = context.getEvent();
+
     RealmModel realm = context.getRealm();
     UserModel user = context.getUser();
     log.infof(
@@ -87,11 +92,23 @@ public class InvitationRequiredAction implements RequiredActionProvider {
                 // add membership
                 log.infof("selected %s", i.getOrganization().getId());
                 memberFromInvitation(i, user);
-                // todo future tell the inviter they accepted
+                event
+                    .clone()
+                    .event(CUSTOM_REQUIRED_ACTION)
+                    .user(user)
+                    .detail("org_id", i.getOrganization().getId())
+                    .detail("invitation_id", i.getId())
+                    .success();
               }
               // revoke invitation
               i.getOrganization().revokeInvitation(i.getId());
-              // todo future tell the inviter they rejected
+              event
+                  .clone()
+                  .event(CUSTOM_REQUIRED_ACTION)
+                  .detail("org_id", i.getOrganization().getId())
+                  .detail("invitation_id", i.getId())
+                  .user(user)
+                  .error("User invitation revoked.");
             });
 
     context.success();
