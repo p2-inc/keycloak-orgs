@@ -1,0 +1,134 @@
+{
+  "realm": "org-realm",
+  "enabled": true,
+  "identityProviders": [
+    {
+      "alias": "keycloak-oidc",
+      "providerId": "keycloak-oidc",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "config": {
+        "userInfoUrl": "http://localhost:8080/",
+        "validateSignature": "false",
+        "hideOnLoginPage": "true",
+        "tokenUrl": "http://localhost:8080/auth/",
+        "clientId": "admin",
+        "pkceEnabled": "false",
+        "authorizationUrl": "http://localhost:8080/",
+        "clientAuthMethod": "client_secret_post",
+        "logoutUrl": "http://localhost:8080/",
+        "syncMode": "FORCE",
+        "clientSecret": "**********"
+      }
+    }
+  ],
+  "organizations": [
+    {
+      "organization": {
+        "name": "test1",
+        "displayName": "test1",
+        "url": "",
+        "domains": [
+          ""
+        ],
+        "attributes": {}
+      },
+      "roles": [
+        {
+          "name": "view-organization"
+        },
+        {
+          "name": "manage-organization"
+        },
+        {
+          "name": "view-members"
+        },
+        {
+          "name": "manage-members"
+        },
+        {
+          "name": "view-roles"
+        },
+        {
+          "name": "manage-roles"
+        },
+        {
+          "name": "view-invitations"
+        },
+        {
+          "name": "manage-invitations"
+        },
+        {
+          "name": "view-identity-providers"
+        },
+        {
+          "name": "manage-identity-providers"
+        },
+        {
+          "name": "test1"
+        }
+      ],
+      "idpLink": "keycloak-oidc",
+      "members": [],
+      "invitations": []
+    },
+    {
+      "organization": {
+        "name": "test3",
+        "displayName": "test3",
+        "url": "test3",
+        "domains": [
+          "test3"
+        ],
+        "attributes": {}
+      },
+      "roles": [
+        {
+          "name": "view-organization"
+        },
+        {
+          "name": "manage-organization"
+        },
+        {
+          "name": "view-members"
+        },
+        {
+          "name": "manage-members"
+        },
+        {
+          "name": "view-roles"
+        },
+        {
+          "name": "manage-roles"
+        },
+        {
+          "name": "view-invitations"
+        },
+        {
+          "name": "manage-invitations"
+        },
+        {
+          "name": "view-identity-providers"
+        },
+        {
+          "name": "manage-identity-providers"
+        },
+        {
+          "name": "test2",
+          "description": ""
+        },
+        {
+          "name": "test3",
+          "description": ""
+        }
+      ],
+      "members": [],
+      "invitations": []
+    }
+  ]
+}

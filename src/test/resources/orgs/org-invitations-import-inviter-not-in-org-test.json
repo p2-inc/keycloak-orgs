@@ -1,0 +1,80 @@
+{
+  "realm": "org-realm",
+  "enabled": true,
+  "users": [
+    {
+      "username": "test",
+      "email": "test+2@phasetwo.io",
+      "enabled": true
+    },
+    {
+      "username": "test2",
+      "enabled": true
+    },
+    {
+      "username": "test3",
+      "enabled": true
+    }
+  ],
+  "organizations": [
+    {
+      "organization": {
+        "name": "test1"
+      },
+      "roles": [
+        {
+          "name": "test_role1"
+        }
+      ],
+      "members": [
+        {
+          "username": "test",
+          "roles": []
+        },
+        {
+          "username": "test2",
+          "roles": [
+            "test_role1",
+            "view-members",
+            "manage-members"
+          ]
+        }
+      ],
+      "invitations": []
+    },
+    {
+      "organization": {
+        "name": "test2"
+      },
+      "roles": [
+        {
+          "name": "test_role2",
+          "description": ""
+        },
+        {
+          "name": "test_role3",
+          "description": ""
+        }
+      ],
+      "members": [
+        {
+          "username": "test3",
+          "roles": [
+            "test_role2",
+            "test_role3"
+          ]
+        }
+      ],
+      "invitations": [
+        {
+          "email": "test+2@phasetwo.io",
+          "inviterUsername": "test",
+          "roles": [],
+          "redirectUri": "",
+          "attributes": {
+          }
+        }
+      ]
+    }
+  ]
+}

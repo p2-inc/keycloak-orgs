@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
+import io.phasetwo.service.datastore.representation.KeycloakOrgsRealmRepresentation;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -76,6 +77,8 @@ public abstract class AbstractOrganizationTest {
       new KeycloakContainer(KEYCLOAK_IMAGE)
           .withContextPath("/auth")
           .withReuse(true)
+          .withAdminPassword("admin")
+          .withAdminUsername("admin")
           .withProviderClassesFrom("target/classes")
           .withProviderLibsFrom(getDeps())
           .withAccessToHost(true);
@@ -205,6 +208,45 @@ public abstract class AbstractOrganizationTest {
         objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
     assertThat(orgRep.getId(), is(id));
     return orgRep;
+  }
+
+  protected KeycloakOrgsRealmRepresentation export(Keycloak keycloak) throws IOException {
+    var response =
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath("admin/realms/" + REALM + "/partial-export")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
+            .and()
+            .when()
+            .post(String.join("/partial-export"))
+            .then()
+            .extract()
+            .response();
+    var rep =
+        objectMapper()
+            .readValue(response.getBody().asString(), KeycloakOrgsRealmRepresentation.class);
+
+    return rep;
+  }
+
+  protected Response importRealm(
+      KeycloakOrgsRealmRepresentation keycloakOrgsRealmRepresentation, Keycloak keycloak)
+      throws IOException {
+    return given()
+        .baseUri(container.getAuthServerUrl())
+        .basePath("admin/realms/")
+        .contentType("application/json")
+        .auth()
+        .oauth2(keycloak.tokenManager().getAccessTokenString())
+        .and()
+        .body(keycloakOrgsRealmRepresentation)
+        .when()
+        .post()
+        .then()
+        .extract()
+        .response();
   }
 
   protected OrganizationRoleRepresentation createOrgRole(String orgId, String name)

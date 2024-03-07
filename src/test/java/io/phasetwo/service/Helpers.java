@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.phasetwo.client.openapi.model.WebhookRepresentation;
 import io.phasetwo.service.resource.OrganizationResourceType;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -21,6 +23,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.EventRepresentation;
 import org.keycloak.representations.idm.RealmEventsConfigRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.util.JsonSerialization;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 import org.testcontainers.shaded.com.google.common.collect.Lists;
 
@@ -185,5 +188,13 @@ public class Helpers {
         .filter(
             adminEventRepresentation ->
                 orgsTypes.contains(adminEventRepresentation.getResourceType()));
+  }
+
+  public static <T> T loadJson(InputStream is, Class<T> type) {
+    try {
+      return JsonSerialization.readValue(is, type);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to parse json", e);
+    }
   }
 }
