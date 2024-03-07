@@ -26,7 +26,7 @@ import java.util.Set;
           "SELECT i FROM InvitationEntity i WHERE i.organization in (SELECT o FROM OrganizationEntity o WHERE o.realmId = :realmId) AND lower(i.email) = lower(:search) ORDER BY i.createdAt"),
   @NamedQuery(
       name = "getInvitationCount",
-      query = "select count(t) from InvitationEntity t where t.organization = :organization")
+      query = "SELECT COUNT(t) FROM InvitationEntity t WHERE t.organization = :organization")
 })
 @Entity
 @Table(

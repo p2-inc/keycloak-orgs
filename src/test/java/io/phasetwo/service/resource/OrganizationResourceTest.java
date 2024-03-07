@@ -265,7 +265,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest("count");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     Long cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
-    ;
     assertThat(orgs, notNullValue());
     assertThat(cnt, is(6L));
 
@@ -1092,7 +1091,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
             .attribute("foo", "bar")
             .attribute("foo", "bar2")
             .attribute("humpty", "dumpty");
-    // xxx
+
     Response response = postRequest(inv, id, "invitations");
     assertThat(response.statusCode(), is(Status.CREATED.getStatusCode()));
     assertNotNull(response.getHeader("Location"));
@@ -1117,6 +1116,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(invites.get(0).getAttributes().get("humpty").size(), is(1));
     assertThat(invites.get(0).getAttributes().get("humpty").get(0), is("dumpty"));
     String invId = invites.get(0).getId();
+
+    // count invitations
+    response = getRequest(id, "invitations", "count");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    Long cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
+    assertThat(cnt, is(1L));
 
     // get a specific innvitation
     response = getRequest(id, "invitations", invId);
@@ -1157,6 +1162,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     invites = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(invites, notNullValue());
     assertThat(invites, empty());
+
+    // count invitations, now 0
+    response = getRequest(id, "invitations", "count");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
+    assertThat(cnt, is(0L));
 
     // delete user
     deleteUser(keycloak, REALM, user1.getId());

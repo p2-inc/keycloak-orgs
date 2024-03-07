@@ -219,6 +219,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   }
 
   @Override
+  public Long getInvitationsCount() {
+    TypedQuery<Long> query = em.createNamedQuery("getInvitationCount", Long.class);
+    query.setParameter("organization", org);
+    return query.getSingleResult();
+  }
+
+  @Override
   public Stream<InvitationModel> getInvitationsStream() {
     /*
           public List<InvitationEntity> getInvitationsByRealmAndEmail(String realmName, String email) {
