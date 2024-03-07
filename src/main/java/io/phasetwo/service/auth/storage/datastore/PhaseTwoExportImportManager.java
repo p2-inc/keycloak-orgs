@@ -3,7 +3,10 @@ package io.phasetwo.service.auth.storage.datastore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.resource.Converters;
+import io.phasetwo.service.resource.OrganizationAdminAuth;
+import io.phasetwo.service.resource.OrganizationAdminPermissionEvaluator;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -18,6 +21,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
@@ -29,6 +33,7 @@ import org.keycloak.util.JsonSerialization;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -73,7 +78,7 @@ public class PhaseTwoExportImportManager extends DefaultExportImportManager {
                             0,
                             Constants.DEFAULT_MAX_RESULTS,
                             Optional.empty())
-                    .map(Converters::convertOrganizationModelToOrganization)
+                    .map(Converters::convertOrganizationModelToOrganizationRepresentation)
                     .toList();
             phaseTwoRepresentation.setOrganizations(organizations);
 
@@ -104,13 +109,34 @@ public class PhaseTwoExportImportManager extends DefaultExportImportManager {
         var phaseTwoRepresentation = (PhaseTwoRealmRepresentation) rep;
         var organizations = phaseTwoRepresentation.getOrganizations();
         organizations
-                .forEach(organizationRep -> {
-                    var org = organizationProvider.createOrganization(newRealm, organizationRep.getName(), this.auth.getUser(), true);
-                    org.setDisplayName(organizationRep.getDisplayName());
-                    org.setUrl(organizationRep.getUrl());
-                    if (organizationRep.getAttributes() != null)
-                        organizationRep.getAttributes().forEach((k, v) -> org.setAttribute(k, v));
-                    if (organizationRep.getDomains() != null) org.setDomains(organizationRep.getDomains());
+                .forEach(organizationRepresentation -> {
+                    var organization = organizationRepresentation.getOrganization();
+                    var org = organizationProvider.createOrganization(newRealm, organization.getName(), this.auth.getUser(), true);
+                    org.setDisplayName(organization.getDisplayName());
+                    org.setUrl(organization.getUrl());
+                    if (organization.getAttributes() != null)
+                        organization.getAttributes().forEach((k, v) -> org.setAttribute(k, v));
+                    if (organization.getDomains() != null) org.setDomains(organization.getDomains());
+
+                    organizationRepresentation
+                            .getRoles()
+                            .stream()
+                            .filter(organizationRole ->
+                                    Arrays.stream(OrganizationAdminAuth.DEFAULT_ORG_ROLES).noneMatch(role -> role.equals(organizationRole.getName())))
+                            .forEach(organizationRole ->
+                            {
+                                var role = org.addRole(organizationRole.getName());
+                                role.setDescription(organizationRole.getDescription());
+                            });
+
+//                    organizationRepresentation
+//                            .getLinkIdps()
+//                            .stream()
+//                            .forEach(linkIdp -> {
+//                                org.keycloak.services.resources.admin.IdentityProviderResource kcResource =
+//                                        getIdpResource().getIdentityProvider(alias);
+//                                IdentityProviderRepresentation provider = kcResource.getIdentityProvider();
+//                            });
                 });
     }
 
