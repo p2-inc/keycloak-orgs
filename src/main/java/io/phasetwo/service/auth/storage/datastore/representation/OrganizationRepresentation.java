@@ -21,11 +21,11 @@ public class OrganizationRepresentation {
     @JsonProperty("roles")
     private List<OrganizationRole> roles = new ArrayList<>();
 
-    @JsonProperty("linkIdps")
-    private List<LinkIdp> linkIdps = new ArrayList<>();
+    @JsonProperty("idpLink")
+    private LinkIdp idpLink;
 
     @JsonProperty("members")
-    private List<String> members = new ArrayList<>();
+    private List<UserRolesRepresentation> members = new ArrayList<>();
 
     @JsonProperty("invitations")
     private List<Invitation> invitations = new ArrayList<>();

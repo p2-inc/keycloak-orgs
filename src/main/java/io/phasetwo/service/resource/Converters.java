@@ -3,6 +3,7 @@ package io.phasetwo.service.resource;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.auth.storage.datastore.representation.OrganizationRepresentation;
+import io.phasetwo.service.auth.storage.datastore.representation.UserRolesRepresentation;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -141,7 +142,14 @@ public class Converters {
 
         if (options.isUsersIncluded()) {
             var members = organizationModel.getMembersStream()
-                    .map(UserModel::getUsername)
+                    .map(userModel -> {
+                        var userRoles = organizationModel.getRolesByUserStream(userModel)
+                                .stream()
+                                .map(r-> r.getRole().getName())
+                                .toList();
+
+                        return new UserRolesRepresentation(userModel.getUsername(), userRoles);
+                    })
                     .toList();
             organizationRepresentation.setMembers(members);
 

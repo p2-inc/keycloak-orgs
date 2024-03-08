@@ -6,12 +6,13 @@ import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import java.util.stream.Stream;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
+
+import java.util.stream.Stream;
 
 public class OrganizationRoleAdapter
     implements OrganizationRoleModel, JpaModel<OrganizationRoleEntity> {
@@ -103,7 +104,7 @@ public class OrganizationRoleAdapter
 
   UserOrganizationRoleMappingEntity getByUser(UserModel user) {
     TypedQuery<UserOrganizationRoleMappingEntity> query =
-        em.createNamedQuery("getMappingByRoleAndUser", UserOrganizationRoleMappingEntity.class);
+            em.createNamedQuery("getMappingByRoleAndUser", UserOrganizationRoleMappingEntity.class);
     query.setParameter("userId", user.getId());
     query.setParameter("role", role);
     try {

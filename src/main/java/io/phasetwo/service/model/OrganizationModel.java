@@ -1,8 +1,12 @@
 package io.phasetwo.service.model;
 
 import com.google.common.collect.MoreCollectors;
+
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -62,6 +66,8 @@ public interface OrganizationModel extends WithAttributes {
   InvitationModel addInvitation(String email, UserModel inviter);
 
   Stream<OrganizationRoleModel> getRolesStream();
+
+  List<UserOrganizationRoleMappingEntity> getRolesByUserStream(UserModel user);
 
   default OrganizationRoleModel getRoleByName(String name) {
     return getRolesStream()

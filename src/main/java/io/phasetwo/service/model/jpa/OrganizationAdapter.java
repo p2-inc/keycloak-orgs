@@ -13,6 +13,7 @@ import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
+import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
@@ -268,6 +269,18 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   public Stream<OrganizationRoleModel> getRolesStream() {
     return org.getRoles().stream()
         .map(r -> new OrganizationRoleAdapter(session, realm, em, this, r));
+  }
+
+  @Override
+  public List<UserOrganizationRoleMappingEntity> getRolesByUserStream(UserModel user) {
+      TypedQuery<UserOrganizationRoleMappingEntity> query =
+              em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
+      query.setParameter("userId", user.getId());
+      try {
+        return query.getResultList();
+      } catch (Exception ignore) {
+        return null;
+      }
   }
 
   @Override

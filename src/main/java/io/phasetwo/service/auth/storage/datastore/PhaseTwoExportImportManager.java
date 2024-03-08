@@ -27,9 +27,7 @@ import org.keycloak.models.ModelException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
@@ -131,7 +129,7 @@ public class PhaseTwoExportImportManager extends DefaultExportImportManager {
 
                         createOrganizationRoles(organizationRepresentation, org);
 
-                        createOrganizationIdo(newRealm, organizationRepresentation, organization, org);
+                        createOrganizationIdp(newRealm, organizationRepresentation, org);
 
                         addMembers(newRealm, organizationRepresentation, org);
 
@@ -174,30 +172,35 @@ public class PhaseTwoExportImportManager extends DefaultExportImportManager {
 
     private void addMembers(RealmModel newRealm, OrganizationRepresentation organizationRepresentation, OrganizationModel org) {
         organizationRepresentation.getMembers()
-                .stream()
-                .map(member -> session.users().getUserByUsername(newRealm, member))
-                .filter(Objects::nonNull)
-                .forEach(org::grantMembership);
+                .forEach(member -> {
+                    var userModel = session.users().getUserByUsername(newRealm, member.getUsername());
+                    if (Objects.nonNull(userModel)) {
+                        org.grantMembership(userModel);
+                        member.getRoles()
+                                .stream()
+                                .map(org::getRoleByName)
+                                .forEach(organizationRoleModel -> organizationRoleModel.grantRole(userModel));
+                    }
+                });
     }
 
-    private static void createOrganizationIdo(RealmModel newRealm, OrganizationRepresentation organizationRepresentation, Organization organization, OrganizationModel org) {
-        organizationRepresentation
-                .getLinkIdps()
-                .forEach(linkIdp -> {
-                    IdentityProviderModel idp = newRealm.getIdentityProviderByAlias(linkIdp.getAlias());
-                    if (!Strings.isNullOrEmpty(linkIdp.getSyncMode())) {
-                        idp.getConfig().put("syncMode", linkIdp.getSyncMode());
-                    }
-                    if (!Strings.isNullOrEmpty(linkIdp.getPostBrokerFlow())) {
-                        idp.setPostBrokerLoginFlowId(linkIdp.getPostBrokerFlow());
-                    }
-                    idp.getConfig().put("hideOnLoginPage", "true");
-                    idp.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
+    private static void createOrganizationIdp(RealmModel newRealm, OrganizationRepresentation organizationRepresentation, OrganizationModel org) {
+        var idpLink = organizationRepresentation
+                .getIdpLink();
+        if (Objects.nonNull(idpLink)) {
 
+            IdentityProviderModel idp = newRealm.getIdentityProviderByAlias(idpLink.getAlias());
+            if (!Strings.isNullOrEmpty(idpLink.getSyncMode())) {
+                idp.getConfig().put("syncMode", idpLink.getSyncMode());
+            }
+            if (!Strings.isNullOrEmpty(idpLink.getPostBrokerFlow())) {
+                idp.setPostBrokerLoginFlowId(idpLink.getPostBrokerFlow());
+            }
+            idp.getConfig().put("hideOnLoginPage", "true");
+            idp.getConfig().put(ORG_OWNER_CONFIG_KEY, org.getId());
 
-                    //smth still not right. IDp doesn't appear on Organization Details. screen
-                    newRealm.updateIdentityProvider(idp);
-                });
+            newRealm.updateIdentityProvider(idp);
+        }
     }
 
     private static void createOrganizationRoles(OrganizationRepresentation organizationRepresentation, OrganizationModel org) {
