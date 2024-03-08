@@ -74,10 +74,16 @@ public class InvitationAdapter implements InvitationModel, JpaModel<InvitationEn
   @Override
   public UserModel getInviter() {
     if (invitation.getInviterId() != null) {
-      return session.users().getUserById(realm, invitation.getInviterId());
-    } else {
-      return null;
+      UserModel inviter = session.users().getUserById(realm, invitation.getInviterId());
+      // it is possible that the inviter was removed
+      if (inviter != null) {
+        return inviter;
+      } else {
+        // lazy remove the inviterId
+        invitation.setInviterId(null);
+      }
     }
+    return null;
   }
 
   @Override
