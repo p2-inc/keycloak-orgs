@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.keycloak.exportimport.ExportOptions;
 import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.account.UserRepresentation;
 
@@ -121,7 +123,7 @@ public class Converters {
         return idp;
     }
 
-    public static OrganizationRepresentation convertOrganizationModelToOrganizationRepresentation(OrganizationModel organizationModel) {
+    public static OrganizationRepresentation convertOrganizationModelToOrganizationRepresentation(OrganizationModel organizationModel, ExportOptions options) {
         var organization = convertOrganizationModelToOrganization(organizationModel);
         var roles = organizationModel
                 .getRolesStream()
@@ -136,6 +138,19 @@ public class Converters {
         organizationRepresentation.setOrganization(organization);
         organizationRepresentation.setRoles(roles);
         organizationRepresentation.setLinkIdps(idps);
+
+        if (options.isUsersIncluded()) {
+            var members = organizationModel.getMembersStream()
+                    .map(UserModel::getUsername)
+                    .toList();
+            organizationRepresentation.setMembers(members);
+
+            var invitations = organizationModel.getInvitationsStream()
+                    .map(Converters::convertInvitationModelToInvitation)
+                    .toList();
+            organizationRepresentation.setInvitations(invitations);
+        }
+
         return organizationRepresentation;
     }
 }

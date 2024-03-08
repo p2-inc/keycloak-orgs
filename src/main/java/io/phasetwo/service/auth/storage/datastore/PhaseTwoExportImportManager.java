@@ -2,24 +2,32 @@ package io.phasetwo.service.auth.storage.datastore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
+import io.phasetwo.service.auth.storage.datastore.representation.OrganizationRepresentation;
+import io.phasetwo.service.model.InvitationModel;
+import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.resource.Converters;
 import io.phasetwo.service.resource.OrganizationAdminAuth;
-import io.phasetwo.service.resource.OrganizationAdminPermissionEvaluator;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.logging.Logger;
+import org.keycloak.common.util.CollectionUtil;
 import org.keycloak.exportimport.ExportAdapter;
 import org.keycloak.exportimport.ExportOptions;
 import org.keycloak.exportimport.util.ExportUtils;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.jose.jws.JWSInputException;
 import org.keycloak.models.Constants;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelException;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
@@ -35,8 +43,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import static org.keycloak.models.utils.StripSecretsUtils.stripForExport;
 
 /**
@@ -78,7 +88,7 @@ public class PhaseTwoExportImportManager extends DefaultExportImportManager {
                             0,
                             Constants.DEFAULT_MAX_RESULTS,
                             Optional.empty())
-                    .map(Converters::convertOrganizationModelToOrganizationRepresentation)
+                    .map(organization -> Converters.convertOrganizationModelToOrganizationRepresentation(organization, options))
                     .toList();
             phaseTwoRepresentation.setOrganizations(organizations);
 
@@ -108,35 +118,98 @@ public class PhaseTwoExportImportManager extends DefaultExportImportManager {
 
         var phaseTwoRepresentation = (PhaseTwoRealmRepresentation) rep;
         var organizations = phaseTwoRepresentation.getOrganizations();
-        organizations
-                .forEach(organizationRepresentation -> {
-                    var organization = organizationRepresentation.getOrganization();
-                    var org = organizationProvider.createOrganization(newRealm, organization.getName(), this.auth.getUser(), true);
-                    org.setDisplayName(organization.getDisplayName());
-                    org.setUrl(organization.getUrl());
-                    if (organization.getAttributes() != null)
-                        organization.getAttributes().forEach((k, v) -> org.setAttribute(k, v));
-                    if (organization.getDomains() != null) org.setDomains(organization.getDomains());
+        if (!CollectionUtil.isEmpty(organizations)) {
+            organizations
+                    .forEach(organizationRepresentation -> {
+                        var organization = organizationRepresentation.getOrganization();
+                        var org = organizationProvider.createOrganization(newRealm, organization.getName(), this.auth.getUser(), true);
+                        org.setDisplayName(organization.getDisplayName());
+                        org.setUrl(organization.getUrl());
+                        if (organization.getAttributes() != null)
+                            organization.getAttributes().forEach((k, v) -> org.setAttribute(k, v));
+                        if (organization.getDomains() != null) org.setDomains(organization.getDomains());
 
-                    organizationRepresentation
-                            .getRoles()
-                            .stream()
-                            .filter(organizationRole ->
-                                    Arrays.stream(OrganizationAdminAuth.DEFAULT_ORG_ROLES).noneMatch(role -> role.equals(organizationRole.getName())))
-                            .forEach(organizationRole ->
-                            {
-                                var role = org.addRole(organizationRole.getName());
-                                role.setDescription(organizationRole.getDescription());
-                            });
+                        createOrganizationRoles(organizationRepresentation, org);
 
-//                    organizationRepresentation
-//                            .getLinkIdps()
-//                            .stream()
-//                            .forEach(linkIdp -> {
-//                                org.keycloak.services.resources.admin.IdentityProviderResource kcResource =
-//                                        getIdpResource().getIdentityProvider(alias);
-//                                IdentityProviderRepresentation provider = kcResource.getIdentityProvider();
-//                            });
+                        createOrganizationIdo(newRealm, organizationRepresentation, organization, org);
+
+                        addMembers(newRealm, organizationRepresentation, org);
+
+                        addInvitations(newRealm, organizationRepresentation, org);
+                    });
+        }
+    }
+
+    private void addInvitations(RealmModel newRealm,
+                                OrganizationRepresentation organizationRepresentation,
+                                OrganizationModel org) {
+        organizationRepresentation.getInvitations()
+                .stream()
+                .forEach(invitation -> {
+                    var user = KeycloakModelUtils.findUserByNameOrEmail(session, newRealm, invitation.getEmail());
+                    if (user != null) {
+
+                        UserModel inviter = null;
+                        if (invitation.getInviterId() == null || invitation.getInviterId().equals("")) {
+                            inviter = auth.getUser();
+                        } else {
+                            inviter = session.users().getUserById(newRealm, invitation.getInviterId());
+                        }
+
+                        InvitationModel i = org.addInvitation(invitation.getEmail(), inviter);
+                        i.setUrl(invitation.getInvitationUrl());
+                        if (invitation.getRoles() != null) i.setRoles(invitation.getRoles());
+                        if (invitation.getAttributes() != null && invitation.getAttributes().size() > 0) {
+                            invitation
+                                    .getAttributes()
+                                    .entrySet()
+                                    .forEach(
+                                            e -> {
+                                                i.setAttribute(e.getKey(), e.getValue());
+                                            });
+                        }
+                    }
+                });
+    }
+
+    private void addMembers(RealmModel newRealm, OrganizationRepresentation organizationRepresentation, OrganizationModel org) {
+        organizationRepresentation.getMembers()
+                .stream()
+                .map(member -> session.users().getUserByUsername(newRealm, member))
+                .filter(Objects::nonNull)
+                .forEach(org::grantMembership);
+    }
+
+    private static void createOrganizationIdo(RealmModel newRealm, OrganizationRepresentation organizationRepresentation, Organization organization, OrganizationModel org) {
+        organizationRepresentation
+                .getLinkIdps()
+                .forEach(linkIdp -> {
+                    IdentityProviderModel idp = newRealm.getIdentityProviderByAlias(linkIdp.getAlias());
+                    if (!Strings.isNullOrEmpty(linkIdp.getSyncMode())) {
+                        idp.getConfig().put("syncMode", linkIdp.getSyncMode());
+                    }
+                    if (!Strings.isNullOrEmpty(linkIdp.getPostBrokerFlow())) {
+                        idp.setPostBrokerLoginFlowId(linkIdp.getPostBrokerFlow());
+                    }
+                    idp.getConfig().put("hideOnLoginPage", "true");
+                    idp.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
+
+
+                    //smth still not right. IDp doesn't appear on Organization Details. screen
+                    newRealm.updateIdentityProvider(idp);
+                });
+    }
+
+    private static void createOrganizationRoles(OrganizationRepresentation organizationRepresentation, OrganizationModel org) {
+        organizationRepresentation
+                .getRoles()
+                .stream()
+                .filter(organizationRole ->
+                        Arrays.stream(OrganizationAdminAuth.DEFAULT_ORG_ROLES).noneMatch(role -> role.equals(organizationRole.getName())))
+                .forEach(organizationRole ->
+                {
+                    var role = org.addRole(organizationRole.getName());
+                    role.setDescription(organizationRole.getDescription());
                 });
     }
 
