@@ -28,5 +28,5 @@ public class OrganizationRepresentation {
     private List<UserRolesRepresentation> members = new ArrayList<>();
 
     @JsonProperty("invitations")
-    private List<Invitation> invitations = new ArrayList<>();
+    private List<InvitationRepresentation> invitations = new ArrayList<>();
 }

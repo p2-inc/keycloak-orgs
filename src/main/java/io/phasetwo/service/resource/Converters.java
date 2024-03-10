@@ -2,6 +2,7 @@ package io.phasetwo.service.resource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.phasetwo.service.auth.storage.datastore.representation.InvitationRepresentation;
 import io.phasetwo.service.auth.storage.datastore.representation.OrganizationRepresentation;
 import io.phasetwo.service.auth.storage.datastore.representation.UserRolesRepresentation;
 import io.phasetwo.service.model.InvitationModel;
@@ -14,16 +15,16 @@ import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationRole;
 import io.phasetwo.service.representation.Team;
+import org.keycloak.exportimport.ExportOptions;
+import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.representations.account.UserRepresentation;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.keycloak.exportimport.ExportOptions;
-import org.keycloak.models.IdentityProviderModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.representations.account.UserRepresentation;
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 
 /**
  * Utilities for converting Entities to/from Representations.
@@ -130,15 +131,17 @@ public class Converters {
                 .getRolesStream()
                 .map(Converters::convertOrganizationRole)
                 .toList();
-        var idps = organizationModel
+        var idpOptional = organizationModel
                 .getIdentityProvidersStream()
+                .filter(identityProviderModel -> idpInOrg(identityProviderModel, organization.getId()))
                 .map(Converters::convertIdpLinkModelToIdpLInk)
-                .toList();
+                .findFirst();
 
         var organizationRepresentation = new OrganizationRepresentation();
         organizationRepresentation.setOrganization(organization);
         organizationRepresentation.setRoles(roles);
-        organizationRepresentation.setLinkIdps(idps);
+
+        idpOptional.ifPresent(organizationRepresentation::setIdpLink);
 
         if (options.isUsersIncluded()) {
             var members = organizationModel.getMembersStream()
@@ -154,11 +157,26 @@ public class Converters {
             organizationRepresentation.setMembers(members);
 
             var invitations = organizationModel.getInvitationsStream()
-                    .map(Converters::convertInvitationModelToInvitation)
+                    .map(Converters::convertInvitationModelToInvitationRepresentation)
                     .toList();
             organizationRepresentation.setInvitations(invitations);
         }
 
         return organizationRepresentation;
+    }
+
+    private static InvitationRepresentation convertInvitationModelToInvitationRepresentation(InvitationModel invitationModel) {
+        var i = new InvitationRepresentation();
+        i.setEmail(invitationModel.getEmail());
+        i.setInviterUsername(invitationModel.getInviter().getUsername());
+        i.setRedirectUri(invitationModel.getUrl());
+        i.setRoles(Lists.newArrayList(invitationModel.getRoles()));
+        i.setAttributes(Maps.newHashMap(invitationModel.getAttributes()));
+        return i;
+    }
+
+    private static boolean idpInOrg(IdentityProviderModel provider, String orgId) {
+        return (provider.getConfig().containsKey(ORG_OWNER_CONFIG_KEY)
+                && orgId.equals(provider.getConfig().get(ORG_OWNER_CONFIG_KEY)));
     }
 }

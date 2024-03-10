@@ -7,7 +7,6 @@ import io.phasetwo.service.auth.storage.datastore.representation.OrganizationRep
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.resource.Converters;
 import io.phasetwo.service.resource.OrganizationAdminAuth;
 import jakarta.ws.rs.NotAuthorizedException;
@@ -25,7 +24,6 @@ import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelException;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.RealmRepresentation;
@@ -146,16 +144,9 @@ public class PhaseTwoExportImportManager extends DefaultExportImportManager {
                 .forEach(invitation -> {
                     var user = KeycloakModelUtils.findUserByNameOrEmail(session, newRealm, invitation.getEmail());
                     if (user != null) {
-
-                        UserModel inviter = null;
-                        if (invitation.getInviterId() == null || invitation.getInviterId().equals("")) {
-                            inviter = auth.getUser();
-                        } else {
-                            inviter = session.users().getUserById(newRealm, invitation.getInviterId());
-                        }
-
+                        var inviter = session.users().getUserByUsername(newRealm, invitation.getInviterUsername());
                         InvitationModel i = org.addInvitation(invitation.getEmail(), inviter);
-                        i.setUrl(invitation.getInvitationUrl());
+                        i.setUrl(invitation.getRedirectUri());
                         if (invitation.getRoles() != null) i.setRoles(invitation.getRoles());
                         if (invitation.getAttributes() != null && invitation.getAttributes().size() > 0) {
                             invitation
