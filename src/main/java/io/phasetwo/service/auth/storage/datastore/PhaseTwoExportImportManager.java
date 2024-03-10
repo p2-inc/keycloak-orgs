@@ -176,8 +176,7 @@ public class PhaseTwoExportImportManager extends DefaultExportImportManager {
     }
 
     private static void createOrganizationIdp(RealmModel newRealm, OrganizationRepresentation organizationRepresentation, OrganizationModel org) {
-        var idpLink = organizationRepresentation
-                .getIdpLink();
+        var idpLink = organizationRepresentation.getIdpLink();
         if (Objects.nonNull(idpLink)) {
 
             IdentityProviderModel idp = newRealm.getIdentityProviderByAlias(idpLink.getAlias());

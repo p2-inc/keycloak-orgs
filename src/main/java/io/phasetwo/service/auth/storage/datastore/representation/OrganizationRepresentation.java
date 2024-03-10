@@ -2,10 +2,7 @@ package io.phasetwo.service.auth.storage.datastore.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.LinkIdp;
-import io.phasetwo.service.representation.Organization;
-import io.phasetwo.service.representation.OrganizationRole;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -16,10 +13,10 @@ import java.util.List;
 public class OrganizationRepresentation {
 
     @JsonProperty("organization")
-    private Organization organization;
+    private OrganizationAttributes organization;
 
     @JsonProperty("roles")
-    private List<OrganizationRole> roles = new ArrayList<>();
+    private List<OrganizationRoleRepresentation> roles = new ArrayList<>();
 
     @JsonProperty("idpLink")
     private LinkIdp idpLink;

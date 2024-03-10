@@ -3,7 +3,9 @@ package io.phasetwo.service.resource;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.auth.storage.datastore.representation.InvitationRepresentation;
+import io.phasetwo.service.auth.storage.datastore.representation.OrganizationAttributes;
 import io.phasetwo.service.auth.storage.datastore.representation.OrganizationRepresentation;
+import io.phasetwo.service.auth.storage.datastore.representation.OrganizationRoleRepresentation;
 import io.phasetwo.service.auth.storage.datastore.representation.UserRolesRepresentation;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
@@ -37,6 +39,13 @@ public class Converters {
         return r;
     }
 
+    public static OrganizationRoleRepresentation convertOrganizationRoleRepresentation(OrganizationRoleModel m) {
+        var role = new OrganizationRoleRepresentation();
+        role.setName(m.getName());
+        role.setDescription(m.getDescription());
+        return role;
+    }
+
     public static Organization convertOrganizationModelToOrganization(OrganizationModel e) {
         Organization o =
                 new Organization()
@@ -49,6 +58,18 @@ public class Converters {
         o.setAttributes(e.getAttributes());
         return o;
     }
+
+    public static OrganizationAttributes convertOrganizationModelToOrganizationAttributes(OrganizationModel e) {
+        var o = new OrganizationAttributes();
+
+        o.setName(e.getName());
+        o.setDisplayName(e.getDisplayName());
+        o.setDomains(e.getDomains());
+        o.setUrl(e.getUrl());
+        o.setAttributes(e.getAttributes());
+        return o;
+    }
+
 
     public static Team convertTeamEntityToTeam(TeamEntity e) {
         Team t = new Team().id(e.getId()).name(e.getName()).organizationId(e.getOrganization().getId());
@@ -126,21 +147,20 @@ public class Converters {
     }
 
     public static OrganizationRepresentation convertOrganizationModelToOrganizationRepresentation(OrganizationModel organizationModel, ExportOptions options) {
-        var organization = convertOrganizationModelToOrganization(organizationModel);
+        var organization = convertOrganizationModelToOrganizationAttributes(organizationModel);
         var roles = organizationModel
                 .getRolesStream()
-                .map(Converters::convertOrganizationRole)
+                .map(Converters::convertOrganizationRoleRepresentation)
                 .toList();
         var idpOptional = organizationModel
                 .getIdentityProvidersStream()
-                .filter(identityProviderModel -> idpInOrg(identityProviderModel, organization.getId()))
+                .filter(identityProviderModel -> idpInOrg(identityProviderModel, organizationModel.getId()))
                 .map(Converters::convertIdpLinkModelToIdpLInk)
                 .findFirst();
 
         var organizationRepresentation = new OrganizationRepresentation();
         organizationRepresentation.setOrganization(organization);
         organizationRepresentation.setRoles(roles);
-
         idpOptional.ifPresent(organizationRepresentation::setIdpLink);
 
         if (options.isUsersIncluded()) {
