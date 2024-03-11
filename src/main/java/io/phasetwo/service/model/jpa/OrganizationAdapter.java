@@ -272,15 +272,16 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   }
 
   @Override
-  public List<UserOrganizationRoleMappingEntity> getRolesByUserStream(UserModel user) {
-      TypedQuery<UserOrganizationRoleMappingEntity> query =
-              em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
-      query.setParameter("userId", user.getId());
-      try {
-        return query.getResultList();
-      } catch (Exception ignore) {
-        return null;
-      }
+  public Stream<OrganizationRoleModel> getRolesByUserStream(UserModel user) {
+    TypedQuery<UserOrganizationRoleMappingEntity> query =
+        em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
+    query.setParameter("userId", user.getId());
+    try {
+      return query.getResultList().stream()
+          .map(r -> new OrganizationRoleAdapter(session, realm, em, this, r.getRole()));
+    } catch (Exception ignore) {
+      return null;
+    }
   }
 
   @Override

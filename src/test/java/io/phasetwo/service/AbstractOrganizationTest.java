@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
+import io.phasetwo.service.datastore.KeycloakOrgsRealmRepresentation;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -40,7 +41,7 @@ public abstract class AbstractOrganizationTest {
 
   public static final String KEYCLOAK_IMAGE =
       String.format(
-          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "23.0.0"));
+          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "24.0.0"));
   public static final String REALM = "master";
   public static final String ADMIN_CLI = "admin-cli";
 
@@ -76,6 +77,8 @@ public abstract class AbstractOrganizationTest {
       new KeycloakContainer(KEYCLOAK_IMAGE)
           .withContextPath("/auth")
           .withReuse(true)
+          .withAdminPassword("admin")
+          .withAdminUsername("admin")
           .withProviderClassesFrom("target/classes")
           .withProviderLibsFrom(getDeps())
           .withAccessToHost(true);
@@ -205,6 +208,22 @@ public abstract class AbstractOrganizationTest {
         objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
     assertThat(orgRep.getId(), is(id));
     return orgRep;
+  }
+
+  protected KeycloakOrgsRealmRepresentation export(Keycloak keycloak) throws IOException {
+    Response response =
+        givenSpec(keycloak)
+            .and()
+            .when()
+            .post(String.join("/partial-export"))
+            .then()
+            .extract()
+            .response();
+    var rep =
+        objectMapper()
+            .readValue(response.getBody().asString(), KeycloakOrgsRealmRepresentation.class);
+
+    return rep;
   }
 
   protected OrganizationRoleRepresentation createOrgRole(String orgId, String name)

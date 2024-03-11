@@ -1,17 +1,14 @@
-package io.phasetwo.service.auth.storage.datastore.representation;
+package io.phasetwo.service.datastore.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -22,9 +19,9 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserRolesRepresentation {
 
-    @JsonProperty("username")
-    private @NotNull @Valid String username;
+  @JsonProperty("username")
+  private String username;
 
-    @JsonProperty("roles")
-    private List<String> roles;
+  @JsonProperty("roles")
+  private List<String> roles;
 }
