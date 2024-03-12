@@ -190,7 +190,9 @@ final class HomeIdpDiscoverer {
                     }
                     String cid = o.getFirstAttribute("customer_id");
                     boolean hasCID = cid != null && !cid.isEmpty();
-                    return hasCID;
+                    String forceSSO = o.getFirstAttribute("force_sso");
+                    boolean hasForceSSO = forceSSO != null && forceSSO.equals("1");
+                    return hasCID && hasForceSSO;
                 })
                 .sorted((o1, o2) -> {
                     if(o1.getFirstAttribute("customer_id") == userDefaultCID) return -1;
