@@ -47,6 +47,8 @@ public interface OrganizationModel extends WithAttributes {
 
   void revokeMembership(UserModel user);
 
+  Long getInvitationsCount();
+
   Stream<InvitationModel> getInvitationsStream();
 
   default Stream<InvitationModel> getInvitationsByEmail(String email) {
