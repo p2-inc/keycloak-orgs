@@ -171,7 +171,7 @@ public class InvitationsResource extends OrganizationAdminResource {
     bodyAttributes.put("realmName", realmName);
     bodyAttributes.put("orgName", orgName);
     bodyAttributes.put("inviterName", inviterName);
-    bodyAttributes.put("inviter", new ProfileBean(inviter));
+    bodyAttributes.put("inviter", new ProfileBean(inviter, session));
     bodyAttributes.put("link", link);
     bodyAttributes.put("attributes", attributes);
 

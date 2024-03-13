@@ -31,7 +31,7 @@
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>5.8.2</junit.version>
     <keycloak.version>24.0.0</keycloak.version>
-    <resteasy.version>6.2.4.Final</resteasy.version>
+    <resteasy.version>6.2.7.Final</resteasy.version>
     <lombok.version>1.18.30</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
     <jackson.version>2.15.2</jackson.version>
@@ -300,7 +300,7 @@
     <dependency>
       <groupId>com.github.dasniko</groupId>
       <artifactId>testcontainers-keycloak</artifactId>
-      <version>3.2.0</version>
+      <version>3.3.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>

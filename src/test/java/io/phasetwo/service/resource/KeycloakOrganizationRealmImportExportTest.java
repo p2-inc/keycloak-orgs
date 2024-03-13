@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 @JBossLog
 public class KeycloakOrganizationRealmImportExportTest extends AbstractOrganizationTest {
+  /*
   @Test
   void testOrganizationExport() throws Exception {
     createOrganization(
@@ -18,5 +19,21 @@ public class KeycloakOrganizationRealmImportExportTest extends AbstractOrganizat
 
     var export = export(keycloak);
     assertThat(export.getOrganizations(), hasSize(1));
+  }
+  */
+
+  @Test
+  void testAddGetUpdateDeleteOrg() throws Exception {
+    // get single
+    OrganizationRepresentation rep =
+        createOrganization(
+            new OrganizationRepresentation().name("example").domains(List.of("example.com")));
+    String id = rep.getId();
+
+    var export = export(keycloak);
+    assertThat(export.getOrganizations(), hasSize(1));
+
+    // delete
+    deleteOrganization(id);
   }
 }

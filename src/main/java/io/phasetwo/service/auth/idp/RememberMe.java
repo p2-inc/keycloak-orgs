@@ -22,7 +22,7 @@ final class RememberMe {
         if (remember) {
             AuthenticationManager.createRememberMeCookie(username, context.getUriInfo(), context.getSession());
         } else {
-            AuthenticationManager.expireRememberMeCookie(realm, context.getUriInfo(), context.getSession());
+            AuthenticationManager.expireRememberMeCookie(context.getSession());
         }
     }
 
@@ -41,7 +41,6 @@ final class RememberMe {
     }
 
     String getUserName() {
-        return AuthenticationManager.getRememberMeUsername(context.getRealm(),
-            context.getHttpRequest().getHttpHeaders());
+      return AuthenticationManager.getRememberMeUsername(context.getSession());
     }
 }

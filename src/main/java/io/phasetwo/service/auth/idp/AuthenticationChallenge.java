@@ -1,9 +1,9 @@
 //package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.services.managers.AuthenticationManager;
@@ -25,7 +25,7 @@ final class AuthenticationChallenge {
     }
 
     void forceChallenge() {
-        MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
+        MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
         String loginHintUsername = loginHint.getFromSession();
 
         String rememberMeUsername = rememberMe.getUserName();

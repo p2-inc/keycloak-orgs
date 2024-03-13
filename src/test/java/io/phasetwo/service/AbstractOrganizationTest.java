@@ -212,10 +212,15 @@ public abstract class AbstractOrganizationTest {
 
   protected KeycloakOrgsRealmRepresentation export(Keycloak keycloak) throws IOException {
     Response response =
-        givenSpec(keycloak)
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath("admin/realms/" + REALM + "/partial-export")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
             .and()
             .when()
-            .post(String.join("/partial-export"))
+            .post()
             .then()
             .extract()
             .response();
