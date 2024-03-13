@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.KC_ORGS_SKIP_MIGRATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_CREATE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORGANIZATION;
@@ -61,7 +62,7 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
             realmPostCreate((RealmModel.RealmPostCreateEvent) event);
           } else if (event instanceof PostMigrationEvent) {
             log.debug("PostMigrationEvent");
-            if (System.getenv("KC_ORGS_SKIP_MIGRATION") == null) {
+            if (KC_ORGS_SKIP_MIGRATION == null) {
               log.info("initializing organization roles following migration");
               KeycloakModelUtils.runJobInTransaction(factory, this::initRoles);
             }
