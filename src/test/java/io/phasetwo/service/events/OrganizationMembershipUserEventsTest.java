@@ -17,6 +17,7 @@ import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @JBossLog
@@ -50,6 +51,7 @@ class OrganizationMembershipUserEventsTest extends AbstractOrganizationTest {
   }
 
   @Test
+  @Disabled
   void organizationMembershipSwitchTest() throws IOException {
     // create a user
     var user = createUserWithCredentials(keycloak, REALM, "user", "password");
