@@ -19,6 +19,8 @@
 
   <!-- crdb specific -->
   <changeSet author="garth (generated)" id="1590682724768-crdb">
+    <validCheckSum>8:c4f727d3a9db8b66ceb9d4e6a268fa22</validCheckSum>
+    <validCheckSum>8:d41d8cd98f00b204e9800998ecf8427e</validCheckSum>
     <sql dbms="cockroachdb">ALTER TABLE USER_ORGANIZATION_ROLE_MAPPING ALTER PRIMARY KEY USING COLUMNS (ID);</sql>
   </changeSet>
 </databaseChangeLog>

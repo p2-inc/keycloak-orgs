@@ -226,6 +226,14 @@ public class InvitationsResource extends OrganizationAdminResource {
   }
 
   @GET
+  @Path("count")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Long countInvitations() {
+    log.debugf("countInvitations %s %s", realm.getName(), organization.getId());
+    return organization.getInvitationsCount();
+  }
+
+  @GET
   @Path("{invitationId}")
   @Produces(MediaType.APPLICATION_JSON)
   public Invitation getInvitation(@PathParam("invitationId") String invitationId) {

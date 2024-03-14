@@ -219,6 +219,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   }
 
   @Override
+  public Long getInvitationsCount() {
+    TypedQuery<Long> query = em.createNamedQuery("getInvitationCount", Long.class);
+    query.setParameter("organization", org);
+    return query.getSingleResult();
+  }
+
+  @Override
   public Stream<InvitationModel> getInvitationsStream() {
     /*
           public List<InvitationEntity> getInvitationsByRealmAndEmail(String realmName, String email) {
@@ -266,7 +273,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
 
   @Override
   public Stream<OrganizationRoleModel> getRolesStream() {
-    return org.getRoles().stream().map(r -> new OrganizationRoleAdapter(session, realm, em, r));
+    return org.getRoles().stream()
+        .map(r -> new OrganizationRoleAdapter(session, realm, em, this, r));
   }
 
   @Override
@@ -282,7 +290,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
     r.setOrganization(org);
     em.persist(r);
     org.getRoles().add(r);
-    return new OrganizationRoleAdapter(session, realm, em, r);
+    return new OrganizationRoleAdapter(session, realm, em, this, r);
   }
 
   @Override
