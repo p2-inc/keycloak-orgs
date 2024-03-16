@@ -452,6 +452,93 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   }
 
   @Test
+  void testSearchMembersWithMultipleNameParameter() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    Response response = getRequest(id, "members");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+
+    // create a user
+    UserRepresentation user1 = createUser(keycloak, REALM, "johndoe");
+    UserRepresentation user2 = createUser(keycloak, REALM, "johndow");
+    UserRepresentation user3 = createUser(keycloak, REALM, "jack");
+    UserRepresentation user4 = createUser(keycloak, REALM, "jill");
+
+    // add membership
+    response = putRequest("foo", org.getId(), "members", user1.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("foo", org.getId(), "members", user2.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("foo", org.getId(), "members", user3.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("foo", org.getId(), "members", user4.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+
+    response = getRequest(id, "members");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    List<UserRepresentation> members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(5)); // including org admin default
+
+    // search members with query parameter
+    response = getRequest(id, "members?search=john");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(2));
+    assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
+    assertThat(members, hasItem(hasProperty("username", is("johndow"))));
+
+    response = getRequest(id, "members?search=jack,jill");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(2));
+    assertThat(members, hasItem(hasProperty("username", is("jack"))));
+    assertThat(members, hasItem(hasProperty("username", is("jill"))));
+
+    response = getRequest(id, "members?search=john, jack, jill");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(4));
+    assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
+    assertThat(members, hasItem(hasProperty("username", is("johndow"))));
+    assertThat(members, hasItem(hasProperty("username", is("jack"))));
+    assertThat(members, hasItem(hasProperty("username", is("jill"))));
+
+    response = getRequest(id, "members?search=,,jack");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(1));
+    assertThat(members, hasItem(hasProperty("username", is("jack"))));
+
+    response = getRequest(id, "members?search=,, ,");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(0));
+
+    response = getRequest(id, "members?search= ,, jack , ");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(1));
+    assertThat(members, hasItem(hasProperty("username", is("jack"))));
+
+    // delete user
+    deleteUser(keycloak, REALM, user1.getId());
+    deleteUser(keycloak, REALM, user2.getId());
+    deleteUser(keycloak, REALM, user3.getId());
+    deleteUser(keycloak, REALM, user4.getId());
+
+    // delete org
+    deleteOrganization(id);
+  }
+
+  @Test
   void testDuplicateRoles() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
     String id = org.getId();
