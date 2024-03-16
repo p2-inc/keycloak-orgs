@@ -21,8 +21,8 @@ import org.keycloak.http.HttpRequest;
 import org.keycloak.http.HttpResponse;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.services.cors.Cors;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.Cors;
 import org.keycloak.theme.Theme;
 
 @JBossLog

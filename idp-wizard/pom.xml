@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.phasetwo</groupId>
-  <artifactId>idp-wizard</artifactId>
+  <artifactId>phasetwo-idp-wizard</artifactId>
   <packaging>jar</packaging>
   <version>1.0.0-SNAPSHOT</version>
 
@@ -10,6 +10,13 @@
     <artifactId>oss-parent</artifactId>
     <version>0.7</version>
   </parent>
+  
+  <developers>
+    <developer>
+      <name>Phase Two, Inc.</name>
+      <url>https://github.com/p2-inc</url>
+    </developer>
+  </developers>
 
   <licenses>
     <license>
@@ -22,10 +29,11 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.wizard</main.java.package>
-    <keycloak.version>23.0.1</keycloak.version>
+    <keycloak.version>24.0.1</keycloak.version>
     <guava.version>32.0.0-jre</guava.version>
     <lombok.version>1.18.30</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
+    <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
   </properties>
 
   <scm>
@@ -132,6 +140,11 @@
             </configuration>            
           </execution>
         </executions>
+      </plugin>
+      <plugin> <!-- pretty up the code using google java standards `mvn fmt:format` -->
+        <groupId>com.spotify.fmt</groupId>
+        <artifactId>fmt-maven-plugin</artifactId>
+        <version>2.21.1</version>
       </plugin>
     </plugins>
     <sourceDirectory>ext/main/java</sourceDirectory>
