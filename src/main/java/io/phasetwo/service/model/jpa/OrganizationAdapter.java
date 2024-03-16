@@ -165,15 +165,23 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   @Override
   public Stream<UserModel> searchForMembersStream(
       String search, Integer firstResult, Integer maxResults) {
+    String[] searchTerms = Strings.isNullOrEmpty(search) ? null : search.split(",");
     // TODO this could be optimized for large member lists with a query
     return getMembersStream()
         .filter(
             (m) -> {
-              if (Strings.isNullOrEmpty(search)) return true;
-              return (m.getEmail() != null && m.getEmail().toLowerCase().contains(search))
-                  || (m.getUsername() != null && m.getUsername().toLowerCase().contains(search))
-                  || (m.getFirstName() != null && m.getFirstName().toLowerCase().contains(search))
-                  || (m.getLastName() != null && m.getLastName().toLowerCase().contains(search));
+              if (searchTerms == null) return true;
+              for (String searchTerm : searchTerms) {
+                String term = searchTerm.trim().toLowerCase();
+                if (term.isEmpty()) continue;
+                if ((m.getEmail() != null && m.getEmail().toLowerCase().contains(term))
+                        || (m.getUsername() != null && m.getUsername().toLowerCase().contains(term))
+                        || (m.getFirstName() != null && m.getFirstName().toLowerCase().contains(term))
+                        || (m.getLastName() != null && m.getLastName().toLowerCase().contains(term))){
+                  return true;
+                }
+              }
+              return false;
             })
         .skip(firstResult)
         .limit(maxResults);
