@@ -177,7 +177,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
                 if ((m.getEmail() != null && m.getEmail().toLowerCase().contains(term))
                         || (m.getUsername() != null && m.getUsername().toLowerCase().contains(term))
                         || (m.getFirstName() != null && m.getFirstName().toLowerCase().contains(term))
-                        || (m.getLastName() != null && m.getLastName().toLowerCase().contains(term))){
+                        || (m.getLastName() != null && m.getLastName().toLowerCase().contains(term))) {
                   return true;
                 }
               }
