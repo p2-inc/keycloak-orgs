@@ -82,16 +82,16 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     representation.setPostBrokerLoginFlowAlias(postBrokerFlow);
   }
 
-  private void deactivateOtherIdps(IdentityProviderRepresentation representation) {
-    // Organization can have only one active idp
-    // Activating an idp deactivates all others
+  private void deactivateOtherIdps(
+      IdentityProviderRepresentation representation, boolean unlink, boolean disable) {
     if (representation.isEnabled()) {
       realm
           .getIdentityProvidersStream()
           .filter(provider -> idpInOrg(provider))
           .forEach(
               provider -> {
-                provider.setEnabled(false);
+                if (disable) provider.setEnabled(false);
+                if (unlink) provider.getConfig().remove(ORG_OWNER_CONFIG_KEY);
                 realm.updateIdentityProvider(provider); // weird that this is necessary
               });
     }
@@ -129,7 +129,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     idpDefaults(representation, Optional.of(linkFromRep(representation)));
-    deactivateOtherIdps(representation);
+    deactivateOtherIdps(representation, false, true);
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
@@ -145,10 +145,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response linkIdp(LinkIdp linkIdp) {
     // authz
-    if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
+    if (!auth.hasManageOrgs()) {
       throw new NotAuthorizedException(
           String.format(
-              "Insufficient permission to create identity providers for %s", organization.getId()));
+              "Insufficient permission to link identity providers for %s", organization.getId()));
     }
 
     // get an idp with the same alias
@@ -161,14 +161,6 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
           String.format("Cannot link disabled IdP %s", linkIdp.getAlias()));
     }
 
-    // does it already contain an orgId for a different org?
-    String orgId = idp.getConfig().get(ORG_OWNER_CONFIG_KEY);
-    if (orgId != null && !organization.getId().equals(orgId)) {
-      throw new ClientErrorException(
-          String.format("IdP with alias %s unavailable for linking.", linkIdp.getAlias()),
-          Response.Status.CONFLICT);
-    }
-
     IdentityProviderRepresentation representation =
         ModelToRepresentation.toRepresentation(realm, idp);
     idpDefaults(representation, Optional.of(linkIdp));
@@ -179,7 +171,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       representation.setPostBrokerLoginFlowAlias(linkIdp.getPostBrokerFlow());
     }
 
-    deactivateOtherIdps(representation);
+    deactivateOtherIdps(representation, true, false);
 
     try {
       IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);

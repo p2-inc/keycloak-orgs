@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.representations.idm.IdentityProviderMapperRepresentation;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
@@ -42,6 +43,27 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   public Response delete() {
     requireManage();
     return kcResource.delete();
+  }
+
+  @POST
+  @Path("unlink")
+  public Response unlinkIdp() {
+    // authz
+    if (!auth.hasManageOrgs()) {
+      throw new NotAuthorizedException(
+          String.format(
+              "Insufficient permission to unlink identity provider for %s", organization.getId()));
+    }
+
+    // get an idp with the same alias
+    IdentityProviderModel idp = realm.getIdentityProviderByAlias(alias);
+    if (idp == null) {
+      throw new NotFoundException(String.format("No IdP found with alias %s", alias));
+    }
+
+    idp.getConfig().remove(ORG_OWNER_CONFIG_KEY);
+    realm.updateIdentityProvider(idp);
+    return Response.noContent().build();
   }
 
   @PUT
