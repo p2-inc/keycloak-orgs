@@ -165,12 +165,11 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   @Override
   public Stream<UserModel> searchForMembersStream(
       String search, Integer firstResult, Integer maxResults) {
-    String[] searchTerms = Strings.isNullOrEmpty(search) ? null : search.split(",");
+    String[] searchTerms = Strings.isNullOrEmpty(search) ? new String[0] : search.split(",");
     // TODO this could be optimized for large member lists with a query
     return getMembersStream()
         .filter(
             (m) -> {
-              if (searchTerms == null) return true;
               for (String searchTerm : searchTerms) {
                 String term = searchTerm.trim().toLowerCase();
                 if (term.isEmpty()) continue;
@@ -181,7 +180,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
                   return true;
                 }
               }
-              return false;
+              return searchTerms.length == 0;
             })
         .skip(firstResult)
         .limit(maxResults);

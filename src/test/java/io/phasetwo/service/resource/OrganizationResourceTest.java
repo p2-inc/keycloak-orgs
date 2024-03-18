@@ -528,6 +528,13 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(members, hasSize(1));
     assertThat(members, hasItem(hasProperty("username", is("jack"))));
 
+    response = getRequest(id, "members?search=");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(5));
+
+
     // delete user
     deleteUser(keycloak, REALM, user1.getId());
     deleteUser(keycloak, REALM, user2.getId());
