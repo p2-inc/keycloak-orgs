@@ -87,7 +87,7 @@ Start the idp-wizard:
 ```bash
 git clone https://github.com/p2-inc/idp-wizard
 cd idp-wizard
-npm install --legacy-peer-deps && npm run start:dev
+yarn install --force && npm run start:dev
 ```
 
 ## License
@@ -102,5 +102,3 @@ We’ve changed the license of our core extensions from the AGPL v3 to the [Elas
 -----
 
 All other documentation, source code and other files in this repository are Copyright 2024 Phase Two, Inc.
-
-
