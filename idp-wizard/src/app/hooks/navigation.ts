@@ -13,30 +13,30 @@ import { UNSAFE_NavigationContext as NavigationContext } from "react-router-dom"
  * @param  when
  * @see https://reactrouter.com/api/useBlocker
  */
-export function useBlocker(blocker, when = true) {
-  const { navigator } = useContext(NavigationContext);
+// export function useBlocker(blocker, when = true) {
+//   const { navigator } = useContext(NavigationContext);
 
-  useEffect(() => {
-    if (!when) return;
+//   useEffect(() => {
+//     if (!when) return;
 
-    const unblock = navigator.block((tx) => {
-      const autoUnblockingTx = {
-        ...tx,
-        retry() {
-          // Automatically unblock the transition so it can play all the way
-          // through before retrying it. TODO: Figure out how to re-enable
-          // this block if the transition is cancelled for some reason.
-          unblock();
-          tx.retry();
-        },
-      };
+//     const unblock = navigator.block((tx) => {
+//       const autoUnblockingTx = {
+//         ...tx,
+//         retry() {
+//           // Automatically unblock the transition so it can play all the way
+//           // through before retrying it. TODO: Figure out how to re-enable
+//           // this block if the transition is cancelled for some reason.
+//           unblock();
+//           tx.retry();
+//         },
+//       };
 
-      blocker(autoUnblockingTx);
-    });
+//       blocker(autoUnblockingTx);
+//     });
 
-    return unblock;
-  }, [navigator, blocker, when]);
-}
+//     return unblock;
+//   }, [navigator, blocker, when]);
+// }
 /**
  * Prompts the user with an Alert before they leave the current screen.
  *
@@ -52,5 +52,5 @@ export function usePrompt(message, when = true) {
     [message]
   );
 
-  useBlocker(blocker, when);
+  // useBlocker(blocker, when);
 }
