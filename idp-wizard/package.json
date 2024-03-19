@@ -17,7 +17,9 @@
     "format": "prettier --check --write ./src/**/*.{tsx,ts}",
     "type-check": "tsc --noEmit",
     "build:bundle-profile": "webpack --config webpack.prod.js --profile --json > stats.json",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "storybook": "start-storybook -p 6006",
+    "build:storybook": "build-storybook"
   },
   "dependencies": {
     "@keycloak/keycloak-admin-client": "^15.0.2",
@@ -28,6 +30,7 @@
     "@patternfly/react-table": "^4.71.16",
     "@react-keycloak/web": "^3.4.0",
     "@reduxjs/toolkit": "^1.8.1",
+    "@storybook/builder-webpack5": "^6.2.9",
     "axios": "^0.24.0",
     "classnames": "^2.3.1",
     "formik": "^2.2.9",
@@ -45,6 +48,12 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@storybook/addon-actions": "^6.2.9",
+    "@storybook/addon-info": "^5.3.21",
+    "@storybook/addon-knobs": "^6.2.9",
+    "@storybook/addon-links": "^6.2.9",
+    "@storybook/addons": "^6.2.9",
+    "@storybook/react": "^6.2.9",
     "@types/enzyme": "^3.10.8",
     "@types/jest": "^26.0.23",
     "@types/victory": "^33.1.4",
