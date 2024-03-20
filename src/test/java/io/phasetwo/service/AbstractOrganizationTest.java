@@ -469,9 +469,12 @@ public abstract class AbstractOrganizationTest {
   }
 
   protected Response getUser(String userId) {
-    Response response = getAdminRootRequest(Optional.empty())
-        .when()
-        .get("/users/" + userId + "?userProfileMetadata=false").andReturn();;
+    Response response =
+        getAdminRootRequest(Optional.empty())
+            .when()
+            .get("/users/" + userId + "?userProfileMetadata=false")
+            .andReturn();
+    ;
     assertThat(response.getStatusCode(), Matchers.is(Status.OK.getStatusCode()));
     return response;
   }

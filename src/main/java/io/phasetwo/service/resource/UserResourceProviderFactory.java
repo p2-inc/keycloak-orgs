@@ -51,12 +51,12 @@ public class UserResourceProviderFactory implements RealmResourceProviderFactory
           } else if (event instanceof PostMigrationEvent) {
             log.debug("PostMigrationEvent");
             if (KC_ORGS_SKIP_MIGRATION == null) {
-              log.info("initializing active organization user profile attribute following migration");
+              log.info(
+                  "initializing active organization user profile attribute following migration");
               KeycloakModelUtils.runJobInTransaction(factory, this::postMigrationInitUserProfile);
             }
           }
-        }
-    );
+        });
   }
 
   private void realmPostCreateInitUserProfile(RealmModel.RealmPostCreateEvent event) {
@@ -76,8 +76,7 @@ public class UserResourceProviderFactory implements RealmResourceProviderFactory
             realm -> {
               session.getContext().setRealm(realm);
               initUserProfile(session);
-            }
-        );
+            });
   }
 
   private void initUserProfile(KeycloakSession session) {
@@ -90,7 +89,7 @@ public class UserResourceProviderFactory implements RealmResourceProviderFactory
     try {
       t.setConfiguration(config);
     } catch (ComponentValidationException e) {
-      //show validation result containing details about error
+      // show validation result containing details about error
       log.error(e.getMessage());
     }
   }

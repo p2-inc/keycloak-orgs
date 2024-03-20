@@ -28,8 +28,7 @@ class UsernameNoteAuthenticator extends AbstractUsernameFormAuthenticator
     String loginHint =
         context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
 
-    String rememberMeUsername =
-        AuthenticationManager.getRememberMeUsername(context.getSession());
+    String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getSession());
 
     if (loginHint != null || rememberMeUsername != null) {
       if (loginHint != null) {

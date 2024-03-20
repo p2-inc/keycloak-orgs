@@ -476,7 +476,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     response = getRequest(id, "members");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    List<UserRepresentation> members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    List<UserRepresentation> members =
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(members, notNullValue());
     assertThat(members, hasSize(5)); // including org admin default
 
@@ -532,7 +533,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(members, notNullValue());
     assertThat(members, hasSize(5));
-
 
     // delete user
     deleteUser(keycloak, REALM, user1.getId());
@@ -1379,6 +1379,15 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(representation.getAlias(), is(alias1));
     assertThat(representation.getProviderId(), is("oidc"));
     assertThat(representation.getConfig().get("syncMode"), is("IMPORT"));
+    String idpId = representation.getAlias();
+
+    // unlink
+    response = postRequest("foo", org.getId(), "idps", idpId, "unlink");
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+    // check it
+    response = getRequest(id, "idps", idpId);
+    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // delete org
     deleteOrganization(id);
