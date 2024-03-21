@@ -38,7 +38,6 @@ public class TokenManager {
 
   public TokenManager(
       KeycloakSession session, AccessToken accessToken, RealmModel realm, UserModel user) {
-    this.session = session;
     this.accessToken = accessToken;
     this.realm = realm;
     this.targetClient =
@@ -47,6 +46,8 @@ public class TokenManager {
             .getClientByClientId(realm, accessToken.getIssuedFor());
     this.targetClientConfig = OIDCAdvancedConfigWrapper.fromClientModel(targetClient);
     this.user = user;
+    this.session = session;
+    this.session.getContext().setClient(targetClient);
   }
 
   /**

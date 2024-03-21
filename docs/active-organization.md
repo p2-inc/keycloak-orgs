@@ -6,7 +6,7 @@
   * [Contents](#contents)
   * [Overview](#overview)
     * [Currently supported mode](#currently-supported-mode)
-      * [Important note (`ATTRIBUTE_MODE`)](#important-note-attribute_mode)
+      * [Important note (`ATTRIBUTE_MODE`) before v24.x+](#important-note-attribute_mode-before-v24x)
     * [Code extension](#code-extension)
   * [Endpoints](#endpoints)
     * [Switch Organization](#switch-organization)
@@ -15,7 +15,7 @@
     * [New mapper](#new-mapper)
     * [Configure the mapper](#configure-the-mapper)
   * [Standard Flow (Demo)](#standard-flow-demo)
-  * [Attack Scenario and Mitigation](#attack-scenario-and-mitigation)
+  * [Attack Scenario and Mitigation (before v24.x+)](#attack-scenario-and-mitigation-before-v24x)
     * [Case with user read only attributes](#case-with-user-read-only-attributes)
     * [Case with no user read only attributes](#case-with-no-user-read-only-attributes)
 <!-- TOC -->
@@ -28,7 +28,8 @@ This means that the active organization is kept in the user's attributes, he doe
 - If the user doesn't have an active organization attribute and belong to one or more organization, the first one is taken by default.  
 - Switching organization create a new session for the user (it return a new access token).
 
-#### Important note (`ATTRIBUTE_MODE`)
+#### Important note (`ATTRIBUTE_MODE`) before v24.x+
+**Starting of the version 24.x+, the org.ro.active is not visible and not editable by standard users.**
 Currently, the attribute key for active organization is not configurable and is by default `org.ro.active`.  
 It follows this format as it can be set as read-only with `--spi-user-profile-declarative-user-profile-read-only-attributes=org.ro.*` 
 of Keycloak which is **recommended**.  
@@ -208,7 +209,9 @@ Side note, if the user tries to get the active-organization without belonging to
 the `404 NOT FOUND` response will be returned.
 ![no-organization](assets/active-organization/flow/case-with-no-org.png)
 
-## Attack Scenario and Mitigation
+## Attack Scenario and Mitigation (before v24.x+)
+**Starting of the version 24.x+, the org.ro.active is not visible and not editable by standard users.**
+
 Now, let's assume the standard user is malicious and knows a little about Keycloak.  
 He may think that he could change organization by directly writing the `org.ro.active` attribute.
 

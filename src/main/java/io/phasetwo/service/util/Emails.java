@@ -29,7 +29,7 @@ public class Emails {
     String realmName =
         Strings.isNullOrEmpty(realm.getDisplayName()) ? realm.getName() : realm.getDisplayName();
     bodyAttributes.put("realmName", realmName);
-    bodyAttributes.put("user", new ProfileBean(user));
+    bodyAttributes.put("user", new ProfileBean(user, session));
 
     emailTemplateProvider
         .setRealm(realm)

@@ -5,6 +5,7 @@ import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import com.google.common.collect.Lists;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -46,26 +47,15 @@ public class ActiveOrganization {
       activeOrganizationId = user.getFirstAttribute(ACTIVE_ORGANIZATION);
     }
 
-    // security measure
-    // verify that the user belong to the organization (in case he modified through account POST
-    // api)
-    // no issue if read-only user attributes is enabled with "org.ro.*"
-    // --spi-user-profile-declarative-user-profile-read-only-attributes=org.ro.*
+    // lazy removal of active org attribute when org is deleted
     if (organizationProvider
         .getUserOrganizationsStream(realm, user)
         .noneMatch(org -> org.getId().equals(activeOrganizationId))) {
       log.warnf("%s doesn't belong to this organization", user.getUsername());
-
-      // verify that the organization still exists
-      organization = organizationProvider.getOrganizationById(realm, activeOrganizationId);
-      if (organization == null) {
-        log.warnf("organization doesn't exists anymore.");
-        user.removeAttribute(ACTIVE_ORGANIZATION);
-        // TODO: This method has a side effect. In the future it should be removed and the code
-        // refactored
-        // Tests failed if the we had event here
-      }
-
+      user.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
+      // TODO: This method has a side effect. In the future it should be removed and the code
+      // refactored
+      // Tests failed if the we had event here
       return false;
     }
 
