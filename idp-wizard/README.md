@@ -87,7 +87,7 @@ Start the idp-wizard:
 ```bash
 git clone https://github.com/p2-inc/idp-wizard
 cd idp-wizard
-yarn install --force && npm run start:dev
+yarn install --force && yarn start:dev
 ```
 
 ## License
