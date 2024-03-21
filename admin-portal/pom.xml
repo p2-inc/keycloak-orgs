@@ -29,7 +29,7 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.portal</main.java.package>
-    <keycloak.version>23.0.1</keycloak.version>
+    <keycloak.version>24.0.0</keycloak.version>
     <guava.version>32.0.0-jre</guava.version>
     <commons-lang3.version>3.11</commons-lang3.version>
     <lombok.version>1.18.30</lombok.version>

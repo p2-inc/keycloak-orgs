@@ -2,7 +2,7 @@
   "themes": [
     {
       "name": "portal",
-      "types": ["login"]
+      "types": ["account", "login"]
     }
   ]
 }

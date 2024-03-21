@@ -30,16 +30,17 @@ import org.keycloak.http.HttpResponse;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.Urls;
+import org.keycloak.services.cors.Cors;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.Auth;
 import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.resource.AccountResourceProvider;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.Cors;
 import org.keycloak.services.resources.RealmsResource;
 import org.keycloak.theme.Theme;
 
 @JBossLog
-public class PortalResourceProvider implements RealmResourceProvider {
+public class PortalResourceProvider implements AccountResourceProvider, RealmResourceProvider {
 
   private static ObjectMapper mapper = new ObjectMapper();
 
