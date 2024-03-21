@@ -245,10 +245,10 @@ the realm representation should include the `organizations`. Organization should
 
 ## Compatibility
 
-### Standard Keycloak -> PhaseTwo
+### Standard Keycloak -> Keycloak + keycloak-orgs extension
 
 A realm can be created using a valid realm representation json for the current Keycloak version.
 
-### PhaseTwo -> Standard Keycloak
+### Keycloak + keycloak-orgs extension -> Standard Keycloak
 
 To port back from PhaseTwo to standard Keycloak the `organizations` must be removed from the realm representation json.

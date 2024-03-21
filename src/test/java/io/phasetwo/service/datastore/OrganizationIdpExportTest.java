@@ -1,4 +1,4 @@
-package io.phasetwo.service.resource;
+package io.phasetwo.service.datastore;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -12,7 +12,7 @@ import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.Test;
 
 @JBossLog
-public class KeycloakOrganizationIdpExportTest extends AbstractOrganizationTest {
+public class OrganizationIdpExportTest extends AbstractOrganizationTest {
 
   @Test
   void testOrganizationLinkIdp() throws IOException {

@@ -1,4 +1,4 @@
-package io.phasetwo.service.resource;
+package io.phasetwo.service.datastore;
 
 import static io.phasetwo.service.Helpers.loadJson;
 import static io.phasetwo.service.Helpers.objectMapper;
@@ -23,7 +23,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 @JBossLog
-public class KeycloakOrganizationInvitationsImportTest extends AbstractOrganizationTest {
+public class OrganizationInvitationsImportTest extends AbstractOrganizationTest {
 
   @Test
   void testOrganizationInvitationsImport() throws IOException {

@@ -77,8 +77,6 @@ public abstract class AbstractOrganizationTest {
       new KeycloakContainer(KEYCLOAK_IMAGE)
           .withContextPath("/auth")
           .withReuse(true)
-          .withAdminPassword("admin")
-          .withAdminUsername("admin")
           .withProviderClassesFrom("target/classes")
           .withProviderLibsFrom(getDeps())
           .withAccessToHost(true);

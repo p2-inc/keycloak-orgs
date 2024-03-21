@@ -1,4 +1,4 @@
-package io.phasetwo.service.resource;
+package io.phasetwo.service.datastore;
 
 import static io.phasetwo.service.Helpers.loadJson;
 import static io.phasetwo.service.Helpers.objectMapper;
@@ -27,7 +27,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 @JBossLog
-public class KeycloakOrganizationImportTest extends AbstractOrganizationTest {
+public class OrganizationImportTest extends AbstractOrganizationTest {
 
   @Test
   void testStandardKeycloakRealmImport() throws IOException {

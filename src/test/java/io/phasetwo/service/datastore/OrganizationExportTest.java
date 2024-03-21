@@ -1,4 +1,4 @@
-package io.phasetwo.service.resource;
+package io.phasetwo.service.datastore;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -13,7 +13,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 @JBossLog
-public class KeycloakOrganizationExportTest extends AbstractOrganizationTest {
+public class OrganizationExportTest extends AbstractOrganizationTest {
   @Test
   void testOrganizationExport() throws Exception {
     // create organization1

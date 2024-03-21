@@ -1,4 +1,4 @@
-package io.phasetwo.service.resource;
+package io.phasetwo.service.datastore;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @JBossLog
-public class KeycloakOrganizationRoleExportTest extends AbstractOrganizationTest {
+public class OrganizationRoleExportTest extends AbstractOrganizationTest {
   @Test
   void testOrganizationRoleExport() throws Exception {
     // create organization1
