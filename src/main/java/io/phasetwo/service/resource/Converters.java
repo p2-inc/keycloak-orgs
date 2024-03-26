@@ -1,7 +1,14 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.phasetwo.service.datastore.representation.InvitationRepresentation;
+import io.phasetwo.service.datastore.representation.OrganizationAttributes;
+import io.phasetwo.service.datastore.representation.OrganizationRepresentation;
+import io.phasetwo.service.datastore.representation.OrganizationRoleRepresentation;
+import io.phasetwo.service.datastore.representation.UserRolesRepresentation;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -14,6 +21,9 @@ import io.phasetwo.service.representation.Team;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.keycloak.exportimport.ExportOptions;
+import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.account.UserRepresentation;
 
@@ -26,6 +36,14 @@ public class Converters {
     return r;
   }
 
+  public static OrganizationRoleRepresentation convertOrganizationRoleRepresentation(
+      OrganizationRoleModel m) {
+    var role = new OrganizationRoleRepresentation();
+    role.setName(m.getName());
+    role.setDescription(m.getDescription());
+    return role;
+  }
+
   public static Organization convertOrganizationModelToOrganization(OrganizationModel e) {
     Organization o =
         new Organization()
@@ -35,6 +53,18 @@ public class Converters {
             .domains(e.getDomains())
             .url(e.getUrl())
             .realm(e.getRealm().getName());
+    o.setAttributes(e.getAttributes());
+    return o;
+  }
+
+  public static OrganizationAttributes convertOrganizationModelToOrganizationAttributes(
+      OrganizationModel e) {
+    var o = new OrganizationAttributes();
+
+    o.setName(e.getName());
+    o.setDisplayName(e.getDisplayName());
+    o.setDomains(e.getDomains());
+    o.setUrl(e.getUrl());
     o.setAttributes(e.getAttributes());
     return o;
   }
@@ -101,5 +131,75 @@ public class Converters {
             .roles(Lists.newArrayList(e.getRoles()));
     i.setAttributes(Maps.newHashMap(e.getAttributes()));
     return i;
+  }
+
+  public static OrganizationRepresentation convertOrganizationModelToOrganizationRepresentation(
+      OrganizationModel organizationModel, RealmModel realm, ExportOptions options) {
+    var organization = convertOrganizationModelToOrganizationAttributes(organizationModel);
+    var roles =
+        organizationModel
+            .getRolesStream()
+            .map(Converters::convertOrganizationRoleRepresentation)
+            .toList();
+    var idpOptional =
+        organizationModel
+            .getIdentityProvidersStream()
+            .filter(
+                identityProviderModel -> idpInOrg(identityProviderModel, organizationModel.getId()))
+            .map(IdentityProviderModel::getAlias)
+            .findFirst();
+
+    var organizationRepresentation = new OrganizationRepresentation();
+    organizationRepresentation.setOrganization(organization);
+    organizationRepresentation.setRoles(roles);
+    idpOptional.ifPresent(organizationRepresentation::setIdpLink);
+
+    if (options.isUsersIncluded()) {
+      var members =
+          organizationModel
+              .getMembersStream()
+              .filter(
+                  userModel ->
+                      !OrganizationResourceProviderFactory.getDefaultAdminUsername(
+                              organizationModel)
+                          .contains(userModel.getUsername()))
+              .map(
+                  userModel -> {
+                    var userRoles =
+                        organizationModel
+                            .getRolesByUserStream(userModel)
+                            .map(OrganizationRoleModel::getName)
+                            .toList();
+
+                    return new UserRolesRepresentation(userModel.getUsername(), userRoles);
+                  })
+              .toList();
+      organizationRepresentation.setMembers(members);
+
+      var invitations =
+          organizationModel
+              .getInvitationsStream()
+              .map(Converters::convertInvitationModelToInvitationRepresentation)
+              .toList();
+      organizationRepresentation.setInvitations(invitations);
+    }
+
+    return organizationRepresentation;
+  }
+
+  private static InvitationRepresentation convertInvitationModelToInvitationRepresentation(
+      InvitationModel invitationModel) {
+    var i = new InvitationRepresentation();
+    i.setEmail(invitationModel.getEmail());
+    i.setInviterUsername(invitationModel.getInviter().getUsername());
+    i.setRedirectUri(invitationModel.getUrl());
+    i.setRoles(Lists.newArrayList(invitationModel.getRoles()));
+    i.setAttributes(Maps.newHashMap(invitationModel.getAttributes()));
+    return i;
+  }
+
+  private static boolean idpInOrg(IdentityProviderModel provider, String orgId) {
+    return (provider.getConfig().containsKey(ORG_OWNER_CONFIG_KEY)
+        && orgId.equals(provider.getConfig().get(ORG_OWNER_CONFIG_KEY)));
   }
 }

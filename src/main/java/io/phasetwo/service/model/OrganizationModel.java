@@ -65,6 +65,8 @@ public interface OrganizationModel extends WithAttributes {
 
   Stream<OrganizationRoleModel> getRolesStream();
 
+  Stream<OrganizationRoleModel> getRolesByUserStream(UserModel user);
+
   default OrganizationRoleModel getRoleByName(String name) {
     return getRolesStream()
         .filter(r -> name.equals(r.getName()))

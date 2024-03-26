@@ -1,0 +1,58 @@
+{
+  "realm": "org-realm",
+  "enabled": true,
+  "users": [
+    {
+      "username": "test1",
+      "enabled": true
+    },
+    {
+      "username": "test2",
+      "enabled": true,
+      "email": "test+2@phasetwo.io"
+    },
+    {
+      "username": "test3",
+      "enabled": true
+    }
+  ],
+  "organizations": [
+    {
+      "organization": {
+        "name": "test1_org"
+      },
+      "roles": [
+        {
+          "name": "test_role2",
+          "description": ""
+        },
+        {
+          "name": "test_role3",
+          "description": ""
+        }
+      ],
+      "members": [
+        {
+          "username": "test3",
+          "roles": [
+            "test_role3"
+          ]
+        },
+        {
+          "username": "test2",
+          "roles": [
+          ]
+        }
+      ],
+      "invitations": [
+        {
+          "email": "test+2@phasetwo.io",
+          "inviterUsername": "test3",
+          "roles": ["test_role2"],
+          "redirectUri": "",
+          "attributes": {}
+        }
+      ]
+    }
+  ]
+}

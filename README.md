@@ -29,6 +29,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
     - [Authentication](#authentication)
       - [Invitations](#invitations)
       - [IdP Discovery](#idp-discovery)
+    - [Import/Export organizations](#importexport-organizations)
   - [License](#license)
 
 ## Overview
@@ -159,6 +160,10 @@ A group of custom REST resources are made available for administrator and custom
 ### Events
 
 For more information you can refer to: [Events](./docs/events.md)
+
+### Import/Export organizations
+
+For more information you can refer to: [Import/Export](./docs/import-export.md)
 
 ### Mappers
 
