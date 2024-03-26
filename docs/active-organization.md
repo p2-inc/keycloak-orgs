@@ -8,6 +8,7 @@
     * [Currently supported mode](#currently-supported-mode)
       * [Important note (`ATTRIBUTE_MODE`) before v24.x+](#important-note-attribute_mode-before-v24x)
     * [Code extension](#code-extension)
+  * [Authenticator](#authenticator)
   * [Endpoints](#endpoints)
     * [Switch Organization](#switch-organization)
     * [Active organization](#active-organization)
@@ -54,6 +55,11 @@ Several files have been added or modified to cover the "active organization" fea
   - To extend the abstract functionalities for testing (create client, create client-scope, assign client role, get user account, ...)
 - [Modified `OrganizationResourceTest.java`](../src/test/java/io/phasetwo/service/resource/OrganizationResourceTest.java)
   - Added `void testOrganizationSwitch()` to cover the switch organization logic with standard flow or 'malicious attack'.
+
+## Authenticator
+For a [spec-compliant](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest) approach, 
+you can use the "Select Organization" authenticator based on `prompt=select_account`.  
+**For more information**, see [active-organization-authenticator](./active-organization-authenticator.md) doc.
 
 ## Endpoints
 2 new endpoints were added.
@@ -206,7 +212,8 @@ As you can see, the user can't perform this action.
 **End.**
 
 Side note, if the user tries to get the active-organization without belonging to an organization, 
-the `404 NOT FOUND` response will be returned.
+the `404 NOT FOUND` response will be returned.  
+
 ![no-organization](assets/active-organization/flow/case-with-no-org.png)
 
 ## Attack Scenario and Mitigation (before v24.x+)

@@ -16,6 +16,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
     - [Definitions](#definitions)
   - [Quick start](#quick-start)
   - [Building](#building)
+  - [Cypress-Test](#cypress-test)
   - [Installation](#installation)
     - [Admin UI](#admin-ui)
     - [Compatibility](#compatibility)
@@ -29,6 +30,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
     - [Authentication](#authentication)
       - [Invitations](#invitations)
       - [IdP Discovery](#idp-discovery)
+    - [Active Organization](#active-organization)
   - [License](#license)
 
 ## Overview
@@ -73,6 +75,10 @@ And then run the build with the tests using the `test` profile:
 ```bash
 mvn clean install -Ptest
 ```
+
+## Cypress Test
+For more information you can refer to [cypress-tests](./docs/cypress-tests.md).
+
 
 ## Installation
 
