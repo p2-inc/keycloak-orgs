@@ -11,6 +11,7 @@ import io.phasetwo.service.util.ActiveOrganization;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.EventBuilder;
@@ -65,34 +66,33 @@ public class MembersResource extends OrganizationAdminResource {
             .equals(OrganizationResourceProviderFactory.getDefaultAdminUsername(organization))) {
       throw new ForbiddenException("Cannot remove default organization user.");
     }
-    if (member != null && organization.hasMembership(member)) {
 
-      ActiveOrganization activeOrganizationUtil = new ActiveOrganization(session, realm, member);
-      if (activeOrganizationUtil.isValid()
-          && activeOrganizationUtil.getActiveOrganization().getId().equals(organization.getId())) {
-        member.removeAttribute(ACTIVE_ORGANIZATION);
+    if (!organization.hasMembership(member)) throw new NotFoundException();
 
-        EventBuilder event = new EventBuilder(realm, session, connection);
-        event
-            .event(UPDATE_PROFILE)
-            .user(user)
-            .detail(
-                "removed_active_organization_id",
-                activeOrganizationUtil.getActiveOrganization().getId())
-            .success();
-      }
+    ActiveOrganization activeOrganizationUtil = ActiveOrganization
+        .fromContext(session, realm, member);
+    if (activeOrganizationUtil.isValid() &&
+        activeOrganizationUtil.isCurrentActiveOrganization(organization.getId())) {
+      member.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
 
-      organization.revokeMembership(member);
-      adminEvent
-          .resource(ORGANIZATION_MEMBERSHIP.name())
-          .operation(OperationType.DELETE)
-          .resourcePath(session.getContext().getUri())
-          .representation(userId)
+      EventBuilder event = new EventBuilder(realm, session, connection);
+      event
+          .event(UPDATE_PROFILE)
+          .user(user)
+          .detail(
+              "removed_active_organization_id",
+              activeOrganizationUtil.getOrganization().getId())
           .success();
-      return Response.noContent().build();
-    } else {
-      throw new NotFoundException();
     }
+
+    organization.revokeMembership(member);
+    adminEvent
+        .resource(ORGANIZATION_MEMBERSHIP.name())
+        .operation(OperationType.DELETE)
+        .resourcePath(session.getContext().getUri())
+        .representation(userId)
+        .success();
+    return Response.noContent().build();
   }
 
   @GET
