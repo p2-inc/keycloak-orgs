@@ -34,14 +34,14 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
 
 ## Overview
 
-If you search for "multi-tenant Keycloak", you'll find several opinionated approaches, each promising, and each with their own tradeoffs. This project represents one such approach. It was built initially for a multi-tenant, public cloud, SaaS application. It has now been, in the form of the [Phase Two](https://phasetwo.io) cloud offering, adopted by several other companies for the same purpose.
+If you search for "multi-tenant Keycloak", you'll find several opinionated approaches, each promising, and each with their own trade-offs. This project represents one such approach. It was built initially for a multi-tenant, public cloud, SaaS application. It has now been, in the form of the [Phase Two](https://phasetwo.io) cloud offering, adopted by several other companies for the same purpose.
 
 Other approaches that we tried and decided against were:
 
 - One Realm for each tenant
 - Using existing Keycloak Groups to model Organizations, Roles and Memberships
 
-But each of these approaches had tradeoffs of scale or frailty we found undesirable or unacceptable to meet our requirements. Instead, we opted to make Organizations, and their Invitations, Roles and Memberships first-class entities in Keycloak.
+But each of these approaches had trade-offs of scale or frailty we found undesirable or unacceptable to meet our requirements. Instead, we opted to make Organizations, and their Invitations, Roles and Memberships first-class entities in Keycloak.
 
 ### Definitions
 
