@@ -1,4 +1,4 @@
-# Import/Export
+# Import/Export (Experimental)
 
 ## Contents
 
@@ -16,7 +16,8 @@
 
 ## Overview
 
-This documents describes the functionality for importing and exporting a realm containing organizations.
+This documents describes the functionality for importing and exporting a realm containing organizations. </br> 
+The current approach works with the import/export functionality from the Keycloak UI console (not CLI commands)
 
 ## Import
 
@@ -240,8 +241,6 @@ The `inviter` must be defined in `users` import schema.
 
 Using Keycloak `/partial-export` the realm representation should include the `organizations`. Organization will not
 contain `members` and `invitations`.<br>
-Using startup export functionality [Configuring how users are exported](https://www.keycloak.org/server/importExport#_exporting_a_realm_to_a_directory)
-the realm representation should include the `organizations`. Organization should contain `members` and `invitations`.
 
 ## Compatibility
 
