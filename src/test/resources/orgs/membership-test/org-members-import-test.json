@@ -1,12 +1,4 @@
 {
-  "realm": "org-realm",
-  "enabled": true,
-  "users": [
-    {
-      "username": "test",
-      "enabled": true
-    }
-  ],
   "organizations": [
     {
       "organization": {
@@ -25,7 +17,26 @@
         {
           "username": "test2",
           "roles": [
+            "test_role1",
+            "view-members",
+            "manage-members"
           ]
+        }
+      ],
+      "invitations": []
+    },
+    {
+      "organization": {
+        "name": "test2"
+      },
+      "roles": [
+        {
+          "name": "test_role2",
+          "description": ""
+        },
+        {
+          "name": "test_role3",
+          "description": ""
         }
       ],
       "invitations": []

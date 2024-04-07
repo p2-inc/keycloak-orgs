@@ -1,15 +1,28 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.resource.Converters.*;
-import static io.phasetwo.service.resource.OrganizationResourceType.*;
+import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
+import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
+import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_IMPORT;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.phasetwo.service.importexport.KeycloakOrgsExportConverter;
+import io.phasetwo.service.importexport.KeycloakOrgsImportConverter;
+import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
+import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
 import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.representation.Organization;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
@@ -17,9 +30,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.common.util.CollectionUtil;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.models.ModelException;
+import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.utils.SearchQueryUtils;
 
 @JBossLog
@@ -141,5 +160,115 @@ public class OrganizationsResource extends OrganizationAdminResource {
     return Response.created(
             session.getContext().getUri().getAbsolutePathBuilder().path(o.getId()).build())
         .build();
+  }
+
+  @GET
+  @Path("export")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response exportOrgs(
+      @QueryParam("exportMembersAndInvitations") Boolean exportMembersAndInvitations) {
+    log.debugf("Export org for %s", realm.getName());
+    if (!auth.hasManageOrgs()) {
+      throw new NotAuthorizedException("Insufficient permission to export organization.");
+    }
+
+    var organizations =
+        orgs.searchForOrganizationStream(realm, Map.of(), 0, Integer.MAX_VALUE, Optional.empty())
+            .map(
+                organization ->
+                    KeycloakOrgsExportConverter
+                        .convertOrganizationModelToOrganizationRepresentation(
+                            organization, exportMembersAndInvitations))
+            .toList();
+
+    KeycloakOrgsRepresentation keycloakOrgsRepresentation = new KeycloakOrgsRepresentation();
+    keycloakOrgsRepresentation.setOrganizations(organizations);
+
+    Response.ResponseBuilder response = Response.ok();
+    response.type(MediaType.APPLICATION_JSON);
+    response.entity(keycloakOrgsRepresentation);
+
+    return response.build();
+  }
+
+  @POST
+  @Path("import")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response importOrgs(
+      KeycloakOrgsRepresentation keycloakOrgsRealmRepresentation,
+      @QueryParam("skipMissingMember") Boolean skipMissingMember,
+      @QueryParam("skipMissingIdp") Boolean skipMissingIdp) {
+    log.debugf("Import orgs for %s", realm.getName());
+    if (!(auth.hasCreateOrg() || (auth.hasViewOrgs() && auth.hasManageOrgs()))) {
+      throw new NotAuthorizedException("Insufficient permission to import organization.");
+    }
+
+    var organizations = keycloakOrgsRealmRepresentation.getOrganizations();
+
+    if (CollectionUtil.isEmpty(organizations)) {
+      Response.ResponseBuilder response = Response.noContent();
+      response.type(MediaType.APPLICATION_JSON);
+      return response.build();
+    }
+
+    KeycloakModelUtils.runJobInTransaction(
+        session.getKeycloakSessionFactory(),
+        (session) -> {
+          organizations.forEach(
+              organizationRepresentation ->
+                  createOrganization(
+                      skipMissingMember, skipMissingIdp, session, organizationRepresentation));
+          AdminEventBuilder adminEventClone = adminEvent.clone(session);
+
+          // create import event
+          adminEventClone
+              .resource(ORGANIZATION_IMPORT.name())
+              .operation(OperationType.CREATE)
+              .resourcePath(session.getContext().getUri())
+              .representation(keycloakOrgsRealmRepresentation)
+              .success();
+        });
+
+    Response.ResponseBuilder response = Response.ok();
+    response.type(MediaType.APPLICATION_JSON);
+
+    return response.build();
+  }
+
+  private void createOrganization(
+      Boolean skipMissingMember,
+      Boolean skipMissingIdp,
+      KeycloakSession session,
+      OrganizationRepresentation organizationRepresentation) {
+    try {
+      var org =
+          session
+              .getProvider(OrganizationProvider.class)
+              .createOrganization(
+                  realm, organizationRepresentation.getOrganization().getName(), user, false);
+      KeycloakOrgsImportConverter.setOrganizationAttributes(
+          organizationRepresentation.getOrganization(), org);
+
+      KeycloakOrgsImportConverter.createOrganizationRoles(
+          organizationRepresentation.getRoles(), org);
+
+      KeycloakOrgsImportConverter.createOrganizationIdp(
+          realm, organizationRepresentation.getIdpLink(), org, skipMissingIdp);
+
+      KeycloakOrgsImportConverter.addMembers(
+          session, realm, organizationRepresentation, org, skipMissingMember);
+
+      KeycloakOrgsImportConverter.addInvitations(
+          session, realm, organizationRepresentation, org, skipMissingMember);
+    } catch (ModelDuplicateException e) {
+      throw ErrorResponse.exists(
+          "Duplicate organization with name: %s"
+              .formatted(organizationRepresentation.getOrganization().getName()));
+    } catch (ModelException e) {
+      throw ErrorResponse.error(e.getMessage(), Response.Status.BAD_REQUEST);
+    } catch (Exception e) {
+      throw ErrorResponse.error(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+    }
   }
 }

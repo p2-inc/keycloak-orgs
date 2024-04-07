@@ -1,0 +1,30 @@
+{
+  "realm": "org-realm",
+  "enabled": true,
+  "identityProviders": [
+    {
+      "alias": "keycloak-oidc",
+      "providerId": "keycloak-oidc",
+      "enabled": true,
+      "updateProfileFirstLoginMode": "on",
+      "trustEmail": false,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "authenticateByDefault": false,
+      "linkOnly": false,
+      "config": {
+        "userInfoUrl": "http://localhost:8080/",
+        "validateSignature": "false",
+        "hideOnLoginPage": "true",
+        "tokenUrl": "http://localhost:8080/auth/",
+        "clientId": "admin",
+        "pkceEnabled": "false",
+        "authorizationUrl": "http://localhost:8080/",
+        "clientAuthMethod": "client_secret_post",
+        "logoutUrl": "http://localhost:8080/",
+        "syncMode": "FORCE",
+        "clientSecret": "**********"
+      }
+    }
+  ]
+}

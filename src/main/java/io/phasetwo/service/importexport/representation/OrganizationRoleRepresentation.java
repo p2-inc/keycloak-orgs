@@ -1,4 +1,4 @@
-package io.phasetwo.service.datastore.representation;
+package io.phasetwo.service.importexport.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

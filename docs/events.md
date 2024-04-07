@@ -22,6 +22,7 @@ Description of the events associated with the management of organizations:
 | `/auth/realms/:realmId/orgs/:orgId/invitations/:invitationId`               | `POST`   | INVITATION                | CREATE    |
 | `/auth/realms/:realmId/orgs/:orgId/invitations/:invitationId/:invitationId` | `DELETE` | INVITATION                | DELETE    |
 | `/auth/realms/:realmId/orgs/:orgId/domains/:domainName/verify`              | `POST`   | DOMAIN                    | UPDATE    |
+| `/auth/realms/:realmId/orgs/import`                                         | `POST`   | ORGANIZATION_IMPORT       | CREATE    |
 
 ### User events
 
@@ -29,12 +30,12 @@ Description of the events associated with users in the context of a organization
 
 Organization management
 
-| Path                                                | Method   | Event type      |
-|-----------------------------------------------------|----------|-----------------|
-| `/auth/realms/:realmId/users/switch-organization`   | `PUT`    | UPDATE_PROFILE  |
-| `/auth/realms/:realmId/orgs/:orgId/members/:userId` | `DELETE` | UPDATE_PROFILE  | 
+| Path                                                | Method   | Event type     |
+|-----------------------------------------------------|----------|----------------|
+| `/auth/realms/:realmId/users/switch-organization`   | `PUT`    | UPDATE_PROFILE |
+| `/auth/realms/:realmId/orgs/:orgId/members/:userId` | `DELETE` | UPDATE_PROFILE | 
 
-`Invitations` -  Event type: CUSTOM_REQUIRED_ACTION
+`Invitations` - Event type: CUSTOM_REQUIRED_ACTION
 
 ![invitation-required-action-success](./assets/events/invitation-required-action-success-event.png)
 
@@ -45,7 +46,6 @@ Organization management
 ![add-to-organization-success](./assets/events/add-to-organization-success-event.png)
 
 ![remove-organization-invitation-event](./assets/events/remove-organization-invitation-event.png)
-
 
 `PortalLink` - Event type: EXECUTE_ACTION_TOKEN
 

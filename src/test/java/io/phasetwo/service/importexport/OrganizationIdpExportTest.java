@@ -1,4 +1,4 @@
-package io.phasetwo.service.datastore;
+package io.phasetwo.service.importexport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -56,7 +56,7 @@ public class OrganizationIdpExportTest extends AbstractOrganizationTest {
     postRequest(link, org.getId(), "idps", "link");
 
     // export
-    var export = export(keycloak);
+    var export = exportOrgs(keycloak, true);
     assertThat(export.getOrganizations(), hasSize(1));
 
     // validate

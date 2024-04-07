@@ -8,5 +8,6 @@ public enum OrganizationResourceType {
   TEAM,
   TEAM_MEMBERSHIP,
   INVITATION,
-  DOMAIN;
+  DOMAIN,
+  ORGANIZATION_IMPORT
 }

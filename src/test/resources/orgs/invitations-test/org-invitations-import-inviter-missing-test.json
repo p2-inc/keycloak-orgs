@@ -1,21 +1,4 @@
 {
-  "realm": "org-realm",
-  "enabled": true,
-  "users": [
-    {
-      "username": "test1",
-      "enabled": true
-    },
-    {
-      "username": "test2",
-      "enabled": true,
-      "email": "test+2@phasetwo.io"
-    },
-    {
-      "username": "test3",
-      "enabled": true
-    }
-  ],
   "organizations": [
     {
       "organization": {
@@ -47,7 +30,7 @@
       "invitations": [
         {
           "email": "test+2@phasetwo.io",
-          "inviterUsername": "test3",
+          "inviterUsername": "test5",
           "roles": ["test_role2"],
           "redirectUri": "",
           "attributes": {}

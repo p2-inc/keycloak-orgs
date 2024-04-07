@@ -9,9 +9,13 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -19,7 +23,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
-import io.phasetwo.service.datastore.representation.KeycloakOrgsRealmRepresentation;
+import io.phasetwo.service.importexport.representation.InvitationRepresentation;
+import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
+import io.phasetwo.service.importexport.representation.UserRolesRepresentation;
+import io.phasetwo.service.representation.Invitation;
+import io.phasetwo.service.representation.OrganizationRole;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -31,12 +39,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.Testcontainers;
 
 public abstract class AbstractOrganizationTest {
@@ -210,43 +221,102 @@ public abstract class AbstractOrganizationTest {
     return orgRep;
   }
 
-  protected KeycloakOrgsRealmRepresentation export(Keycloak keycloak) throws IOException {
+  protected KeycloakOrgsRepresentation exportOrgs(
+      Keycloak keycloak, boolean exportMembersAndInvitations) throws IOException {
     var response =
         given()
             .baseUri(container.getAuthServerUrl())
-            .basePath("admin/realms/" + REALM + "/partial-export")
+            .basePath("realms/" + REALM + "/orgs")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
+            .queryParam("exportMembersAndInvitations", exportMembersAndInvitations)
+            .when()
+            .get("export")
+            .then()
+            .extract()
+            .response();
+
+    return objectMapper()
+        .readValue(response.getBody().asString(), KeycloakOrgsRepresentation.class);
+  }
+
+  protected Response importOrgs(
+      KeycloakOrgsRepresentation representation, Keycloak keycloak, String realm) {
+    return given()
+        .baseUri(container.getAuthServerUrl())
+        .basePath("realms/" + realm + "/orgs")
+        .contentType("application/json")
+        .auth()
+        .oauth2(keycloak.tokenManager().getAccessTokenString())
+        .queryParam("skipMissingMember", false)
+        .queryParam("skipMissingIdp", false)
+        .when()
+        .and()
+        .body(representation)
+        .when()
+        .post("import")
+        .then()
+        .extract()
+        .response();
+  }
+
+  protected Response importOrgsSkipMissingMembers(
+      KeycloakOrgsRepresentation representation, Keycloak keycloak, String realm) {
+    return given()
+        .baseUri(container.getAuthServerUrl())
+        .basePath("realms/" + realm + "/orgs")
+        .contentType("application/json")
+        .auth()
+        .oauth2(keycloak.tokenManager().getAccessTokenString())
+        .queryParam("skipMissingMember", true)
+        .queryParam("skipMissingIdp", false)
+        .when()
+        .and()
+        .body(representation)
+        .when()
+        .post("import")
+        .then()
+        .extract()
+        .response();
+  }
+
+  protected Response importOrgSkipMissingIdp(
+      KeycloakOrgsRepresentation representation, Keycloak keycloak, String realm) {
+    return given()
+        .baseUri(container.getAuthServerUrl())
+        .basePath("realms/" + realm + "/orgs")
+        .contentType("application/json")
+        .auth()
+        .oauth2(keycloak.tokenManager().getAccessTokenString())
+        .queryParam("skipMissingMember", false)
+        .queryParam("skipMissingIdp", true)
+        .when()
+        .and()
+        .body(representation)
+        .when()
+        .post("import")
+        .then()
+        .extract()
+        .response();
+  }
+
+  protected void importRealm(RealmRepresentation representation, Keycloak keycloak) {
+    var response =
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath("admin/realms/")
             .contentType("application/json")
             .auth()
             .oauth2(keycloak.tokenManager().getAccessTokenString())
             .and()
+            .body(representation)
             .when()
-            .post(String.join("/partial-export"))
+            .post()
             .then()
             .extract()
             .response();
-    var rep =
-        objectMapper()
-            .readValue(response.getBody().asString(), KeycloakOrgsRealmRepresentation.class);
-
-    return rep;
-  }
-
-  protected Response importRealm(
-      KeycloakOrgsRealmRepresentation keycloakOrgsRealmRepresentation, Keycloak keycloak)
-      throws IOException {
-    return given()
-        .baseUri(container.getAuthServerUrl())
-        .basePath("admin/realms/")
-        .contentType("application/json")
-        .auth()
-        .oauth2(keycloak.tokenManager().getAccessTokenString())
-        .and()
-        .body(keycloakOrgsRealmRepresentation)
-        .when()
-        .post()
-        .then()
-        .extract()
-        .response();
+    assertThat(response.getStatusCode(), CoreMatchers.is(Status.CREATED.getStatusCode()));
   }
 
   protected OrganizationRoleRepresentation createOrgRole(String orgId, String name)
@@ -651,5 +721,211 @@ public abstract class AbstractOrganizationTest {
 
     response = root.and().body(realm).when().put().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+  }
+
+  protected void validateOrgInvitations(
+      List<InvitationRepresentation> importInvitations,
+      OrganizationRepresentation organizationRepresentation,
+      String realm) {
+    try {
+      List<Invitation> invitations = getOrgInvitations(organizationRepresentation, realm);
+
+      // validate invitations and parameters
+      assertThat(importInvitations, hasSize(invitations.size()));
+      invitations.forEach(
+          invitation -> {
+            var importedInvitation =
+                importInvitations.stream()
+                    .filter(invitationRep -> invitation.getEmail().equals(invitationRep.getEmail()))
+                    .findFirst()
+                    .orElseThrow();
+            validateInvitationParameters(importedInvitation, invitation, realm);
+          });
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  protected List<Invitation> getOrgInvitations(
+      OrganizationRepresentation organizationRepresentation, String realm)
+      throws JsonProcessingException {
+
+    var invitationsResponse =
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath(
+                "realms/" + realm + "/orgs/" + organizationRepresentation.getId() + "/invitations")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
+            .and()
+            .when()
+            .get()
+            .then()
+            .extract()
+            .response();
+    return objectMapper()
+        .readValue(invitationsResponse.getBody().asString(), new TypeReference<>() {});
+  }
+
+  private void validateInvitationParameters(
+      InvitationRepresentation invitationRepresentation, Invitation invitation, String realm) {
+    var inviter =
+        keycloak
+            .realm(realm)
+            .users()
+            .searchByUsername(invitationRepresentation.getInviterUsername(), true)
+            .stream()
+            .findFirst()
+            .orElseThrow();
+    assertThat(inviter.getId(), Matchers.is(invitation.getInviterId()));
+    assertThat(
+        invitationRepresentation.getRedirectUri(), Matchers.is(invitation.getInvitationUrl()));
+    assertThat(invitationRepresentation.getEmail(), Matchers.is(invitation.getEmail()));
+
+    if (invitationRepresentation.getRoles().isEmpty()) {
+      assertThat(invitationRepresentation.getRoles(), hasSize(invitation.getRoles().size()));
+    } else {
+      assertThat(
+          invitationRepresentation.getRoles(), containsInAnyOrder(invitation.getRoles().toArray()));
+    }
+
+    if (invitationRepresentation.getAttributes().isEmpty()) {
+      assertThat(invitationRepresentation.getAttributes().entrySet(), hasSize(0));
+    } else {
+      assertThat(
+          invitationRepresentation.getAttributes().entrySet(),
+          containsInAnyOrder(invitation.getAttributes().entrySet().toArray()));
+    }
+  }
+
+  protected void validateOrgMembers(
+      List<UserRolesRepresentation> exportedMembers,
+      OrganizationRepresentation organizationRepresentation,
+      String realm) {
+    try {
+      var managedUsers = getOrgMembers(organizationRepresentation, realm);
+
+      assertThat(managedUsers, hasSize(exportedMembers.size()));
+      assertThat(
+          managedUsers.stream().map(UserRepresentation::getUsername).toList(),
+          containsInAnyOrder(
+              exportedMembers.stream().map(UserRolesRepresentation::getUsername).toArray()));
+
+      // validate roles
+      managedUsers.forEach(
+          userRepresentation -> {
+            var member =
+                exportedMembers.stream()
+                    .filter(
+                        importedMember ->
+                            importedMember.getUsername().equals(userRepresentation.getUsername()))
+                    .findFirst()
+                    .orElseThrow();
+            validateOrgRoles(userRepresentation, member, organizationRepresentation.getId(), realm);
+          });
+
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  protected void validateOrgRoles(
+      UserRepresentation userRepresentation,
+      UserRolesRepresentation member,
+      String orgId,
+      String realm) {
+
+    var rolesResponse =
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath(
+                "realms/"
+                    + realm
+                    + "/users/"
+                    + userRepresentation.getId()
+                    + "/orgs/"
+                    + orgId
+                    + "/roles")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
+            .and()
+            .when()
+            .get()
+            .then()
+            .extract()
+            .response();
+    try {
+      List<OrganizationRole> roles =
+          objectMapper().readValue(rolesResponse.getBody().asString(), new TypeReference<>() {});
+
+      assertThat(roles, hasSize(member.getRoles().size()));
+      assertThat(
+          roles.stream().map(OrganizationRole::getName).toList(),
+          containsInAnyOrder(member.getRoles().toArray()));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  protected List<UserRepresentation> getOrgMembers(
+      OrganizationRepresentation organizationRepresentation, String realm)
+      throws JsonProcessingException {
+
+    var membersResponse =
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath(
+                "realms/" + realm + "/orgs/" + organizationRepresentation.getId() + "/members")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
+            .and()
+            .when()
+            .get()
+            .then()
+            .extract()
+            .response();
+
+    List<UserRepresentation> members =
+        objectMapper().readValue(membersResponse.getBody().asString(), new TypeReference<>() {});
+
+    return members.stream()
+        .filter(
+            member ->
+                !String.format("org-admin-%s", organizationRepresentation.getId())
+                    .equals(member.getUsername()))
+        .toList();
+  }
+
+  protected void validateOrg(
+      io.phasetwo.service.importexport.representation.OrganizationRepresentation
+          exportOrganizationReprezentation,
+      OrganizationRepresentation rep) {
+    assertThat(
+        exportOrganizationReprezentation.getOrganization().getName(), Matchers.is(rep.getName()));
+
+    if (rep.getDomains().isEmpty()) {
+      assertThat(exportOrganizationReprezentation.getOrganization().getDomains(), hasSize(0));
+    } else {
+      assertThat(
+          exportOrganizationReprezentation.getOrganization().getDomains(),
+          contains(rep.getDomains().toArray()));
+    }
+    assertThat(
+        exportOrganizationReprezentation.getOrganization().getUrl(), Matchers.is(rep.getUrl()));
+    assertThat(
+        exportOrganizationReprezentation.getOrganization().getDisplayName(),
+        Matchers.is(rep.getDisplayName()));
+    if (rep.getAttributes().isEmpty()) {
+      assertThat(
+          exportOrganizationReprezentation.getOrganization().getAttributes().entrySet(),
+          hasSize(0));
+    } else {
+      assertThat(
+          exportOrganizationReprezentation.getOrganization().getAttributes().entrySet(),
+          contains(rep.getAttributes().entrySet().toArray()));
+    }
   }
 }
