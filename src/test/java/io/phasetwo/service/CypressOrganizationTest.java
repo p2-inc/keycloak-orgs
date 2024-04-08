@@ -9,6 +9,7 @@ import io.github.wimdeblauwe.testcontainers.cypress.CypressTestSuite;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.jbosslog.JBossLog;
@@ -21,10 +22,16 @@ import org.testcontainers.Testcontainers;
 
 @JBossLog
 @org.testcontainers.junit.jupiter.Testcontainers
-class CypressOrganizationTest extends AbstractOrganizationTest {
+class CypressOrganizationTest extends AbstractCypressOrganizationTest {
+
+  private static final boolean RUN_CYPRESS = Boolean.parseBoolean(System.getProperty("include.cypress", "false"));
 
   @TestFactory
   List<DynamicContainer> runCypressTests() throws IOException, InterruptedException, TimeoutException {
+    if (!RUN_CYPRESS) {
+      return Collections.emptyList();
+    }
+
     Testcontainers.exposeHostPorts(container.getHttpPort());
 
     setupSelectOrgTests();

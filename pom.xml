@@ -49,6 +49,15 @@
     <tag>HEAD</tag>
   </scm>
 
+  <profiles>
+    <profile>
+      <id>cypress-tests</id>
+      <properties>
+        <include.cypress>true</include.cypress>
+      </properties>
+    </profile>
+  </profiles>
+
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <plugins>
@@ -132,6 +141,7 @@
         <configuration>
           <systemPropertyVariables>
             <keycloak-version>${keycloak.version}</keycloak-version>
+            <include.cypress>${include.cypress}</include.cypress>
           </systemPropertyVariables>
         </configuration>
       </plugin>

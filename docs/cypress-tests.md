@@ -43,6 +43,10 @@ export default defineConfig({
 ```
 For example, if your Keycloak instance or container is not running on http://localhost:8080/, modify it.  
 
+## Running the Cypress test
+Cypress test are under a specific profile. To run them with maven use `-P cypress-tests`.  
+Example: `maven clean test -P cypress-tests`
+
 ## Running with Cypress
 After the setting up your environment and configuring your `cypress.config.ts`. 
 You start cypress UI by executing the command 
