@@ -17,3 +17,9 @@ dependency-reduced-pom.xml
 .vscode
 .swagger*
 src/main/resources/META-INF/jpa-changelog-phasetwo-full.xml
+
+# cypress
+node_modules
+src/test/e2e/cypress/reports
+src/test/e2e/cypress/videos
+src/test/e2e/cypress/screenshots

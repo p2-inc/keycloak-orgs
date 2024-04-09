@@ -79,13 +79,13 @@ public class UserResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response switchActiveOrganization(@Valid SwitchOrganization body) {
 
-    OrganizationModel org = orgs.getOrganizationById(realm, body.getId());
+    OrganizationModel organization = orgs.getOrganizationById(realm, body.getId());
 
-    if (org == null) {
+    if (organization == null) {
       throw new NotFoundException(String.format("%s not found", body.getId()));
     }
 
-    if (!org.hasMembership(user)) {
+    if (!organization.hasMembership(user)) {
       throw new NotAuthorizedException("Not a member of this organization.");
     }
 
@@ -108,19 +108,14 @@ public class UserResource extends OrganizationAdminResource {
   @Path("/active-organization")
   @Produces(MediaType.APPLICATION_JSON)
   public Organization getActiveOrganization() {
-
-    ActiveOrganization activeOrganizationUtil =
-        new ActiveOrganization(session, realm, auth.getUser());
-
-    if (!activeOrganizationUtil.hasOrganization()) {
-      throw new NotFoundException("No available organizations.");
-    }
+    ActiveOrganization activeOrganizationUtil = ActiveOrganization
+        .fromContext(session, realm, auth.getUser());
 
     if (!activeOrganizationUtil.isValid()) {
       throw new NotAuthorizedException("Action not allowed.");
     }
 
-    return convertOrganizationModelToOrganization(activeOrganizationUtil.getActiveOrganization());
+    return convertOrganizationModelToOrganization(activeOrganizationUtil.getOrganization());
   }
 
   @PUT

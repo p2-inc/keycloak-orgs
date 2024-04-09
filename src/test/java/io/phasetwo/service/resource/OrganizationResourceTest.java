@@ -1892,7 +1892,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // Get active organization with no organization membership
     Response response = getRequest(kc, "users", "active-organization");
-    assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
+    assertThat(response.getStatusCode(), is(Status.UNAUTHORIZED.getStatusCode()));
 
     // Add user to org1
     putRequest("pass", org1Id, "members", user.getId());

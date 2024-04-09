@@ -10,4 +10,6 @@ public class Orgs {
   public static final String ORG_DEFAULT_SYNC_MODE_KEY = "_providerConfig.orgs.defaults.syncMode";
   public static final String ACTIVE_ORGANIZATION = "org.ro.active";
   public static final String KC_ORGS_SKIP_MIGRATION = System.getenv("KC_ORGS_SKIP_MIGRATION");
+  public static final String ORG_BROWSER_AUTH_FLOW_ALIAS = "Org Browser Flow";
+  public static final String ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS = "Org Direct Grant Flow";
 }

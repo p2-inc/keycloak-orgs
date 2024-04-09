@@ -54,29 +54,26 @@ public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
         configProperties);
   }
 
-  /*
-   gets all information for the user's active organization
-  */
   @Override
   protected Map<String, Object> getOrganizationClaim(
       KeycloakSession session, RealmModel realm, UserModel user, ProtocolMapperModel mappingModel) {
-
-    ActiveOrganization activeOrganizationUtil = new ActiveOrganization(session, realm, user);
+    ActiveOrganization activeOrganizationUtil = ActiveOrganization.fromContext(session, realm, user);
 
     if (!activeOrganizationUtil.isValid()) {
       return Maps.newHashMap();
     }
 
     String inputProperties = mappingModel.getConfig().get(INCLUDED_ORGANIZATION_PROPERTIES);
-    List<String> properties = Arrays.asList(inputProperties.replaceAll("\\s", "").split(","));
+    List<String> properties = Arrays.asList(inputProperties.replaceAll("\\s", "")
+        .split(","));
 
     Map<String, Object> claim = Maps.newHashMap();
     if (properties.contains(ID)) {
-      claim.put(ID, activeOrganizationUtil.getActiveOrganization().getId());
+      claim.put(ID, activeOrganizationUtil.getOrganization().getId());
     }
 
     if (properties.contains(NAME)) {
-      claim.put(NAME, activeOrganizationUtil.getActiveOrganization().getName());
+      claim.put(NAME, activeOrganizationUtil.getOrganization().getName());
     }
 
     if (properties.contains(ROLE)) {
@@ -84,7 +81,7 @@ public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
     }
 
     if (properties.contains(ATTRIBUTE)) {
-      claim.put(ATTRIBUTE, activeOrganizationUtil.getActiveOrganization().getAttributes());
+      claim.put(ATTRIBUTE, activeOrganizationUtil.getOrganization().getAttributes());
     }
 
     log.debugf("created user %s claim %s", user.getUsername(), claim);

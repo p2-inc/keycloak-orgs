@@ -7,8 +7,8 @@ import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -17,75 +17,58 @@ import org.keycloak.models.UserModel;
 public class ActiveOrganization {
 
   private static final Logger log = Logger.getLogger(ActiveOrganization.class);
-
   private final RealmModel realm;
-
   private final UserModel user;
-
   private final OrganizationProvider organizationProvider;
+  @Getter()
+  private final OrganizationModel organization;
 
-  private OrganizationModel organization;
+  public static ActiveOrganization fromContext(
+      KeycloakSession session, RealmModel realm, UserModel user) {
+    return new ActiveOrganization(session, realm, user);
+  }
 
-  public ActiveOrganization(KeycloakSession session, RealmModel realm, UserModel user) {
+  private ActiveOrganization(KeycloakSession session, RealmModel realm, UserModel user) {
     this.realm = realm;
     this.user = user;
     this.organizationProvider = session.getProvider(OrganizationProvider.class);
+    this.organization = userHasActiveOrganizationAttribute() ?
+        initializeActiveOrganization() : initializeDefaultActiveOrganization();
+    clearOutdatedActiveOrganizationAttribute();
   }
 
-  public boolean hasOrganization() {
+  private boolean userHasActiveOrganizationAttribute() {
+    return user.getAttributes().containsKey(ACTIVE_ORGANIZATION);
+  }
+
+  private OrganizationModel initializeActiveOrganization() {
+    return organizationProvider.getOrganizationById(realm, getActiveOrganizationIdFromAttribute());
+  }
+
+  private OrganizationModel initializeDefaultActiveOrganization() {
+    Stream<OrganizationModel> userOrganizations =
+        organizationProvider.getUserOrganizationsStream(realm, user);
+    return userOrganizations.findFirst().orElse(null);
+  }
+
+  private void clearOutdatedActiveOrganizationAttribute() {
+    if (!userHasOrganization() && userHasActiveOrganizationAttribute()) {
+      user.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
+    }
+    else if (organizationProvider
+        .getUserOrganizationsStream(realm, user)
+        .noneMatch(org -> org.getId().equals(getActiveOrganizationIdFromAttribute()))) {
+      log.warnf("%s doesn't belong to this organization", user.getUsername());
+      user.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
+    }
+  }
+
+  public boolean userHasOrganization() {
     return organizationProvider.getUserOrganizationsStream(realm, user).findFirst().isPresent();
   }
 
-  public boolean isValid() {
-
-    String activeOrganizationId;
-
-    // If the user has no active organization, we take the first one by default, if there is any.
-    if (!user.getAttributes().containsKey(ACTIVE_ORGANIZATION)) {
-      return getDefaultActiveOrganization();
-    } else {
-      activeOrganizationId = user.getFirstAttribute(ACTIVE_ORGANIZATION);
-    }
-
-    // lazy removal of active org attribute when org is deleted
-    if (organizationProvider
-        .getUserOrganizationsStream(realm, user)
-        .noneMatch(org -> org.getId().equals(activeOrganizationId))) {
-      log.warnf("%s doesn't belong to this organization", user.getUsername());
-      user.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
-      // TODO: This method has a side effect. In the future it should be removed and the code
-      // refactored
-      // Tests failed if the we had event here
-      return false;
-    }
-
-    organization = organizationProvider.getOrganizationById(realm, activeOrganizationId);
-
-    if (organization == null) {
-      log.errorf("%s not found", activeOrganizationId);
-      return false;
-    }
-
-    return true;
-  }
-
-  public boolean getDefaultActiveOrganization() {
-
-    Stream<OrganizationModel> userOrganizations =
-        organizationProvider.getUserOrganizationsStream(realm, user);
-    Optional<OrganizationModel> firstOrganization = userOrganizations.findFirst();
-
-    if (firstOrganization.isEmpty()) {
-      return false;
-    }
-
-    organization = firstOrganization.get();
-
-    return true;
-  }
-
-  public OrganizationModel getActiveOrganization() {
-    return organization;
+  private String getActiveOrganizationIdFromAttribute() {
+    return user.getFirstAttribute(ACTIVE_ORGANIZATION);
   }
 
   public List<String> getUserActiveOrganizationRoles() {
@@ -99,5 +82,13 @@ public class ActiveOrganization {
               }
             });
     return userOrganizationRoles;
+  }
+
+  public boolean isCurrentActiveOrganization(String organizationId) {
+    return organization.getId().equals(organizationId);
+  }
+
+  public boolean isValid() {
+    return organization != null;
   }
 }

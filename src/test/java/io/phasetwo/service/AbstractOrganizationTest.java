@@ -3,6 +3,8 @@ package io.phasetwo.service;
 import static io.phasetwo.service.Helpers.enableEvents;
 import static io.phasetwo.service.Helpers.objectMapper;
 import static io.phasetwo.service.Helpers.toJsonString;
+import static io.phasetwo.service.Orgs.ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS;
+import static io.phasetwo.service.Orgs.ORG_BROWSER_AUTH_FLOW_ALIAS;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -348,7 +350,7 @@ public abstract class AbstractOrganizationTest {
 
   protected void grantClientRoles(String clientName, String userId, String... roleNames)
       throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = objectMapper();
 
     // build root RequestSpecification
     RequestSpecification root = getAdminRootRequest(Optional.empty());
@@ -389,7 +391,7 @@ public abstract class AbstractOrganizationTest {
   }
 
   protected void createPublicClient(String clientId) {
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = objectMapper();
     ObjectNode body = mapper.createObjectNode();
     body.put("protocol", "openid-connect");
     body.put("clientId", clientId);
@@ -427,7 +429,7 @@ public abstract class AbstractOrganizationTest {
   }
 
   protected void createClientScope(String clientScopeName) {
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = objectMapper();
     ObjectNode body = mapper.createObjectNode();
     body.put("name", clientScopeName);
     body.put("description", clientScopeName);
@@ -460,7 +462,7 @@ public abstract class AbstractOrganizationTest {
       String protocolMapperName,
       Map<String, String> additionalConfig)
       throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = objectMapper();
     ObjectNode body = mapper.createObjectNode();
     body.put("protocol", "openid-connect");
     body.put("protocolMapper", protocolMapperName);
@@ -524,7 +526,7 @@ public abstract class AbstractOrganizationTest {
       throws JsonProcessingException {
     Response response = getUserAccount(keycloak);
 
-    ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = objectMapper();
     JsonNode rootNode = mapper.readTree(response.body().asString());
     JsonNode attributeNode = rootNode.get("attributes");
 
@@ -537,7 +539,7 @@ public abstract class AbstractOrganizationTest {
     }
 
     ((ObjectNode) attributeNode)
-        .set(attributeKey, new ObjectMapper().createArrayNode().add(attributeValue));
+        .set(attributeKey, objectMapper().createArrayNode().add(attributeValue));
 
     ObjectNode body = mapper.createObjectNode();
     body.put("username", username);
@@ -594,7 +596,7 @@ public abstract class AbstractOrganizationTest {
   private String getElementId(Response response, String targetKey, String targetValue)
       throws JsonProcessingException {
     ArrayNode clientArrayNode =
-        (ArrayNode) new ObjectMapper().readTree(response.getBody().asString());
+        (ArrayNode) objectMapper().readTree(response.getBody().asString());
     String id = "";
     for (JsonNode clientJsonNode : clientArrayNode) {
       if (clientJsonNode.get(targetKey).asText().equals(targetValue)) {
@@ -635,5 +637,32 @@ public abstract class AbstractOrganizationTest {
         value -> requestSpecification.auth().oauth2(value.tokenManager().getAccessTokenString()));
 
     return requestSpecification;
+  }
+
+  protected void configureSelectOrgFlows() throws JsonProcessingException {
+    ObjectMapper mapper = objectMapper();
+    RequestSpecification root = getAdminRootRequest(Optional.empty());
+
+    Response response = root
+        .when()
+        .get()
+        .then()
+        .extract()
+        .response();
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    JsonNode realm = mapper.readTree(response.getBody().asString());
+    ((ObjectNode) realm).put("browserFlow", ORG_BROWSER_AUTH_FLOW_ALIAS);
+    ((ObjectNode) realm).put("directGrantFlow", ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
+
+    response = root
+        .and()
+        .body(realm)
+        .when()
+        .put()
+        .then()
+        .extract()
+        .response();
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 }
