@@ -24,8 +24,6 @@ import org.testcontainers.Testcontainers;
 @org.testcontainers.junit.jupiter.Testcontainers
 class CypressOrganizationTest extends AbstractCypressOrganizationTest {
 
-  private static final boolean RUN_CYPRESS = Boolean.parseBoolean(System.getProperty("include.cypress", "false"));
-
   @TestFactory
   List<DynamicContainer> runCypressTests() throws IOException, InterruptedException, TimeoutException {
     if (!RUN_CYPRESS) {

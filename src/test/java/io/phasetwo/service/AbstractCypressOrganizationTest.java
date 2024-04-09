@@ -37,6 +37,8 @@ import org.testcontainers.Testcontainers;
 
 public class AbstractCypressOrganizationTest {
 
+  protected static final boolean RUN_CYPRESS = Boolean.parseBoolean(System.getProperty("include.cypress", "false"));
+
   public static final String KEYCLOAK_IMAGE =
       String.format(
           "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "24.0.0"));
@@ -87,6 +89,10 @@ public class AbstractCypressOrganizationTest {
 
   @BeforeAll
   public static void beforeAll() {
+    if (!RUN_CYPRESS) {
+      return; //do nothing
+    }
+
     Testcontainers.exposeHostPorts(WEBHOOK_SERVER_PORT);
     resteasyClient =
         new ResteasyClientBuilderImpl()
