@@ -1,11 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.69-SNAPSHOT</version>
+  <version>0.69</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
@@ -46,7 +44,7 @@
   <scm>
     <url>https://github.com/p2-inc/keycloak-orgs</url>
     <connection>scm:git:git@github.com:p2-inc/keycloak-orgs.git</connection>
-    <tag>HEAD</tag>
+    <tag>v0.69</tag>
   </scm>
 
   <profiles>
