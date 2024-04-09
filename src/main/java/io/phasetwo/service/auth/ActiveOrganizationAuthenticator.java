@@ -29,18 +29,16 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
   private static final String ERROR_FORM = "error.ftl";
 
   public ActiveOrganizationAuthenticator(KeycloakSession session) {
-    this.provider =  session.getProvider(OrganizationProvider.class);
+    this.provider = session.getProvider(OrganizationProvider.class);
   }
 
   @Override
   public void authenticate(AuthenticationFlowContext context) {
     if (requestHasAccountHintParam(context)) {
       evaluateAuthenticationWithAccountHint(context);
-    }
-    else if (shouldChallengeForOrganizationSelection(context)) {
+    } else if (shouldChallengeForOrganizationSelection(context)) {
       tryOrganizationSelectionChallenge(context);
-    }
-    else {
+    } else {
       context.success();
     }
   }
@@ -77,7 +75,8 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
     }
   }
 
-  private void evaluateAuthenticationChallenge(AuthenticationFlowContext context, String organizationId) {
+  private void evaluateAuthenticationChallenge(
+      AuthenticationFlowContext context, String organizationId) {
     if (hasMembership(context, organizationId)) {
       updateActiveOrganizationAttributeAndSucceedChallenge(context, organizationId);
     } else {
@@ -86,7 +85,8 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
   }
 
   private boolean hasMembership(AuthenticationFlowContext context, String organizationId) {
-    if (provider.getUserOrganizationsStream(context.getRealm(), context.getUser())
+    if (provider
+        .getUserOrganizationsStream(context.getRealm(), context.getUser())
         .noneMatch(org -> org.getId().equals(organizationId))) {
       log.errorf("User isn't a member of this organization");
       return false;
@@ -95,11 +95,10 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
   }
 
   private void updateActiveOrganizationAttributeAndSucceedChallenge(
-      AuthenticationFlowContext context,
-      String organizationIdFromHint
-  ) {
+      AuthenticationFlowContext context, String organizationIdFromHint) {
     log.debugf("Authentication Challenge Success");
-    context.getUser()
+    context
+        .getUser()
         .setAttribute(ACTIVE_ORGANIZATION, Collections.singletonList(organizationIdFromHint));
     context.success();
   }
@@ -122,18 +121,17 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
   }
 
   private void tryOrganizationSelectionChallenge(AuthenticationFlowContext context) {
-    List<OrganizationModel> organizations = provider
-        .getUserOrganizationsStream(context.getRealm(), context.getUser()).toList();
+    List<OrganizationModel> organizations =
+        provider.getUserOrganizationsStream(context.getRealm(), context.getUser()).toList();
 
     if (organizations.isEmpty()) {
-      log.warnf("Select organization challenge couldn't be performed because the user has no organization.");
+      log.warnf(
+          "Select organization challenge couldn't be performed because the user has no organization.");
       failChallenge(context, "noOrganizationError");
-    }
-    else if (organizations.size() == 1) {
+    } else if (organizations.size() == 1) {
       log.infof("User has 1 organization, skip organization selection challenge.");
       updateActiveOrganizationAttributeAndSucceedChallenge(context, organizations.get(0).getId());
-    }
-    else {
+    } else {
       LoginFormsProvider loginForm = context.form();
       loginForm.setAttribute("organizations", organizations);
       context.challenge(loginForm.createForm("select-organization.ftl"));
@@ -160,14 +158,14 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
   }
 
   @Override
-  public boolean configuredFor(KeycloakSession keycloakSession, RealmModel realmModel,
-      UserModel userModel) {
+  public boolean configuredFor(
+      KeycloakSession keycloakSession, RealmModel realmModel, UserModel userModel) {
     return true;
   }
 
   @Override
-  public void setRequiredActions(KeycloakSession keycloakSession, RealmModel realmModel,
-      UserModel userModel) {}
+  public void setRequiredActions(
+      KeycloakSession keycloakSession, RealmModel realmModel, UserModel userModel) {}
 
   @Override
   public void close() {}

@@ -108,8 +108,8 @@ public class UserResource extends OrganizationAdminResource {
   @Path("/active-organization")
   @Produces(MediaType.APPLICATION_JSON)
   public Organization getActiveOrganization() {
-    ActiveOrganization activeOrganizationUtil = ActiveOrganization
-        .fromContext(session, realm, auth.getUser());
+    ActiveOrganization activeOrganizationUtil =
+        ActiveOrganization.fromContext(session, realm, auth.getUser());
 
     if (!activeOrganizationUtil.isValid()) {
       throw new NotAuthorizedException("Action not allowed.");

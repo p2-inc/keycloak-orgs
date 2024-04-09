@@ -25,7 +25,8 @@ import org.testcontainers.Testcontainers;
 class CypressOrganizationTest extends AbstractCypressOrganizationTest {
 
   @TestFactory
-  List<DynamicContainer> runCypressTests() throws IOException, InterruptedException, TimeoutException {
+  List<DynamicContainer> runCypressTests()
+      throws IOException, InterruptedException, TimeoutException {
     if (!RUN_CYPRESS) {
       return Collections.emptyList();
     }
@@ -34,12 +35,12 @@ class CypressOrganizationTest extends AbstractCypressOrganizationTest {
 
     setupSelectOrgTests();
 
-    try (
-        CypressContainer cypressContainer = new CypressContainer()
+    try (CypressContainer cypressContainer =
+        new CypressContainer()
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(getUserSID()))
-            .withBaseUrl("http://host.testcontainers.internal:" + container.getHttpPort() + "/auth/")
-            .withBrowser("electron")
-    ) {
+            .withBaseUrl(
+                "http://host.testcontainers.internal:" + container.getHttpPort() + "/auth/")
+            .withBrowser("electron")) {
       cypressContainer.start();
       CypressTestResults testResults = cypressContainer.getTestResults();
       return convertToJUnitDynamicTests(testResults);
@@ -63,25 +64,31 @@ class CypressOrganizationTest extends AbstractCypressOrganizationTest {
     return dynamicContainers;
   }
 
-  private void createContainerFromSuite(List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
+  private void createContainerFromSuite(
+      List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
     List<DynamicTest> dynamicTests = new ArrayList<>();
     for (CypressTest test : suite.getTests()) {
-      dynamicTests.add(DynamicTest.dynamicTest(test.getDescription(), () -> {
-        if (!test.isSuccess()) {
-          log.error(test.getErrorMessage());
-          log.error(test.getStackTrace());
-        }
-        Assertions.assertTrue(test.isSuccess());
-      }));
+      dynamicTests.add(
+          DynamicTest.dynamicTest(
+              test.getDescription(),
+              () -> {
+                if (!test.isSuccess()) {
+                  log.error(test.getErrorMessage());
+                  log.error(test.getStackTrace());
+                }
+                Assertions.assertTrue(test.isSuccess());
+              }));
     }
     dynamicContainers.add(DynamicContainer.dynamicContainer(suite.getTitle(), dynamicTests));
   }
 
   private void setupSelectOrgTests() throws IOException {
-    OrganizationRepresentation org1 = createOrganization(
-        new OrganizationRepresentation().name("org-1").domains(List.of("org1.com")));
-    OrganizationRepresentation org2 = createOrganization(
-        new OrganizationRepresentation().name("org-2").domains(List.of("org2.com")));
+    OrganizationRepresentation org1 =
+        createOrganization(
+            new OrganizationRepresentation().name("org-1").domains(List.of("org1.com")));
+    OrganizationRepresentation org2 =
+        createOrganization(
+            new OrganizationRepresentation().name("org-2").domains(List.of("org2.com")));
 
     // User with 2 Org
     UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "user-1", "user-1");
@@ -105,5 +112,4 @@ class CypressOrganizationTest extends AbstractCypressOrganizationTest {
     // Create a public client
     createPublicClient("public-client");
   }
-
 }

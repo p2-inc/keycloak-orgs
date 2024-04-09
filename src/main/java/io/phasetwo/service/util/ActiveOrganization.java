@@ -20,8 +20,7 @@ public class ActiveOrganization {
   private final RealmModel realm;
   private final UserModel user;
   private final OrganizationProvider organizationProvider;
-  @Getter()
-  private final OrganizationModel organization;
+  @Getter() private final OrganizationModel organization;
 
   public static ActiveOrganization fromContext(
       KeycloakSession session, RealmModel realm, UserModel user) {
@@ -32,8 +31,10 @@ public class ActiveOrganization {
     this.realm = realm;
     this.user = user;
     this.organizationProvider = session.getProvider(OrganizationProvider.class);
-    this.organization = userHasActiveOrganizationAttribute() ?
-        initializeActiveOrganization() : initializeDefaultActiveOrganization();
+    this.organization =
+        userHasActiveOrganizationAttribute()
+            ? initializeActiveOrganization()
+            : initializeDefaultActiveOrganization();
     clearOutdatedActiveOrganizationAttribute();
   }
 
@@ -54,8 +55,7 @@ public class ActiveOrganization {
   private void clearOutdatedActiveOrganizationAttribute() {
     if (!userHasOrganization() && userHasActiveOrganizationAttribute()) {
       user.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
-    }
-    else if (organizationProvider
+    } else if (organizationProvider
         .getUserOrganizationsStream(realm, user)
         .noneMatch(org -> org.getId().equals(getActiveOrganizationIdFromAttribute()))) {
       log.warnf("%s doesn't belong to this organization", user.getUsername());

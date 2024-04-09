@@ -37,7 +37,8 @@ import org.testcontainers.Testcontainers;
 
 public class AbstractCypressOrganizationTest {
 
-  protected static final boolean RUN_CYPRESS = Boolean.parseBoolean(System.getProperty("include.cypress", "false"));
+  protected static final boolean RUN_CYPRESS =
+      Boolean.parseBoolean(System.getProperty("include.cypress", "false"));
 
   public static final String KEYCLOAK_IMAGE =
       String.format(
@@ -46,12 +47,12 @@ public class AbstractCypressOrganizationTest {
   public static final String ADMIN_CLI = "admin-cli";
 
   static final String[] deps = {
-      "dnsjava:dnsjava",
-      "org.wildfly.client:wildfly-client-config",
-      "org.jboss.resteasy:resteasy-client",
-      "org.jboss.resteasy:resteasy-client-api",
-      "org.keycloak:keycloak-admin-client",
-      "io.phasetwo.keycloak:keycloak-events"
+    "dnsjava:dnsjava",
+    "org.wildfly.client:wildfly-client-config",
+    "org.jboss.resteasy:resteasy-client",
+    "org.jboss.resteasy:resteasy-client-api",
+    "org.keycloak:keycloak-admin-client",
+    "io.phasetwo.keycloak:keycloak-events"
   };
 
   static List<File> getDeps() {
@@ -90,7 +91,7 @@ public class AbstractCypressOrganizationTest {
   @BeforeAll
   public static void beforeAll() {
     if (!RUN_CYPRESS) {
-      return; //do nothing
+      return; // do nothing
     }
 
     Testcontainers.exposeHostPorts(WEBHOOK_SERVER_PORT);
@@ -239,15 +240,13 @@ public class AbstractCypressOrganizationTest {
     attributes.put("oidc.ciba.grant.enabled", false);
     body.putIfAbsent("attributes", attributes);
 
-    Response response =
-        getAdminRootRequest().body(body).post("clients").andReturn();
+    Response response = getAdminRootRequest().body(body).post("clients").andReturn();
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
   }
 
   private String getClientId(String clientName) throws JsonProcessingException {
     // get clients
-    Response response =
-        getAdminRootRequest().when().get("clients?first=0&max=20").andReturn();
+    Response response = getAdminRootRequest().when().get("clients?first=0&max=20").andReturn();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     return getElementId(response, "clientId", clientName);
@@ -255,8 +254,7 @@ public class AbstractCypressOrganizationTest {
 
   private String getElementId(Response response, String targetKey, String targetValue)
       throws JsonProcessingException {
-    ArrayNode clientArrayNode =
-        (ArrayNode) objectMapper().readTree(response.getBody().asString());
+    ArrayNode clientArrayNode = (ArrayNode) objectMapper().readTree(response.getBody().asString());
     String id = "";
     for (JsonNode clientJsonNode : clientArrayNode) {
       if (clientJsonNode.get(targetKey).asText().equals(targetValue)) {
@@ -271,38 +269,25 @@ public class AbstractCypressOrganizationTest {
 
   private RequestSpecification getAdminRootRequest() {
     return given()
-            .baseUri(container.getAuthServerUrl())
-            .basePath("/admin/realms/" + REALM + "/")
-            .contentType("application/json")
-            .auth()
-            .oauth2(keycloak.tokenManager().getAccessTokenString());
+        .baseUri(container.getAuthServerUrl())
+        .basePath("/admin/realms/" + REALM + "/")
+        .contentType("application/json")
+        .auth()
+        .oauth2(keycloak.tokenManager().getAccessTokenString());
   }
 
   protected void configureSelectOrgFlows() throws JsonProcessingException {
     ObjectMapper mapper = objectMapper();
     RequestSpecification root = getAdminRootRequest();
 
-    Response response = root
-        .when()
-        .get()
-        .then()
-        .extract()
-        .response();
+    Response response = root.when().get().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     JsonNode realm = mapper.readTree(response.getBody().asString());
     ((ObjectNode) realm).put("browserFlow", ORG_BROWSER_AUTH_FLOW_ALIAS);
     ((ObjectNode) realm).put("directGrantFlow", ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
 
-    response = root
-        .and()
-        .body(realm)
-        .when()
-        .put()
-        .then()
-        .extract()
-        .response();
+    response = root.and().body(realm).when().put().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
-
 }

@@ -39,8 +39,8 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
   public static final String PROVIDER_HELP_TEXT = "Select the current Organization on Login";
 
   private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
-      AuthenticationExecutionModel.Requirement.REQUIRED,
-      AuthenticationExecutionModel.Requirement.DISABLED
+    AuthenticationExecutionModel.Requirement.REQUIRED,
+    AuthenticationExecutionModel.Requirement.DISABLED
   };
 
   @Override
@@ -101,12 +101,12 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
           } else if (event instanceof PostMigrationEvent) {
             log.debug("PostMigrationEvent");
             if (KC_ORGS_SKIP_MIGRATION == null) {
-              log.info("initializing active organization user profile attribute following migration");
+              log.info(
+                  "initializing active organization user profile attribute following migration");
               KeycloakModelUtils.runJobInTransaction(factory, this::postMigrationCreateAuthFlow);
             }
           }
-        }
-    );
+        });
   }
 
   @Override
@@ -121,8 +121,7 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
             realm -> {
               createOrgBrowserFlow(realm);
               createOrgDirectGrantFlow(realm);
-            }
-        );
+            });
   }
 
   private void createOrgBrowserFlow(RealmModel realm) {
@@ -285,7 +284,8 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
     conditionalOTP.setTopLevel(false);
     conditionalOTP.setBuiltIn(true);
     conditionalOTP.setAlias(alias);
-    conditionalOTP.setDescription("Flow to determine if the OTP is required for the authentication");
+    conditionalOTP.setDescription(
+        "Flow to determine if the OTP is required for the authentication");
     conditionalOTP.setProviderId(AuthenticationFlow.BASIC_FLOW);
     conditionalOTP = realm.addAuthenticationFlow(conditionalOTP);
     AuthenticationExecutionModel execution = new AuthenticationExecutionModel();

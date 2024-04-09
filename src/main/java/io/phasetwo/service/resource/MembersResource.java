@@ -69,10 +69,10 @@ public class MembersResource extends OrganizationAdminResource {
 
     if (!organization.hasMembership(member)) throw new NotFoundException();
 
-    ActiveOrganization activeOrganizationUtil = ActiveOrganization
-        .fromContext(session, realm, member);
-    if (activeOrganizationUtil.isValid() &&
-        activeOrganizationUtil.isCurrentActiveOrganization(organization.getId())) {
+    ActiveOrganization activeOrganizationUtil =
+        ActiveOrganization.fromContext(session, realm, member);
+    if (activeOrganizationUtil.isValid()
+        && activeOrganizationUtil.isCurrentActiveOrganization(organization.getId())) {
       member.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
 
       EventBuilder event = new EventBuilder(realm, session, connection);
@@ -80,8 +80,7 @@ public class MembersResource extends OrganizationAdminResource {
           .event(UPDATE_PROFILE)
           .user(user)
           .detail(
-              "removed_active_organization_id",
-              activeOrganizationUtil.getOrganization().getId())
+              "removed_active_organization_id", activeOrganizationUtil.getOrganization().getId())
           .success();
     }
 

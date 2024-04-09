@@ -57,15 +57,15 @@ public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
   @Override
   protected Map<String, Object> getOrganizationClaim(
       KeycloakSession session, RealmModel realm, UserModel user, ProtocolMapperModel mappingModel) {
-    ActiveOrganization activeOrganizationUtil = ActiveOrganization.fromContext(session, realm, user);
+    ActiveOrganization activeOrganizationUtil =
+        ActiveOrganization.fromContext(session, realm, user);
 
     if (!activeOrganizationUtil.isValid()) {
       return Maps.newHashMap();
     }
 
     String inputProperties = mappingModel.getConfig().get(INCLUDED_ORGANIZATION_PROPERTIES);
-    List<String> properties = Arrays.asList(inputProperties.replaceAll("\\s", "")
-        .split(","));
+    List<String> properties = Arrays.asList(inputProperties.replaceAll("\\s", "").split(","));
 
     Map<String, Object> claim = Maps.newHashMap();
     if (properties.contains(ID)) {
