@@ -168,6 +168,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
   public Response exportOrgs(
       @QueryParam("exportMembersAndInvitations") Boolean exportMembersAndInvitations) {
     log.debugf("Export org for %s", realm.getName());
+
+    boolean membersAndInvitationsExported =
+        exportMembersAndInvitations != null && exportMembersAndInvitations;
     if (!auth.hasManageOrgs()) {
       throw new NotAuthorizedException("Insufficient permission to export organization.");
     }
@@ -178,7 +181,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
                 organization ->
                     KeycloakOrgsExportConverter
                         .convertOrganizationModelToOrganizationRepresentation(
-                            organization, exportMembersAndInvitations))
+                            organization, membersAndInvitationsExported))
             .toList();
 
     KeycloakOrgsRepresentation keycloakOrgsRepresentation = new KeycloakOrgsRepresentation();
@@ -199,8 +202,12 @@ public class OrganizationsResource extends OrganizationAdminResource {
       KeycloakOrgsRepresentation keycloakOrgsRealmRepresentation,
       @QueryParam("skipMissingMember") Boolean skipMissingMember,
       @QueryParam("skipMissingIdp") Boolean skipMissingIdp) {
+
     log.debugf("Import orgs for %s", realm.getName());
-    if (!(auth.hasCreateOrg() || (auth.hasViewOrgs() && auth.hasManageOrgs()))) {
+
+    boolean missingMemberSkip = skipMissingMember != null && skipMissingMember;
+    boolean missingIdpSkip = skipMissingIdp != null && skipMissingIdp;
+    if (!(auth.hasViewOrgs() && auth.hasManageOrgs())) {
       throw new NotAuthorizedException("Insufficient permission to import organization.");
     }
 
@@ -218,7 +225,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
           organizations.forEach(
               organizationRepresentation ->
                   createOrganization(
-                      skipMissingMember, skipMissingIdp, session, organizationRepresentation));
+                      missingMemberSkip, missingIdpSkip, session, organizationRepresentation));
           AdminEventBuilder adminEventClone = adminEvent.clone(session);
 
           // create import event
@@ -237,8 +244,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
   }
 
   private void createOrganization(
-      Boolean skipMissingMember,
-      Boolean skipMissingIdp,
+      boolean skipMissingMember,
+      boolean skipMissingIdp,
       KeycloakSession session,
       OrganizationRepresentation organizationRepresentation) {
     try {

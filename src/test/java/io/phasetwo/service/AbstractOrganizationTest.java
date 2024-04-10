@@ -3,8 +3,6 @@ package io.phasetwo.service;
 import static io.phasetwo.service.Helpers.enableEvents;
 import static io.phasetwo.service.Helpers.objectMapper;
 import static io.phasetwo.service.Helpers.toJsonString;
-import static io.phasetwo.service.Orgs.ORG_BROWSER_AUTH_FLOW_ALIAS;
-import static io.phasetwo.service.Orgs.ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -706,21 +704,6 @@ public abstract class AbstractOrganizationTest {
         value -> requestSpecification.auth().oauth2(value.tokenManager().getAccessTokenString()));
 
     return requestSpecification;
-  }
-
-  protected void configureSelectOrgFlows() throws JsonProcessingException {
-    ObjectMapper mapper = objectMapper();
-    RequestSpecification root = getAdminRootRequest(Optional.empty());
-
-    Response response = root.when().get().then().extract().response();
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-
-    JsonNode realm = mapper.readTree(response.getBody().asString());
-    ((ObjectNode) realm).put("browserFlow", ORG_BROWSER_AUTH_FLOW_ALIAS);
-    ((ObjectNode) realm).put("directGrantFlow", ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
-
-    response = root.and().body(realm).when().put().then().extract().response();
-    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
   protected void validateOrgInvitations(

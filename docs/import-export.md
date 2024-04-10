@@ -23,9 +23,11 @@ This documents describes the functionality for importing and exporting organizat
 
 Organizations can be imported, by performing a `POST` http call to `orgs/import` endpoint.  <br>
 The endpoint support two query parameters `skipMissingMember` and `skipMissingIdp`. <br>
-<br>
+
+
 The import functionality is transactional meaning that all elements in the `organizations` array must be imported in order to complete successfully.
-<br>
+
+
 If both `skipMissingMember` and `skipMissingIdp`are set to `false` the import will be strict, meaning that the realm should contain the all users and idps which are referred in the import json file. <br>
 
 E.q.:
@@ -213,8 +215,10 @@ The default organization roles are created even if not defined in the `roles`.
 
 ### Identity provider link import/export schema
 
-To add an identity provider to a organization use the following schema. <br>
-If the `skipMissingIdp` is set to `false`, the identity provider with the `alias` mentioned in the property `idpLink` must be present the realm `identityProviders`.<br>
+To add an identity provider to a organization use the following schema.
+
+If the `skipMissingIdp` is set to `false`, the identity provider with the `alias` mentioned in the property `idpLink` must be present the realm `identityProviders`.
+
 If the `skipMissingIdp` is set to `true`, if the identity provider with the `alias` mentioned in the property `idpLink` is not present the realm `identityProviders` the import will ignore it.
 
 ```
@@ -233,15 +237,16 @@ If the `skipMissingIdp` is set to `true`, if the identity provider with the `ali
 
 ### Members import/export schema
 
-To add a member to an organization use the following schema.<br>
-<br>
-If the `skipMissingMember` is set to `false`:<br>
+To add a member to an organization use the following schema.
+
+
+If the `skipMissingMember` is set to `false`:
 - The users from the `members` must be defined in realm `users`.
 - The roles associated to a `member` must be defined in organization `roles`.
-<br>
 
-If the `skipMissingMember` is set to `true`:<br>
-- The users from the `members` which are not found in the realm `users` will be ignored.<br>
+
+If the `skipMissingMember` is set to `true`:
+- The users from the `members` which are not found in the realm `users` will be ignored.
 
 ```
 {
@@ -297,12 +302,12 @@ If the `skipMissingMember` is set to `true`:<br>
 
 ### Invitations import/export schema
 
-To add an invitations to an organization use the following schema. <br>
-The invitation `email` should not belong to a existing member of the organization.<br>
-<br>
+To add an invitations to an organization use the following schema.  
+The invitation `email` should not belong to a existing member of the organization.  
+
 If the `skipMissingMember` is set to `false`:
 - The `inviter` must be defined in `users` import schema.
-<br>
+
 
 If the `skipMissingMember` is set to `true`:
 - If the `inviter` is not found in the realm `users` the invitation import will be skipped.

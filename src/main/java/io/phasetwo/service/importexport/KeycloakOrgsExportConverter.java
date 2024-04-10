@@ -17,7 +17,7 @@ import org.keycloak.models.IdentityProviderModel;
 
 public final class KeycloakOrgsExportConverter {
   public static OrganizationRepresentation convertOrganizationModelToOrganizationRepresentation(
-      OrganizationModel organizationModel, Boolean exportMembersAndInvitations) {
+      OrganizationModel organizationModel, boolean exportMembersAndInvitations) {
     var organization =
         KeycloakOrgsExportConverter.convertOrganizationModelToOrganizationAttributes(
             organizationModel);

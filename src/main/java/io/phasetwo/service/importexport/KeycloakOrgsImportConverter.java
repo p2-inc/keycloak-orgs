@@ -38,7 +38,7 @@ public final class KeycloakOrgsImportConverter {
       RealmModel newRealm,
       OrganizationRepresentation organizationRepresentation,
       OrganizationModel org,
-      Boolean skipMissingMember) {
+      boolean skipMissingMember) {
     organizationRepresentation
         .getInvitations()
         .forEach(
@@ -82,7 +82,7 @@ public final class KeycloakOrgsImportConverter {
       RealmModel newRealm,
       OrganizationRepresentation organizationRepresentation,
       OrganizationModel org,
-      Boolean skipMissingMember) {
+      boolean skipMissingMember) {
     organizationRepresentation
         .getMembers()
         .forEach(
@@ -107,7 +107,7 @@ public final class KeycloakOrgsImportConverter {
   }
 
   public static void createOrganizationIdp(
-      RealmModel realm, String idpLink, OrganizationModel org, Boolean skipMissingIdp) {
+      RealmModel realm, String idpLink, OrganizationModel org, boolean skipMissingIdp) {
     if (Objects.nonNull(idpLink)) {
       IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpLink);
       if (Objects.nonNull(idp)) {
