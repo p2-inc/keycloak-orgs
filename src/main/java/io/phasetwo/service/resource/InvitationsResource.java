@@ -6,6 +6,7 @@ import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import io.phasetwo.service.auth.invitation.InvitationLinkActionToken;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.Invitation;
@@ -16,6 +17,8 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collection;
@@ -27,6 +30,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.authentication.actiontoken.DefaultActionToken;
+import org.keycloak.common.util.Time;
 import org.keycloak.email.EmailTemplateProvider;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.email.freemarker.beans.ProfileBean;
@@ -36,6 +41,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.services.Urls;
+import org.keycloak.services.resources.LoginActionsService;
+import org.keycloak.services.resources.RealmsResource;
 
 @JBossLog
 public class InvitationsResource extends OrganizationAdminResource {
@@ -116,7 +124,13 @@ public class InvitationsResource extends OrganizationAdminResource {
 
       if (invitation.isSend()) {
         try {
-          sendInvitationEmail(email, session, realm, inviter, link, o.getAttributes());
+          String actionLink =
+              linkFromActionToken(
+                  session,
+                  realm,
+                  createInvitationLinkActionToken(
+                      email, organization.getId(), getClientIdForEmail(session), link));
+          sendInvitationEmail(email, session, realm, inviter, actionLink, o.getAttributes());
         } catch (Exception e) {
           log.warn("Unable to send invitation email", e);
         }
@@ -138,6 +152,43 @@ public class InvitationsResource extends OrganizationAdminResource {
       }
     }
     return true;
+  }
+
+  private static String getClientIdForEmail(KeycloakSession session) {
+    if (session.getContext().getClient() != null
+        && session.getContext().getClient().getClientId() != null) {
+      return session.getContext().getClient().getClientId();
+    } else {
+      return Constants.ACCOUNT_MANAGEMENT_CLIENT_ID;
+    }
+  }
+
+  private static DefaultActionToken createInvitationLinkActionToken(
+      String email, String orgId, String clientId, String link) {
+    int validityInSecs = (60 * 60 * 24 * 7); // 7 days
+    int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
+    return new InvitationLinkActionToken(email, absoluteExpirationInSecs, orgId, clientId, link);
+  }
+
+  private static String linkFromActionToken(
+      KeycloakSession session, RealmModel realm, DefaultActionToken token) {
+    UriInfo uriInfo = session.getContext().getUri();
+    RealmModel r = session.getContext().getRealm();
+    session.getContext().setRealm(realm);
+    UriBuilder builder =
+        actionTokenBuilder(
+            uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo), token.getIssuedFor());
+    session.getContext().setRealm(r);
+    return builder.build(realm.getName()).toString();
+  }
+
+  private static UriBuilder actionTokenBuilder(URI baseUri, String tokenString, String clientId) {
+    log.debugf("baseUri: %s, tokenString: %s, clientId: %s", baseUri, tokenString, clientId);
+    return Urls.realmBase(baseUri)
+        .path(RealmsResource.class, "getLoginActionsService")
+        .path(LoginActionsService.class, "executeActionToken")
+        .queryParam(Constants.KEY, tokenString)
+        .queryParam(Constants.CLIENT_ID, clientId);
   }
 
   void sendInvitationEmail(

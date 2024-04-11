@@ -15,6 +15,7 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.events.EventBuilder;
+import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
@@ -32,7 +33,7 @@ public class InvitationRequiredAction implements RequiredActionProvider {
         "InvitationRequiredAction.evaluateTriggers called for realm %s and user %s",
         realm.getName(), user.getEmail());
 
-    long cnt = getUserInvites(context, realm, user).count();
+    long cnt = getUserInvites(context.getSession(), realm, user).count();
     log.debugf("Found %d invites for %s", cnt, user.getEmail());
     if (cnt > 0) {
       log.debugf("Adding InvitationRequiredActionFactory for %s", user.getEmail());
@@ -40,9 +41,9 @@ public class InvitationRequiredAction implements RequiredActionProvider {
     }
   }
 
-  private Stream<InvitationModel> getUserInvites(
-      RequiredActionContext context, RealmModel realm, UserModel user) {
-    OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
+  protected static Stream<InvitationModel> getUserInvites(
+      KeycloakSession session, RealmModel realm, UserModel user) {
+    OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
     return orgs.getUserInvitationsStream(realm, user);
   }
 
@@ -56,7 +57,7 @@ public class InvitationRequiredAction implements RequiredActionProvider {
         realm.getName(), user.getEmail());
     if (user.isEmailVerified() && user.getEmail() != null) {
       List<InvitationModel> invites =
-          getUserInvites(context, realm, user).collect(Collectors.toList());
+          getUserInvites(context.getSession(), realm, user).collect(Collectors.toList());
       if (invites != null && invites.size() > 0) {
         log.infof("Found %d invites for %s", invites.size(), user.getEmail());
         InvitationsBean ib = new InvitationsBean(realm, invites);
