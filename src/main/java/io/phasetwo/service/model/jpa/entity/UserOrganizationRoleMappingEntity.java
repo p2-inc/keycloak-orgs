@@ -34,7 +34,8 @@ import java.util.Objects;
           "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.userId = :userId AND m.role = :role"),
   @NamedQuery(
       name = "getMappingsByUser",
-      query = "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.userId = :userId"),
+      query =
+          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.userId = :userId AND m.role.organization.id = :orgId"),
   @NamedQuery(
       name = "deleteMappingsByRoleAndUser",
       query =

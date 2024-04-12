@@ -1,20 +1,4 @@
 {
-  "realm": "org-realm",
-  "enabled": true,
-  "users": [
-    {
-      "username": "test",
-      "enabled": true
-    },
-    {
-      "username": "test2",
-      "enabled": true
-    },
-    {
-      "username": "test3",
-      "enabled": true
-    }
-  ],
   "organizations": [
     {
       "organization": {
@@ -55,7 +39,25 @@
           "description": ""
         }
       ],
-      "invitations": []
+      "members": [
+        {
+          "username": "test3",
+          "roles": [
+            "test_role2",
+            "test_role3"
+          ]
+        }
+      ],
+      "invitations": [
+        {
+          "email": "test+2@phasetwo.io",
+          "inviterUsername": "test",
+          "roles": [],
+          "redirectUri": "",
+          "attributes": {
+          }
+        }
+      ]
     }
   ]
 }

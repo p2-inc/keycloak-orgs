@@ -1,11 +1,11 @@
-package io.phasetwo.service.datastore;
+package io.phasetwo.service.importexport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
-import io.phasetwo.service.datastore.representation.OrganizationRoleRepresentation;
+import io.phasetwo.service.importexport.representation.OrganizationRoleRepresentation;
 import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class OrganizationRoleExportTest extends AbstractOrganizationTest {
     createOrgRole(rep2.getId(), orgRoleName3);
 
     // export
-    var export = export(keycloak);
+    var export = exportOrgs(keycloak, true);
     assertThat(export.getOrganizations(), hasSize(2));
 
     // validate

@@ -290,8 +290,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
     TypedQuery<UserOrganizationRoleMappingEntity> query =
         em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
     query.setParameter("userId", user.getId());
+    query.setParameter("orgId", org.getId());
     try {
-      return query.getResultList().stream()
+      return query
+          .getResultStream()
           .map(r -> new OrganizationRoleAdapter(session, realm, em, this, r.getRole()));
     } catch (Exception ignore) {
       return null;

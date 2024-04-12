@@ -1,21 +1,4 @@
 {
-  "realm": "org-realm",
-  "enabled": true,
-  "users": [
-    {
-      "username": "test",
-      "email": "test+2@phasetwo.io",
-      "enabled": true
-    },
-    {
-      "username": "test2",
-      "enabled": true
-    },
-    {
-      "username": "test3",
-      "enabled": true
-    }
-  ],
   "organizations": [
     {
       "organization": {

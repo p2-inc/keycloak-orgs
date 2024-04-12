@@ -1,0 +1,19 @@
+{
+  "realm": "org-realm",
+  "enabled": true,
+  "users": [
+    {
+      "username": "test1",
+      "enabled": true
+    },
+    {
+      "username": "test2",
+      "enabled": true,
+      "email": "test+2@phasetwo.io"
+    },
+    {
+      "username": "test3",
+      "enabled": true
+    }
+  ]
+}

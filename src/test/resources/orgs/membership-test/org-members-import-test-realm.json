@@ -1,0 +1,18 @@
+{
+  "realm": "org-realm",
+  "enabled": true,
+  "users": [
+    {
+      "username": "test",
+      "enabled": true
+    },
+    {
+      "username": "test2",
+      "enabled": true
+    },
+    {
+      "username": "test3",
+      "enabled": true
+    }
+  ]
+}

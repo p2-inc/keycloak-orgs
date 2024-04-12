@@ -1,7 +1,6 @@
-package io.phasetwo.service.datastore;
+package io.phasetwo.service.importexport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
@@ -9,7 +8,6 @@ import io.phasetwo.service.AbstractOrganizationTest;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 @JBossLog
@@ -48,7 +46,7 @@ public class OrganizationExportTest extends AbstractOrganizationTest {
         createOrganization(new OrganizationRepresentation().name("example5").url("example5.com"));
 
     // export
-    var export = export(keycloak);
+    var export = exportOrgs(keycloak, true);
     assertThat(export.getOrganizations(), hasSize(5));
 
     // validate
@@ -83,35 +81,5 @@ public class OrganizationExportTest extends AbstractOrganizationTest {
     deleteOrganization(rep3.getId());
     deleteOrganization(rep4.getId());
     deleteOrganization(rep5.getId());
-  }
-
-  private static void validateOrg(
-      io.phasetwo.service.datastore.representation.OrganizationRepresentation
-          exportOrganizationReprezentation,
-      OrganizationRepresentation rep) {
-    assertThat(
-        exportOrganizationReprezentation.getOrganization().getName(), Matchers.is(rep.getName()));
-
-    if (rep.getDomains().isEmpty()) {
-      assertThat(exportOrganizationReprezentation.getOrganization().getDomains(), hasSize(0));
-    } else {
-      assertThat(
-          exportOrganizationReprezentation.getOrganization().getDomains(),
-          contains(rep.getDomains().toArray()));
-    }
-    assertThat(
-        exportOrganizationReprezentation.getOrganization().getUrl(), Matchers.is(rep.getUrl()));
-    assertThat(
-        exportOrganizationReprezentation.getOrganization().getDisplayName(),
-        Matchers.is(rep.getDisplayName()));
-    if (rep.getAttributes().isEmpty()) {
-      assertThat(
-          exportOrganizationReprezentation.getOrganization().getAttributes().entrySet(),
-          hasSize(0));
-    } else {
-      assertThat(
-          exportOrganizationReprezentation.getOrganization().getAttributes().entrySet(),
-          contains(rep.getAttributes().entrySet().toArray()));
-    }
   }
 }
