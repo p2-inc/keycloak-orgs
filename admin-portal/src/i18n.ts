@@ -4,7 +4,8 @@ import { initReactI18next } from "react-i18next";
 import { joinPath } from "services/join-path";
 
 const ENGLISH_LOCALE = "en";
-const FRENCH_LOCAL = "fr";
+const FRENCH_LOCALE = "fr";
+const KOREAN_LOCALE = "ko";
 const DEFAULT_NAMESPACE = "translation";
 
 // use localStorage to avoid losing language on page reload
@@ -20,7 +21,7 @@ i18n
     lng: locale || ENGLISH_LOCALE,
     returnNull: false,
     defaultNS: DEFAULT_NAMESPACE,
-    fallbackLng: [ENGLISH_LOCALE, FRENCH_LOCAL],
+    fallbackLng: [ENGLISH_LOCALE, FRENCH_LOCALE, KOREAN_LOCALE],
     ns: [DEFAULT_NAMESPACE],
     interpolation: {
       escapeValue: false,
