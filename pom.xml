@@ -382,6 +382,7 @@
       <groupId>io.github.wimdeblauwe</groupId>
       <artifactId>testcontainers-cypress</artifactId>
       <version>1.9.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
