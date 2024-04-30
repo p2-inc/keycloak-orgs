@@ -1,4 +1,4 @@
-> :rocket: **Try it for free** in the new Phase Two [keycloak managed service](https://phasetwo.io/?utm_source=github&utm_medium=readme&utm_campaign=keycloak-orgs). See the [announcement and demo video](https://phasetwo.io/blog/self-service/) for more information.
+> :rocket: **Try it for free** in the new Phase Two [keycloak managed service](https://phasetwo.io/?utm_source=github&utm_medium=readme&utm_campaign=keycloak-orgs). Go to [Phase Two](https://phasetwo.io/) for more information.
 
 # Organizations for Keycloak
 
@@ -7,6 +7,8 @@
 This project intends to provide a range of Keycloak extensions focused on solving several of the common use cases of multi-tenant SaaS applications that Keycloak does not solve out of the box.
 
 The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud offering, and are released here as part of its commitment to making its [core extensions](https://phasetwo.io/docs/introduction/open-source) open source. Please consult the [license](COPYING) for information regarding use.
+
+> :exclamation: See [our note regarding Keycloak's upcoming organizations feature](./docs/note-keycloak-organizations-feature.md).
 
 ## Contents
 
@@ -45,6 +47,9 @@ Other approaches that we tried and decided against were:
 
 But each of these approaches had trade-offs of scale or frailty we found undesirable or unacceptable to meet our requirements. Instead, we opted to make Organizations, and their Invitations, Roles and Memberships first-class entities in Keycloak.
 
+We recently did a presentation at Keycloak DevDay 2024 on the features of the keycloak-orgs extension. Watch the full video for an introduction and more information about what is possible
+[![Multi-Tenancy in Keycloak](https://img.youtube.com/vi/DNq51wWw3F4/0.jpg)](https://www.youtube.com/watch?v=DNq51wWw3F4)
+
 ### Definitions
 
 - **Organizations** are "tenants" or "customers" as commonly used. A Realm can have multiple Organizations.
@@ -57,47 +62,30 @@ But each of these approaches had trade-offs of scale or frailty we found undesir
 
 The easiest way to get started is our [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags). Documentation and examples for using it are in the [phasetwo-containers](https://github.com/p2-inc/phasetwo-containers) repo. The most recent version of this extension is included.
 
-## Building
+## Building and testing
 
-Checkout this project and run `mvn package`, which will produce a jar in the `target/` directory.
+Checkout this project and run `mvn clean install`, which will build the source, run all unit/integration tests, and produce a jar in the `target/` directory.
 
-The build uses `keycloak-testsuite-utils` for the unit tests. If you want to run the tests, you'll need to install Keycloak from source locally, as the test utility never gets published to maven central by the Keycloak team. To build Keycloak from source you must check out the tag of the Keycloak version you are using and then build (do this in a separate directory):
+### Cypress tests
 
-```bash
-KC_VERSION=21.1.1
-git clone https://github.com/keycloak/keycloak
-git fetch origin --tags
-git checkout $KC_VERSION
-mvn clean install -DskipTests
-```
-
-And then run the build with the tests using the `test` profile:
-
-```bash
-mvn clean install -Ptest
-```
-
-## Cypress Test
 For more information you can refer to [cypress-tests](./docs/cypress-tests.md).
-
 
 ## Installation
 
-The maven build uses the shade plugin to package a fat-jar with all dependencies, except for the [`keycloak-admin-client`](https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client). Put the `keycloak-orgs` jar and `keycloak-admin-client` jar (that corresponds to your Keycloak version) in your `provider` (for Quarkus-based distribution) or in `standalone/deployments` (for Wildfly, legacy distribution) directory and restart Keycloak. It is unknown if these extensions will work with hot reloading using the legacy distribution.
+The maven build only produces a jar of the code here, and some additional libraries are necessary when using this library. If you are intending to use this library outside of the [Phase Two Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak), please consult the `pom.xml` file in the [phasetwo-containers repo](https://github.com/p2-inc/phasetwo-containers/blob/main/libs/pom.xml) for more information on what is required. Furthermore, there are some uses of the `keycloak-admin-client` by this library. Because of the way Quarkus does augmentation of this dependency, it is necessary to include this when building Keycloak itself. Our image has these changes, but they will [never be included](https://github.com/keycloak/keycloak/issues/25589) in the default Keycloak image. We encourage you to either use our [base Docker image](https://quay.io/repository/phasetwo/keycloak-crdb) that includes this, or see the [`pom.xml` diffs](https://github.com/keycloak/keycloak/compare/24.0.3...p2-inc:keycloak:24.0.3_crdb#diff-398bf5e6ab6c70cc2fa4c088f20e15b2a3777e8e67b82afe65b5784226bc07cb) for an example of how to do it yourself.
 
 During the first run, some initial migrations steps will occur:
 
-- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with SQL Server,
-  MySQL, MariaDB, H2, and Postgres. Other database types may fail.
+- Database migrations will be run to add the tables for use by the JPA entities. These have been tested with SQL Server, MySQL, MariaDB, H2, and Postgres. Other database types may fail.
 - Initial `realm-management` client roles (`view-organizations` and `manage-organizations`) will be be added to each realm.
 
 ### Admin UI
 
-If you are using the extension as bundled in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags) or by building our [Admin UI theme](https://github.com/p2-inc/keycloak-ui), you must take an additional step in order to show that theme. In the Admin Console UI, go to the *Realm Settings* -> *Themes* page and select `phasetwo.v2`. Then, the "Organizations" section will be available in the left navigation. Because of a quirk in Keycloak, if you are logging in to the `master` realm, the theme must be set in *that* realm, rather than the realm you wish to administer.  
+If you are using the extension as bundled in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak) or by building our [Admin UI theme](https://github.com/p2-inc/keycloak-ui), you must take an additional step in order to show that theme. In the Admin Console UI, go to the *Realm Settings* -> *Themes* page and select `phasetwo.v2`. Then, the "Organizations" section will be available in the left navigation. Because of a quirk in Keycloak, if you are logging in to the `master` realm, the theme must be set in *that* realm, rather than the realm you wish to administer.  
 
 ### Compatibility
 
-Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Please file an issue if you have successfully installed it with prior versions. Additionally, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak?tab=tags).
+Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Additionally, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak).
 
 ## Extensions
 
@@ -173,7 +161,7 @@ For more information you can refer to: [Import/Export](./docs/import-export.md)
 
 ### Mappers
 
-There is currently a single OIDC mapper that adds Organization membership and roles to the token. The format of the addition to the token is
+There are currently two OIDC mapper that adds either Organization attributes or Organization membership and roles to the token. An example of the format of the membership addition to the token is:
 
 ```json
   "organizations": {
