@@ -151,7 +151,14 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
   }
 
   private void createOrgDirectGrantFlow(RealmModel realm) {
-    AuthenticationFlowModel grant = new AuthenticationFlowModel();
+    AuthenticationFlowModel grant = realm.getFlowByAlias(ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
+    if (grant != null) {
+      log.infof("%s flow exists. Skipping.", ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
+      return;
+    }
+
+    log.infof("creating built-in auth flow for %s", ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
+    grant = new AuthenticationFlowModel();
     grant.setAlias(ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
     grant.setDescription("Direct grant flow with select organization step.");
     grant.setProviderId(AuthenticationFlow.BASIC_FLOW);
