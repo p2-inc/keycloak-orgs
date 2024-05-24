@@ -91,4 +91,12 @@ public class ActiveOrganization {
   public boolean isValid() {
     return organization != null;
   }
+
+  public List<String> getRealmLevelTiers() {
+    List<String> realmRoles = Lists.newArrayList();
+    organization
+        .getRealmTierMappingsStream()
+        .forEach(tier -> realmRoles.add(tier.getRoleName()));
+    return realmRoles;
+  }
 }

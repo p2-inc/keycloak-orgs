@@ -10,7 +10,6 @@ import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.Organization;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -90,6 +89,16 @@ public class OrganizationResource extends OrganizationAdminResource {
     } else {
       throw new NotAuthorizedException(
           String.format("Insufficient permission to access domains for %s", organization.getId()));
+    }
+  }
+
+  @Path("role-mappings")
+  public OrganizationTierMappingsResource roleMappings() {
+    if (auth.hasViewOrgs() || auth.hasOrgViewOrg(organization)) {
+      return new OrganizationTierMappingsResource(this, organization);
+    } else {
+      throw new NotAuthorizedException(
+          String.format("Insufficient permission to access tiers for %s", organization.getId()));
     }
   }
 

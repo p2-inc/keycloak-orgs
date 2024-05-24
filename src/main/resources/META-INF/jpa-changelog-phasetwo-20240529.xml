@@ -1,0 +1,19 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+  <changeSet author="mgll" id="add-organization-role-mapping">
+    <createTable tableName="EXT_P2_ORGANIZATION_ROLE_MAPPING">
+      <column name="ID" type="VARCHAR(36)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="ORGANIZATION_ID" type="VARCHAR(36)"/>
+      <column name="KC_ROLE_ID" type="VARCHAR(36)"/>
+      <column name="EXPIRE_DATE" type="TIMESTAMP"/>
+    </createTable>
+
+    <addPrimaryKey columnNames="ID" constraintName="PK_EXT_P2_ORGANIZATION_ROLE_MAPPING" tableName="EXT_P2_ORGANIZATION_ROLE_MAPPING"/>
+    <addUniqueConstraint columnNames="ORGANIZATION_ID, KC_ROLE_ID" constraintName="UK_EXT_P2_ORGANIZATION_ROLE_MAPPING" tableName="EXT_P2_ORGANIZATION_ROLE_MAPPING"/>
+    <addForeignKeyConstraint baseColumnNames="ORGANIZATION_ID" baseTableName="EXT_P2_ORGANIZATION_ROLE_MAPPING" constraintName="FK_EXT_P2_ORGANIZATION_ROLE_MAPPING_ORG" deferrable="false" initiallyDeferred="false" referencedColumnNames="ID" referencedTableName="ORGANIZATION" onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseColumnNames="KC_ROLE_ID" baseTableName="EXT_P2_ORGANIZATION_ROLE_MAPPING" constraintName="FK_EXT_P2_ORGANIZATION_ROLE_MAPPING_KC_ROLE" deferrable="false" initiallyDeferred="false" referencedColumnNames="ID" referencedTableName="KEYCLOAK_ROLE" onDelete="CASCADE"/>
+  </changeSet>
+</databaseChangeLog>

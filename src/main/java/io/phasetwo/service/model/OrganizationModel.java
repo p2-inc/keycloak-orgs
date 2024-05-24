@@ -9,7 +9,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderEvent;
 
-public interface OrganizationModel extends WithAttributes {
+public interface OrganizationModel extends WithAttributes, TierMapperModel {
 
   String getId();
 

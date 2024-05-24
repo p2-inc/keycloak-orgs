@@ -5,6 +5,8 @@ import static io.phasetwo.service.model.jpa.entity.Entities.setCollection;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 // import org.hibernate.validator.constraints.URL; todo
@@ -99,6 +101,15 @@ public class OrganizationEntity {
       orphanRemoval = true,
       mappedBy = "organization")
   protected Collection<InvitationEntity> invitations = new ArrayList<InvitationEntity>();
+
+  @OneToMany(
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      mappedBy = "organization")
+  @Setter
+  @Getter
+  protected Collection<OrganizationTierMappingEntity> tierMappings = new ArrayList<>();
 
   public String getId() {
     return id;
