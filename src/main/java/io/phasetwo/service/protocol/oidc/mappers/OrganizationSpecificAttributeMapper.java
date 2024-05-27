@@ -19,35 +19,39 @@ import org.keycloak.provider.ProviderConfigProperty;
 @AutoService(ProtocolMapper.class)
 public class OrganizationSpecificAttributeMapper extends AbstractOrganizationMapper {
 
-    public static final String PROVIDER_ID = "oidc-organization-specific-attribute-mapper";
-  
-    private static final List<ProviderConfigProperty> configProperties = Lists.newArrayList();
-  
-    static {
-      OIDCAttributeMapperHelper.addAttributeConfig(
-          configProperties, OrganizationSpecificAttributeMapper.class);
-    }
-  
-    public OrganizationSpecificAttributeMapper() {
-      super(
-          PROVIDER_ID,
-          "Organization Specific Attribute",
-          TOKEN_MAPPER_CATEGORY,
-          "Map organization single specific attributes in a token claim.",
-          configProperties);
-    }
-  
-    @Override
-    protected Map<String, Object> getOrganizationClaim(
-        KeycloakSession session, RealmModel realm, UserModel user, ProtocolMapperModel mappingModel) {
-      OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
-      Map<String, Object> claim = Maps.newHashMap();
-      orgs.getUserOrganizationsStream(realm, user)
-          .forEach(
-              o -> {
-                claim.put(o.getId(), o.getFirstAttribute(mappingModel.getName()));
-              });
-      log.debugf("created user %s claim %s", user.getUsername(), claim);
-      return claim;
-    }
+  public static final String PROVIDER_ID = "oidc-organization-specific-attribute-mapper";
+
+  private static final List<ProviderConfigProperty> configProperties = Lists.newArrayList();
+
+  static {
+    OIDCAttributeMapperHelper.addAttributeConfig(
+        configProperties, OrganizationSpecificAttributeMapper.class);
+  }
+
+  public OrganizationSpecificAttributeMapper() {
+    super(
+        PROVIDER_ID,
+        "Organization Specific Attribute",
+        TOKEN_MAPPER_CATEGORY,
+        "Map organization single specific attributes in a token claim.",
+        configProperties);
+  }
+
+  @Override
+  protected Map<String, Object> getOrganizationClaim(
+      KeycloakSession session, RealmModel realm, UserModel user, ProtocolMapperModel mappingModel) {
+    OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
+    Map<String, Object> organizationClaim = Maps.newHashMap();
+    orgs.getUserOrganizationsStream(realm, user)
+        .forEach(
+            o -> {
+              // add to token only when value is available
+              String attributeValue = o.getFirstAttribute(mappingModel.getName());
+              if (attributeValue != null) {
+                organizationClaim.put(o.getId(), attributeValue);
+              }
+            });
+    log.debugf("created user %s organization claim %s", user.getUsername(), organizationClaim);
+    return organizationClaim;
+  }
 }
