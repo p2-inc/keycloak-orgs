@@ -54,7 +54,7 @@ We recently did a presentation at Keycloak DevDay 2024 on the features of the ke
 
 - **Organizations** are "tenants" or "customers" as commonly used. A Realm can have multiple Organizations.
 - **Memberships** are the relationship of Users to Organizations. Users may be members of multiple Organizations.
-- **Roles** are mechanisms of role-based security specific to an Organization, much like Keycloak Realm Roles and Client Roles. In addition to a set of standard roles related to Organization data visibilty and management, administrators can create Roles unique to an organization. Users who are Members of Organizations can be granted that Organization's Roles.
+- **Roles** are mechanisms of role-based security specific to an Organization, much like Keycloak Realm Roles and Client Roles. In addition to a set of standard roles related to Organization data visibility and management, administrators can create Roles unique to an organization. Users who are Members of Organizations can be granted that Organization's Roles.
 - **Invitations** allow Users and non-Users to be invited to join an Organization. Invitations can be created by administrators or Organization members with permission.
 - **Domains** are email domains that are used to automatically select Organization IdPs using the optional authenticators. Included is a facility to validate customer domain ownership using DNS records.
 
