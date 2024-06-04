@@ -10,7 +10,6 @@ import static io.phasetwo.service.Helpers.deleteWebhook;
 import static io.phasetwo.service.Helpers.objectMapper;
 import static io.phasetwo.service.Helpers.removeEventListener;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
-import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -1875,17 +1874,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // Client SETUP
     // Create basic front end client to get a proper user access token
     createPublicClient("test-ui");
-    createClientScope(ACTIVE_ORG_CLAIM);
-
-    Map<String, String> additionalConfig =
-        Map.of(INCLUDED_ORGANIZATION_PROPERTIES, "id, name, role, attribute");
-    addMapperToClientScope(
-        ACTIVE_ORG_CLAIM,
-        ACTIVE_ORG_CLAIM,
-        "JSON",
-        "oidc-active-organization-mapper",
-        additionalConfig);
-    addClientScopeToClient(ACTIVE_ORG_CLAIM, "test-ui");
+    createActiveOrganizationScopeMapper(ACTIVE_ORG_CLAIM, "id, name, role, attribute", "test-ui");
 
     // authenticate as standard user
     Keycloak kc = getKeycloak(REALM, "test-ui", "user", "password");

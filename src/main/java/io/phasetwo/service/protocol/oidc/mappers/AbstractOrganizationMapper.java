@@ -92,7 +92,6 @@ public abstract class AbstractOrganizationMapper extends AbstractOIDCProtocolMap
       KeycloakSession keycloakSession,
       ClientSessionContext clientSessionCtx) {
     log.debugf("adding org claim to accessToken for %s", userSession.getUser().getUsername());
-    UserModel user = userSession.getUser();
     Object claim =
         getOrganizationClaim(
             keycloakSession, userSession.getRealm(), userSession.getUser(), mappingModel);

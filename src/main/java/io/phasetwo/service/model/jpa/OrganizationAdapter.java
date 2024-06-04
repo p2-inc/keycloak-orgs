@@ -3,21 +3,26 @@ package io.phasetwo.service.model.jpa;
 import static io.phasetwo.service.Orgs.*;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.model.TierModel;
 import io.phasetwo.service.model.jpa.entity.DomainEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
+import io.phasetwo.service.model.jpa.entity.OrganizationTierMappingEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +30,7 @@ import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RoleModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
@@ -327,5 +333,68 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
                   && config.containsKey(ORG_OWNER_CONFIG_KEY)
                   && getId().equals(config.get(ORG_OWNER_CONFIG_KEY));
             });
+  }
+
+  @Override
+  public Stream<TierModel> getRealmTierMappingsStream() {
+    List<TierModel> currentTiers = getTierMappingsStream().toList();
+    List<TierModel> tiers = removeExpiredTiers(currentTiers);
+    return tiers.stream();
+  }
+
+  @Override
+  public Stream<TierModel> getTierMappingsStream() {
+    Stream<TierModel> tiersStream = org.getTierMappings().stream()
+        .map(t -> new TierAdapter(realm.getRoleById(t.getRoleId()), t));
+    List<TierModel> tiers = removeExpiredTiers(tiersStream.toList());
+    return tiers.stream();
+  }
+
+  @Override
+  public void addTier(RoleModel role, LocalDate expireDate) {
+    if (hasTier(role)) {
+      updateExistingTier(role, expireDate);
+      return;
+    }
+
+    OrganizationTierMappingEntity entity = new OrganizationTierMappingEntity();
+    entity.setId(KeycloakModelUtils.generateId());
+    entity.setOrganization(getEntity());
+    entity.setRoleId(role.getId());
+    entity.setExpireDate(expireDate);
+    em.persist(entity);
+    org.getTierMappings().add(entity);
+  }
+
+  private void updateExistingTier(RoleModel role, LocalDate expireDate) {
+    Optional<OrganizationTierMappingEntity> optionalTme = org.getTierMappings()
+        .stream().filter(e -> e.getRoleId().equals(role.getId())).findFirst();
+    if (optionalTme.isEmpty()) {
+      return;
+    }
+    OrganizationTierMappingEntity entity = optionalTme.get();
+    entity.setExpireDate(expireDate);
+    em.persist(entity);
+    org.getTierMappings().add(entity);
+  }
+
+  @Override
+  public void removeTier(RoleModel role) {
+    if (org == null || role == null) return;
+    org.getTierMappings().removeIf(t -> t.getRoleId().equals(role.getId()));
+  }
+
+  private List<TierModel> removeExpiredTiers(List<TierModel> currentTiers) {
+    List<TierModel> tiers = Lists.newArrayList();
+
+    LocalDate now = LocalDate.now();
+    for (TierModel t : currentTiers) {
+      if(now.isAfter(t.getExpireDate())) {
+        removeTier(t.getRole());
+      } else {
+        tiers.add(t);
+      }
+    }
+    return tiers;
   }
 }

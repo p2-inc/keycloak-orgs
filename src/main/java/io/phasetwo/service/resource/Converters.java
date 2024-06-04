@@ -5,16 +5,20 @@ import com.google.common.collect.Maps;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.model.TierModel;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.TeamEntity;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationRole;
+import io.phasetwo.service.representation.OrganizationTier;
 import io.phasetwo.service.representation.Team;
+import io.phasetwo.service.util.DateFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.account.UserRepresentation;
 
 /** Utilities for converting Entities to/from Representations. */
@@ -101,5 +105,13 @@ public class Converters {
             .roles(Lists.newArrayList(e.getRoles()));
     i.setAttributes(Maps.newHashMap(e.getAttributes()));
     return i;
+  }
+
+  public static OrganizationTier convertTierModelToOrganizationTier(TierModel t) {
+    return OrganizationTier.builder()
+        .id(t.getId())
+        .role(ModelToRepresentation.toBriefRepresentation(t.getRole()))
+        .expireDate(DateFormatter.format(t.getExpireDate()))
+        .build();
   }
 }

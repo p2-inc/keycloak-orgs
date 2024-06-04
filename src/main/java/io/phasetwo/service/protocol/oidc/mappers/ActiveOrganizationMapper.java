@@ -27,6 +27,7 @@ public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
   private static final String NAME = "name";
   private static final String ROLE = "role";
   private static final String ATTRIBUTE = "attribute";
+  private static final String TIERS = "tiers";
 
   private static final List<ProviderConfigProperty> configProperties = Lists.newArrayList();
 
@@ -36,10 +37,11 @@ public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
     property.setLabel("Active Organization Properties");
     property.setHelpText(
         "Properties of the active organization to map into the token claims, "
-            + "it can be multiple, separated by comma. Available properties are: id, name, role and attribute. "
+            + "it can be multiple, separated by comma. Available properties are: id, name, role, attributes and tiers. "
+            + "role refer to specific organization role and tiers refer to realm role assigned to the organization. "
             + "For example you can write: id or id, role");
     property.setType(ProviderConfigProperty.STRING_TYPE);
-    property.setDefaultValue("id, name, role, attribute");
+    property.setDefaultValue("id, name, role, attribute, tiers");
     configProperties.add(property);
 
     OIDCAttributeMapperHelper.addAttributeConfig(configProperties, ActiveOrganizationMapper.class);
@@ -82,6 +84,10 @@ public class ActiveOrganizationMapper extends AbstractOrganizationMapper {
 
     if (properties.contains(ATTRIBUTE)) {
       claim.put(ATTRIBUTE, activeOrganizationUtil.getOrganization().getAttributes());
+    }
+
+    if (properties.contains(TIERS)) {
+      claim.put(TIERS, activeOrganizationUtil.getRealmLevelTiers());
     }
 
     log.debugf("created user %s claim %s", user.getUsername(), claim);
