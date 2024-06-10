@@ -17,8 +17,6 @@ import java.util.regex.Pattern;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
-import org.keycloak.http.HttpRequest;
-import org.keycloak.http.HttpResponse;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.cors.Cors;
@@ -42,10 +40,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
   }
 
   private void setupCors() {
-    HttpRequest request = session.getContext().getHttpRequest();
-    HttpResponse response = session.getContext().getHttpResponse();
-    UriInfo uriInfo = session.getContext().getUri();
-    Cors.add(request).allowAllOrigins().allowedMethods(METHODS).auth().build(response);
+    Cors.builder().allowAllOrigins().allowedMethods(METHODS).auth().add();
   }
 
   public static final String[] METHODS = {
@@ -56,8 +51,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @Path("{any:.*}")
   public Response preflight() {
     log.trace("CORS OPTIONS preflight request");
-    HttpRequest request = session.getContext().getContextObject(HttpRequest.class);
-    return Cors.add(request, Response.ok()).auth().allowedMethods(METHODS).preflight().build();
+    return Cors.builder().auth().allowedMethods(METHODS).preflight().add(Response.ok());
   }
 
   /**
