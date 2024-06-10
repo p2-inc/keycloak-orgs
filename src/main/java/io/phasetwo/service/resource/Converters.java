@@ -6,14 +6,11 @@ import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
-import io.phasetwo.service.model.jpa.entity.TeamEntity;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationRole;
-import io.phasetwo.service.representation.Team;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.account.UserRepresentation;
 
@@ -37,12 +34,6 @@ public class Converters {
             .realm(e.getRealm().getName());
     o.setAttributes(e.getAttributes());
     return o;
-  }
-
-  public static Team convertTeamEntityToTeam(TeamEntity e) {
-    Team t = new Team().id(e.getId()).name(e.getName()).organizationId(e.getOrganization().getId());
-    e.getAttributes().forEach(a -> t.attribute(a.getName(), a.getValue()));
-    return t;
   }
 
   public static UserRepresentation convertUserEntityToUserRepresentation(UserEntity e) {
@@ -74,8 +65,7 @@ public class Converters {
             .createdAt(e.getCreatedAt())
             .inviterId(e.getInviterId())
             .organizationId(e.getOrganization().getId())
-            .roles(Lists.newArrayList(e.getRoles()))
-            .teamIds(e.getTeams().stream().map(t -> t.getId()).collect(Collectors.toList()));
+            .roles(Lists.newArrayList(e.getRoles()));
     Map<String, List<String>> attr = Maps.newHashMap();
     e.getAttributes()
         .forEach(

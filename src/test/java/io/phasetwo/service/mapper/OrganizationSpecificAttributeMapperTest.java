@@ -12,7 +12,6 @@ import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.protocol.oidc.mappers.OrganizationSpecificAttributeMapper;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.Response.Status;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -37,48 +36,53 @@ class OrganizationSpecificAttributeMapperTest extends AbstractOrganizationTest {
   @Test
   void shouldConfigureOrganizationSpecificAttributeMapperOidcProtocolMapper() throws Exception {
     // add Example 1 with attribute 'secret_attr' with value "My Secret Value"
-    var organization1 = createOrganization(
-        new OrganizationRepresentation()
-            .name("example1")
-            .domains(List.of("example1.com"))
-            .url("www.example1.com")
-            .displayName("Example 1")
-            .attributes(Map.of(CLAIM, List.of("My Secret Value"))));
+    var organization1 =
+        createOrganization(
+            new OrganizationRepresentation()
+                .name("example1")
+                .domains(List.of("example1.com"))
+                .url("www.example1.com")
+                .displayName("Example 1")
+                .attributes(Map.of(CLAIM, List.of("My Secret Value"))));
     String organizationId1 = organization1.getId();
 
     // add Example 2 with attribute 'secret_attr', value "My Second Secret Value"
-    var organization2 = createOrganization(
-        new OrganizationRepresentation()
-            .name("example2")
-            .domains(List.of("example2.com"))
-            .url("www.example2.com")
-            .displayName("Example 2")
-            .attributes(Map.of(CLAIM, List.of("My Second Secret Value"))));
+    var organization2 =
+        createOrganization(
+            new OrganizationRepresentation()
+                .name("example2")
+                .domains(List.of("example2.com"))
+                .url("www.example2.com")
+                .displayName("Example 2")
+                .attributes(Map.of(CLAIM, List.of("My Second Secret Value"))));
     String organizationId2 = organization2.getId();
 
     // add organization Example 3 with attribute 'secret_attr' with no value
-    var organization3 = createOrganization(
-        new OrganizationRepresentation()
-            .name("example3")
-            .domains(List.of("example3.com"))
-            .url("www.example3.com")
-            .displayName("Example 3")
-            .attributes(Map.of(CLAIM, List.of(""))));
+    var organization3 =
+        createOrganization(
+            new OrganizationRepresentation()
+                .name("example3")
+                .domains(List.of("example3.com"))
+                .url("www.example3.com")
+                .displayName("Example 3")
+                .attributes(Map.of(CLAIM, List.of(""))));
     String organizationId3 = organization3.getId();
 
     // add organizanization Example 4 with a different attribute `another_attribute`
-    var organization4 = createOrganization(
-        new OrganizationRepresentation()
-            .name("example4")
-            .domains(List.of("example4.com"))
-            .url("www.example4.com")
-            .displayName("Example 4")
-            .attributes(Map.of(SECOND_CLAIM, List.of("My Value"))));
+    var organization4 =
+        createOrganization(
+            new OrganizationRepresentation()
+                .name("example4")
+                .domains(List.of("example4.com"))
+                .url("www.example4.com")
+                .displayName("Example 4")
+                .attributes(Map.of(SECOND_CLAIM, List.of("My Value"))));
     String organizationId4 = organization4.getId();
 
     // add the user to all organization
     final UserRepresentation user = createUserWithCredentials(keycloak, REALM, "jdoe", "pass");
-    List<String> organizationIdList = Arrays.asList(organizationId1, organizationId2, organizationId3, organizationId4);
+    List<String> organizationIdList =
+        Arrays.asList(organizationId1, organizationId2, organizationId3, organizationId4);
     for (String organizationId : organizationIdList) {
       Response response = putRequest("foo", organizationId, "members", user.getId());
       assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
@@ -92,17 +96,19 @@ class OrganizationSpecificAttributeMapperTest extends AbstractOrganizationTest {
 
     keycloak = getKeycloak(REALM, ADMIN_CLI, user.getUsername(), "pass");
 
-    TokenVerifier<AccessToken> verifier = TokenVerifier.create(keycloak.tokenManager().getAccessTokenString(),
-        AccessToken.class);
+    TokenVerifier<AccessToken> verifier =
+        TokenVerifier.create(keycloak.tokenManager().getAccessTokenString(), AccessToken.class);
     verifier.parse();
 
     // check for the custom claim
     AccessToken accessToken = verifier.getToken();
-    validateFirstClaim(accessToken, organizationId1, organizationId2, organizationId3, organizationId4);
+    validateFirstClaim(
+        accessToken, organizationId1, organizationId2, organizationId3, organizationId4);
     validateSecondClaim(accessToken, organizationId4);
 
     // change authorization
-    keycloak = getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
+    keycloak =
+        getKeycloak(REALM, ADMIN_CLI, container.getAdminUsername(), container.getAdminPassword());
     // delete user
     deleteUser(keycloak, REALM, user.getId());
 
@@ -113,7 +119,8 @@ class OrganizationSpecificAttributeMapperTest extends AbstractOrganizationTest {
   }
 
   private void validateSecondClaim(AccessToken accessToken, String organizationId4) {
-    Map<String, Object> customClaimValue = (Map<String, Object>) accessToken.getOtherClaims().get(SECOND_CLAIM);
+    Map<String, Object> customClaimValue =
+        (Map<String, Object>) accessToken.getOtherClaims().get(SECOND_CLAIM);
     log.debugf("Custom Claim name secret_attr= %s", customClaimValue.toString());
 
     // check the attribute values
@@ -124,9 +131,14 @@ class OrganizationSpecificAttributeMapperTest extends AbstractOrganizationTest {
     assertEquals("My Value", customClaimValue.get(organizationId4));
   }
 
-  private void validateFirstClaim(AccessToken accessToken, String organizationId1, String organizationId2,
-      String organizationId3, String organizationId4) {
-    Map<String, Object> customClaimValue = (Map<String, Object>) accessToken.getOtherClaims().get(CLAIM);
+  private void validateFirstClaim(
+      AccessToken accessToken,
+      String organizationId1,
+      String organizationId2,
+      String organizationId3,
+      String organizationId4) {
+    Map<String, Object> customClaimValue =
+        (Map<String, Object>) accessToken.getOtherClaims().get(CLAIM);
     log.debugf("Custom Claim name secret_attr= %s", customClaimValue.toString());
 
     // check the attribute values
@@ -148,7 +160,8 @@ class OrganizationSpecificAttributeMapperTest extends AbstractOrganizationTest {
     assertThat(customClaimValue.containsKey(organizationId4), is(false));
   }
 
-  private static void configureCustomOidcProtocolMapper(RealmResource realm, ClientRepresentation client) {
+  private static void configureCustomOidcProtocolMapper(
+      RealmResource realm, ClientRepresentation client) {
 
     // add first claim is same as attribute name
     ProtocolMapperRepresentation mapper = new ProtocolMapperRepresentation();

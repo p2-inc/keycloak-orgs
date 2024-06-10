@@ -1,8 +1,8 @@
 package io.phasetwo.service.resource;
 
 import io.phasetwo.service.model.OrganizationModel;
+import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.*;
 

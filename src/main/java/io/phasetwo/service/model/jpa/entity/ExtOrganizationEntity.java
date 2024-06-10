@@ -7,36 +7,34 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.hibernate.annotations.Nationalized;
 
-// import org.hibernate.validator.constraints.URL; todo
-
 /** */
 @NamedQueries({
   @NamedQuery(
       name = "getOrganizationbyRealmIdAndId",
-      query = "SELECT o FROM OrganizationEntity o WHERE o.realmId = :realmId AND o.id = :id"),
+      query = "SELECT o FROM ExtOrganizationEntity o WHERE o.realmId = :realmId AND o.id = :id"),
   @NamedQuery(
       name = "getOrganizationsByRealmId",
-      query = "SELECT o FROM OrganizationEntity o WHERE o.realmId = :realmId"),
+      query = "SELECT o FROM ExtOrganizationEntity o WHERE o.realmId = :realmId"),
   @NamedQuery(
       name = "getOrganizationsByRealmIdAndName",
       query =
-          "SELECT o FROM OrganizationEntity o WHERE o.realmId = :realmId AND lower(o.name) LIKE lower(:search) ORDER BY o.name"),
+          "SELECT o FROM ExtOrganizationEntity o WHERE o.realmId = :realmId AND lower(o.name) LIKE lower(:search) ORDER BY o.name"),
   @NamedQuery(
       name = "countOrganizationsByRealmIdAndName",
       query =
-          "SELECT count(o) FROM OrganizationEntity o WHERE o.realmId = :realmId AND lower(o.name) LIKE lower(:search)"),
+          "SELECT count(o) FROM ExtOrganizationEntity o WHERE o.realmId = :realmId AND lower(o.name) LIKE lower(:search)"),
   @NamedQuery(
       name = "getOrganizationCount",
-      query = "select count(o) from OrganizationEntity o where o.realmId = :realmId"),
+      query = "select count(o) from ExtOrganizationEntity o where o.realmId = :realmId"),
   @NamedQuery(
       name = "removeAllOrganizations",
-      query = "delete from OrganizationEntity o where o.realmId = :realmId")
+      query = "delete from ExtOrganizationEntity o where o.realmId = :realmId")
 })
 @Entity
 @Table(
     name = "ORGANIZATION",
     uniqueConstraints = {@UniqueConstraint(columnNames = {"REALM_ID", "NAME"})})
-public class OrganizationEntity {
+public class ExtOrganizationEntity {
   @Id
   @Column(name = "ID", length = 36)
   @Access(
@@ -91,13 +89,6 @@ public class OrganizationEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       mappedBy = "organization")
-  protected Collection<TeamEntity> teams = new ArrayList<TeamEntity>();
-
-  @OneToMany(
-      fetch = FetchType.LAZY,
-      cascade = CascadeType.ALL,
-      orphanRemoval = true,
-      mappedBy = "organization")
   protected Collection<InvitationEntity> invitations = new ArrayList<InvitationEntity>();
 
   public String getId() {
@@ -138,14 +129,6 @@ public class OrganizationEntity {
 
   public void setRoles(Collection<OrganizationRoleEntity> roles) {
     setCollection(roles, this.roles);
-  }
-
-  public Collection<TeamEntity> getTeams() {
-    return teams;
-  }
-
-  public void setTeams(Collection<TeamEntity> teams) {
-    setCollection(teams, this.teams);
   }
 
   public Collection<InvitationEntity> getInvitations() {
@@ -200,9 +183,9 @@ public class OrganizationEntity {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null) return false;
-    if (!(o instanceof OrganizationEntity)) return false;
+    if (!(o instanceof ExtOrganizationEntity)) return false;
 
-    OrganizationEntity that = (OrganizationEntity) o;
+    ExtOrganizationEntity that = (ExtOrganizationEntity) o;
 
     if (!id.equals(that.id)) return false;
 

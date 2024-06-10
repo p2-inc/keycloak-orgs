@@ -23,7 +23,7 @@ import java.util.Set;
   @NamedQuery(
       name = "getInvitationsByRealmAndEmail",
       query =
-          "SELECT i FROM InvitationEntity i WHERE i.organization in (SELECT o FROM OrganizationEntity o WHERE o.realmId = :realmId) AND lower(i.email) = lower(:search) ORDER BY i.createdAt"),
+          "SELECT i FROM InvitationEntity i WHERE i.organization in (SELECT o FROM ExtOrganizationEntity o WHERE o.realmId = :realmId) AND lower(i.email) = lower(:search) ORDER BY i.createdAt"),
   @NamedQuery(
       name = "getInvitationCount",
       query = "SELECT COUNT(t) FROM InvitationEntity t WHERE t.organization = :organization")
@@ -56,18 +56,11 @@ public class InvitationEntity {
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "ORGANIZATION_ID")
-  private OrganizationEntity organization;
+  private ExtOrganizationEntity organization;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "invitation")
   protected Collection<InvitationAttributeEntity> attributes =
       new ArrayList<InvitationAttributeEntity>();
-
-  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  @JoinTable(
-      name = "INVITATION_TEAM",
-      joinColumns = @JoinColumn(name = "INVITATION_ID", referencedColumnName = "ID"),
-      inverseJoinColumns = @JoinColumn(name = "TEAM_ID", referencedColumnName = "ID"))
-  protected Collection<TeamEntity> teams = new ArrayList<TeamEntity>();
 
   @ElementCollection
   @Column(name = "ROLE")
@@ -87,21 +80,6 @@ public class InvitationEntity {
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public Collection<TeamEntity> getTeams() {
-    return teams;
-  }
-
-  public void setTeams(Collection<TeamEntity> teams) {
-    if (this.teams == null) {
-      this.teams = teams;
-    } else if (this.teams != teams) {
-      this.teams.clear();
-      if (teams != null) {
-        this.teams.addAll(teams);
-      }
-    }
   }
 
   public String getEmail() {
@@ -136,11 +114,11 @@ public class InvitationEntity {
     createdAt = at;
   }
 
-  public OrganizationEntity getOrganization() {
+  public ExtOrganizationEntity getOrganization() {
     return organization;
   }
 
-  public void setOrganization(OrganizationEntity organization) {
+  public void setOrganization(ExtOrganizationEntity organization) {
     this.organization = organization;
   }
 
