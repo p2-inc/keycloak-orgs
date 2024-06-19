@@ -5,9 +5,6 @@ on:
     branches:
       - main
 
-env:
- JAVA_HOME: /usr/lib/jvm/java-21-openjdk/
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,11 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Build and Test
-        uses: qcastel/github-actions-maven-cmd@master
-        with:
-          maven-args: "clean install -Ddockerfile.skip -DdockerCompose.skip -Djib.skip"
 
       - name: Release
         uses: qcastel/github-actions-maven-release@master
