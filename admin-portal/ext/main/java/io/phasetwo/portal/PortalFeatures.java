@@ -3,7 +3,6 @@ package io.phasetwo.portal;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.annotation.Generated;
 import java.net.URI;
 import org.keycloak.authentication.requiredactions.DeleteAccount;
 import org.keycloak.common.Profile;
@@ -43,7 +42,6 @@ import org.keycloak.services.managers.Auth;
   "orgSsoEnabled",
   "orgEventsEnabled"
 })
-@Generated("jsonschema2pojo")
 public class PortalFeatures {
 
   public static String CONFIG_KEY(String property) {

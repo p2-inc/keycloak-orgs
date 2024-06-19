@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.annotation.Generated;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -25,7 +24,6 @@ import java.util.Map;
   "features",
   "styles"
 })
-@Generated("jsonschema2pojo")
 public class PortalEnvironment {
 
   @JsonProperty("name")
