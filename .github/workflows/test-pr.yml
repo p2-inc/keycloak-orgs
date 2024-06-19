@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, edited, ready_for_review, reopened]
 
+env:
+ JAVA_HOME: /usr/lib/jvm/java-21-openjdk/
+
 jobs:
   build:
     runs-on: ubuntu-latest
