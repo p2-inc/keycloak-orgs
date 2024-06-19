@@ -7,16 +7,12 @@ import org.keycloak.connections.jpa.entityprovider.JpaEntityProvider;
 /** */
 public class OrganizationEntityProvider implements JpaEntityProvider {
 
-  // remember to also put new entity classes in src/main/resources/META-INF/persistence.xml
   private static Class<?>[] entities = {
     DomainEntity.class,
-    OrganizationEntity.class,
+    ExtOrganizationEntity.class,
     OrganizationAttributeEntity.class,
     OrganizationMemberEntity.class,
     OrganizationRoleEntity.class,
-    TeamEntity.class,
-    TeamAttributeEntity.class,
-    TeamMemberEntity.class,
     UserOrganizationRoleMappingEntity.class,
     InvitationEntity.class,
     InvitationAttributeEntity.class

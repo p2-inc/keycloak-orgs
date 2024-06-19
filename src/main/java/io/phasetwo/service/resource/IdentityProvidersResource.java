@@ -56,7 +56,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
         .filter(provider -> idpInOrg(provider))
         .map(
             provider ->
-                StripSecretsUtils.strip(ModelToRepresentation.toRepresentation(realm, provider)));
+                StripSecretsUtils.stripSecrets(
+                    session, ModelToRepresentation.toRepresentation(realm, provider)));
   }
 
   protected void idpDefaults(

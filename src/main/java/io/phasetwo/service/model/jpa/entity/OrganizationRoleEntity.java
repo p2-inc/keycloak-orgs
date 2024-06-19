@@ -34,7 +34,7 @@ public class OrganizationRoleEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "ORGANIZATION_ID")
-  protected OrganizationEntity organization;
+  protected ExtOrganizationEntity organization;
 
   @Column(name = "NAME", nullable = false)
   protected String name;
@@ -58,11 +58,11 @@ public class OrganizationRoleEntity {
     this.id = id;
   }
 
-  public OrganizationEntity getOrganization() {
+  public ExtOrganizationEntity getOrganization() {
     return organization;
   }
 
-  public void setOrganization(OrganizationEntity organization) {
+  public void setOrganization(ExtOrganizationEntity organization) {
     this.organization = organization;
   }
 

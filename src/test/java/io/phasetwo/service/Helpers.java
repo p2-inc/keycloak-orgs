@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.representations.idm.AdminEventRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.EventRepresentation;
@@ -160,8 +159,8 @@ public class Helpers {
       rep.setEventTypes(types);
     }
 
-    SimpleHttp.Response response =
-        SimpleHttp.doPost(baseUrl, httpClient)
+    LegacySimpleHttp.Response response =
+        LegacySimpleHttp.doPost(baseUrl, httpClient)
             .auth(keycloak.tokenManager().getAccessTokenString())
             .json(rep)
             .asResponse();
@@ -176,8 +175,8 @@ public class Helpers {
       Keycloak keycloak, CloseableHttpClient httpClient, String baseUrl, String webhookId)
       throws Exception {
 
-    SimpleHttp.Response response =
-        SimpleHttp.doDelete(baseUrl + "/" + webhookId, httpClient)
+    LegacySimpleHttp.Response response =
+        LegacySimpleHttp.doDelete(baseUrl + "/" + webhookId, httpClient)
             .auth(keycloak.tokenManager().getAccessTokenString())
             .asResponse();
     assertThat(response.getStatus(), is(204));
