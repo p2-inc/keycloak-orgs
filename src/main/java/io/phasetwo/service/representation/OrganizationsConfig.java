@@ -3,24 +3,25 @@ package io.phasetwo.service.representation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OrganizationsConfig {
-    @JsonProperty("createAdminUserEnabled")
-    private boolean createAdminUser;
-    @JsonProperty("sharedIdpsEnabled")
-    private boolean sharedIdps;
+  @JsonProperty("createAdminUserEnabled")
+  private boolean createAdminUser;
 
-    public boolean isCreateAdminUser() {
-        return createAdminUser;
-    }
+  @JsonProperty("sharedIdpsEnabled")
+  private boolean sharedIdps;
 
-    public void setCreateAdminUser(boolean createAdminUser) {
-        this.createAdminUser = createAdminUser;
-    }
+  public boolean isCreateAdminUser() {
+    return createAdminUser;
+  }
 
-    public boolean isSharedIdps() {
-        return sharedIdps;
-    }
+  public void setCreateAdminUser(boolean createAdminUser) {
+    this.createAdminUser = createAdminUser;
+  }
 
-    public void setSharedIdps(boolean sharedIdps) {
-        this.sharedIdps = sharedIdps;
-    }
+  public boolean isSharedIdps() {
+    return sharedIdps;
+  }
+
+  public void setSharedIdps(boolean sharedIdps) {
+    this.sharedIdps = sharedIdps;
+  }
 }

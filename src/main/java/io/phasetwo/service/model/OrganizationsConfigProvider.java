@@ -7,9 +7,9 @@ import org.keycloak.provider.Provider;
 
 public interface OrganizationsConfigProvider extends Provider {
 
-    OrganizationsConfigModel addConfig(RealmModel realm, OrganizationsConfig config);
+  OrganizationsConfigModel addConfig(RealmModel realm, OrganizationsConfig config);
 
-    OrganizationsConfigModel getConfig(RealmModel realm);
+  OrganizationsConfigModel getConfig(RealmModel realm);
 
-    OrganizationsConfigAdapter update(RealmModel realm, OrganizationsConfigModel existingConfig);
+  OrganizationsConfigAdapter update(RealmModel realm, OrganizationsConfigModel existingConfig);
 }
