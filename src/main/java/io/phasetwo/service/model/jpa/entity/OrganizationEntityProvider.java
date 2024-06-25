@@ -15,7 +15,8 @@ public class OrganizationEntityProvider implements JpaEntityProvider {
     OrganizationRoleEntity.class,
     UserOrganizationRoleMappingEntity.class,
     InvitationEntity.class,
-    InvitationAttributeEntity.class
+    InvitationAttributeEntity.class,
+          OrganizationsConfigEntity.class
   };
 
   @Override
