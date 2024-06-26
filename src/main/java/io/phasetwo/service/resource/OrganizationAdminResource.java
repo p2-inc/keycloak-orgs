@@ -1,7 +1,6 @@
 package io.phasetwo.service.resource;
 
 import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.model.OrganizationsConfigProvider;
 import jakarta.persistence.EntityManager;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +13,6 @@ import org.keycloak.models.KeycloakSession;
 public class OrganizationAdminResource extends AbstractAdminResource<OrganizationAdminAuth> {
 
   protected OrganizationProvider orgs;
-  protected OrganizationsConfigProvider orgsConfig;
   protected EntityManager em;
 
   protected OrganizationAdminResource(KeycloakSession session) {
@@ -39,6 +37,5 @@ public class OrganizationAdminResource extends AbstractAdminResource<Organizatio
   protected final void init() {
     this.em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
     this.orgs = session.getProvider(OrganizationProvider.class);
-    this.orgsConfig = session.getProvider(OrganizationsConfigProvider.class);
   }
 }

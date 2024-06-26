@@ -12,4 +12,7 @@ public class Orgs {
   public static final String KC_ORGS_SKIP_MIGRATION = System.getenv("KC_ORGS_SKIP_MIGRATION");
   public static final String ORG_BROWSER_AUTH_FLOW_ALIAS = "Org Browser Flow";
   public static final String ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS = "Org Direct Grant Flow";
+  public static final String ORG_CONFIG_CREATE_ADMIN_USER_KEY =
+          "_providerConfig.orgs.config.createAdminUser";
+  public static final String ORG_CONFIG_SHARED_IDPS_KEY = "_providerConfig.orgs.config.sharedIdps";
 }

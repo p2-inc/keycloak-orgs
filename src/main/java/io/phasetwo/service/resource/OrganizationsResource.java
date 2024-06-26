@@ -1,5 +1,7 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_SHARED_IDPS_KEY;
 import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_IMPORT;
@@ -12,7 +14,6 @@ import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentatio
 import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.model.OrganizationsConfigModel;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationsConfig;
 import jakarta.validation.Valid;
@@ -171,24 +172,13 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response addOrganizationsConfig(@Valid OrganizationsConfig body) {
     log.debugf("Create org config for realm %s", realm.getName());
-    if (!(auth.hasRealmRole("realm-management") || auth.hasManageOrgs())) {
+    if (!auth.hasManageRealm()) {
       throw new NotAuthorizedException("Insufficient permission to update organization config.");
     }
-    var existingConfig = orgsConfig.getConfig(realm);
-    OrganizationsConfigModel newConfig;
-    if (existingConfig == null) {
-      newConfig = orgsConfig.addConfig(realm, body);
+    realm.setAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, body.isCreateAdminUser());
+    realm.setAttribute(ORG_CONFIG_SHARED_IDPS_KEY, body.isSharedIdps());
 
-    } else {
-      existingConfig.setSharedIdps(body.isSharedIdps());
-      existingConfig.setCreateAdminUser(body.isCreateAdminUser());
-      newConfig = orgsConfig.update(realm, existingConfig);
-    }
-    var representation = new OrganizationsConfig();
-    representation.setCreateAdminUser(newConfig.isCreateAdminUser());
-    representation.setSharedIdps(newConfig.isSharedIdps());
-
-    return Response.ok(representation).build();
+    return Response.ok(body).build();
   }
 
   @GET
@@ -196,14 +186,13 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getOrganizationConfig() {
     log.debugf("Create org config for realm %s", realm.getName());
-    if (!(auth.hasRealmRole("realm-management") || auth.hasViewOrgs())) {
+    if (!auth.hasManageRealm()) {
       throw new NotAuthorizedException("Insufficient permission to update organization config.");
     }
 
-    var config = orgsConfig.getConfig(realm);
     var representation = new OrganizationsConfig();
-    representation.setCreateAdminUser(config.isCreateAdminUser());
-    representation.setSharedIdps(config.isSharedIdps());
+    representation.setCreateAdminUser(realm.getAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, true));
+    representation.setSharedIdps(realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false));
 
     return Response.ok(representation).build();
   }
