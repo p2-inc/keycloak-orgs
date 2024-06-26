@@ -171,6 +171,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     if (!Strings.isNullOrEmpty(linkIdp.getPostBrokerFlow())) {
       representation.setPostBrokerLoginFlowAlias(linkIdp.getPostBrokerFlow());
     }
+    var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
+    if (isSharedIdpsConfigEnabled) {
+      representation.getConfig().put(ORG_SHARED_IDP_KEY, String.valueOf(linkIdp.isShared()));
+    }
 
     deactivateOtherIdps(representation, true, false);
 

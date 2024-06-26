@@ -15,4 +15,5 @@ public class Orgs {
   public static final String ORG_CONFIG_CREATE_ADMIN_USER_KEY =
           "_providerConfig.orgs.config.createAdminUser";
   public static final String ORG_CONFIG_SHARED_IDPS_KEY = "_providerConfig.orgs.config.sharedIdps";
+  public static final String ORG_SHARED_IDP_KEY = "home.idp.discovery.shared";
 }
