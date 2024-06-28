@@ -8,15 +8,15 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LinkIdp {
 
-    @JsonProperty("alias")
-    private String alias;
+  @JsonProperty("alias")
+  private String alias;
 
-    @JsonProperty("post_broker_flow")
-    private String postBrokerFlow;
+  @JsonProperty("post_broker_flow")
+  private String postBrokerFlow;
 
-    @JsonProperty("sync_mode")
-    private String syncMode;
+  @JsonProperty("sync_mode")
+  private String syncMode;
 
-    @JsonProperty("shared")
-    private boolean shared = false;
+  @JsonProperty("shared")
+  private boolean shared = false;
 }

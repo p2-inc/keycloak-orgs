@@ -14,6 +14,7 @@ import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
+import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
@@ -323,9 +324,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
         .filter(
             i -> {
               Map<String, String> config = i.getConfig();
-              return config != null
-                  && config.containsKey(ORG_OWNER_CONFIG_KEY)
-                  && getId().equals(config.get(ORG_OWNER_CONFIG_KEY));
+              var orgs = IdentityProviders.getAttributeMultivalued(config, ORG_OWNER_CONFIG_KEY);
+              return orgs.contains(getId());
             });
   }
 }

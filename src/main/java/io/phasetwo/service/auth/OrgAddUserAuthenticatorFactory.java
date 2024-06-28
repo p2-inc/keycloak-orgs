@@ -8,6 +8,7 @@ import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.util.IdentityProviders;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -51,42 +52,46 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
     Map<String, String> idpConfig = brokerContext.getIdpConfig().getConfig();
     if (idpConfig != null && idpConfig.containsKey(ORG_OWNER_CONFIG_KEY)) {
       OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
-      OrganizationModel org =
-          orgs.getOrganizationById(context.getRealm(), idpConfig.get(ORG_OWNER_CONFIG_KEY));
-      if (org == null) {
-        log.infof(
-            "idpConfig contained %s = %s, but org not found",
-            ORG_OWNER_CONFIG_KEY, idpConfig.get(ORG_OWNER_CONFIG_KEY));
-        return;
-      }
-      if (!org.hasMembership(context.getUser())) {
-        log.infof(
-            "granting membership to %s for user %s",
-            org.getName(), context.getUser().getUsername());
-        org.grantMembership(context.getUser());
-        context
-            .getEvent()
-            .user(context.getUser())
-            .detail("joined_organization", org.getId())
-            .success();
-        orgs.getUserInvitationsStream(context.getRealm(), context.getUser())
-            .filter(
-                invitationModel -> invitationModel.getOrganization().getId().equals(org.getId()))
-            .forEach(
-                invitationModel -> {
-                  addRolesFromInvitation(invitationModel, context.getUser());
+      var orgIds = IdentityProviders.getAttributeMultivalued(idpConfig, ORG_OWNER_CONFIG_KEY);
 
-                  invitationModel.getOrganization().revokeInvitation(invitationModel.getId());
-                  context
-                      .getEvent()
-                      .clone()
-                      .event(IDENTITY_PROVIDER_POST_LOGIN)
-                      .detail("org_id", invitationModel.getOrganization().getId())
-                      .detail("invitation_id", invitationModel.getId())
-                      .user(context.getUser())
-                      .error("User invitation revoked.");
-                });
-      }
+      orgIds.forEach(
+          orgId -> {
+            OrganizationModel org = orgs.getOrganizationById(context.getRealm(), orgId);
+            if (org == null) {
+              log.infof(
+                  "idpConfig  %s contained %s, but org not found", ORG_OWNER_CONFIG_KEY, orgId);
+              return;
+            }
+            if (!org.hasMembership(context.getUser())) {
+              log.infof(
+                  "granting membership to %s for user %s",
+                  org.getName(), context.getUser().getUsername());
+              org.grantMembership(context.getUser());
+              context
+                  .getEvent()
+                  .user(context.getUser())
+                  .detail("joined_organization", org.getId())
+                  .success();
+              orgs.getUserInvitationsStream(context.getRealm(), context.getUser())
+                  .filter(
+                      invitationModel ->
+                          invitationModel.getOrganization().getId().equals(org.getId()))
+                  .forEach(
+                      invitationModel -> {
+                        addRolesFromInvitation(invitationModel, context.getUser());
+
+                        invitationModel.getOrganization().revokeInvitation(invitationModel.getId());
+                        context
+                            .getEvent()
+                            .clone()
+                            .event(IDENTITY_PROVIDER_POST_LOGIN)
+                            .detail("org_id", invitationModel.getOrganization().getId())
+                            .detail("invitation_id", invitationModel.getId())
+                            .user(context.getUser())
+                            .error("User invitation revoked.");
+                      });
+            }
+          });
     } else {
       log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
     }

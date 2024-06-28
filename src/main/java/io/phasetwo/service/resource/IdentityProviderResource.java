@@ -1,11 +1,9 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.*;
-import static io.phasetwo.service.resource.Converters.*;
-import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
 import io.phasetwo.service.model.OrganizationModel;
-import jakarta.validation.constraints.*;
+import io.phasetwo.service.util.IdentityProviders;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -61,7 +59,10 @@ public class IdentityProviderResource extends OrganizationAdminResource {
       throw new NotFoundException(String.format("No IdP found with alias %s", alias));
     }
 
-    idp.getConfig().remove(ORG_OWNER_CONFIG_KEY);
+    var orgs = IdentityProviders.getAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY);
+    orgs.remove(organization.getId());
+    IdentityProviders.setAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+
     realm.updateIdentityProvider(idp);
     return Response.noContent().build();
   }
@@ -70,9 +71,16 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response update(IdentityProviderRepresentation providerRep) {
     requireManage();
+    IdentityProviderModel idp = realm.getIdentityProviderByAlias(alias);
+    if (idp == null) {
+      throw new NotFoundException(String.format("No IdP found with alias %s", alias));
+    }
+    var orgs = IdentityProviders.getAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY);
+
     // don't allow override of ownership and other conf vars
     providerRep.getConfig().put("hideOnLoginPage", "true");
-    providerRep.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
+    IdentityProviders.setAttributeMultivalued(providerRep.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+
     // force alias
     providerRep.setAlias(alias);
 

@@ -1,19 +1,18 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.*;
-import static io.phasetwo.service.resource.Converters.*;
-import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.LinkIdp;
-import jakarta.validation.constraints.*;
+import io.phasetwo.service.util.IdentityProviders;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
@@ -40,9 +39,11 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   public IdentityProviderResource identityProvider(@PathParam("alias") String alias) {
     org.keycloak.services.resources.admin.IdentityProviderResource kcResource =
         getIdpResource().getIdentityProvider(alias);
+    // if identityProviderIsShared then user must be realm admin, they see share idps
     IdentityProviderRepresentation provider = kcResource.getIdentityProvider();
-    if (!(provider.getConfig().containsKey(ORG_OWNER_CONFIG_KEY)
-        && organization.getId().equals(provider.getConfig().get(ORG_OWNER_CONFIG_KEY)))) {
+    var orgs =
+        IdentityProviders.getAttributeMultivalued(provider.getConfig(), ORG_OWNER_CONFIG_KEY);
+    if (!orgs.contains(organization.getId())) {
       throw new NotFoundException(String.format("%s not found", alias));
     }
     return new IdentityProviderResource(this, organization, alias, kcResource);
@@ -54,6 +55,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     return realm
         .getIdentityProvidersStream()
         .filter(provider -> idpInOrg(provider))
+        // if identityProviderIsShared then user must be realm admin, they see share idps
         .map(
             provider ->
                 StripSecretsUtils.stripSecrets(
@@ -79,12 +81,32 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
 
     representation.getConfig().put(IdentityProviderModel.SYNC_MODE, syncMode);
     representation.getConfig().put(IdentityProviderModel.HIDE_ON_LOGIN, "true");
-    representation.getConfig().put(ORG_OWNER_CONFIG_KEY, organization.getId());
     representation.setPostBrokerLoginFlowAlias(postBrokerFlow);
+
+    var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
+
+    if (isSharedIdpsConfigEnabled) {
+      linkIdp
+          .map(LinkIdp::isShared)
+          .ifPresent(
+              shared -> representation.getConfig().put(ORG_SHARED_IDP_KEY, String.valueOf(shared)));
+      var orgs =
+          IdentityProviders.getAttributeMultivalued(
+              representation.getConfig(), ORG_OWNER_CONFIG_KEY);
+      orgs.add(organization.getId());
+      IdentityProviders.setAttributeMultivalued(
+          representation.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+    } else {
+      IdentityProviders.setAttributeMultivalued(
+          representation.getConfig(), ORG_OWNER_CONFIG_KEY, Set.of(organization.getId()));
+    }
   }
 
   private void deactivateOtherIdps(
-      IdentityProviderRepresentation representation, boolean unlink, boolean disable) {
+      IdentityProviderRepresentation representation,
+      boolean unlink,
+      boolean disable,
+      String orgId) {
     if (representation.isEnabled()) {
       realm
           .getIdentityProvidersStream()
@@ -92,7 +114,14 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
           .forEach(
               provider -> {
                 if (disable) provider.setEnabled(false);
-                if (unlink) provider.getConfig().remove(ORG_OWNER_CONFIG_KEY);
+                if (unlink) {
+                  var orgs =
+                      IdentityProviders.getAttributeMultivalued(
+                          representation.getConfig(), ORG_OWNER_CONFIG_KEY);
+                  orgs.remove(orgId);
+                  IdentityProviders.setAttributeMultivalued(
+                      representation.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+                }
                 realm.updateIdentityProvider(provider); // weird that this is necessary
               });
     }
@@ -130,7 +159,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     idpDefaults(representation, Optional.of(linkFromRep(representation)));
-    deactivateOtherIdps(representation, false, true);
+    deactivateOtherIdps(representation, false, true, organization.getId());
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
@@ -171,12 +200,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     if (!Strings.isNullOrEmpty(linkIdp.getPostBrokerFlow())) {
       representation.setPostBrokerLoginFlowAlias(linkIdp.getPostBrokerFlow());
     }
-    var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
-    if (isSharedIdpsConfigEnabled) {
-      representation.getConfig().put(ORG_SHARED_IDP_KEY, String.valueOf(linkIdp.isShared()));
-    }
 
-    deactivateOtherIdps(representation, true, false);
+    deactivateOtherIdps(representation, true, false, organization.getId());
 
     try {
       IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
@@ -205,8 +230,9 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   }
 
   private boolean idpInOrg(IdentityProviderModel provider) {
-    return (provider.getConfig().containsKey(ORG_OWNER_CONFIG_KEY)
-        && organization.getId().equals(provider.getConfig().get(ORG_OWNER_CONFIG_KEY)));
+    var orgs =
+        IdentityProviders.getAttributeMultivalued(provider.getConfig(), ORG_OWNER_CONFIG_KEY);
+    return orgs.contains(organization.getId());
   }
 
   private org.keycloak.services.resources.admin.IdentityProvidersResource getIdpResource() {
