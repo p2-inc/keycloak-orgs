@@ -108,6 +108,19 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
     />,
   ];
 
+  if (window.opener) {
+    AppLauncherItems.push(
+      <ApplicationLauncherItem
+        key="close"
+        onClick={() => window.close()}
+        tooltip={<div>Closes window to return to previous location.</div>}
+        title="Close the window."
+      >
+        Close window
+      </ApplicationLauncherItem>
+    );
+  }
+
   return (
     <ApplicationLauncher
       onSelect={onSelect}
