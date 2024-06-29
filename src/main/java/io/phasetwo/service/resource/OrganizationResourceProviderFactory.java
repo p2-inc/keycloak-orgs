@@ -1,6 +1,7 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.KC_ORGS_SKIP_MIGRATION;
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_CREATE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORGANIZATION;
@@ -11,6 +12,7 @@ import io.phasetwo.service.Orgs;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.util.IdentityProviders;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
 import org.keycloak.models.AdminRoles;
@@ -212,7 +214,9 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
       org.getIdentityProvidersStream()
           .forEach(
               idp -> {
-                idp.getConfig().remove(Orgs.ORG_OWNER_CONFIG_KEY);
+                var orgs = IdentityProviders.getAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY);
+                orgs.remove(org.getId());
+                IdentityProviders.setAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
               });
     } catch (Exception e) {
       log.warnf(

@@ -290,6 +290,97 @@ public class SharedIdpsEnabledTest extends AbstractOrganizationTest {
     }
 
 
+    @Test
+    void testOrganizationRemoveIdpLink() throws IOException {
+        // create organization
+        var organization1 =
+                createOrganization(
+                        new OrganizationRepresentation()
+                                .name("example-org")
+                                .domains(List.of("example.com", "test.org")));
+        // create organization
+        var organization2 =
+                createOrganization(
+                        new OrganizationRepresentation()
+                                .name("example-org2")
+                                .domains(List.of("example2.com", "test2.org")));
+
+        // create identity provider
+        String alias1 = "linking-provider-1";
+        org.keycloak.representations.idm.IdentityProviderRepresentation idp =
+                new org.keycloak.representations.idm.IdentityProviderRepresentation();
+        idp.setAlias(alias1);
+        idp.setProviderId("oidc");
+        idp.setEnabled(true);
+        idp.setFirstBrokerLoginFlowAlias("first broker login");
+        idp.setConfig(
+                new ImmutableMap.Builder<String, String>()
+                        .put("useJwksUrl", "true")
+                        .put("syncMode", "FORCE")
+                        .put("authorizationUrl", "https://foo.com")
+                        .put("hideOnLoginPage", "")
+                        .put("loginHint", "")
+                        .put("uiLocales", "")
+                        .put("backchannelSupported", "")
+                        .put("disableUserInfo", "")
+                        .put("acceptsPromptNoneForwardFromClient", "")
+                        .put("validateSignature", "")
+                        .put("pkceEnabled", "")
+                        .put("tokenUrl", "https://foo.com")
+                        .put("clientAuthMethod", "client_secret_post")
+                        .put("clientId", "aabbcc")
+                        .put("clientSecret", "112233")
+                        .build());
+        keycloak.realm(REALM).identityProviders().create(idp);
+
+        // link org1
+        LinkIdp link1 = new LinkIdp();
+        link1.setAlias(alias1);
+        link1.setSyncMode("IMPORT");
+        link1.setShared(true);
+        var responseOrg1Link = postRequest(link1, organization1.getId(), "idps", "link");
+        assertThat(
+                responseOrg1Link.getStatusCode(),
+                is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+
+        // link org2
+        var link2 = new LinkIdp();
+        link2.setAlias(alias1);
+        link2.setSyncMode("IMPORT");
+        link2.setShared(true);
+        var responseOrg2Link = postRequest(link2, organization2.getId(), "idps", "link");
+        assertThat(
+                responseOrg2Link.getStatusCode(),
+                is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+
+        // delete org1
+        deleteOrganization(organization1.getId());
+
+        // get IDP for org2. It should still have 1 organization linked
+        var org2GetIdpResponse = getRequest(organization2.getId(), "idps");
+
+        List<IdentityProviderRepresentation> org2Idp =
+                objectMapper().readValue(org2GetIdpResponse.getBody().asString(), new TypeReference<>() {
+                });
+
+        assertThat(org2Idp, notNullValue());
+        var representation = org2Idp.get(0);
+        assertThat(representation.getConfig().get(Orgs.ORG_SHARED_IDP_KEY), is("true"));
+
+        var discoveredOrg2Config =
+                representation.getConfig().get(Orgs.ORG_OWNER_CONFIG_KEY).toString();
+        var discoveredOrg1 = Arrays.asList(Constants.CFG_DELIMITER_PATTERN.split(discoveredOrg2Config));
+        assertThat(discoveredOrg1.size(), is(1));
+
+
+        // delete org2
+        deleteOrganization(organization2.getId());
+
+        // delete idp
+        keycloak.realm(REALM).identityProviders().get(alias1).remove();
+    }
+
+
     @BeforeEach
     public void beforeEach() throws JsonProcessingException {
         // add shared idp master config
