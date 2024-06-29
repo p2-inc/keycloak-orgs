@@ -80,6 +80,7 @@ public class IdentityProviderResource extends OrganizationAdminResource {
     // don't allow override of ownership and other conf vars
     providerRep.getConfig().put("hideOnLoginPage", "true");
     IdentityProviders.setAttributeMultivalued(providerRep.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+    providerRep.getConfig().put(ORG_SHARED_IDP_KEY, idp.getConfig().get(ORG_SHARED_IDP_KEY));
 
     // force alias
     providerRep.setAlias(alias);
