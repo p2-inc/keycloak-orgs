@@ -39,7 +39,7 @@ const SectionHeader: FC<Props> = ({
         {title}
       </h2>
       {description && (
-        <p className="max-w-prose text-base text-gray-600 dark:text-zinc-400">
+        <p className="max-w-prose text-base text-gray-600 dark:text-zinc-300">
           {description}
         </p>
       )}

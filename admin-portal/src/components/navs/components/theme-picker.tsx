@@ -1,10 +1,17 @@
 import { Listbox } from "@headlessui/react";
-import { useTheme } from "components/utils/useTheme";
+import { Theme as ThemeType, Themes } from "components/utils/useTheme";
 import { useTranslation } from "react-i18next";
 
-export default function ThemePicker() {
-  const { changeTheme, currentTheme, Themes } = useTheme();
+export default function ThemePicker({
+  theme,
+  changeTheme,
+}: {
+  theme: ThemeType;
+  changeTheme: (theme: ThemeType) => void;
+}) {
   const { t } = useTranslation();
+  const currentTheme = Themes.find((t) => t.key === theme)!;
+
   return (
     <>
       <div className="text-sm dark:text-zinc-200">{t("theme")}</div>

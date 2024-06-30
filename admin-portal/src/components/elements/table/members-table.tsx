@@ -61,7 +61,7 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
                   <div className="text-sm font-semibold dark:text-zinc-200">
                     {getNameOrUsername(item)}
                   </div>
-                  <div className="flex align-middle text-sm text-gray-500 dark:text-zinc-500">
+                  <div className="flex align-middle text-sm text-gray-500 dark:text-zinc-400">
                     {item["email"]}
                     {item["enabled"] === false && disabledInfo}
                   </div>
@@ -81,7 +81,7 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
                   return (
                     <tr key={item["email"]}>
                       <td className="px-5 py-4 align-middle">
-                        <div className="text-sm text-gray-500 dark:text-zinc-500">
+                        <div className="text-sm text-gray-500 dark:text-zinc-400">
                           {t("admin")}
                         </div>
                       </td>
@@ -102,7 +102,7 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
                       <div className=" text-sm font-semibold dark:text-zinc-200">
                         {getNameOrUsername(item)}
                       </div>
-                      <div className="flex align-middle text-sm text-gray-500 dark:text-zinc-500">
+                      <div className="flex align-middle text-sm text-gray-500 dark:text-zinc-400">
                         {item["email"]}
                         {item["enabled"] === false && disabledInfo}
                       </div>

@@ -148,7 +148,7 @@ export default function OrganizationDetail() {
                   <Stat label={t("members")} value={allMembersCount}></Stat>
                   <Stat label={t("pending")} value={invites.length}></Stat>
                 </OACTopRow>
-                <div className="text-sm leading-relaxed text-gray-600">
+                <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
                   {t("inviteNewMembersOrRemoveMembersFromTheOrganization")}
                 </div>
                 <div>
@@ -184,7 +184,7 @@ export default function OrganizationDetail() {
                     value={idps.length}
                   ></Stat>
                 </OACTopRow>
-                <div className="text-sm leading-relaxed text-gray-600">
+                <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
                   {t("setupSsoConnectionsAsNecessaryForThisOrganization")}
                 </div>
                 <div>
@@ -209,7 +209,7 @@ export default function OrganizationDetail() {
                   <Stat label={t("domains")} value={domains.length}></Stat>
                   <Stat label={t("pending")} value={unverifiedDomains}></Stat>
                 </OACTopRow>
-                <div className="text-sm leading-relaxed text-gray-600">
+                <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
                   {t("setupAssociatedDomainsAndVerifyThemToEnsureFullSecurity")}
                 </div>
                 <div>
