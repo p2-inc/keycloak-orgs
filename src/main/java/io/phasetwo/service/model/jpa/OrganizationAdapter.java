@@ -321,6 +321,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   public Stream<IdentityProviderModel> getIdentityProvidersStream() {
     return getRealm()
         .getIdentityProvidersStream()
+        // Todo: do we need to apply here a role filter? I believe not since its part of the
+        // HomeIdpDiscoverer
         .filter(
             i -> {
               Map<String, String> config = i.getConfig();

@@ -39,7 +39,13 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   public IdentityProviderResource identityProvider(@PathParam("alias") String alias) {
     org.keycloak.services.resources.admin.IdentityProviderResource kcResource =
         getIdpResource().getIdentityProvider(alias);
-    // if identityProviderIsShared then user must be realm admin, they see share idps
+    if (!canManageIdp()) {
+      throw new NotAuthorizedException(
+          String.format(
+              "Insufficient permission to manage identity provider %s for %s",
+              alias, organization.getId()));
+    }
+
     IdentityProviderRepresentation provider = kcResource.getIdentityProvider();
     var orgs =
         IdentityProviders.getAttributeMultivalued(provider.getConfig(), ORG_OWNER_CONFIG_KEY);
@@ -54,8 +60,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   public Stream<IdentityProviderRepresentation> getIdentityProviders() {
     return realm
         .getIdentityProvidersStream()
-        .filter(provider -> idpInOrg(provider))
-        // if identityProviderIsShared then user must be realm admin, they see share idps
+        .filter(provider -> canViewIdp())
+        .filter(this::idpInOrg)
         .map(
             provider ->
                 StripSecretsUtils.stripSecrets(
@@ -117,10 +123,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
                 if (unlink) {
                   var orgs =
                       IdentityProviders.getAttributeMultivalued(
-                          representation.getConfig(), ORG_OWNER_CONFIG_KEY);
+                          provider.getConfig(), ORG_OWNER_CONFIG_KEY);
                   orgs.remove(orgId);
                   IdentityProviders.setAttributeMultivalued(
-                      representation.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+                      provider.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
                 }
                 realm.updateIdentityProvider(provider); // weird that this is necessary
               });
@@ -263,5 +269,25 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     // create a client for the core realm
     // create an idp in the core realm
     return null;
+  }
+
+  private boolean canViewIdp() {
+    var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
+
+    if (!isSharedIdpsConfigEnabled) {
+      return true;
+    }
+
+    return auth.hasOrgViewIdentityProviders(organization) || auth.hasViewOrgs();
+  }
+
+  private boolean canManageIdp() {
+    var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
+
+    if (!isSharedIdpsConfigEnabled) {
+      return true;
+    }
+
+    return auth.hasManageOrgs() || auth.hasOrgManageIdentityProviders(organization);
   }
 }

@@ -8,7 +8,6 @@ import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORG
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_VIEW_ORGANIZATION;
 
 import com.google.auto.service.AutoService;
-import io.phasetwo.service.Orgs;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -212,11 +211,15 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
     OrganizationModel org = event.getOrganization();
     try {
       org.getIdentityProvidersStream()
+          // Todo: do we need to apply here a role filter for shared IDPs?
           .forEach(
               idp -> {
-                var orgs = IdentityProviders.getAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY);
+                var orgs =
+                    IdentityProviders.getAttributeMultivalued(
+                        idp.getConfig(), ORG_OWNER_CONFIG_KEY);
                 orgs.remove(org.getId());
-                IdentityProviders.setAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+                IdentityProviders.setAttributeMultivalued(
+                    idp.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
               });
     } catch (Exception e) {
       log.warnf(
