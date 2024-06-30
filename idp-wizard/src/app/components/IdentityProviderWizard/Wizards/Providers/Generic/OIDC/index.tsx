@@ -254,12 +254,16 @@ export const GenericOIDC: FC = () => {
       alias,
       displayName: `OIDC Single Sign-on`,
       providerId: "oidc",
-      config: { ...OidcDefaults, ...credentialValidationResp, ...credentials },
+      config: {
+        ...OidcDefaults,
+        ...credentialValidationResp,
+        ...metadata,
+        ...credentials,
+      },
     };
 
     try {
       await CreateIdp({ createIdPUrl, payload, featureFlags });
-      // TODO emailAsUsername, Mapper?
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);

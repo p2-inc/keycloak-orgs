@@ -5,7 +5,7 @@ import {
   Step,
   UrlForm,
 } from "@wizardComponents";
-import { Config, ConfigurationFile, OidcConfig, OpenIdUrl } from "./forms";
+import { Config, OidcConfig } from "./forms";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 import { Card, CardBody, CardTitle } from "@patternfly/react-core";
 
@@ -97,7 +97,7 @@ export const Step2: FC<Props> = ({
           <CardTitle>Configuration Information</CardTitle>
           <CardBody>
             <div className="pf-u-pb-sm">
-              If not configuration URL or File is available, enter values
+              If no Configuration URL or File is available, enter values
               manually below.
             </div>
             <Config

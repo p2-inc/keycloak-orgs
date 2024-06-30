@@ -59,7 +59,7 @@ export function useNavigateToBasePath(realm?: string) {
 // Check for Roles and Redirect to Access Denied
 const PrivateRoute = ({ children }) => {
   const { hasRealmRoles } = useRoleAccess();
-  if (hasRealmRoles()) {
+  if (!hasRealmRoles()) {
     return <Navigate to={`${generateBasePath()}access-denied`} />;
   }
   return children;
