@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { TableRows } from "./table";
 import { Lock } from "lucide-react";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 type Props = {
   rows: TableRows;
@@ -71,7 +72,7 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
               );
             })}
           </div>
-          <table className="hidden w-full table-auto md:table">
+          <table className="w-full table-auto sm:hidden md:table">
             <tbody className="divide-y dark:divide-zinc-600">
               {rows.map((item) => {
                 const isOrgAdmin =
@@ -81,8 +82,15 @@ const MembersTable: React.FC<Props> = ({ rows, isLoading }) => {
                   return (
                     <tr key={item["email"]}>
                       <td className="px-5 py-4 align-middle">
-                        <div className="text-sm text-gray-500 dark:text-zinc-400">
-                          {t("admin")}
+                        <div className="align-center flex text-gray-500 dark:text-zinc-400">
+                          <div className="text-sm ">{t("admin")}</div>
+                          <div
+                            className="ml-2"
+                            data-tooltip-id="tooltip"
+                            data-tooltip-content={t("tooltipMembersTableAdmin")}
+                          >
+                            <InformationCircleIcon className="w-5" />
+                          </div>
                         </div>
                       </td>
                       <td

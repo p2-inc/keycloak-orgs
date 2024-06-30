@@ -21,7 +21,7 @@ const Breadcrumbs: FC<Props> = ({ items }) => {
           >
             <div>{item.title}</div>
           </Link>
-          <div className="hidden text-xl opacity-10 dark:text-zinc-700 dark:opacity-100 md:block">
+          <div className="text-xl opacity-10 dark:text-zinc-700 dark:opacity-100 md:block">
             /
           </div>
         </div>
