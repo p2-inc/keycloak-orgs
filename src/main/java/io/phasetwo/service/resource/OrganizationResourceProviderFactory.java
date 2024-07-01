@@ -1,6 +1,7 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.KC_ORGS_SKIP_MIGRATION;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
 import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_CREATE_ORGANIZATION;
@@ -186,21 +187,26 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
       org.addRole(role);
     }
 
-    // create default admin user
-    String adminUsername = getDefaultAdminUsername(org);
-    UserModel user =
-        event
-            .getKeycloakSession()
-            .users()
-            .addUser(event.getRealm(), KeycloakModelUtils.generateId(), adminUsername, true, false);
-    user.setEnabled(true);
-    // other defaults? email? emailVerified? attributes?
-    user.setEmail(String.format("%s@noreply.phasetwo.io", adminUsername)); // todo dynamic email?
-    user.setEmailVerified(true);
-    org.grantMembership(user);
-    for (String role : DEFAULT_ORG_ROLES) {
-      OrganizationRoleModel roleModel = org.getRoleByName(role);
-      roleModel.grantRole(user);
+    var isCreateAdminUserConfigEnabled =
+        event.getRealm().getAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, true);
+    if (isCreateAdminUserConfigEnabled) {
+      // create default admin user
+      String adminUsername = getDefaultAdminUsername(org);
+      UserModel user =
+          event
+              .getKeycloakSession()
+              .users()
+              .addUser(
+                  event.getRealm(), KeycloakModelUtils.generateId(), adminUsername, true, false);
+      user.setEnabled(true);
+      // other defaults? email? emailVerified? attributes?
+      user.setEmail(String.format("%s@noreply.phasetwo.io", adminUsername)); // todo dynamic email?
+      user.setEmailVerified(true);
+      org.grantMembership(user);
+      for (String role : DEFAULT_ORG_ROLES) {
+        OrganizationRoleModel roleModel = org.getRoleByName(role);
+        roleModel.grantRole(user);
+      }
     }
   }
 

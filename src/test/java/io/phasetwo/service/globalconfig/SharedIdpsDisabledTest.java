@@ -1,4 +1,4 @@
-package io.phasetwo.service.sharedidps;
+package io.phasetwo.service.globalconfig;
 
 import static io.phasetwo.service.Helpers.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OrganizationsConfig {
   @JsonProperty("createAdminUserEnabled")
-  private boolean createAdminUser;
+  private boolean createAdminUser = true;
 
   @JsonProperty("sharedIdpsEnabled")
-  private boolean sharedIdps;
+  private boolean sharedIdps = false;
 
   public boolean isCreateAdminUser() {
     return createAdminUser;
