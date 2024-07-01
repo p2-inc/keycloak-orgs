@@ -91,23 +91,32 @@ export const GenericSAML: FC = () => {
     setResults(`Creating ${idpCommonName}...`);
 
     const payload: IdentityProviderRepresentation = {
-      alias: "generic-saml",
+      alias,
       displayName: `SAML Single Sign-on`,
       providerId: "saml",
       config: metadata!,
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-      
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
+
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
-        usernameAttribute: { attributeName: "username", friendlyName: "username" },
+        usernameAttribute: {
+          attributeName: "username",
+          friendlyName: "username",
+        },
         emailAttribute: { attributeName: "email", friendlyName: "email" },
-        firstNameAttribute: { attributeName: "firstName", friendlyName: "firstName" },
-        lastNameAttribute: { attributeName: "lastName", friendlyName: "lastName" },
-	featureFlags,
+        firstNameAttribute: {
+          attributeName: "firstName",
+          friendlyName: "firstName",
+        },
+        lastNameAttribute: {
+          attributeName: "lastName",
+          friendlyName: "lastName",
+        },
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
