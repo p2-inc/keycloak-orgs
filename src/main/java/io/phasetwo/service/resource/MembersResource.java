@@ -37,13 +37,14 @@ public class MembersResource extends OrganizationAdminResource {
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults,
-      @QueryParam("includeServiceAccounts") boolean includeServiceAccounts) {
+      @QueryParam("includeServiceAccounts") Boolean includeServiceAccounts) {
     log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
     firstResult = firstResult != null ? firstResult : 0;
+    boolean shouldIncludeServiceAccounts = includeServiceAccounts != null && includeServiceAccounts;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     return organization
         .searchForMembersStream(searchQuery, firstResult, maxResults)
-        .filter(u -> includeServiceAccounts || (u != null && u.getServiceAccountClientLink() == null))
+        .filter(u -> shouldIncludeServiceAccounts || (u != null && u.getServiceAccountClientLink() == null))
         .map(m -> toRepresentation(session, realm, m));
   }
 
