@@ -8,9 +8,11 @@ import io.phasetwo.service.importexport.representation.OrganizationRoleRepresent
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.resource.OrganizationAdminAuth;
+import io.phasetwo.service.util.IdentityProviders;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
@@ -111,7 +113,8 @@ public final class KeycloakOrgsImportConverter {
     if (Objects.nonNull(idpLink)) {
       IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpLink);
       if (Objects.nonNull(idp)) {
-        idp.getConfig().put(ORG_OWNER_CONFIG_KEY, org.getId());
+        IdentityProviders.setAttributeMultivalued(
+            idp.getConfig(), ORG_OWNER_CONFIG_KEY, Set.of(org.getId()));
         realm.updateIdentityProvider(idp);
       } else {
         if (skipMissingIdp) {

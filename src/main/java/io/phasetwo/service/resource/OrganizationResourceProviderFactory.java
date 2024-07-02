@@ -1,16 +1,17 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.KC_ORGS_SKIP_MIGRATION;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_CREATE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_VIEW_ORGANIZATION;
 
 import com.google.auto.service.AutoService;
-import io.phasetwo.service.Orgs;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.util.IdentityProviders;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
 import org.keycloak.models.AdminRoles;
@@ -185,21 +186,26 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
       org.addRole(role);
     }
 
-    // create default admin user
-    String adminUsername = getDefaultAdminUsername(org);
-    UserModel user =
-        event
-            .getKeycloakSession()
-            .users()
-            .addUser(event.getRealm(), KeycloakModelUtils.generateId(), adminUsername, true, false);
-    user.setEnabled(true);
-    // other defaults? email? emailVerified? attributes?
-    user.setEmail(String.format("%s@noreply.phasetwo.io", adminUsername)); // todo dynamic email?
-    user.setEmailVerified(true);
-    org.grantMembership(user);
-    for (String role : DEFAULT_ORG_ROLES) {
-      OrganizationRoleModel roleModel = org.getRoleByName(role);
-      roleModel.grantRole(user);
+    var isCreateAdminUserConfigEnabled =
+        event.getRealm().getAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, true);
+    if (isCreateAdminUserConfigEnabled) {
+      // create default admin user
+      String adminUsername = getDefaultAdminUsername(org);
+      UserModel user =
+          event
+              .getKeycloakSession()
+              .users()
+              .addUser(
+                  event.getRealm(), KeycloakModelUtils.generateId(), adminUsername, true, false);
+      user.setEnabled(true);
+      // other defaults? email? emailVerified? attributes?
+      user.setEmail(String.format("%s@noreply.phasetwo.io", adminUsername)); // todo dynamic email?
+      user.setEmailVerified(true);
+      org.grantMembership(user);
+      for (String role : DEFAULT_ORG_ROLES) {
+        OrganizationRoleModel roleModel = org.getRoleByName(role);
+        roleModel.grantRole(user);
+      }
     }
   }
 
@@ -210,10 +216,7 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
     OrganizationModel org = event.getOrganization();
     try {
       org.getIdentityProvidersStream()
-          .forEach(
-              idp -> {
-                idp.getConfig().remove(Orgs.ORG_OWNER_CONFIG_KEY);
-              });
+          .forEach(idp -> IdentityProviders.removeOrganization(org.getId(), idp));
     } catch (Exception e) {
       log.warnf(
           "Couldn't remove identity providers on organizationRemoved. Likely because this follows a realmRemoved event. %s",

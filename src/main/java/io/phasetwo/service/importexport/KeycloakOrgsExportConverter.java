@@ -13,6 +13,7 @@ import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
+import io.phasetwo.service.util.IdentityProviders;
 import org.keycloak.models.IdentityProviderModel;
 
 public final class KeycloakOrgsExportConverter {
@@ -104,7 +105,8 @@ public final class KeycloakOrgsExportConverter {
   }
 
   private static boolean idpInOrg(IdentityProviderModel provider, String orgId) {
-    return (provider.getConfig().containsKey(ORG_OWNER_CONFIG_KEY)
-        && orgId.equals(provider.getConfig().get(ORG_OWNER_CONFIG_KEY)));
+    var orgs =
+        IdentityProviders.getAttributeMultivalued(provider.getConfig(), ORG_OWNER_CONFIG_KEY);
+    return orgs.contains(orgId);
   }
 }

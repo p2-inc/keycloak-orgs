@@ -11,6 +11,7 @@ import jakarta.ws.rs.NotAuthorizedException;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.models.AdminRoles;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -60,6 +61,10 @@ public class OrganizationAdminAuth extends AdminAuth {
 
   boolean hasManageOrgs() {
     return hasAppRole(getClient(), ROLE_MANAGE_ORGANIZATION);
+  }
+
+  boolean hasManageRealm() {
+    return hasAppRole(getClient(), AdminRoles.MANAGE_REALM);
   }
 
   // org in realm
