@@ -16,7 +16,4 @@ public class LinkIdp {
 
   @JsonProperty("sync_mode")
   private String syncMode;
-
-  @JsonProperty("shared")
-  private boolean shared = false;
 }

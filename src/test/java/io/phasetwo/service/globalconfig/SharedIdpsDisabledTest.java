@@ -75,7 +75,6 @@ public class SharedIdpsDisabledTest extends AbstractOrganizationTest {
     LinkIdp link1 = new LinkIdp();
     link1.setAlias(alias1);
     link1.setSyncMode("IMPORT");
-    link1.setShared(true);
     var responseOrg1Link = postRequest(link1, organization1.getId(), "idps", "link");
     assertThat(
         responseOrg1Link.getStatusCode(),
@@ -85,7 +84,6 @@ public class SharedIdpsDisabledTest extends AbstractOrganizationTest {
     var link2 = new LinkIdp();
     link2.setAlias(alias1);
     link2.setSyncMode("IMPORT");
-    link2.setShared(true);
     var responseOrg2Link = postRequest(link2, organization2.getId(), "idps", "link");
     assertThat(
         responseOrg2Link.getStatusCode(),

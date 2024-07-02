@@ -92,17 +92,9 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
 
     if (isSharedIdpsConfigEnabled) {
-      linkIdp
-          .map(LinkIdp::isShared)
-          .ifPresent(
-              shared -> representation.getConfig().put(ORG_SHARED_IDP_KEY, String.valueOf(shared)));
-      var orgs =
-          IdentityProviders.getAttributeMultivalued(
-              representation.getConfig(), ORG_OWNER_CONFIG_KEY);
-      orgs.add(organization.getId());
-      IdentityProviders.setAttributeMultivalued(
-          representation.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+      IdentityProviders.addMultiOrganization(organization, representation);
     } else {
+      representation.getConfig().put(ORG_SHARED_IDP_KEY, "false");
       IdentityProviders.setAttributeMultivalued(
           representation.getConfig(), ORG_OWNER_CONFIG_KEY, Set.of(organization.getId()));
     }
@@ -121,12 +113,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
               provider -> {
                 if (disable) provider.setEnabled(false);
                 if (unlink) {
-                  var orgs =
-                      IdentityProviders.getAttributeMultivalued(
-                          provider.getConfig(), ORG_OWNER_CONFIG_KEY);
-                  orgs.remove(orgId);
-                  IdentityProviders.setAttributeMultivalued(
-                      provider.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+                  IdentityProviders.removeOrganization(orgId, provider);
                 }
                 realm.updateIdentityProvider(provider); // weird that this is necessary
               });

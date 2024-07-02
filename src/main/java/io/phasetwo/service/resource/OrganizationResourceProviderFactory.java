@@ -2,7 +2,6 @@ package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.KC_ORGS_SKIP_MIGRATION;
 import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
-import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_CREATE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORGANIZATION;
@@ -217,16 +216,7 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
     OrganizationModel org = event.getOrganization();
     try {
       org.getIdentityProvidersStream()
-          // Todo: do we need to apply here a role filter for shared IDPs?
-          .forEach(
-              idp -> {
-                var orgs =
-                    IdentityProviders.getAttributeMultivalued(
-                        idp.getConfig(), ORG_OWNER_CONFIG_KEY);
-                orgs.remove(org.getId());
-                IdentityProviders.setAttributeMultivalued(
-                    idp.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
-              });
+          .forEach(idp -> IdentityProviders.removeOrganization(org.getId(), idp));
     } catch (Exception e) {
       log.warnf(
           "Couldn't remove identity providers on organizationRemoved. Likely because this follows a realmRemoved event. %s",

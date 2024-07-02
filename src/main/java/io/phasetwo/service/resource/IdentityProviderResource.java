@@ -58,10 +58,7 @@ public class IdentityProviderResource extends OrganizationAdminResource {
     if (idp == null) {
       throw new NotFoundException(String.format("No IdP found with alias %s", alias));
     }
-
-    var orgs = IdentityProviders.getAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY);
-    orgs.remove(organization.getId());
-    IdentityProviders.setAttributeMultivalued(idp.getConfig(), ORG_OWNER_CONFIG_KEY, orgs);
+    IdentityProviders.removeOrganization(organization.getId(), idp);
 
     realm.updateIdentityProvider(idp);
     return Response.noContent().build();
