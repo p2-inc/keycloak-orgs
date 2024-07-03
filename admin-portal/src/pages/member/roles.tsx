@@ -250,7 +250,7 @@ const Roles = () => {
         </div>
       )}
       <div className="mt-8 flex items-center space-x-2 border-b pb-2">
-        <div className="inline-block text-sm text-gray-600">
+        <div className="inline-block text-sm text-gray-600 dark:text-zinc-300">
           {t("role-set")}
         </div>
         <Button

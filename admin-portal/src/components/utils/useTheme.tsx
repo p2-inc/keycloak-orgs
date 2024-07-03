@@ -1,37 +1,32 @@
 import { useEffect, useState } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 
+export type Theme = "system" | "dark" | "light";
+export type ThemeOption = {
+  key: Theme;
+  name: string;
+  icon: JSX.Element;
+};
+export const Themes: ThemeOption[] = [
+  {
+    key: "system",
+    name: "system",
+    icon: <Monitor className="h-4 w-4" />,
+  },
+  {
+    key: "light",
+    name: "light",
+    icon: <Sun className="h-4 w-4" />,
+  },
+  {
+    key: "dark",
+    name: "dark",
+    icon: <Moon className="h-4 w-4" />,
+  },
+];
 export function useTheme() {
-  type Theme = "system" | "dark" | "light";
-  type ThemeOption = {
-    key: Theme;
-    name: string;
-    icon: JSX.Element;
-  };
-
-  const Themes: ThemeOption[] = [
-    {
-      key: "system",
-      name: "system",
-      icon: <Monitor className="h-4 w-4" />,
-    },
-    {
-      key: "light",
-      name: "light",
-      icon: <Sun className="h-4 w-4" />,
-    },
-    {
-      key: "dark",
-      name: "dark",
-      icon: <Moon className="h-4 w-4" />,
-    },
-  ];
-
   const [theme, setTheme] = useState<Theme>(
-    (localStorage.getItem("theme") as Theme) ||
-      (window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "system")
+    (localStorage.getItem("theme") as Theme) || "system"
   );
 
   useEffect(() => {

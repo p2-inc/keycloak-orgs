@@ -47,7 +47,7 @@ const Stat: React.FC<Props> = ({ percent, hoverPercentText, value, label }) => {
       )}
       <div>
         <div className="font-semibold dark:text-zinc-200">{value}</div>
-        <div className="text-sm font-medium capitalize text-gray-600 dark:text-zinc-500">
+        <div className="text-sm font-medium capitalize text-gray-600 dark:text-zinc-300">
           {label}
         </div>
       </div>

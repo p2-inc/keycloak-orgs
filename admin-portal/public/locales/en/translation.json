@@ -305,5 +305,6 @@
   "viewOrganizationInformationChangeDisplayName": "View organization information change display name",
   "welcomeMessage": "Welcome to keycloak account management",
   "youAreTheSameUserAsThisUser": "This is your account! This is you!",
-  "youLackTheManageRolesRole": "You lack the manage roles role"
+  "youLackTheManageRolesRole": "You lack the manage roles role",
+  "tooltipMembersTableAdmin": "Admin users cannot be edited."
 }

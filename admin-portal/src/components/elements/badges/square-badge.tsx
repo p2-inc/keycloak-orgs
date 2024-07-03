@@ -11,6 +11,7 @@ const SquareBadge: FC<Props> = ({ children, className }) => {
     <span
       className={cs(
         "rounded border border-secondary-900 px-1 py-px font-mono text-xs font-medium",
+        "dark:border-primary-500 dark:text-zinc-200",
         className
       )}
     >

@@ -35,6 +35,7 @@ import Member from "pages/member";
 import ProfileDelete from "pages/profile-delete";
 import InjectStyles from "components/utils/injectStyles";
 import NotAuthorized from "pages/not-authorized";
+import { Tooltip } from "react-tooltip";
 const { features: featureFlags } = config.env;
 
 export type P2Params = {
@@ -194,6 +195,11 @@ root.render(
       toastOptions={{
         duration: 6000,
       }}
+    />
+    <Tooltip
+      id="tooltip"
+      positionStrategy="fixed"
+      style={{ maxWidth: "300px", zIndex: 1999 }}
     />
   </ReactKeycloakProvider>
 );
