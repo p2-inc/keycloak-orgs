@@ -53,10 +53,10 @@ export class KeycloakService {
       if (this.keycloakAuth.token) {
         this.keycloakAuth
           .updateToken(5)
-          .success(() => {
+          .then(() => {
             resolve(this.keycloakAuth.token as string);
           })
-          .error(() => {
+          .catch(() => {
             reject("Failed to refresh token");
           });
       } else {
