@@ -49,7 +49,6 @@ export function useRoleAccess() {
 
   function hasRealmRole(role) {
     const realmAccessRoles = keycloak?.tokenParsed?.resource_access;
-    // console.log("hasRealmRole", role, realmAccessRoles);
 
     if (realmAccessRoles === null || realmAccessRoles === undefined)
       return false;
@@ -72,7 +71,13 @@ export function useRoleAccess() {
   function hasOrganizationRole(role, orgId) {
     // console.log("hasOrganizationRole", role, orgId);
     const orgs = keycloak?.tokenParsed?.organizations;
-    if (orgId === null || orgId === undefined || orgs === null) return false;
+    if (
+      orgId === null ||
+      orgId === undefined ||
+      orgs === null ||
+      orgs === undefined
+    )
+      return false;
     const roles = orgs[orgId]?.roles;
     if (roles && roles.indexOf(role) > -1) return true;
     else return false;
