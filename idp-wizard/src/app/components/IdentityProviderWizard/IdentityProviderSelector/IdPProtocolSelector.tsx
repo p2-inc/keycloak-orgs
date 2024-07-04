@@ -1,6 +1,12 @@
 import React, { FC, useEffect } from "react";
 import { IdPButton } from "./components/IdPButton";
-import { generatePath, Link, useNavigate, useParams } from "react-router-dom";
+import {
+  generatePath,
+  Link,
+  Navigate,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { ArrowLeftIcon } from "@patternfly/react-icons";
 import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
 import {
@@ -13,9 +19,14 @@ import { useRoleAccess } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const IdPProtocolSelector: FC = ({}) => {
+  const { hasRealmRoles } = useRoleAccess();
   const { provider, realm } = useParams<keyof RouterParams>() as RouterParams;
   let navigate = useNavigate();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
+
+  if (!hasRealmRoles()) {
+    return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
+  }
 
   const currentProvider = IdentityProviders.find((i) => i.id === provider)!;
 

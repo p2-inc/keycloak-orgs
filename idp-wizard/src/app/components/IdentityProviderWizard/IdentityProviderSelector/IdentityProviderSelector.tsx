@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { IdPButton } from "./components/IdPButton";
-import { generatePath, Link, useParams } from "react-router-dom";
+import { generatePath, Link, Navigate, useParams } from "react-router-dom";
 import {
   PageSection,
   PageSectionVariants,
@@ -17,13 +17,19 @@ import { useTitle } from "react-use";
 import { useHostname } from "@app/hooks/useHostname";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { MainNav } from "@app/components/navigation/main-nav";
+import { useRoleAccess } from "@app/hooks";
 
 export const IdentityProviderSelector: FC = () => {
+  const { hasRealmRoles } = useRoleAccess();
   useTitle("Select your Identity Provider | Phase Two");
 
   let { realm } = useParams();
   const hostname = useHostname();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
+
+  if (!hasRealmRoles()) {
+    return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
+  }
 
   return (
     <PageSection variant={PageSectionVariants.light}>

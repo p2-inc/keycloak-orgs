@@ -14,10 +14,14 @@ import { MainNav } from "../navigation";
 import { ActivityLog } from "./ActivityLog";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { DashboardSummary } from "./DashboardSummary";
+import { Navigate, generatePath, useParams } from "react-router-dom";
+import { PATHS } from "@app/routes";
 
 const Dashboard: React.FunctionComponent = () => {
   useTitle("Dashboard | Phase Two");
   const { navigateToAccessDenied } = useRoleAccess();
+  const { hasRealmRoles } = useRoleAccess();
+  let { realm } = useParams();
   const { data: featureFlags, isLoading } = useGetFeatureFlagsQuery();
 
   if (isLoading) {
@@ -27,6 +31,10 @@ const Dashboard: React.FunctionComponent = () => {
   if (!isLoading && !featureFlags?.enableDashboard) {
     navigateToAccessDenied();
     return <Loading />;
+  }
+
+  if (!hasRealmRoles()) {
+    return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
   }
 
   return (

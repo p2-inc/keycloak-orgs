@@ -14,7 +14,6 @@ import Provider from "./components/IdentityProviderWizard/providers";
 import { IdPProtocolSelector } from "./components/IdentityProviderWizard/IdentityProviderSelector/IdPProtocolSelector";
 import { Protocols, Providers } from "./configurations";
 import { AccessDenied } from "./components/AccessDenied/AccessDenied";
-import { useRoleAccess } from "./hooks";
 
 export interface RouterParams {
   provider: Providers;
@@ -56,54 +55,17 @@ export function useNavigateToBasePath(realm?: string) {
   return navigateToBasePath;
 }
 
-// Check for Roles and Redirect to Access Denied
-const PrivateRoute = ({ children }) => {
-  const { hasRealmRoles } = useRoleAccess();
-  if (!hasRealmRoles()) {
-    return <Navigate to={`${generateBasePath()}access-denied`} />;
-  }
-  return children;
-};
-
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path={BASE_PATH}>
-        <Route
-          index
-          element={
-            <PrivateRoute>
-              <IdentityProviderSelector />
-            </PrivateRoute>
-          }
-        />
+        <Route index element={<IdentityProviderSelector />} />
         <Route path="idp/*">
-          <Route
-            path=":provider/protocol"
-            element={
-              <PrivateRoute>
-                <IdPProtocolSelector />{" "}
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path=":provider/:protocol"
-            element={
-              <PrivateRoute>
-                <Provider />
-              </PrivateRoute>
-            }
-          />
+          <Route path=":provider/protocol" element={<IdPProtocolSelector />} />
+          <Route path=":provider/:protocol" element={<Provider />} />
         </Route>
         <Route path="dashboard">
-          <Route
-            index
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
+          <Route index element={<Dashboard />} />
         </Route>
         <Route path="access-denied" element={<AccessDenied />} />
       </Route>

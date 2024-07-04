@@ -4,7 +4,7 @@ import {
   Protocols,
   Providers,
 } from "@app/configurations";
-import { RouterParams } from "@app/routes";
+import { PATHS, RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
 import { useTitle } from "react-use";
@@ -26,11 +26,19 @@ import {
   OneLoginWizard,
   PingOneWizard,
 } from "./Wizards";
+import { useRoleAccess } from "@app/hooks";
+import { Navigate, generatePath } from "react-router-dom";
 
 const Provider = () => {
-  const { provider, protocol } = useParams<
+  const { provider, protocol, realm } = useParams<
     keyof RouterParams
   >() as RouterParams;
+
+  const { hasRealmRoles } = useRoleAccess();
+
+  if (!hasRealmRoles()) {
+    return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
+  }
 
   const providers = [...IdentityProviders, ...GenericIdentityProviders];
 
