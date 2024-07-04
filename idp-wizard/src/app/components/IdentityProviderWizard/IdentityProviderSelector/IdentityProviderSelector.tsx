@@ -20,14 +20,14 @@ import { MainNav } from "@app/components/navigation/main-nav";
 import { useRoleAccess } from "@app/hooks";
 
 export const IdentityProviderSelector: FC = () => {
-  const { hasRealmRoles } = useRoleAccess();
+  const { hasIDPRoles } = useRoleAccess();
   useTitle("Select your Identity Provider | Phase Two");
 
   let { realm } = useParams();
   const hostname = useHostname();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
 
-  if (!hasRealmRoles()) {
+  if (!hasIDPRoles()) {
     return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
   }
 
