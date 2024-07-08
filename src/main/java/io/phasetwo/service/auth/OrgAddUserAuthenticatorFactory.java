@@ -9,6 +9,7 @@ import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.util.Domains;
 import io.phasetwo.service.util.IdentityProviders;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
@@ -52,6 +53,7 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
 
     Map<String, String> idpConfig = brokerContext.getIdpConfig().getConfig();
     var idpIsShared = Boolean.parseBoolean(idpConfig.getOrDefault(ORG_SHARED_IDP_KEY, "false"));
+
     if (idpConfig.containsKey(ORG_OWNER_CONFIG_KEY)) {
       OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
       var orgIds = IdentityProviders.getAttributeMultivalued(idpConfig, ORG_OWNER_CONFIG_KEY);
@@ -64,17 +66,9 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
                   "idpConfig  %s contained %s, but org not found", ORG_OWNER_CONFIG_KEY, orgId);
               return;
             }
-            if (!org.hasMembership(context.getUser()) && !idpIsShared) {
-              log.infof(
-                  "granting membership to %s for user %s",
-                  org.getName(), context.getUser().getUsername());
-              org.grantMembership(context.getUser());
-              context
-                  .getEvent()
-                  .user(context.getUser())
-                  .detail("joined_organization", org.getId())
-                  .success();
-            }
+
+            handleOrganizationMembership(context, org, idpIsShared);
+
             if (org.hasMembership(context.getUser())) {
               orgs.getUserInvitationsStream(context.getRealm(), context.getUser())
                   .filter(
@@ -98,6 +92,35 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
           });
     } else {
       log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
+    }
+  }
+
+  private static void handleOrganizationMembership(
+      AuthenticationFlowContext context, OrganizationModel org, boolean idpIsShared) {
+    if (!org.hasMembership(context.getUser()) && !idpIsShared) {
+      log.infof(
+          "granting membership to %s for user %s", org.getName(), context.getUser().getUsername());
+      org.grantMembership(context.getUser());
+      context
+          .getEvent()
+          .user(context.getUser())
+          .detail("joined_organization", org.getId())
+          .success();
+    }
+
+    if (!org.hasMembership(context.getUser()) && idpIsShared) {
+      var userDomain = Domains.extract(context.getUser().getEmail());
+      if (userDomain.isPresent() && Domains.supportsDomain(org.getDomains(), userDomain.get())) {
+        log.infof(
+            "granting membership to %s for user %s",
+            org.getName(), context.getUser().getUsername());
+        org.grantMembership(context.getUser());
+        context
+            .getEvent()
+            .user(context.getUser())
+            .detail("joined_organization", org.getId())
+            .success();
+      }
     }
   }
 

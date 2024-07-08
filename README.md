@@ -215,7 +215,7 @@ These configs are persisted in the realm config under the flags `_providerConfig
 
 It is possible to share the same IDP between multiple organizations by switching `on` the `Shared IDPs` config.   
 This offers the possibility to login using the same IDP to different organizations by using the [IdP Discovery](#idp-discovery) method.   
-For a shared IdP if the `Post login flow` authentication flow is set to `post org broker login` the `Add User to Org` authenticator will skip organization assignment.
+For a shared IdP if the `Post login flow` authentication flow is set to `post org broker login` the `Add User to Org` authenticator will add the new member to all organizations which contain the user email domain in their domains configuration list.
 
 ## License
 
