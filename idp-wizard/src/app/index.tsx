@@ -22,7 +22,6 @@ const App: React.FC = () => {
 
   // Set apiMode into Settings
   useEffect(() => {
-    // console.log("[apiMode useEffect]", apiMode);
     if (apiMode) {
       return;
     }
@@ -42,7 +41,6 @@ const App: React.FC = () => {
     .filter((orgId) => orgId);
 
   useEffect(() => {
-    // console.log("[useEffect Org Check]", organization);
     if (organization) {
       return;
     }

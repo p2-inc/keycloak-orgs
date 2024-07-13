@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { generatePath, useParams } from "react-router-dom";
 import { useAppSelector } from "./hooks";
 
+export const requiredIdpRoles = [
+  "view-identity-providers",
+  "manage-identity-providers",
+];
+
 export const requiredOrganizationResourceRoles = [
   "view-identity-providers",
   "manage-identity-providers",
@@ -69,7 +74,6 @@ export function useRoleAccess() {
   }
 
   function hasOrganizationRole(role, orgId) {
-    // console.log("hasOrganizationRole", role, orgId);
     const orgs = keycloak?.tokenParsed?.organizations;
     if (
       orgId === null ||
@@ -84,7 +88,6 @@ export function useRoleAccess() {
   }
 
   function hasOrganizationRoles(roleGroup: "admin" | "resource", orgId) {
-    // console.log("[hasOrganizationRoles]", roleGroup, orgId);
     let roleAccess: boolean[] = [];
     let roleGroupUsage;
     if (roleGroup === "admin") {
@@ -93,10 +96,18 @@ export function useRoleAccess() {
     if (roleGroup === "resource") {
       roleGroupUsage = requiredOrganizationResourceRoles;
     }
-
     roleGroupUsage.map((role) => {
       return roleAccess.push(hasOrganizationRole(role, orgId));
     });
+    return !roleAccess.includes(false);
+  }
+
+  function hasIDPRoles() {
+    let roleAccess: boolean[] = [];
+    requiredIdpRoles.map((role) => {
+      return roleAccess.push(hasOrganizationRole(role, currentOrg));
+    });
+
     return !roleAccess.includes(false);
   }
 
@@ -146,5 +157,6 @@ export function useRoleAccess() {
     hasOrganizationRoles,
     hasRealmRoles,
     navigateToAccessDenied,
+    hasIDPRoles,
   };
 }

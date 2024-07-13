@@ -34,9 +34,9 @@ const Provider = () => {
     keyof RouterParams
   >() as RouterParams;
 
-  const { hasRealmRoles } = useRoleAccess();
+  const { hasIDPRoles } = useRoleAccess();
 
-  if (!hasRealmRoles()) {
+  if (!hasIDPRoles()) {
     return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
   }
 
