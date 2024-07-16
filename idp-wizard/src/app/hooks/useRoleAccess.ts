@@ -4,10 +4,14 @@ import { useEffect, useState } from "react";
 import { generatePath, useParams } from "react-router-dom";
 import { useAppSelector } from "./hooks";
 
-export const requiredIdpRoles = [
-  "view-identity-providers",
-  "manage-identity-providers",
-];
+// Logic for role checks
+// 1. Check if the user has the required roles for the realm admin. This sets
+//    access for ability to set Realm level IDP
+// 2. Check if the user has the required roles for the organization admin. This sets
+//    access for ability to set Organization level IDP
+// 3. If the user has access to more than 1 org or to 1 org and realm level, show the selector
+//    for the org picker to allow the choice.
+// Choice is saved locally. On keycloak token refreshes, access is rechecked.
 
 export const requiredOrganizationResourceRoles = [
   "view-identity-providers",
@@ -45,9 +49,11 @@ export function useRoleAccess() {
   const [hasOrgAccess, setHasOrgAccess] = useState<null | boolean>(null);
 
   function navigateToAccessDenied() {
-    window.location.replace(
+    if (window.location.pathname.endsWith("access-denied")) return;
+
+    window.location.assign(
       generatePath(PATHS.accessDenied, {
-        realm,
+        realm: realm || window.location.pathname.split("/")[3],
       })
     );
   }
@@ -102,15 +108,8 @@ export function useRoleAccess() {
     return !roleAccess.includes(false);
   }
 
-  function hasIDPRoles() {
-    let roleAccess: boolean[] = [];
-    requiredIdpRoles.map((role) => {
-      return roleAccess.push(hasOrganizationRole(role, currentOrg));
-    });
-
-    return !roleAccess.includes(false);
-  }
-
+  // TODO: is this fully sufficient to refresh the choice of org?
+  // may need to force refresh
   function checkAccess() {
     if (currentOrg === "global") {
       setHasOrgAccess(true);
@@ -144,19 +143,10 @@ export function useRoleAccess() {
     checkAccess();
   }, []);
 
-  // Can't use this here in order to get correct role access for use with
-  // the Org Selector
-  // useEffect(() => {
-  //   if (hasOrgAccess === false && realm) {
-  //     navigateToAccessDenied();
-  //   }
-  // }, [hasOrgAccess, realm]);
-
   return {
     hasOrgAccess,
     hasOrganizationRoles,
     hasRealmRoles,
     navigateToAccessDenied,
-    hasIDPRoles,
   };
 }

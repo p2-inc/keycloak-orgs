@@ -50,7 +50,10 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
     const hasAdminRole = hasOrganizationRoles("admin", orgId);
     if (hasAdminRole) return orgId;
   });
-  const hasNoOrgsToPick = orgsToPick.length <= 1 || !hasRealmRoles();
+
+  let pickerVisibility = orgsToPick.length;
+  if (hasRealmRoles()) pickerVisibility++;
+  const showOrgPicker = pickerVisibility <= 1;
 
   const AppLauncherItems: React.ReactElement[] = [
     <ApplicationLauncherItem
@@ -91,7 +94,7 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
         onClick={() => toggleOrgPicker(true)}
         title="Change the active organization for IdP creation."
         className={cs({
-          "pf-u-display-none": hasNoOrgsToPick,
+          "pf-u-display-none": showOrgPicker,
         })}
       >
         Switch Organization

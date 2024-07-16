@@ -19,14 +19,9 @@ import { useRoleAccess } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const IdPProtocolSelector: FC = ({}) => {
-  const { hasIDPRoles } = useRoleAccess();
   const { provider, realm } = useParams<keyof RouterParams>() as RouterParams;
   let navigate = useNavigate();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
-
-  if (!hasIDPRoles()) {
-    return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
-  }
 
   const currentProvider = IdentityProviders.find((i) => i.id === provider)!;
 

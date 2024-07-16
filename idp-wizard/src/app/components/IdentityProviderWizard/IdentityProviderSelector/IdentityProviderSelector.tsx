@@ -17,19 +17,17 @@ import { useTitle } from "react-use";
 import { useHostname } from "@app/hooks/useHostname";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { MainNav } from "@app/components/navigation/main-nav";
-import { useRoleAccess } from "@app/hooks";
+import { useAppSelector, useOrganization, useRoleAccess } from "@app/hooks";
 
 export const IdentityProviderSelector: FC = () => {
-  const { hasIDPRoles } = useRoleAccess();
   useTitle("Select your Identity Provider | Phase Two");
 
   let { realm } = useParams();
   const hostname = useHostname();
-  const { data: featureFlags } = useGetFeatureFlagsQuery();
+  const { getCurrentOrgName } = useOrganization();
+  const currentOrgName = getCurrentOrgName();
 
-  if (!hasIDPRoles()) {
-    return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
-  }
+  const { data: featureFlags } = useGetFeatureFlagsQuery();
 
   return (
     <PageSection variant={PageSectionVariants.light}>
@@ -41,7 +39,10 @@ export const IdentityProviderSelector: FC = () => {
           <div className="container">
             <div className="vertical-center">
               <h1>Select your Identity Provider</h1>
-              <h2>This is how users will sign in to {hostname}</h2>
+              <h2>
+                This is how users will sign in to{" "}
+                <b>{currentOrgName === "Global" ? "realms" : currentOrgName}</b>
+              </h2>
               <div className="selection-container">
                 {IdentityProviders.filter((idp) => idp.active)
                   .sort((a, b) =>

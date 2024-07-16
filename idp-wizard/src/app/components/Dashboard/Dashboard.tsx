@@ -20,21 +20,16 @@ import { PATHS } from "@app/routes";
 const Dashboard: React.FunctionComponent = () => {
   useTitle("Dashboard | Phase Two");
   const { navigateToAccessDenied } = useRoleAccess();
-  const { hasIDPRoles } = useRoleAccess();
-  let { realm } = useParams();
-  const { data: featureFlags, isLoading } = useGetFeatureFlagsQuery();
+  const { data: featureFlags, isLoading: isLoadingFeatureFlags } =
+    useGetFeatureFlagsQuery();
 
-  if (isLoading) {
+  if (isLoadingFeatureFlags) {
     return <Loading />;
-  }
-
-  if (!isLoading && !featureFlags?.enableDashboard) {
-    navigateToAccessDenied();
-    return <Loading />;
-  }
-
-  if (!hasIDPRoles()) {
-    return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
+  } else {
+    if (!featureFlags?.enableDashboard) {
+      navigateToAccessDenied();
+      return <Loading />;
+    }
   }
 
   return (

@@ -34,12 +34,6 @@ const Provider = () => {
     keyof RouterParams
   >() as RouterParams;
 
-  const { hasIDPRoles } = useRoleAccess();
-
-  if (!hasIDPRoles()) {
-    return <Navigate to={generatePath(PATHS.accessDenied, { realm })} />;
-  }
-
   const providers = [...IdentityProviders, ...GenericIdentityProviders];
 
   useTitle(`${providers.find((ip) => ip.id === provider)?.name} | Phase Two`);

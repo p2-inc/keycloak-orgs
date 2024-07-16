@@ -91,7 +91,11 @@ const OrgPicker: React.FC<Props> = ({
         For which Organization are you configuring an Identity Provider?
       </div>
       <br />
-      <div>{OrgRadioGroups.map((grp) => grp)}</div>
+      <div>
+        {OrgRadioGroups.map((grp, index) =>
+          React.cloneElement(grp, { key: index })
+        )}
+      </div>
       {hasRealmRoles() && (
         <>
           <Divider className="pf-u-mt-lg pf-u-mb-lg" />
