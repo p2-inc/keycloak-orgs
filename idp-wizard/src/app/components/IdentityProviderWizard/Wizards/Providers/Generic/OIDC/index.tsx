@@ -24,6 +24,8 @@ const forms = {
   CONFIG: true,
 };
 
+export type ApplicationConfigType = "urlOrFile" | "manual";
+
 export const GenericOIDC: FC = () => {
   const idpCommonName = "OIDC IdP";
   const title = "OIDC wizard";
@@ -57,6 +59,8 @@ export const GenericOIDC: FC = () => {
   // Form Values
   const [formsActive, setFormsActive] = useState(forms);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [applicationConfigType, setApplicationConfigType] =
+    useState<ApplicationConfigType>("urlOrFile");
   const [url, setUrl] = useState("");
   const [metadata, setMetadata] = useState<OidcConfig>({
     ...OidcDefaults,
@@ -98,7 +102,6 @@ export const GenericOIDC: FC = () => {
   };
 
   const validateUrl = async ({ url }: { url: string }) => {
-    let resp;
     setUrl(url);
     try {
       const payload = {
@@ -176,38 +179,18 @@ export const GenericOIDC: FC = () => {
   };
 
   const validateConfig = async (config: OidcConfig) => {
-    let resp;
+    setIsFormValid(true);
+    setMetadata(config);
+    setFormsActive({
+      ...formsActive,
+      FILE: false,
+      URL: false,
+    });
 
-    try {
-      const payload = {
-        alias,
-        displayName: "OIDC Single Sign-on",
-        providerId: "oidc",
-        config,
-      };
-
-      await Axios.post(identifierURL, payload);
-
-      setIsFormValid(true);
-      setMetadata(resp);
-      setFormsActive({
-        ...formsActive,
-        FILE: false,
-        URL: false,
-      });
-
-      return {
-        status: API_STATUS.SUCCESS,
-        message:
-          "Configuration successfully validated with OIDC. Continue to next step.",
-      };
-    } catch (e) {
-      return {
-        status: API_STATUS.ERROR,
-        message:
-          "Configuration validation failed with OIDC. Check values and try again.",
-      };
-    }
+    return {
+      status: API_STATUS.SUCCESS,
+      message: "Configuration values saved. Continue to next step.",
+    };
   };
 
   const validateCredentials = async ({
@@ -216,34 +199,12 @@ export const GenericOIDC: FC = () => {
   }: ClientCreds) => {
     setCredentials({ clientId, clientSecret });
 
-    // let resp;
-    // try {
-    //   resp = await Axios.post(
-    //     metadata.tokenUrl,
-    //     `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
-    //   );
-    // } catch (e) {
-    //   return {
-    //     status: API_STATUS.ERROR,
-    //     message: "Credentials validation failed. Check values and try again.",
-    //   };
-    // }
-
-    // if (resp.status === 200) {
-    //   setCredentialValidationResp(resp.data);
     setCredentailsValid(true);
 
     return {
       status: API_STATUS.SUCCESS,
-      // message: "Credentials successfully validated. Continue to next step.",
       message: "Credentials saved. Continue to next step.",
     };
-    // }
-
-    // return {
-    //   status: API_STATUS.ERROR,
-    //   message: "Credentials validation failed. Check values and try again.",
-    // };
   };
 
   const createIdP = async () => {
@@ -264,13 +225,12 @@ export const GenericOIDC: FC = () => {
 
     try {
       await CreateIdp({ createIdPUrl, payload, featureFlags });
-
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
     } catch (e) {
-      setResults(`Error creating ${idpCommonName}.`);
+      setResults(`Error creating ${idpCommonName}. Check for an existing IDP.`);
       setError(true);
     } finally {
       setIsValidating(false);
@@ -298,6 +258,8 @@ export const GenericOIDC: FC = () => {
           url={url}
           formsActive={formsActive}
           metadata={metadata}
+          applicationConfigType={applicationConfigType}
+          setApplicationConfigType={setApplicationConfigType}
         />
       ),
       enableNext: isFormValid,

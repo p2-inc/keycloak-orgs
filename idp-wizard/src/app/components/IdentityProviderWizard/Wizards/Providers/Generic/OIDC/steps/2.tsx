@@ -7,7 +7,9 @@ import {
 } from "@wizardComponents";
 import { Config, OidcConfig } from "./forms";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
-import { Card, CardBody, CardTitle } from "@patternfly/react-core";
+import { Card, CardBody, CardTitle, Switch } from "@patternfly/react-core";
+import cs from "classnames";
+import { ApplicationConfigType } from "..";
 
 interface Props {
   validateUrl: ({ url }: { url: string }) => API_RETURN_PROMISE;
@@ -24,6 +26,8 @@ interface Props {
     CONFIG: boolean;
   };
   metadata: OidcConfig;
+  applicationConfigType: ApplicationConfigType;
+  setApplicationConfigType: (configType: ApplicationConfigType) => void;
 }
 
 export const Step2: FC<Props> = ({
@@ -33,7 +37,11 @@ export const Step2: FC<Props> = ({
   url,
   formsActive,
   metadata,
+  applicationConfigType,
+  setApplicationConfigType,
 }) => {
+  const showUrlandFile = applicationConfigType === "urlOrFile";
+  const showManual = applicationConfigType === "manual";
   const instructions: InstructionProps[] = [
     {
       component: (
@@ -48,16 +56,27 @@ export const Step2: FC<Props> = ({
     {
       text: "",
       component: (
-        <div>
-          Use either the configuration URL, the configuration file, or if you do
-          not have either, you can input the values manually.
-        </div>
+        <>
+          <div className="pf-u-mb-md">
+            Use either the configuration URL, the configuration file, or if you
+            do not have either, you can input the values manually.
+          </div>
+          <Switch
+            id="changeConfigType"
+            label="Use Url Or File"
+            labelOff="Use Manual Configuration"
+            isChecked={showManual}
+            onChange={(checked: boolean) =>
+              setApplicationConfigType(checked ? "manual" : "urlOrFile")
+            }
+          />
+        </>
       ),
     },
     {
       text: "",
       component: (
-        <Card>
+        <Card className={cs({ "pf-u-display-none-on-sm": !showUrlandFile })}>
           <CardTitle>Configuration URL</CardTitle>
           <CardBody>
             <div className="pf-u-pb-sm">
@@ -76,7 +95,7 @@ export const Step2: FC<Props> = ({
     },
     {
       component: (
-        <Card>
+        <Card className={cs({ "pf-u-display-none-on-sm": !showUrlandFile })}>
           <CardTitle>Configuration File</CardTitle>
           <CardBody>
             <div className="pf-u-pb-sm">
@@ -93,7 +112,7 @@ export const Step2: FC<Props> = ({
     },
     {
       component: (
-        <Card>
+        <Card className={cs({ "pf-u-display-none-on-sm": !showManual })}>
           <CardTitle>Configuration Information</CardTitle>
           <CardBody>
             <div className="pf-u-pb-sm">

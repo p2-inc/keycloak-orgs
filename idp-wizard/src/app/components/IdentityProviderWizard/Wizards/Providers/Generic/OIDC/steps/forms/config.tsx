@@ -35,9 +35,7 @@ const configSchema = Yup.object().shape({
   tokenUrl: Yup.string()
     .url("Token URL should be a valid URL.")
     .required("Token URL is a required field."),
-  userInfoUrl: Yup.string()
-    .url("User Info URL should be a valid URL.")
-    .required("User Info URL is a required field."),
+  userInfoUrl: Yup.string().url("User Info URL should be a valid URL."),
   validateSignature: Yup.boolean(),
   jwksUrl: Yup.string().when("validateSignature", {
     is: true,
@@ -146,10 +144,8 @@ export const Config: FC<Props> = ({
         fieldId="userInfoUrl"
         validated={hasError("userInfoUrl")}
         helperTextInvalid={errors.userInfoUrl}
-        isRequired
       >
         <TextInput
-          isRequired
           id="userInfoUrl"
           name="userInfoUrl"
           value={values.userInfoUrl}

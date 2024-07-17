@@ -13,11 +13,11 @@ type CreateIdpProps = {
   payload: IdentityProviderRepresentation;
   featureFlags: FeatureFlagsState | undefined;
 };
-  
+
 export const CreateIdp = async ({
   createIdPUrl,
   payload,
-  featureFlags
+  featureFlags,
 }: CreateIdpProps) => {
   payload.trustEmail = featureFlags?.trustEmail;
   return Axios.post(createIdPUrl, payload);
@@ -29,13 +29,13 @@ type AttributesConfig = {
   friendlyName: string;
   syncMode: string;
 };
-  
+
 type AttributesProps = {
   alias: string;
   attributes: AttributesConfig[];
   createIdPUrl: string;
 };
-  
+
 type MapperConfig = {
   attributeName: string;
   friendlyName: string;
@@ -68,7 +68,7 @@ export const SamlAttributeMapper = async ({
       attributeName: usernameAttribute.attributeName,
       friendlyName: usernameAttribute.friendlyName,
       userAttribute: idpUsernameAttributeName,
-      syncMode: 'INHERIT',
+      syncMode: "INHERIT",
     });
     // update the usernameAttribute with the emailAttribute attributeName and friendlyName
     usernameAttribute.attributeName = emailAttribute.attributeName;
@@ -84,19 +84,19 @@ export const SamlAttributeMapper = async ({
     attributeName: emailAttribute.attributeName,
     friendlyName: emailAttribute.friendlyName,
     userAttribute: emailAttributeName,
-    syncMode: 'INHERIT',
+    syncMode: "INHERIT",
   });
   attributes.push({
     attributeName: firstNameAttribute.attributeName,
     friendlyName: firstNameAttribute.friendlyName,
     userAttribute: firstNameAttributeName,
-    syncMode: 'INHERIT',
+    syncMode: "INHERIT",
   });
   attributes.push({
     attributeName: lastNameAttribute.attributeName,
     friendlyName: lastNameAttribute.friendlyName,
     userAttribute: lastNameAttributeName,
-    syncMode: 'INHERIT',
+    syncMode: "INHERIT",
   });
 
   return SamlUserAttributeMapper({
@@ -139,4 +139,3 @@ export const SamlUserAttributeMapper = async ({
 
   return Promise.all(attributes.map((atr) => mapAttribute(atr)));
 };
-
