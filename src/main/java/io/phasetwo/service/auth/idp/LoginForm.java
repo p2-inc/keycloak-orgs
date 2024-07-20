@@ -22,12 +22,24 @@ final class LoginForm {
         this.loginFormsProvider = loginFormsProvider;
     }
 
+    Response createWithSignInButtonOnly(MultivaluedMap<String, String> formData) {
+        LoginFormsProvider form = createForm(formData);
+        form.setAttribute(LoginFormsProvider.USERNAME_HIDDEN, "true");
+        form.setAttribute(LoginFormsProvider.REGISTRATION_DISABLED, "true");
+        return form.createLoginUsername();
+    }
+
     Response create(MultivaluedMap<String, String> formData) {
+        LoginFormsProvider forms = createForm(formData);
+        return forms.createLoginUsername();
+    }
+
+    private LoginFormsProvider createForm(MultivaluedMap<String, String> formData) {
         LoginFormsProvider forms = context.form();
         if (!formData.isEmpty()) {
             forms.setFormData(formData);
         }
-        return forms.createLoginUsername();
+        return forms;
     }
 
     Response create(List<IdentityProviderModel> idps) {
