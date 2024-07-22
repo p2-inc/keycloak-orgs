@@ -97,6 +97,8 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
                     Collectors.toMap(FederatedIdentityModel::getIdentityProvider, FederatedIdentityModel::getUserName));
         }
 
+
+        //Todo: This logic should be moved in a custom identity provider class. see OrgsIdentityProviders
         List<IdentityProviderModel> candidateIdps = identityProviders.candidatesForHomeIdp(context, user);
         if (candidateIdps == null) {
             candidateIdps = emptyList();
@@ -112,7 +114,7 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
         OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
         List<IdentityProviderModel> idpsWithMatchingDomain =
             orgs.getOrganizationsStreamForDomain(
-                    context.getRealm(), domain.toString(), config.forwardUserWithUnverifiedEmail())
+                    context.getRealm(), domain.toString(), config.requireVerifiedDomain())
                 .flatMap(OrganizationModel::getIdentityProvidersStream)
                 .filter(IdentityProviderModel::isEnabled)
                 .collect(Collectors.toList());

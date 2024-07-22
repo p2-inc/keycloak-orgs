@@ -13,12 +13,15 @@ import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.managers.AuthenticationManager;
 
 import java.util.List;
 
+import static org.keycloak.protocol.oidc.OIDCLoginProtocol.LOGIN_HINT_PARAM;
 import static org.keycloak.services.validation.Validation.FIELD_USERNAME;
 
 final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthenticator {
@@ -106,8 +109,12 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
 
         final List<IdentityProviderModel> homeIdps = context.discoverer(discovererConfig).discoverForUser(authenticationFlowContext, username);
         if (homeIdps.isEmpty()) {
-            authenticationFlowContext.attempted();
-            context.loginHint().setInAuthSession(username);
+            if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
+                authenticationFlowContext.success();
+            } else {
+                authenticationFlowContext.attempted();
+                context.loginHint().setInAuthSession(username);
+            }
         } else {
             RememberMe rememberMe = context.rememberMe();
             rememberMe.handleAction(formData);
@@ -117,6 +124,7 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     }
 
     private String setUserInContext(AuthenticationFlowContext context, String username) {
+        context.clearUser();
         username = trimToNull(username);
 
         if (username == null) {
@@ -130,6 +138,19 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         LOG.debugf("Found username '%s' in request", username);
         context.getEvent().detail(Details.USERNAME, username);
         context.getAuthenticationSession().setAuthNote(ATTEMPTED_USERNAME, username);
+        context.getAuthenticationSession().setClientNote(LOGIN_HINT_PARAM, username);
+
+        try {
+            UserModel user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(),
+                    username);
+            if (user != null) {
+                LOG.tracef("Setting user '%s' in context", user.getId());
+                context.setUser(user);
+            }
+        } catch (ModelDuplicateException ex) {
+            LOG.warnf(ex, "Could not uniquely identify the user. Multiple users with name or email '%s' found.",
+                    username);
+        }
 
         return username;
     }

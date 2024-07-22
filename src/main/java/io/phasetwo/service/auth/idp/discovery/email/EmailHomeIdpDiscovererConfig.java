@@ -16,6 +16,7 @@ final class EmailHomeIdpDiscovererConfig {
     private static final String FORWARD_TO_LINKED_IDP = "forwardToLinkedIdp";
     private static final String USER_ATTRIBUTE = "userAttribute";
     private static final String FORWARD_UNVERIFIED_ATTRIBUTE = "forwardUnverifiedEmail";
+    static final String REQUIRE_VERIFIED_DOMAIN = "requireVerifiedDomain";
 
     private static final ProviderConfigProperty FORWARD_TO_LINKED_IDP_PROPERTY = new ProviderConfigProperty(
         FORWARD_TO_LINKED_IDP,
@@ -41,10 +42,19 @@ final class EmailHomeIdpDiscovererConfig {
         false,
         false);
 
+    private static final ProviderConfigProperty REQUIRE_VERIFIED_DOMAIN_PROPERTY = new ProviderConfigProperty(
+         REQUIRE_VERIFIED_DOMAIN,
+         "Require a verified domain",
+         "Whether a verified domain name for an organization is required to forward to their identity provider.",
+         BOOLEAN_TYPE,
+         false,
+         false);
+
     static final List<ProviderConfigProperty> CONFIG_PROPERTIES = ProviderConfigurationBuilder.create()
         .property(USER_ATTRIBUTE_PROPERTY)
         .property(FORWARD_UNVERIFIED_PROPERTY)
         .property(FORWARD_TO_LINKED_IDP_PROPERTY)
+        .property(REQUIRE_VERIFIED_DOMAIN_PROPERTY)
         .build();
     private final AuthenticatorConfigModel authenticatorConfigModel;
 
@@ -68,6 +78,12 @@ final class EmailHomeIdpDiscovererConfig {
         return Optional.ofNullable(authenticatorConfigModel)
             .map(it -> Boolean.parseBoolean(it.getConfig().getOrDefault(FORWARD_UNVERIFIED_ATTRIBUTE, "false")))
             .orElse(false);
+    }
+
+    boolean requireVerifiedDomain() {
+        return Optional.ofNullable(authenticatorConfigModel)
+                .map(it -> Boolean.parseBoolean(it.getConfig().getOrDefault(REQUIRE_VERIFIED_DOMAIN, "false")))
+                .orElse(false);
     }
 
     String getAlias() {
