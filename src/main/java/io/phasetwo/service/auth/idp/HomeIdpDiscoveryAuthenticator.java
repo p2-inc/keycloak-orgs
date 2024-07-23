@@ -127,6 +127,14 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         context.clearUser();
         username = trimToNull(username);
 
+       /*Todo: @xpg. I saw this piece of code in a PR you've made. I'm not sure it's needed since on line 53 we get the attemptedUsername using the usernameHint method. Please check
+        if (username == null) {
+            LOG.debug(
+                    "Could not find username in request. Trying attempted username from previous authenticator");
+            username = getAttemptedUsername(context);
+        }
+        */
+
         if (username == null) {
             LOG.warn("No or empty username found in request");
             context.getEvent().error(Errors.USER_NOT_FOUND);
