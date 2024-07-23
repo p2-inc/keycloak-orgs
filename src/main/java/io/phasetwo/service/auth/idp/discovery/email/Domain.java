@@ -1,9 +1,11 @@
-//package de.sventorben.keycloak.authentication.hidpd;
-package io.phasetwo.service.auth.idp;
+//package io.phasetwo.service.auth.idp.discovery.email;
+package io.phasetwo.service.auth.idp.discovery.email;
 
 import java.util.Objects;
+import io.phasetwo.service.auth.idp.PublicAPI;
 
-class Domain {
+@PublicAPI(unstable = true)
+public final class Domain {
 
     private final String value;
 
@@ -14,6 +16,10 @@ class Domain {
 
     boolean isSubDomainOf(Domain domain) {
         return this.value.endsWith("." + domain.value);
+    }
+
+    public String getRawValue() {
+        return this.value;
     }
 
     @Override

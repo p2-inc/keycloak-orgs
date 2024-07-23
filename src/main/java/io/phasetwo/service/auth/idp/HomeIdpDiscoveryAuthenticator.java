@@ -28,7 +28,10 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
 
     private static final Logger LOG = Logger.getLogger(HomeIdpDiscoveryAuthenticator.class);
 
-    HomeIdpDiscoveryAuthenticator() {
+    private final AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig;
+
+    HomeIdpDiscoveryAuthenticator(AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig) {
+        this.discovererConfig = discovererConfig;
     }
 
     @Override
@@ -36,7 +39,7 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
 
         //backwards compatibilty with original keycloak-orgs port
-        String attemptedUsername = getAttemptedUsername(authenticationFlowContext);
+        String attemptedUsername = usernameHint(authenticationFlowContext, context);
         if (attemptedUsername != null) {
             if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
                 action(authenticationFlowContext);
@@ -47,10 +50,10 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         }
 
         if (context.loginPage().shouldByPass()) {
-            String loginHint = trimToNull(context.loginHint().getFromSession());
-            if (loginHint != null) {
-                String username = setUserInContext(authenticationFlowContext, loginHint);
-                final List<IdentityProviderModel> homeIdps = context.discoverer().discoverForUser(username);
+            String usernameHint = usernameHint(authenticationFlowContext, context);
+            if (usernameHint != null) {
+                String username = setUserInContext(authenticationFlowContext, usernameHint);
+                final List<IdentityProviderModel> homeIdps = context.discoverer(discovererConfig).discoverForUser(authenticationFlowContext, username);
                 if (!homeIdps.isEmpty()) {
                     context.rememberMe().remember(username);
                     redirectOrChallenge(context, username, homeIdps);
@@ -61,8 +64,12 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         context.authenticationChallenge().forceChallenge();
     }
 
-    private String getAttemptedUsername(AuthenticationFlowContext context) {
-        return trimToNull(context.getAuthenticationSession().getAuthNote(ATTEMPTED_USERNAME));
+    private String usernameHint(AuthenticationFlowContext authenticationFlowContext, HomeIdpAuthenticationFlowContext context) {
+        String usernameHint = trimToNull(context.loginHint().getFromSession());
+        if (usernameHint == null) {
+            usernameHint = trimToNull(authenticationFlowContext.getAuthenticationSession().getAuthNote(ATTEMPTED_USERNAME));
+        }
+        return usernameHint;
     }
 
     private void redirectOrChallenge(HomeIdpAuthenticationFlowContext context, String username, List<IdentityProviderModel> homeIdps) {
@@ -84,20 +91,29 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
             return;
         }
 
-        String username = setUserInContext(authenticationFlowContext, formData.getFirst(AuthenticationManager.FORM_USERNAME));
+        HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
+
+        String tryUsername;
+        if (context.reauthentication().required() && authenticationFlowContext.getUser() != null) {
+            tryUsername = authenticationFlowContext.getUser().getUsername();
+        } else {
+            tryUsername = formData.getFirst(AuthenticationManager.FORM_USERNAME);
+        }
+
+        String username = setUserInContext(authenticationFlowContext, tryUsername);
         if (username == null) {
             LOG.debugf("No username in request");
             return;
         }
 
-        HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
 
-        final List<IdentityProviderModel> homeIdps = context.discoverer().discoverForUser(username);
+        final List<IdentityProviderModel> homeIdps = context.discoverer(discovererConfig).discoverForUser(authenticationFlowContext, username);
         if (homeIdps.isEmpty()) {
             if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
-              authenticationFlowContext.success();
+                authenticationFlowContext.success();
             } else {
-              authenticationFlowContext.attempted();
+                authenticationFlowContext.attempted();
+                context.loginHint().setInAuthSession(username);
             }
         } else {
             RememberMe rememberMe = context.rememberMe();
@@ -109,14 +125,15 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
 
     private String setUserInContext(AuthenticationFlowContext context, String username) {
         context.clearUser();
-
         username = trimToNull(username);
 
+       /*Todo: @xpg. I saw this piece of code in a PR you've made. I'm not sure it's needed since on line 53 we get the attemptedUsername using the usernameHint method. Please check
         if (username == null) {
-          LOG.debug(
-              "Could not find username in request. Trying attempted username from previous authenticator");
-          username = getAttemptedUsername(context);
+            LOG.debug(
+                    "Could not find username in request. Trying attempted username from previous authenticator");
+            username = getAttemptedUsername(context);
         }
+        */
 
         if (username == null) {
             LOG.warn("No or empty username found in request");
@@ -133,20 +150,20 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
 
         try {
             UserModel user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(),
-                username);
+                    username);
             if (user != null) {
                 LOG.tracef("Setting user '%s' in context", user.getId());
                 context.setUser(user);
             }
         } catch (ModelDuplicateException ex) {
             LOG.warnf(ex, "Could not uniquely identify the user. Multiple users with name or email '%s' found.",
-                username);
+                    username);
         }
 
         return username;
     }
 
-    private String trimToNull(String username) {
+    private static String trimToNull(String username) {
         if (username != null) {
             username = username.trim();
             if ("".equalsIgnoreCase(username))
