@@ -1,12 +1,9 @@
-//package io.phasetwo.service.auth.idp.discovery.email;
-package io.phasetwo.service.auth.idp.discovery.email;
-
+package de.sventorben.keycloak.authentication.hidpd;
 
 import com.google.auto.service.AutoService;
-import io.phasetwo.service.auth.idp.OperationalInfo;
-import io.phasetwo.service.auth.idp.Users;
-import io.phasetwo.service.auth.idp.discovery.spi.HomeIdpDiscoverer;
-import io.phasetwo.service.auth.idp.discovery.spi.HomeIdpDiscovererFactory;
+import de.sventorben.keycloak.authentication.hidpd.discovery.email.EmailHomeIdpDiscoverer;
+import de.sventorben.keycloak.authentication.hidpd.discovery.spi.HomeIdpDiscoverer;
+import de.sventorben.keycloak.authentication.hidpd.discovery.spi.HomeIdpDiscovererFactory;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -15,13 +12,13 @@ import org.keycloak.provider.ServerInfoAwareProviderFactory;
 import java.util.Map;
 
 @AutoService(HomeIdpDiscovererFactory.class)
-public final class EmailHomeIdpDiscovererFactory implements HomeIdpDiscovererFactory, ServerInfoAwareProviderFactory {
+public final class OrgsEmailHomeIdpDiscovererFactory implements HomeIdpDiscovererFactory, ServerInfoAwareProviderFactory {
 
-    static final String PROVIDER_ID = "email";
+    static final String PROVIDER_ID = "orgs-ext-email";
 
     @Override
     public HomeIdpDiscoverer create(KeycloakSession keycloakSession) {
-        return new EmailHomeIdpDiscoverer(new Users(keycloakSession), new DefaultIdentityProviders());
+        return new EmailHomeIdpDiscoverer(new Users(keycloakSession), new OrgsIdentityProviders());
     }
 
     @Override
@@ -45,7 +42,7 @@ public final class EmailHomeIdpDiscovererFactory implements HomeIdpDiscovererFac
     }
 
     @Override
-    public Map<String, String> getOperationalInfo() {
+    public final Map<String, String> getOperationalInfo() {
         return OperationalInfo.get();
     }
 }

@@ -1,5 +1,4 @@
-//package de.sventorben.keycloak.authentication.hidpd;
-package io.phasetwo.service.auth.idp;
+package de.sventorben.keycloak.authentication.hidpd;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -24,13 +23,13 @@ import java.util.List;
 import static org.keycloak.protocol.oidc.OIDCLoginProtocol.LOGIN_HINT_PARAM;
 import static org.keycloak.services.validation.Validation.FIELD_USERNAME;
 
-final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthenticator {
+final class PhaseTwoAuthenticator extends AbstractUsernameFormAuthenticator {
 
-    private static final Logger LOG = Logger.getLogger(HomeIdpDiscoveryAuthenticator.class);
+    private static final Logger LOG = Logger.getLogger(PhaseTwoAuthenticator.class);
 
     private final AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig;
 
-    HomeIdpDiscoveryAuthenticator(AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig) {
+    PhaseTwoAuthenticator(AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig) {
         this.discovererConfig = discovererConfig;
     }
 

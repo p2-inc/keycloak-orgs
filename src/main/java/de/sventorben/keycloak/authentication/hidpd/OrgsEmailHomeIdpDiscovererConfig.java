@@ -1,5 +1,4 @@
-//package io.phasetwo.service.auth.idp.discovery.email;
-package io.phasetwo.service.auth.idp.discovery.email;
+package de.sventorben.keycloak.authentication.hidpd;
 
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.provider.ProviderConfigProperty;
@@ -11,7 +10,7 @@ import java.util.Optional;
 import static org.keycloak.provider.ProviderConfigProperty.BOOLEAN_TYPE;
 import static org.keycloak.provider.ProviderConfigProperty.STRING_TYPE;
 
-final class EmailHomeIdpDiscovererConfig {
+final class OrgsEmailHomeIdpDiscovererConfig {
 
     private static final String FORWARD_TO_LINKED_IDP = "forwardToLinkedIdp";
     private static final String USER_ATTRIBUTE = "userAttribute";
@@ -58,7 +57,7 @@ final class EmailHomeIdpDiscovererConfig {
         .build();
     private final AuthenticatorConfigModel authenticatorConfigModel;
 
-    public EmailHomeIdpDiscovererConfig(AuthenticatorConfigModel authenticatorConfigModel) {
+    public OrgsEmailHomeIdpDiscovererConfig(AuthenticatorConfigModel authenticatorConfigModel) {
         this.authenticatorConfigModel = authenticatorConfigModel;
     }
 

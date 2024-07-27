@@ -259,6 +259,13 @@
       <version>3.5.3</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>de.sventorben.keycloak</groupId>
+      <artifactId>keycloak-home-idp-discovery</artifactId>
+      <version>25.0.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/keycloak-home-idp-discovery.jar</systemPath>
+    </dependency>
 
     <!-- testing -->
     <dependency>

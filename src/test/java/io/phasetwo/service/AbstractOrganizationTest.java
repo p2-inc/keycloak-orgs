@@ -65,10 +65,19 @@ public abstract class AbstractOrganizationTest {
     "io.phasetwo.keycloak:keycloak-events"
   };
 
+  static final String[] internalDeps = {
+          "lib/keycloak-home-idp-discovery.jar"
+  };
+
   static List<File> getDeps() {
     List<File> dependencies = new ArrayList<File>();
     for (String dep : deps) {
       dependencies.addAll(getDep(dep));
+    }
+
+    for (String dep: internalDeps){
+      File f = new File(dep);
+      dependencies.add(f);
     }
     return dependencies;
   }
