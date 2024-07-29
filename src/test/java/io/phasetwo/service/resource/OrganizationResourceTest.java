@@ -5,10 +5,12 @@ import static io.phasetwo.service.Helpers.addEventListener;
 import static io.phasetwo.service.Helpers.createUser;
 import static io.phasetwo.service.Helpers.createUserWithCredentials;
 import static io.phasetwo.service.Helpers.createWebhook;
+import static io.phasetwo.service.Helpers.createServiceAccountClient;
 import static io.phasetwo.service.Helpers.deleteUser;
 import static io.phasetwo.service.Helpers.deleteWebhook;
 import static io.phasetwo.service.Helpers.objectMapper;
 import static io.phasetwo.service.Helpers.removeEventListener;
+import static io.phasetwo.service.Helpers.SERVICE_ACCOUNT_PREFIX;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -2061,4 +2063,59 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(false));
     }
   }
+
+  @Test
+  void testIncludeServiceAccountsQueryParameter() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    Response response = getRequest(id, "members");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+
+    // create a user
+    UserRepresentation user1 = createUser(keycloak, REALM, "johndoe");
+    UserRepresentation user2 = createUser(keycloak, REALM, "johndow");
+    UserRepresentation user3 = createServiceAccountClient(keycloak, REALM, "client1");
+    UserRepresentation user4 = createServiceAccountClient(keycloak, REALM, "client2");
+
+    // add membership
+    response = putRequest("foo", org.getId(), "members", user1.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("foo", org.getId(), "members", user2.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("foo", org.getId(), "members", user3.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("foo", org.getId(), "members", user4.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+
+    // search members with query parameter
+    response = getRequest(id, "members?includeServiceAccounts=true");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    List<UserRepresentation> members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(5)); // including org admin default
+    assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
+    assertThat(members, hasItem(hasProperty("username", is("johndow"))));
+    assertThat(members, hasItem(hasProperty("username", is(SERVICE_ACCOUNT_PREFIX + "client1"))));
+    assertThat(members, hasItem(hasProperty("username", is(SERVICE_ACCOUNT_PREFIX + "client2"))));
+
+    response = getRequest(id, "members?includeServiceAccounts=false");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(3)); // including org admin default
+    assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
+    assertThat(members, hasItem(hasProperty("username", is("johndow"))));
+
+    // delete user
+    deleteUser(keycloak, REALM, user1.getId());
+    deleteUser(keycloak, REALM, user2.getId());
+    deleteClient("client1");
+    deleteClient("client2");
+
+    // delete org
+    deleteOrganization(id);
+  }
+
+
 }

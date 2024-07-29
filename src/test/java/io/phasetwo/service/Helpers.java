@@ -18,6 +18,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.broker.provider.util.SimpleHttp;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.AdminEventRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.EventRepresentation;
@@ -32,6 +33,8 @@ public class Helpers {
   private static final ObjectMapper mapper;
   private static List<String> orgsTypes =
       Arrays.stream(OrganizationResourceType.values()).map(Enum::toString).toList();
+
+  public static final String SERVICE_ACCOUNT_PREFIX = "service-account-";
 
   static {
     mapper = new ObjectMapper();
@@ -82,6 +85,17 @@ public class Helpers {
 
   public static void deleteUser(Keycloak keycloak, String realm, String id) {
     keycloak.realm(realm).users().delete(id);
+  }
+
+ public static UserRepresentation createServiceAccountClient(
+          Keycloak keycloak, String realm, String clientId) {
+    ClientRepresentation clientRepresentation = new ClientRepresentation();
+    clientRepresentation.setEnabled(true);
+    clientRepresentation.setClientId(clientId);
+    clientRepresentation.setServiceAccountsEnabled(true);
+    keycloak.realm(realm).clients().create(clientRepresentation);
+
+    return keycloak.realm(realm).users().searchByUsername(SERVICE_ACCOUNT_PREFIX+ clientId, true).get(0);
   }
 
   public static RealmEventsConfigRepresentation addEventListener(
