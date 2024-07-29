@@ -4,14 +4,14 @@ import com.google.common.collect.ImmutableList;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
-import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
-import io.phasetwo.service.model.jpa.entity.TeamEntity;
 import jakarta.ws.rs.NotAuthorizedException;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.models.AdminRoles;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -63,9 +63,13 @@ public class OrganizationAdminAuth extends AdminAuth {
     return hasAppRole(getClient(), ROLE_MANAGE_ORGANIZATION);
   }
 
+  boolean hasManageRealm() {
+    return hasAppRole(getClient(), AdminRoles.MANAGE_REALM);
+  }
+
   // org in realm
   @Deprecated
-  void requireOrgInRealm(OrganizationEntity orgEntity) {
+  void requireOrgInRealm(ExtOrganizationEntity orgEntity) {
     if (!orgEntity.getRealmId().equals(getRealm().getId())) {
       throw new NotAuthorizedException(
           String.format(
@@ -96,7 +100,8 @@ public class OrganizationAdminAuth extends AdminAuth {
 
   // invitation in org in realm
   @Deprecated
-  void requireInvitationInOrgInRealm(InvitationEntity inviteEntity, OrganizationEntity orgEntity) {
+  void requireInvitationInOrgInRealm(
+      InvitationEntity inviteEntity, ExtOrganizationEntity orgEntity) {
     if (!inviteEntity.getOrganization().equals(orgEntity)) {
       throw new NotAuthorizedException(
           String.format("Invitation %s not in org %s", inviteEntity.getId(), orgEntity.getId()));
@@ -116,20 +121,12 @@ public class OrganizationAdminAuth extends AdminAuth {
     return (invite.getOrganization().equals(org) && isOrgInRealm(org));
   }
 
-  // team in org in realm
-  @Deprecated
-  void requireTeamInOrgInRealm(TeamEntity teamEntity, OrganizationEntity orgEntity) {
-    if (!teamEntity.getOrganization().equals(orgEntity)) {
-      throw new NotAuthorizedException(
-          String.format("Team %s not in org %s", teamEntity.getId(), orgEntity.getId()));
-    }
-    requireOrgInRealm(orgEntity);
-  }
-
   // user in org in realm
   @Deprecated
   void requireUserInOrgInRealm(
-      UserEntity userEntity, OrganizationMemberEntity memberEntity, OrganizationEntity orgEntity) {
+      UserEntity userEntity,
+      OrganizationMemberEntity memberEntity,
+      ExtOrganizationEntity orgEntity) {
     if (userEntity == null
         || memberEntity == null
         || orgEntity != null

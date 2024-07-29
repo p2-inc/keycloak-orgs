@@ -41,7 +41,7 @@ public class DomainEntity {
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "ORGANIZATION_ID")
-  private OrganizationEntity organization;
+  private ExtOrganizationEntity organization;
 
   public String getId() {
     return id;
@@ -67,11 +67,11 @@ public class DomainEntity {
     this.verified = verified;
   }
 
-  public OrganizationEntity getOrganization() {
+  public ExtOrganizationEntity getOrganization() {
     return organization;
   }
 
-  public void setOrganization(OrganizationEntity organization) {
+  public void setOrganization(ExtOrganizationEntity organization) {
     this.organization = organization;
   }
 

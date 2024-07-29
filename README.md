@@ -34,6 +34,8 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
       - [IdP Discovery](#idp-discovery)
     - [Import/Export organizations](#importexport-organizations)
     - [Active Organization](#active-organization)
+    - [Global organization settings](#global-organization-settings)
+    - [Organizations shared IDPs](#organizations-shared-idps)
   - [License](#license)
 
 ## Overview
@@ -200,6 +202,20 @@ These are the configuration options for the "Home IdP Discovery" Authenticator. 
 
 It is possible to define an active organization and switch it. It's currently based on user's attribute and the active organization id, name, role or attribute can be mapped into tokens with a configurable mapper.  
 For more information you can refer to [active-organization](./docs/active-organization.md).
+
+### Global organization settings
+
+In the `Organizations` tab it is possible to switch between two master configuration settings: "Create Admin User" and "Shared IDPs"
+
+The `Create Admin User` setting controls the creation of the initial administrator when a new organization is created.    
+The `Shared IDPs` will give a keycloak admin user the possibility to control the assignment of a Keycloak identity provider in the context of multiple organization. If turned `on`the same IDP can be shared between multiple organizations. If turned `off` a IDP can be assigned to one organization. Switching this setting from `on` to `off` will erase all the IDP settings the current organizations have.  
+These configs are persisted in the realm config under the flags `_providerConfig.orgs.config.createAdminUser` and `_providerConfig.orgs.config.sharedIdps`
+
+### Organizations shared IDPs
+
+It is possible to share the same IDP between multiple organizations by switching `on` the `Shared IDPs` config.   
+This offers the possibility to login using the same IDP to different organizations by using the [IdP Discovery](#idp-discovery) method.   
+For a shared IdP if the `Post login flow` authentication flow is set to `post org broker login` the `Add User to Org` authenticator will add the new member to all organizations which contain the user email domain in their domains configuration list.
 
 ## License
 

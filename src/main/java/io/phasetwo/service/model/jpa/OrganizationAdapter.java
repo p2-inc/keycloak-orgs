@@ -8,12 +8,13 @@ import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.jpa.entity.DomainEntity;
+import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
-import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
+import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
@@ -29,15 +30,15 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
-public class OrganizationAdapter implements OrganizationModel, JpaModel<OrganizationEntity> {
+public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrganizationEntity> {
 
   protected final KeycloakSession session;
-  protected final OrganizationEntity org;
+  protected final ExtOrganizationEntity org;
   protected final EntityManager em;
   protected final RealmModel realm;
 
   public OrganizationAdapter(
-      KeycloakSession session, RealmModel realm, EntityManager em, OrganizationEntity org) {
+      KeycloakSession session, RealmModel realm, EntityManager em, ExtOrganizationEntity org) {
     this.session = session;
     this.em = em;
     this.org = org;
@@ -45,7 +46,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   }
 
   @Override
-  public OrganizationEntity getEntity() {
+  public ExtOrganizationEntity getEntity() {
     return org;
   }
 
@@ -319,12 +320,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<Organiza
   public Stream<IdentityProviderModel> getIdentityProvidersStream() {
     return getRealm()
         .getIdentityProvidersStream()
+        // Todo: do we need to apply here a role filter? I believe not since its part of the
+        // HomeIdpDiscoverer
         .filter(
             i -> {
               Map<String, String> config = i.getConfig();
-              return config != null
-                  && config.containsKey(ORG_OWNER_CONFIG_KEY)
-                  && getId().equals(config.get(ORG_OWNER_CONFIG_KEY));
+              var orgs = IdentityProviders.getAttributeMultivalued(config, ORG_OWNER_CONFIG_KEY);
+              return orgs.contains(getId());
             });
   }
 }

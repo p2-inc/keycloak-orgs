@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <changeSet author="richardalberto" id="add-organization-member-user-index" >
+    <preConditions onFail="MARK_RAN">
+      <not>
+          <indexExists indexName="IDX_USER_ID" />
+      </not>
+    </preConditions>
+    <createIndex indexName="IDX_USER_ID" tableName="ORGANIZATION_MEMBER">
+      <column name="USER_ID" type="VARCHAR(255)"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

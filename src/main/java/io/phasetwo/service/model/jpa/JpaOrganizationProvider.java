@@ -10,9 +10,9 @@ import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.jpa.entity.DomainEntity;
+import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
-import io.phasetwo.service.model.jpa.entity.OrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.resource.OrganizationAdminAuth;
 import jakarta.persistence.EntityManager;
@@ -47,7 +47,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   @Override
   public OrganizationModel createOrganization(
       RealmModel realm, String name, UserModel createdBy, boolean admin) {
-    OrganizationEntity e = new OrganizationEntity();
+    ExtOrganizationEntity e = new ExtOrganizationEntity();
     e.setId(KeycloakModelUtils.generateId());
     e.setRealmId(realm.getId());
     e.setName(name);
@@ -70,7 +70,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
   @Override
   public OrganizationModel getOrganizationById(RealmModel realm, String id) {
-    OrganizationEntity org = em.find(OrganizationEntity.class, id);
+    ExtOrganizationEntity org = em.find(ExtOrganizationEntity.class, id);
     if (org != null && org.getRealmId().equals(realm.getId())) {
       return new OrganizationAdapter(session, realm, em, org);
     } else {
@@ -124,8 +124,9 @@ public class JpaOrganizationProvider implements OrganizationProvider {
       attributes = ImmutableMap.of();
     }
     CriteriaBuilder builder = em.getCriteriaBuilder();
-    CriteriaQuery<OrganizationEntity> queryBuilder = builder.createQuery(OrganizationEntity.class);
-    Root<OrganizationEntity> root = queryBuilder.from(OrganizationEntity.class);
+    CriteriaQuery<ExtOrganizationEntity> queryBuilder =
+        builder.createQuery(ExtOrganizationEntity.class);
+    Root<ExtOrganizationEntity> root = queryBuilder.from(ExtOrganizationEntity.class);
 
     List<Predicate> predicates = attributePredicates(attributes, root);
 
@@ -135,7 +136,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
     queryBuilder.where(predicates.toArray(new Predicate[0])).orderBy(builder.asc(root.get("name")));
 
-    TypedQuery<OrganizationEntity> query = em.createQuery(queryBuilder);
+    TypedQuery<ExtOrganizationEntity> query = em.createQuery(queryBuilder);
 
     return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
         .map(orgEntity -> getOrganizationById(realm, orgEntity.getId()))
@@ -154,7 +155,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   @Override
   public boolean removeOrganization(RealmModel realm, String id) {
     OrganizationModel org = getOrganizationById(realm, id);
-    OrganizationEntity e = em.find(OrganizationEntity.class, id);
+    ExtOrganizationEntity e = em.find(ExtOrganizationEntity.class, id);
     em.remove(e);
     session.getKeycloakSessionFactory().publish(orgRemovedEvent(realm, org));
     em.flush();
@@ -220,7 +221,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   private List<Predicate> attributePredicates(
-      Map<String, String> attributes, Root<OrganizationEntity> root) {
+      Map<String, String> attributes, Root<ExtOrganizationEntity> root) {
     CriteriaBuilder builder = em.getCriteriaBuilder();
 
     List<Predicate> predicates = new ArrayList<>();
@@ -243,7 +244,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
                       builder.lower(root.get("displayName")), "%" + value.toLowerCase() + "%")));
           break;
         default:
-          Join<OrganizationEntity, OrganizationAttributeEntity> attributesJoin =
+          Join<ExtOrganizationEntity, OrganizationAttributeEntity> attributesJoin =
               root.join("attributes", JoinType.LEFT);
 
           attributePredicates.add(
@@ -261,10 +262,10 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     return predicates;
   }
 
-  private Predicate memberPredicate(UserModel member, Root<OrganizationEntity> root) {
+  private Predicate memberPredicate(UserModel member, Root<ExtOrganizationEntity> root) {
     CriteriaBuilder builder = em.getCriteriaBuilder();
 
-    Join<OrganizationEntity, OrganizationMemberEntity> membersJoin =
+    Join<ExtOrganizationEntity, OrganizationMemberEntity> membersJoin =
         root.join("members", JoinType.LEFT);
 
     return builder.equal(membersJoin.get("userId"), member.getId());

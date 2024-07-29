@@ -174,8 +174,8 @@ public class Helpers {
       rep.setEventTypes(types);
     }
 
-    SimpleHttp.Response response =
-        SimpleHttp.doPost(baseUrl, httpClient)
+    LegacySimpleHttp.Response response =
+        LegacySimpleHttp.doPost(baseUrl, httpClient)
             .auth(keycloak.tokenManager().getAccessTokenString())
             .json(rep)
             .asResponse();
@@ -190,8 +190,8 @@ public class Helpers {
       Keycloak keycloak, CloseableHttpClient httpClient, String baseUrl, String webhookId)
       throws Exception {
 
-    SimpleHttp.Response response =
-        SimpleHttp.doDelete(baseUrl + "/" + webhookId, httpClient)
+    LegacySimpleHttp.Response response =
+        LegacySimpleHttp.doDelete(baseUrl + "/" + webhookId, httpClient)
             .auth(keycloak.tokenManager().getAccessTokenString())
             .asResponse();
     assertThat(response.getStatus(), is(204));

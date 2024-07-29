@@ -41,7 +41,7 @@ public class OrganizationAttributeEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "ORGANIZATION_ID")
-  protected OrganizationEntity organization;
+  protected ExtOrganizationEntity organization;
 
   @Column(name = "NAME")
   protected String name;
@@ -74,11 +74,11 @@ public class OrganizationAttributeEntity {
     this.value = value;
   }
 
-  public OrganizationEntity getOrganization() {
+  public ExtOrganizationEntity getOrganization() {
     return organization;
   }
 
-  public void setOrganization(OrganizationEntity organization) {
+  public void setOrganization(ExtOrganizationEntity organization) {
     this.organization = organization;
   }
 

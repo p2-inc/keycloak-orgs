@@ -1,5 +1,9 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_SHARED_IDPS_KEY;
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
+import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_IMPORT;
@@ -13,12 +17,14 @@ import io.phasetwo.service.importexport.representation.OrganizationRepresentatio
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.representation.Organization;
+import io.phasetwo.service.representation.OrganizationsConfig;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -160,6 +166,54 @@ public class OrganizationsResource extends OrganizationAdminResource {
     return Response.created(
             session.getContext().getUri().getAbsolutePathBuilder().path(o.getId()).build())
         .build();
+  }
+
+  @PUT
+  @Path("config")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response addOrganizationsConfig(@Valid OrganizationsConfig body) {
+    log.debugf("Create org config for realm %s", realm.getName());
+    if (!auth.hasManageRealm()) {
+      throw new NotAuthorizedException("Insufficient permission to update organization config.");
+    }
+    resetIdentityProviders(body.isSharedIdps());
+
+    realm.setAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, body.isCreateAdminUser());
+    realm.setAttribute(ORG_CONFIG_SHARED_IDPS_KEY, body.isSharedIdps());
+
+    return Response.ok(body).build();
+  }
+
+  private void resetIdentityProviders(boolean newSharedIdpConfig) {
+    var existingSharedIdpConfig = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
+    if (existingSharedIdpConfig && !newSharedIdpConfig) {
+      realm
+          .getIdentityProvidersStream()
+          .forEach(
+              identityProviderModel -> {
+                identityProviderModel.getConfig().put(ORG_SHARED_IDP_KEY, "false");
+                identityProviderModel.getConfig().put(ORG_OWNER_CONFIG_KEY, null);
+
+                realm.updateIdentityProvider(identityProviderModel);
+              });
+    }
+  }
+
+  @GET
+  @Path("config")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getOrganizationConfig() {
+    log.debugf("Create org config for realm %s", realm.getName());
+    if (!auth.hasManageRealm()) {
+      throw new NotAuthorizedException("Insufficient permission to update organization config.");
+    }
+
+    var representation = new OrganizationsConfig();
+    representation.setCreateAdminUser(realm.getAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, true));
+    representation.setSharedIdps(realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false));
+
+    return Response.ok(representation).build();
   }
 
   @GET
