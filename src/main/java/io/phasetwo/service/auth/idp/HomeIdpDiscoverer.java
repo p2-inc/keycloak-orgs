@@ -37,7 +37,7 @@ final class HomeIdpDiscoverer {
         String realmName = context.getRealm().getName();
         AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
         LOG.tracef("Trying to discover home IdP for username '%s' in realm '%s' with authenticator config '%s'",
-                username, realmName, authenticatorConfig == null ? "<unconfigured>" : authenticatorConfig.getAlias());
+            username, realmName, authenticatorConfig == null ? "<unconfigured>" : authenticatorConfig.getAlias());
 
         List<IdentityProviderModel> homeIdps = new ArrayList<>();
 
@@ -45,11 +45,11 @@ final class HomeIdpDiscoverer {
         UserModel user = context.getUser();
         if (user == null) {
             LOG.tracef("No user found in AuthenticationFlowContext. Extracting domain from provided username '%s'.",
-                    username);
+                username);
             emailDomain = domainExtractor.extractFrom(username);
         } else {
             LOG.tracef("User found in AuthenticationFlowContext. Extracting domain from stored user '%s'.",
-                    user.getId());
+                user.getId());
             emailDomain = domainExtractor.extractFrom(user);
         }
 
@@ -86,38 +86,37 @@ final class HomeIdpDiscoverer {
         HomeIdpDiscoveryConfig config = new HomeIdpDiscoveryConfig(context.getAuthenticatorConfig());
         if (user == null || !config.forwardToLinkedIdp()) {
             LOG.tracef(
-                    "User '%s' is not stored locally or forwarding to linked IdP is disabled. Skipping discovery of linked IdPs.",
-                    username);
+                "User '%s' is not stored locally or forwarding to linked IdP is disabled. Skipping discovery of linked IdPs.",
+                username);
             return Collections.emptyList();
         }
 
         LOG.tracef(
-                "Found local user '%s' and forwarding to linked IdP is enabled. Discovering linked IdPs.",
-                username);
+            "Found local user '%s' and forwarding to linked IdP is enabled. Discovering linked IdPs.",
+            username);
 
         linkedIdps = context.getSession().users()
                 .getFederatedIdentitiesStream(context.getRealm(), user)
                 .collect(
-                        Collectors.toMap(FederatedIdentityModel::getIdentityProvider,
-                                FederatedIdentityModel::getUserName));
+                    Collectors.toMap(FederatedIdentityModel::getIdentityProvider, FederatedIdentityModel::getUserName));
 
         // Custom Fastly lookup mechanism.
         //
         // 1. Get all Orgs linked to the user
-        // 3. Filter orgs based on inbound client (i.e. only return Sig-Sci orgs for
-        // sig-sci client etc)
+        // 3. Filter orgs based on inbound client (i.e. only return Sig-Sci orgs for sig-sci client etc)
         // 4. Filter orgs to only those with force_sso
         // 2. Filter to only enabled IdPs
         String clientID = context.getAuthenticationSession().getClient().getClientId();
         OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
         String userDefaultCID = Objects.toString(
                 user.getFirstAttribute("default_cid"),
-                "");
+            "");
 
-        List<IdentityProviderModel> enabledIdpsForUserOrgs = orgs.getUserOrganizationsStream(
-                context.getRealm(), user)
+        List<IdentityProviderModel> enabledIdpsForUserOrgs =
+            orgs.getUserOrganizationsStream(
+                    context.getRealm(), user)
                 .filter(o -> {
-                    if (clientID.equals("sigsci-dashboard")) {
+                    if(clientID.equals("sigsci-dashboard")) {
                         String corp = o.getFirstAttribute("corp_id");
                         boolean hasCorpID = corp != null && !corp.isEmpty();
                         return hasCorpID;
@@ -134,10 +133,8 @@ final class HomeIdpDiscoverer {
                     return hasCID && hasForceSSO;
                 })
                 .sorted((o1, o2) -> {
-                    if (o1.getFirstAttribute("customer_id") == userDefaultCID)
-                        return -1;
-                    else
-                        return 1;
+                    if(o1.getFirstAttribute("customer_id") == userDefaultCID) return -1;
+                    else return 1;
                 })
                 .flatMap(o -> o.getIdentityProvidersStream())
                 .filter(IdentityProviderModel::isEnabled)
@@ -150,19 +147,17 @@ final class HomeIdpDiscoverer {
         return homeIdps;
     }
 
-    private void logFoundIdps(String idpQualifier, String domainQualifier, List<IdentityProviderModel> homeIdps,
-            Domain domain, String username) {
+    private void logFoundIdps(String idpQualifier, String domainQualifier, List<IdentityProviderModel> homeIdps, Domain domain, String username) {
         String homeIdpsString = homeIdps.stream()
-                .map(IdentityProviderModel::getAlias)
-                .collect(Collectors.joining(","));
+            .map(IdentityProviderModel::getAlias)
+            .collect(Collectors.joining(","));
         LOG.tracef("Found %s IdPs [%s] with %s domain '%s' for user '%s'",
-                idpQualifier, homeIdpsString, domainQualifier, domain, username);
+            idpQualifier, homeIdpsString, domainQualifier, domain, username);
     }
 
-    private List<IdentityProviderModel> getLinkedIdpsFrom(List<IdentityProviderModel> enabledIdpsWithMatchingDomain,
-            Map<String, String> linkedIdps) {
+    private List<IdentityProviderModel> getLinkedIdpsFrom(List<IdentityProviderModel> enabledIdpsWithMatchingDomain, Map<String, String> linkedIdps) {
         return enabledIdpsWithMatchingDomain.stream()
-                .filter(it -> linkedIdps.containsKey(it.getAlias()))
-                .collect(Collectors.toList());
+            .filter(it -> linkedIdps.containsKey(it.getAlias()))
+            .collect(Collectors.toList());
     }
 }
