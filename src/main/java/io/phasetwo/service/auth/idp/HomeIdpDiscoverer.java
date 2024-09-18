@@ -128,6 +128,17 @@ final class HomeIdpDiscoverer {
                     return hasCID && hasForceSSO;
                 })
                 .sorted((o1, o2) -> {
+                    String corp_id = o.getFirstAttribute("corp_id");
+                    String customer_id = o.getFirstAttribute("customer_id");
+                    if(clientID.equals("sigsci-dashboard") && corp_id != null && !corp_id.isEmpty()) {
+                        return -1;
+                    }
+                    if(!clientID.equals("sigsci-dashboard") && customer_id != null && !customer_id.isEmpty()) {
+                        return -1;
+                    }
+                    else return 1;
+                })
+                .sorted((o1, o2) -> {
                     if(o1.getFirstAttribute("customer_id") == userDefaultCID) return -1;
                     else return 1;
                 })
