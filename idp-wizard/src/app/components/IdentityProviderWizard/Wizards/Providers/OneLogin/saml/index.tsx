@@ -29,25 +29,19 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const OneLoginWizard: FC = () => {
   const idpCommonName = "OneLogin IdP";
-  const alias = getAlias({
-    provider: Providers.ONE_LOGIN,
-    protocol: Protocols.SAML,
-    preface: "onelogin-saml",
-  });
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const title = "OneLogin wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getRealm } = useKeycloakAdminApi();
   const {
-    endpoints,
+    alias,
     setAlias,
     entityId,
     loginRedirectURL: acsUrl,
     adminLinkSaml: adminLink,
     identifierURL,
     createIdPUrl,
-    baseServerRealmsUrl,
   } = useApi();
 
   const acsUrlValidator = acsUrl.replace(/\//g, "\\/");
@@ -63,8 +57,13 @@ export const OneLoginWizard: FC = () => {
   const [disableButton, setDisableButton] = useState(false);
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.ONE_LOGIN,
+      protocol: Protocols.SAML,
+      preface: "onelogin-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const finishStep = 6;
 
@@ -140,8 +139,8 @@ export const OneLoginWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-      
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
+
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
@@ -149,14 +148,21 @@ export const OneLoginWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
-        attributes: [ { userAttribute: "idpUserId", attributeName: "id", friendlyName: ""} ],
-	featureFlags,
+        attributes: [
+          { userAttribute: "idpUserId", attributeName: "id", friendlyName: "" },
+        ],
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+
+      clearAlias({
+        provider: Providers.ONE_LOGIN,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       setResults(
         `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`

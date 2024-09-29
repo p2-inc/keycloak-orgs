@@ -11,7 +11,10 @@ import { Step1, Step2, Step3, Step4, Step5 } from "./steps";
 import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
-import { CreateIdp, SamlAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
+import {
+  CreateIdp,
+  SamlAttributeMapper,
+} from "@app/components/IdentityProviderWizard/Wizards/services";
 import { Axios } from "@wizardServices";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
@@ -21,24 +24,19 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const PingOneWizard: FC = () => {
   const idpCommonName = "PingOne IdP";
-  const alias = getAlias({
-    provider: Providers.PING_ONE,
-    protocol: Protocols.SAML,
-    preface: "pingone-saml",
-  });
+
   const navigateToBasePath = useNavigateToBasePath();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const title = "PingOne wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     loginRedirectURL: acsUrl,
     entityId,
     adminLinkSaml: adminLink,
     identifierURL,
     createIdPUrl,
-    baseServerRealmsUrl,
   } = useApi();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
@@ -51,8 +49,13 @@ export const PingOneWizard: FC = () => {
   const [disableButton, setDisableButton] = useState(false);
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.PING_ONE,
+      protocol: Protocols.SAML,
+      preface: "pingone-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const finishStep = 6;
 
@@ -125,8 +128,8 @@ export const PingOneWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-      
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
+
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
@@ -134,14 +137,25 @@ export const PingOneWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
-        attributes: [ { userAttribute: "idpUserId", attributeName: "saml_subject", friendlyName: ""} ],
-	featureFlags,
+        attributes: [
+          {
+            userAttribute: "idpUserId",
+            attributeName: "saml_subject",
+            friendlyName: "",
+          },
+        ],
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+
+      clearAlias({
+        provider: Providers.PING_ONE,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       setResults(
         `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`
@@ -184,7 +198,8 @@ export const PingOneWizard: FC = () => {
       hideCancelButton: true,
       enableNext: true,
       canJumpTo: stepIdReached >= 4,
-    },    {
+    },
+    {
       id: 5,
       name: `Upload ${idpCommonName} Information`,
       component: <Step5 handleFormSubmit={handleFormSubmit} />,

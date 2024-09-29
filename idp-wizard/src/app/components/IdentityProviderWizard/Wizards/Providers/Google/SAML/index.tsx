@@ -12,7 +12,10 @@ import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import { Axios, clearAlias } from "@wizardServices";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
-import { CreateIdp, SamlAttributeMapper } from "@app/components/IdentityProviderWizard/Wizards/services";
+import {
+  CreateIdp,
+  SamlAttributeMapper,
+} from "@app/components/IdentityProviderWizard/Wizards/services";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
@@ -24,14 +27,10 @@ export const GoogleWizard: FC = () => {
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
-  const alias = getAlias({
-    provider: Providers.GOOGLE_SAML,
-    protocol: Protocols.SAML,
-    preface: "google-saml",
-  });
+
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { getServerUrl, getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     loginRedirectURL: acsUrl,
     entityId,
@@ -50,8 +49,13 @@ export const GoogleWizard: FC = () => {
   const [disableButton, setDisableButton] = useState(false);
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.GOOGLE_SAML,
+      protocol: Protocols.SAML,
+      preface: "google-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const finishStep = 8;
 
@@ -121,8 +125,8 @@ export const GoogleWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-      
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
+
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
@@ -130,13 +134,18 @@ export const GoogleWizard: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
-	featureFlags
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+
+      clearAlias({
+        provider: Providers.GOOGLE_SAML,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       setResults(`Error creating IdP for ${idpCommonName}.`);
       setError(true);

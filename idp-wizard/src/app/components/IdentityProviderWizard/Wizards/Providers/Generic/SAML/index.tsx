@@ -30,20 +30,14 @@ export const GenericSAML: FC = () => {
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getServerUrl, getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     loginRedirectURL: ssoUrl,
     entityId,
     adminLinkSaml: adminLink,
     identifierURL,
     createIdPUrl,
-    baseServerRealmsUrl,
   } = useApi();
-
-  const alias = getAlias({
-    provider: Providers.SAML,
-    protocol: Protocols.SAML,
-    preface: "generic-saml",
-  });
 
   const samlMetadata = `${getServerUrl()}/realms/${getRealm()}/protocol/saml/descriptor`;
 
@@ -59,10 +53,15 @@ export const GenericSAML: FC = () => {
   const [disableButton, setDisableButton] = useState(false);
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.SAML,
+      protocol: Protocols.SAML,
+      preface: "generic-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
-  const finishStep = 6;
+  const finishStep = 5;
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
@@ -123,6 +122,10 @@ export const GenericSAML: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      clearAlias({
+        provider: Providers.SAML,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       setResults(
         `Error creating ${idpCommonName}. Please confirm there is no SAML configured already.`

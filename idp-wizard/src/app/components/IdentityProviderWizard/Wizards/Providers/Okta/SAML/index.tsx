@@ -8,10 +8,9 @@ import {
 import OktaLogo from "@app/images/okta/okta-logo.png";
 import { Header, WizardConfirmation } from "@wizardComponents";
 import { Step1, Step2, Step3, Step4, Step5, Step6 } from "./Steps";
-import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { Axios, CreateIdp, SamlAttributeMapper } from "@wizardServices";
-import { API_RETURN, API_STATUS } from "@app/configurations/api-status";
+import { API_STATUS } from "@app/configurations/api-status";
 import { useNavigateToBasePath } from "@app/routes";
 import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
@@ -26,22 +25,15 @@ export const OktaWizardSaml: FC = () => {
   const [metadata, setMetadata] = useState();
   const [isFormValid, setIsFormValid] = useState(false);
   const [stepIdReached, setStepIdReached] = useState(1);
-  const { getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     loginRedirectURL: ssoUrl,
     entityId: audienceUri,
     adminLinkSaml: adminLink,
     identifierURL,
     createIdPUrl,
-    baseServerRealmsUrl,
   } = useApi();
-
-  const alias = getAlias({
-    provider: Providers.OKTA,
-    protocol: Protocols.SAML,
-    preface: "okta-saml",
-  });
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -50,8 +42,13 @@ export const OktaWizardSaml: FC = () => {
   const [disableButton, setDisableButton] = useState(false);
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.OKTA,
+      protocol: Protocols.SAML,
+      preface: "okta-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const finishStep = 8;
 
@@ -79,8 +76,6 @@ export const OktaWizardSaml: FC = () => {
     const fd = new FormData();
     fd.append("providerId", "saml");
     fd.append("file", idpMetadata);
-
-    console.log(fd);
 
     try {
       const resp = await Axios.post(identifierURL, fd);
@@ -117,8 +112,8 @@ export const OktaWizardSaml: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-      
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
+
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
@@ -126,13 +121,18 @@ export const OktaWizardSaml: FC = () => {
         emailAttribute: { attributeName: "email", friendlyName: "" },
         firstNameAttribute: { attributeName: "firstName", friendlyName: "" },
         lastNameAttribute: { attributeName: "lastName", friendlyName: "" },
-	featureFlags,
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+
+      clearAlias({
+        provider: Providers.OKTA,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       console.log("error", e);
       setResults(`Error creating ${idpCommonName}.`);

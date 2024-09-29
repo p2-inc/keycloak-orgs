@@ -123,6 +123,7 @@ export const useApi = () => {
   let federationMetadataAddressUrl = `${loginRedirectURL}/descriptor`;
 
   return {
+    alias,
     setAlias,
     endpoints,
     baseServerRealmsUrl,

@@ -25,27 +25,26 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const Auth0WizardSAML: FC = () => {
   const idpCommonName = "Auth0 SAML IdP";
-  const alias = getAlias({
-    provider: Providers.AUTH0,
-    protocol: Protocols.SAML,
-    preface: "auth0-saml",
-  });
+
   const navigateToBasePath = useNavigateToBasePath();
-  const { getRealm } = useKeycloakAdminApi();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const {
-    endpoints,
+    alias,
     setAlias,
     adminLinkSaml: adminLink,
     identifierURL,
     createIdPUrl,
     loginRedirectURL,
-    baseServerRealmsUrl,
   } = useApi();
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.AUTH0,
+      protocol: Protocols.SAML,
+      preface: "auth0-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -149,6 +148,10 @@ export const Auth0WizardSAML: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      clearAlias({
+        provider: Providers.AUTH0,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       setResults(`Error creating ${idpCommonName}.`);
       setError(true);

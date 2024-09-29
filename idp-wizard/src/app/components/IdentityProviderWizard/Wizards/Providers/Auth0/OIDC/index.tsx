@@ -20,15 +20,12 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const Auth0WizardOIDC: FC = () => {
   const idpCommonName = "Auth0 OIDC IdP";
-  const alias = getAlias({
-    provider: Providers.AUTH0,
-    protocol: Protocols.OPEN_ID,
-    preface: "auth0-oidc",
-  });
+
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
-  const { getServerUrl, getRealm, getAuthRealm } = useKeycloakAdminApi();
+  const { getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     loginRedirectURL,
     identifierURL,
@@ -53,8 +50,13 @@ export const Auth0WizardOIDC: FC = () => {
   });
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.AUTH0,
+      protocol: Protocols.OPEN_ID,
+      preface: "auth0-oidc",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const finishStep = 5;
 
@@ -107,7 +109,7 @@ export const Auth0WizardOIDC: FC = () => {
         };
       }
     } catch (e) {
-      console.log(err);
+      console.log(e);
     }
     setIsFormValid(false);
     return {
@@ -133,13 +135,17 @@ export const Auth0WizardOIDC: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
       // TODO emailAsUsername, Mapper?
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      clearAlias({
+        provider: Providers.AUTH0,
+        protocol: Protocols.OPEN_ID,
+      });
     } catch (e) {
       setResults(`Error creating ${idpCommonName}.`);
       setError(true);

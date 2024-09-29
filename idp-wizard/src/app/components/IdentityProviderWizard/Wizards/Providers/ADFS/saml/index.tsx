@@ -28,21 +28,16 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const ADFSWizard: FC = () => {
   const idpCommonName = "ADFS IdP";
-  const alias = getAlias({
-    provider: Providers.ADFS,
-    protocol: Protocols.SAML,
-    preface: "adfs-saml",
-  });
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const title = "ADFS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     adminLinkSaml: adminLink,
     federationMetadataAddressUrl,
-    entityId,
     identifierURL,
     createIdPUrl,
     updateIdPUrl,
@@ -63,6 +58,14 @@ export const ADFSWizard: FC = () => {
   useEffect(() => {
     setAlias(alias);
   }, [alias]);
+  useEffect(() => {
+    const genAlias = getAlias({
+      provider: Providers.ADFS,
+      protocol: Protocols.SAML,
+      preface: "adfs-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const finishStep = 5;
 
@@ -193,6 +196,10 @@ export const ADFSWizard: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      clearAlias({
+        provider: Providers.ADFS,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       setResults(
         `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`

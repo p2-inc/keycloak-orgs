@@ -29,11 +29,7 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const EntraIdWizard: FC = () => {
   const idpCommonName = "EntraId SAML IdP";
-  const alias = getAlias({
-    provider: Providers.ENTRAID,
-    protocol: Protocols.SAML,
-    preface: "entraid-saml",
-  });
+
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -45,21 +41,26 @@ export const EntraIdWizard: FC = () => {
 
   const { getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     adminLinkSaml: adminLink,
     identifierURL,
     createIdPUrl,
     loginRedirectURL: acsUrl,
     entityId,
-    baseServerRealmsUrl,
   } = useApi();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.ENTRAID,
+      protocol: Protocols.SAML,
+      preface: "entraid-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const finishStep = 7;
 
@@ -169,6 +170,11 @@ export const EntraIdWizard: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+
+      clearAlias({
+        provider: Providers.ENTRAID,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       console.error(e);
       setResults(

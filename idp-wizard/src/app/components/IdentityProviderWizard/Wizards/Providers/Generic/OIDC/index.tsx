@@ -30,15 +30,12 @@ export const GenericOIDC: FC = () => {
   const idpCommonName = "OIDC IdP";
   const title = "OIDC wizard";
   const navigateToBasePath = useNavigateToBasePath();
-  const alias = getAlias({
-    provider: Providers.OPEN_ID,
-    protocol: Protocols.OPEN_ID,
-    preface: "generic-oidc",
-  });
+
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     adminLinkOidc: adminLink,
     identifierURL,
@@ -47,8 +44,13 @@ export const GenericOIDC: FC = () => {
   } = useApi();
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.OPEN_ID,
+      protocol: Protocols.OPEN_ID,
+      preface: "generic-oidc",
+    });
+    setAlias(genAlias);
+  }, []);
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -229,6 +231,10 @@ export const GenericOIDC: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      clearAlias({
+        provider: Providers.OPEN_ID,
+        protocol: Protocols.OPEN_ID,
+      });
     } catch (e) {
       setResults(`Error creating ${idpCommonName}. Check for an existing IDP.`);
       setError(true);

@@ -29,11 +29,6 @@ import { useGetFeatureFlagsQuery } from "@app/services";
 
 export const DuoWizard: FC = () => {
   const idpCommonName = "Duo SAML IdP";
-  const alias = getAlias({
-    provider: Providers.DUO,
-    protocol: Protocols.SAML,
-    preface: "duo-saml",
-  });
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -42,8 +37,9 @@ export const DuoWizard: FC = () => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
-  const {  getRealm } = useKeycloakAdminApi();
+  const { getRealm } = useKeycloakAdminApi();
   const {
+    alias,
     setAlias,
     adminLinkSaml: adminLink,
     loginRedirectURL: acsUrl,
@@ -57,8 +53,13 @@ export const DuoWizard: FC = () => {
   const [metadataUrl, setMetadataUrl] = useState("");
 
   useEffect(() => {
-    setAlias(alias);
-  }, [alias]);
+    const genAlias = getAlias({
+      provider: Providers.DUO,
+      protocol: Protocols.SAML,
+      preface: "duo-saml",
+    });
+    setAlias(genAlias);
+  }, []);
 
   const finishStep = 6;
 
@@ -133,22 +134,42 @@ export const DuoWizard: FC = () => {
     };
 
     try {
-      await CreateIdp({createIdPUrl, payload, featureFlags});
-      
+      await CreateIdp({ createIdPUrl, payload, featureFlags });
+
       await SamlAttributeMapper({
         alias,
         createIdPUrl,
-        usernameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email", friendlyName: "" }, //using email for username
-        emailAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email", friendlyName: "" },
-        firstNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/firstname", friendlyName: "" },
-        lastNameAttribute: { attributeName: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/lastname", friendlyName: "" },
-	featureFlags,
+        usernameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email",
+          friendlyName: "",
+        }, //using email for username
+        emailAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email",
+          friendlyName: "",
+        },
+        firstNameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/firstname",
+          friendlyName: "",
+        },
+        lastNameAttribute: {
+          attributeName:
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/lastname",
+          friendlyName: "",
+        },
+        featureFlags,
       });
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      clearAlias({
+        provider: Providers.DUO,
+        protocol: Protocols.SAML,
+      });
     } catch (e) {
       setResults(
         `Error creating ${idpCommonName}. Please confirm there is no Duo SAML configured already.`
