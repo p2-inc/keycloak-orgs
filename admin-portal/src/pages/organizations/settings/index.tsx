@@ -12,6 +12,7 @@ import SettingsSSO from "./sso";
 import useUser from "components/utils/useUser";
 import { useTranslation } from "react-i18next";
 import useOrgDisplayName from "components/utils/org-display-name";
+const { features: featureFlags } = config.env;
 
 export type SettingsProps = {
   hasManageOrganizationRole?: boolean;
@@ -62,12 +63,20 @@ export default function OrganizationSettings() {
           <SettingsGeneral
             hasManageOrganizationRole={hasManageOrganizationRole}
           />
-          <hr className="my-10 dark:border-zinc-600" />
-          <SettingsDomain
-            hasManageOrganizationRole={hasManageOrganizationRole}
-          />
-          <hr className="my-10 dark:border-zinc-600" />
-          <SettingsSSO hasManageIDPRole={hasManageIDPRole} />
+          {featureFlags.orgDomainsEnabled && (
+            <>
+              <hr className="my-10 dark:border-zinc-600" />
+              <SettingsDomain
+                hasManageOrganizationRole={hasManageOrganizationRole}
+              />
+            </>
+          )}
+          {featureFlags.orgSsoEnabled && (
+            <>
+              <hr className="my-10 dark:border-zinc-600" />
+              <SettingsSSO hasManageIDPRole={hasManageIDPRole} />
+            </>
+          )}
         </PrimaryContentArea>
       </FixedWidthMainContent>
     </>

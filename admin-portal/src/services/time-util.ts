@@ -8,19 +8,42 @@ class TimeUtil {
     hour: "numeric",
     minute: "numeric",
   };
-  private formatter: Intl.DateTimeFormat;
-
-  constructor() {
+  private shortOptions: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+  private getFormatter(
+    options: Intl.DateTimeFormatOptions
+  ): Intl.DateTimeFormat {
     try {
-      this.formatter = new Intl.DateTimeFormat(locale, this.options);
+      return new Intl.DateTimeFormat(locale, options);
     } catch (e) {
       // unknown locale falling back to English
-      this.formatter = new Intl.DateTimeFormat("en", this.options);
+      return new Intl.DateTimeFormat("en", options);
     }
   }
 
   format(time: number): string {
-    return this.formatter.format(time);
+    const formatter = this.getFormatter(this.options);
+    return formatter.format(time);
+  }
+
+  formatShort(time: number): string {
+    const formatter = this.getFormatter(this.shortOptions);
+    return formatter.format(time);
+  }
+
+  formatISO(time: string): string {
+    const dateObject = new Date(time);
+    const formatter = this.getFormatter(this.options);
+    return formatter.format(dateObject.getTime());
+  }
+
+  formatISOShort(time: string): string {
+    const dateObject = new Date(time);
+    const formatter = this.getFormatter(this.shortOptions);
+    return formatter.format(dateObject.getTime());
   }
 }
 

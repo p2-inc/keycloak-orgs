@@ -1,4 +1,3 @@
-import cs from "classnames";
 import { FC } from "react";
 
 type Props = {
@@ -6,7 +5,7 @@ type Props = {
 };
 
 export const OACTopRow: FC<Props> = ({ children }) => (
-  <div className="flex-wrap justify-between space-y-3 md:flex md:space-y-1 md:space-x-1">
+  <div className="flex-wrap gap-4 space-y-3 md:flex md:space-y-1 md:space-x-1">
     {children}
   </div>
 );

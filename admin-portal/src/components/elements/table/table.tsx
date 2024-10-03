@@ -1,9 +1,9 @@
 import cs from "classnames";
 
 export const firstThClasses =
-  "py-3.5 pl-4 pr-3 text-left font-medium text-black dark:text-zinc-200 sm:pl-6";
+  "py-3.5 pl-4 pr-3 text-left font-semibold text-black dark:text-zinc-200 sm:pl-6";
 export const thClasses =
-  "px-3 py-3.5 text-left font-medium text-black dark:text-zinc-200";
+  "px-3 py-3.5 text-left font-semibold text-black dark:text-zinc-200";
 export const firstTdClasses =
   "whitespace-normal py-4 pl-4 pr-3 font-medium text-black dark:text-zinc-200 sm:pl-6";
 export const tdClasses = "whitespace-normal px-3 py-4";

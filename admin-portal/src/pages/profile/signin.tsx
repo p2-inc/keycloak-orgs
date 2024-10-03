@@ -42,6 +42,9 @@ const SigninProfile = () => {
   });
   const [deleteCredential] = useDeleteCredentialMutation();
 
+  const hasPassword = credentials.find(
+    (cred) => cred.type === CredentialType.PASSWORD
+  );
   const hasWebAuthN = credentials.find(
     (cred) => cred.type === CredentialType.WEB_AUTH_N
   );
@@ -153,11 +156,26 @@ const SigninProfile = () => {
               description={t("signInByEnteringYourPassword")}
               variant="small"
             />
-            <Table
-              columns={cols}
-              rows={rowsForType(CredentialType.PASSWORD, credentials)}
-              isLoading={isLoading}
-            />
+            {!hasPassword ? (
+              <Table
+                columns={cols}
+                rows={rowsForType(CredentialType.PASSWORD, credentials)}
+                isLoading={isLoading}
+              />
+            ) : (
+              <div>
+                {featureFlags.passwordUpdateAllowed ? (
+                  <Button
+                    onClick={() => setUpCredential("UPDATE_PASSWORD")}
+                    isBlackButton
+                  >
+                    {t("setupPassword")}
+                  </Button>
+                ) : (
+                  t("passwordUpdateNotAllowed")
+                )}
+              </div>
+            )}
           </div>
         </div>
         {featureFlags.twoFactorUpdateAllowed && (

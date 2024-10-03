@@ -80,7 +80,7 @@ const NewInvitation = () => {
             title: t("invitation-toast-submit-success", { data }),
           });
           reset();
-          return navigate(`/organizations/${orgId}/details`);
+          return navigate(`/organizations/${orgId}/invitation/pending`);
         })
         .catch((e) => {
           return P2Toast({
@@ -107,7 +107,7 @@ const NewInvitation = () => {
             to={`/organizations/${orgId}/details`}
             className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
           >
-            {t("cancel")}
+            {t("organization")}
           </Link>
         }
       />

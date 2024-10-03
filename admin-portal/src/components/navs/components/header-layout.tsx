@@ -5,15 +5,22 @@ type Props = {
   leftAreaItems?: ReactElement | ReactElement[];
   rightAreaItems?: ReactElement | ReactElement[];
   collapseOnMobile?: boolean;
+  className?: string;
 };
 
 const HeaderLayout: FC<Props> = ({
   leftAreaItems,
   rightAreaItems,
   collapseOnMobile,
+  className,
 }) => {
   return (
-    <div className="flex flex-col space-y-4 px-4 py-4 md:flex-row md:space-y-0 md:px-10 md:py-6">
+    <div
+      className={cs(
+        "flex flex-col space-y-4 px-4 py-4 md:flex-row md:space-y-0 md:px-10 md:py-6",
+        className
+      )}
+    >
       <div
         className={cs("items-center justify-between md:justify-start", {
           flex: !collapseOnMobile,

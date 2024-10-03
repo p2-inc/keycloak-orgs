@@ -3,7 +3,7 @@ export const addTagTypes = [
   "Organizations",
   "Organization Memberships",
   "Organization Domains",
-  "Organization Invitations",
+  "Organization Invitation",
   "Organization Roles",
   "Identity Providers",
   "Users",
@@ -26,6 +26,7 @@ const injectedRtkApi = api
             search: queryArg.search,
             first: queryArg.first,
             max: queryArg.max,
+            q: queryArg.q,
           },
         }),
         providesTags: ["Organizations"],
@@ -40,6 +41,16 @@ const injectedRtkApi = api
           body: queryArg.organizationRepresentation,
         }),
         invalidatesTags: ["Organizations"],
+      }),
+      getOrganizationsCount: build.query<
+        GetOrganizationsCountApiResponse,
+        GetOrganizationsCountApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/count`,
+          params: { search: queryArg.search },
+        }),
+        providesTags: ["Organizations"],
       }),
       getMe: build.query<GetMeApiResponse, GetMeApiArg>({
         query: (queryArg) => ({ url: `/${queryArg.realm}/orgs/me` }),
@@ -97,6 +108,15 @@ const injectedRtkApi = api
             first: queryArg.first,
             max: queryArg.max,
           },
+        }),
+        providesTags: ["Organization Memberships"],
+      }),
+      getOrganizationMembershipsCount: build.query<
+        GetOrganizationMembershipsCountApiResponse,
+        GetOrganizationMembershipsCountApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/${queryArg.orgId}/members/count`,
         }),
         providesTags: ["Organization Memberships"],
       }),
@@ -165,7 +185,7 @@ const injectedRtkApi = api
           method: "POST",
           body: queryArg.invitationRequestRepresentation,
         }),
-        invalidatesTags: ["Organization Invitations"],
+        invalidatesTags: ["Organization Invitation"],
       }),
       getOrganizationInvitations: build.query<
         GetOrganizationInvitationsApiResponse,
@@ -179,7 +199,25 @@ const injectedRtkApi = api
             max: queryArg.max,
           },
         }),
-        providesTags: ["Organization Invitations"],
+        providesTags: ["Organization Invitation"],
+      }),
+      getOrganizationInvitationCount: build.query<
+        GetOrganizationInvitationCountApiResponse,
+        GetOrganizationInvitationCountApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/${queryArg.orgId}/invitations/count`,
+        }),
+        providesTags: ["Organization Invitation"],
+      }),
+      getOrganizationInvitationById: build.query<
+        GetOrganizationInvitationByIdApiResponse,
+        GetOrganizationInvitationByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/${queryArg.orgId}/invitations/${queryArg.invitationId}`,
+        }),
+        providesTags: ["Organization Invitation"],
       }),
       removeOrganizationInvitation: build.mutation<
         RemoveOrganizationInvitationApiResponse,
@@ -189,7 +227,17 @@ const injectedRtkApi = api
           url: `/${queryArg.realm}/orgs/${queryArg.orgId}/invitations/${queryArg.invitationId}`,
           method: "DELETE",
         }),
-        invalidatesTags: ["Organization Invitations"],
+        invalidatesTags: ["Organization Invitation"],
+      }),
+      resendOrganizationInvitation: build.mutation<
+        ResendOrganizationInvitationApiResponse,
+        ResendOrganizationInvitationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/${queryArg.orgId}/invitations/${queryArg.invitationId}/resend-email`,
+          method: "PUT",
+        }),
+        invalidatesTags: ["Organization Invitation"],
       }),
       getOrganizationRoles: build.query<
         GetOrganizationRolesApiResponse,
@@ -208,6 +256,28 @@ const injectedRtkApi = api
           url: `/${queryArg.realm}/orgs/${queryArg.orgId}/roles`,
           method: "POST",
           body: queryArg.organizationRoleRepresentation,
+        }),
+        invalidatesTags: ["Organization Roles"],
+      }),
+      createOrganizationRoles: build.mutation<
+        CreateOrganizationRolesApiResponse,
+        CreateOrganizationRolesApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/${queryArg.orgId}/roles`,
+          method: "PUT",
+          body: queryArg.body,
+        }),
+        invalidatesTags: ["Organization Roles"],
+      }),
+      deleteOrganizationRoles: build.mutation<
+        DeleteOrganizationRolesApiResponse,
+        DeleteOrganizationRolesApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/${queryArg.orgId}/roles`,
+          method: "PATCH",
+          body: queryArg.body,
         }),
         invalidatesTags: ["Organization Roles"],
       }),
@@ -303,6 +373,21 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Identity Providers"],
       }),
+      linkIdp: build.mutation<LinkIdpApiResponse, LinkIdpApiArg>({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/${queryArg.orgId}/idps/link`,
+          method: "POST",
+          body: queryArg.linkIdentityProviderRepresentation,
+        }),
+        invalidatesTags: ["Identity Providers"],
+      }),
+      unlinkIdp: build.mutation<UnlinkIdpApiResponse, UnlinkIdpApiArg>({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/orgs/${queryArg.orgId}/idps/${queryArg.alias}/unlink`,
+          method: "POST",
+        }),
+        invalidatesTags: ["Identity Providers"],
+      }),
       getIdp: build.query<GetIdpApiResponse, GetIdpApiArg>({
         query: (queryArg) => ({
           url: `/${queryArg.realm}/orgs/${queryArg.orgId}/idps/${queryArg.alias}`,
@@ -376,7 +461,7 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/${queryArg.realm}/users/${queryArg.userId}/orgs`,
         }),
-        providesTags: ["Users", "Organizations"],
+        providesTags: ["Users"],
       }),
       getByRealmUsersAndUserIdOrgsOrgIdRoles: build.query<
         GetByRealmUsersAndUserIdOrgsOrgIdRolesApiResponse,
@@ -386,6 +471,28 @@ const injectedRtkApi = api
           url: `/${queryArg.realm}/users/${queryArg.userId}/orgs/${queryArg.orgId}/roles`,
         }),
         providesTags: ["Users"],
+      }),
+      putByRealmUsersAndUserIdOrgsOrgIdRoles: build.mutation<
+        PutByRealmUsersAndUserIdOrgsOrgIdRolesApiResponse,
+        PutByRealmUsersAndUserIdOrgsOrgIdRolesApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/users/${queryArg.userId}/orgs/${queryArg.orgId}/roles`,
+          method: "PUT",
+          body: queryArg.body,
+        }),
+        invalidatesTags: ["Users"],
+      }),
+      patchByRealmUsersAndUserIdOrgsOrgIdRoles: build.mutation<
+        PatchByRealmUsersAndUserIdOrgsOrgIdRolesApiResponse,
+        PatchByRealmUsersAndUserIdOrgsOrgIdRolesApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/${queryArg.realm}/users/${queryArg.userId}/orgs/${queryArg.orgId}/roles`,
+          method: "PATCH",
+          body: queryArg.body,
+        }),
+        invalidatesTags: ["Users"],
       }),
       createEvent: build.mutation<CreateEventApiResponse, CreateEventApiArg>({
         query: (queryArg) => ({
@@ -508,15 +615,24 @@ export type GetOrganizationsApiResponse =
 export type GetOrganizationsApiArg = {
   /** realm name (not id!) */
   realm: string;
+  /** search by name */
   search?: string;
   first?: number;
   max?: number;
+  /** search by attributes using the format `k1:v1,k2:v2` */
+  q?: string;
 };
 export type CreateOrganizationApiResponse = unknown;
 export type CreateOrganizationApiArg = {
   /** realm name (not id!) */
   realm: string;
   organizationRepresentation: OrganizationRepresentation;
+};
+export type GetOrganizationsCountApiResponse = /** status 200 success */ number;
+export type GetOrganizationsCountApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  search?: string;
 };
 export type GetMeApiResponse =
   /** status 200 success */ MyOrganizationsRepresentation;
@@ -568,6 +684,14 @@ export type GetOrganizationMembershipsApiArg = {
   search?: string;
   first?: number;
   max?: number;
+};
+export type GetOrganizationMembershipsCountApiResponse =
+  /** status 200 success */ number;
+export type GetOrganizationMembershipsCountApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** organization id */
+  orgId: string;
 };
 export type GetOrganizationDomainsApiResponse =
   /** status 200 success */ OrganizationDomainRepresentation[];
@@ -642,8 +766,35 @@ export type GetOrganizationInvitationsApiArg = {
   first?: number;
   max?: number;
 };
+export type GetOrganizationInvitationCountApiResponse =
+  /** status 200 success */ number;
+export type GetOrganizationInvitationCountApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** organization id */
+  orgId: string;
+};
+export type GetOrganizationInvitationByIdApiResponse =
+  /** status 200 success */ InvitationRepresentation;
+export type GetOrganizationInvitationByIdApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** organization id */
+  orgId: string;
+  /** invitation id */
+  invitationId: string;
+};
 export type RemoveOrganizationInvitationApiResponse = unknown;
 export type RemoveOrganizationInvitationApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** organization id */
+  orgId: string;
+  /** invitation id */
+  invitationId: string;
+};
+export type ResendOrganizationInvitationApiResponse = unknown;
+export type ResendOrganizationInvitationApiArg = {
   /** realm name (not id!) */
   realm: string;
   /** organization id */
@@ -666,6 +817,24 @@ export type CreateOrganizationRoleApiArg = {
   /** organization id */
   orgId: string;
   organizationRoleRepresentation: OrganizationRoleRepresentation;
+};
+export type CreateOrganizationRolesApiResponse =
+  /** status 207 Multi Status */ BulkResponseItem[];
+export type CreateOrganizationRolesApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** organization id */
+  orgId: string;
+  body: OrganizationRoleRepresentation[];
+};
+export type DeleteOrganizationRolesApiResponse =
+  /** status 207 Multi Status */ BulkResponseItem[];
+export type DeleteOrganizationRolesApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** organization id */
+  orgId: string;
+  body: OrganizationRoleRepresentation[];
 };
 export type GetOrganizationRoleApiResponse =
   /** status 200 success */ OrganizationRoleRepresentation;
@@ -739,7 +908,9 @@ export type RevokeUserOrganizationRoleApiArg = {
   /** user id */
   userId: string;
 };
-export type ImportIdpJsonApiResponse = unknown;
+export type ImportIdpJsonApiResponse = /** status 200 success */ {
+  [key: string]: any;
+};
 export type ImportIdpJsonApiArg = {
   /** realm name (not id!) */
   realm: string;
@@ -762,6 +933,24 @@ export type CreateIdpApiArg = {
   orgId: string;
   /** JSON body */
   identityProviderRepresentation: IdentityProviderRepresentation;
+};
+export type LinkIdpApiResponse = unknown;
+export type LinkIdpApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** organization id */
+  orgId: string;
+  /** JSON body */
+  linkIdentityProviderRepresentation: LinkIdentityProviderRepresentation;
+};
+export type UnlinkIdpApiResponse = unknown;
+export type UnlinkIdpApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** organization id */
+  orgId: string;
+  /** idp alias */
+  alias: string;
 };
 export type GetIdpApiResponse =
   /** status 200 success */ IdentityProviderRepresentation;
@@ -860,6 +1049,28 @@ export type GetByRealmUsersAndUserIdOrgsOrgIdRolesApiArg = {
   /** organization id */
   orgId: string;
 };
+export type PutByRealmUsersAndUserIdOrgsOrgIdRolesApiResponse =
+  /** status 207 Multi Status */ BulkResponseItem[];
+export type PutByRealmUsersAndUserIdOrgsOrgIdRolesApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** user id */
+  userId: string;
+  /** organization id */
+  orgId: string;
+  body: OrganizationRoleRepresentation[];
+};
+export type PatchByRealmUsersAndUserIdOrgsOrgIdRolesApiResponse =
+  /** status 207 Multi Status */ BulkResponseItem[];
+export type PatchByRealmUsersAndUserIdOrgsOrgIdRolesApiArg = {
+  /** realm name (not id!) */
+  realm: string;
+  /** user id */
+  userId: string;
+  /** organization id */
+  orgId: string;
+  body: OrganizationRoleRepresentation[];
+};
 export type CreateEventApiResponse = unknown;
 export type CreateEventApiArg = {
   /** realm name (not id!) */
@@ -957,7 +1168,15 @@ export type OrganizationRepresentation = {
     [key: string]: string[];
   };
 };
-export type MyOrganizationRepresentation = object;
+export type MyOrganizationRepresentation = {
+  name?: string;
+  displayName?: string;
+  url?: string;
+  attributes?: {
+    [key: string]: string[];
+  };
+  roles?: string[];
+};
 export type MyOrganizationsRepresentation = {
   [key: string]: MyOrganizationRepresentation;
 };
@@ -993,18 +1212,31 @@ export type InvitationRequestRepresentation = {
   inviterId?: string;
   redirectUri?: string;
   roles?: string[];
+  attributes?: {
+    [key: string]: string[];
+  };
 };
 export type InvitationRepresentation = {
   id?: string;
+  createdAt?: string;
   email?: string;
   inviterId?: string;
+  invitationUrl?: string;
   organizationId?: string;
   roles?: string[];
+  attributes?: {
+    [key: string]: string[];
+  };
 };
 export type OrganizationRoleRepresentation = {
   id?: string;
   name?: string;
   description?: string;
+};
+export type BulkResponseItem = {
+  status?: number;
+  error?: string;
+  item?: object;
 };
 export type IdentityProviderRepresentation = {
   addReadTokenRoleOnCreate?: boolean;
@@ -1021,6 +1253,11 @@ export type IdentityProviderRepresentation = {
   providerId?: string;
   storeToken?: boolean;
   trustEmail?: boolean;
+};
+export type LinkIdentityProviderRepresentation = {
+  alias?: string;
+  post_broker_flow?: string;
+  sync_mode?: string;
 };
 export type IdentityProviderMapperRepresentation = {
   config?: {
@@ -1069,10 +1306,10 @@ export type WebhookRepresentation = {
   enabled?: boolean;
   url?: string;
   secret?: string;
-  created_by?: string;
-  created_at?: string;
+  createdBy?: string;
+  createdAt?: string;
   realm?: string;
-  event_types?: string[];
+  eventTypes?: string[];
 };
 export type MagicLinkRepresentation = {
   email: string;
@@ -1085,12 +1322,14 @@ export type MagicLinkRepresentation = {
 export const {
   useGetOrganizationsQuery,
   useCreateOrganizationMutation,
+  useGetOrganizationsCountQuery,
   useGetMeQuery,
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
   useDeleteOrganizationMutation,
   useCreatePortalLinkMutation,
   useGetOrganizationMembershipsQuery,
+  useGetOrganizationMembershipsCountQuery,
   useGetOrganizationDomainsQuery,
   useGetOrganizationDomainQuery,
   useVerifyDomainMutation,
@@ -1099,9 +1338,14 @@ export const {
   useRemoveOrganizationMemberMutation,
   useAddOrganizationInvitationMutation,
   useGetOrganizationInvitationsQuery,
+  useGetOrganizationInvitationCountQuery,
+  useGetOrganizationInvitationByIdQuery,
   useRemoveOrganizationInvitationMutation,
+  useResendOrganizationInvitationMutation,
   useGetOrganizationRolesQuery,
   useCreateOrganizationRoleMutation,
+  useCreateOrganizationRolesMutation,
+  useDeleteOrganizationRolesMutation,
   useGetOrganizationRoleQuery,
   useUpdateOrganizationRoleMutation,
   useDeleteOrganizationRoleMutation,
@@ -1112,6 +1356,8 @@ export const {
   useImportIdpJsonMutation,
   useGetIdpsQuery,
   useCreateIdpMutation,
+  useLinkIdpMutation,
+  useUnlinkIdpMutation,
   useGetIdpQuery,
   useUpdateIdpMutation,
   useDeleteIdpMutation,
@@ -1122,6 +1368,8 @@ export const {
   useDeleteIdpMapperMutation,
   useGetByRealmUsersAndUserIdOrgsQuery,
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
+  usePutByRealmUsersAndUserIdOrgsOrgIdRolesMutation,
+  usePatchByRealmUsersAndUserIdOrgsOrgIdRolesMutation,
   useCreateEventMutation,
   useGetRealmAttributesQuery,
   useCreateRealmAttributeMutation,

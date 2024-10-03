@@ -36,6 +36,7 @@ import ProfileDelete from "pages/profile-delete";
 import InjectStyles from "components/utils/injectStyles";
 import NotAuthorized from "pages/not-authorized";
 import { Tooltip } from "react-tooltip";
+import PendingInvitations from "pages/invitation/pending";
 const { features: featureFlags } = config.env;
 
 export type P2Params = {
@@ -115,6 +116,10 @@ const router = createBrowserRouter(
                   element: <NewInvitation />,
                 },
               ],
+            },
+            {
+              path: ":orgId/invitation/pending",
+              element: <PendingInvitations />,
             },
             {
               path: ":orgId/members/:memberId",

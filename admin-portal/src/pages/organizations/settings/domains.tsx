@@ -17,7 +17,6 @@ import { SettingsProps } from ".";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import ConfirmationModal from "components/elements/confirmation-modal";
-import Alert from "components/elements/alerts/alert";
 import P2Toast from "components/utils/toast";
 
 const { realm } = config.env;

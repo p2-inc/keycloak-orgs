@@ -8,7 +8,7 @@ import {
   useGetIdpsQuery,
   useGetOrganizationByIdQuery,
   useGetOrganizationDomainsQuery,
-  useGetOrganizationInvitationsQuery,
+  useGetOrganizationInvitationCountQuery,
   useGetOrganizationMembershipsQuery,
 } from "store/apis/orgs";
 import RoundBadge from "components/elements/badges/round-badge";
@@ -43,6 +43,7 @@ export default function OrganizationDetail() {
   const { features: featureFlags, realm } = config.env;
   const {
     hasManageInvitationsRole: hasManageInvitationsRoleCheck,
+    hasViewInvitationsRole: hasViewInvitationsRoleCheck,
     hasManageOrganizationRole: hasManageOrganizationRoleCheck,
     hasManageIdentityProvidersRole,
     hasViewIdentityProvidersRole,
@@ -68,7 +69,7 @@ export default function OrganizationDetail() {
     orgId: orgId!,
     realm,
   });
-  const { data: invites = [] } = useGetOrganizationInvitationsQuery({
+  const { data: inviteCount = 0 } = useGetOrganizationInvitationCountQuery({
     orgId: orgId!,
     realm,
   });
@@ -88,6 +89,7 @@ export default function OrganizationDetail() {
   }, [search]);
 
   const hasManageInvitationsRole = hasManageInvitationsRoleCheck(orgId);
+  const hasViewInvitationsRole = hasViewInvitationsRoleCheck(orgId);
   const hasManageOrganizationRole = hasManageOrganizationRoleCheck(orgId);
   const hasManageIDPRole = hasManageIdentityProvidersRole(orgId);
   const hasViewIDPRole = hasViewIdentityProvidersRole(orgId);
@@ -146,7 +148,13 @@ export default function OrganizationDetail() {
                     <User className="h-5 w-5" />
                   </RoundedIcon>
                   <Stat label={t("members")} value={allMembersCount}></Stat>
-                  <Stat label={t("pending")} value={invites.length}></Stat>
+                  {hasViewInvitationsRole ? (
+                    <Link to={`/organizations/${orgId}/invitation/pending`}>
+                      <Stat label={t("pending")} value={inviteCount}></Stat>
+                    </Link>
+                  ) : (
+                    <Stat label={t("pending")} value={inviteCount}></Stat>
+                  )}
                 </OACTopRow>
                 <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
                   {t("inviteNewMembersOrRemoveMembersFromTheOrganization")}
