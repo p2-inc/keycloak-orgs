@@ -33,10 +33,10 @@ final class LoginForm {
     Response create(List<IdentityProviderModel> idps) {
         URI baseUriWithCodeAndClientId = loginFormsProvider.getBaseUriWithCodeAndClientId();
         LoginFormsProvider forms = context.form();
-        forms.setAttribute("hidpd", new IdentityProviderBean(context.getRealm(),
-            context.getSession(),
-            idps.stream().map(AlwaysSelectableIdentityProviderModel::new).collect(Collectors.toList()),
-            baseUriWithCodeAndClientId));
+        forms.setAttribute("hidpd", new IdentityProviderBean(context.getSession(),
+            context.getRealm(),
+            baseUriWithCodeAndClientId,
+            context));
         return forms.createForm("hidpd-select-idp.ftl");
     }
 }

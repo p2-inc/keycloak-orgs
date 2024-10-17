@@ -83,7 +83,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   @Override
   public void setDomains(Set<String> domains) {
     //  org.setDomains(domains);
-    Set<String> lower = domains.stream().map(d -> d.toLowerCase()).collect(Collectors.toSet());
+    Set<String> lower = domains.stream().map(String::toLowerCase).collect(Collectors.toSet());
     org.getDomains().removeIf(e -> !lower.contains(e.getDomain()));
     lower.removeIf(d -> org.getDomains().stream().filter(e -> d.equals(e.getDomain())).count() > 0);
     lower.forEach(
@@ -198,7 +198,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   @Override
   public Stream<UserModel> getMembersStream() {
     return org.getMembers().stream()
-        .map(m -> m.getUserId())
+        .map(OrganizationMemberEntity::getUserId)
         .map(uid -> session.users().getUserById(realm, uid))
         .filter(u -> u != null && u.getServiceAccountClientLink() == null);
   }
@@ -319,8 +319,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<IdentityProviderModel> getIdentityProvidersStream() {
-    return getRealm()
-        .getIdentityProvidersStream()
+    return session.identityProviders()
+        .getAllStream()
         // Todo: do we need to apply here a role filter? I believe not since its part of the
         // HomeIdpDiscoverer
         .filter(
