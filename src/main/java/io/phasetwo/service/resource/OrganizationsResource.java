@@ -327,6 +327,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     } catch (ModelException e) {
       throw ErrorResponse.error(e.getMessage(), Response.Status.BAD_REQUEST);
     } catch (Exception e) {
+      log.error("Error: {}", e);
       throw ErrorResponse.error(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
     }
   }

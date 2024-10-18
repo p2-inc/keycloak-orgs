@@ -90,7 +90,10 @@ public abstract class AbstractOrganizationTest {
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
           .withProviderLibsFrom(getDeps())
-          .withAccessToHost(true);
+          .withAccessToHost(true)
+          .withExposedPorts(9000, 8080, 8787)
+          .withEnv("KC_FEATURES_DISABLED", "organization")
+          .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8787,server=y,suspend=n -Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true");
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
 
