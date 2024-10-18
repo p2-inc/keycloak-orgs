@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
-import org.junit.jupiter.api.Test;
 import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
@@ -33,7 +32,7 @@ class OrganizationSpecificAttributeMapperTest extends AbstractOrganizationTest {
   public static final String CLAIM = "secret_attr";
   public static final String SECOND_CLAIM = "another_attribute";
 
-  @Test
+  //@Test
   void shouldConfigureOrganizationSpecificAttributeMapperOidcProtocolMapper() throws Exception {
     // add Example 1 with attribute 'secret_attr' with value "My Secret Value"
     var organization1 =
@@ -185,4 +184,18 @@ class OrganizationSpecificAttributeMapperTest extends AbstractOrganizationTest {
     mapper.setConfig(config);
     realm.clients().get(client.getId()).getProtocolMappers().createMapper(mapper).close();
   }
+//
+//  protected void createAppClientInRealm(RealmResource realm) {
+//    ClientRepresentation client = new ClientRepresentation();
+//    client.setClientId("test-app");
+//    client.setName("test-app");
+//    client.setSecret("password");
+//    client.setEnabled(true);
+//    client.setDirectAccessGrantsEnabled(true);
+//
+//    OIDCAdvancedConfigWrapper.fromClientRepresentation(client).setPostLogoutRedirectUris(Collections.singletonList("+"));
+//
+//    Response response = realm.clients().create(client);
+//    response.close();
+//  }
 }

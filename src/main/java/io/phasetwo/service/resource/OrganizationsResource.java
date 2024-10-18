@@ -275,6 +275,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     KeycloakModelUtils.runJobInTransaction(
         session.getKeycloakSessionFactory(),
         (session) -> {
+          session.getContext().setRealm(realm);
           organizations.forEach(
               organizationRepresentation ->
                   createOrganization(
