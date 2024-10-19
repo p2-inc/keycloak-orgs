@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
+import org.junit.jupiter.api.Test;
 import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
@@ -30,7 +31,7 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
 
   public static final String CLAIM = "organizations";
 
-  //@Test
+  @Test
   void shouldConfigureOrganizationRoleOidcProtocolMapper() throws Exception {
     // add org
     String id = createDefaultOrg().getId();
@@ -50,12 +51,12 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
     }
 
     RealmResource realm = keycloak.realm(REALM);
-    ClientRepresentation client = realm.clients().findByClientId(ADMIN_CLI).get(0);
+    ClientRepresentation client = createPublicClientInRealm(realm, "test-app");
 
     // parse the received access-token
     configureCustomOidcProtocolMapper(realm, client);
 
-    keycloak = getKeycloak(REALM, ADMIN_CLI, user.getUsername(), "pass");
+    keycloak = getKeycloak(REALM, client.getClientId(), user.getUsername(), "pass");
 
     TokenVerifier<AccessToken> verifier =
         TokenVerifier.create(keycloak.tokenManager().getAccessTokenString(), AccessToken.class);
@@ -85,6 +86,8 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
     deleteUser(keycloak, REALM, user.getId());
     // delete organization
     deleteOrganization(keycloak, id);
+    // remove client
+    deleteClient(client.getClientId());
   }
 
   private static void configureCustomOidcProtocolMapper(

@@ -44,6 +44,9 @@ import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.Testcontainers;
@@ -90,9 +93,7 @@ public abstract class AbstractOrganizationTest {
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
           .withProviderLibsFrom(getDeps())
-          .withAccessToHost(true)
-          .withExposedPorts(9000, 8080, 8787)
-          .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8787,server=y,suspend=n -Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true");
+          .withAccessToHost(true);
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
 
@@ -912,5 +913,21 @@ public abstract class AbstractOrganizationTest {
           exportOrganizationReprezentation.getOrganization().getAttributes().entrySet(),
           contains(rep.getAttributes().entrySet().toArray()));
     }
+  }
+
+  protected ClientRepresentation createPublicClientInRealm(RealmResource realm, String clientId) {
+    ClientRepresentation client = new ClientRepresentation();
+    client.setClientId(clientId);
+    client.setName(clientId);
+    client.setPublicClient(true);
+    client.setServiceAccountsEnabled(false);
+    client.setDirectAccessGrantsEnabled(true);
+    client.setEnabled(true);
+    client.setSecret("secret");
+    client.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
+    client.setFullScopeAllowed(false);
+    realm.clients().create(client).close();
+
+    return  realm.clients().findByClientId(client.getClientId()).getFirst();
   }
 }
