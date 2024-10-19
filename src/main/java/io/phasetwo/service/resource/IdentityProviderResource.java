@@ -54,13 +54,13 @@ public class IdentityProviderResource extends OrganizationAdminResource {
     }
 
     // get an idp with the same alias
-    IdentityProviderModel idp = realm.getIdentityProviderByAlias(alias);
+    IdentityProviderModel idp = session.identityProviders().getByAlias(alias);
     if (idp == null) {
       throw new NotFoundException(String.format("No IdP found with alias %s", alias));
     }
     IdentityProviders.removeOrganization(organization.getId(), idp);
 
-    realm.updateIdentityProvider(idp);
+    session.identityProviders().update(idp);
     return Response.noContent().build();
   }
 
@@ -68,7 +68,7 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response update(IdentityProviderRepresentation providerRep) {
     requireManage();
-    IdentityProviderModel idp = realm.getIdentityProviderByAlias(alias);
+    IdentityProviderModel idp = session.identityProviders().getByAlias(alias);
     if (idp == null) {
       throw new NotFoundException(String.format("No IdP found with alias %s", alias));
     }

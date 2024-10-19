@@ -1,6 +1,7 @@
 //package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
+import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -107,7 +108,7 @@ final class HomeIdpDiscoverer {
         List<IdentityProviderModel> enabledIdpsWithMatchingDomain =
             orgs.getOrganizationsStreamForDomain(
                     context.getRealm(), domain.toString(), config.requireVerifiedDomain())
-                .flatMap(o -> o.getIdentityProvidersStream())
+                .flatMap(OrganizationModel::getIdentityProvidersStream)
                 .filter(IdentityProviderModel::isEnabled)
                 .collect(Collectors.toList());
 
@@ -159,7 +160,7 @@ final class HomeIdpDiscoverer {
 
     private List<IdentityProviderModel> determineEnabledIdps() {
         RealmModel realm = context.getRealm();
-        List<IdentityProviderModel> enabledIdps = realm.getIdentityProvidersStream()
+        List<IdentityProviderModel> enabledIdps = context.getSession().identityProviders().getAllStream()
             .filter(IdentityProviderModel::isEnabled)
             .collect(Collectors.toList());
         LOG.tracef("Enabled IdPs in realm '%s': %s",
