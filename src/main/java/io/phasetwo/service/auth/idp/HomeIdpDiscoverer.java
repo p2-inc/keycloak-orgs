@@ -58,7 +58,7 @@ final class HomeIdpDiscoverer {
         if (config.requireVerifiedEmail()
             && "email".equalsIgnoreCase(config.userAttribute())
             && !user.isEmailVerified()) {
-            LOG.infof("Email of user %s not verified. Skipping discovery of linked IdPs", user.getId());
+            LOG.debugf("Email of user %s not verified. Skipping discovery of linked IdPs", user.getId());
             return homeIdps;
         }
 
@@ -66,7 +66,7 @@ final class HomeIdpDiscoverer {
             Domain domain = emailDomain.get();
             homeIdps = discoverHomeIdps(domain, user, username);
             if (homeIdps.isEmpty()) {
-                LOG.infof("Could not find home IdP for domain '%s' and user '%s' in realm '%s'",
+                LOG.debugf("Could not find home IdP for domain '%s' and user '%s' in realm '%s'",
                     domain, username, realmName);
             }
         } else {

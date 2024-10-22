@@ -97,7 +97,7 @@ public class IdpSelectorAuthenticator implements Authenticator {
   public void action(AuthenticationFlowContext context) {
     MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
     String providerId = formData.getFirst("providerId");
-    log.infof("Redirecting to %s", providerId);
+    log.debugf("Redirecting to %s", providerId);
     redirect(context, providerId);
   }
 

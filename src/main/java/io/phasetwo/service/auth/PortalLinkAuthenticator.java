@@ -31,7 +31,7 @@ public class PortalLinkAuthenticator implements Authenticator {
 
     String tokenString =
         authSession.getAuthNote(PortalLinkActionTokenHandler.ORIGINAL_ACTION_TOKEN);
-    log.infof(
+    log.debugf(
         "Got token string from auth note (%s): %s",
         PortalLinkActionTokenHandler.ORIGINAL_ACTION_TOKEN, tokenString);
     if (tokenString == null) {
@@ -43,7 +43,7 @@ public class PortalLinkAuthenticator implements Authenticator {
       JsonWebToken token = TokenVerifier.create(tokenString, JsonWebToken.class).getToken();
 
       // lookup the user
-      log.infof("found user %s in token", token.getSubject());
+      log.debugf("found user %s in token", token.getSubject());
       UserModel user = session.users().getUserById(realm, token.getSubject());
       context.setUser(user);
       // context.attachUserSession(authResult.getSession());

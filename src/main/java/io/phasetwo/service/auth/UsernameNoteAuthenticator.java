@@ -64,7 +64,7 @@ class UsernameNoteAuthenticator extends AbstractUsernameFormAuthenticator
       return;
     }
 
-    log.infof("username set in auth note %s.", username);
+    log.debugf("username set in auth note %s.", username);
     if (context.getExecution().getRequirement()
         == AuthenticationExecutionModel.Requirement.REQUIRED) {
       context.success();

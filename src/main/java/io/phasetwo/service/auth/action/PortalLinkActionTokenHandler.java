@@ -58,7 +58,7 @@ public class PortalLinkActionTokenHandler
   public Response handleToken(
       PortalLinkActionToken token, ActionTokenContext<PortalLinkActionToken> tokenContext) {
     EventBuilder event = tokenContext.getEvent();
-    log.infof(
+    log.debugf(
         "handleToken for iss:%s, org:%s, user:%s, rdu:%s",
         token.getIssuedFor(), token.getOrgId(), token.getUserId(), token.getRedirectUri());
     UserModel user = tokenContext.getAuthenticationSession().getAuthenticatedUser();
@@ -70,12 +70,12 @@ public class PortalLinkActionTokenHandler
             ? token.getRedirectUri()
             : ResolveRelative.resolveRelativeUri(
                 tokenContext.getSession(), client.getRootUrl(), client.getBaseUrl());
-    log.infof("Using client_id %s redirect_uri %s", client.getClientId(), redirectUri);
+    log.debugf("Using client_id %s redirect_uri %s", client.getClientId(), redirectUri);
 
     String redirect =
         RedirectUtils.verifyRedirectUri(
             tokenContext.getSession(), redirectUri, authSession.getClient());
-    log.infof("Redirect after verify %s -> %s", redirectUri, redirect);
+    log.debugf("Redirect after verify %s -> %s", redirectUri, redirect);
     if (redirect != null) {
       authSession.setAuthNote(
           AuthenticationManager.SET_REDIRECT_URI_AFTER_REQUIRED_ACTIONS, "true");

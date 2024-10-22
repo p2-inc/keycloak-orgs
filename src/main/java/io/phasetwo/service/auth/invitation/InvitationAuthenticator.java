@@ -16,13 +16,13 @@ public class InvitationAuthenticator implements Authenticator {
 
   @Override
   public void authenticate(AuthenticationFlowContext context) {
-    log.info("InvitationAuthenticator.authenticate called");
+    log.debug("InvitationAuthenticator.authenticate called");
     context.success(); // There was no failure or challenge.
   }
 
   @Override
   public void action(AuthenticationFlowContext context) {
-    log.info("InvitationAuthenticator.action called");
+    log.debug("InvitationAuthenticator.action called");
     context.attempted(); // There was no failure or challenge.
   }
 
@@ -33,7 +33,7 @@ public class InvitationAuthenticator implements Authenticator {
 
   @Override
   public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-    log.infof(
+    log.debugf(
         "InvitationAuthenticator.configuredFor called for realm %s and user %s",
         realm.getName(), user.getEmail());
 
@@ -44,13 +44,13 @@ public class InvitationAuthenticator implements Authenticator {
     // "they're okay. no need to run the authenticator".
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
     long cnt = orgs.getUserInvitationsStream(realm, user).count();
-    log.infof("Found %d invites for %s", cnt, user.getEmail());
+    log.debugf("Found %d invites for %s", cnt, user.getEmail());
     return !(cnt > 0);
   }
 
   @Override
   public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
-    log.infof(
+    log.debugf(
         "InvitationAuthenticator.setRequiredActions called for realm %s and user %s",
         realm.getName(), user.getEmail());
     user.addRequiredAction(InvitationRequiredActionFactory.PROVIDER_ID);

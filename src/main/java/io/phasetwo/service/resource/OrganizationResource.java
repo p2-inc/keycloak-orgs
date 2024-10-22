@@ -175,7 +175,7 @@ public class OrganizationResource extends OrganizationAdminResource {
   public Response getPortalLink(
       @DefaultValue("") @FormParam("userId") String userId,
       @DefaultValue("") @FormParam("baseUri") String baseUri) {
-    log.infof("requesting portal-link for user %s, org %s", userId, organization.getId());
+    log.debugf("requesting portal-link for user %s, org %s", userId, organization.getId());
 
     // check for existence of idp-wizard client and wizard theme
     ClientModel idpWizardClient = session.clients().getClientByClientId(realm, IDP_WIZARD_CLIENT);
@@ -273,49 +273,4 @@ public class OrganizationResource extends OrganizationAdminResource {
     }
     return null;
   }
-
-  /*
-  teams is on hold for now
-
-    @GET
-    @Path("teams")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response listTeams(
-        @QueryParam("search") String searchQuery,
-        @QueryParam("first") Integer firstResult,
-        @QueryParam("max") Integer maxResults) {
-      log.infof("Get teams for %s %s", realm.getName(), orgId);
-      Optional<String> search = Optional.ofNullable(searchQuery);
-      firstResult = firstResult != null ? firstResult : 0;
-      maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
-      Teams teams =
-          mgr
-              .getTeamsByOrganizationId(
-                  orgId, search, Optional.ofNullable(firstResult), Optional.ofNullable(maxResults))
-              .stream()
-              .map(e -> convertTeamEntityToTeam(e))
-              .collect(Collectors.toCollection(() -> new Teams()));
-      return Response.ok().entity(teams).build();
-    }
-
-    @POST
-    @Path("teams")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createTeam(@Valid Team body) {
-      log.infof("Create team for %s %s", realm.getName(), orgId);
-
-      TeamEntity e = mgr.createTeamForOrganization(orgId, body);
-      Team o = convertTeamEntityToTeam(e);
-
-      adminEvent
-          .resource(TEAM.name())
-          .operation(OperationType.CREATE)
-          .resourcePath(session.getContext().getUri(), e.getId())
-          .representation(o)
-          .success();
-
-      return Response.ok().entity(o).build();
-    }
-    */
 }
