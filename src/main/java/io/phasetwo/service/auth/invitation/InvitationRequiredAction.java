@@ -51,14 +51,14 @@ public class InvitationRequiredAction implements RequiredActionProvider {
     RealmModel realm = context.getRealm();
     UserModel user = context.getUser();
     OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
-    log.infof(
+    log.debugf(
         "InvitationRequiredAction.requiredActionChallenge called for realm %s and user %s",
         realm.getName(), user.getEmail());
     if (user.isEmailVerified() && user.getEmail() != null) {
       List<InvitationModel> invites =
           getUserInvites(context, realm, user).collect(Collectors.toList());
       if (invites != null && invites.size() > 0) {
-        log.infof("Found %d invites for %s", invites.size(), user.getEmail());
+        log.debugf("Found %d invites for %s", invites.size(), user.getEmail());
         InvitationsBean ib = new InvitationsBean(realm, invites);
         Response challenge =
             context.form().setAttribute("invitations", ib).createForm("invitations.ftl");
@@ -66,7 +66,7 @@ public class InvitationRequiredAction implements RequiredActionProvider {
         return;
       }
     }
-    log.info("No challenge");
+    log.debug("No challenge");
     context.ignore();
   }
 
@@ -76,13 +76,13 @@ public class InvitationRequiredAction implements RequiredActionProvider {
 
     RealmModel realm = context.getRealm();
     UserModel user = context.getUser();
-    log.infof(
+    log.debugf(
         "InvitationRequiredAction.processAction called for realm %s and user %s",
         realm.getName(), user.getEmail());
 
     MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
 
-    log.infof("Form Parameters: %s", mapToString(formData));
+    log.debugf("Form Parameters: %s", mapToString(formData));
     OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
     List<String> selected = formData.get("orgs");
     orgs.getUserInvitationsStream(realm, user)
@@ -90,7 +90,7 @@ public class InvitationRequiredAction implements RequiredActionProvider {
             i -> {
               if (selected != null && selected.contains(i.getOrganization().getId())) {
                 // add membership
-                log.infof("selected %s", i.getOrganization().getId());
+                log.debugf("selected %s", i.getOrganization().getId());
                 memberFromInvitation(i, user);
                 event
                     .clone()

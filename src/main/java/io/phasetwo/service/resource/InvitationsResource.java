@@ -67,7 +67,7 @@ public class InvitationsResource extends OrganizationAdminResource {
     String link = Optional.ofNullable(invitation.getRedirectUri()).orElse("");
 
     if (organization.getInvitationsByEmail(email).count() > 0) {
-      log.infof(
+      log.debugf(
           "invitation for %s %s %s already exists. .",
           email, realm.getName(), organization.getId());
       throw new ClientErrorException(
@@ -76,7 +76,7 @@ public class InvitationsResource extends OrganizationAdminResource {
 
     UserModel user = KeycloakModelUtils.findUserByNameOrEmail(session, realm, email);
     if (user != null && organization.hasMembership(user)) {
-      log.infof("%s is already a member of %s", email, organization.getId());
+      log.debugf("%s is already a member of %s", email, organization.getId());
       throw new ClientErrorException(
           String.format("%s is already a member of this organization.", email),
           Response.Status.CONFLICT);

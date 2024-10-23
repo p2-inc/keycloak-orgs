@@ -129,7 +129,7 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
           "Select organization challenge couldn't be performed because the user has no organization.");
       failChallenge(context, "noOrganizationError");
     } else if (organizations.size() == 1) {
-      log.infof("User has 1 organization, skip organization selection challenge.");
+      log.debugf("User has 1 organization, skip organization selection challenge.");
       updateActiveOrganizationAttributeAndSucceedChallenge(context, organizations.get(0).getId());
     } else {
       LoginFormsProvider loginForm = context.form();

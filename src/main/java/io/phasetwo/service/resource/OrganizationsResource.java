@@ -122,7 +122,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
             maxResults,
             auth.hasViewOrgs() ? Optional.empty() : Optional.of(auth.getUser()))
         .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
-        .map(m -> convertOrganizationModelToOrganization(m));
+        .map(Converters::convertOrganizationModelToOrganization);
   }
 
   @GET
@@ -151,7 +151,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     org.setDisplayName(body.getDisplayName());
     org.setUrl(body.getUrl());
     if (body.getAttributes() != null)
-      body.getAttributes().forEach((k, v) -> org.setAttribute(k, v));
+      body.getAttributes().forEach(org::setAttribute);
     if (body.getDomains() != null) org.setDomains(body.getDomains());
 
     Organization o = convertOrganizationModelToOrganization(org);
@@ -188,14 +188,13 @@ public class OrganizationsResource extends OrganizationAdminResource {
   private void resetIdentityProviders(boolean newSharedIdpConfig) {
     var existingSharedIdpConfig = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
     if (existingSharedIdpConfig && !newSharedIdpConfig) {
-      realm
-          .getIdentityProvidersStream()
+      session.identityProviders().getAllStream()
           .forEach(
               identityProviderModel -> {
                 identityProviderModel.getConfig().put(ORG_SHARED_IDP_KEY, "false");
                 identityProviderModel.getConfig().put(ORG_OWNER_CONFIG_KEY, null);
 
-                realm.updateIdentityProvider(identityProviderModel);
+                session.identityProviders().update(identityProviderModel);
               });
     }
   }
@@ -276,6 +275,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     KeycloakModelUtils.runJobInTransaction(
         session.getKeycloakSessionFactory(),
         (session) -> {
+          session.getContext().setRealm(realm);
           organizations.forEach(
               organizationRepresentation ->
                   createOrganization(
@@ -314,8 +314,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
       KeycloakOrgsImportConverter.createOrganizationRoles(
           organizationRepresentation.getRoles(), org);
 
-      KeycloakOrgsImportConverter.createOrganizationIdp(
-          realm, organizationRepresentation.getIdpLink(), org, skipMissingIdp);
+      KeycloakOrgsImportConverter.createOrganizationIdp(session, organizationRepresentation.getIdpLink(), org, skipMissingIdp);
 
       KeycloakOrgsImportConverter.addMembers(
           session, realm, organizationRepresentation, org, skipMissingMember);
@@ -329,6 +328,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     } catch (ModelException e) {
       throw ErrorResponse.error(e.getMessage(), Response.Status.BAD_REQUEST);
     } catch (Exception e) {
+      log.error("Error: {}", e);
       throw ErrorResponse.error(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
     }
   }

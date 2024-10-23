@@ -216,7 +216,10 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
     OrganizationModel org = event.getOrganization();
     try {
       org.getIdentityProvidersStream()
-          .forEach(idp -> IdentityProviders.removeOrganization(org.getId(), idp));
+          .forEach(idp -> {
+            IdentityProviders.removeOrganization(org.getId(), idp);
+            event.getKeycloakSession().identityProviders().update(idp);
+          });
     } catch (Exception e) {
       log.warnf(
           "Couldn't remove identity providers on organizationRemoved. Likely because this follows a realmRemoved event. %s",

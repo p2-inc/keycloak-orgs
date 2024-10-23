@@ -37,13 +37,13 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
 
   @Override
   public void authenticate(AuthenticationFlowContext context) {
-    log.info("OrgAddUserAuthenticatorFactory.authenticate");
+    log.debug("OrgAddUserAuthenticatorFactory.authenticate");
     addUser(context);
   }
 
   @Override
   public void action(AuthenticationFlowContext context) {
-    log.info("OrgAddUserAuthenticatorFactory.authenticate");
+    log.debug("OrgAddUserAuthenticatorFactory.authenticate");
   }
 
   private void addUser(AuthenticationFlowContext context) {
@@ -62,8 +62,8 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
           orgId -> {
             OrganizationModel org = orgs.getOrganizationById(context.getRealm(), orgId);
             if (org == null) {
-              log.infof(
-                  "idpConfig  %s contained %s, but org not found", ORG_OWNER_CONFIG_KEY, orgId);
+              log.debugf(
+                  "idpConfig %s contained %s, but org not found", ORG_OWNER_CONFIG_KEY, orgId);
               return;
             }
 
@@ -91,14 +91,14 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
             }
           });
     } else {
-      log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
+      log.debugf("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
     }
   }
 
   private static void handleOrganizationMembership(
       AuthenticationFlowContext context, OrganizationModel org, boolean idpIsShared) {
     if (!org.hasMembership(context.getUser()) && !idpIsShared) {
-      log.infof(
+      log.debugf(
           "granting membership to %s for user %s", org.getName(), context.getUser().getUsername());
       org.grantMembership(context.getUser());
       context
@@ -111,7 +111,7 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
     if (!org.hasMembership(context.getUser()) && idpIsShared) {
       var userDomain = Domains.extract(context.getUser().getEmail());
       if (userDomain.isPresent() && Domains.supportsDomain(org.getDomains(), userDomain.get())) {
-        log.infof(
+        log.debugf(
             "granting membership to %s for user %s",
             org.getName(), context.getUser().getUsername());
         org.grantMembership(context.getUser());

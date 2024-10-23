@@ -95,9 +95,9 @@ public class DomainsResource extends OrganizationAdminResource {
           final TXTRecord txt = (TXTRecord) record;
           builder.delete(0, builder.length());
           String text = Joiner.on("").join(txt.getStrings().iterator());
-          log.infof("found record for %s = %s", getRecordKey(domainName), text);
+          log.debugf("found record for %s = %s", getRecordKey(domainName), text);
           if (valueToCompare.equals(text)) {
-            log.infof("verified domain %s using %s", domainName, valueToCompare);
+            log.debugf("verified domain %s using %s", domainName, valueToCompare);
             lookupDomain(domainName).setVerified(true);
             break;
           }
@@ -112,13 +112,13 @@ public class DomainsResource extends OrganizationAdminResource {
   @Path("{domainName}/verify")
   @Produces(MediaType.APPLICATION_JSON)
   public Response verifyDomain(@PathParam("domainName") String domainName) {
-    log.infof("verifyDomain %s %s", domainName, organization.getId());
+    log.debugf("verifyDomain %s %s", domainName, organization.getId());
     if (auth.hasManageOrgs() || auth.hasOrgManageOrg(organization)) {
-      log.infof("startVerification %s %s", domainName, organization.getId());
+      log.debugf("startVerification %s %s", domainName, organization.getId());
       startVerification(lookupDomain(domainName).getDomain());
       DomainModel d = lookupDomain(domainName);
       Domain domain = fromModel(d);
-      log.infof("endVerification %s %s %s", domainName, organization.getId(), domain);
+      log.debugf("endVerification %s %s %s", domainName, organization.getId(), domain);
 
       adminEvent
           .resource(DOMAIN.name())

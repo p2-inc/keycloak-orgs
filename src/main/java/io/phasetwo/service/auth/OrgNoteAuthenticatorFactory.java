@@ -28,13 +28,13 @@ public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory
 
   @Override
   public void authenticate(AuthenticationFlowContext context) {
-    log.info("OrgNoteAuthenticatorFactory.authenticate");
+    log.debug("OrgNoteAuthenticatorFactory.authenticate");
     setNote(context);
   }
 
   @Override
   public void action(AuthenticationFlowContext context) {
-    log.info("OrgNoteAuthenticatorFactory.action");
+    log.debug("OrgNoteAuthenticatorFactory.action");
   }
 
   private void setNote(AuthenticationFlowContext context) {
@@ -44,7 +44,7 @@ public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory
 
     Map<String, String> idpConfig = brokerContext.getIdpConfig().getConfig();
     if (idpConfig != null && idpConfig.containsKey(ORG_OWNER_CONFIG_KEY)) {
-      log.infof(
+      log.debugf(
           "Set auth/session note %s = %s for IdP %s",
           FIELD_ORG_ID,
           idpConfig.get(ORG_OWNER_CONFIG_KEY),
@@ -56,7 +56,7 @@ public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory
           .getAuthenticationSession()
           .setUserSessionNote(FIELD_ORG_ID, idpConfig.get(ORG_OWNER_CONFIG_KEY));
     } else {
-      log.infof("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
+      log.debugf("No organization owns IdP %s", brokerContext.getIdpConfig().getAlias());
     }
   }
 
