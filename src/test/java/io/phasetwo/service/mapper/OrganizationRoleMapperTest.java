@@ -51,12 +51,12 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
     }
 
     RealmResource realm = keycloak.realm(REALM);
-    ClientRepresentation client = realm.clients().findByClientId(ADMIN_CLI).get(0);
+    ClientRepresentation client = createPublicClientInRealm(realm, "test-app");
 
     // parse the received access-token
     configureCustomOidcProtocolMapper(realm, client);
 
-    keycloak = getKeycloak(REALM, ADMIN_CLI, user.getUsername(), "pass");
+    keycloak = getKeycloak(REALM, client.getClientId(), user.getUsername(), "pass");
 
     TokenVerifier<AccessToken> verifier =
         TokenVerifier.create(keycloak.tokenManager().getAccessTokenString(), AccessToken.class);
@@ -86,6 +86,8 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
     deleteUser(keycloak, REALM, user.getId());
     // delete organization
     deleteOrganization(keycloak, id);
+    // remove client
+    deleteClient(client.getClientId());
   }
 
   private static void configureCustomOidcProtocolMapper(

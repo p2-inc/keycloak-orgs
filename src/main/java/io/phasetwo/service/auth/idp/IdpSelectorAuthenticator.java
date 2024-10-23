@@ -1,23 +1,15 @@
 package io.phasetwo.service.auth.idp;
 
-import java.net.URI;
-import java.util.List;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.protocol.oidc.OIDCLoginProtocol;
-import org.keycloak.services.Urls;
-import org.keycloak.services.managers.ClientSessionCode;
 
 /** */
 @JBossLog
@@ -39,7 +31,8 @@ public class IdpSelectorAuthenticator implements Authenticator {
   }
 
   private void redirect(AuthenticationFlowContext context, String providerId) {
-    IdentityProviderModel identityProvider = context.getRealm().getIdentityProviderByAlias(providerId);
+    IdentityProviderModel identityProvider = context.getSession()
+            .identityProviders().getByAlias(providerId);
     if (identityProvider != null && identityProvider.isEnabled()) {
       new Redirector(context).redirectTo(identityProvider);
         /*

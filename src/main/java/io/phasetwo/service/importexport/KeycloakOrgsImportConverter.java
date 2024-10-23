@@ -109,13 +109,13 @@ public final class KeycloakOrgsImportConverter {
   }
 
   public static void createOrganizationIdp(
-      RealmModel realm, String idpLink, OrganizationModel org, boolean skipMissingIdp) {
+          KeycloakSession session, String idpLink, OrganizationModel org, boolean skipMissingIdp) {
     if (Objects.nonNull(idpLink)) {
-      IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpLink);
+      IdentityProviderModel idp = session.identityProviders().getByAlias(idpLink);
       if (Objects.nonNull(idp)) {
         IdentityProviders.setAttributeMultivalued(
             idp.getConfig(), ORG_OWNER_CONFIG_KEY, Set.of(org.getId()));
-        realm.updateIdentityProvider(idp);
+        session.identityProviders().update(idp);
       } else {
         if (skipMissingIdp) {
           log.debug(
