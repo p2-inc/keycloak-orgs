@@ -7,6 +7,7 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import keycloak from "../../../keycloak";
 import keycloakJson from "../../../keycloak.json";
+import { RELATIVE_PATH } from "@app/routes";
 
 export interface FeatureFlagsState {
   usernameMapperImport: boolean;
@@ -87,7 +88,7 @@ const dynamicBaseQuery: BaseQueryFn<
 
   const urlEnd = typeof args === "string" ? args : args.url;
   // construct a dynamically generated portion of the url
-  const adjustedUrl = `auth/realms/${pathRealm}/wizard/${urlEnd}`;
+  const adjustedUrl = `${RELATIVE_PATH}/realms/${pathRealm}/wizard/${urlEnd}`;
   const adjustedArgs =
     typeof args === "string" ? adjustedUrl : { ...args, url: adjustedUrl };
 
