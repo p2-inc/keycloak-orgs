@@ -95,6 +95,8 @@ public class PortalFeatures {
     // deviceActivityEnabled
     config.deviceActivityEnabled(CONFIG_ENABLED(realm, "profile.activity.enabled", true));
     // linkedAccountsEnabled
+    // TODO update to `IdentityProviderStorageProvider.html#isIdentityFederationEnabled()` because
+    // of deprecation
     config.linkedAccountsEnabled(
         realm.isIdentityFederationEnabled()
             && CONFIG_ENABLED(realm, "profile.linked.enabled", true));

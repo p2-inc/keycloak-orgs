@@ -163,12 +163,12 @@ public class PortalResourceProvider implements AccountResourceProvider, RealmRes
     String portalResources =
         Urls.themeRoot(authUrl).getPath() + "/" + "admin-portal" + "/" + theme.getName();
 
-    Locale locale = new Locale("en");
+    Locale locale = Locale.of("en");
     try {
       if (auth != null && auth.getUser() != null) {
         locale = session.getContext().resolveLocale(auth.getUser());
       } else {
-        locale = new Locale(realm.getDefaultLocale() != null ? realm.getDefaultLocale() : "en");
+        locale = Locale.of(realm.getDefaultLocale() != null ? realm.getDefaultLocale() : "en");
       }
     } catch (Exception e) {
       log.warn("Unable to determine locale.");
@@ -235,7 +235,7 @@ public class PortalResourceProvider implements AccountResourceProvider, RealmRes
 
       String envStr =
           new String(JsonStringEncoder.getInstance().quoteAsString(mapper.writeValueAsString(env)));
-      log.infof("set environment string to %s", envStr);
+      log.debugf("set environment string to %s", envStr);
       String authUrlAttribute =
           authUrl.getPath().endsWith("/")
               ? authUrl.toString().substring(0, authUrl.toString().length() - 1)
@@ -263,9 +263,7 @@ public class PortalResourceProvider implements AccountResourceProvider, RealmRes
               .setAttribute("displayName", realmName)
               .setAttribute("realmName", realm.getName());
       FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
-      Method processTemplateMethod =
-          fm.getClass()
-              .getDeclaredMethod("processTemplate", Theme.class, String.class, Locale.class);
+      Method processTemplateMethod = getProcessTemplateMethod(fm);
       processTemplateMethod.setAccessible(true);
       Response resp =
           (Response)
@@ -276,6 +274,24 @@ public class PortalResourceProvider implements AccountResourceProvider, RealmRes
       log.warn("Could not call processTemplate on FreeMarkerLoginFormsProvider", e);
     }
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+  }
+
+  Method getProcessTemplateMethod(FreeMarkerLoginFormsProvider provider)
+      throws NoSuchMethodException {
+    Class<?> clazz = provider.getClass();
+    StringBuilder o = new StringBuilder();
+    while (clazz != null) {
+      o.append(clazz.getSimpleName()).append("->");
+      try {
+        Method method =
+            clazz.getDeclaredMethod("processTemplate", Theme.class, String.class, Locale.class);
+        return method;
+      } catch (NoSuchMethodException ignore) {
+      }
+      clazz = clazz.getSuperclass();
+    }
+    throw new NoSuchMethodException(
+        String.format("Unable to find processTemplate method in hierarchy %s", o.toString()));
   }
 
   Map<String, String> getSupportedLocales(RealmModel realm, Locale locale) {
