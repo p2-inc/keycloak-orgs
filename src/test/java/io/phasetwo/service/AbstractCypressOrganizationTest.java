@@ -51,6 +51,7 @@ public class AbstractCypressOrganizationTest {
     "org.wildfly.client:wildfly-client-config",
     "org.jboss.resteasy:resteasy-client",
     "org.jboss.resteasy:resteasy-client-api",
+    "org.keycloak:keycloak-admin-client",
     "io.phasetwo.keycloak:keycloak-events"
   };
 
