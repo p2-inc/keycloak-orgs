@@ -40,9 +40,9 @@ public class AbstractCypressOrganizationTest {
   protected static final boolean RUN_CYPRESS =
       Boolean.parseBoolean(System.getProperty("include.cypress", "false"));
 
-  public static final String KEYCLOAK_IMAGE = "quay.io/phasetwo/keycloak-crdb:26.0.0-alpha";
-  /*      String.format(
-            "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "24.0.0"));*/
+  public static final String KEYCLOAK_IMAGE =
+          String.format(
+            "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "26.0.2"));
   public static final String REALM = "master";
   public static final String ADMIN_CLI = "admin-cli";
 
