@@ -67,7 +67,7 @@ public final class KeycloakOrgsImportConverter {
                 }
               } else {
                 if (skipMissingMember) {
-                  log.info(
+                  log.debug(
                       "Skipped invitation import for email: %s. Inviter with username %s not found."
                           .formatted(invitation.getEmail(), invitation.getInviterUsername()));
                 } else {
@@ -97,7 +97,7 @@ public final class KeycloakOrgsImportConverter {
                     .forEach(organizationRoleModel -> organizationRoleModel.grantRole(userModel));
               } else {
                 if (skipMissingMember) {
-                  log.info(
+                  log.debug(
                       "Skipped import for member with username: "
                           + member.getUsername()
                           + ". No user found.");
@@ -109,16 +109,16 @@ public final class KeycloakOrgsImportConverter {
   }
 
   public static void createOrganizationIdp(
-      RealmModel realm, String idpLink, OrganizationModel org, boolean skipMissingIdp) {
+          KeycloakSession session, String idpLink, OrganizationModel org, boolean skipMissingIdp) {
     if (Objects.nonNull(idpLink)) {
-      IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpLink);
+      IdentityProviderModel idp = session.identityProviders().getByAlias(idpLink);
       if (Objects.nonNull(idp)) {
         IdentityProviders.setAttributeMultivalued(
             idp.getConfig(), ORG_OWNER_CONFIG_KEY, Set.of(org.getId()));
-        realm.updateIdentityProvider(idp);
+        session.identityProviders().update(idp);
       } else {
         if (skipMissingIdp) {
-          log.info(
+          log.debug(
               "Skipped import for idp with alias: "
                   + idpLink
                   + ". No identity provider config found.");

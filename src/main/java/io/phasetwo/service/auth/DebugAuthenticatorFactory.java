@@ -25,7 +25,7 @@ public class DebugAuthenticatorFactory extends BaseAuthenticatorFactory
 
   @Override
   public void authenticate(AuthenticationFlowContext context) {
-    log.infof("DebugAuthenticator.authenticate: %s", context.getRealm().getName());
+    log.debugf("DebugAuthenticator.authenticate: %s", context.getRealm().getName());
     debug(context);
     if (context.getExecution().getRequirement()
         == AuthenticationExecutionModel.Requirement.REQUIRED) {
@@ -37,7 +37,7 @@ public class DebugAuthenticatorFactory extends BaseAuthenticatorFactory
 
   @Override
   public void action(AuthenticationFlowContext context) {
-    log.infof("DebugAuthenticator.action: %s", context.getRealm().getName());
+    log.debugf("DebugAuthenticator.action: %s", context.getRealm().getName());
     debug(context);
     if (context.getExecution().getRequirement()
         == AuthenticationExecutionModel.Requirement.REQUIRED) {
@@ -48,12 +48,12 @@ public class DebugAuthenticatorFactory extends BaseAuthenticatorFactory
   }
 
   private void debug(AuthenticationFlowContext context) {
-    log.infof("requirement: %s", context.getExecution().getRequirement().toString());
-    log.infof(
+    log.debugf("requirement: %s", context.getExecution().getRequirement().toString());
+    log.debugf(
         "clientNotes: %s", writeValueAsJson(context.getAuthenticationSession().getClientNotes()));
-    log.infof(
+    log.debugf(
         "clientScopes: %s", writeValueAsJson(context.getAuthenticationSession().getClientScopes()));
-    log.infof(
+    log.debugf(
         "userSessionNotes: %s",
         writeValueAsJson(context.getAuthenticationSession().getUserSessionNotes()));
   }

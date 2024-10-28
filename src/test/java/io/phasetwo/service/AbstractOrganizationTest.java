@@ -44,6 +44,9 @@ import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.protocol.oidc.OIDCLoginProtocol;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.Testcontainers;
@@ -51,8 +54,8 @@ import org.testcontainers.Testcontainers;
 public abstract class AbstractOrganizationTest {
 
   public static final String KEYCLOAK_IMAGE =
-      String.format(
-          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "24.0.0"));
+          String.format(
+          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "26.0.2"));
   public static final String REALM = "master";
   public static final String ADMIN_CLI = "admin-cli";
 
@@ -910,5 +913,21 @@ public abstract class AbstractOrganizationTest {
           exportOrganizationReprezentation.getOrganization().getAttributes().entrySet(),
           contains(rep.getAttributes().entrySet().toArray()));
     }
+  }
+
+  protected ClientRepresentation createPublicClientInRealm(RealmResource realm, String clientId) {
+    ClientRepresentation client = new ClientRepresentation();
+    client.setClientId(clientId);
+    client.setName(clientId);
+    client.setPublicClient(true);
+    client.setServiceAccountsEnabled(false);
+    client.setDirectAccessGrantsEnabled(true);
+    client.setEnabled(true);
+    client.setSecret("secret");
+    client.setProtocol(OIDCLoginProtocol.LOGIN_PROTOCOL);
+    client.setFullScopeAllowed(false);
+    realm.clients().create(client).close();
+
+    return  realm.clients().findByClientId(client.getClientId()).getFirst();
   }
 }

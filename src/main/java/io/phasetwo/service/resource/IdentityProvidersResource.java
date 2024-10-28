@@ -58,8 +58,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<IdentityProviderRepresentation> getIdentityProviders() {
-    return realm
-        .getIdentityProvidersStream()
+    return session.identityProviders()
+        .getAllStream()
         .filter(provider -> canViewIdp())
         .filter(this::idpInOrg)
         .map(
@@ -106,16 +106,16 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       boolean disable,
       String orgId) {
     if (representation.isEnabled()) {
-      realm
-          .getIdentityProvidersStream()
-          .filter(provider -> idpInOrg(provider))
+      session.identityProviders()
+          .getAllStream()
+          .filter(this::idpInOrg)
           .forEach(
               provider -> {
                 if (disable) provider.setEnabled(false);
                 if (unlink) {
                   IdentityProviders.removeOrganization(orgId, provider);
                 }
-                realm.updateIdentityProvider(provider); // weird that this is necessary
+                session.identityProviders().update(provider); // weird that this is necessary
               });
     }
   }
@@ -175,7 +175,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     // get an idp with the same alias
-    IdentityProviderModel idp = realm.getIdentityProviderByAlias(linkIdp.getAlias());
+    IdentityProviderModel idp = session.identityProviders().getByAlias(linkIdp.getAlias());
     if (idp == null) {
       throw new NotFoundException(String.format("No IdP found with alias %s", linkIdp.getAlias()));
     }
@@ -198,7 +198,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
 
     try {
       IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
-      realm.updateIdentityProvider(updated);
+      session.identityProviders().update(updated);
       return createdResponse(representation);
     } catch (Exception e) {
       throw new InternalServerErrorException(
