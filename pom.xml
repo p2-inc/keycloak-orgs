@@ -33,6 +33,7 @@
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>5.11.2</junit.version>
     <keycloak.version>26.0.2</keycloak.version>
+    <keycloak-admin-client.version>26.0.1</keycloak-admin-client.version>
     <resteasy.version>6.2.7.Final</resteasy.version>
     <lombok.version>1.18.34</lombok.version>
     <guava.version>33.0.0-jre</guava.version>
@@ -264,7 +265,7 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-admin-client</artifactId>
-      <version>${keycloak.version}</version>
+      <version>${keycloak-admin-client.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
