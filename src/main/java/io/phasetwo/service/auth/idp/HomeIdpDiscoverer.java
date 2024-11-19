@@ -118,7 +118,7 @@ final class HomeIdpDiscoverer {
                 .filter(o -> {
                     String cid = o.getFirstAttribute("customer_id");
                     boolean hasCID = cid != null && !cid.isEmpty();
-                    if(clientID.equals("sigsci-dashboard") || !hasCID) {
+                    if(clientID.equals("sigsci-dashboard") || (!hasCID && !clientID.equals("manage-fastly-com"))) {
                         String corp = o.getFirstAttribute("corp_id");
                         boolean hasCorpID = corp != null && !corp.isEmpty();
                         return hasCorpID;
