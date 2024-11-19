@@ -1,5 +1,6 @@
 package io.phasetwo.service.auth.idp;
 
+import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -116,16 +117,17 @@ final class HomeIdpDiscoverer {
             orgs.getUserOrganizationsStream(
                     context.getRealm(), user)
                 .filter(o -> {
-                    String cid = o.getFirstAttribute("customer_id");
-                    boolean hasCID = cid != null && !cid.isEmpty();
-                    if(clientID.equals("sigsci-dashboard") || (!hasCID && !clientID.equals("manage-fastly-com"))) {
-                        String corp = o.getFirstAttribute("corp_id");
-                        boolean hasCorpID = corp != null && !corp.isEmpty();
-                        return hasCorpID;
+                    boolean isFastlyCustomer = isFastlyCustomer(o);
+
+                    if(clientID.equals("sigsci-dashboard")) {
+                        return isCorp(o);
                     }
-                    String forceSSO = o.getFirstAttribute("force_sso");
-                    boolean hasForceSSO = forceSSO != null && forceSSO.equals("1");
-                    return hasCID && hasForceSSO;
+
+                    if(!isFastlyCustomer && !clientID.equals("manage-fastly-com")) {
+                        return isCorp(o);
+                    }
+
+                    return isFastlyCustomer && hasForceSso(o);
                 })
                 .sorted((o1, o2) -> {
                     if(clientID.equals("sigsci-dashboard")) {
@@ -155,6 +157,27 @@ final class HomeIdpDiscoverer {
         logFoundIdps("linked", "matching", homeIdps, domain, username);
 
         return homeIdps;
+    }
+
+    private boolean isCorp(OrganizationModel org) {
+        String corp = org.getFirstAttribute("corp_id");
+        boolean hasCorpID = corp != null && !corp.isEmpty();
+        
+        return hasCorpID;
+    }
+
+    private boolean isFastlyCustomer(OrganizationModel org) {
+        String customerID = org.getFirstAttribute("customer_id");
+        boolean hasCustomerID = customerID != null && !customerID.isEmpty();
+        
+        return hasCustomerID;
+    }
+
+    private boolean hasForceSso(OrganizationModel org) {
+        String forceSSO = org.getFirstAttribute("force_sso");
+        boolean hasForceSSO = forceSSO != null && forceSSO.equals("1");
+        
+        return hasForceSSO;
     }
 
     private void logFoundIdps(String idpQualifier, String domainQualifier, List<IdentityProviderModel> homeIdps, Domain domain, String username) {
