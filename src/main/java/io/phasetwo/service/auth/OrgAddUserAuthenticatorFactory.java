@@ -103,6 +103,7 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
       org.grantMembership(context.getUser());
       context
           .getEvent()
+          .clone()
           .user(context.getUser())
           .detail("joined_organization", org.getId())
           .success();
@@ -117,6 +118,7 @@ public class OrgAddUserAuthenticatorFactory extends BaseAuthenticatorFactory
         org.grantMembership(context.getUser());
         context
             .getEvent()
+            .clone()
             .user(context.getUser())
             .detail("joined_organization", org.getId())
             .success();
