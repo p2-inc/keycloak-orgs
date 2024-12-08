@@ -314,7 +314,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
       KeycloakOrgsImportConverter.createOrganizationRoles(
           organizationRepresentation.getRoles(), org);
 
-      KeycloakOrgsImportConverter.createOrganizationIdp(session, organizationRepresentation.getIdpLink(), org, skipMissingIdp);
+      KeycloakOrgsImportConverter.createOrganizationIdp(session, realm, organizationRepresentation.getIdpLink(), org, skipMissingIdp);
 
       KeycloakOrgsImportConverter.addMembers(
           session, realm, organizationRepresentation, org, skipMissingMember);
