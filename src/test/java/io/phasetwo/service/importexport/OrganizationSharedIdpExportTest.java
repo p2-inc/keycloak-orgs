@@ -1,88 +1,28 @@
 package io.phasetwo.service.importexport;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.representation.LinkIdp;
-import java.io.IOException;
-import java.util.List;
-
 import io.phasetwo.service.representation.OrganizationsConfig;
 import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+
 @JBossLog
-public class OrganizationIdpExportTest extends AbstractOrganizationTest {
+public class OrganizationSharedIdpExportTest extends AbstractOrganizationTest {
 
   @Test
-  void testOrganizationLinkIdp() throws IOException {
-    // create org
-    var org = createDefaultOrg();
-    var id = org.getId();
-
-    // create identityProvider
-    String alias1 = "linking-provider-1";
-    org.keycloak.representations.idm.IdentityProviderRepresentation idp =
-        new org.keycloak.representations.idm.IdentityProviderRepresentation();
-    idp.setAlias(alias1);
-    idp.setProviderId("oidc");
-    idp.setEnabled(true);
-    idp.setFirstBrokerLoginFlowAlias("first broker login");
-    idp.setConfig(
-        new ImmutableMap.Builder<String, String>()
-            .put("useJwksUrl", "true")
-            .put("syncMode", "FORCE")
-            .put("authorizationUrl", "https://foo.com")
-            .put("hideOnLoginPage", "")
-            .put("loginHint", "")
-            .put("uiLocales", "")
-            .put("backchannelSupported", "")
-            .put("disableUserInfo", "")
-            .put("acceptsPromptNoneForwardFromClient", "")
-            .put("validateSignature", "")
-            .put("pkceEnabled", "")
-            .put("tokenUrl", "https://foo.com")
-            .put("clientAuthMethod", "client_secret_post")
-            .put("clientId", "aabbcc")
-            .put("clientSecret", "112233")
-            .build());
-    keycloak.realm(REALM).identityProviders().create(idp);
-
-    // link it
-    LinkIdp link = new LinkIdp();
-    link.setAlias(alias1);
-    link.setSyncMode("IMPORT");
-
-    postRequest(link, org.getId(), "idps", "link");
-
-    // export
-    var export = exportOrgs(keycloak, true);
-    assertThat(export.getOrganizations(), hasSize(1));
-
-    // validate
-    export.getOrganizations().stream()
-        .filter(exportOrg -> exportOrg.getOrganization().getName().equals(org.getName()))
-        .findFirst()
-        .ifPresent(exportOrg -> assertThat(exportOrg.getIdpLink(), is(alias1)));
-
-    // delete org
-    deleteOrganization(id);
-
-    // delete idp
-    keycloak.realm(REALM).identityProviders().get(alias1).remove();
-  }
-
-  @Test
-  void testOrganizationChangeLink() throws IOException {
+  void testMultiOrganizationLink() throws IOException {
     // create organization
     var organization1 =
             createOrganization(
@@ -150,7 +90,7 @@ public class OrganizationIdpExportTest extends AbstractOrganizationTest {
     export.getOrganizations().stream()
             .filter(exportOrg -> exportOrg.getOrganization().getName().equals(organization1.getName()))
             .findFirst()
-            .ifPresent(exportOrg -> Assertions.assertNull(exportOrg.getIdpLink()));
+            .ifPresent(exportOrg -> assertThat(exportOrg.getIdpLink(), is(alias1)));
 
     // validate org2
     export.getOrganizations().stream()
@@ -173,7 +113,7 @@ public class OrganizationIdpExportTest extends AbstractOrganizationTest {
     // add shared idp master config
     var url = getAuthUrl() + "/realms/master/orgs/config";
     var orgConfig = new OrganizationsConfig();
-    orgConfig.setSharedIdps(false);
+    orgConfig.setSharedIdps(true);
     var responseOrgsConfig = putRequest(orgConfig, url);
     assertThat(
             responseOrgsConfig.getStatusCode(),
@@ -185,7 +125,7 @@ public class OrganizationIdpExportTest extends AbstractOrganizationTest {
     // remove shared idp master config
     var url = getAuthUrl() + "/realms/master/orgs/config";
     var orgConfig = new OrganizationsConfig();
-    orgConfig.setSharedIdps(false);
+    orgConfig.setSharedIdps(true);
     var responseOrgsConfig = putRequest(orgConfig, url);
     assertThat(
             responseOrgsConfig.getStatusCode(),
