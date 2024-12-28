@@ -42,7 +42,10 @@ public class MembersResource extends OrganizationAdminResource {
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     return organization
         .searchForMembersStream(searchQuery, firstResult, maxResults)
-        .map(m -> toRepresentation(session, realm, m));
+        .map(m ->{
+          var membership = organization.getOrganizationMembersStream();
+          return toRepresentation(session, realm, m);
+        });
   }
 
   @GET

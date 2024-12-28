@@ -5,6 +5,7 @@ import static io.phasetwo.service.Orgs.*;
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.InvitationModel;
+import io.phasetwo.service.model.OrganizationMembershipModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.jpa.entity.DomainEntity;
@@ -12,6 +13,7 @@ import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
+import io.phasetwo.service.model.jpa.entity.OrganizationMembershipAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
@@ -189,6 +191,20 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   }
 
   @Override
+  public Stream<OrganizationMembershipModel> getOrganizationMembersStream() {
+    TypedQuery<OrganizationMemberEntity> query = em.createNamedQuery("getOrganizationMembers", OrganizationMemberEntity.class);
+    query.setParameter("organization", org);
+
+    return query.getResultStream()
+            .map(organizationMemberEntity ->  new OrganizationMembershipAdapter(session, realm, em, organizationMemberEntity));
+  }
+
+  @Override
+  public Stream<OrganizationMembershipModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
+    return Stream.empty();
+  }
+
+  @Override
   public Long getMembersCount() {
     TypedQuery<Long> query = em.createNamedQuery("getOrganizationMembersCount", Long.class);
     query.setParameter("organization", org);
@@ -299,6 +315,14 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     } catch (Exception ignore) {
       return null;
     }
+  }
+
+  @Override
+  public OrganizationMembershipModel getMembershipDetails(UserModel user) {
+    TypedQuery<OrganizationMembershipModel> query = em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMembershipModel.class);
+    query.setParameter("organization", org);
+    query.setParameter("id", user.getId());
+    return query.getSingleResult();
   }
 
   @Override
