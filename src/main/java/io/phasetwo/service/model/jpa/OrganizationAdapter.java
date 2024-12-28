@@ -8,10 +8,7 @@ import static org.keycloak.models.UserModel.USERNAME;
 import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
 import static org.keycloak.utils.StreamsUtil.closing;
 
-import io.phasetwo.service.model.DomainModel;
-import io.phasetwo.service.model.InvitationModel;
-import io.phasetwo.service.model.OrganizationModel;
-import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.model.*;
 import io.phasetwo.service.model.jpa.entity.DomainEntity;
 import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
@@ -369,6 +366,14 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     } catch (Exception ignore) {
       return null;
     }
+  }
+
+  @Override
+  public OrganizationMembershipModel getMembershipDetails(UserModel user) {
+    TypedQuery<OrganizationMembershipModel> query = em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMembershipModel.class);
+    query.setParameter("organization", org);
+    query.setParameter("id", user.getId());
+    return query.getSingleResult();
   }
 
   @Override

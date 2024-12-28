@@ -2,6 +2,7 @@ package io.phasetwo.service.model.jpa.entity;
 
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,11 +11,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -60,6 +65,9 @@ public class OrganizationMemberEntity {
   @Column(name = "CREATED_AT")
   protected Date createdAt;
 
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "organizationMember")
+  protected Collection<OrganizationMembershipAttributeEntity> attributes = new ArrayList<>();
+
   @PrePersist
   protected void onCreate() {
     if (createdAt == null) createdAt = new Date();
@@ -95,6 +103,14 @@ public class OrganizationMemberEntity {
 
   public void setCreatedAt(Date at) {
     createdAt = at;
+  }
+
+  public Collection<OrganizationMembershipAttributeEntity> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(Collection<OrganizationMembershipAttributeEntity> attributes) {
+    this.attributes = attributes;
   }
 
   @Override
