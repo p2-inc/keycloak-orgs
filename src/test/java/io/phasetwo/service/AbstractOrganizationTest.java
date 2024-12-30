@@ -391,6 +391,15 @@ public abstract class AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
 
+  protected void deleteAllOrganizations() {
+    deleteAllOrganizations(keycloak);
+  }
+
+  protected void deleteAllOrganizations(Keycloak keycloak) {
+    Response response = givenSpec(keycloak).when().delete().then().extract().response();
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+  }
+
   protected RequestSpecification givenSpec(String... paths) {
     return givenSpec(keycloak, paths);
   }

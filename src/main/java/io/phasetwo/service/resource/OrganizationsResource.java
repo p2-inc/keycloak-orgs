@@ -19,16 +19,7 @@ import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationsConfig;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotAuthorizedException;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
@@ -295,6 +286,18 @@ public class OrganizationsResource extends OrganizationAdminResource {
     response.type(MediaType.APPLICATION_JSON);
 
     return response.build();
+  }
+
+  @DELETE
+  @Path("")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response deleteAllOrgs() {
+    log.debugf("Delete orgs for %s %s", realm.getName());
+
+    auth.requireManageOrgs();
+
+    orgs.removeOrganizations(realm);
+    return Response.status(204).build();
   }
 
   private void createOrganization(

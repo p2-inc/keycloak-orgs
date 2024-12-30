@@ -7,6 +7,7 @@ import static io.phasetwo.service.Helpers.createUserWithCredentials;
 import static io.phasetwo.service.Helpers.createWebhook;
 import static io.phasetwo.service.Helpers.deleteUser;
 import static io.phasetwo.service.Helpers.deleteWebhook;
+import static io.phasetwo.service.Helpers.enableEvents;
 import static io.phasetwo.service.Helpers.objectMapper;
 import static io.phasetwo.service.Helpers.removeEventListener;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
@@ -91,11 +92,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(rep.getId(), is(id));
 
     // get list
-    Response response = getRequest();
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRepresentation> organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertNotNull(organizations);
+    List<OrganizationRepresentation> organizations = getListOfOrganizations(keycloak);
     assertThat(organizations.size(), is(1));
 
     rep = organizations.get(0);
@@ -112,7 +109,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
         .displayName("Example company")
         .attributes(ImmutableMap.of("foo", List.of("bar")));
 
-    response = putRequest(rep, id);
+    Response response = putRequest(rep, id);
     assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get single
@@ -140,13 +137,38 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // get list
-    response = getRequest();
-
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertNotNull(organizations);
+    organizations = getListOfOrganizations(keycloak);
     assertThat(organizations.size(), is(0));
+  }
+
+  @Test
+  void testDeleteAllOrganizations() throws Exception {
+    final int numberOfOrgs = 3;
+    for (int i = 0; i < numberOfOrgs; i++) {
+      createOrganization(
+          new OrganizationRepresentation().name("master" + i).domains(List.of("master" + i + ".com")));
+    }
+
+    // get list before delete
+    List<OrganizationRepresentation> organizations1 = getListOfOrganizations(keycloak);
+    assertThat(organizations1.size(), is(numberOfOrgs));
+
+    // delete
+    deleteAllOrganizations();
+
+    // get list after delete
+    List<OrganizationRepresentation> organizations1AfterDelete = getListOfOrganizations(keycloak);
+    assertThat(organizations1AfterDelete.size(), is(0));
+  }
+
+  private List<OrganizationRepresentation> getListOfOrganizations(Keycloak keycloak) throws IOException {
+    Response getOrgsListResponse = getRequest(keycloak);
+    assertThat(getOrgsListResponse.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationRepresentation> organizations = objectMapper().readValue(getOrgsListResponse.getBody().asString(),
+        new TypeReference<>() {
+        });
+    assertNotNull(organizations);
+    return organizations;
   }
 
   @Test
