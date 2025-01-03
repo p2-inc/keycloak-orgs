@@ -5,7 +5,7 @@ import static io.phasetwo.service.Orgs.*;
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.InvitationModel;
-import io.phasetwo.service.model.OrganizationMembershipModel;
+import io.phasetwo.service.model.OrganizationMemberModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.jpa.entity.DomainEntity;
@@ -13,7 +13,6 @@ import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
-import io.phasetwo.service.model.jpa.entity.OrganizationMembershipAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
@@ -191,16 +190,16 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   }
 
   @Override
-  public Stream<OrganizationMembershipModel> getOrganizationMembersStream() {
+  public Stream<OrganizationMemberModel> getOrganizationMembersStream() {
     TypedQuery<OrganizationMemberEntity> query = em.createNamedQuery("getOrganizationMembers", OrganizationMemberEntity.class);
     query.setParameter("organization", org);
 
     return query.getResultStream()
-            .map(organizationMemberEntity ->  new OrganizationMembershipAdapter(session, realm, em, organizationMemberEntity));
+            .map(organizationMemberEntity ->  new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
   }
 
   @Override
-  public Stream<OrganizationMembershipModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
+  public Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
     return Stream.empty();
   }
 
@@ -318,8 +317,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   }
 
   @Override
-  public OrganizationMembershipModel getMembershipDetails(UserModel user) {
-    TypedQuery<OrganizationMembershipModel> query = em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMembershipModel.class);
+  public OrganizationMemberModel getMembershipDetails(UserModel user) {
+    TypedQuery<OrganizationMemberModel> query = em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberModel.class);
     query.setParameter("organization", org);
     query.setParameter("id", user.getId());
     return query.getSingleResult();

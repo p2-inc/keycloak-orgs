@@ -41,9 +41,9 @@ public interface OrganizationModel extends WithAttributes {
 
   Stream<UserModel> searchForMembersStream(String search, Integer firstResult, Integer maxResults);
 
-  Stream<OrganizationMembershipModel> getOrganizationMembersStream();
+  Stream<OrganizationMemberModel> getOrganizationMembersStream();
 
-  Stream<OrganizationMembershipModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults);
+  Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults);
 
   boolean hasMembership(UserModel user);
 
@@ -78,7 +78,7 @@ public interface OrganizationModel extends WithAttributes {
         .orElse(null);
   }
 
-  OrganizationMembershipModel getMembershipDetails(UserModel user);
+  OrganizationMemberModel getMembershipDetails(UserModel user);
 
   void removeRole(String name);
 
