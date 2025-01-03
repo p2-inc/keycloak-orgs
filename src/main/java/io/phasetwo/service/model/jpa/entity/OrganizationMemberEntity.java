@@ -33,6 +33,14 @@ import java.util.Objects;
       name = "getOrganizationMembers",
       query =
           "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization ORDER BY m.createdAt"),
+
+  @NamedQuery(
+          name = "searchOrganizationMembers",
+          query = "SELECT m FROM OrganizationMemberEntity m inner join UserEntity ue ON ue.id = m.userId" +
+                  " WHERE m.organization = :organization" +
+                  " AND (lower(ue.username) like concat('%',:search,'%') OR ue.firstName like concat('%',:search,'%')" +
+                  " OR ue.lastName like concat('%',:search,'%') OR ue.email like concat('%',:search,'%'))" +
+                  " ORDER BY m.createdAt"),
   @NamedQuery(
       name = "getOrganizationMemberByUserId",
       query =

@@ -1,6 +1,8 @@
 package io.phasetwo.service.model.jpa;
 
 import static io.phasetwo.service.Orgs.*;
+import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
+import static org.keycloak.utils.StreamsUtil.closing;
 
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.DomainModel;
@@ -20,6 +22,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -200,7 +203,19 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
-    return Stream.empty();
+    TypedQuery<OrganizationMemberEntity> query;
+    if(search != null && !search.isEmpty()) {
+      query = em.createNamedQuery("searchOrganizationMembers", OrganizationMemberEntity.class);
+      query.setParameter("organization", org);
+      query.setParameter("search", search);
+    } else {
+      query = em.createNamedQuery("getOrganizationMembers", OrganizationMemberEntity.class);
+      query.setParameter("organization", org);
+    }
+
+    return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
+            .filter(Objects::nonNull)
+            .map(organizationMemberEntity -> new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
   }
 
   @Override
