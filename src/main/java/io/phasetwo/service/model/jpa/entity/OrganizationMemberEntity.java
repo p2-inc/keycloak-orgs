@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
-import org.keycloak.models.jpa.entities.UserEntity;
 
 /** */
 @NamedQueries({
@@ -30,6 +29,18 @@ import org.keycloak.models.jpa.entities.UserEntity;
       name = "getOrganizationMembersCount",
       query =
           "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization"),
+  @NamedQuery(
+      name = "getOrganizationMembers",
+      query =
+          "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization ORDER BY m.createdAt"),
+
+  @NamedQuery(
+          name = "searchOrganizationMembers",
+          query = "SELECT m FROM OrganizationMemberEntity m inner join UserEntity ue ON ue.id = m.userId" +
+                  " WHERE m.organization = :organization" +
+                  " AND (lower(ue.username) like concat('%',:search,'%') OR ue.firstName like concat('%',:search,'%')" +
+                  " OR ue.lastName like concat('%',:search,'%') OR ue.email like concat('%',:search,'%'))" +
+                  " ORDER BY m.createdAt"),
   @NamedQuery(
       name = "getOrganizationMembersCountExcludeAdmin",
       query =
@@ -82,7 +93,7 @@ public class OrganizationMemberEntity {
   }
 
   public String getUserId() {
-    return  userId;
+    return userId;
   }
 
   public void setUserId(String userId) {

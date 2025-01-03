@@ -5,6 +5,8 @@ import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberAttributeEntity;
+import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
+import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import jakarta.persistence.EntityManager;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.KeycloakSession;
@@ -54,7 +56,14 @@ public class OrganizationMemberAdapter implements OrganizationMemberModel, JpaMo
 
   @Override
   public List<String> getRoles() {
-    return List.of();
+    return organizationMemberEntity.getOrganization().getRoles()
+            .stream()
+            .flatMap(organizationRoleEntity -> organizationRoleEntity.getUserMappings().stream())
+            .filter(userOrganizationRoleMappingEntity ->
+                    userOrganizationRoleMappingEntity.getUserId().equals(organizationMemberEntity.getUserId()))
+            .map(UserOrganizationRoleMappingEntity::getRole)
+            .map(OrganizationRoleEntity::getName)
+            .toList();
   }
 
   @Override

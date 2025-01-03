@@ -34,7 +34,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrganizationEntity> {
@@ -256,10 +255,22 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
                 .map(organizationMemberEntity ->  new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
     }
 
-    @Override
-    public Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
-        return Stream.empty();
+  @Override
+  public Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
+    TypedQuery<OrganizationMemberEntity> query;
+    if(search != null && !search.isEmpty()) {
+      query = em.createNamedQuery("searchOrganizationMembers", OrganizationMemberEntity.class);
+      query.setParameter("organization", org);
+      query.setParameter("search", search);
+    } else {
+      query = em.createNamedQuery("getOrganizationMembers", OrganizationMemberEntity.class);
+      query.setParameter("organization", org);
     }
+
+    return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
+            .filter(Objects::nonNull)
+            .map(organizationMemberEntity -> new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
+  }
 
   @Override
   public Long getMembersCount(boolean excludeAdmin) {
