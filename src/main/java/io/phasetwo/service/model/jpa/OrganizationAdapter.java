@@ -247,6 +247,20 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
         .filter(u -> u.getServiceAccountClientLink() == null);
   }
 
+    @Override
+    public Stream<OrganizationMemberModel> getOrganizationMembersStream() {
+        TypedQuery<OrganizationMemberEntity> query = em.createNamedQuery("getOrganizationMembers", OrganizationMemberEntity.class);
+        query.setParameter("organization", org);
+
+        return query.getResultStream()
+                .map(organizationMemberEntity ->  new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
+    }
+
+    @Override
+    public Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
+        return Stream.empty();
+    }
+
   @Override
   public Long getMembersCount(boolean excludeAdmin) {
     TypedQuery<Long> query =
@@ -369,8 +383,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   }
 
   @Override
-  public OrganizationMembershipModel getMembershipDetails(UserModel user) {
-    TypedQuery<OrganizationMembershipModel> query = em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMembershipModel.class);
+  public OrganizationMemberModel getMembershipDetails(UserModel user) {
+    TypedQuery<OrganizationMemberModel> query = em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberModel.class);
     query.setParameter("organization", org);
     query.setParameter("id", user.getId());
     return query.getSingleResult();

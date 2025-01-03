@@ -18,7 +18,7 @@ import java.util.Objects;
         name = "ORGANIZATION_MEMBER_ATTRIBUTE",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"ORGANIZATION_MEMBER_ID", "NAME"})})
 @Entity
-public class OrganizationMembershipAttributeEntity {
+public class OrganizationMemberAttributeEntity {
 
     @Id
     @Column(name = "ID", length = 36)
@@ -73,7 +73,7 @@ public class OrganizationMembershipAttributeEntity {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        OrganizationMembershipAttributeEntity that = (OrganizationMembershipAttributeEntity) o;
+        OrganizationMemberAttributeEntity that = (OrganizationMemberAttributeEntity) o;
         return Objects.equals(id, that.id) && Objects.equals(organizationMember, that.organizationMember);
     }
 

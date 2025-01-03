@@ -1,10 +1,10 @@
 package io.phasetwo.service.model.jpa;
 
-import io.phasetwo.service.model.OrganizationMembershipModel;
+import io.phasetwo.service.model.OrganizationMemberModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
-import io.phasetwo.service.model.jpa.entity.OrganizationMembershipAttributeEntity;
+import io.phasetwo.service.model.jpa.entity.OrganizationMemberAttributeEntity;
 import jakarta.persistence.EntityManager;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.KeycloakSession;
@@ -15,14 +15,14 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import java.util.List;
 import java.util.Map;
 
-public class OrganizationMembershipAdapter implements OrganizationMembershipModel, JpaModel<OrganizationMemberEntity> {
+public class OrganizationMemberAdapter implements OrganizationMemberModel, JpaModel<OrganizationMemberEntity> {
 
   protected final KeycloakSession session;
   protected final OrganizationMemberEntity organizationMemberEntity;
   protected final EntityManager em;
   protected final RealmModel realm;
 
-  public OrganizationMembershipAdapter(
+  public OrganizationMemberAdapter(
       KeycloakSession session, RealmModel realm, EntityManager em, OrganizationMemberEntity organizationMemberEntity) {
     this.session = session;
     this.em = em;
@@ -53,9 +53,14 @@ public class OrganizationMembershipAdapter implements OrganizationMembershipMode
   }
 
   @Override
+  public List<String> getRoles() {
+    return List.of();
+  }
+
+  @Override
   public Map<String, List<String>> getAttributes() {
     MultivaluedHashMap<String, String> result = new MultivaluedHashMap<>();
-    for (OrganizationMembershipAttributeEntity attr : organizationMemberEntity.getAttributes()) {
+    for (OrganizationMemberAttributeEntity attr : organizationMemberEntity.getAttributes()) {
       result.add(attr.getName(), attr.getValue());
     }
     return result;
@@ -75,7 +80,7 @@ public class OrganizationMembershipAdapter implements OrganizationMembershipMode
   public void setAttribute(String name, List<String> values) {
     removeAttribute(name);
     for (String value : values) {
-      OrganizationMembershipAttributeEntity a = new OrganizationMembershipAttributeEntity();
+      OrganizationMemberAttributeEntity a = new OrganizationMemberAttributeEntity();
       a.setId(KeycloakModelUtils.generateId());
       a.setName(name);
       a.setValue(value);

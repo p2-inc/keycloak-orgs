@@ -66,7 +66,7 @@ public class OrganizationMemberEntity {
   protected Date createdAt;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "organizationMember")
-  protected Collection<OrganizationMembershipAttributeEntity> attributes = new ArrayList<>();
+  protected Collection<OrganizationMemberAttributeEntity> attributes = new ArrayList<>();
 
   @PrePersist
   protected void onCreate() {
@@ -105,11 +105,11 @@ public class OrganizationMemberEntity {
     createdAt = at;
   }
 
-  public Collection<OrganizationMembershipAttributeEntity> getAttributes() {
+  public Collection<OrganizationMemberAttributeEntity> getAttributes() {
     return attributes;
   }
 
-  public void setAttributes(Collection<OrganizationMembershipAttributeEntity> attributes) {
+  public void setAttributes(Collection<OrganizationMemberAttributeEntity> attributes) {
     this.attributes = attributes;
   }
 
