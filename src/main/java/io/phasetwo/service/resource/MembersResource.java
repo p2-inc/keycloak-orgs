@@ -3,7 +3,6 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import static org.keycloak.events.EventType.UPDATE_PROFILE;
-import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
@@ -42,10 +41,7 @@ public class MembersResource extends OrganizationAdminResource {
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     return organization
         .searchForOrganizationMembersStream(searchQuery, firstResult, maxResults)
-        .map(m ->{
-          var user = session.users().getUserById(realm, m.getUserId());
-          return toRepresentation(session, realm, user);
-        });
+        .map(m -> UserOrganizationMemberConverter.toRepresentation(session, realm, m));
   }
 
   @GET

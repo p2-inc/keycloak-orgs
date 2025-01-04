@@ -1,6 +1,10 @@
 package io.phasetwo.service.model.jpa;
 
 import static io.phasetwo.service.Orgs.*;
+import static org.keycloak.models.UserModel.EMAIL;
+import static org.keycloak.models.UserModel.FIRST_NAME;
+import static org.keycloak.models.UserModel.LAST_NAME;
+import static org.keycloak.models.UserModel.USERNAME;
 import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
 import static org.keycloak.utils.StreamsUtil.closing;
 
@@ -20,18 +24,28 @@ import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrganizationEntity> {
@@ -40,6 +54,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   protected final ExtOrganizationEntity org;
   protected final EntityManager em;
   protected final RealmModel realm;
+
+  private static final char ESCAPE_BACKSLASH = '\\';
 
   public OrganizationAdapter(
       KeycloakSession session, RealmModel realm, EntityManager em, ExtOrganizationEntity org) {
@@ -203,19 +219,49 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
-    TypedQuery<OrganizationMemberEntity> query;
-    if(search != null && !search.isEmpty()) {
-      query = em.createNamedQuery("searchOrganizationMembers", OrganizationMemberEntity.class);
-      query.setParameter("organization", org);
-      query.setParameter("search", search);
-    } else {
-      query = em.createNamedQuery("getOrganizationMembers", OrganizationMemberEntity.class);
-      query.setParameter("organization", org);
+    CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+    CriteriaQuery<OrganizationMemberEntity> criteriaQuery = criteriaBuilder.createQuery(OrganizationMemberEntity.class);
+
+    Root<OrganizationMemberEntity> root = criteriaQuery.from(OrganizationMemberEntity.class);
+
+    List<Predicate> predicates = new ArrayList<>();
+    // defining the organization search clause
+    predicates.add(criteriaBuilder.equal(root.get("organization"), org));
+    if (search != null && !search.isEmpty()) {
+      var userIds =  userIdsSubquery(criteriaQuery, search);
+      predicates.add(root.get("userId").in(userIds));
     }
+
+    criteriaQuery.where(predicates.toArray(Predicate[]::new)).orderBy(criteriaBuilder.asc(root.get("createdAt")));
+
+    TypedQuery<OrganizationMemberEntity> query = em.createQuery(criteriaQuery);
 
     return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
             .filter(Objects::nonNull)
             .map(organizationMemberEntity -> new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
+  }
+
+  private Subquery<String> userIdsSubquery(CriteriaQuery<?> query, String search) {
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    Subquery<String> subquery = query.subquery(String.class);
+    Root<UserEntity> subRoot = subquery.from(UserEntity.class);
+
+    subquery.select(subRoot.get("id"));
+    List<Predicate> subqueryPredicates = new ArrayList<>();
+
+    subqueryPredicates.add(cb.equal(subRoot.get("realmId"), realm.getId()));
+
+    List<Predicate> searchTermsPredicates = new ArrayList<>();
+    //define search terms
+    for (String stringToSearch : search.trim().split(",")) {
+     searchTermsPredicates.add(cb.or(getSearchOptionPredicateArray(stringToSearch, cb, subRoot)));
+    }
+    Predicate searchPredicate = cb.or(searchTermsPredicates.toArray(Predicate[]::new));
+    subqueryPredicates.add(searchPredicate);
+
+    subquery.where(subqueryPredicates.toArray(Predicate[]::new));
+
+    return subquery;
   }
 
   @Override
@@ -367,5 +413,18 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
               var orgs = IdentityProviders.getAttributeMultivalued(config, ORG_OWNER_CONFIG_KEY);
               return orgs.contains(getId());
             });
+  }
+
+  private Predicate[] getSearchOptionPredicateArray(String value, CriteriaBuilder builder, From<?, UserEntity> from) {
+    value = value.trim().toLowerCase();
+    List<Predicate> orPredicates = new ArrayList<>();
+    if (!value.isEmpty()) {
+      value = "%" + value + "%"; //contains in SQL query manner
+      orPredicates.add(builder.like(from.get(USERNAME), value, ESCAPE_BACKSLASH));
+      orPredicates.add(builder.like(from.get(EMAIL), value, ESCAPE_BACKSLASH));
+      orPredicates.add(builder.like(builder.lower(from.get(FIRST_NAME)), value, ESCAPE_BACKSLASH));
+      orPredicates.add(builder.like(builder.lower(from.get(LAST_NAME)), value, ESCAPE_BACKSLASH));
+    }
+    return orPredicates.toArray(Predicate[]::new);
   }
 }
