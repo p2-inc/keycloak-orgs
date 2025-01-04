@@ -7,7 +7,6 @@ import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
-import io.phasetwo.service.representation.UserWithOrgs;
 import io.phasetwo.service.util.ActiveOrganization;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -19,6 +18,7 @@ import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.UserModel;
+import org.keycloak.representations.idm.UserRepresentation;
 
 @JBossLog
 public class MembersResource extends OrganizationAdminResource {
