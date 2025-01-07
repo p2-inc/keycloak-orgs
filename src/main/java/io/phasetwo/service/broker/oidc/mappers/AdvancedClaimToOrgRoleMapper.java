@@ -29,7 +29,9 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
 
   public static final String CLAIM_PROPERTY_NAME = "claims";
   public static final String ARE_CLAIM_VALUES_REGEX_PROPERTY_NAME = "are.claim.values.regex";
-
+  public static final String ORG_PROPERTY_NAME = "org";
+  public static final String ORG_ROLE_PROPERTY_NAME = "org_role";
+  
   public static final String[] COMPATIBLE_PROVIDERS = {
     KeycloakOIDCIdentityProviderFactory.PROVIDER_ID, OIDCIdentityProviderFactory.PROVIDER_ID
   };
@@ -53,16 +55,22 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
         "If enabled claim values are interpreted as regular expressions.");
     isClaimValueRegexProperty.setType(ProviderConfigProperty.BOOLEAN_TYPE);
     configProperties.add(isClaimValueRegexProperty);
-    ProviderConfigProperty roleProperty = new ProviderConfigProperty();
-    roleProperty.setName(ConfigConstants.ROLE);
-    roleProperty.setLabel("Role");
-    roleProperty.setHelpText(
-        "Role to grant to user if claim is present. Click 'Select Role' button to browse roles, or just type it in the textbox. To reference a client role the syntax is clientname.clientrole, i.e. myclient.myrole");
-    roleProperty.setType(ProviderConfigProperty.ROLE_TYPE);
-    configProperties.add(roleProperty);
+    
+    ProviderConfigProperty org = new ProviderConfigProperty();
+    org.setName(ORG_PROPERTY_NAME);
+    org.setLabel("Organization");
+    org.setHelpText("Organization containing the role to grant to user.");
+    org.setType(ProviderConfigProperty.STRING_TYPE);
+    configProperties.add(org);
+    ProviderConfigProperty orgRole = new ProviderConfigProperty();
+    orgRole.setName(ORG_ROLE_PROPERTY_NAME);
+    orgRole.setLabel("Organization Role");
+    orgRole.setHelpText("Organization role to grant to user.");
+    orgRole.setType(ProviderConfigProperty.STRING_TYPE);
+    configProperties.add(orgRole);
   }
 
-  public static final String PROVIDER_ID = "oidc-advanced-role-idp-mapper";
+  public static final String PROVIDER_ID = "oidc-advanced-org-role-idp-mapper";
 
   @Override
   public boolean supportsSyncMode(IdentityProviderSyncMode syncMode) {

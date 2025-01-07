@@ -26,14 +26,18 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
       new HashSet<>(Arrays.asList(IdentityProviderSyncMode.values()));
 
   static {
-    ProviderConfigProperty property;
-    property = new ProviderConfigProperty();
-    property.setName(ConfigConstants.ROLE);
-    property.setLabel("Role");
-    property.setHelpText(
-        "Role to grant to user.  Click 'Select Role' button to browse roles, or just type it in the textbox.  To reference a client role the syntax is clientname.clientrole, i.e. myclient.myrole");
-    property.setType(ProviderConfigProperty.ROLE_TYPE);
-    configProperties.add(property);
+    ProviderConfigProperty org = new ProviderConfigProperty();
+    org.setName("org");
+    org.setLabel("Organization");
+    org.setHelpText("Organization containing the role to grant to user.");
+    org.setType(ProviderConfigProperty.STRING_TYPE);
+    configProperties.add(org);
+    ProviderConfigProperty orgRole = new ProviderConfigProperty();
+    orgRole.setName("org_role");
+    orgRole.setLabel("Organization Role");
+    orgRole.setHelpText("Organization role to grant to user.");
+    orgRole.setType(ProviderConfigProperty.STRING_TYPE);
+    configProperties.add(orgRole);
   }
 
   @Override
@@ -48,12 +52,12 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
 
   @Override
   public String getDisplayType() {
-    return "Hardcoded Role";
+    return "Hardcoded Organization Role";
   }
 
   public static final String[] COMPATIBLE_PROVIDERS = {ANY_PROVIDER};
 
-  public static final String PROVIDER_ID = "oidc-hardcoded-role-idp-mapper";
+  public static final String PROVIDER_ID = "oidc-hardcoded-org-role-idp-mapper";
 
   @Override
   public boolean supportsSyncMode(IdentityProviderSyncMode syncMode) {
