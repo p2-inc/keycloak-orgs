@@ -1,37 +1,36 @@
 package io.phasetwo.service.representation;
 
-import org.keycloak.representations.idm.UserRepresentation;
-
 import java.util.List;
 import java.util.Map;
+import org.keycloak.representations.idm.UserRepresentation;
 
 public class UserOrganizationMember extends UserRepresentation {
 
-    Map<String, List<String>> organizationAttributes;
-    String organizationId;
-    List<String> organizationRoles;
+  Map<String, List<String>> organizationMemberAttributes;
+  String organizationId;
+  List<String> organizationRoles;
 
-    public Map<String, List<String>> getOrganizationAttributes() {
-        return organizationAttributes;
-    }
+  public Map<String, List<String>> getOrganizationMemberAttributes() {
+    return organizationMemberAttributes;
+  }
 
-    public void setOrganizationAttributes(Map<String, List<String>> organizationAttributes) {
-        this.organizationAttributes = organizationAttributes;
-    }
+  public void setOrganizationMemberAttributes(Map<String, List<String>> organizationMemberAttributes) {
+    this.organizationMemberAttributes = organizationMemberAttributes;
+  }
 
-    public String getOrganizationId() {
-        return organizationId;
-    }
+  public String getOrganizationId() {
+    return organizationId;
+  }
 
-    public void setOrganizationId(String organizationId) {
-        this.organizationId = organizationId;
-    }
+  public void setOrganizationId(String organizationId) {
+    this.organizationId = organizationId;
+  }
 
-    public List<String> getOrganizationRoles() {
-        return organizationRoles;
-    }
+  public List<String> getOrganizationRoles() {
+    return organizationRoles;
+  }
 
-    public void setOrganizationRoles(List<String> organizationRoles) {
-        this.organizationRoles = organizationRoles;
-    }
+  public void setOrganizationRoles(List<String> organizationRoles) {
+    this.organizationRoles = organizationRoles;
+  }
 }

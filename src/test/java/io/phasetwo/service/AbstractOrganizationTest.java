@@ -54,7 +54,7 @@ import org.testcontainers.Testcontainers;
 public abstract class AbstractOrganizationTest {
 
   public static final String KEYCLOAK_IMAGE =
-          String.format(
+      String.format(
           "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "26.0.2"));
   public static final String REALM = "master";
   public static final String ADMIN_CLI = "admin-cli";
@@ -928,6 +928,6 @@ public abstract class AbstractOrganizationTest {
     client.setFullScopeAllowed(false);
     realm.clients().create(client).close();
 
-    return  realm.clients().findByClientId(client.getClientId()).getFirst();
+    return realm.clients().findByClientId(client.getClientId()).getFirst();
   }
 }

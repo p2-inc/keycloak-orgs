@@ -43,7 +43,8 @@ public interface OrganizationModel extends WithAttributes {
 
   Stream<OrganizationMemberModel> getOrganizationMembersStream();
 
-  Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults);
+  Stream<OrganizationMemberModel> searchForOrganizationMembersStream(
+      String search, Integer firstResult, Integer maxResults);
 
   boolean hasMembership(UserModel user);
 

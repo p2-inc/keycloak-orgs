@@ -24,7 +24,12 @@ import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +37,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
@@ -210,17 +208,23 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<OrganizationMemberModel> getOrganizationMembersStream() {
-    TypedQuery<OrganizationMemberEntity> query = em.createNamedQuery("getOrganizationMembers", OrganizationMemberEntity.class);
+    TypedQuery<OrganizationMemberEntity> query =
+        em.createNamedQuery("getOrganizationMembers", OrganizationMemberEntity.class);
     query.setParameter("organization", org);
 
-    return query.getResultStream()
-            .map(organizationMemberEntity ->  new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
+    return query
+        .getResultStream()
+        .map(
+            organizationMemberEntity ->
+                new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
   }
 
   @Override
-  public Stream<OrganizationMemberModel> searchForOrganizationMembersStream(String search, Integer firstResult, Integer maxResults) {
+  public Stream<OrganizationMemberModel> searchForOrganizationMembersStream(
+      String search, Integer firstResult, Integer maxResults) {
     CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-    CriteriaQuery<OrganizationMemberEntity> criteriaQuery = criteriaBuilder.createQuery(OrganizationMemberEntity.class);
+    CriteriaQuery<OrganizationMemberEntity> criteriaQuery =
+        criteriaBuilder.createQuery(OrganizationMemberEntity.class);
 
     Root<OrganizationMemberEntity> root = criteriaQuery.from(OrganizationMemberEntity.class);
 
@@ -228,17 +232,21 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     // defining the organization search clause
     predicates.add(criteriaBuilder.equal(root.get("organization"), org));
     if (search != null && !search.isEmpty()) {
-      var userIds =  userIdsSubquery(criteriaQuery, search);
+      var userIds = userIdsSubquery(criteriaQuery, search);
       predicates.add(root.get("userId").in(userIds));
     }
 
-    criteriaQuery.where(predicates.toArray(Predicate[]::new)).orderBy(criteriaBuilder.asc(root.get("createdAt")));
+    criteriaQuery
+        .where(predicates.toArray(Predicate[]::new))
+        .orderBy(criteriaBuilder.asc(root.get("createdAt")));
 
     TypedQuery<OrganizationMemberEntity> query = em.createQuery(criteriaQuery);
 
     return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
-            .filter(Objects::nonNull)
-            .map(organizationMemberEntity -> new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
+        .filter(Objects::nonNull)
+        .map(
+            organizationMemberEntity ->
+                new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity));
   }
 
   private Subquery<String> userIdsSubquery(CriteriaQuery<?> query, String search) {
@@ -252,9 +260,9 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     subqueryPredicates.add(cb.equal(subRoot.get("realmId"), realm.getId()));
 
     List<Predicate> searchTermsPredicates = new ArrayList<>();
-    //define search terms
+    // define search terms
     for (String stringToSearch : search.trim().split(",")) {
-     searchTermsPredicates.add(cb.or(getSearchOptionPredicateArray(stringToSearch, cb, subRoot)));
+      searchTermsPredicates.add(cb.or(getSearchOptionPredicateArray(stringToSearch, cb, subRoot)));
     }
     Predicate searchPredicate = cb.or(searchTermsPredicates.toArray(Predicate[]::new));
     subqueryPredicates.add(searchPredicate);
@@ -379,7 +387,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public OrganizationMemberModel getMembershipDetails(UserModel user) {
-    TypedQuery<OrganizationMemberModel> query = em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberModel.class);
+    TypedQuery<OrganizationMemberModel> query =
+        em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberModel.class);
     query.setParameter("organization", org);
     query.setParameter("id", user.getId());
     return query.getSingleResult();
@@ -403,7 +412,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<IdentityProviderModel> getIdentityProvidersStream() {
-    return session.identityProviders()
+    return session
+        .identityProviders()
         .getAllStream()
         // Todo: do we need to apply here a role filter? I believe not since its part of the
         // HomeIdpDiscoverer
@@ -415,11 +425,12 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
             });
   }
 
-  private Predicate[] getSearchOptionPredicateArray(String value, CriteriaBuilder builder, From<?, UserEntity> from) {
+  private Predicate[] getSearchOptionPredicateArray(
+      String value, CriteriaBuilder builder, From<?, UserEntity> from) {
     value = value.trim().toLowerCase();
     List<Predicate> orPredicates = new ArrayList<>();
     if (!value.isEmpty()) {
-      value = "%" + value + "%"; //contains in SQL query manner
+      value = "%" + value + "%"; // contains in SQL query manner
       orPredicates.add(builder.like(from.get(USERNAME), value, ESCAPE_BACKSLASH));
       orPredicates.add(builder.like(from.get(EMAIL), value, ESCAPE_BACKSLASH));
       orPredicates.add(builder.like(builder.lower(from.get(FIRST_NAME)), value, ESCAPE_BACKSLASH));
