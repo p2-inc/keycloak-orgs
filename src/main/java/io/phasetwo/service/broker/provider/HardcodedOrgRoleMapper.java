@@ -1,5 +1,7 @@
 package io.phasetwo.service.broker.provider;
 
+import com.google.common.collect.MoreCollectors;
+import com.google.common.base.Strings;
 import com.google.auto.service.AutoService;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +18,7 @@ import org.keycloak.models.RoleModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
+import io.phasetwo.service.model.OrganizationProvider;
 
 @JBossLog
 @AutoService(IdentityProviderMapper.class)
@@ -81,28 +84,32 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
-    grantUserRole(realm, user, mapperModel);
+    grantOrgRole(session, realm, user, mapperModel);
   }
 
-  private void grantUserRole(
-      RealmModel realm, UserModel user, IdentityProviderMapperModel mapperModel) {
-    RoleModel role = getRole(realm, mapperModel);
-    if (role != null) {
-      user.grantRole(role);
+  private void grantOrgRole(KeycloakSession session,
+                            RealmModel realm,
+                            UserModel user,
+                            IdentityProviderMapperModel mapperModel) {
+    OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
+    String orgName = mapperModel.getConfig().get("org");
+    String orgRoleName = mapperModel.getConfig().get("org_role");
+    if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return;
+
+    OrganizationModel> org = orgs.searchForOrganizationByNameStream(realm, orgName, 0, 1).filter(o -> o.getName().equals(orgName))
+                             .collect(MoreCollectors.toOptional())
+                             .orElse(null);
+    if (org == null) {
+      log.debugf("Cannot map non-existent org %s", orgName);
+      return;
     }
-  }
-
-  private RoleModel getRole(final RealmModel realm, final IdentityProviderMapperModel mapperModel) {
-    String roleName = mapperModel.getConfig().get(ConfigConstants.ROLE);
-    RoleModel role = KeycloakModelUtils.getRoleFromString(realm, roleName);
-
+    OrganizationRoleModel role = org.getRoleByName(orgRoleName);
     if (role == null) {
-      log.warnf(
-          "Unable to find role '%s' referenced by mapper '%s' on realm '%s'.",
-          roleName, mapperModel.getName(), realm.getName());
+      log.debugf("Cannot map non-existent org role %s - %s", orgName, orgRoleName);
+      return;
     }
-
-    return role;
+    log.infof("Granting org: %s - role: %s to %s", orgName, orgRoleName, user.getUsername());
+    role.grantRole(user);
   }
 
   @Override
@@ -112,7 +119,7 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
-    grantUserRole(realm, user, mapperModel);
+    grantOrgRole(realm, user, mapperModel);
   }
 
   @Override
@@ -125,6 +132,6 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
 
   @Override
   public String getHelpText() {
-    return "When user is imported from provider, hardcode a role mapping for it.";
+    return "When user is imported from provider, hardcode an organization role mapping for it.";
   }
 }
