@@ -19,6 +19,8 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.model.OrganizationRoleModel;
 
 @JBossLog
 @AutoService(IdentityProviderMapper.class)

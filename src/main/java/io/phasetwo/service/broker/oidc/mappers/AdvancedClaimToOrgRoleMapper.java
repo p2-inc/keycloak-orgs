@@ -22,6 +22,9 @@ import org.keycloak.models.RoleModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
+import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.model.OrganizationRoleModel;
 
 @JBossLog
 @AutoService(IdentityProviderMapper.class)
@@ -99,12 +102,12 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
 
   @Override
   public String getDisplayType() {
-    return "Advanced Claim to Role";
+    return "Advanced Claim to Org Role";
   }
 
   @Override
   public String getHelpText() {
-    return "If all claims exists, grant the user the specified realm or client role.";
+    return "If all claims exists, grant the user the specified organization role.";
   }
 
   @Override
@@ -212,4 +215,32 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
 
     return role;
   }
+
+    private void grantOrgRole(KeycloakSession session,
+                            RealmModel realm,
+                            UserModel user,
+                            IdentityProviderMapperModel mapperModel) {
+    OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
+    String orgName = mapperModel.getConfig().get("org");
+    String orgRoleName = mapperModel.getConfig().get("org_role");
+    if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return;
+
+    OrganizationModel> org = orgs.searchForOrganizationByNameStream(realm, orgName, 0, 1).filter(o -> o.getName().equals(orgName))
+                             .collect(MoreCollectors.toOptional())
+                             .orElse(null);
+    if (org == null) {
+      log.debugf("Cannot map non-existent org %s", orgName);
+      return;
+    }
+    OrganizationRoleModel role = org.getRoleByName(orgRoleName);
+    if (role == null) {
+      log.debugf("Cannot map non-existent org role %s - %s", orgName, orgRoleName);
+      return;
+    }
+    log.infof("Granting org: %s - role: %s to %s", orgName, orgRoleName, user.getUsername());
+    role.grantRole(user);
+  }
+
+  private static class OrgRoleGrantor {
+    public OrgRoleGrantor(String orgName, String orgRoleName) {
 }
