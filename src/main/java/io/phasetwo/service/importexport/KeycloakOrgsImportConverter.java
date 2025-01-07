@@ -1,5 +1,9 @@
 package io.phasetwo.service.importexport;
 
+import static io.phasetwo.service.Orgs.ORG_CONFIG_SHARED_IDPS_KEY;
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
+import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
+
 import io.phasetwo.service.importexport.representation.OrganizationAttributes;
 import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
 import io.phasetwo.service.importexport.representation.OrganizationRoleRepresentation;
@@ -11,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
@@ -21,10 +24,6 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.models.utils.RepresentationToModel;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
-
-import static io.phasetwo.service.Orgs.ORG_CONFIG_SHARED_IDPS_KEY;
-import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
-import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 
 @JBossLog
 public final class KeycloakOrgsImportConverter {
@@ -115,15 +114,21 @@ public final class KeycloakOrgsImportConverter {
   }
 
   public static void createOrganizationIdp(
-          KeycloakSession session, RealmModel realm, String idpLink, OrganizationModel org, boolean skipMissingIdp) {
+      KeycloakSession session,
+      RealmModel realm,
+      String idpLink,
+      OrganizationModel org,
+      boolean skipMissingIdp) {
     if (Objects.nonNull(idpLink)) {
       IdentityProviderModel idp = session.identityProviders().getByAlias(idpLink);
       if (Objects.nonNull(idp)) {
-          IdentityProviderRepresentation representation = ModelToRepresentation.toRepresentation(realm, idp);
-          processsSharedIdps(realm, org, representation);
+        IdentityProviderRepresentation representation =
+            ModelToRepresentation.toRepresentation(realm, idp);
+        processsSharedIdps(realm, org, representation);
 
-          IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
-          session.identityProviders().update(updated);
+        IdentityProviderModel updated =
+            RepresentationToModel.toModel(realm, representation, session);
+        session.identityProviders().update(updated);
       } else {
         if (skipMissingIdp) {
           log.debug(
@@ -137,19 +142,20 @@ public final class KeycloakOrgsImportConverter {
     }
   }
 
-    private static void processsSharedIdps(RealmModel realm, OrganizationModel org, IdentityProviderRepresentation representation) {
-        var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
+  private static void processsSharedIdps(
+      RealmModel realm, OrganizationModel org, IdentityProviderRepresentation representation) {
+    var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
 
-        if (isSharedIdpsConfigEnabled) {
-            IdentityProviders.addMultiOrganization(org, representation);
-        } else {
-            representation.getConfig().put(ORG_SHARED_IDP_KEY, "false");
-            IdentityProviders.setAttributeMultivalued(
-                    representation.getConfig(), ORG_OWNER_CONFIG_KEY, Set.of(org.getId()));
-        }
+    if (isSharedIdpsConfigEnabled) {
+      IdentityProviders.addMultiOrganization(org, representation);
+    } else {
+      representation.getConfig().put(ORG_SHARED_IDP_KEY, "false");
+      IdentityProviders.setAttributeMultivalued(
+          representation.getConfig(), ORG_OWNER_CONFIG_KEY, Set.of(org.getId()));
     }
+  }
 
-    public static void createOrganizationRoles(
+  public static void createOrganizationRoles(
       List<OrganizationRoleRepresentation> roles, OrganizationModel org) {
     roles.stream()
         .filter(
