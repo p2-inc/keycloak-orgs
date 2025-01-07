@@ -2,22 +2,21 @@ package io.phasetwo.service.model.jpa;
 
 import io.phasetwo.service.model.OrganizationMemberModel;
 import io.phasetwo.service.model.OrganizationModel;
-import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberAttributeEntity;
+import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import jakarta.persistence.EntityManager;
+import java.util.List;
+import java.util.Map;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.JpaModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
-import java.util.List;
-import java.util.Map;
-
-public class OrganizationMemberAdapter implements OrganizationMemberModel, JpaModel<OrganizationMemberEntity> {
+public class OrganizationMemberAdapter
+    implements OrganizationMemberModel, JpaModel<OrganizationMemberEntity> {
 
   protected final KeycloakSession session;
   protected final OrganizationMemberEntity organizationMemberEntity;
@@ -25,7 +24,10 @@ public class OrganizationMemberAdapter implements OrganizationMemberModel, JpaMo
   protected final RealmModel realm;
 
   public OrganizationMemberAdapter(
-      KeycloakSession session, RealmModel realm, EntityManager em, OrganizationMemberEntity organizationMemberEntity) {
+      KeycloakSession session,
+      RealmModel realm,
+      EntityManager em,
+      OrganizationMemberEntity organizationMemberEntity) {
     this.session = session;
     this.em = em;
     this.organizationMemberEntity = organizationMemberEntity;
@@ -49,21 +51,21 @@ public class OrganizationMemberAdapter implements OrganizationMemberModel, JpaMo
 
   @Override
   public OrganizationModel getOrganization() {
-    return session
-            .getProvider(OrganizationProvider.class)
-            .getOrganizationById(realm, organizationMemberEntity.getOrganization().getId());
+    return new OrganizationAdapter(session, realm, em, organizationMemberEntity.getOrganization());
   }
 
   @Override
   public List<String> getRoles() {
-    return organizationMemberEntity.getOrganization().getRoles()
-            .stream()
-            .flatMap(organizationRoleEntity -> organizationRoleEntity.getUserMappings().stream())
-            .filter(userOrganizationRoleMappingEntity ->
-                    userOrganizationRoleMappingEntity.getUserId().equals(organizationMemberEntity.getUserId()))
-            .map(UserOrganizationRoleMappingEntity::getRole)
-            .map(OrganizationRoleEntity::getName)
-            .toList();
+    return organizationMemberEntity.getOrganization().getRoles().stream()
+        .flatMap(organizationRoleEntity -> organizationRoleEntity.getUserMappings().stream())
+        .filter(
+            userOrganizationRoleMappingEntity ->
+                userOrganizationRoleMappingEntity
+                    .getUserId()
+                    .equals(organizationMemberEntity.getUserId()))
+        .map(UserOrganizationRoleMappingEntity::getRole)
+        .map(OrganizationRoleEntity::getName)
+        .toList();
   }
 
   @Override
@@ -77,7 +79,9 @@ public class OrganizationMemberAdapter implements OrganizationMemberModel, JpaMo
 
   @Override
   public void removeAttribute(String name) {
-    organizationMemberEntity.getAttributes().removeIf(attribute -> attribute.getName().equals(name));
+    organizationMemberEntity
+        .getAttributes()
+        .removeIf(attribute -> attribute.getName().equals(name));
   }
 
   @Override

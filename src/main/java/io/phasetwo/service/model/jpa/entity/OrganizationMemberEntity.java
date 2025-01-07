@@ -17,7 +17,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
