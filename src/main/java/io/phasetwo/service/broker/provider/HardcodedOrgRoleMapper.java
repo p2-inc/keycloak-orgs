@@ -1,26 +1,27 @@
 package io.phasetwo.service.broker.provider;
 
-import com.google.common.collect.MoreCollectors;
-import com.google.common.base.Strings;
+import static io.phasetwo.service.broker.Mappers.getOrganizationRole;
+
 import com.google.auto.service.AutoService;
+import com.google.common.base.Strings;
+import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.broker.provider.AbstractIdentityProviderMapper;
+import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.broker.provider.IdentityProviderMapper;
 import org.keycloak.models.IdentityProviderMapperModel;
 import org.keycloak.models.IdentityProviderSyncMode;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.RoleModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
-import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.model.OrganizationModel;
-import io.phasetwo.service.model.OrganizationRoleModel;
 
 @JBossLog
 @AutoService(IdentityProviderMapper.class)
@@ -31,6 +32,12 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
       new HashSet<>(Arrays.asList(IdentityProviderSyncMode.values()));
 
   static {
+    ProviderConfigProperty orgAdd = new ProviderConfigProperty();
+    orgAdd.setName("org_add");
+    orgAdd.setLabel("Add To Organization");
+    orgAdd.setHelpText("Add user to the organization as a member if not already.");
+    orgAdd.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+    configProperties.add(orgAdd);
     ProviderConfigProperty org = new ProviderConfigProperty();
     org.setName("org");
     org.setLabel("Organization");
@@ -89,29 +96,28 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
     grantOrgRole(session, realm, user, mapperModel);
   }
 
-  private void grantOrgRole(KeycloakSession session,
-                            RealmModel realm,
-                            UserModel user,
-                            IdentityProviderMapperModel mapperModel) {
+  private void grantOrgRole(
+      KeycloakSession session,
+      RealmModel realm,
+      UserModel user,
+      IdentityProviderMapperModel mapperModel) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
     String orgName = mapperModel.getConfig().get("org");
     String orgRoleName = mapperModel.getConfig().get("org_role");
+    boolean orgAdd = Boolean.parseBoolean(mapperModel.getConfig().get("org_add"));
+
     if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return;
 
-    OrganizationModel> org = orgs.searchForOrganizationByNameStream(realm, orgName, 0, 1).filter(o -> o.getName().equals(orgName))
-                             .collect(MoreCollectors.toOptional())
-                             .orElse(null);
-    if (org == null) {
-      log.debugf("Cannot map non-existent org %s", orgName);
-      return;
+    OrganizationRoleModel role = getOrganizationRole(orgs, orgName, orgRoleName, realm);
+    if (role != null) {
+      if (orgAdd) {
+        log.infof("Granting org: %s membership to %s", orgName, user.getUsername());
+        OrganizationModel org = orgs.getOrganizationByName(realm, orgName);
+        org.grantMembership(user);
+      }
+      log.infof("Granting org: %s - role: %s to %s", orgName, orgRoleName, user.getUsername());
+      role.grantRole(user);
     }
-    OrganizationRoleModel role = org.getRoleByName(orgRoleName);
-    if (role == null) {
-      log.debugf("Cannot map non-existent org role %s - %s", orgName, orgRoleName);
-      return;
-    }
-    log.infof("Granting org: %s - role: %s to %s", orgName, orgRoleName, user.getUsername());
-    role.grantRole(user);
   }
 
   @Override
@@ -121,7 +127,7 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
-    grantOrgRole(realm, user, mapperModel);
+    grantOrgRole(session, realm, user, mapperModel);
   }
 
   @Override

@@ -79,6 +79,20 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
+  public OrganizationModel getOrganizationByName(RealmModel realm, String name) {
+    TypedQuery<ExtOrganizationEntity> query =
+        em.createNamedQuery("getOrganizationsByRealmIdAndNameExact", ExtOrganizationEntity.class);
+    query.setParameter("realmId", realm.getId());
+    query.setParameter("name", name);
+    try {
+      ExtOrganizationEntity org = query.getSingleResult();
+      return new OrganizationAdapter(session, realm, em, org);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  @Override
   public Stream<OrganizationModel> getOrganizationsStreamForDomain(
       RealmModel realm, String domain, boolean verified) {
     domain = InternetDomainName.from(domain).toString();

@@ -16,6 +16,8 @@ public interface OrganizationProvider extends Provider {
 
   OrganizationModel getOrganizationById(RealmModel realm, String id);
 
+  OrganizationModel getOrganizationByName(RealmModel realm, String name);
+
   Stream<OrganizationModel> getOrganizationsStreamForDomain(
       RealmModel realm, String domain, boolean verified);
 

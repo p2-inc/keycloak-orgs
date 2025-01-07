@@ -1,6 +1,13 @@
 package io.phasetwo.service.broker.oidc.mappers;
 
+import static io.phasetwo.service.broker.Mappers.getOrganizationRole;
+import static org.keycloak.utils.RegexUtils.valueMatchesRegex;
+
 import com.google.auto.service.AutoService;
+import com.google.common.base.Strings;
+import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -12,19 +19,13 @@ import org.keycloak.broker.oidc.KeycloakOIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.OIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.mappers.AbstractClaimMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
-import org.keycloak.broker.provider.ConfigConstants;
 import org.keycloak.broker.provider.IdentityProviderMapper;
 import org.keycloak.models.IdentityProviderMapperModel;
 import org.keycloak.models.IdentityProviderSyncMode;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.RoleModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.provider.ProviderConfigProperty;
-import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.model.OrganizationModel;
-import io.phasetwo.service.model.OrganizationRoleModel;
 
 @JBossLog
 @AutoService(IdentityProviderMapper.class)
@@ -34,7 +35,8 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
   public static final String ARE_CLAIM_VALUES_REGEX_PROPERTY_NAME = "are.claim.values.regex";
   public static final String ORG_PROPERTY_NAME = "org";
   public static final String ORG_ROLE_PROPERTY_NAME = "org_role";
-  
+  public static final String ORG_ADD_PROPERTY_NAME = "org_add";
+
   public static final String[] COMPATIBLE_PROVIDERS = {
     KeycloakOIDCIdentityProviderFactory.PROVIDER_ID, OIDCIdentityProviderFactory.PROVIDER_ID
   };
@@ -58,7 +60,13 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
         "If enabled claim values are interpreted as regular expressions.");
     isClaimValueRegexProperty.setType(ProviderConfigProperty.BOOLEAN_TYPE);
     configProperties.add(isClaimValueRegexProperty);
-    
+
+    ProviderConfigProperty orgAdd = new ProviderConfigProperty();
+    orgAdd.setName(ORG_ADD_PROPERTY_NAME);
+    orgAdd.setLabel("Add To Organization");
+    orgAdd.setHelpText("Add user to the organization as a member if not already.");
+    orgAdd.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+    configProperties.add(orgAdd);
     ProviderConfigProperty org = new ProviderConfigProperty();
     org.setName(ORG_PROPERTY_NAME);
     org.setLabel("Organization");
@@ -110,7 +118,6 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
     return "If all claims exists, grant the user the specified organization role.";
   }
 
-  @Override
   protected boolean applies(
       IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
     Map<String, List<String>> claims = mapperModel.getConfigMap(CLAIM_PROPERTY_NAME);
@@ -133,6 +140,10 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
     return true;
   }
 
+  private boolean orgAdd(IdentityProviderMapperModel mapperModel) {
+    return Boolean.parseBoolean(mapperModel.getConfig().get(ORG_ADD_PROPERTY_NAME));
+  }
+
   @Override
   public void importNewUser(
       KeycloakSession session,
@@ -140,13 +151,14 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
-    RoleModel role = getRole(realm, mapperModel);
+    OrganizationRoleModel role = getOrgRole(session, realm, mapperModel);
     if (role == null) {
       return;
     }
 
     if (applies(mapperModel, context)) {
-      user.grantRole(role);
+      if (orgAdd(mapperModel)) addUserToOrg(session, realm, user, mapperModel);
+      grantOrgRole(role, user);
     }
   }
 
@@ -157,13 +169,13 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
-    RoleModel role = getRole(realm, mapperModel);
+    OrganizationRoleModel role = getOrgRole(session, realm, mapperModel);
     if (role == null) {
       return;
     }
 
     if (!applies(mapperModel, context)) {
-      user.deleteRoleMapping(role);
+      revokeOrgRole(role, user);
     }
   }
 
@@ -174,73 +186,46 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
-    RoleModel role = getRole(realm, mapperModel);
+    OrganizationRoleModel role = getOrgRole(session, realm, mapperModel);
     if (role == null) {
       return;
     }
 
-    String roleName = mapperModel.getConfig().get(ConfigConstants.ROLE);
-    // KEYCLOAK-8730 if a previous mapper has already granted the same role, skip the checks so we
-    // don't accidentally remove a valid role.
-    if (!context.hasMapperGrantedRole(roleName)) {
-      if (applies(mapperModel, context)) {
-        context.addMapperGrantedRole(roleName);
-        user.grantRole(role);
-      } else {
-        user.deleteRoleMapping(role);
-      }
+    if (applies(mapperModel, context)) {
+      if (orgAdd(mapperModel)) addUserToOrg(session, realm, user, mapperModel);
+      grantOrgRole(role, user);
+    } else {
+      revokeOrgRole(role, user);
     }
   }
 
-  /**
-   * Obtains the {@link RoleModel} corresponding the role configured in the specified {@link
-   * IdentityProviderMapperModel}. If the role doesn't correspond to one of the realm's client roles
-   * or to one of the realm's roles, this method returns {@code null}.
-   *
-   * @param realm a reference to the realm.
-   * @param mapperModel a reference to the {@link IdentityProviderMapperModel} containing the
-   *     configured role.
-   * @return the {@link RoleModel} that corresponds to the mapper model role; {@code null}, when
-   *     role was not found
-   */
-  private RoleModel getRole(final RealmModel realm, final IdentityProviderMapperModel mapperModel) {
-    String roleName = mapperModel.getConfig().get(ConfigConstants.ROLE);
-    RoleModel role = KeycloakModelUtils.getRoleFromString(realm, roleName);
-
-    if (role == null) {
-      log.warnf(
-          "Unable to find role '%s' referenced by mapper '%s' on realm '%s'.",
-          roleName, mapperModel.getName(), realm.getName());
-    }
-
-    return role;
+  private void addUserToOrg(
+      KeycloakSession session,
+      RealmModel realm,
+      UserModel user,
+      IdentityProviderMapperModel mapperModel) {
+    OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
+    String orgName = mapperModel.getConfig().get("org");
+    OrganizationModel org = orgs.getOrganizationByName(realm, orgName);
+    org.grantMembership(user);
   }
 
-    private void grantOrgRole(KeycloakSession session,
-                            RealmModel realm,
-                            UserModel user,
-                            IdentityProviderMapperModel mapperModel) {
+  private OrganizationRoleModel getOrgRole(
+      KeycloakSession session, RealmModel realm, IdentityProviderMapperModel mapperModel) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
     String orgName = mapperModel.getConfig().get("org");
     String orgRoleName = mapperModel.getConfig().get("org_role");
-    if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return;
+    if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return null;
+    else return getOrganizationRole(orgs, orgName, orgRoleName, realm);
+  }
 
-    OrganizationModel> org = orgs.searchForOrganizationByNameStream(realm, orgName, 0, 1).filter(o -> o.getName().equals(orgName))
-                             .collect(MoreCollectors.toOptional())
-                             .orElse(null);
-    if (org == null) {
-      log.debugf("Cannot map non-existent org %s", orgName);
-      return;
-    }
-    OrganizationRoleModel role = org.getRoleByName(orgRoleName);
-    if (role == null) {
-      log.debugf("Cannot map non-existent org role %s - %s", orgName, orgRoleName);
-      return;
-    }
-    log.infof("Granting org: %s - role: %s to %s", orgName, orgRoleName, user.getUsername());
+  private void grantOrgRole(OrganizationRoleModel role, UserModel user) {
+    log.infof("Granting role: %s to %s", role.getName(), user.getUsername());
     role.grantRole(user);
   }
 
-  private static class OrgRoleGrantor {
-    public OrgRoleGrantor(String orgName, String orgRoleName) {
+  private void revokeOrgRole(OrganizationRoleModel role, UserModel user) {
+    log.infof("Revoking role: %s to %s", role.getName(), user.getUsername());
+    role.revokeRole(user);
+  }
 }
