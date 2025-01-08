@@ -66,10 +66,12 @@ public class OrganizationRoleAdapter
   }
 
   @Override
-  public Stream<UserModel> getUserMappingsStream() {
+  public Stream<UserModel> getUserMappingsStream(boolean excludeAdmin) {
     return role.getUserMappings().stream()
         .map(m -> m.getUserId())
-        .map(uid -> session.users().getUserById(realm, uid));
+        .map(uid -> session.users().getUserById(realm, uid))
+        .filter(u -> u.getServiceAccountClientLink() == null)
+        .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") && u.getUsername().length() == 46));
   }
 
   @Override

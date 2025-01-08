@@ -166,10 +166,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<UserModel> searchForMembersStream(
-      String search, Integer firstResult, Integer maxResults) {
+      String search, Integer firstResult, Integer maxResults, boolean excludeAdmin) {
     String[] searchTerms = Strings.isNullOrEmpty(search) ? new String[0] : search.split(",");
     // TODO this could be optimized for large member lists with a query
-    return getMembersStream()
+    return getMembersStream(excludeAdmin)
         .filter(
             (m) -> {
               for (String searchTerm : searchTerms) {
@@ -189,18 +189,20 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   }
 
   @Override
-  public Long getMembersCount() {
+  public Long getMembersCount(boolean excludeAdmin) {
     TypedQuery<Long> query = em.createNamedQuery("getOrganizationMembersCount", Long.class);
     query.setParameter("organization", org);
     return query.getSingleResult();
   }
 
   @Override
-  public Stream<UserModel> getMembersStream() {
+  public Stream<UserModel> getMembersStream(boolean excludeAdmin) {
     return org.getMembers().stream()
         .map(OrganizationMemberEntity::getUserId)
         .map(uid -> session.users().getUserById(realm, uid))
-        .filter(u -> u != null && u.getServiceAccountClientLink() == null);
+        .filter(u -> u != null)
+        .filter(u -> u.getServiceAccountClientLink() == null)
+        .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") && u.getUsername().length() == 46));
   }
 
   @Override

@@ -36,21 +36,24 @@ public class MembersResource extends OrganizationAdminResource {
   public Stream<UserRepresentation> getMembers(
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
-      @QueryParam("max") Integer maxResults) {
+      @QueryParam("max") Integer maxResults,
+      @QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
     log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
+    boolean excludeAdmin = excludeAdminAccounts != null ? excludeAdminAccounts.booleanValue() : false;
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     return organization
-        .searchForMembersStream(searchQuery, firstResult, maxResults)
+        .searchForMembersStream(searchQuery, firstResult, maxResults, excludeAdmin)
         .map(m -> toRepresentation(session, realm, m));
   }
 
   @GET
   @Path("count")
   @Produces(MediaType.APPLICATION_JSON)
-  public Long getMembersCount() {
+  public Long getMembersCount(@QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
     log.debugf("Get members count for %s %s", realm.getName(), organization.getId());
-    return organization.getMembersCount();
+    boolean excludeAdmin = excludeAdminAccounts != null ? excludeAdminAccounts.booleanValue() : false;
+    return organization.getMembersCount(excludeAdmin);
   }
 
   @DELETE
