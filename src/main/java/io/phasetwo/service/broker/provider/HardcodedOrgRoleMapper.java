@@ -3,15 +3,9 @@ package io.phasetwo.service.broker.provider;
 import static io.phasetwo.service.broker.Mappers.*;
 
 import com.google.auto.service.AutoService;
-import com.google.common.base.Strings;
-import io.phasetwo.service.model.OrganizationModel;
-import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.broker.OrgRoleMapper;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.broker.provider.AbstractIdentityProviderMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
@@ -25,11 +19,12 @@ import org.keycloak.provider.ProviderConfigProperty;
 
 @JBossLog
 @AutoService(IdentityProviderMapper.class)
-public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
+public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper
+    implements OrgRoleMapper {
   protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
   static {
-    addOrgConfigProperties(configProperties);
+    OrgRoleMapper.addOrgConfigProperties(configProperties);
   }
 
   @Override
@@ -74,34 +69,6 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
     grantOrgRole(session, realm, user, mapperModel);
-  }
-
-  private void grantOrgRole(
-      KeycloakSession session,
-      RealmModel realm,
-      UserModel user,
-      IdentityProviderMapperModel mapperModel) {
-    OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
-    String orgName = mapperModel.getConfig().get(ORG_PROPERTY_NAME);
-    String orgRoleName = mapperModel.getConfig().get(ORG_ROLE_PROPERTY_NAME);
-    boolean orgAdd = Boolean.parseBoolean(mapperModel.getConfig().get(ORG_ADD_PROPERTY_NAME));
-
-    if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return;
-
-    OrganizationModel org = orgs.getOrganizationByName(realm, orgName);
-    OrganizationRoleModel role = getOrganizationRole(orgs, orgName, orgRoleName, realm);
-    if (org != null && role != null) {
-      if (orgAdd) {
-        if (!org.hasMembership(user)) {
-          log.infof("Granting org: %s membership to %s", orgName, user.getUsername());
-          org.grantMembership(user);
-        }
-      }
-      if (org.hasMembership(user)) {
-        log.infof("Granting org: %s - role: %s to %s", orgName, orgRoleName, user.getUsername());
-        role.grantRole(user);
-      }
-    }
   }
 
   @Override

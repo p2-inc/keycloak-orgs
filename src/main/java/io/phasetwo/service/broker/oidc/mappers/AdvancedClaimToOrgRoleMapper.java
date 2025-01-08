@@ -1,19 +1,15 @@
 package io.phasetwo.service.broker.oidc.mappers;
 
-import static io.phasetwo.service.broker.Mappers.getOrganizationRole;
+import static io.phasetwo.service.broker.Mappers.*;
 import static org.keycloak.utils.RegexUtils.valueMatchesRegex;
 
 import com.google.auto.service.AutoService;
-import com.google.common.base.Strings;
+import io.phasetwo.service.broker.OrgRoleMapper;
 import io.phasetwo.service.model.OrganizationModel;
-import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.broker.oidc.KeycloakOIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.OIDCIdentityProviderFactory;
@@ -29,7 +25,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 
 @JBossLog
 @AutoService(IdentityProviderMapper.class)
-public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
+public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper implements OrgRoleMapper {
 
   public static final String[] COMPATIBLE_PROVIDERS = {
     KeycloakOIDCIdentityProviderFactory.PROVIDER_ID, OIDCIdentityProviderFactory.PROVIDER_ID
@@ -53,7 +49,7 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
     isClaimValueRegexProperty.setType(ProviderConfigProperty.BOOLEAN_TYPE);
     configProperties.add(isClaimValueRegexProperty);
 
-    addOrgConfigProperties(configProperties);
+    OrgRoleMapper.addOrgConfigProperties(configProperties);
   }
 
   public static final String PROVIDER_ID = "oidc-advanced-org-role-idp-mapper";
@@ -97,7 +93,8 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
       IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
     Map<String, List<String>> claims = mapperModel.getConfigMap(CLAIM_PROPERTY_NAME);
     boolean areClaimValuesRegex =
-        Boolean.parseBoolean(mapperModel.getConfig().get(ARE_CLAIM_VALUES_REGEX_PROPERTY_NAME));
+        Boolean.parseBoolean(
+            mapperModel.getConfig().getOrDefault(ARE_CLAIM_VALUES_REGEX_PROPERTY_NAME, "false"));
 
     for (Map.Entry<String, List<String>> claim : claims.entrySet()) {
       Object claimValue = getClaimValue(context, claim.getKey());
@@ -113,10 +110,6 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
     }
 
     return true;
-  }
-
-  private boolean orgAdd(IdentityProviderMapperModel mapperModel) {
-    return Boolean.parseBoolean(mapperModel.getConfig().get(ORG_ADD_PROPERTY_NAME));
   }
 
   @Override
@@ -183,43 +176,6 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
       grantOrgRole(org, role, user);
     } else {
       revokeOrgRole(org, role, user);
-    }
-  }
-
-  private void addUserToOrg(
-      OrganizationModel org, UserModel user, IdentityProviderMapperModel mapperModel) {
-    if (orgAdd(mapperModel) && !org.hasMembership(user)) {
-      org.grantMembership(user);
-    }
-  }
-
-  private OrganizationModel getOrg(
-      KeycloakSession session, RealmModel realm, IdentityProviderMapperModel mapperModel) {
-    OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
-    String orgName = mapperModel.getConfig().get(ORG_PROPERTY_NAME);
-    return orgs.getOrganizationByName(realm, orgName);
-  }
-
-  private OrganizationRoleModel getOrgRole(
-      KeycloakSession session, RealmModel realm, IdentityProviderMapperModel mapperModel) {
-    OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
-    String orgName = mapperModel.getConfig().get(ORG_PROPERTY_NAME);
-    String orgRoleName = mapperModel.getConfig().get(ORG_ROLE_PROPERTY_NAME);
-    if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return null;
-    else return getOrganizationRole(orgs, orgName, orgRoleName, realm);
-  }
-
-  private void grantOrgRole(OrganizationModel org, OrganizationRoleModel role, UserModel user) {
-    if (org.hasMembership(user)) {
-      log.infof("Granting role: %s to %s", role.getName(), user.getUsername());
-      role.grantRole(user);
-    }
-  }
-
-  private void revokeOrgRole(OrganizationModel org, OrganizationRoleModel role, UserModel user) {
-    if (org.hasMembership(user)) {
-      log.infof("Revoking role: %s to %s", role.getName(), user.getUsername());
-      role.revokeRole(user);
     }
   }
 }
