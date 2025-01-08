@@ -15,6 +15,7 @@ import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
@@ -50,6 +51,7 @@ import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -143,15 +145,18 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
   @Test
   void testDeleteAllOrganizations() throws Exception {
-    final int numberOfOrgs = 3;
+    final int numberOfOrgs = 1000;
+    final String idpAlias = "idp-testDeleteAllOrganizations";
+    final org.keycloak.representations.idm.IdentityProviderRepresentation idp = createIdentityProvider(idpAlias);
     for (int i = 0; i < numberOfOrgs; i++) {
-      createOrganization(
+      OrganizationRepresentation org = createOrganization(
           new OrganizationRepresentation().name("master" + i).domains(List.of("master" + i + ".com")));
-    }
 
+      linkIdpWithOrg(idpAlias, org.getId());
+    }
     // get list before delete
     List<OrganizationRepresentation> organizations1 = getListOfOrganizations(keycloak);
-    assertThat(organizations1.size(), is(numberOfOrgs));
+    assertThat(organizations1.size(), greaterThanOrEqualTo(100)); // get orgs endpoint returns max 100 organizations
 
     // delete
     deleteAllOrganizations();

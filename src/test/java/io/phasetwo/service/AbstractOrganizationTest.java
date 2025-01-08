@@ -18,14 +18,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.*;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.phasetwo.service.importexport.representation.InvitationRepresentation;
 import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
 import io.phasetwo.service.importexport.representation.UserRolesRepresentation;
-import io.phasetwo.service.representation.Invitation;
-import io.phasetwo.service.representation.OrganizationRole;
+import io.phasetwo.service.representation.*;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -46,9 +46,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
-import org.keycloak.representations.idm.ClientRepresentation;
-import org.keycloak.representations.idm.RealmRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.*;
 import org.testcontainers.Testcontainers;
 
 public abstract class AbstractOrganizationTest {
@@ -201,6 +199,42 @@ public abstract class AbstractOrganizationTest {
   protected OrganizationRepresentation createOrganization(OrganizationRepresentation representation)
       throws IOException {
     return createOrganization(keycloak, representation);
+  }
+
+  protected IdentityProviderRepresentation createIdentityProvider(String alias){
+    IdentityProviderRepresentation idp = new IdentityProviderRepresentation();
+    idp.setAlias(alias);
+    idp.setProviderId("oidc");
+    idp.setEnabled(true);
+    idp.setFirstBrokerLoginFlowAlias("first broker login");
+    idp.setConfig(
+        new ImmutableMap.Builder<String, String>()
+            .put("useJwksUrl", "true")
+            .put("syncMode", "FORCE")
+            .put("authorizationUrl", "https://foo.com")
+            .put("hideOnLoginPage", "")
+            .put("loginHint", "")
+            .put("uiLocales", "")
+            .put("backchannelSupported", "")
+            .put("disableUserInfo", "")
+            .put("acceptsPromptNoneForwardFromClient", "")
+            .put("validateSignature", "")
+            .put("pkceEnabled", "")
+            .put("tokenUrl", "https://foo.com")
+            .put("clientAuthMethod", "client_secret_post")
+            .put("clientId", "aabbcc")
+            .put("clientSecret", "112233")
+            .build());
+    keycloak.realm(REALM).identityProviders().create(idp);
+    return idp;
+  }
+
+  protected void linkIdpWithOrg(String idpAlias, String orgId) throws Exception {
+    LinkIdp link = new LinkIdp();
+    link.setAlias(idpAlias);
+    link.setSyncMode("IMPORT");
+    Response response = postRequest(link, orgId, "idps", "link");
+    assertThat(response.getStatusCode(), Matchers.is(Status.CREATED.getStatusCode()));
   }
 
   // create an organization, fet the created organization and returns it
