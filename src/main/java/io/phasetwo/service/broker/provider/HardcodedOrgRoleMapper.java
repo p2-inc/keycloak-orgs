@@ -1,6 +1,6 @@
 package io.phasetwo.service.broker.provider;
 
-import static io.phasetwo.service.broker.Mappers.getOrganizationRole;
+import static io.phasetwo.service.broker.Mappers.*;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Strings;
@@ -28,28 +28,8 @@ import org.keycloak.provider.ProviderConfigProperty;
 public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
   protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
-  private static final Set<IdentityProviderSyncMode> IDENTITY_PROVIDER_SYNC_MODES =
-      new HashSet<>(Arrays.asList(IdentityProviderSyncMode.values()));
-
   static {
-    ProviderConfigProperty orgAdd = new ProviderConfigProperty();
-    orgAdd.setName("org_add");
-    orgAdd.setLabel("Add To Organization");
-    orgAdd.setHelpText("Add user to the organization as a member if not already.");
-    orgAdd.setType(ProviderConfigProperty.BOOLEAN_TYPE);
-    configProperties.add(orgAdd);
-    ProviderConfigProperty org = new ProviderConfigProperty();
-    org.setName("org");
-    org.setLabel("Organization");
-    org.setHelpText("Organization containing the role to grant to user.");
-    org.setType(ProviderConfigProperty.STRING_TYPE);
-    configProperties.add(org);
-    ProviderConfigProperty orgRole = new ProviderConfigProperty();
-    orgRole.setName("org_role");
-    orgRole.setLabel("Organization Role");
-    orgRole.setHelpText("Organization role to grant to user.");
-    orgRole.setType(ProviderConfigProperty.STRING_TYPE);
-    configProperties.add(orgRole);
+    addOrgConfigProperties(configProperties);
   }
 
   @Override
@@ -102,9 +82,9 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
-    String orgName = mapperModel.getConfig().get("org");
-    String orgRoleName = mapperModel.getConfig().get("org_role");
-    boolean orgAdd = Boolean.parseBoolean(mapperModel.getConfig().get("org_add"));
+    String orgName = mapperModel.getConfig().get(ORG_PROPERTY_NAME);
+    String orgRoleName = mapperModel.getConfig().get(ORG_ROLE_PROPERTY_NAME);
+    boolean orgAdd = Boolean.parseBoolean(mapperModel.getConfig().get(ORG_ADD_PROPERTY_NAME));
 
     if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return;
 
