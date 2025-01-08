@@ -88,15 +88,19 @@ public class HardcodedOrgRoleMapper extends AbstractIdentityProviderMapper {
 
     if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return;
 
+    OrganizationModel org = orgs.getOrganizationByName(realm, orgName);
     OrganizationRoleModel role = getOrganizationRole(orgs, orgName, orgRoleName, realm);
-    if (role != null) {
+    if (org != null && role != null) {
       if (orgAdd) {
-        log.infof("Granting org: %s membership to %s", orgName, user.getUsername());
-        OrganizationModel org = orgs.getOrganizationByName(realm, orgName);
-        org.grantMembership(user);
+        if (!org.hasMembership(user)) {
+          log.infof("Granting org: %s membership to %s", orgName, user.getUsername());
+          org.grantMembership(user);
+        }
       }
-      log.infof("Granting org: %s - role: %s to %s", orgName, orgRoleName, user.getUsername());
-      role.grantRole(user);
+      if (org.hasMembership(user)) {
+        log.infof("Granting org: %s - role: %s to %s", orgName, orgRoleName, user.getUsername());
+        role.grantRole(user);
+      }
     }
   }
 

@@ -126,14 +126,18 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
+    OrganizationModel org = getOrg(session, realm, mapperModel);
+    if (org == null) {
+      return;
+    }
     OrganizationRoleModel role = getOrgRole(session, realm, mapperModel);
     if (role == null) {
       return;
     }
 
     if (applies(mapperModel, context)) {
-      if (orgAdd(mapperModel)) addUserToOrg(session, realm, user, mapperModel);
-      grantOrgRole(role, user);
+      addUserToOrg(org, user, mapperModel);
+      grantOrgRole(org, role, user);
     }
   }
 
@@ -144,13 +148,17 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
+    OrganizationModel org = getOrg(session, realm, mapperModel);
+    if (org == null) {
+      return;
+    }
     OrganizationRoleModel role = getOrgRole(session, realm, mapperModel);
     if (role == null) {
       return;
     }
 
     if (!applies(mapperModel, context)) {
-      revokeOrgRole(role, user);
+      revokeOrgRole(org, role, user);
     }
   }
 
@@ -161,46 +169,57 @@ public class AdvancedClaimToOrgRoleMapper extends AbstractClaimMapper {
       UserModel user,
       IdentityProviderMapperModel mapperModel,
       BrokeredIdentityContext context) {
+    OrganizationModel org = getOrg(session, realm, mapperModel);
+    if (org == null) {
+      return;
+    }
     OrganizationRoleModel role = getOrgRole(session, realm, mapperModel);
     if (role == null) {
       return;
     }
 
     if (applies(mapperModel, context)) {
-      if (orgAdd(mapperModel)) addUserToOrg(session, realm, user, mapperModel);
-      grantOrgRole(role, user);
+      addUserToOrg(org, user, mapperModel);
+      grantOrgRole(org, role, user);
     } else {
-      revokeOrgRole(role, user);
+      revokeOrgRole(org, role, user);
     }
   }
 
   private void addUserToOrg(
-      KeycloakSession session,
-      RealmModel realm,
-      UserModel user,
-      IdentityProviderMapperModel mapperModel) {
+      OrganizationModel org, UserModel user, IdentityProviderMapperModel mapperModel) {
+    if (orgAdd(mapperModel) && !org.hasMembership(user)) {
+      org.grantMembership(user);
+    }
+  }
+
+  private OrganizationModel getOrg(
+      KeycloakSession session, RealmModel realm, IdentityProviderMapperModel mapperModel) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
-    String orgName = mapperModel.getConfig().get("org");
-    OrganizationModel org = orgs.getOrganizationByName(realm, orgName);
-    org.grantMembership(user);
+    String orgName = mapperModel.getConfig().get(ORG_PROPERTY_NAME);
+    return orgs.getOrganizationByName(realm, orgName);
   }
 
   private OrganizationRoleModel getOrgRole(
       KeycloakSession session, RealmModel realm, IdentityProviderMapperModel mapperModel) {
     OrganizationProvider orgs = session.getProvider(OrganizationProvider.class);
-    String orgName = mapperModel.getConfig().get("org");
-    String orgRoleName = mapperModel.getConfig().get("org_role");
+    String orgName = mapperModel.getConfig().get(ORG_PROPERTY_NAME);
+    String orgRoleName = mapperModel.getConfig().get(ORG_ROLE_PROPERTY_NAME);
     if (Strings.isNullOrEmpty(orgName) || Strings.isNullOrEmpty(orgRoleName)) return null;
     else return getOrganizationRole(orgs, orgName, orgRoleName, realm);
   }
 
-  private void grantOrgRole(OrganizationRoleModel role, UserModel user) {
-    log.infof("Granting role: %s to %s", role.getName(), user.getUsername());
-    role.grantRole(user);
+  private void grantOrgRole(OrganizationModel org, OrganizationRoleModel role, UserModel user) {
+    if (org.hasMembership(user)) {
+      log.infof("Granting role: %s to %s", role.getName(), user.getUsername());
+      role.grantRole(user);
+    }
   }
 
-  private void revokeOrgRole(OrganizationRoleModel role, UserModel user) {
-    log.infof("Revoking role: %s to %s", role.getName(), user.getUsername());
-    role.revokeRole(user);
+  private void revokeOrgRole(OrganizationModel org, OrganizationRoleModel role, UserModel user) {
+    if (org.hasMembership(user)) {
+      log.infof("Revoking role: %s to %s", role.getName(), user.getUsername());
+      role.revokeRole(user);
+    }
   }
 }
