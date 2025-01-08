@@ -6,6 +6,7 @@ import org.keycloak.authentication.actiontoken.ActionTokenHandlerFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
+@SuppressWarnings("rawtypes")
 @AutoService(ActionTokenHandlerFactory.class)
 public class PortalLinkActionTokenHandlerFactory
     implements ActionTokenHandlerFactory<PortalLinkActionToken> {
