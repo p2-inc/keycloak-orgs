@@ -1,22 +1,21 @@
 package io.phasetwo.service.importexport;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.representation.OrganizationsConfig;
+import java.io.IOException;
+import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 
 @JBossLog
 public class OrganizationSharedIdpExportTest extends AbstractOrganizationTest {
@@ -25,43 +24,43 @@ public class OrganizationSharedIdpExportTest extends AbstractOrganizationTest {
   void testMultiOrganizationLink() throws IOException {
     // create organization
     var organization1 =
-            createOrganization(
-                    new OrganizationRepresentation()
-                            .name("example-org")
-                            .domains(List.of("example.com", "test.org")));
+        createOrganization(
+            new OrganizationRepresentation()
+                .name("example-org")
+                .domains(List.of("example.com", "test.org")));
     // create organization
     var organization2 =
-            createOrganization(
-                    new OrganizationRepresentation()
-                            .name("example-org2")
-                            .domains(List.of("example2.com", "test2.org")));
+        createOrganization(
+            new OrganizationRepresentation()
+                .name("example-org2")
+                .domains(List.of("example2.com", "test2.org")));
 
     // create identity provider
     String alias1 = "linking-provider-1";
     org.keycloak.representations.idm.IdentityProviderRepresentation idp =
-            new org.keycloak.representations.idm.IdentityProviderRepresentation();
+        new org.keycloak.representations.idm.IdentityProviderRepresentation();
     idp.setAlias(alias1);
     idp.setProviderId("oidc");
     idp.setEnabled(true);
     idp.setFirstBrokerLoginFlowAlias("first broker login");
     idp.setConfig(
-            new ImmutableMap.Builder<String, String>()
-                    .put("useJwksUrl", "true")
-                    .put("syncMode", "FORCE")
-                    .put("authorizationUrl", "https://foo.com")
-                    .put("hideOnLoginPage", "")
-                    .put("loginHint", "")
-                    .put("uiLocales", "")
-                    .put("backchannelSupported", "")
-                    .put("disableUserInfo", "")
-                    .put("acceptsPromptNoneForwardFromClient", "")
-                    .put("validateSignature", "")
-                    .put("pkceEnabled", "")
-                    .put("tokenUrl", "https://foo.com")
-                    .put("clientAuthMethod", "client_secret_post")
-                    .put("clientId", "aabbcc")
-                    .put("clientSecret", "112233")
-                    .build());
+        new ImmutableMap.Builder<String, String>()
+            .put("useJwksUrl", "true")
+            .put("syncMode", "FORCE")
+            .put("authorizationUrl", "https://foo.com")
+            .put("hideOnLoginPage", "")
+            .put("loginHint", "")
+            .put("uiLocales", "")
+            .put("backchannelSupported", "")
+            .put("disableUserInfo", "")
+            .put("acceptsPromptNoneForwardFromClient", "")
+            .put("validateSignature", "")
+            .put("pkceEnabled", "")
+            .put("tokenUrl", "https://foo.com")
+            .put("clientAuthMethod", "client_secret_post")
+            .put("clientId", "aabbcc")
+            .put("clientSecret", "112233")
+            .build());
     keycloak.realm(REALM).identityProviders().create(idp);
 
     // link org1
@@ -70,8 +69,8 @@ public class OrganizationSharedIdpExportTest extends AbstractOrganizationTest {
     link1.setSyncMode("IMPORT");
     var responseOrg1Link = postRequest(link1, organization1.getId(), "idps", "link");
     assertThat(
-            responseOrg1Link.getStatusCode(),
-            is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+        responseOrg1Link.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
 
     // link org2
     var link2 = new LinkIdp();
@@ -79,8 +78,8 @@ public class OrganizationSharedIdpExportTest extends AbstractOrganizationTest {
     link2.setSyncMode("IMPORT");
     var responseOrg2Link = postRequest(link2, organization2.getId(), "idps", "link");
     assertThat(
-            responseOrg2Link.getStatusCode(),
-            is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+        responseOrg2Link.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
 
     // export
     var export = exportOrgs(keycloak, true);
@@ -88,15 +87,15 @@ public class OrganizationSharedIdpExportTest extends AbstractOrganizationTest {
 
     // validate org1
     export.getOrganizations().stream()
-            .filter(exportOrg -> exportOrg.getOrganization().getName().equals(organization1.getName()))
-            .findFirst()
-            .ifPresent(exportOrg -> assertThat(exportOrg.getIdpLink(), is(alias1)));
+        .filter(exportOrg -> exportOrg.getOrganization().getName().equals(organization1.getName()))
+        .findFirst()
+        .ifPresent(exportOrg -> assertThat(exportOrg.getIdpLink(), is(alias1)));
 
     // validate org2
     export.getOrganizations().stream()
-            .filter(exportOrg -> exportOrg.getOrganization().getName().equals(organization2.getName()))
-            .findFirst()
-            .ifPresent(exportOrg -> assertThat(exportOrg.getIdpLink(), is(alias1)));
+        .filter(exportOrg -> exportOrg.getOrganization().getName().equals(organization2.getName()))
+        .findFirst()
+        .ifPresent(exportOrg -> assertThat(exportOrg.getIdpLink(), is(alias1)));
 
     // delete org1
     deleteOrganization(organization1.getId());
@@ -116,8 +115,8 @@ public class OrganizationSharedIdpExportTest extends AbstractOrganizationTest {
     orgConfig.setSharedIdps(true);
     var responseOrgsConfig = putRequest(orgConfig, url);
     assertThat(
-            responseOrgsConfig.getStatusCode(),
-            is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+        responseOrgsConfig.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
   }
 
   @AfterEach
@@ -128,7 +127,7 @@ public class OrganizationSharedIdpExportTest extends AbstractOrganizationTest {
     orgConfig.setSharedIdps(true);
     var responseOrgsConfig = putRequest(orgConfig, url);
     assertThat(
-            responseOrgsConfig.getStatusCode(),
-            is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+        responseOrgsConfig.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
   }
 }

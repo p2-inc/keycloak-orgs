@@ -58,7 +58,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<IdentityProviderRepresentation> getIdentityProviders() {
-    return session.identityProviders()
+    return session
+        .identityProviders()
         .getAllStream()
         .filter(provider -> canViewIdp())
         .filter(this::idpInOrg)
@@ -106,7 +107,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       boolean disable,
       String orgId) {
     if (representation.isEnabled()) {
-      session.identityProviders()
+      session
+          .identityProviders()
           .getAllStream()
           .filter(this::idpInOrg)
           .forEach(
