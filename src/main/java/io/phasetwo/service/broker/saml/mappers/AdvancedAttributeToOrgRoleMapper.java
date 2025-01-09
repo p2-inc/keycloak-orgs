@@ -3,6 +3,7 @@ package io.phasetwo.service.broker.saml.mappers;
 import static io.phasetwo.service.broker.Mappers.*;
 import static org.keycloak.utils.RegexUtils.valueMatchesRegex;
 
+import com.google.auto.service.AutoService;
 import io.phasetwo.service.broker.OrgRoleMapper;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -11,8 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.broker.provider.AbstractIdentityProviderMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
+import org.keycloak.broker.provider.IdentityProviderMapper;
 import org.keycloak.broker.saml.SAMLEndpoint;
 import org.keycloak.broker.saml.SAMLIdentityProviderFactory;
 import org.keycloak.dom.saml.v2.assertion.AssertionType;
@@ -24,6 +27,8 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
 
+@JBossLog
+@AutoService(IdentityProviderMapper.class)
 public class AdvancedAttributeToOrgRoleMapper extends AbstractIdentityProviderMapper
     implements OrgRoleMapper {
 
