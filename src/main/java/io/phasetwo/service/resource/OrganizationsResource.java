@@ -150,8 +150,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
         orgs.createOrganization(realm, body.getName(), auth.getUser(), auth.hasCreateOrg());
     org.setDisplayName(body.getDisplayName());
     org.setUrl(body.getUrl());
-    if (body.getAttributes() != null)
-      body.getAttributes().forEach(org::setAttribute);
+    if (body.getAttributes() != null) body.getAttributes().forEach(org::setAttribute);
     if (body.getDomains() != null) org.setDomains(body.getDomains());
 
     Organization o = convertOrganizationModelToOrganization(org);
@@ -188,7 +187,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
   private void resetIdentityProviders(boolean newSharedIdpConfig) {
     var existingSharedIdpConfig = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
     if (existingSharedIdpConfig && !newSharedIdpConfig) {
-      session.identityProviders().getAllStream()
+      session
+          .identityProviders()
+          .getAllStream()
           .forEach(
               identityProviderModel -> {
                 identityProviderModel.getConfig().put(ORG_SHARED_IDP_KEY, "false");
@@ -314,7 +315,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
       KeycloakOrgsImportConverter.createOrganizationRoles(
           organizationRepresentation.getRoles(), org);
 
-      KeycloakOrgsImportConverter.createOrganizationIdp(session, realm, organizationRepresentation.getIdpLink(), org, skipMissingIdp);
+      KeycloakOrgsImportConverter.createOrganizationIdp(
+          session, realm, organizationRepresentation.getIdpLink(), org, skipMissingIdp);
 
       KeycloakOrgsImportConverter.addMembers(
           session, realm, organizationRepresentation, org, skipMissingMember);

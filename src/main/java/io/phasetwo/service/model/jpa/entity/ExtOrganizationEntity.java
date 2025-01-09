@@ -16,6 +16,10 @@ import org.hibernate.annotations.Nationalized;
       name = "getOrganizationsByRealmId",
       query = "SELECT o FROM ExtOrganizationEntity o WHERE o.realmId = :realmId"),
   @NamedQuery(
+      name = "getOrganizationsByRealmIdAndNameExact",
+      query =
+          "SELECT o FROM ExtOrganizationEntity o WHERE o.realmId = :realmId AND o.name = :name"),
+  @NamedQuery(
       name = "getOrganizationsByRealmIdAndName",
       query =
           "SELECT o FROM ExtOrganizationEntity o WHERE o.realmId = :realmId AND lower(o.name) LIKE lower(:search) ORDER BY o.name"),
