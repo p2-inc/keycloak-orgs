@@ -17,6 +17,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Date;
 import java.util.Objects;
+import org.keycloak.models.jpa.entities.UserEntity;
 
 /** */
 @NamedQueries({
@@ -53,9 +54,10 @@ public class OrganizationMemberEntity {
   @JoinColumn(name = "ORGANIZATION_ID")
   protected ExtOrganizationEntity organization;
 
-  @Column(name = "USER_ID")
-  protected String userId;
-
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name="USER_ID")
+  protected UserEntity user;
+  
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "CREATED_AT")
   protected Date createdAt;
@@ -73,13 +75,17 @@ public class OrganizationMemberEntity {
     this.id = id;
   }
 
-  public String getUserId() {
-    return userId;
-  }
+  // public String getUserId() {
+  //   return userId;
+  // }
 
-  public void setUserId(String userId) {
-    this.userId = userId;
+  public UserEntity getUser() {
+    return user;
   }
+  
+  // public void setUserId(String userId) {
+  //   this.userId = userId;
+  // }
 
   public ExtOrganizationEntity getOrganization() {
     return organization;
@@ -105,7 +111,7 @@ public class OrganizationMemberEntity {
 
     OrganizationMemberEntity key = (OrganizationMemberEntity) o;
 
-    if (!userId.equals(key.userId)) return false;
+    if (!user.equals(key.user)) return false;
     if (!organization.equals(key.organization)) return false;
 
     return true;
@@ -113,6 +119,6 @@ public class OrganizationMemberEntity {
 
   @Override
   public int hashCode() {
-    return Objects.hash(organization, userId);
+    return Objects.hash(organization, user);
   }
 }
