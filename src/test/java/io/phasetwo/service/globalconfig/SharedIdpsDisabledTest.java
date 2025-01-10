@@ -45,49 +45,13 @@ public class SharedIdpsDisabledTest extends AbstractOrganizationTest {
 
     // create identity provider
     String alias1 = "linking-provider-1";
-    org.keycloak.representations.idm.IdentityProviderRepresentation idp =
-        new org.keycloak.representations.idm.IdentityProviderRepresentation();
-    idp.setAlias(alias1);
-    idp.setProviderId("oidc");
-    idp.setEnabled(true);
-    idp.setFirstBrokerLoginFlowAlias("first broker login");
-    idp.setConfig(
-        new ImmutableMap.Builder<String, String>()
-            .put("useJwksUrl", "true")
-            .put("syncMode", "FORCE")
-            .put("authorizationUrl", "https://foo.com")
-            .put("hideOnLoginPage", "")
-            .put("loginHint", "")
-            .put("uiLocales", "")
-            .put("backchannelSupported", "")
-            .put("disableUserInfo", "")
-            .put("acceptsPromptNoneForwardFromClient", "")
-            .put("validateSignature", "")
-            .put("pkceEnabled", "")
-            .put("tokenUrl", "https://foo.com")
-            .put("clientAuthMethod", "client_secret_post")
-            .put("clientId", "aabbcc")
-            .put("clientSecret", "112233")
-            .build());
-    keycloak.realm(REALM).identityProviders().create(idp);
+    var idp = createIdentityProvider(alias1);
 
     // link org1
-    LinkIdp link1 = new LinkIdp();
-    link1.setAlias(alias1);
-    link1.setSyncMode("IMPORT");
-    var responseOrg1Link = postRequest(link1, organization1.getId(), "idps", "link");
-    assertThat(
-        responseOrg1Link.getStatusCode(),
-        is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    linkIdpWithOrg(alias1, organization1.getId());
 
     // link org2
-    var link2 = new LinkIdp();
-    link2.setAlias(alias1);
-    link2.setSyncMode("IMPORT");
-    var responseOrg2Link = postRequest(link2, organization2.getId(), "idps", "link");
-    assertThat(
-        responseOrg2Link.getStatusCode(),
-        is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    linkIdpWithOrg(alias1, organization2.getId());
 
     // get IDP for org1
     var org1GetResponse = getRequest(organization1.getId(), "idps");

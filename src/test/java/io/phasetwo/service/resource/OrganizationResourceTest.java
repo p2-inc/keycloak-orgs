@@ -1343,41 +1343,13 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     String id = org.getId();
 
     String alias1 = "linking-provider-1";
-    org.keycloak.representations.idm.IdentityProviderRepresentation idp =
-        new org.keycloak.representations.idm.IdentityProviderRepresentation();
-    idp.setAlias(alias1);
-    idp.setProviderId("oidc");
-    idp.setEnabled(true);
-    idp.setFirstBrokerLoginFlowAlias("first broker login");
-    idp.setConfig(
-        new ImmutableMap.Builder<String, String>()
-            .put("useJwksUrl", "true")
-            .put("syncMode", "FORCE")
-            .put("authorizationUrl", "https://foo.com")
-            .put("hideOnLoginPage", "")
-            .put("loginHint", "")
-            .put("uiLocales", "")
-            .put("backchannelSupported", "")
-            .put("disableUserInfo", "")
-            .put("acceptsPromptNoneForwardFromClient", "")
-            .put("validateSignature", "")
-            .put("pkceEnabled", "")
-            .put("tokenUrl", "https://foo.com")
-            .put("clientAuthMethod", "client_secret_post")
-            .put("clientId", "aabbcc")
-            .put("clientSecret", "112233")
-            .build());
-    keycloak.realm(REALM).identityProviders().create(idp);
+    createIdentityProvider(alias1);
 
     // link it
-    LinkIdp link = new LinkIdp();
-    link.setAlias(alias1);
-    link.setSyncMode("IMPORT");
-    Response response = postRequest(link, org.getId(), "idps", "link");
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    linkIdpWithOrg(alias1, org.getId());
 
     // get it
-    response = getRequest(id, "idps");
+    Response response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps =
         objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});

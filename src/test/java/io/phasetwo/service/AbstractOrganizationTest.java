@@ -229,7 +229,7 @@ public abstract class AbstractOrganizationTest {
     return idp;
   }
 
-  protected void linkIdpWithOrg(String idpAlias, String orgId) throws Exception {
+  protected void linkIdpWithOrg(String idpAlias, String orgId) throws IOException {
     LinkIdp link = new LinkIdp();
     link.setAlias(idpAlias);
     link.setSyncMode("IMPORT");
