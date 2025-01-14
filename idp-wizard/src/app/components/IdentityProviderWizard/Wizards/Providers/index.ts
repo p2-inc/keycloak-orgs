@@ -7,6 +7,7 @@ export * from "./Duo";
 export * from "./Generic";
 export * from "./Google";
 export * from "./JumpCloud";
+export * from "./LastPass";
 export * from "./Okta";
 export * from "./OneLogin";
 export * from "./Oracle";

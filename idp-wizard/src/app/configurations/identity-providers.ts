@@ -14,6 +14,7 @@ import samlLogo from "@app/images/provider-logos/saml_logo.svg";
 import vmwareLogo from "@app/images/provider-logos/vmware_logo.svg";
 import ldapLogo from "@app/images/provider-logos/ldap_logo.svg";
 import duoLogo from "@app/images/duo/duo.svg";
+import lastpassLogo from "@app/images/lastpass/lastpass-logo.svg";
 import cloudflareLogo from "@app/images/cloudflare/cloudflare.svg";
 import oracleLogo from "@app/images/oracle/oracle-logo.png";
 import { Protocols } from ".";
@@ -28,6 +29,7 @@ export enum Providers {
   DUO = "duo",
   GOOGLE_SAML = "googlesaml",
   JUMP_CLOUD = "jumpcloud",
+  LAST_PASS = "lastpass",
   LDAP = "ldap",
   OKTA = "okta",
   ONE_LOGIN = "onelogin",
@@ -143,6 +145,13 @@ export const IdentityProviders: IIDPType[] = [
     imageSrc: duoLogo,
     active: true,
     id: Providers.DUO,
+    protocols: [Protocols.SAML],
+  },
+  {
+    name: "LastPass",
+    imageSrc: lastpassLogo,
+    active: true,
+    id: Providers.LAST_PASS,
     protocols: [Protocols.SAML],
   },
   {
