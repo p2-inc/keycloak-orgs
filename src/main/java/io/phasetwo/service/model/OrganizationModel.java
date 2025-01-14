@@ -41,6 +41,11 @@ public interface OrganizationModel extends WithAttributes {
 
   Stream<UserModel> searchForMembersStream(String search, Integer firstResult, Integer maxResults);
 
+  Stream<OrganizationMemberModel> getOrganizationMembersStream();
+
+  Stream<OrganizationMemberModel> searchForOrganizationMembersStream(
+      String search, Integer firstResult, Integer maxResults);
+
   boolean hasMembership(UserModel user);
 
   void grantMembership(UserModel user);
@@ -73,6 +78,8 @@ public interface OrganizationModel extends WithAttributes {
         .collect(MoreCollectors.toOptional())
         .orElse(null);
   }
+
+  OrganizationMemberModel getMembershipDetails(UserModel user);
 
   void removeRole(String name);
 
