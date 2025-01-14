@@ -14,6 +14,7 @@ import samlLogo from "@app/images/provider-logos/saml_logo.svg";
 import vmwareLogo from "@app/images/provider-logos/vmware_logo.svg";
 import ldapLogo from "@app/images/provider-logos/ldap_logo.svg";
 import duoLogo from "@app/images/duo/duo.svg";
+import salesforceLogo from "@app/images/salesforce/salesforce-logo.png";
 import lastpassLogo from "@app/images/lastpass/lastpass-logo.svg";
 import cloudflareLogo from "@app/images/cloudflare/cloudflare.svg";
 import oracleLogo from "@app/images/oracle/oracle-logo.png";
@@ -37,6 +38,7 @@ export enum Providers {
   ORACLE = "oracle",
   PING_FEDERATE = "pingfederate",
   PING_ONE = "pingone",
+  SALESFORCE = "salesforce",
   SAML = "saml",
   VMWARE = "vmware",
 }
@@ -148,6 +150,13 @@ export const IdentityProviders: IIDPType[] = [
     protocols: [Protocols.SAML],
   },
   {
+    name: "Salesforce",
+    imageSrc: salesforceLogo,
+    active: true,
+    id: Providers.SALESFORCE,
+    protocols: [Protocols.SAML, Protocols.OPEN_ID],
+  },
+  {    
     name: "LastPass",
     imageSrc: lastpassLogo,
     active: true,

@@ -28,6 +28,8 @@ import {
   OneLoginWizard,
   OracleWizard,
   PingOneWizard,
+  SalesforceWizardOIDC,
+  SalesforceWizardSAML,
 } from "./Wizards";
 import { useRoleAccess } from "@app/hooks";
 import { Navigate, generatePath } from "react-router-dom";
@@ -70,6 +72,9 @@ const Provider = () => {
       return <ADFSWizard />;
     case Providers.DUO:
       return <DuoWizard />;
+    case Providers.SALESFORCE:
+      if (protocol === Protocols.SAML) return <SalesforceWizardSAML />;
+      if (protocol === Protocols.OPEN_ID) return <SalesforceWizardOIDC />;
     case Providers.LAST_PASS:
       return <LastPassWizard />;
     case Providers.CLOUDFLARE:

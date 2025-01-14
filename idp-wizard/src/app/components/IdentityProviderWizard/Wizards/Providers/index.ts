@@ -12,3 +12,4 @@ export * from "./Okta";
 export * from "./OneLogin";
 export * from "./Oracle";
 export * from "./PingOne";
+export * from "./Salesforce";
