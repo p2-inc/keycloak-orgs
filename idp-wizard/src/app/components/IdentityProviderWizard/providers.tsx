@@ -24,6 +24,7 @@ import {
   OktaWizardLDAP,
   OktaWizardSaml,
   OneLoginWizard,
+  OracleWizard,
   PingOneWizard,
 } from "./Wizards";
 import { useRoleAccess } from "@app/hooks";
@@ -67,6 +68,9 @@ const Provider = () => {
       return <ADFSWizard />;
     case Providers.DUO:
       return <DuoWizard />;
+    case Providers.ORACLE:
+      return <OracleWizard />;
+      
 
     default:
       return <div>No provider found</div>;
