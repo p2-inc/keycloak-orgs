@@ -1,6 +1,7 @@
 export * from "./ADFS";
 export * from "./Auth0";
 export * from "./AWS";
+export * from "./CyberArk";
 export * from "./Cloudflare";
 export * from "./MSFT_EntraID";
 export * from "./Duo";

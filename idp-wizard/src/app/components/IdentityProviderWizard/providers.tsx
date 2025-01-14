@@ -14,6 +14,7 @@ import {
   Auth0WizardOIDC,
   Auth0WizardSAML,
   AWSSamlWizard,
+  CyberArkWizard,
   CloudflareWizard,
   EntraIdWizard,
   DuoWizard,
@@ -72,6 +73,8 @@ const Provider = () => {
       return <ADFSWizard />;
     case Providers.DUO:
       return <DuoWizard />;
+    case Providers.CYBERARK:
+      return <CyberArkWizard />;
     case Providers.SALESFORCE:
       if (protocol === Protocols.SAML) return <SalesforceWizardSAML />;
       if (protocol === Protocols.OPEN_ID) return <SalesforceWizardOIDC />;

@@ -96,9 +96,9 @@ export const IdentityProviders: IIDPType[] = [
   {
     name: "Cyberark",
     imageSrc: cyberarkLogo,
-    active: false,
+    active: true,
     id: Providers.CYBERARK,
-    protocols: [],
+    protocols: [Protocols.SAML],
   },
   {
     name: "Jumpcloud",
