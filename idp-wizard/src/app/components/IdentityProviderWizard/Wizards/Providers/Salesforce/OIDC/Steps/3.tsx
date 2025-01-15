@@ -1,8 +1,8 @@
 import { Card, CardBody } from "@patternfly/react-core";
 import React, { FC } from "react";
-import SalesforceOidcStep2Image from "@app/images/salesforce/oidc/salesforce_oidc_2.png";
-import SalesforceOidcStep3Image from "@app/images/salesforce/oidc/salesforce_oidc_3.png";
-import SalesforceOidcStep4Image from "@app/images/salesforce/oidc/salesforce_oidc_4.png";
+import SalesforceOidcStep2Image from "@app/images/salesforce/OIDC/salesforce_oidc_2.png";
+import SalesforceOidcStep3Image from "@app/images/salesforce/OIDC/salesforce_oidc_3.png";
+import SalesforceOidcStep4Image from "@app/images/salesforce/OIDC/salesforce_oidc_4.png";
 import { InstructionProps, Step, StepImage } from "@wizardComponents";
 import { API_RETURN_PROMISE } from "@app/configurations/api-status";
 import { ClientCredentials } from "../forms";
