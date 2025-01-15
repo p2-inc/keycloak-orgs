@@ -3,7 +3,7 @@
   <groupId>io.phasetwo</groupId>
   <artifactId>phasetwo-idp-wizard</artifactId>
   <packaging>jar</packaging>
-  <version>0.17-SNAPSHOT</version>
+  <version>0.16-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
@@ -29,7 +29,7 @@
     <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.wizard</main.java.package>
-    <keycloak.version>26.0.2</keycloak.version>
+    <keycloak.version>26.0.8</keycloak.version>
     <guava.version>33.0.0-jre</guava.version>
     <lombok.version>1.18.34</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
