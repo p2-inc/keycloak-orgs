@@ -43,7 +43,8 @@ public interface OrganizationModel extends WithAttributes {
     return getMembersStream(false);
   }
 
-  default Stream<UserModel> searchForMembersStream(String search, Integer firstResult, Integer maxResults) {
+  default Stream<UserModel> searchForMembersStream(
+      String search, Integer firstResult, Integer maxResults) {
     return searchForMembersStream(search, firstResult, maxResults, false);
   }
 
@@ -51,7 +52,8 @@ public interface OrganizationModel extends WithAttributes {
 
   Stream<UserModel> getMembersStream(boolean excludeAdminAccounts);
 
-  Stream<UserModel> searchForMembersStream(String search, Integer firstResult, Integer maxResults, boolean excludeAdminAccounts);
+  Stream<UserModel> searchForMembersStream(
+      String search, Integer firstResult, Integer maxResults, boolean excludeAdminAccounts);
 
   boolean hasMembership(UserModel user);
 

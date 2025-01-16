@@ -26,16 +26,20 @@ import org.keycloak.models.jpa.entities.UserEntity;
       query =
           "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization"),
   @NamedQuery(
+      name = "getOrganizationMembersCountExcludeAdmin",
+      query =
+          "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization AND NOT (m.user.username LIKE 'org-admin-%' AND LENGTH(m.user.username) = 46)"),
+  @NamedQuery(
       name = "getOrganizationMembers",
       query =
           "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization ORDER BY m.createdAt"),
   @NamedQuery(
-      name = "getOrganizationMemberByUserId",
+      name = "getOrganizationMembersExcludeAdmin",
       query =
-          "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization AND m.userId = :id"),
+          "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization AND NOT (m.user.username LIKE 'org-admin-%' AND LENGTH(m.user.username) = 46) ORDER BY m.createdAt"),
   @NamedQuery(
       name = "getOrganizationMembershipsByUserId",
-      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :id")
+      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.user = :user")
 })
 @Table(
     name = "ORGANIZATION_MEMBER",
@@ -55,9 +59,9 @@ public class OrganizationMemberEntity {
   protected ExtOrganizationEntity organization;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name="USER_ID")
+  @JoinColumn(name = "USER_ID")
   protected UserEntity user;
-  
+
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "CREATED_AT")
   protected Date createdAt;
@@ -82,15 +86,11 @@ public class OrganizationMemberEntity {
   public UserEntity getUser() {
     return user;
   }
-  
-  // public void setUserId(String userId) {
-  //   this.userId = userId;
-  // }
 
   public void setUser(UserEntity user) {
     this.user = user;
   }
-  
+
   public ExtOrganizationEntity getOrganization() {
     return organization;
   }

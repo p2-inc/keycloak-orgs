@@ -32,6 +32,8 @@ import java.util.stream.Stream;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class JpaOrganizationProvider implements OrganizationProvider {
@@ -120,7 +122,13 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   public Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user) {
     TypedQuery<OrganizationMemberEntity> query =
         em.createNamedQuery("getOrganizationMembershipsByUserId", OrganizationMemberEntity.class);
-    query.setParameter("id", user.getId());
+    UserEntity u = null;
+    if (user instanceof UserAdapter) {
+      u = ((UserAdapter) user).getEntity();
+    } else {
+      u = em.find(UserEntity.class, user.getId());
+    }
+    query.setParameter("user", u);
     return query
         .getResultStream()
         .map(e -> new OrganizationAdapter(session, realm, em, e.getOrganization()));

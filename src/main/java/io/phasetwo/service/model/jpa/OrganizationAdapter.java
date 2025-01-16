@@ -192,19 +192,31 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Long getMembersCount(boolean excludeAdmin) {
-    TypedQuery<Long> query = em.createNamedQuery("getOrganizationMembersCount", Long.class);
+    TypedQuery<Long> query =
+        em.createNamedQuery(
+            excludeAdmin
+                ? "getOrganizationMembersCountExcludeAdmin"
+                : "getOrganizationMembersCount",
+            Long.class);
     query.setParameter("organization", org);
     return query.getSingleResult();
   }
 
   @Override
   public Stream<UserModel> getMembersStream(boolean excludeAdmin) {
-    return org.getMembers().stream()
+    TypedQuery<OrganizationMemberEntity> query =
+        em.createNamedQuery(
+            excludeAdmin ? "getOrganizationMembersExcludeAdmin" : "getOrganizationMembers",
+            OrganizationMemberEntity.class);
+    query.setParameter("organization", org);
+    return query
+        .getResultStream()
         .map(OrganizationMemberEntity::getUserId)
         .map(uid -> session.users().getUserById(realm, uid))
         .filter(u -> u != null)
-        .filter(u -> u.getServiceAccountClientLink() == null)
-        .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") && u.getUsername().length() == 46));
+        .filter(u -> u.getServiceAccountClientLink() == null);
+    // .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") &&
+    // u.getUsername().length() == 46));
   }
 
   @Override
@@ -217,16 +229,19 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     if (hasMembership(user)) return;
     OrganizationMemberEntity m = new OrganizationMemberEntity();
     m.setId(KeycloakModelUtils.generateId());
-    UserEntity u = null;
-    if (user instanceof UserAdapter) {
-      u = ((UserAdapter)user).getEntity();
-    } else {
-      em.find(UserEntity.class, user.getId());
-    }
+    UserEntity u = entityFromModel(user);
     m.setUser(u);
     m.setOrganization(org);
     em.persist(m);
     org.getMembers().add(m);
+  }
+
+  private UserEntity entityFromModel(UserModel user) {
+    if (user instanceof UserAdapter) {
+      return ((UserAdapter) user).getEntity();
+    } else {
+      return em.find(UserEntity.class, user.getId());
+    }
   }
 
   @Override
@@ -300,7 +315,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   public Stream<OrganizationRoleModel> getRolesByUserStream(UserModel user) {
     TypedQuery<UserOrganizationRoleMappingEntity> query =
         em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
-    query.setParameter("userId", user.getId());
+    UserEntity u = entityFromModel(user);
+    query.setParameter("user", u);
     query.setParameter("orgId", org.getId());
     try {
       return query

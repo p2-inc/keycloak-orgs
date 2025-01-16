@@ -77,8 +77,10 @@ public class RoleResource extends OrganizationAdminResource {
   @GET
   @Path("users")
   @Produces(MediaType.APPLICATION_JSON)
-  public Stream<UserRepresentation> users(@QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
-    boolean excludeAdmin = excludeAdminAccounts != null ? excludeAdminAccounts.booleanValue() : false;
+  public Stream<UserRepresentation> users(
+      @QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
+    boolean excludeAdmin =
+        excludeAdminAccounts != null ? excludeAdminAccounts.booleanValue() : false;
     return role.getUserMappingsStream(excludeAdmin).map(m -> toRepresentation(session, realm, m));
   }
 

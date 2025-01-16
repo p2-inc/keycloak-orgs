@@ -11,6 +11,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
+import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class OrganizationRoleAdapter
@@ -67,11 +69,18 @@ public class OrganizationRoleAdapter
 
   @Override
   public Stream<UserModel> getUserMappingsStream(boolean excludeAdmin) {
-    return role.getUserMappings().stream()
+    TypedQuery<UserOrganizationRoleMappingEntity> query =
+        em.createNamedQuery(
+            excludeAdmin ? "getMappingsByRoleExcludeAdmin" : "getMappingsByRole",
+            UserOrganizationRoleMappingEntity.class);
+    query.setParameter("role", role);
+    return query
+        .getResultStream()
         .map(m -> m.getUserId())
         .map(uid -> session.users().getUserById(realm, uid))
-        .filter(u -> u.getServiceAccountClientLink() == null)
-        .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") && u.getUsername().length() == 46));
+        .filter(u -> u.getServiceAccountClientLink() == null);
+    // .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") &&
+    // u.getUsername().length() == 46));
   }
 
   @Override
@@ -82,7 +91,11 @@ public class OrganizationRoleAdapter
     if (hasRole(user)) return;
     UserOrganizationRoleMappingEntity m = new UserOrganizationRoleMappingEntity();
     m.setId(KeycloakModelUtils.generateId());
-    m.setUserId(user.getId());
+    if (user instanceof UserAdapter) {
+      m.setUser(((UserAdapter) user).getEntity());
+    } else {
+      m.setUser(em.find(UserEntity.class, user.getId()));
+    }
     m.setRole(role);
     em.persist(m);
     role.getUserMappings().add(m);
