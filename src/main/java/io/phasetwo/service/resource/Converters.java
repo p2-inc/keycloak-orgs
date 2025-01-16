@@ -85,7 +85,7 @@ public class Converters {
             .id(e.getId())
             .email(e.getEmail())
             .createdAt(e.getCreatedAt())
-            .inviterId(e.getInviter().getId())
+            .inviterId(e.getInviter() != null ? e.getInviter().getId() : null)
             .invitationUrl(e.getUrl())
             .organizationId(e.getOrganization().getId())
             .roles(Lists.newArrayList(e.getRoles()));
