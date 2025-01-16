@@ -28,6 +28,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
+import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrganizationEntity> {
@@ -215,7 +217,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     if (hasMembership(user)) return;
     OrganizationMemberEntity m = new OrganizationMemberEntity();
     m.setId(KeycloakModelUtils.generateId());
-    m.setUserId(user.getId());
+    UserEntity u = null;
+    if (user instanceof UserAdapter) {
+      u = ((UserAdapter)user).getEntity();
+    } else {
+      em.find(UserEntity.class, user.getId());
+    }
+    m.setUser(u);
     m.setOrganization(org);
     em.persist(m);
     org.getMembers().add(m);

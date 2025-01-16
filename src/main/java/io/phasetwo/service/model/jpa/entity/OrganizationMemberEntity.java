@@ -75,9 +75,9 @@ public class OrganizationMemberEntity {
     this.id = id;
   }
 
-  // public String getUserId() {
-  //   return userId;
-  // }
+  public String getUserId() {
+    return user.getId();
+  }
 
   public UserEntity getUser() {
     return user;
@@ -87,6 +87,10 @@ public class OrganizationMemberEntity {
   //   this.userId = userId;
   // }
 
+  public void setUser(UserEntity user) {
+    this.user = user;
+  }
+  
   public ExtOrganizationEntity getOrganization() {
     return organization;
   }
