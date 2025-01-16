@@ -28,6 +28,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
+import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrganizationEntity> {
@@ -166,10 +168,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<UserModel> searchForMembersStream(
-      String search, Integer firstResult, Integer maxResults) {
+      String search, Integer firstResult, Integer maxResults, boolean excludeAdmin) {
     String[] searchTerms = Strings.isNullOrEmpty(search) ? new String[0] : search.split(",");
     // TODO this could be optimized for large member lists with a query
-    return getMembersStream()
+    return getMembersStream(excludeAdmin)
         .filter(
             (m) -> {
               for (String searchTerm : searchTerms) {
@@ -189,18 +191,32 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   }
 
   @Override
-  public Long getMembersCount() {
-    TypedQuery<Long> query = em.createNamedQuery("getOrganizationMembersCount", Long.class);
+  public Long getMembersCount(boolean excludeAdmin) {
+    TypedQuery<Long> query =
+        em.createNamedQuery(
+            excludeAdmin
+                ? "getOrganizationMembersCountExcludeAdmin"
+                : "getOrganizationMembersCount",
+            Long.class);
     query.setParameter("organization", org);
     return query.getSingleResult();
   }
 
   @Override
-  public Stream<UserModel> getMembersStream() {
-    return org.getMembers().stream()
+  public Stream<UserModel> getMembersStream(boolean excludeAdmin) {
+    TypedQuery<OrganizationMemberEntity> query =
+        em.createNamedQuery(
+            excludeAdmin ? "getOrganizationMembersExcludeAdmin" : "getOrganizationMembers",
+            OrganizationMemberEntity.class);
+    query.setParameter("organization", org);
+    return query
+        .getResultStream()
         .map(OrganizationMemberEntity::getUserId)
         .map(uid -> session.users().getUserById(realm, uid))
-        .filter(u -> u != null && u.getServiceAccountClientLink() == null);
+        .filter(u -> u != null)
+        .filter(u -> u.getServiceAccountClientLink() == null);
+    // .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") &&
+    // u.getUsername().length() == 46));
   }
 
   @Override
@@ -213,10 +229,19 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     if (hasMembership(user)) return;
     OrganizationMemberEntity m = new OrganizationMemberEntity();
     m.setId(KeycloakModelUtils.generateId());
-    m.setUserId(user.getId());
+    UserEntity u = entityFromModel(user);
+    m.setUser(u);
     m.setOrganization(org);
     em.persist(m);
     org.getMembers().add(m);
+  }
+
+  private UserEntity entityFromModel(UserModel user) {
+    if (user instanceof UserAdapter) {
+      return ((UserAdapter) user).getEntity();
+    } else {
+      return em.find(UserEntity.class, user.getId());
+    }
   }
 
   @Override
@@ -290,7 +315,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   public Stream<OrganizationRoleModel> getRolesByUserStream(UserModel user) {
     TypedQuery<UserOrganizationRoleMappingEntity> query =
         em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
-    query.setParameter("userId", user.getId());
+    UserEntity u = entityFromModel(user);
+    query.setParameter("user", u);
     query.setParameter("orgId", org.getId());
     try {
       return query
