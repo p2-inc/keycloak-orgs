@@ -3,7 +3,7 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.85-SNAPSHOT</version>
+  <version>0.84-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
@@ -32,7 +32,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>5.11.2</junit.version>
-    <keycloak.version>26.0.7</keycloak.version>
+    <keycloak.version>26.0.8</keycloak.version>
     <keycloak-admin-client.version>26.0.3</keycloak-admin-client.version>
     <resteasy.version>6.2.7.Final</resteasy.version>
     <lombok.version>1.18.34</lombok.version>
