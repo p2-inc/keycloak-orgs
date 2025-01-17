@@ -1,12 +1,14 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
+import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import static org.keycloak.events.EventType.UPDATE_PROFILE;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.representation.UserWithOrgs;
 import io.phasetwo.service.util.ActiveOrganization;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -36,13 +38,29 @@ public class MembersResource extends OrganizationAdminResource {
   public Stream<UserRepresentation> getMembers(
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
-      @QueryParam("max") Integer maxResults) {
+      @QueryParam("max") Integer maxResults,
+      @QueryParam("includeOrgs") Boolean includeOrgs) {
     log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
+    final boolean addOrgs = includeOrgs != null ? includeOrgs : false;
     return organization
         .searchForMembersStream(searchQuery, firstResult, maxResults)
-        .map(m -> toRepresentation(session, realm, m));
+        // .map(m -> toRepresentation(session, realm, m));
+        .map(
+            m -> {
+              UserWithOrgs u = new UserWithOrgs(toBriefRepresentation(m));
+              if (includeOrgs) {
+                u.addOrganization(
+                    organization.getId(),
+                    organization
+                        .getRolesStream()
+                        .filter(r -> r.hasRole(user))
+                        .map(r -> convertOrganizationRole(r))
+                        .toList());
+              }
+              return u;
+            });
   }
 
   @GET
