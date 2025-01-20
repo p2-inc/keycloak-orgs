@@ -30,16 +30,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
       query =
           "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization AND NOT (m.user.username LIKE 'org-admin-%' AND LENGTH(m.user.username) = 46)"),
   @NamedQuery(
-      name = "getOrganizationMembers",
-      query =
-          "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization ORDER BY m.createdAt"),
-  @NamedQuery(
-      name = "getOrganizationMembersExcludeAdmin",
-      query =
-          "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization AND NOT (m.user.username LIKE 'org-admin-%' AND LENGTH(m.user.username) = 46) ORDER BY m.createdAt"),
-  @NamedQuery(
       name = "getOrganizationMembershipsByUserId",
-      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.user = :user")
+      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.user.id = :userId")
 })
 @Table(
     name = "ORGANIZATION_MEMBER",

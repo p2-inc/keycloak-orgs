@@ -71,16 +71,14 @@ public class OrganizationRoleAdapter
   public Stream<UserModel> getUserMappingsStream(boolean excludeAdmin) {
     TypedQuery<UserOrganizationRoleMappingEntity> query =
         em.createNamedQuery(
-            excludeAdmin ? "getMappingsByRoleExcludeAdmin" : "getMappingsByRole",
+            excludeAdmin ? "getMappingByRoleExcludeAdmin" : "getMappingByRole",
             UserOrganizationRoleMappingEntity.class);
     query.setParameter("role", role);
     return query
         .getResultStream()
-        .map(m -> m.getUserId())
+        .map(UserOrganizationRoleMappingEntity::getUserId)
         .map(uid -> session.users().getUserById(realm, uid))
         .filter(u -> u.getServiceAccountClientLink() == null);
-    // .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") &&
-    // u.getUsername().length() == 46));
   }
 
   @Override

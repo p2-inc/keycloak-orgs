@@ -35,7 +35,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
   @NamedQuery(
       name = "getMappingByRoleAndUser",
       query =
-          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.user = :user AND m.role = :role"),
+          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.user.id = :userId AND m.role = :role"),
   @NamedQuery(
       name = "getMappingsByUser",
       query =

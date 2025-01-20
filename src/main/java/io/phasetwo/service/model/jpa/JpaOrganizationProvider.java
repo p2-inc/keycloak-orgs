@@ -32,8 +32,6 @@ import java.util.stream.Stream;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.UserAdapter;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class JpaOrganizationProvider implements OrganizationProvider {
@@ -122,20 +120,13 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   public Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user) {
     TypedQuery<OrganizationMemberEntity> query =
         em.createNamedQuery("getOrganizationMembershipsByUserId", OrganizationMemberEntity.class);
-    UserEntity u = null;
-    if (user instanceof UserAdapter) {
-      u = ((UserAdapter) user).getEntity();
-    } else {
-      u = em.find(UserEntity.class, user.getId());
-    }
-    query.setParameter("user", u);
+    query.setParameter("userId", user.getId());
     return query
         .getResultStream()
         .map(e -> new OrganizationAdapter(session, realm, em, e.getOrganization()));
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public Stream<OrganizationModel> searchForOrganizationStream(
       RealmModel realm,
       Map<String, String> attributes,
@@ -257,24 +248,21 @@ public class JpaOrganizationProvider implements OrganizationProvider {
         continue;
       }
 
-      switch (key) {
-        case "name":
-          predicates.add(
-              builder.or(
-                  builder.like(builder.lower(root.get("name")), "%" + value.toLowerCase() + "%"),
-                  builder.like(
-                      builder.lower(root.get("displayName")), "%" + value.toLowerCase() + "%")));
-          break;
-        default:
-          Join<ExtOrganizationEntity, OrganizationAttributeEntity> attributesJoin =
-              root.join("attributes", JoinType.LEFT);
+        if (key.equals("name")) {
+            predicates.add(
+                    builder.or(
+                            builder.like(builder.lower(root.get("name")), "%" + value.toLowerCase() + "%"),
+                            builder.like(
+                                    builder.lower(root.get("displayName")), "%" + value.toLowerCase() + "%")));
+        } else {
+            Join<ExtOrganizationEntity, OrganizationAttributeEntity> attributesJoin =
+                    root.join("attributes", JoinType.LEFT);
 
-          attributePredicates.add(
-              builder.and(
-                  builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
-                  builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
-          break;
-      }
+            attributePredicates.add(
+                    builder.and(
+                            builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
+                            builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
+        }
     }
 
     if (!attributePredicates.isEmpty()) {
@@ -290,6 +278,6 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     Join<ExtOrganizationEntity, OrganizationMemberEntity> membersJoin =
         root.join("members", JoinType.LEFT);
 
-    return builder.equal(membersJoin.get("userId"), member.getId());
+    return builder.equal(membersJoin.get("user").get("id"), member.getId());
   }
 }
