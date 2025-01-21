@@ -39,8 +39,7 @@ public class MembersResource extends OrganizationAdminResource {
       @QueryParam("max") Integer maxResults,
       @QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
     log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
-    boolean excludeAdmin =
-        excludeAdminAccounts != null ? excludeAdminAccounts.booleanValue() : false;
+    boolean excludeAdmin = excludeAdminAccounts != null && excludeAdminAccounts;
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     return organization
@@ -53,8 +52,7 @@ public class MembersResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Long getMembersCount(@QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
     log.debugf("Get members count for %s %s", realm.getName(), organization.getId());
-    boolean excludeAdmin =
-        excludeAdminAccounts != null ? excludeAdminAccounts.booleanValue() : false;
+    boolean excludeAdmin = excludeAdminAccounts != null && excludeAdminAccounts;
     return organization.getMembersCount(excludeAdmin);
   }
 

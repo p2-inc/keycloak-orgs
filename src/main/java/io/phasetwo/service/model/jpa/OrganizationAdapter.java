@@ -1,8 +1,13 @@
 package io.phasetwo.service.model.jpa;
 
 import static io.phasetwo.service.Orgs.*;
+import static org.keycloak.models.UserModel.EMAIL;
+import static org.keycloak.models.UserModel.FIRST_NAME;
+import static org.keycloak.models.UserModel.LAST_NAME;
+import static org.keycloak.models.UserModel.USERNAME;
+import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
+import static org.keycloak.utils.StreamsUtil.closing;
 
-import com.google.common.base.Strings;
 import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
@@ -17,11 +22,20 @@ import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
@@ -38,6 +52,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   protected final ExtOrganizationEntity org;
   protected final EntityManager em;
   protected final RealmModel realm;
+
+  private static final char ESCAPE_BACKSLASH = '\\';
 
   public OrganizationAdapter(
       KeycloakSession session, RealmModel realm, EntityManager em, ExtOrganizationEntity org) {
@@ -166,28 +182,67 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     }
   }
 
+  private TypedQuery<OrganizationMemberEntity> membersQuery(
+          String search,
+          boolean excludeAdmin) {
+    CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<OrganizationMemberEntity> criteriaQuery =
+            cb.createQuery(OrganizationMemberEntity.class);
+
+    Root<OrganizationMemberEntity> root = criteriaQuery.from(OrganizationMemberEntity.class);
+
+    List<Predicate> predicates = new ArrayList<>();
+    // defining the organization search clause
+    predicates.add(cb.equal(root.get("organization"), org));
+
+    // join tables
+    From<OrganizationMemberEntity, UserEntity> userJoin = root.join("user");
+    if (search != null && !search.isEmpty()) {
+      List<Predicate> searchTermsPredicates = new ArrayList<>();
+      // define search terms
+      for (String stringToSearch : search.trim().split(",")) {
+        searchTermsPredicates.add(cb.or(getSearchOptionPredicateArray(stringToSearch, cb, userJoin)));
+      }
+      predicates.add(cb.or(searchTermsPredicates.toArray(Predicate[]::new)));
+    }
+
+    if (excludeAdmin){
+      List<Predicate> excludeAdminsPredicates = new ArrayList<>();
+      excludeAdminsPredicates.add(cb.like(userJoin.get(USERNAME), "org-admin-%", ESCAPE_BACKSLASH));
+      excludeAdminsPredicates.add(cb.equal(cb.length(userJoin.get(USERNAME)), "46"));
+
+      predicates.add(cb.not(cb.and(excludeAdminsPredicates.toArray(Predicate[]::new))));
+    }
+
+    criteriaQuery
+            .where(predicates.toArray(Predicate[]::new))
+            .orderBy(cb.asc(root.get("createdAt")));
+   return em.createQuery(criteriaQuery);
+  }
+
+  private Predicate[] getSearchOptionPredicateArray(
+          String value, CriteriaBuilder builder, From<?, UserEntity> from) {
+    value = value.trim().toLowerCase();
+    List<Predicate> orPredicates = new ArrayList<>();
+    if (!value.isEmpty()) {
+      value = "%" + value + "%"; // contains in SQL query manner
+      orPredicates.add(builder.like(from.get(USERNAME), value, ESCAPE_BACKSLASH));
+      orPredicates.add(builder.like(from.get(EMAIL), value, ESCAPE_BACKSLASH));
+      orPredicates.add(builder.like(builder.lower(from.get(FIRST_NAME)), value, ESCAPE_BACKSLASH));
+      orPredicates.add(builder.like(builder.lower(from.get(LAST_NAME)), value, ESCAPE_BACKSLASH));
+    }
+    return orPredicates.toArray(Predicate[]::new);
+  }
+
   @Override
   public Stream<UserModel> searchForMembersStream(
       String search, Integer firstResult, Integer maxResults, boolean excludeAdmin) {
-    String[] searchTerms = Strings.isNullOrEmpty(search) ? new String[0] : search.split(",");
-    // TODO this could be optimized for large member lists with a query
-    return getMembersStream(excludeAdmin)
-        .filter(
-            (m) -> {
-              for (String searchTerm : searchTerms) {
-                String term = searchTerm.trim().toLowerCase();
-                if (term.isEmpty()) continue;
-                if ((m.getEmail() != null && m.getEmail().toLowerCase().contains(term))
-                    || (m.getUsername() != null && m.getUsername().toLowerCase().contains(term))
-                    || (m.getFirstName() != null && m.getFirstName().toLowerCase().contains(term))
-                    || (m.getLastName() != null && m.getLastName().toLowerCase().contains(term))) {
-                  return true;
-                }
-              }
-              return searchTerms.length == 0;
-            })
-        .skip(firstResult)
-        .limit(maxResults);
+    var query = membersQuery(search, excludeAdmin);
+    return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
+            .filter(Objects::nonNull)
+            .map(OrganizationMemberEntity::getUserId)
+            .map( userId -> session.users().getUserById(realm, userId))
+            .filter(u -> u.getServiceAccountClientLink() == null);
   }
 
   @Override
@@ -204,19 +259,12 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<UserModel> getMembersStream(boolean excludeAdmin) {
-    TypedQuery<OrganizationMemberEntity> query =
-        em.createNamedQuery(
-            excludeAdmin ? "getOrganizationMembersExcludeAdmin" : "getOrganizationMembers",
-            OrganizationMemberEntity.class);
-    query.setParameter("organization", org);
-    return query
-        .getResultStream()
-        .map(OrganizationMemberEntity::getUserId)
-        .map(uid -> session.users().getUserById(realm, uid))
-        .filter(u -> u != null)
-        .filter(u -> u.getServiceAccountClientLink() == null);
-    // .filter(u -> !excludeAdmin || !(u.getUsername().startsWith("org-admin-") &&
-    // u.getUsername().length() == 46));
+    var query = membersQuery(null, excludeAdmin);
+    return query.getResultStream()
+            .filter(Objects::nonNull)
+            .map(OrganizationMemberEntity::getUserId)
+            .map( userId -> session.users().getUserById(realm, userId))
+            .filter(u -> u.getServiceAccountClientLink() == null);
   }
 
   @Override
