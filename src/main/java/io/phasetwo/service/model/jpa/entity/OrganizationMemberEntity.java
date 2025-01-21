@@ -17,6 +17,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Date;
 import java.util.Objects;
+import org.keycloak.models.jpa.entities.UserEntity;
 
 /** */
 @NamedQueries({
@@ -25,16 +26,12 @@ import java.util.Objects;
       query =
           "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization"),
   @NamedQuery(
-      name = "getOrganizationMembers",
+      name = "getOrganizationMembersCountExcludeAdmin",
       query =
-          "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization ORDER BY m.createdAt"),
-  @NamedQuery(
-      name = "getOrganizationMemberByUserId",
-      query =
-          "SELECT m FROM OrganizationMemberEntity m WHERE m.organization = :organization AND m.userId = :id"),
+          "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization AND NOT (m.user.username LIKE 'org-admin-%' AND LENGTH(m.user.username) = 46)"),
   @NamedQuery(
       name = "getOrganizationMembershipsByUserId",
-      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :id")
+      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.user.id = :userId")
 })
 @Table(
     name = "ORGANIZATION_MEMBER",
@@ -53,8 +50,9 @@ public class OrganizationMemberEntity {
   @JoinColumn(name = "ORGANIZATION_ID")
   protected ExtOrganizationEntity organization;
 
-  @Column(name = "USER_ID")
-  protected String userId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "USER_ID")
+  protected UserEntity user;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "CREATED_AT")
@@ -74,11 +72,15 @@ public class OrganizationMemberEntity {
   }
 
   public String getUserId() {
-    return userId;
+    return user.getId();
   }
 
-  public void setUserId(String userId) {
-    this.userId = userId;
+  public UserEntity getUser() {
+    return user;
+  }
+
+  public void setUser(UserEntity user) {
+    this.user = user;
   }
 
   public ExtOrganizationEntity getOrganization() {
@@ -105,7 +107,7 @@ public class OrganizationMemberEntity {
 
     OrganizationMemberEntity key = (OrganizationMemberEntity) o;
 
-    if (!userId.equals(key.userId)) return false;
+    if (!user.equals(key.user)) return false;
     if (!organization.equals(key.organization)) return false;
 
     return true;
@@ -113,6 +115,6 @@ public class OrganizationMemberEntity {
 
   @Override
   public int hashCode() {
-    return Objects.hash(organization, userId);
+    return Objects.hash(organization, user);
   }
 }

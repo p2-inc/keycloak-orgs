@@ -15,7 +15,11 @@ public interface OrganizationRoleModel {
 
   void setDescription(String description);
 
-  Stream<UserModel> getUserMappingsStream();
+  default Stream<UserModel> getUserMappingsStream() {
+    return getUserMappingsStream(false);
+  }
+
+  Stream<UserModel> getUserMappingsStream(boolean excludeAdminAccounts);
 
   void grantRole(UserModel user);
 

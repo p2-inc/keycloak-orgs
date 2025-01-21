@@ -35,11 +35,25 @@ public interface OrganizationModel extends WithAttributes {
 
   UserModel getCreatedBy();
 
-  Long getMembersCount();
+  default Long getMembersCount() {
+    return getMembersCount(false);
+  }
 
-  Stream<UserModel> getMembersStream();
+  default Stream<UserModel> getMembersStream() {
+    return getMembersStream(false);
+  }
 
-  Stream<UserModel> searchForMembersStream(String search, Integer firstResult, Integer maxResults);
+  default Stream<UserModel> searchForMembersStream(
+      String search, Integer firstResult, Integer maxResults) {
+    return searchForMembersStream(search, firstResult, maxResults, false);
+  }
+
+  Long getMembersCount(boolean excludeAdminAccounts);
+
+  Stream<UserModel> getMembersStream(boolean excludeAdminAccounts);
+
+  Stream<UserModel> searchForMembersStream(
+      String search, Integer firstResult, Integer maxResults, boolean excludeAdminAccounts);
 
   boolean hasMembership(UserModel user);
 
