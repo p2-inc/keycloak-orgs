@@ -75,7 +75,7 @@ public class OrganizationRoleMapper extends AbstractSAMLProtocolMapper
                   .forEach(
                       r -> {
                         if (r.hasRole(user)) {
-                          String orgRole = String.format("%s/%s", o.getName(), r.getName());
+                          String orgRole = String.format("%s/%s", o.getId(), r.getName());
                           log.debugf("added attributeValue %s", orgRole);
                           attribute.addAttributeValue(orgRole);
                         }
