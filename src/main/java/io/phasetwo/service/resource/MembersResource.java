@@ -1,7 +1,6 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
-import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 import static org.keycloak.events.EventType.UPDATE_PROFILE;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
@@ -20,7 +19,6 @@ import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.UserModel;
-import org.keycloak.representations.idm.UserRepresentation;
 
 @JBossLog
 public class MembersResource extends OrganizationAdminResource {
@@ -35,7 +33,7 @@ public class MembersResource extends OrganizationAdminResource {
   @GET
   @Path("")
   @Produces(MediaType.APPLICATION_JSON)
-  public Stream<UserRepresentation> getMembers(
+  public Stream<UserWithOrgs> getMembers(
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults,
@@ -43,20 +41,20 @@ public class MembersResource extends OrganizationAdminResource {
     log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
-    final boolean addOrgs = includeOrgs != null ? includeOrgs : false;
+    boolean addOrgs = includeOrgs != null && includeOrgs;
+
     return organization
         .searchForMembersStream(searchQuery, firstResult, maxResults)
-        // .map(m -> toRepresentation(session, realm, m));
         .map(
-            m -> {
-              UserWithOrgs u = new UserWithOrgs(toBriefRepresentation(m));
-              if (includeOrgs) {
+            userModel -> {
+              UserWithOrgs u = new UserWithOrgs(toBriefRepresentation(userModel));
+              if (addOrgs) {
                 u.addOrganization(
                     organization.getId(),
                     organization
                         .getRolesStream()
-                        .filter(r -> r.hasRole(user))
-                        .map(r -> convertOrganizationRole(r))
+                        .filter(r -> r.hasRole(userModel))
+                        .map(Converters::convertOrganizationRole)
                         .toList());
               }
               return u;
