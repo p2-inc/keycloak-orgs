@@ -22,7 +22,11 @@ import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +34,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
@@ -182,12 +180,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     }
   }
 
-  private TypedQuery<OrganizationMemberEntity> membersQuery(
-          String search,
-          boolean excludeAdmin) {
+  private TypedQuery<OrganizationMemberEntity> membersQuery(String search, boolean excludeAdmin) {
     CriteriaBuilder cb = em.getCriteriaBuilder();
     CriteriaQuery<OrganizationMemberEntity> criteriaQuery =
-            cb.createQuery(OrganizationMemberEntity.class);
+        cb.createQuery(OrganizationMemberEntity.class);
 
     Root<OrganizationMemberEntity> root = criteriaQuery.from(OrganizationMemberEntity.class);
 
@@ -201,12 +197,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
       List<Predicate> searchTermsPredicates = new ArrayList<>();
       // define search terms
       for (String stringToSearch : search.trim().split(",")) {
-        searchTermsPredicates.add(cb.or(getSearchOptionPredicateArray(stringToSearch, cb, userJoin)));
+        searchTermsPredicates.add(
+            cb.or(getSearchOptionPredicateArray(stringToSearch, cb, userJoin)));
       }
       predicates.add(cb.or(searchTermsPredicates.toArray(Predicate[]::new)));
     }
 
-    if (excludeAdmin){
+    if (excludeAdmin) {
       List<Predicate> excludeAdminsPredicates = new ArrayList<>();
       excludeAdminsPredicates.add(cb.like(userJoin.get(USERNAME), "org-admin-%", ESCAPE_BACKSLASH));
       excludeAdminsPredicates.add(cb.equal(cb.length(userJoin.get(USERNAME)), "46"));
@@ -215,13 +212,13 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     }
 
     criteriaQuery
-            .where(predicates.toArray(Predicate[]::new))
-            .orderBy(cb.asc(root.get("createdAt")));
-   return em.createQuery(criteriaQuery);
+        .where(predicates.toArray(Predicate[]::new))
+        .orderBy(cb.asc(root.get("createdAt")));
+    return em.createQuery(criteriaQuery);
   }
 
   private Predicate[] getSearchOptionPredicateArray(
-          String value, CriteriaBuilder builder, From<?, UserEntity> from) {
+      String value, CriteriaBuilder builder, From<?, UserEntity> from) {
     value = value.trim().toLowerCase();
     List<Predicate> orPredicates = new ArrayList<>();
     if (!value.isEmpty()) {
@@ -239,10 +236,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
       String search, Integer firstResult, Integer maxResults, boolean excludeAdmin) {
     var query = membersQuery(search, excludeAdmin);
     return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
-            .filter(Objects::nonNull)
-            .map(OrganizationMemberEntity::getUserId)
-            .map( userId -> session.users().getUserById(realm, userId))
-            .filter(u -> u.getServiceAccountClientLink() == null);
+        .filter(Objects::nonNull)
+        .map(OrganizationMemberEntity::getUserId)
+        .map(userId -> session.users().getUserById(realm, userId))
+        .filter(u -> u.getServiceAccountClientLink() == null);
   }
 
   @Override
@@ -260,11 +257,12 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   @Override
   public Stream<UserModel> getMembersStream(boolean excludeAdmin) {
     var query = membersQuery(null, excludeAdmin);
-    return query.getResultStream()
-            .filter(Objects::nonNull)
-            .map(OrganizationMemberEntity::getUserId)
-            .map( userId -> session.users().getUserById(realm, userId))
-            .filter(u -> u.getServiceAccountClientLink() == null);
+    return query
+        .getResultStream()
+        .filter(Objects::nonNull)
+        .map(OrganizationMemberEntity::getUserId)
+        .map(userId -> session.users().getUserById(realm, userId))
+        .filter(u -> u.getServiceAccountClientLink() == null);
   }
 
   @Override

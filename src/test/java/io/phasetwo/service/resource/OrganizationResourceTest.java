@@ -2067,8 +2067,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = getRequest(id, "members?excludeAdminAccounts=true");
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     List<UserRepresentation> members =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
-            });
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(members, notNullValue());
     assertThat(members, hasSize(2)); // exclude org admin default
 
@@ -2125,7 +2124,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // grant role to user
     grantUserRole(id, orgRoleName, user1.getId());
 
-
     UserRepresentation user2 = createUser(keycloak, REALM, "johndow");
     // add membership
     var response2 = putRequest("foo", id, "members", user2.getId());
@@ -2133,9 +2131,9 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // grant role to user
     grantUserRole(id, orgRoleName, user2.getId());
 
-    //get org admin
+    // get org admin
     UserRepresentation orgAdmin =
-            keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).getFirst();
+        keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).getFirst();
     // grant role to user
     grantUserRole(id, orgRoleName, orgAdmin.getId());
 
@@ -2143,8 +2141,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     var response = getRequest(id, "roles", orgRoleName, "users?excludeAdminAccounts=true");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<UserRepresentation> rs =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
-            });
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(rs, notNullValue());
     assertThat(rs, hasSize(2));
 
