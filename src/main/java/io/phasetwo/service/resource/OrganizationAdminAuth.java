@@ -1,6 +1,7 @@
 package io.phasetwo.service.resource;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -153,6 +154,23 @@ public class OrganizationAdminAuth extends AdminAuth {
   public static final String ORG_ROLE_VIEW_IDENTITY_PROVIDERS = "view-identity-providers";
   public static final String ORG_ROLE_MANAGE_IDENTITY_PROVIDERS = "manage-identity-providers";
 
+  public static final String ORG_ROLE_VIEW_ORGANIZATION_DESC = "View this organization";
+  public static final String ORG_ROLE_MANAGE_ORGANIZATION_DESC = "Manage this organization";
+  public static final String ORG_ROLE_VIEW_MEMBERS_DESC = "View members of this organization";
+  public static final String ORG_ROLE_MANAGE_MEMBERS_DESC =
+      "Add and manage members of this organization";
+  public static final String ORG_ROLE_VIEW_ROLES_DESC = "View roles of this organization";
+  public static final String ORG_ROLE_MANAGE_ROLES_DESC =
+      "Create and manage roles and member assignments of this organization";
+  public static final String ORG_ROLE_VIEW_INVITATIONS_DESC =
+      "View invitations to this organization";
+  public static final String ORG_ROLE_MANAGE_INVITATIONS_DESC =
+      "Create and manage invitations to this organization";
+  public static final String ORG_ROLE_VIEW_IDENTITY_PROVIDERS_DESC =
+      "View the identity provider used to authenticate users to this organization";
+  public static final String ORG_ROLE_MANAGE_IDENTITY_PROVIDERS_DESC =
+      "Add and manage the identity provider used to authenticate users to this organization";
+
   public static final String[] DEFAULT_ORG_ROLES = {
     ORG_ROLE_VIEW_ORGANIZATION,
     ORG_ROLE_MANAGE_ORGANIZATION,
@@ -165,6 +183,20 @@ public class OrganizationAdminAuth extends AdminAuth {
     ORG_ROLE_VIEW_IDENTITY_PROVIDERS,
     ORG_ROLE_MANAGE_IDENTITY_PROVIDERS
   };
+
+  public static final Map<String, String> DEFAULT_ORG_ROLES_DESC =
+      new ImmutableMap.Builder<String, String>()
+          .put(ORG_ROLE_VIEW_ORGANIZATION, ORG_ROLE_VIEW_ORGANIZATION_DESC)
+          .put(ORG_ROLE_MANAGE_ORGANIZATION, ORG_ROLE_MANAGE_ORGANIZATION_DESC)
+          .put(ORG_ROLE_VIEW_MEMBERS, ORG_ROLE_VIEW_MEMBERS_DESC)
+          .put(ORG_ROLE_MANAGE_MEMBERS, ORG_ROLE_MANAGE_MEMBERS_DESC)
+          .put(ORG_ROLE_VIEW_ROLES, ORG_ROLE_VIEW_ROLES_DESC)
+          .put(ORG_ROLE_MANAGE_ROLES, ORG_ROLE_MANAGE_ROLES_DESC)
+          .put(ORG_ROLE_VIEW_INVITATIONS, ORG_ROLE_VIEW_INVITATIONS_DESC)
+          .put(ORG_ROLE_MANAGE_INVITATIONS, ORG_ROLE_MANAGE_INVITATIONS_DESC)
+          .put(ORG_ROLE_VIEW_IDENTITY_PROVIDERS, ORG_ROLE_VIEW_IDENTITY_PROVIDERS_DESC)
+          .put(ORG_ROLE_MANAGE_IDENTITY_PROVIDERS, ORG_ROLE_MANAGE_IDENTITY_PROVIDERS_DESC)
+          .build();
 
   /**
    * @param org The selected organization

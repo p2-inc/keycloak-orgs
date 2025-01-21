@@ -37,14 +37,16 @@ public class MembersResource extends OrganizationAdminResource {
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults,
-      @QueryParam("includeOrgs") Boolean includeOrgs) {
+      @QueryParam("includeOrgs") Boolean includeOrgs,
+      @QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
     log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
+    boolean excludeAdmin = excludeAdminAccounts != null && excludeAdminAccounts;
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
     boolean addOrgs = includeOrgs != null && includeOrgs;
 
     return organization
-        .searchForMembersStream(searchQuery, firstResult, maxResults)
+        .searchForMembersStream(searchQuery, firstResult, maxResults, excludeAdmin)
         .map(
             userModel -> {
               UserWithOrgs u = new UserWithOrgs(toBriefRepresentation(userModel));
@@ -64,9 +66,10 @@ public class MembersResource extends OrganizationAdminResource {
   @GET
   @Path("count")
   @Produces(MediaType.APPLICATION_JSON)
-  public Long getMembersCount() {
+  public Long getMembersCount(@QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
     log.debugf("Get members count for %s %s", realm.getName(), organization.getId());
-    return organization.getMembersCount();
+    boolean excludeAdmin = excludeAdminAccounts != null && excludeAdminAccounts;
+    return organization.getMembersCount(excludeAdmin);
   }
 
   @DELETE

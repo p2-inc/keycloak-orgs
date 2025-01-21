@@ -2173,4 +2173,110 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       assertThat(attributeNode.hasNonNull(ACTIVE_ORGANIZATION), is(false));
     }
   }
+
+  @Test
+  void testSearchMembersWithExcludeAdminParameter() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    Response response = getRequest(id, "members");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+
+    // create a user
+    UserRepresentation user1 = createUser(keycloak, REALM, "johndoe");
+    UserRepresentation user2 = createUser(keycloak, REALM, "johndow");
+
+    // add membership
+    response = putRequest("foo", org.getId(), "members", user1.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("foo", org.getId(), "members", user2.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+
+    response = getRequest(id, "members?excludeAdminAccounts=true");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    List<UserRepresentation> members =
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members, notNullValue());
+    assertThat(members, hasSize(2)); // exclude org admin default
+
+    // delete org
+    deleteOrganization(id);
+    deleteUser(keycloak, REALM, user1.getId());
+    deleteUser(keycloak, REALM, user2.getId());
+  }
+
+  @Test
+  void tesCountMembersWithExcludeAdminParameter() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    Response response = getRequest(id, "members");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+
+    // create a user
+    UserRepresentation user1 = createUser(keycloak, REALM, "johndoe");
+    UserRepresentation user2 = createUser(keycloak, REALM, "johndow");
+
+    // add membership
+    response = putRequest("foo", org.getId(), "members", user1.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("foo", org.getId(), "members", user2.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = getRequest(id, "members", "count?excludeAdminAccounts=true");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    Long memberCount = objectMapper().readValue(response.getBody().asString(), Long.class);
+    assertThat(memberCount, notNullValue());
+    assertTrue(memberCount == 2L); // exclude org admin default
+
+    // delete org
+    deleteOrganization(id);
+
+    deleteUser(keycloak, REALM, user1.getId());
+    deleteUser(keycloak, REALM, user2.getId());
+  }
+
+  @Test
+  void testGetUserByRoleExcludeAdmin() throws IOException {
+    var org = createDefaultOrg();
+    var id = org.getId();
+
+    // create a role
+    var orgRoleName = "eat-apples";
+    var orgRole = createOrgRole(id, orgRoleName);
+
+    // create a user
+    var user1 = createUser(keycloak, REALM, "johndoe");
+    // add membership
+    var response1 = putRequest("foo", id, "members", user1.getId());
+    assertThat(response1.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    // grant role to user
+    grantUserRole(id, orgRoleName, user1.getId());
+
+    UserRepresentation user2 = createUser(keycloak, REALM, "johndow");
+    // add membership
+    var response2 = putRequest("foo", id, "members", user2.getId());
+    assertThat(response2.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    // grant role to user
+    grantUserRole(id, orgRoleName, user2.getId());
+
+    // get org admin
+    UserRepresentation orgAdmin =
+        keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).getFirst();
+    // grant role to user
+    grantUserRole(id, orgRoleName, orgAdmin.getId());
+
+    // get users with role
+    var response = getRequest(id, "roles", orgRoleName, "users?excludeAdminAccounts=true");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<UserRepresentation> rs =
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(rs, notNullValue());
+    assertThat(rs, hasSize(2));
+
+    // delete org
+    deleteOrganization(id);
+
+    deleteUser(keycloak, REALM, user1.getId());
+    deleteUser(keycloak, REALM, user2.getId());
+  }
 }

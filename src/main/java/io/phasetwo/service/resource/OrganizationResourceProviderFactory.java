@@ -12,6 +12,7 @@ import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.util.IdentityProviders;
+import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
 import org.keycloak.models.AdminRoles;
@@ -182,8 +183,9 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
     OrganizationModel org = event.getOrganization();
 
     // setup default roles
-    for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
-      org.addRole(role);
+    for (Map.Entry<String, String> role : OrganizationAdminAuth.DEFAULT_ORG_ROLES_DESC.entrySet()) {
+      OrganizationRoleModel r = org.addRole(role.getKey());
+      r.setDescription(role.getValue());
     }
 
     var isCreateAdminUserConfigEnabled =
