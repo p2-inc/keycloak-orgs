@@ -4,23 +4,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.keycloak.representations.idm.UserRepresentation;
 
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
 public class UserWithOrgs extends UserRepresentation {
 
-  Map<String, List<OrganizationRole>> organizations;
+  final Map<String, List<OrganizationRole>> organizations = Maps.newHashMap();
 
   public UserWithOrgs(UserRepresentation user) {
     super(user);
-    this.organizations = Maps.newHashMap();
-  }
-
-  public Map<String, List<OrganizationRole>> getOrganizations() {
-    return this.organizations;
-  }
-
-  public void setOrganizations(Map<String, List<OrganizationRole>> organizations) {
-    this.organizations = organizations;
   }
 
   @JsonIgnore
