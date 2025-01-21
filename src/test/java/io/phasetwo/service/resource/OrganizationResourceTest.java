@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,6 +46,7 @@ import io.phasetwo.service.representation.InvitationRequest;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.representation.OrganizationRole;
 import io.phasetwo.service.representation.SwitchOrganization;
+import io.phasetwo.service.representation.UserWithOrgs;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -1999,6 +2001,132 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteClientScope(ACTIVE_ORG_CLAIM);
     deleteOrganization(org1Id);
     deleteOrganization(org2Id);
+  }
+
+  @Test
+  void testSearchMembersWithIncludeOrgs() throws IOException {
+    // create users
+    var user1 = createUser(keycloak, REALM, "johndoe1");
+    var user2 = createUser(keycloak, REALM, "johndoe2");
+    var user3 = createUser(keycloak, REALM, "johndoe3");
+
+    // create organization1
+    var organization1 =
+        createOrganization(new OrganizationRepresentation().name("example").displayName("example"));
+
+    // create role for organization1
+    createOrgRole(organization1.getId(), "example-role");
+    createOrgRole(organization1.getId(), "example-role2");
+
+    // create organization2
+    var organization2 =
+        createOrganization(
+            new OrganizationRepresentation().name("example2").displayName("example2"));
+
+    // create role for organization2
+    createOrgRole(organization2.getId(), "example2-role");
+
+    // add membership
+    putRequest("foo", organization1.getId(), "members", user1.getId());
+
+    putRequest("foo", organization1.getId(), "members", user2.getId());
+
+    putRequest("foo", organization2.getId(), "members", user2.getId());
+
+    putRequest("foo", organization2.getId(), "members", user3.getId());
+
+    // add role to users for org1
+    grantUserRole(organization1.getId(), "example-role", user1.getId());
+    grantUserRole(organization1.getId(), "example-role2", user2.getId());
+    grantUserRole(organization1.getId(), "example-role", user2.getId());
+
+    // add role to users for org2
+    grantUserRole(organization2.getId(), "example2-role", user2.getId());
+
+    // search members of organization1 with query parameter
+    var response1 = getRequest(organization1.getId(), "members?includeOrgs=true");
+    assertThat(response1.statusCode(), is(Status.OK.getStatusCode()));
+    List<UserWithOrgs> members1 =
+        objectMapper().readValue(response1.getBody().asString(), new TypeReference<>() {});
+    assertThat(members1, notNullValue());
+
+    // check user1
+    var user1RepresentationOptional =
+        members1.stream()
+            .filter(member -> member.getUsername().equals(user1.getUsername()))
+            .findFirst();
+    assertTrue(user1RepresentationOptional.isPresent());
+    var user1Representation = user1RepresentationOptional.get();
+    // get the organization
+    assertNotNull(user1Representation.getOrganizations().get(organization1.getId()));
+    assertNull(user1Representation.getOrganizations().get(organization2.getId()));
+    // check roles
+    var roles = user1Representation.getOrganizations().get(organization1.getId());
+    assertTrue(roles.stream().anyMatch(role -> role.getName().equals("example-role")));
+
+    // check user2
+    var user2RepresentationOptional =
+        members1.stream()
+            .filter(member -> member.getUsername().equals(user2.getUsername()))
+            .findFirst();
+    assertTrue(user2RepresentationOptional.isPresent());
+    var user2Representation = user2RepresentationOptional.get();
+    // get the organization
+    assertNotNull(user2Representation.getOrganizations().get(organization1.getId()));
+    assertNull(user2Representation.getOrganizations().get(organization2.getId()));
+
+    // check roles
+    var roles2 = user2Representation.getOrganizations().get(organization1.getId());
+    assertTrue(roles2.stream().anyMatch(role -> role.getName().equals("example-role")));
+    assertTrue(roles2.stream().anyMatch(role -> role.getName().equals("example-role2")));
+    assertTrue(roles2.stream().noneMatch(role -> role.getName().equals("example2-role")));
+
+    // search members of organization2 with query parameter
+    var response2 = getRequest(organization2.getId(), "members?includeOrgs=true");
+    assertThat(response1.statusCode(), is(Status.OK.getStatusCode()));
+    List<UserWithOrgs> members2 =
+        objectMapper().readValue(response2.getBody().asString(), new TypeReference<>() {});
+    assertThat(members2, notNullValue());
+    // check user2
+    user2RepresentationOptional =
+        members2.stream()
+            .filter(member -> member.getUsername().equals(user2.getUsername()))
+            .findFirst();
+    assertTrue(user2RepresentationOptional.isPresent());
+    user2Representation = user2RepresentationOptional.get();
+    // get the organization
+    assertNotNull(user2Representation.getOrganizations().get(organization2.getId()));
+    assertNull(user2Representation.getOrganizations().get(organization1.getId()));
+
+    // check roles
+    roles2 = user2Representation.getOrganizations().get(organization2.getId());
+    assertTrue(roles2.stream().anyMatch(role -> role.getName().equals("example2-role")));
+    assertTrue(roles2.stream().noneMatch(role -> role.getName().equals("example-role2")));
+    assertTrue(roles2.stream().noneMatch(role -> role.getName().equals("example-role")));
+
+    // check user3
+    var user3RepresentationOptional =
+        members2.stream()
+            .filter(member -> member.getUsername().equals(user3.getUsername()))
+            .findFirst();
+    assertTrue(user3RepresentationOptional.isPresent());
+    var user3Representation = user3RepresentationOptional.get();
+    // get the organization
+    assertNotNull(user3Representation.getOrganizations().get(organization2.getId()));
+    assertNull(user3Representation.getOrganizations().get(organization1.getId()));
+
+    // check roles
+    var roles3 = user3Representation.getOrganizations().get(organization2.getId());
+    assertTrue(roles3.isEmpty());
+
+    // delete user
+    deleteUser(keycloak, REALM, user1.getId());
+    deleteUser(keycloak, REALM, user2.getId());
+    deleteUser(keycloak, REALM, user3.getId());
+
+    // delete org
+    deleteOrganization(organization1.getId());
+    deleteOrganization(organization2.getId());
   }
 
   private void validateActiveOrganizationFromAccessToken(

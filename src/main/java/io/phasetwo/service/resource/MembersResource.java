@@ -7,6 +7,7 @@ import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.representation.UserWithOrgs;
 import io.phasetwo.service.util.ActiveOrganization;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -18,7 +19,6 @@ import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.UserModel;
-import org.keycloak.representations.idm.UserRepresentation;
 
 @JBossLog
 public class MembersResource extends OrganizationAdminResource {
@@ -33,18 +33,34 @@ public class MembersResource extends OrganizationAdminResource {
   @GET
   @Path("")
   @Produces(MediaType.APPLICATION_JSON)
-  public Stream<UserRepresentation> getMembers(
+  public Stream<UserWithOrgs> getMembers(
       @QueryParam("search") String searchQuery,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults,
+      @QueryParam("includeOrgs") Boolean includeOrgs,
       @QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {
     log.debugf("Get members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
     boolean excludeAdmin = excludeAdminAccounts != null && excludeAdminAccounts;
     firstResult = firstResult != null ? firstResult : 0;
     maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
+    boolean addOrgs = includeOrgs != null && includeOrgs;
+
     return organization
         .searchForMembersStream(searchQuery, firstResult, maxResults, excludeAdmin)
-        .map(m -> toRepresentation(session, realm, m));
+        .map(
+            userModel -> {
+              UserWithOrgs u = new UserWithOrgs(toBriefRepresentation(userModel));
+              if (addOrgs) {
+                u.addOrganization(
+                    organization.getId(),
+                    organization
+                        .getRolesStream()
+                        .filter(r -> r.hasRole(userModel))
+                        .map(Converters::convertOrganizationRole)
+                        .toList());
+              }
+              return u;
+            });
   }
 
   @GET
