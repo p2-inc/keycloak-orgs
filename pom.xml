@@ -32,10 +32,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit.version>5.11.2</junit.version>
-    <keycloak.version>26.0.8</keycloak.version>
-    <keycloak-admin-client.version>26.0.3</keycloak-admin-client.version>
+    <keycloak.version>26.1.1</keycloak.version>
+    <keycloak-admin-client.version>26.0.4</keycloak-admin-client.version>
     <resteasy.version>6.2.7.Final</resteasy.version>
-    <lombok.version>1.18.34</lombok.version>
+    <lombok.version>1.18.36</lombok.version>
     <guava.version>33.0.0-jre</guava.version>
     <auto-service.version>1.1.1</auto-service.version>
     <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
@@ -44,7 +44,6 @@
   <scm>
     <url>https://github.com/p2-inc/keycloak-orgs</url>
     <connection>scm:git:git@github.com:p2-inc/keycloak-orgs.git</connection>
-    <tag>v0.84</tag>
   </scm>
 
   <profiles>
@@ -130,7 +129,7 @@
       <plugin> <!-- pretty up the code using google java standards `mvn fmt:format` -->
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.23</version>
+        <version>2.25</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
