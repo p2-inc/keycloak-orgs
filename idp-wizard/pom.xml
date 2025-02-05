@@ -29,9 +29,9 @@
     <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.wizard</main.java.package>
-    <keycloak.version>26.0.8</keycloak.version>
+    <keycloak.version>26.1.1</keycloak.version>
     <guava.version>33.0.0-jre</guava.version>
-    <lombok.version>1.18.34</lombok.version>
+    <lombok.version>1.18.36</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
     <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
   </properties>
@@ -141,7 +141,7 @@
       <plugin> <!-- pretty up the code using google java standards `mvn fmt:format` -->
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.23</version>
+        <version>2.25</version>
       </plugin>
     </plugins>
     <sourceDirectory>ext/main/java</sourceDirectory>
