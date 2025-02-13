@@ -220,7 +220,7 @@ public class LegacySimpleHttp {
       case "PATCH":
         return new HttpPatch(appendParameterToUrl(url));
       case "POST":
-        // explicit fall through as we want POST to be the default HTTP method
+      // explicit fall through as we want POST to be the default HTTP method
       default:
         return new HttpPost(url);
     }

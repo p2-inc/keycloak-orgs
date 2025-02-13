@@ -8,6 +8,7 @@ import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORG
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_VIEW_ORGANIZATION;
 
 import com.google.auto.service.AutoService;
+import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -200,15 +201,20 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
               .addUser(
                   event.getRealm(), KeycloakModelUtils.generateId(), adminUsername, true, false);
       user.setEnabled(true);
-      // other defaults? email? emailVerified? attributes?
       user.setEmail(String.format("%s@noreply.phasetwo.io", adminUsername)); // todo dynamic email?
       user.setEmailVerified(true);
+      user.setFirstName(getDisplayName(org));
+      user.setLastName("Org Admin User");
       org.grantMembership(user);
       for (String role : DEFAULT_ORG_ROLES) {
         OrganizationRoleModel roleModel = org.getRoleByName(role);
         roleModel.grantRole(user);
       }
     }
+  }
+
+  private static String getDisplayName(OrganizationModel org) {
+    return Strings.isNullOrEmpty(org.getDisplayName()) ? org.getName() : org.getDisplayName();
   }
 
   private void organizationRemoved(OrganizationModel.OrganizationRemovedEvent event) {
