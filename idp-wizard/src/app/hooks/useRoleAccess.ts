@@ -72,6 +72,11 @@ export function useRoleAccess() {
     let roleAccess: boolean[] = [];
     let roleGroupUsage = requiredRealmResourceRoles;
 
+    // There is a race condition while the page is still loading where the realm is undefined
+    // this causes a premature redirection to the access denied page
+    // TODO: change Access Denied page to actually render rather than redirect
+    if (realm === undefined) return "skip";
+
     roleGroupUsage.map((role) => {
       return roleAccess.push(hasRealmRole(role));
     });

@@ -1,6 +1,6 @@
 import * as React from "react";
 import "@patternfly/react-core/dist/styles/base.css";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, useParams } from "react-router-dom";
 import { AppLayout } from "@app/AppLayout/AppLayout";
 import { AppRoutes } from "@app/routes";
 import "@app/styles/app.css";
@@ -34,16 +34,21 @@ const App: React.FC = () => {
   // Organization setup and selection
   const orgsObj = keycloak?.tokenParsed?.organizations || {};
   const orgsArr: string[] = Object.keys(orgsObj)
-    .map((orgId): string | false => {
-      const hasRealmRoles = hasOrganizationRoles("admin", orgId);
-      return hasRealmRoles ? orgId : false;
-    })
+    .map((orgId): string | false =>
+      hasOrganizationRoles("admin", orgId) ? orgId : false
+    )
     .filter((orgId): orgId is string => Boolean(orgId));
 
   useEffect(() => {
     // Organization already selected and is still locally saved
     // and still in token
     if (organization && orgsArr.includes(organization)) {
+      return;
+    }
+
+    const checkRoles = hasRealmRoles();
+
+    if (checkRoles === "skip") {
       return;
     }
 
