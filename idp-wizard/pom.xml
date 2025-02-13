@@ -3,7 +3,7 @@
   <groupId>io.phasetwo</groupId>
   <artifactId>phasetwo-idp-wizard</artifactId>
   <packaging>jar</packaging>
-  <version>0.19-SNAPSHOT</version>
+  <version>0.18-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
