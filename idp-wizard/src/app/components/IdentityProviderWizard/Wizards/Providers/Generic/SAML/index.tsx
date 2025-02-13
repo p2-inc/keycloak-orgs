@@ -227,7 +227,7 @@ export const GenericSAML: FC = () => {
 
       setMetadata({
         ...SamlIDPDefaults,
-        ...resp,
+        ...resp.data,
       });
       setIsFormValid(true);
 
