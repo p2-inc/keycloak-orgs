@@ -134,7 +134,7 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
     } else {
       LoginFormsProvider loginForm = context.form();
       loginForm.setAttribute("organizations", organizations);
-      context.challenge(loginForm.createForm("select-organization.ftl"));
+      context.challenge(loginForm.createForm("ext-select-organization.ftl"));
     }
   }
 
