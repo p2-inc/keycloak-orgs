@@ -78,7 +78,7 @@ public class OrgIdpDomainVerifierAuthenticatorFactory extends BaseAuthenticatorF
       return;
     }
 
-    var identityEmailDomain = Domains.extract(context.getUser().getEmail());
+    var identityEmailDomain = Domains.extract(brokerContext.getEmail());
     if (identityEmailDomain.isEmpty()) {
       log.debugf(
           "User %s does not contain a valid email domain {}.",

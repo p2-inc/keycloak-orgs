@@ -100,7 +100,7 @@ public class PostOrgAuthFlow {
           session.getKeycloakSessionFactory().getProviderFactory(Authenticator.class, providerId);
       AuthenticationExecutionModel execution = new AuthenticationExecutionModel();
       execution.setParentFlow(flow.getId());
-      execution.setRequirement(AuthenticationExecutionModel.Requirement.REQUIRED);
+      execution.setRequirement(requirement);
       execution.setAuthenticatorFlow(false);
       execution.setAuthenticator(providerId);
       execution = realm.addAuthenticatorExecution(execution);
