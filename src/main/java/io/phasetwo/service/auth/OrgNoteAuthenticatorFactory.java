@@ -9,6 +9,7 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
+import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
@@ -95,7 +96,10 @@ public class OrgNoteAuthenticatorFactory extends BaseAuthenticatorFactory
     factory.register(
         (ProviderEvent ev) -> {
           if (ev instanceof RealmModel.RealmPostCreateEvent) {
-            PostOrgAuthFlow.realmPostCreate((RealmModel.RealmPostCreateEvent) ev, PROVIDER_ID);
+            PostOrgAuthFlow.realmPostCreate(
+                (RealmModel.RealmPostCreateEvent) ev,
+                PROVIDER_ID,
+                AuthenticationExecutionModel.Requirement.REQUIRED);
           }
         });
   }

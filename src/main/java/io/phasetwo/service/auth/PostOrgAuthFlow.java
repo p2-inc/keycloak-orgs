@@ -69,7 +69,10 @@ public class PostOrgAuthFlow {
     }
   }
 
-  static void realmPostCreate(RealmModel.RealmPostCreateEvent event, String providerId) {
+  static void realmPostCreate(
+      RealmModel.RealmPostCreateEvent event,
+      String providerId,
+      AuthenticationExecutionModel.Requirement requirement) {
     KeycloakSession session = event.getKeycloakSession();
     RealmModel realm = event.getCreatedRealm();
     AuthenticationFlowModel flow = realm.getFlowByAlias(ORG_AUTH_FLOW_ALIAS);
@@ -97,7 +100,7 @@ public class PostOrgAuthFlow {
           session.getKeycloakSessionFactory().getProviderFactory(Authenticator.class, providerId);
       AuthenticationExecutionModel execution = new AuthenticationExecutionModel();
       execution.setParentFlow(flow.getId());
-      execution.setRequirement(AuthenticationExecutionModel.Requirement.REQUIRED);
+      execution.setRequirement(requirement);
       execution.setAuthenticatorFlow(false);
       execution.setAuthenticator(providerId);
       execution = realm.addAuthenticatorExecution(execution);
