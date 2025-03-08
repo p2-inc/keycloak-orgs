@@ -157,11 +157,25 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public Long getOrganizationsCount(RealmModel realm, String search) {
-    TypedQuery<Long> query = em.createNamedQuery("countOrganizationsByRealmIdAndName", Long.class);
-    query.setParameter("realmId", realm.getId());
-    search = createSearchString(search);
-    query.setParameter("search", search);
+  public Long getOrganizationsCount(RealmModel realm, String search, Map<String, String> attributes) {
+    if (attributes == null) {
+      attributes = ImmutableMap.of();
+    }
+
+    CriteriaBuilder builder = em.getCriteriaBuilder();
+    CriteriaQuery<Long> queryBuilder = builder.createQuery(Long.class);
+    Root<ExtOrganizationEntity> root = queryBuilder.from(ExtOrganizationEntity.class);
+
+    List<Predicate> predicates = attributePredicates(attributes, root);
+    predicates.add(builder.equal(root.get("realmId"), realm.getId()));
+
+    if (search != null && !search.trim().isEmpty()) {
+        String searchPattern = "%" + search.toLowerCase() + "%";
+        predicates.add(builder.like(builder.lower(root.get("name")), searchPattern));
+    }
+
+    queryBuilder.select(builder.count(root)).where(predicates.toArray(new Predicate[0]));
+    TypedQuery<Long> query = em.createQuery(queryBuilder);
     return query.getSingleResult();
   }
 
