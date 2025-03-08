@@ -272,6 +272,18 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(orgs, notNullValue());
     assertThat(cnt, is(6L));
 
+    // orgs count with attribute filter
+    response = givenSpec("orgs", "count").when().queryParam("q", "foo:bar").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
+    assertThat(cnt, is(2L));
+
+    // orgs count with name + attribute filter
+    response = givenSpec("orgs", "count").when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
+    assertThat(cnt, is(1L));
+
     for (String id : ids) {
       deleteOrganization(id);
     }
