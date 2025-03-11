@@ -128,12 +128,24 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @GET
   @Path("count")
   @Produces(MediaType.APPLICATION_JSON)
-  public Long countOrgs(@QueryParam("search") String searchQuery) {
-    log.debugf("countOrgs %s %s", realm.getName(), searchQuery);
+  public Long countOrgs(
+          @QueryParam("search") String searchQuery,
+          @QueryParam("q") String searchAttributes) {
+
+    log.debugf("countOrgs realm: %s, search: %s, query: %s", realm.getName(), searchQuery, searchAttributes);
+
     if (!auth.hasViewOrgs()) {
       throw new NotAuthorizedException("Insufficient permission to count organizations.");
     }
-    return orgs.getOrganizationsCount(realm, searchQuery);
+
+    Map<String, String> attributes =
+            (searchAttributes == null) ? Maps.newHashMap() : SearchQueryUtils.getFields(searchAttributes);
+
+    if (searchQuery != null) {
+      attributes.put("name", searchQuery.trim());
+    }
+
+    return orgs.getOrganizationsCount(realm, searchQuery, attributes);
   }
 
   @POST

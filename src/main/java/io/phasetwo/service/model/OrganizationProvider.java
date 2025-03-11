@@ -30,7 +30,7 @@ public interface OrganizationProvider extends Provider {
       Integer maxResults,
       Optional<UserModel> member);
 
-  Long getOrganizationsCount(RealmModel realm, String search);
+  Long getOrganizationsCount(RealmModel realm, String search, Map<String, String> attributes);
 
   boolean removeOrganization(RealmModel realm, String id);
 
