@@ -8,6 +8,8 @@ import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.FederatedIdentityModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.protocol.oidc.endpoints.AuthorizationEndpoint;
+import org.keycloak.sessions.AuthenticationSessionModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +25,10 @@ final class HomeIdpDiscoverer {
 
     private final DomainExtractor domainExtractor;
     private final AuthenticationFlowContext context;
+
+    private static final String ACCOUNT_HINT_QUERY_PARAM =
+        AuthorizationEndpoint.LOGIN_SESSION_NOTE_ADDITIONAL_REQ_PARAMS_PREFIX +
+        "account_hint";
 
     HomeIdpDiscoverer(AuthenticationFlowContext context) {
         this(new DomainExtractor(new HomeIdpDiscoveryConfig(context.getAuthenticatorConfig())), context);
@@ -107,7 +113,9 @@ final class HomeIdpDiscoverer {
         // 3. Filter orgs based on inbound client (i.e. only return SigSci orgs for sigsci-only customers etc)
         // 4. Filter orgs to only those with force_sso
         // 2. Filter to only enabled IdPs
-        String clientID = context.getAuthenticationSession().getClient().getClientId();
+        AuthenticationSessionModel authSession =
+            context.getAuthenticationSession();
+        String clientID = authSession.getClient().getClientId();
         OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
         String userDefaultCID = Objects.toString(
                 user.getFirstAttribute("default_cid"),
@@ -148,6 +156,18 @@ final class HomeIdpDiscoverer {
                     if(o1.getFirstAttribute("customer_id") == userDefaultCID) return -1;
                     else return 1;
                 })
+                .sorted((o1, o2) -> {
+                    String accountHint = authSession.getAuthNote(
+                        ACCOUNT_HINT_QUERY_PARAM
+                    );
+                    String customerID = o1.getFirstAttribute("customer_id");
+                    if (accountHint != null && !accountHint.isEmpty() &&
+                        customerID != null && !customerID.isEmpty() &&
+                        accountHint == customerID) {
+                        return -1;
+                    }
+                    return 1;
+                })
                 .flatMap(o -> o.getIdentityProvidersStream())
                 .filter(IdentityProviderModel::isEnabled)
                 .collect(Collectors.toList());
@@ -162,21 +182,21 @@ final class HomeIdpDiscoverer {
     private boolean isCorp(OrganizationModel org) {
         String corp = org.getFirstAttribute("corp_id");
         boolean hasCorpID = corp != null && !corp.isEmpty();
-        
+
         return hasCorpID;
     }
 
     private boolean isFastlyCustomer(OrganizationModel org) {
         String customerID = org.getFirstAttribute("customer_id");
         boolean hasCustomerID = customerID != null && !customerID.isEmpty();
-        
+
         return hasCustomerID;
     }
 
     private boolean hasForceSso(OrganizationModel org) {
         String forceSSO = org.getFirstAttribute("force_sso");
         boolean hasForceSSO = forceSSO != null && forceSSO.equals("1");
-        
+
         return hasForceSSO;
     }
 
