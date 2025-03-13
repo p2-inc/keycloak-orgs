@@ -62,8 +62,7 @@ public class UserResource extends OrganizationAdminResource {
     OrganizationModel org = orgs.getOrganizationById(realm, orgId);
     if (auth.hasViewOrgs() || auth.hasOrgViewRoles(org)) {
       if (org.hasMembership(user)) {
-        return org.getRolesStream()
-            .filter(r -> r.hasRole(user))
+        return org.getRolesByUserStream(user)
             .map(r -> convertOrganizationRole(r));
       } else {
         throw new NotFoundException("User is not a member of the organization");
