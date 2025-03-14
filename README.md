@@ -32,6 +32,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
     - [Authentication](#authentication)
       - [Invitations](#invitations)
       - [IdP Discovery](#idp-discovery)
+      - [Conditional Attributes](#conditional-attributes)
     - [Import/Export organizations](#importexport-organizations)
     - [Active Organization](#active-organization)
     - [Global organization settings](#global-organization-settings)
@@ -197,6 +198,10 @@ Organizations may optionally be given permission to manage their own IdP. The cu
 ![mapper](./docs/assets/home-idp-discovery-config.png)
 
 These are the configuration options for the "Home IdP Discovery" Authenticator. It will need to be placed in your flow as a replacement for a "Username form", or after another Authenticator/Form that sets the `ATTEMPTED_USERNAME` note. 
+
+#### Conditional Attributes
+
+It may sometimes be desirable to execute an authenticaiton flow conditionally on the presence of an organization attribute. There is a conditional authenticator for this purpose. It allows you to select an attribute name and value to match, and specify if it should be applied to all of the user's organization, or just the "active" one.
 
 ### Active Organization
 

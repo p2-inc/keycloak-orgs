@@ -157,7 +157,8 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public Long getOrganizationsCount(RealmModel realm, String search, Map<String, String> attributes) {
+  public Long getOrganizationsCount(
+      RealmModel realm, String search, Map<String, String> attributes) {
     if (attributes == null) {
       attributes = ImmutableMap.of();
     }
@@ -170,8 +171,8 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     predicates.add(builder.equal(root.get("realmId"), realm.getId()));
 
     if (search != null && !search.trim().isEmpty()) {
-        String searchPattern = "%" + search.toLowerCase() + "%";
-        predicates.add(builder.like(builder.lower(root.get("name")), searchPattern));
+      String searchPattern = "%" + search.toLowerCase() + "%";
+      predicates.add(builder.like(builder.lower(root.get("name")), searchPattern));
     }
 
     queryBuilder.select(builder.count(root)).where(predicates.toArray(new Predicate[0]));

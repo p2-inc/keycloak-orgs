@@ -26,6 +26,10 @@ public interface WithAttributes {
     }
   }
 
+  default boolean hasAttribute(String name, String value) {
+    return getAttributesStream(name).anyMatch(v -> value.equals(v));
+  }
+
   void removeAttributes();
 
   void removeAttribute(String name);
