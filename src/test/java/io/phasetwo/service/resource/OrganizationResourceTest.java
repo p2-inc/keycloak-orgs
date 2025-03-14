@@ -279,24 +279,38 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(cnt, is(2L));
 
     // orgs count with name + attribute filter
-    response = givenSpec("orgs", "count").when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
+    response =
+        givenSpec("orgs", "count")
+            .when()
+            .queryParam("search", "qu")
+            .queryParam("q", "foo:bar")
+            .get()
+            .andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
     assertThat(cnt, is(1L));
 
     // orgs count with multiple attribute filters
-    response = givenSpec("orgs", "count").when().queryParam("q", "foo:bar foo2:bar2").get().andReturn();
+    response =
+        givenSpec("orgs", "count").when().queryParam("q", "foo:bar foo2:bar2").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
     assertThat(cnt, is(1L));
 
-    response = givenSpec("orgs", "count").when().queryParam("q", "foo:bar foo3:bar3").get().andReturn();
+    response =
+        givenSpec("orgs", "count").when().queryParam("q", "foo:bar foo3:bar3").get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
     assertThat(cnt, is(0L));
 
     // orgs count with name + multiple attribute filters
-    response = givenSpec("orgs", "count").when().queryParam("search", "qu").queryParam("q", "foo:bar foo2:bar2").get().andReturn();
+    response =
+        givenSpec("orgs", "count")
+            .when()
+            .queryParam("search", "qu")
+            .queryParam("q", "foo:bar foo2:bar2")
+            .get()
+            .andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
     assertThat(cnt, is(1L));
