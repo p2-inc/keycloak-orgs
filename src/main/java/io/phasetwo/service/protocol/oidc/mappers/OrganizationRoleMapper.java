@@ -6,6 +6,8 @@ import com.google.common.collect.Maps;
 import io.phasetwo.service.model.OrganizationProvider;
 import java.util.List;
 import java.util.Map;
+
+import io.phasetwo.service.model.OrganizationRoleModel;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
@@ -53,8 +55,7 @@ public class OrganizationRoleMapper extends AbstractOrganizationMapper {
     orgs.getUserOrganizationsStream(realm, user)
         .forEach(
             o -> {
-              List<String> roles = Lists.newArrayList();
-              o.getRolesByUserStream(user).forEach(r -> roles.add(r.getName()));
+              List<String> roles = o.getRolesByUserStream(user).map(OrganizationRoleModel::getName).toList();
               Map<String, Object> org = Maps.newHashMap();
               org.put("name", o.getName());
               org.put("roles", roles);

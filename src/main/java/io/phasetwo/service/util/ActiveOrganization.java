@@ -8,6 +8,8 @@ import io.phasetwo.service.model.OrganizationProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import io.phasetwo.service.model.OrganizationRoleModel;
 import lombok.Getter;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
@@ -72,11 +74,9 @@ public class ActiveOrganization {
   }
 
   public List<String> getUserActiveOrganizationRoles() {
-    List<String> userOrganizationRoles = Lists.newArrayList();
-    organization
+    return organization
         .getRolesByUserStream(user)
-        .forEach(role -> userOrganizationRoles.add(role.getName()));
-    return userOrganizationRoles;
+        .map(OrganizationRoleModel::getName).toList();
   }
 
   public boolean isCurrentActiveOrganization(String organizationId) {

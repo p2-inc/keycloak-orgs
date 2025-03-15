@@ -16,6 +16,7 @@ import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentatio
 import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationsConfig;
 import jakarta.validation.Valid;
@@ -74,8 +75,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     orgs.getUserOrganizationsStream(realm, user)
         .forEach(
             o -> {
-              List<String> roles = Lists.newArrayList();
-              o.getRolesByUserStream(user).forEach(r -> roles.add(r.getName()));
+              List<String> roles = o.getRolesByUserStream(user).map(OrganizationRoleModel::getName).toList();
               Map<String, Object> org = Maps.newHashMap();
               org.put("name", o.getName());
               if (o.getDisplayName() != null) org.put("displayName", o.getDisplayName());
