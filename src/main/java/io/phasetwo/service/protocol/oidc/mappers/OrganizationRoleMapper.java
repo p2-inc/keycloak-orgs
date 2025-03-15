@@ -4,10 +4,9 @@ import com.google.auto.service.AutoService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.List;
 import java.util.Map;
-
-import io.phasetwo.service.model.OrganizationRoleModel;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;

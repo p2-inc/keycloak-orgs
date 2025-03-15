@@ -2,14 +2,12 @@ package io.phasetwo.service.util;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 
-import com.google.common.collect.Lists;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
-import io.phasetwo.service.model.OrganizationRoleModel;
 import lombok.Getter;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;

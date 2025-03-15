@@ -8,7 +8,6 @@ import static io.phasetwo.service.resource.Converters.convertOrganizationModelTo
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_IMPORT;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.importexport.KeycloakOrgsExportConverter;
 import io.phasetwo.service.importexport.KeycloakOrgsImportConverter;
