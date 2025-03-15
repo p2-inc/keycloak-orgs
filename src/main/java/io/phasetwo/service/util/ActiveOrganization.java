@@ -2,9 +2,9 @@ package io.phasetwo.service.util;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 
-import com.google.common.collect.Lists;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -72,16 +72,9 @@ public class ActiveOrganization {
   }
 
   public List<String> getUserActiveOrganizationRoles() {
-    List<String> userOrganizationRoles = Lists.newArrayList();
-    organization
-        .getRolesStream()
-        .forEach(
-            role -> {
-              if (role.hasRole(user)) {
-                userOrganizationRoles.add(role.getName());
-              }
-            });
-    return userOrganizationRoles;
+    return organization
+        .getRolesByUserStream(user)
+        .map(OrganizationRoleModel::getName).toList();
   }
 
   public boolean isCurrentActiveOrganization(String organizationId) {
