@@ -20,6 +20,7 @@ import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationsConfig;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
@@ -308,6 +309,18 @@ public class OrganizationsResource extends OrganizationAdminResource {
     response.type(MediaType.APPLICATION_JSON);
 
     return response.build();
+  }
+
+  @DELETE
+  @Path("")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response deleteAllOrgs() {
+    log.debugf("Delete orgs for %s %s", realm.getName());
+
+    auth.requireManageOrgs();
+
+    orgs.removeOrganizations(realm);
+    return Response.status(204).build();
   }
 
   private void createOrganization(
