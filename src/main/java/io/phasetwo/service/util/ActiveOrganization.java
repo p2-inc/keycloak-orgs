@@ -74,13 +74,8 @@ public class ActiveOrganization {
   public List<String> getUserActiveOrganizationRoles() {
     List<String> userOrganizationRoles = Lists.newArrayList();
     organization
-        .getRolesStream()
-        .forEach(
-            role -> {
-              if (role.hasRole(user)) {
-                userOrganizationRoles.add(role.getName());
-              }
-            });
+        .getRolesByUserStream(user)
+        .forEach(role -> userOrganizationRoles.add(role.getName()));
     return userOrganizationRoles;
   }
 

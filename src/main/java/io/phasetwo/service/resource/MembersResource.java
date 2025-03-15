@@ -54,8 +54,7 @@ public class MembersResource extends OrganizationAdminResource {
                 u.addOrganization(
                     organization.getId(),
                     organization
-                        .getRolesStream()
-                        .filter(r -> r.hasRole(userModel))
+                        .getRolesByUserStream(userModel)
                         .map(Converters::convertOrganizationRole)
                         .toList());
               }

@@ -169,11 +169,8 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
             org -> {
               try {
                 org.revokeMembership(event.getUser());
-                org.getRolesStream()
-                    .forEach(
-                        r -> {
-                          if (r.hasRole(event.getUser())) r.revokeRole(event.getUser());
-                        });
+                org.getRolesByUserStream(event.getUser())
+                    .forEach(r -> r.revokeRole(event.getUser()));
               } catch (Exception e) {
                 log.warn("error removing user from org", e);
               }

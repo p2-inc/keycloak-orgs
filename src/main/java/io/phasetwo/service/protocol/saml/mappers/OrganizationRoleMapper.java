@@ -70,17 +70,14 @@ public class OrganizationRoleMapper extends AbstractSAMLProtocolMapper
 
     orgs.getUserOrganizationsStream(realm, user)
         .forEach(
-            o -> {
-              o.getRolesStream()
-                  .forEach(
-                      r -> {
-                        if (r.hasRole(user)) {
+            o ->
+                o.getRolesByUserStream(user)
+                    .forEach(
+                        r -> {
                           String orgRole = String.format("%s/%s", o.getId(), r.getName());
                           log.debugf("added attributeValue %s", orgRole);
                           attribute.addAttributeValue(orgRole);
-                        }
-                      });
-            });
+                        }));
 
     if (attribute.getAttributeValue().isEmpty()) {
       return;

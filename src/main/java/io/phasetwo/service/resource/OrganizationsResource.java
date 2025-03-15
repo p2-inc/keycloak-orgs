@@ -75,11 +75,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
         .forEach(
             o -> {
               List<String> roles = Lists.newArrayList();
-              o.getRolesStream()
-                  .forEach(
-                      r -> {
-                        if (r.hasRole(user)) roles.add(r.getName());
-                      });
+              o.getRolesByUserStream(user).forEach(r -> roles.add(r.getName()));
               Map<String, Object> org = Maps.newHashMap();
               org.put("name", o.getName());
               if (o.getDisplayName() != null) org.put("displayName", o.getDisplayName());
