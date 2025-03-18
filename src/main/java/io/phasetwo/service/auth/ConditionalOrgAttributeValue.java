@@ -31,36 +31,28 @@ public class ConditionalOrgAttributeValue implements ConditionalAuthenticator {
         Boolean.parseBoolean(config.get(ConditionalOrgAttributeValueFactory.CONF_NOT));
 
     // Check org(s) for attribute
-    final AtomicBoolean match = new AtomicBoolean(false);
+    boolean match = false;
     OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
     if (!allOrgs) {
-      context
-          .getUser()
-          .getAttributeStream(ACTIVE_ORGANIZATION)
-          .findFirst()
-          .ifPresent(
-              orgId -> {
-                if (orgId != null) {
-                  OrganizationModel o = orgs.getOrganizationById(context.getRealm(), orgId);
-                  if (o.hasMembership(context.getUser())
-                      && o.hasAttribute(attributeName, attributeValue)) {
-                    match.set(true);
-                  }
-                }
-              });
+      match = context
+              .getUser()
+              .getAttributeStream(ACTIVE_ORGANIZATION)
+              .findFirst()
+              .map(
+                  orgId -> {
+                    OrganizationModel o = orgs.getOrganizationById(context.getRealm(), orgId);
+                    return o.hasMembership(context.getUser())
+                        && o.hasAttribute(attributeName, attributeValue);
+                  })
+              .orElse(false);
     } else {
-      orgs.getUserOrganizationsStream(context.getRealm(), context.getUser())
-          .forEach(
-              o -> {
-                if (o.hasAttribute(attributeName, attributeValue)) {
-                  match.set(true);
-                }
-              });
+      match = orgs.getUserOrganizationsStream(context.getRealm(), context.getUser())
+              .anyMatch(o -> o.hasAttribute(attributeName, attributeValue));
     }
 
-    log.infof("Testing org attribute %s == %s ? %b", attributeName, attributeValue, match.get());
+    log.infof("Testing org attribute %s == %s ? %b", attributeName, attributeValue, match);
 
-    return negateOutput != match.get();
+    return negateOutput != match;
   }
 
   @Override
