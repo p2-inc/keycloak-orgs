@@ -201,7 +201,7 @@ These are the configuration options for the "Home IdP Discovery" Authenticator. 
 
 #### Conditional Attributes
 
-It may sometimes be desirable to execute an authenticaiton flow conditionally on the presence of an organization attribute. There is a conditional authenticator for this purpose. It allows you to select an attribute name and value to match, and specify if it should be applied to all of the user's organization, or just the "active" one.
+It may sometimes be desirable to execute an authenticaiton flow conditionally on the presence of an organization attribute. There is a conditional authenticator for this purpose. It allows you to select an attribute name and value to match, and specify if it should be applied to all of the user's organizations (where only one organization must contain the name/value match), or just the "active" one.
 
 ### Active Organization
 
