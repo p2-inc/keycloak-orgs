@@ -22,7 +22,6 @@ public class ConditionalOrgAttributeValueFactory implements ConditionalAuthentic
   public static final String CONF_ATTRIBUTE_EXPECTED_VALUE = "org_attribute_expected_value";
   public static final String CONF_ALL_ORGS = "org_attribute_all_orgs";
   public static final String CONF_NOT = "org_attribute_not";
-  public static final String REGEX = "regex";
 
   private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
     AuthenticationExecutionModel.Requirement.REQUIRED,
