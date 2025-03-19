@@ -233,4 +233,5 @@ We’ve changed the license of our core extensions from the AGPL v3 to the [Elas
 
 Portions of the [Home IdP Discovery](https://github.com/p2-inc/keycloak-orgs/tree/main/src/main/java/io/phasetwo/service/auth/idp) code are Copyright (c) 2021-2024 Sven-Torben Janus, and are licensed under the [MIT License](https://github.com/p2-inc/keycloak-orgs/blob/main/src/main/java/io/phasetwo/service/auth/idp/LICENSE.md).
 
-All other documentation, source code and other files in this repository are Copyright 2024 Phase Two, Inc.
+All other documentation, source code and other files in this repository are Copyright 2025 Phase Two, Inc.
+
