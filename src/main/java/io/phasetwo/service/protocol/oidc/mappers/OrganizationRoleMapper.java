@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
@@ -53,12 +54,7 @@ public class OrganizationRoleMapper extends AbstractOrganizationMapper {
     orgs.getUserOrganizationsStream(realm, user)
         .forEach(
             o -> {
-              List<String> roles = Lists.newArrayList();
-              o.getRolesStream()
-                  .forEach(
-                      r -> {
-                        if (r.hasRole(user)) roles.add(r.getName());
-                      });
+              List<String> roles = o.getRolesByUserStream(user).map(OrganizationRoleModel::getName).toList();
               Map<String, Object> org = Maps.newHashMap();
               org.put("name", o.getName());
               org.put("roles", roles);
