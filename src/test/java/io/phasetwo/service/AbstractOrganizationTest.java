@@ -55,7 +55,7 @@ public abstract class AbstractOrganizationTest {
 
   public static final String KEYCLOAK_IMAGE =
       String.format(
-          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "26.0.2"));
+          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "26.1.3"));
   public static final String REALM = "master";
   public static final String ADMIN_CLI = "admin-cli";
 
