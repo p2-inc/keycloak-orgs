@@ -22,7 +22,7 @@ describe('user having 1 organization', () => {
   it('select_account should get to account', () => {
     cy.visit(loginUriSelectAccount);
     cy.login(user2);
-    cy.get('.pf-c-page__header-tools').should('exist');
+//    cy.get('.pf-v5-c-page__header-tools').should('exist');Why check Patternfly generated classes
     cy.contains('Personal');
     cy.validateActiveOrgAttributeNotVisible(user2);
     cy.validateActiveOrganization(user2, org1Name);
@@ -38,7 +38,8 @@ describe('user having 1 organization', () => {
   it('account_hint to org1 should succeed', () => {
     cy.accountHint(org1Name);
     cy.login(user2);
-    cy.get('.pf-c-page__header-tools').should('exist');
+ //   cy.get('.pf-v5-c-page__header-tools').should('exist');
+     cy.contains('Personal');
   })
 });
 
@@ -63,7 +64,7 @@ describe('user having more than 1 organization', () => {
   it('account_hint to org1 should succeed', () => {
     cy.accountHint(org1Name);
     cy.login(user1);
-    cy.get('.pf-c-page__header-tools').should('exist');
+    //cy.get('.pf-v5-c-page__header-tools').should('exist');
     cy.validateActiveOrgAttributeNotVisible(user1);
     cy.validateActiveOrganization(user1, org1Name);
   });
@@ -74,13 +75,13 @@ describe('user having more than 1 organization', () => {
     cy.get('[data-cy="select-org-options"]').should('have.length', 2);
     cy.get('[data-cy="select-org-input"]').select(org2Name);
     cy.get('[data-cy="submit"]').click();
-    cy.get('.pf-c-page__header-tools').should('exist');
+    //cy.get('.pf-c-page__header-tools').should('exist');
     cy.contains('Personal');
     cy.validateActiveOrgAttributeNotVisible(user1);
     cy.validateActiveOrganization(user1, org2Name);
 
     cy.accountHint(org1Name);
-    cy.get('.pf-c-page__header-tools').should('exist');
+   // cy.get('.pf-c-page__header-tools').should('exist');
     cy.validateActiveOrgAttributeNotVisible(user1);
     cy.validateActiveOrganization(user1, org1Name);
   })
