@@ -101,7 +101,7 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
           } else if (event instanceof PostMigrationEvent) {
             log.debug("PostMigrationEvent");
             if (KC_ORGS_SKIP_MIGRATION == null) {
-              log.info(
+              log.debug(
                   "initializing active organization user profile attribute following migration");
               KeycloakModelUtils.runJobInTransaction(factory, this::postMigrationCreateAuthFlow);
             }
@@ -127,7 +127,7 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
   private void createOrgBrowserFlow(RealmModel realm) {
     AuthenticationFlowModel browser = realm.getFlowByAlias(ORG_BROWSER_AUTH_FLOW_ALIAS);
     if (browser != null) {
-      log.infof("%s flow exists. Skipping.", ORG_BROWSER_AUTH_FLOW_ALIAS);
+      log.debugf("%s flow exists. Skipping.", ORG_BROWSER_AUTH_FLOW_ALIAS);
       return;
     }
 
@@ -153,7 +153,7 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
   private void createOrgDirectGrantFlow(RealmModel realm) {
     AuthenticationFlowModel grant = realm.getFlowByAlias(ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
     if (grant != null) {
-      log.infof("%s flow exists. Skipping.", ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
+      log.debugf("%s flow exists. Skipping.", ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS);
       return;
     }
 
