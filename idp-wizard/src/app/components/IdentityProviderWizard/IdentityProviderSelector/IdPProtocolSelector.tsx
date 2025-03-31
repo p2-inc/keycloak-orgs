@@ -1,14 +1,14 @@
 import React, { FC, useEffect } from "react";
 import { IdPButton } from "./components/IdPButton";
-import {
-  generatePath,
-  Link,
-  Navigate,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { generatePath, Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftIcon } from "@patternfly/react-icons";
-import { Stack, StackItem, Text, TextVariants } from "@patternfly/react-core";
+import {
+  Stack,
+  StackItem,
+  Text,
+  Button,
+  TextVariants,
+} from "@patternfly/react-core";
 import {
   IdentityProtocols,
   IdentityProviders,
@@ -52,10 +52,14 @@ export const IdPProtocolSelector: FC = ({}) => {
       <StackItem isFilled>
         <StackItem>
           <Link to={generatePath(PATHS.idpSelector, { realm })}>
-            <Text component={TextVariants.h2} className="link">
-              <ArrowLeftIcon />
-              {" Back to identity provider selection"}
-            </Text>
+            <Button
+              component={TextVariants.h2}
+              variant="link"
+              icon={<ArrowLeftIcon />}
+              iconPosition="left"
+            >
+              Back to identity provider selection
+            </Button>
           </Link>
         </StackItem>
         <StackItem className="selection-container">
