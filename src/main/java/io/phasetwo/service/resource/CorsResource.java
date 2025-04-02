@@ -11,10 +11,17 @@ public class CorsResource {
     "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
   };
 
+  public static final String[] HEADERS = {"Location"};
+
   @OPTIONS
   @Path("{any:.*}")
   public Response preflight() {
     log.debug("CORS OPTIONS preflight request");
-    return Cors.builder().preflight().allowedMethods(METHODS).auth().add(Response.ok());
+    return Cors.builder()
+        .preflight()
+        .allowedMethods(METHODS)
+        .exposedHeaders(HEADERS)
+        .auth()
+        .add(Response.ok());
   }
 }
