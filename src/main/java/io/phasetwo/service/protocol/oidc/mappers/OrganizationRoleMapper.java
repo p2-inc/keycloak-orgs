@@ -54,7 +54,8 @@ public class OrganizationRoleMapper extends AbstractOrganizationMapper {
     orgs.getUserOrganizationsStream(realm, user)
         .forEach(
             o -> {
-              List<String> roles = o.getRolesByUserStream(user).map(OrganizationRoleModel::getName).toList();
+              List<String> roles =
+                  o.getRolesByUserStream(user).map(OrganizationRoleModel::getName).toList();
               Map<String, Object> org = Maps.newHashMap();
               org.put("name", o.getName());
               org.put("roles", roles);
