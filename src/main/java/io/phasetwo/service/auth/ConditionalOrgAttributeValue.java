@@ -5,7 +5,6 @@ import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.authenticators.conditional.ConditionalAuthenticator;
@@ -34,7 +33,8 @@ public class ConditionalOrgAttributeValue implements ConditionalAuthenticator {
     boolean match = false;
     OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
     if (!allOrgs) {
-      match = context
+      match =
+          context
               .getUser()
               .getAttributeStream(ACTIVE_ORGANIZATION)
               .findFirst()
@@ -46,7 +46,8 @@ public class ConditionalOrgAttributeValue implements ConditionalAuthenticator {
                   })
               .orElse(false);
     } else {
-      match = orgs.getUserOrganizationsStream(context.getRealm(), context.getUser())
+      match =
+          orgs.getUserOrganizationsStream(context.getRealm(), context.getUser())
               .anyMatch(o -> o.hasAttribute(attributeName, attributeValue));
     }
 

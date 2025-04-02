@@ -72,9 +72,7 @@ public class ActiveOrganization {
   }
 
   public List<String> getUserActiveOrganizationRoles() {
-    return organization
-        .getRolesByUserStream(user)
-        .map(OrganizationRoleModel::getName).toList();
+    return organization.getRolesByUserStream(user).map(OrganizationRoleModel::getName).toList();
   }
 
   public boolean isCurrentActiveOrganization(String organizationId) {
