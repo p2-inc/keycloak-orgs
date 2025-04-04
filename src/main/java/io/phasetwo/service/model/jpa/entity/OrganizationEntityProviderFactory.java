@@ -13,7 +13,7 @@ import org.keycloak.models.KeycloakSessionFactory;
 @AutoService(JpaEntityProviderFactory.class)
 public class OrganizationEntityProviderFactory implements JpaEntityProviderFactory {
 
-  protected static final String ID = "organization-entity-provider";
+  protected static final String ID = "ext-entity-organization";
 
   @Override
   public JpaEntityProvider create(KeycloakSession session) {
