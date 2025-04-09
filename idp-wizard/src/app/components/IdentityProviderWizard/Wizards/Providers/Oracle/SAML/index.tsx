@@ -120,6 +120,8 @@ export const OracleWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
+      hideOnLogin: true,
+      hideOnLogin: true,
       displayName: `Oracle Cloud SAML Single Sign-on`,
       providerId: "saml",
       config: metadata!,

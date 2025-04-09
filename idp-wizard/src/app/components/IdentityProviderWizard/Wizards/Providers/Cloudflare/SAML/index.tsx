@@ -130,6 +130,7 @@ export const CloudflareWizard: FC = () => {
       alias,
       displayName: `Cloudflare SAML Single Sign-on`,
       providerId: "saml",
+      hideOnLogin: true,
       config: metadata!,
     };
 

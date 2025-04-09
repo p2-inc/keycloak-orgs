@@ -120,6 +120,7 @@ export const GoogleWizard: FC = () => {
     const payload: IdentityProviderRepresentation = {
       alias,
       displayName: "Google SAML Single Sign-on",
+      hideOnLogin: true,
       providerId: "saml",
       config: metadata!,
     };

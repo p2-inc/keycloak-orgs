@@ -130,6 +130,7 @@ export const DuoWizard: FC = () => {
       alias,
       displayName: `Duo SAML Single Sign-on`,
       providerId: "saml",
+      hideOnLogin: true,
       config: metadata!,
     };
 

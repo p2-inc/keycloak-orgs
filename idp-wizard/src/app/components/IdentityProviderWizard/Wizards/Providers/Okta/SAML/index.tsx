@@ -107,6 +107,7 @@ export const OktaWizardSaml: FC = () => {
     const payload: IdentityProviderRepresentation = {
       alias: alias,
       displayName: `Okta SAML Single Sign-on`,
+      hideOnLogin: true,
       providerId: "saml",
       config: metadata!,
     };
