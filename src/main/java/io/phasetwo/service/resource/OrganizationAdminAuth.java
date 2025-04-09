@@ -144,6 +144,7 @@ public class OrganizationAdminAuth extends AdminAuth {
   //
 
   public static final String ORG_ROLE_VIEW_ORGANIZATION = "view-organization";
+  public static final String ORG_ROLE_DELETE_ORGANIZATION = "delete-organization";
   public static final String ORG_ROLE_MANAGE_ORGANIZATION = "manage-organization";
   public static final String ORG_ROLE_VIEW_MEMBERS = "view-members";
   public static final String ORG_ROLE_MANAGE_MEMBERS = "manage-members";
@@ -155,6 +156,7 @@ public class OrganizationAdminAuth extends AdminAuth {
   public static final String ORG_ROLE_MANAGE_IDENTITY_PROVIDERS = "manage-identity-providers";
 
   public static final String ORG_ROLE_VIEW_ORGANIZATION_DESC = "View this organization";
+  public static final String ORG_ROLE_DELETE_ORGANIZATION_DESC = "Delete this organization";
   public static final String ORG_ROLE_MANAGE_ORGANIZATION_DESC = "Manage this organization";
   public static final String ORG_ROLE_VIEW_MEMBERS_DESC = "View members of this organization";
   public static final String ORG_ROLE_MANAGE_MEMBERS_DESC =
@@ -173,6 +175,7 @@ public class OrganizationAdminAuth extends AdminAuth {
 
   public static final String[] DEFAULT_ORG_ROLES = {
     ORG_ROLE_VIEW_ORGANIZATION,
+    ORG_ROLE_DELETE_ORGANIZATION,
     ORG_ROLE_MANAGE_ORGANIZATION,
     ORG_ROLE_VIEW_MEMBERS,
     ORG_ROLE_MANAGE_MEMBERS,
@@ -187,6 +190,7 @@ public class OrganizationAdminAuth extends AdminAuth {
   public static final Map<String, String> DEFAULT_ORG_ROLES_DESC =
       new ImmutableMap.Builder<String, String>()
           .put(ORG_ROLE_VIEW_ORGANIZATION, ORG_ROLE_VIEW_ORGANIZATION_DESC)
+          .put(ORG_ROLE_DELETE_ORGANIZATION, ORG_ROLE_DELETE_ORGANIZATION_DESC)
           .put(ORG_ROLE_MANAGE_ORGANIZATION, ORG_ROLE_MANAGE_ORGANIZATION_DESC)
           .put(ORG_ROLE_VIEW_MEMBERS, ORG_ROLE_VIEW_MEMBERS_DESC)
           .put(ORG_ROLE_MANAGE_MEMBERS, ORG_ROLE_MANAGE_MEMBERS_DESC)
@@ -205,6 +209,15 @@ public class OrganizationAdminAuth extends AdminAuth {
    */
   boolean hasOrgViewOrg(OrganizationModel org) {
     return hasOrgRole(org, ORG_ROLE_VIEW_ORGANIZATION) || org.hasMembership(getUser());
+  }
+
+  /**
+   * @param org The selected organization
+   * @return true if the logged-in user has the delete-organization permission *IN* the specified 
+   *     org
+   */
+  boolean hasOrgDeleteOrg(OrganizationModel org) {
+    return hasOrgRole(org, ORG_ROLE_DELETE_ORGANIZATION);
   }
 
   /**
