@@ -126,6 +126,7 @@ export const Auth0WizardOIDC: FC = () => {
       alias,
       displayName: `Auth0 OIDC Single Sign-on`,
       providerId: "oidc",
+      hideOnLogin: true
       config: {
         ...OidcDefaults,
         ...validationResults,

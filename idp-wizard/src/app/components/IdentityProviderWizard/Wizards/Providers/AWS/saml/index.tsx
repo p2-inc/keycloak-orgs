@@ -142,6 +142,7 @@ export const AWSSamlWizard: FC = () => {
       displayName: "AWS SSO Saml",
       providerId: "saml",
       config: metadata!,
+      hideOnLogin: true
     };
 
     try {

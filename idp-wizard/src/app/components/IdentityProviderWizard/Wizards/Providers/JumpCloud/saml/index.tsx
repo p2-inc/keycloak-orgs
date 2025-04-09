@@ -121,6 +121,7 @@ export const JumpCloudWizard: FC = () => {
     const payload: IdentityProviderRepresentation = {
       alias,
       displayName: `JumpCloud Single Sign-on`,
+      hideOnLogin: true,
       providerId: "saml",
       config: metadata!,
     };

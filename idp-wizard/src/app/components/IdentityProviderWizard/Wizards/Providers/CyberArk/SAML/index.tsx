@@ -129,6 +129,7 @@ export const CyberArkWizard: FC = () => {
       alias,
       displayName: `CyberArk SAML Single Sign-on`,
       providerId: "saml",
+      hideOnLogin: true,
       config: metadata!,
     };
 
