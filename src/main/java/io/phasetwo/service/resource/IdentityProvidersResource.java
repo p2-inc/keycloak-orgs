@@ -85,9 +85,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     log.debugf(
         "using syncMode %s, postBrokerFlow %s for idp %s",
         syncMode, postBrokerFlow, representation.getAlias());
-
+    representation.setHideOnLogin(true);
     representation.getConfig().put(IdentityProviderModel.SYNC_MODE, syncMode);
-    representation.getConfig().put(IdentityProviderModel.HIDE_ON_LOGIN, "true");
     representation.setPostBrokerLoginFlowAlias(postBrokerFlow);
 
     var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
