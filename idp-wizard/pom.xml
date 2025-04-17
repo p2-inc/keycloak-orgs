@@ -3,7 +3,7 @@
   <groupId>io.phasetwo</groupId>
   <artifactId>phasetwo-idp-wizard</artifactId>
   <packaging>jar</packaging>
-  <version>0.21-SNAPSHOT</version>
+  <version>0.21</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
@@ -39,7 +39,7 @@
   <scm>
     <url>https://github.com/p2-inc/idp-wizard</url>
     <connection>scm:git:git@github.com:p2-inc/idp-wizard.git</connection>
-    <tag>HEAD</tag>
+    <tag>v0.21</tag>
   </scm>
 
   <build>
