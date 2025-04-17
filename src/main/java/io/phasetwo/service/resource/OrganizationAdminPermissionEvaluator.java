@@ -3,6 +3,7 @@ package io.phasetwo.service.resource;
 import io.phasetwo.service.model.OrganizationModel;
 import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.authorization.model.ResourceServer;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.permissions.*;
 
@@ -33,6 +34,11 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
   }
 
   @Override
+  public boolean hasOneAdminRole(String... adminRoles) {
+    return permissions.hasOneAdminRole(adminRoles);
+  }
+
+  @Override
   public ClientPermissionEvaluator clients() {
     return permissions.clients();
   }
@@ -52,8 +58,8 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
       }
 
       @Override
-      public boolean canManageAuthorization() {
-        return realm.canManageAuthorization();
+      public boolean canManageAuthorization(ResourceServer resourceServer) {
+        return realm.canManageAuthorization(resourceServer);
       }
 
       @Override
@@ -64,12 +70,12 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
       @Override
       public boolean canManageIdentityProviders() {
         log.debugf(
-            "canManageIdentityProviders %b",
-            (realm.canManageIdentityProviders()
-                || auth.hasOrgManageIdentityProviders(organization)));
+                "canManageIdentityProviders %b",
+                (realm.canManageIdentityProviders()
+                        || auth.hasOrgManageIdentityProviders(organization)));
         // custom
         return (realm.canManageIdentityProviders()
-            || auth.hasOrgManageIdentityProviders(organization));
+                || auth.hasOrgManageIdentityProviders(organization));
       }
 
       @Override
@@ -78,8 +84,8 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
       }
 
       @Override
-      public boolean canViewAuthorization() {
-        return realm.canViewAuthorization();
+      public boolean canViewAuthorization(ResourceServer resourceServer) {
+        return realm.canViewAuthorization(resourceServer);
       }
 
       @Override
@@ -90,8 +96,8 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
       @Override
       public boolean canViewIdentityProviders() {
         log.debugf(
-            "canViewIdentityProviders %b",
-            (realm.canViewIdentityProviders() || auth.hasOrgViewIdentityProviders(organization)));
+                "canViewIdentityProviders %b",
+                (realm.canViewIdentityProviders() || auth.hasOrgViewIdentityProviders(organization)));
         // custom
         return (realm.canViewIdentityProviders() || auth.hasOrgViewIdentityProviders(organization));
       }
@@ -102,8 +108,8 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
       }
 
       @Override
-      public void requireManageAuthorization() {
-        realm.requireManageAuthorization();
+      public void requireManageAuthorization(ResourceServer resourceServer) {
+        realm.requireManageAuthorization(resourceServer);
       }
 
       @Override
@@ -129,8 +135,8 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
       }
 
       @Override
-      public void requireViewAuthorization() {
-        realm.requireViewAuthorization();
+      public void requireViewAuthorization(ResourceServer resourceServer) {
+        realm.requireViewAuthorization(resourceServer);
       }
 
       @Override

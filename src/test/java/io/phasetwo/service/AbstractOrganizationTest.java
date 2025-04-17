@@ -55,7 +55,7 @@ public abstract class AbstractOrganizationTest {
 
   public static final String KEYCLOAK_IMAGE =
       String.format(
-          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "26.0.2"));
+          "quay.io/phasetwo/keycloak-crdb:%s", System.getProperty("keycloak-version", "26.2.0"));
   public static final String REALM = "master";
   public static final String ADMIN_CLI = "admin-cli";
 
@@ -89,10 +89,12 @@ public abstract class AbstractOrganizationTest {
 
   public static final KeycloakContainer container =
       new KeycloakContainer(KEYCLOAK_IMAGE)
+          .withImagePullPolicy(org.testcontainers.images.PullPolicy.alwaysPull())
           .withContextPath("/auth")
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
           .withProviderLibsFrom(getDeps())
+          .withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m")
           .withAccessToHost(true);
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;

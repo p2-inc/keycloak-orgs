@@ -1,7 +1,7 @@
 package org.keycloak.services.resources.admin.permissions;
 
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.authorization.common.UserModelIdentity;
+import org.keycloak.authorization.identity.UserModelIdentity;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
