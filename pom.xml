@@ -136,6 +136,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.2</version>
         <configuration>
+          <classpathDependencyExcludes>
+            <classpathDependencyExclude>org.jboss.slf4j:slf4j-jboss-logmanager</classpathDependencyExclude>
+          </classpathDependencyExcludes>
           <systemPropertyVariables>
             <keycloak-version>${keycloak.version}</keycloak-version>
             <include.cypress>${include.cypress}</include.cypress>

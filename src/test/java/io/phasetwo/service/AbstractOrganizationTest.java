@@ -89,6 +89,7 @@ public abstract class AbstractOrganizationTest {
 
   public static final KeycloakContainer container =
       new KeycloakContainer(KEYCLOAK_IMAGE)
+          .withImagePullPolicy(org.testcontainers.images.PullPolicy.alwaysPull())
           .withContextPath("/auth")
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
