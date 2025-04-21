@@ -39,9 +39,11 @@ export const IdentityProviderSelector: FC = () => {
           <div className="container">
             <div className="vertical-center">
               <h1>Select your Identity Provider</h1>
-              <h2>
+              <h2 className="description">
                 This is how users will sign in to{" "}
-                <b>{currentOrgName === "Global" ? "realms" : currentOrgName}</b>
+                <span className="currentOrg">
+                  {currentOrgName === "Global" ? "realms" : currentOrgName}
+                </span>
               </h2>
               <div className="selection-container">
                 {IdentityProviders.filter((idp) => idp.active)

@@ -49,6 +49,18 @@ body,
     font-size: 36px;
     padding: 10px;
   }
+
+  h2.description {
+    font-size: 24px;
+    padding: 10px;
+
+    .currentOrg {
+      font-weight: bold;
+      background-color: #d7edff;
+      padding: 3px;
+      border-radius: 5px;
+    }
+  }
 }
 
 .vertical-center {

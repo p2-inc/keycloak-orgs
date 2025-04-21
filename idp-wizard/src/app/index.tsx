@@ -43,6 +43,15 @@ const App: React.FC = () => {
     // Organization already selected and is still locally saved
     // and still in token
     if (organization && orgsArr.includes(organization)) {
+      // Set organization to a specific org if present in the URL as a query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const orgParam = urlParams.get("org_id") as string;
+
+      if (orgParam && orgsArr.includes(orgParam)) {
+        dispatch(setOrganization(orgParam as string));
+        return;
+      }
+
       return;
     }
 
