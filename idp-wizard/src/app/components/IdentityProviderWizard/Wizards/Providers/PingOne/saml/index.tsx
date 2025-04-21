@@ -122,6 +122,7 @@ export const PingOneWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
+      hideOnLogin: true,
       displayName: `PingOne Single Sign-on`,
       providerId: "saml",
       config: metadata!,

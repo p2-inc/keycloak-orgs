@@ -1,4 +1,4 @@
-import { PATHS } from "@app/routes";
+import { getRealmFromPath, PATHS } from "@app/routes";
 import { useKeycloak } from "@react-keycloak/web";
 import { useEffect, useState } from "react";
 import { generatePath, useParams } from "react-router-dom";
@@ -44,7 +44,14 @@ export function useRoleAccess() {
   const apiMode = useAppSelector((state) => state.settings.apiMode);
   const currentOrg = useAppSelector((state) => state.settings.currentOrg);
   const { keycloak } = useKeycloak();
-  let { realm } = useParams();
+  let { realm: pathRealm } = useParams();
+
+  // Due to load order, the dynamic path is not always available.
+  // Which means the realm is not always available.
+  // This is a workaround to get the realm from the path
+  // if it is not available in the params.
+  const realm = pathRealm || getRealmFromPath();
+
   // Starts as null to make true/false explicit states
   const [hasOrgAccess, setHasOrgAccess] = useState<null | boolean>(null);
 

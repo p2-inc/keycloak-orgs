@@ -112,6 +112,7 @@ export const Auth0WizardSAML: FC = () => {
       alias,
       displayName: `Auth0 SAML Single Sign-on`,
       providerId: "saml",
+      hideOnLogin: true,
       config: configData!,
     };
 

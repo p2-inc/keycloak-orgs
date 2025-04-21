@@ -122,6 +122,7 @@ export const SalesforceWizardSAML: FC = () => {
     const payload: IdentityProviderRepresentation = {
       alias,
       displayName: `Salesforce SAML Single Sign-on`,
+      hideOnLogin: true,
       providerId: "saml",
       config: configData!,
     };

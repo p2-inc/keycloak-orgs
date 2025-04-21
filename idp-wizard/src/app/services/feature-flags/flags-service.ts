@@ -7,7 +7,7 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import keycloak from "../../../keycloak";
 import keycloakJson from "../../../keycloak.json";
-import { RELATIVE_PATH } from "@app/routes";
+import { generateBasePath } from "@app/routes";
 
 export interface FeatureFlagsState {
   usernameMapperImport: boolean;
@@ -73,7 +73,6 @@ const dynamicBaseQuery: BaseQueryFn<
 
   // TODO: @xgp is this the correct realm to leverage? or should it be pathRealm?
   const pathRealm = keycloak.realm;
-  // const pathRealm = window.location.pathname.split("/")[4];
 
   // gracefully handle scenarios where data to generate the URL is missing
   if (!pathRealm) {
@@ -88,7 +87,7 @@ const dynamicBaseQuery: BaseQueryFn<
 
   const urlEnd = typeof args === "string" ? args : args.url;
   // construct a dynamically generated portion of the url
-  const adjustedUrl = `${RELATIVE_PATH}/realms/${pathRealm}/wizard/${urlEnd}`;
+  const adjustedUrl = `${generateBasePath(pathRealm)}/${urlEnd}`;
   const adjustedArgs =
     typeof args === "string" ? adjustedUrl : { ...args, url: adjustedUrl };
 

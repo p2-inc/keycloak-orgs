@@ -112,6 +112,7 @@ export const LastPassWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
+      hideOnLogin: true,
       displayName: `LastPass SAML Single Sign-on`,
       providerId: "saml",
       config: metadata!,

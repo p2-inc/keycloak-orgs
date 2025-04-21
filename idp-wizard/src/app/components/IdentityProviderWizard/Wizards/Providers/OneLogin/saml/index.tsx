@@ -134,6 +134,7 @@ export const OneLoginWizard: FC = () => {
     const payload: IdentityProviderRepresentation = {
       alias,
       displayName: `OneLogin Single Sign-on`,
+      hideOnLogin: true,
       providerId: "saml",
       config: metadata!,
     };

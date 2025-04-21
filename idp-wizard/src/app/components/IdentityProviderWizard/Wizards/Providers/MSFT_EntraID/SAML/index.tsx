@@ -132,6 +132,7 @@ export const EntraIdWizard: FC = () => {
     const payload: IdentityProviderRepresentation = {
       alias,
       displayName: `EntraId SAML Single Sign-on`,
+      hideOnLogin: true,
       providerId: "saml",
       config: metadata!,
     };

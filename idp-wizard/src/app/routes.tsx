@@ -21,10 +21,6 @@ export interface RouterParams {
   realm: string;
 }
 
-export const routes = [];
-export const RELATIVE_PATH = "auth";
-export const BASE_PATH = `/${RELATIVE_PATH}/realms/:realm/wizard`;
-
 export enum ROUTE_PATHS {
   DASHBOARD = "dashboard",
   IDP_SELECTOR = "idpSelector",
@@ -33,16 +29,36 @@ export enum ROUTE_PATHS {
 }
 
 export const PATHS = {
-  idpSelector: BASE_PATH,
-  idpProtocolSelector: `${BASE_PATH}/idp/:provider/protocol`,
-  idpProvider: `${BASE_PATH}/idp/:provider/:protocol`,
-  dashboard: `${BASE_PATH}/dashboard`,
-  accessDenied: `${BASE_PATH}/access-denied`,
+  idpSelector: getBasePath(),
+  idpProtocolSelector: `${getBasePath()}/idp/:provider/protocol`,
+  idpProvider: `${getBasePath()}/idp/:provider/:protocol`,
+  dashboard: `${getBasePath()}/dashboard`,
+  accessDenied: `${getBasePath()}/access-denied`,
 };
 
+// Function to dynamically determine the base path
+export function getBasePath() {
+  const match = window.location.pathname.match(
+    /^(\/.*)?\/realms\/([^/]+)\/wizard/
+  );
+  if (match) {
+    return match[0].replace(/\/realms\/[^/]+\//, "/realms/:realm/");
+  }
+
+  return "/auth/realms/:realm/wizard"; // Default fallback
+}
+
+export function getRealmFromPath() {
+  const match = window.location.pathname.match(/\/realms\/([^/]+)\/wizard/);
+  if (match) {
+    return match[1];
+  }
+  return "";
+}
+
 export function generateBasePath(realm?: string) {
-  const { realm: realmParam } = useParams();
-  const pth = generatePath(`${BASE_PATH}/`, {
+  const realmParam = getRealmFromPath();
+  const pth = generatePath(`${getBasePath()}/`, {
     realm: realmParam || realm || "",
   });
   return pth;
@@ -55,23 +71,21 @@ export function useNavigateToBasePath(realm?: string) {
   return navigateToBasePath;
 }
 
-const AppRoutes = () => {
-  return (
-    <Routes>
-      <Route path={BASE_PATH}>
-        <Route index element={<IdentityProviderSelector />} />
-        <Route path="idp/*">
-          <Route path=":provider/protocol" element={<IdPProtocolSelector />} />
-          <Route path=":provider/:protocol" element={<Provider />} />
-        </Route>
-        <Route path="dashboard">
-          <Route index element={<Dashboard />} />
-        </Route>
-        <Route path="access-denied" element={<AccessDenied />} />
+const AppRoutes = () => (
+  <Routes>
+    <Route path={getBasePath()}>
+      <Route index element={<IdentityProviderSelector />} />
+      <Route path="idp/*">
+        <Route path=":provider/protocol" element={<IdPProtocolSelector />} />
+        <Route path=":provider/:protocol" element={<Provider />} />
       </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
-};
+      <Route path="dashboard">
+        <Route index element={<Dashboard />} />
+      </Route>
+      <Route path="access-denied" element={<AccessDenied />} />
+    </Route>
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
 
 export { AppRoutes };

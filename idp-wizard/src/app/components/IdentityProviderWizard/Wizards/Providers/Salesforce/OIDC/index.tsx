@@ -126,6 +126,7 @@ export const SalesforceWizardOIDC: FC = () => {
       alias,
       displayName: `Salesforce OIDC Single Sign-on`,
       providerId: "oidc",
+      hideOnLogin: true,
       config: {
         ...OidcDefaults,
         ...validationResults,

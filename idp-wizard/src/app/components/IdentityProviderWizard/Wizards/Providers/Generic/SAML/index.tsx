@@ -93,6 +93,7 @@ export const GenericSAML: FC = () => {
       alias,
       displayName: `SAML Single Sign-on`,
       providerId: "saml",
+      hideOnLogin: true,
       config: metadata!,
     };
 

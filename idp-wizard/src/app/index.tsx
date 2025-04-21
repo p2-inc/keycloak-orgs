@@ -34,10 +34,9 @@ const App: React.FC = () => {
   // Organization setup and selection
   const orgsObj = keycloak?.tokenParsed?.organizations || {};
   const orgsArr: string[] = Object.keys(orgsObj)
-    .map((orgId): string | false => {
-      const hasRealmRoles = hasOrganizationRoles("admin", orgId);
-      return hasRealmRoles ? orgId : false;
-    })
+    .map((orgId): string | false =>
+      hasOrganizationRoles("admin", orgId) ? orgId : false
+    )
     .filter((orgId): orgId is string => Boolean(orgId));
 
   useEffect(() => {
