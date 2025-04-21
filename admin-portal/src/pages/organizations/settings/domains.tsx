@@ -108,58 +108,60 @@ const SettingsDomain = ({ hasManageOrganizationRole }: SettingsProps) => {
       .finally(() => setShowRemoveConfirmModal(null));
   };
 
-  const rows: TableRows = domains.map((domain) => {
-    let domainActions = <></>;
-    const verifyDomainBtn = (
-      <Button
-        onClick={() => checkVerification(domain.domain_name as string)}
-        disabled={isVerifyDomainLoading}
-      >
-        {isVerifyDomainLoading && <SpinnerIcon className="mr-2" />}
-        {t("verify")}
-      </Button>
-    );
-    const removeDomainBtn = (
-      <Button
-        onClick={() => setShowRemoveConfirmModal(domain)}
-        className="ml-2"
-      >
-        {t("removeDomain")}
-      </Button>
-    );
-
-    if (hasManageOrganizationRole) {
-      domainActions = (
-        <>
-          {!domain.verified && <>{verifyDomainBtn}</>}
-          {removeDomainBtn}
-        </>
+  const rows: TableRows = domains
+    .filter((domain) => domain.domain_name !== "")
+    .map((domain) => {
+      let domainActions = <></>;
+      const verifyDomainBtn = (
+        <Button
+          onClick={() => checkVerification(domain.domain_name as string)}
+          disabled={isVerifyDomainLoading}
+        >
+          {isVerifyDomainLoading && <SpinnerIcon className="mr-2" />}
+          {t("verify")}
+        </Button>
       );
-    }
+      const removeDomainBtn = (
+        <Button
+          onClick={() => setShowRemoveConfirmModal(domain)}
+          className="ml-2"
+        >
+          {t("removeDomain")}
+        </Button>
+      );
 
-    return {
-      ...domain,
-      verifiedC: domain.verified ? (
-        <div className="text-green-600">{t("verified")}</div>
-      ) : (
-        <div>
-          <span className="mr-2 text-orange-600">
-            {t("verificationPending")}
-          </span>
-          <div className="mt-4">
-            <CopyInline
-              labelNumber={1}
-              label={t(
-                "createATxtRecordInYourDnsConfigurationForTheFollowingHostname"
-              )}
-              value={`${domain.record_key}=${domain.record_value}`}
-            />
+      if (hasManageOrganizationRole) {
+        domainActions = (
+          <>
+            {!domain.verified && <>{verifyDomainBtn}</>}
+            {removeDomainBtn}
+          </>
+        );
+      }
+
+      return {
+        ...domain,
+        verifiedC: domain.verified ? (
+          <div className="text-green-600">{t("verified")}</div>
+        ) : (
+          <div>
+            <span className="mr-2 text-orange-600">
+              {t("verificationPending")}
+            </span>
+            <div className="mt-4">
+              <CopyInline
+                labelNumber={1}
+                label={t(
+                  "createATxtRecordInYourDnsConfigurationForTheFollowingHostname"
+                )}
+                value={`${domain.record_key}=${domain.record_value}`}
+              />
+            </div>
           </div>
-        </div>
-      ),
-      action: domainActions,
-    };
-  });
+        ),
+        action: domainActions,
+      };
+    });
 
   return (
     <div className="space-y-4">
