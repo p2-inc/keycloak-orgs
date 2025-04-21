@@ -34,7 +34,7 @@ const CopyBlock: FC<Props> = ({ label, value, labelNumber }) => {
           )}
           <div className="font-semibold dark:text-zinc-200">{label}</div>
         </div>
-        <div className="flex items-center justify-between space-x-10 rounded border p-2 transition hover:border-gray-400 dark:border-zinc-600">
+        <div className="flex items-center justify-between space-x-10 rounded border p-2 font-mono transition hover:border-gray-400 dark:border-zinc-600">
           <div className="break-all p-2 text-sm text-gray-800 dark:text-zinc-200">
             {value}
           </div>

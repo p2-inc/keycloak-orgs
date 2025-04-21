@@ -16,6 +16,7 @@ import MembersStat from "./components/members-stat";
 import useUser from "components/utils/useUser";
 import Fuse from "fuse.js";
 import { useTranslation } from "react-i18next";
+import SsoConnections from "./components/sso-connections-stat";
 
 const { realm } = config.env;
 
@@ -98,6 +99,7 @@ export default function Organizations() {
                     >
                       <MembersStat org={org} realm={realm} />
                       <DomainStat org={org} realm={realm} />
+                      <SsoConnections org={org} realm={realm} />
                     </OrganizationItem>
                   );
                 })}

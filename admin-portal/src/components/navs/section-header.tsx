@@ -7,6 +7,7 @@ type Props = {
   variant?: "large" | "medium" | "small";
   icon?: ReactElement;
   rightContent?: ReactElement;
+  breadCrumbs?: ReactElement;
 };
 
 const SectionHeader: FC<Props> = ({
@@ -15,6 +16,7 @@ const SectionHeader: FC<Props> = ({
   variant = "large",
   icon,
   rightContent,
+  breadCrumbs,
 }) => {
   return (
     <div
@@ -23,12 +25,14 @@ const SectionHeader: FC<Props> = ({
         "space-y-0": variant === "small",
       })}
     >
+      {breadCrumbs && <>{breadCrumbs}</>}
       {(icon || rightContent) && (
         <div className="mb-8 flex items-center justify-between">
           {icon && <>{icon}</>}
           {rightContent && <>{rightContent}</>}
         </div>
       )}
+
       <h2
         className={cs("font-semibold text-secondary-900 dark:text-zinc-200", {
           "text-2xl": variant === "large",

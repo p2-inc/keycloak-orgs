@@ -50,7 +50,7 @@ const Button: FC<ButtonProps> = ({
               {
                 "bg-secondary-900 group-enabled:text-white group-enabled:group-hover:bg-secondary-800 group-disabled:bg-neutral-400 group-disabled:text-white/50 dark:bg-white dark:group-enabled:text-zinc-800 dark:group-enabled:group-hover:bg-p2dark-1000 dark:group-enabled:group-hover:text-zinc-200":
                   isBlackButton,
-                "bg-neutral-50 group-enabled:text-secondary-900 group-disabled:text-secondary-900/50 dark:bg-p2dark-1000 dark:group-enabled:text-zinc-200 dark:group-disabled:text-zinc-200/50":
+                "bg-neutral-50 hover:bg-neutral-200 group-enabled:text-secondary-900 group-disabled:text-secondary-900/50 dark:bg-p2dark-1000 dark:group-enabled:text-zinc-200 dark:group-disabled:text-zinc-200/50":
                   !isBlackButton,
               }
             )}
@@ -64,8 +64,7 @@ const Button: FC<ButtonProps> = ({
             "transition-opacity duration-200",
             "group-active:hidden",
             {
-              "drop-shadow-btn-dark": isBlackButton,
-              "drop-shadow-btn-light": !isBlackButton,
+              "hover:drop-shadow-btn-dark": isBlackButton,
             },
             {
               "group-enabled:group-hover:opacity-100": !isCompact,

@@ -162,7 +162,10 @@ const ActivityProfile = () => {
             />
             {isShowSignOutAll(devices) && (
               <div className="mt-3">
-                <Button onClick={() => setShowSignOutAllConfModal(true)}>
+                <Button
+                  onClick={() => setShowSignOutAllConfModal(true)}
+                  isBlackButton
+                >
                   {t("signOutAllDevices")}
                 </Button>
               </div>
@@ -174,7 +177,10 @@ const ActivityProfile = () => {
             ) : (
               devices.map(
                 (device: DeviceRepresentation, deviceIndex: number) => (
-                  <div className="divide-y dark:divide-zinc-600">
+                  <div
+                    className="divide-y dark:divide-zinc-600"
+                    key={device.lastAccess}
+                  >
                     {device.sessions!.map(
                       (
                         session: SessionRepresentation,
