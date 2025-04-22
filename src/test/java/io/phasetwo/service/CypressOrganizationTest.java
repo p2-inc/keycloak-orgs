@@ -37,7 +37,7 @@ class CypressOrganizationTest extends AbstractCypressOrganizationTest {
 
     try (CypressContainer cypressContainer =
         new CypressContainer()
-            .withCreateContainerCmdModifier(cmd -> cmd.withUser(getUserSID()))
+           // .withCreateContainerCmdModifier(cmd -> cmd.withUser(getUserSID()))
             .withBaseUrl(
                 "http://host.testcontainers.internal:" + container.getHttpPort() + "/auth/")
             .withBrowser("electron")) {
