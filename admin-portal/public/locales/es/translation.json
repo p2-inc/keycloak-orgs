@@ -1,4 +1,5 @@
 {
+
   "accept": "Aceptar",
   "accessGrantedOn": "Acceso concedido el",
   "accountSecurity": "Seguridad de la cuenta",
@@ -53,6 +54,8 @@
   "currentRegisteredDomains": "Dominios registrados actuales",
   "currentSession": "Sesión actual",
   "dark": "Oscuro",
+  "deleteSSOProvider": "¿Eliminar el proveedor SSO {{0}}?",
+  "deleteSSOProviderQuestion": "¿Estás seguro de que deseas eliminar este proveedor SSO? Esta acción no se puede deshacer."
   "description": "Descripción",
   "details": "Detalles",
   "device-activity": "Actividad del dispositivo",
@@ -67,9 +70,9 @@
   "domains-add-success": "{{domain}} ha sido agregado a la organización. Por favor, verifica el dominio.",
   "domains-verify": "Verificar dominio",
   "domains": "Dominios",
-  "domainVerificationError": "{{domain}} no fue verificado. ({{error}})",
-  "domainVerificationFailed": "{{domain}} no pudo ser verificado. Por favor, revisa los registros DNS e inténtalo de nuevo.",
-  "domainVerificationSuccess": "{{domain}} ha sido verificado.",
+  "domainVerificationError": "{{0}} no fue verificado. ({{1}})",
+  "domainVerificationFailed": "{{0}} no pudo ser verificado. Por favor, verifica los registros DNS e inténtalo de nuevo.",
+  "domainVerificationSuccess": "{{0}} ha sido verificado.",
   "done": "Hecho",
   "doSave": "Guardar",
   "doSignOut": "Cerrar sesión",
@@ -284,6 +287,11 @@
   "speakToAnAdminInOrderToBeGrantedThisRole": "Habla con un administrador para que se te otorgue este rol",
   "sso": "SSO",
   "ssoConnections": "Conexiones SSO",
+  "ssoProviderDeleted": "{{0}} fue eliminado para esta organización.",
+  "ssoProviderDeleteError": "{{0}} no fue eliminado para esta organización. ({{1}})",
+  "ssoProviderDisabled": "{{0}} está deshabilitado para esta organización.",
+  "ssoProviderEnabled": "{{0}} está habilitado para esta organización.",
+  "ssoProviderError": "{{0}} no fue habilitado para esta organización. ({{1}})",
   "started": "Iniciado",
   "status": "Estado",
   "stopUsingCred": "¿Dejar de usar {{0}}?",
@@ -336,5 +344,5 @@
   "viewRecords": "Ver registros",
   "welcomeMessage": "Bienvenido a la gestión de cuentas de keycloak",
   "youAreTheSameUserAsThisUser": "¡Esta es tu cuenta! ¡Eres tú!",
-  "youLackTheManageRolesRole": "No tienes el rol de gestionar roles"
+  "youLackTheManageRolesRole": "No tienes el rol de gestionar roles",
 }

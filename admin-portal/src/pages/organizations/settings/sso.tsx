@@ -9,7 +9,9 @@ import { useTranslation } from "react-i18next";
 import { config } from "config";
 import {
   IdentityProviderRepresentation,
+  useDeleteIdpMutation,
   useGetIdpsQuery,
+  useUpdateIdpMutation,
 } from "store/apis/orgs";
 import Table, {
   TableColumns,
@@ -19,6 +21,8 @@ import { FindIdpIcon } from "pages/profile/linked";
 import SquareBadge from "components/elements/badges/square-badge";
 import { useState } from "react";
 import ConfirmationModal from "components/elements/confirmation-modal";
+import P2Toast from "components/utils/toast";
+import { TrashIcon } from "lucide-react";
 
 const SettingsSSO = ({ hasManageIDPRole }: SettingsProps) => {
   const { realm } = config.env;
@@ -30,7 +34,10 @@ const SettingsSSO = ({ hasManageIDPRole }: SettingsProps) => {
   });
   const [confirmEnableSSOProvider, setConfirmEnableSSOProvider] =
     useState<IdentityProviderRepresentation | null>();
-  console.log("🚀 ~ SettingsSSO ~ idps:", idps);
+  const [confirmRemoveSSOProvider, setConfirmRemoveSSOProvider] =
+    useState<IdentityProviderRepresentation | null>();
+  const [updateIdP, { isLoading: isUpdatingIdP }] = useUpdateIdpMutation();
+  const [deleteIdp, { isLoading: isDeletingIdP }] = useDeleteIdpMutation();
 
   const idpColumns = [
     { key: "enabled", data: t("status") },
@@ -40,53 +47,117 @@ const SettingsSSO = ({ hasManageIDPRole }: SettingsProps) => {
     { key: "actions", data: "" },
   ] as TableColumns;
 
-  const rows: TableRows = idps.map((idp) => ({
-    enabled: (
-      <div className="flex items-center space-x-2">
-        {FindIdpIcon(idp)}{" "}
-        <SquareBadge>
-          <div className="flex items-center space-x-2">
-            <span
-              className="relative flex h-2 w-2"
-              title={idp.enabled ? t("enabled") : t("disabled")}
-            >
-              <span
-                className={cs(
-                  "absolute inline-flex h-full w-full rounded-full  opacity-75",
-                  {
-                    "animate-ping  bg-primary-700": idp.enabled,
-                    "bg-gray-300": !idp.enabled,
-                  }
-                )}
-              ></span>
-              <span
-                className={cs("relative inline-flex h-2 w-2 rounded-full ", {
-                  "bg-primary-700": idp.enabled,
-                  "bg-gray-300": !idp.enabled,
-                })}
-              ></span>
-            </span>
-            <div>{idp.enabled ? t("enabled") : t("disabled")}</div>
-          </div>
-        </SquareBadge>
-      </div>
-    ),
-    alias: idp.alias,
-    displayName: idp.displayName || "--",
-    authorizationUrl: idp.config?.authorizationUrl,
-    actions: <></>,
-    // actions: idp.enabled ? (
-    //   <></>
-    // ) : (
-    //   <Button isBlackButton onClick={() => setConfirmEnableSSOProvider(idp)}>
-    //     {t("enable")}
-    //   </Button>
-    // ),
-  }));
-
   const toggleSSOProvider = (idp: IdentityProviderRepresentation) => {
-    console.log("🚀 ~ toggleSSOProvider ~ idp:", idp);
+    updateIdP({
+      orgId: orgId!,
+      realm,
+      alias: idp.alias as string,
+      identityProviderRepresentation: {
+        ...idp,
+        enabled: true,
+      },
+    })
+      .then(() => {
+        setConfirmEnableSSOProvider(null);
+        P2Toast({
+          title: t("ssoProviderEnabled", [idp.displayName || idp.alias]),
+          success: true,
+        });
+      })
+      .catch((err) => {
+        console.error("Error enabling SSO provider:", err);
+        P2Toast({
+          title: t("ssoProviderEnableError", [idp.displayName || idp.alias]),
+          error: true,
+        });
+      });
   };
+
+  const handleDeleteIdP = (idp: IdentityProviderRepresentation) => {
+    deleteIdp({
+      orgId: orgId!,
+      realm,
+      alias: idp.alias as string,
+    })
+      .then(() => {
+        P2Toast({
+          title: t("ssoProviderDeleted", [idp.displayName || idp.alias]),
+          success: true,
+        });
+      })
+      .catch((err) => {
+        P2Toast({
+          title: t("ssoProviderDeleteError", [
+            idp.displayName || idp.alias,
+            err.message,
+          ]),
+          error: true,
+        });
+      });
+  };
+
+  const rows: TableRows = idps.map((idp) => {
+    const actions = (
+      <div className="flex items-center space-x-2">
+        {!idp.enabled ? (
+          <></>
+        ) : (
+          <Button
+            isCompact
+            isBlackButton
+            onClick={() => setConfirmEnableSSOProvider(idp)}
+            disabled={isUpdatingIdP}
+          >
+            {t("enable")}
+          </Button>
+        )}
+        <Button
+          isCompact
+          onClick={() => setConfirmRemoveSSOProvider(idp)}
+          disabled={isDeletingIdP}
+        >
+          <TrashIcon className="h-4 w-4" aria-hidden="true"></TrashIcon>
+        </Button>
+      </div>
+    );
+
+    return {
+      enabled: (
+        <div className="flex items-center space-x-2">
+          {FindIdpIcon(idp)}{" "}
+          <SquareBadge>
+            <div className="flex items-center space-x-2">
+              <span
+                className="relative flex h-2 w-2"
+                title={idp.enabled ? t("enabled") : t("disabled")}
+              >
+                <span
+                  className={cs(
+                    "absolute inline-flex h-full w-full rounded-full  opacity-75",
+                    {
+                      "animate-ping  bg-primary-700": idp.enabled,
+                      "bg-gray-300": !idp.enabled,
+                    }
+                  )}
+                ></span>
+                <span
+                  className={cs("relative inline-flex h-2 w-2 rounded-full ", {
+                    "bg-primary-700": idp.enabled,
+                    "bg-gray-300": !idp.enabled,
+                  })}
+                ></span>
+              </span>
+              <div>{idp.enabled ? t("enabled") : t("disabled")}</div>
+            </div>
+          </SquareBadge>
+        </div>
+      ),
+      alias: idp.alias,
+      displayName: idp.displayName || "--",
+      authorizationUrl: idp.config?.authorizationUrl,
+      actions: actions,
+    };
+  });
 
   return (
     <div className="space-y-4">
@@ -119,6 +190,20 @@ const SettingsSSO = ({ hasManageIDPRole }: SettingsProps) => {
           ])}
           modalMessage={t("toggleSSOQuestion")}
           onContinue={() => toggleSSOProvider(confirmEnableSSOProvider)}
+        />
+      )}
+      {confirmRemoveSSOProvider && (
+        <ConfirmationModal
+          open={!!confirmRemoveSSOProvider}
+          close={() => {
+            setConfirmRemoveSSOProvider(null);
+          }}
+          modalTitle={t("deleteSSOProvider", [
+            confirmEnableSSOProvider?.displayName ||
+              confirmEnableSSOProvider?.alias,
+          ])}
+          modalMessage={t("deleteSSOProviderQuestion")}
+          onContinue={() => handleDeleteIdP(confirmRemoveSSOProvider)}
         />
       )}
     </div>
