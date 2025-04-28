@@ -31,22 +31,18 @@ import org.keycloak.models.jpa.entities.UserEntity;
   @NamedQuery(
       name = "getMappingByRoleExcludeAdmin",
       query =
-          "SELECT m FROM UserOrganizationRoleMappingEntity m  WHERE m.role=:role AND NOT (m.user.username LIKE 'org-admin-%' AND LENGTH(m.user.username) = 46)"),
+          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.role=:role" +
+        " AND m.userId NOT IN " +
+                " (SELECT u.id FROM UserEntity u WHERE u.username LIKE 'org-admin-%' AND LENGTH(u.username) = 46)"
+  ),
   @NamedQuery(
       name = "getMappingByRoleAndUser",
       query =
-          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.user.id = :userId AND m.role = :role"),
+          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.userId = :userId AND m.role = :role"),
   @NamedQuery(
       name = "getMappingsByUser",
       query =
-          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.user = :user AND m.role.organization.id = :orgId"),
-  @NamedQuery(
-      name = "deleteMappingsByRoleAndUser",
-      query =
-          "DELETE FROM UserOrganizationRoleMappingEntity m WHERE m.role = :role AND m.user = :user"),
-  @NamedQuery(
-      name = "deleteMappingsByUser",
-      query = "DELETE FROM UserOrganizationRoleMappingEntity m WHERE m.user = :user")
+          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.userId = :userId AND m.role.organization.id = :orgId"),
 })
 @Table(
     name = "USER_ORGANIZATION_ROLE_MAPPING",
@@ -61,9 +57,8 @@ public class UserOrganizationRoleMappingEntity {
   // avoids an extra SQL
   protected String id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "USER_ID")
-  protected UserEntity user;
+  @Column(name = "USER_ID")
+  protected String userId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "ROLE_ID")
@@ -87,15 +82,11 @@ public class UserOrganizationRoleMappingEntity {
   }
 
   public String getUserId() {
-    return user.getId();
+    return userId;
   }
 
-  public UserEntity getUser() {
-    return user;
-  }
-
-  public void setUser(UserEntity user) {
-    this.user = user;
+  public void setUserId(String userId) {
+    this.userId = userId;
   }
 
   public OrganizationRoleEntity getRole() {
@@ -122,7 +113,7 @@ public class UserOrganizationRoleMappingEntity {
 
     UserOrganizationRoleMappingEntity key = (UserOrganizationRoleMappingEntity) o;
 
-    if (!user.equals(key.user)) return false;
+    if (!userId.equals(key.userId)) return false;
     if (!role.equals(key.role)) return false;
 
     return true;
@@ -130,6 +121,6 @@ public class UserOrganizationRoleMappingEntity {
 
   @Override
   public int hashCode() {
-    return Objects.hash(role, user);
+    return Objects.hash(role, userId);
   }
 }

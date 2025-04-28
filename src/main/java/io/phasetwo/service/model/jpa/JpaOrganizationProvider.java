@@ -127,7 +127,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public Stream<OrganizationModel> searchForOrganizationStream(
+  public Stream<OrganizationModel>searchForOrganizationStream(
       RealmModel realm,
       Map<String, String> attributes,
       Integer firstResult,
@@ -293,6 +293,6 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     Join<ExtOrganizationEntity, OrganizationMemberEntity> membersJoin =
         root.join("members", JoinType.LEFT);
 
-    return builder.equal(membersJoin.get("user").get("id"), member.getId());
+    return builder.equal(membersJoin.get("userId"), member.getId());
   }
 }

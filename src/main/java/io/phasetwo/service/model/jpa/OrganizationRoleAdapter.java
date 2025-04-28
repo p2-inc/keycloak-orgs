@@ -11,8 +11,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
-import org.keycloak.models.jpa.UserAdapter;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class OrganizationRoleAdapter
@@ -89,11 +87,7 @@ public class OrganizationRoleAdapter
     if (hasRole(user)) return;
     UserOrganizationRoleMappingEntity m = new UserOrganizationRoleMappingEntity();
     m.setId(KeycloakModelUtils.generateId());
-    if (user instanceof UserAdapter) {
-      m.setUser(((UserAdapter) user).getEntity());
-    } else {
-      m.setUser(em.find(UserEntity.class, user.getId()));
-    }
+    m.setUserId(user.getId());
     m.setRole(role);
     em.persist(m);
     role.getUserMappings().add(m);
