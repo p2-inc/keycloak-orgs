@@ -59,7 +59,7 @@ const InnerItem = ({
             <Title>{title}</Title>
             <SubTitle>{subTitle}</SubTitle>
           </div>
-          <div className="flex flex-row space-x-8">{children}</div>
+          <div className="flex flex-row flex-wrap gap-4">{children}</div>
         </div>
       </div>
       {viewType === ViewLayoutOptions.GRID && (

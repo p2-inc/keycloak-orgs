@@ -95,7 +95,7 @@ export default function OrganizationDetail() {
   const hasViewIDPRole = hasViewIdentityProvidersRole(orgId);
   // const [createPortalLink, { isSuccess }] = useCreatePortalLinkMutation();
 
-  const allMembersCount = allMembers.length;
+  const allMembersCount = allMembers.length - 1;
   const totalMembers = members.length;
 
   const rows: TableRows = members.map((member) => ({
@@ -150,30 +150,41 @@ export default function OrganizationDetail() {
                   <Stat label={t("members")} value={allMembersCount}></Stat>
                   {hasViewInvitationsRole ? (
                     <Link to={`/organizations/${orgId}/invitation/pending`}>
-                      <Stat label={t("pending")} value={inviteCount}></Stat>
+                      <Stat label={t("invited")} value={inviteCount}></Stat>
                     </Link>
                   ) : (
-                    <Stat label={t("pending")} value={inviteCount}></Stat>
+                    <Stat label={t("invited")} value={inviteCount}></Stat>
                   )}
                 </OACTopRow>
-                <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
-                  {t("inviteNewMembersOrRemoveMembersFromTheOrganization")}
+                <div>
+                  <SectionHeader title={t("members")} variant="small" />
+                  <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
+                    {t("inviteNewMembersOrRemoveMembersFromTheOrganization")}
+                  </div>
                 </div>
                 <div>
                   {hasManageInvitationsRole ? (
-                    <Link to={`/organizations/${orgId}/invitation/new`}>
-                      <Button
-                        isBlackButton
-                        disabled={!hasManageInvitationsRole}
-                      >
-                        <Plus className="mr-2 w-5" />
-                        {t("inviteNewMembers")}
-                      </Button>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link to={`/organizations/${orgId}/invitation/new`}>
+                        <Button
+                          isBlackButton
+                          disabled={!hasManageInvitationsRole}
+                        >
+                          <Plus className="mr-2 h-auto w-4" />
+                          {t("invite")}
+                        </Button>
+                      </Link>
+
+                      <Link to={`/organizations/${orgId}/invitation/pending`}>
+                        <Button className="capitalize">
+                          {t("manageInvites")}
+                        </Button>
+                      </Link>
+                    </div>
                   ) : (
                     <Button isBlackButton disabled={!hasManageInvitationsRole}>
-                      <Plus className="mr-2 w-5" />
-                      {t("inviteNewMembers")}
+                      <Plus className="mr-2 w-3" />
+                      {t("invite")}
                     </Button>
                   )}
                 </div>
@@ -188,21 +199,39 @@ export default function OrganizationDetail() {
                     <Network className="h-5 w-5" />
                   </RoundedIcon>
                   <Stat
-                    label={t("org-details-stat-sso-active")}
-                    value={idps.length}
+                    label={t("active")}
+                    value={idps.filter((idp) => idp.enabled).length}
+                  ></Stat>
+                  <Stat
+                    label={t("disabled")}
+                    value={idps.filter((idp) => idp.enabled === false).length}
                   ></Stat>
                 </OACTopRow>
-                <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
-                  {t("setupSsoConnectionsAsNecessaryForThisOrganization")}
+                <div>
+                  <SectionHeader title={t("ssoConnections")} variant="small" />
+                  <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
+                    {t("setupSsoConnectionsAsNecessaryForThisOrganization")}
+                  </div>
                 </div>
                 <div>
-                  <Button
-                    isBlackButton
-                    onClick={() => OpenSSOLink({ orgId: orgId! })}
-                    disabled={!hasManageIDPRole || !hasViewIDPRole}
-                  >
-                    {t("setupSso")}
-                  </Button>
+                  {hasManageOrganizationRole ? (
+                    <div className="space-x-2">
+                      <Button
+                        isBlackButton
+                        onClick={() => OpenSSOLink({ orgId: orgId! })}
+                        disabled={!hasManageIDPRole || !hasViewIDPRole}
+                      >
+                        {t("setupSso")}
+                      </Button>
+                      <Link to={`/organizations/${org?.id}/settings`}>
+                        <Button className="capitalize">{t("manage")}</Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <Button isBlackButton disabled>
+                      {t("setupSso")}
+                    </Button>
+                  )}
                 </div>
               </OrganizationActionCard>
             )}
@@ -215,16 +244,29 @@ export default function OrganizationDetail() {
                     <Globe className="h-5 w-5" />
                   </RoundedIcon>
                   <Stat label={t("domains")} value={domains.length}></Stat>
-                  <Stat label={t("pending")} value={unverifiedDomains}></Stat>
+                  <Stat
+                    label={t("pendingVerification")}
+                    value={unverifiedDomains}
+                  ></Stat>
                 </OACTopRow>
-                <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
-                  {t("setupAssociatedDomainsAndVerifyThemToEnsureFullSecurity")}
+                <div>
+                  <SectionHeader title={t("domains")} variant="small" />
+                  <div className="text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
+                    {t(
+                      "setupAssociatedDomainsAndVerifyThemToEnsureFullSecurity"
+                    )}
+                  </div>
                 </div>
                 <div>
                   {hasManageOrganizationRole ? (
-                    <Link to={`/organizations/${org?.id}/domains/add`}>
-                      <Button isBlackButton>{t("setupDomains")}</Button>
-                    </Link>
+                    <div className="space-x-2">
+                      <Link to={`/organizations/${org?.id}/domains/add`}>
+                        <Button isBlackButton>{t("setupDomains")}</Button>
+                      </Link>
+                      <Link to={`/organizations/${org?.id}/settings`}>
+                        <Button className="capitalize">{t("manage")}</Button>
+                      </Link>
+                    </div>
                   ) : (
                     <Button isBlackButton disabled>
                       {t("setupDomains")}

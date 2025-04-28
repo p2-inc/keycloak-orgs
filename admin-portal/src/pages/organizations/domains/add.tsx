@@ -15,6 +15,9 @@ import isValidDomain from "is-valid-domain";
 import { Globe } from "lucide-react";
 import useUser from "components/utils/useUser";
 import { useTranslation } from "react-i18next";
+import TopHeader from "components/navs/top-header";
+import Breadcrumbs from "components/navs/breadcrumbs";
+import RoundBadge from "components/elements/badges/round-badge";
 
 const addIcon = (
   <RoundedIcon className="my-4">
@@ -35,6 +38,7 @@ const DomainsAdd = () => {
     orgId: orgId!,
     realm,
   });
+  console.log("🚀 ~ DomainsAdd ~ org:", org);
   const { refetch: refetchDomains } = useGetOrganizationDomainsQuery({
     realm,
     orgId: orgId!,
@@ -89,7 +93,9 @@ const DomainsAdd = () => {
             title: t("domains-add-success", { domain }),
           });
           refetchDomains();
-          return navigate(`/organizations/${orgId}/settings`);
+          return navigate(
+            `/organizations/${orgId}/settings?verifyDomain=${domain}`
+          );
         })
         .catch((e) => {
           P2Toast({
@@ -99,6 +105,9 @@ const DomainsAdd = () => {
         });
     }
   };
+
+  const registeredDomainCount =
+    org?.domains?.filter((domain) => domain.length > 0).length || "0";
 
   return (
     <div className="md:py-20">
@@ -112,32 +121,47 @@ const DomainsAdd = () => {
               to={`/organizations/${orgId}/details`}
               className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
             >
-              Details
+              {t("orgDetails")}
             </Link>
             <Link
               to={`/organizations/${orgId}/settings`}
-              className="inline-block rounded-lg px-4 py-2 font-medium opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
+              className="inline-block rounded-lg px-4 py-2 font-medium capitalize opacity-60 transition hover:bg-gray-100 hover:opacity-100 dark:text-zinc-200 dark:hover:bg-p2dark-1000"
             >
-              {t("settings")}
+              {t("manage")}
             </Link>
           </div>
+        }
+        breadCrumbs={
+          <Breadcrumbs
+            items={[
+              { title: t("organizations"), link: `/organizations` },
+              {
+                title: org?.name || "",
+                link: `/organizations/${orgId}/details`,
+              },
+            ]}
+            dropLastSlash
+          />
         }
       />
       <div className="space-y-5 py-10">
         {org.domains && org.domains?.length > 0 && (
           <div className="divide-y rounded-md border border-gray-200 dark:divide-zinc-600 dark:border-zinc-600">
             <div className="rounded-t-md bg-gray-50 px-3 py-2 text-sm font-semibold dark:bg-zinc-900 dark:text-zinc-200">
-              {t("currentRegisteredDomains")}
+              {t("currentRegisteredDomains")}{" "}
+              <RoundBadge>{registeredDomainCount}</RoundBadge>
             </div>
             <div className="divide-y dark:divide-zinc-600">
-              {org.domains.map((domain) => (
-                <div
-                  key={domain}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm dark:text-zinc-200"
-                >
-                  <div>{domain}</div>
-                </div>
-              ))}
+              {org.domains
+                .filter((domain) => domain.length > 0)
+                .map((domain) => (
+                  <div
+                    key={domain}
+                    className="flex items-center space-x-2 px-3 py-2 text-sm dark:text-zinc-200"
+                  >
+                    <div>{domain}</div>
+                  </div>
+                ))}
             </div>
           </div>
         )}

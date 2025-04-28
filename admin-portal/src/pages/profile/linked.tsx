@@ -8,7 +8,7 @@ import {
   LinkedAccountRepresentation,
   BuildLinkingUriApiArg,
 } from "store/apis/profile";
-import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useState, useEffect } from "react";
 import Table, {
   TableColumns,
@@ -17,18 +17,43 @@ import Table, {
 import * as icons from "components/icons/providers";
 import P2Toast from "components/utils/toast";
 import { useTranslation } from "react-i18next";
+import { useUserOrgIdps } from "./useUserOrgIdps";
+
+export const FindIdpIcon = (
+  account: LinkedAccountRepresentation
+): React.ReactNode => {
+  const k = Object.keys(icons);
+  const f = k.find(
+    (t) => t.toLowerCase() === account.providerAlias?.toLowerCase()
+  );
+  const LucideIcon = icons[f || "Key"];
+  return <LucideIcon />;
+};
 
 const LinkedProfile = () => {
   const { t } = useTranslation();
+  const { realm } = config.env;
   const { features: featureFlags } = config.env;
   const { data: accounts = [], isLoading } = useGetLinkedAccountsQuery({
-    realm: config.env.realm,
+    realm,
   });
+
+  // Get all the org idps for the orgs the user is a member of
+  const { idps: allOrgIdps } = useUserOrgIdps(realm);
   const [deleteAccount] = useDeleteLinkedProviderMutation();
   const [buildLinkState, setBuildLinkState] = useState<
     typeof skipToken | BuildLinkingUriApiArg
   >(skipToken);
   const { data: buildLinker } = useBuildLinkingUriQuery(buildLinkState);
+
+  const socialIdps = accounts.filter((account) => account.social);
+
+  const orgIdps = accounts.filter((account) => {
+    const idp = allOrgIdps.find((idp) => idp.alias === account.providerAlias);
+    return idp;
+  });
+
+  let fullListOfIdps = [...socialIdps, ...orgIdps];
 
   const unlinkAccount = (account: LinkedAccountRepresentation): void => {
     deleteAccount({
@@ -81,15 +106,6 @@ const LinkedProfile = () => {
     );
   };
 
-  const icon = (account: LinkedAccountRepresentation): React.ReactNode => {
-    const k = Object.keys(icons);
-    const f = k.find(
-      (t) => t.toLowerCase() === account.providerAlias?.toLowerCase()
-    );
-    const LucideIcon = icons[f || "Key"];
-    return <LucideIcon />;
-  };
-
   const linkedColumns: TableColumns = [
     { key: "icon", data: "" },
     { key: "providerAlias", data: t("provider") },
@@ -99,10 +115,10 @@ const LinkedProfile = () => {
     { key: "action", data: "", columnClasses: "flex justify-end" },
   ];
 
-  const linkedRows: TableRows = accounts
+  const linkedRows: TableRows = fullListOfIdps
     .filter((account) => account.connected)
     .map((account) => ({
-      icon: icon(account),
+      icon: FindIdpIcon(account),
       providerAlias: account.providerAlias,
       displayName: account.displayName,
       label: label(account),
@@ -126,10 +142,10 @@ const LinkedProfile = () => {
     { key: "action", data: "", columnClasses: "flex justify-end" },
   ];
 
-  const unlinkedRows: TableRows = accounts
+  const unlinkedRows: TableRows = fullListOfIdps
     .filter((account) => !account.connected)
     .map((account) => ({
-      icon: icon(account),
+      icon: FindIdpIcon(account),
       providerAlias: account.providerAlias,
       displayName: account.displayName,
       label: label(account),
