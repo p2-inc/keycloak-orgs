@@ -58,7 +58,7 @@ Wizards are currently available for the following vendors.
 | Generic   | :white_check_mark: | :white_check_mark: | :white_check_mark: |      |       |
 | Google    | :white_check_mark: |                    |                    |      |       |
 | JumpCloud | :white_check_mark: |                    |                    |      |       |
-| Okta      | :white_check_mark: | :white_check_mark: | :white_check_mark: |      |       |
+| Okta      | :white_check_mark: |                    | :white_check_mark: |      |       |
 | OneLogin  | :white_check_mark: |                    |                    |      |       |
 | PingOne   | :white_check_mark: |                    |                    |      |       |
 
