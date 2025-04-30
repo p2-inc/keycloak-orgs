@@ -1,4 +1,4 @@
-package io.phasetwo.service;
+package io.phasetwo.web;
 
 import static io.phasetwo.service.Helpers.enableEvents;
 import static io.phasetwo.service.Helpers.objectMapper;
@@ -27,12 +27,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.Testcontainers;
 
 public class AbstractCypressOrganizationTest {
@@ -131,6 +134,21 @@ public class AbstractCypressOrganizationTest {
   protected Response putRequest(Keycloak keycloak, Object body, String path)
       throws JsonProcessingException {
     return givenSpec(keycloak).and().body(toJsonString(body)).put(path).then().extract().response();
+  }
+
+  protected Response postRequest(Object body, String... paths) throws JsonProcessingException {
+    return postRequest(keycloak, body, String.join("/", paths));
+  }
+
+  protected Response postRequest(Keycloak keycloak, Object body, String path)
+          throws JsonProcessingException {
+    return givenSpec(keycloak)
+            .and()
+            .body(toJsonString(body))
+            .post(path)
+            .then()
+            .extract()
+            .response();
   }
 
   protected OrganizationRepresentation createOrganization(OrganizationRepresentation representation)
@@ -291,5 +309,23 @@ public class AbstractCypressOrganizationTest {
 
     response = root.and().body(realm).when().put().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+  }
+
+  protected void importRealm(RealmRepresentation representation, Keycloak keycloak) {
+    var response =
+            given()
+                    .baseUri(container.getAuthServerUrl())
+                    .basePath("admin/realms/")
+                    .contentType("application/json")
+                    .auth()
+                    .oauth2(keycloak.tokenManager().getAccessTokenString())
+                    .and()
+                    .body(representation)
+                    .when()
+                    .post()
+                    .then()
+                    .extract()
+                    .response();
+    assertThat(response.getStatusCode(), CoreMatchers.is(Status.CREATED.getStatusCode()));
   }
 }

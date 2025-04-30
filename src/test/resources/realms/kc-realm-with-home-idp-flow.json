@@ -1,0 +1,104 @@
+{
+  "realm": "test-realm",
+  "enabled": true,
+  "authenticationFlows": [
+    {
+      "alias": "Copy of browser",
+      "description": "Browser based authentication",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-cookie",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "auth-spnego",
+          "authenticatorFlow": false,
+          "requirement": "DISABLED",
+          "priority": 20,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "identity-provider-redirector",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 25,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 30,
+          "autheticatorFlow": true,
+          "flowAlias": "Copy of browser forms",
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "alias": "Copy of browser forms",
+      "description": "Username, password, otp and other auth forms.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorConfig": "test",
+          "authenticator": "ext-auth-home-idp-discovery",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "auth-password-form",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 1,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "test",
+      "config": {
+        "requireVerifiedDomain": "false",
+        "requireVerifiedEmail": "false",
+        "forwardToFirstMatch": "true",
+        "bypassLoginPage": "false",
+        "userAttribute": "email",
+        "forwardToLinkedIdp": "true"
+      }
+    }
+  ],
+  "browserFlow": "Copy of browser",
+  "users": [
+    {
+      "username": "user-1",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user-1@yahoo.com",
+      "firstName": "R",
+      "lastName": "T",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user-1",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-package io.phasetwo.service;
+package io.phasetwo.web;
 
 import static io.phasetwo.service.Helpers.createUserWithCredentials;
 
@@ -22,7 +22,7 @@ import org.testcontainers.Testcontainers;
 
 @JBossLog
 @org.testcontainers.junit.jupiter.Testcontainers
-class CypressOrganizationTest extends AbstractCypressOrganizationTest {
+class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
 
   @TestFactory
   List<DynamicContainer> runCypressTests()
@@ -37,21 +37,13 @@ class CypressOrganizationTest extends AbstractCypressOrganizationTest {
 
     try (CypressContainer cypressContainer =
         new CypressContainer()
-            // .withCreateContainerCmdModifier(cmd -> cmd.withUser(getUserSID()))
             .withBaseUrl(
                 "http://host.testcontainers.internal:" + container.getHttpPort() + "/auth/")
+            .withSpec("cypress/e2e/select-organization.cy.ts")
             .withBrowser("electron")) {
       cypressContainer.start();
       CypressTestResults testResults = cypressContainer.getTestResults();
       return convertToJUnitDynamicTests(testResults);
-    }
-  }
-
-  private String getUserSID() {
-    if (System.getProperty("os.name").startsWith("Windows")) {
-      return new com.sun.security.auth.module.NTSystem().getUserSID();
-    } else {
-      return Long.toString(new com.sun.security.auth.module.UnixSystem().getUid());
     }
   }
 

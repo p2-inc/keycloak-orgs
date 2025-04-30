@@ -89,3 +89,12 @@ Cypress.Commands.add('accountHint', (orgName: string) => {
     cy.visit(loginUriAccountHint.concat(org.id));
   })
 });
+
+
+Cypress.Commands.add('updatePersonalInformation', (firstName: string, lastName:string, email:string) => {
+  cy.get('#firstName').type(firstName);
+  cy.get('#lastName').type(lastName);
+  cy.get('#email').type(email);
+  cy.get('#kc-form-buttons input[type="submit"]').click()
+});
+
