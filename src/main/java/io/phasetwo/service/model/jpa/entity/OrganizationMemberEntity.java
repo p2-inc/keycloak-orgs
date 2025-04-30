@@ -28,10 +28,13 @@ import org.keycloak.models.jpa.entities.UserEntity;
   @NamedQuery(
       name = "getOrganizationMembersCountExcludeAdmin",
       query =
-          "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization AND NOT (m.user.username LIKE 'org-admin-%' AND LENGTH(m.user.username) = 46)"),
+          "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization" +
+          " AND m.userId NOT IN " +
+          " (SELECT u.id FROM UserEntity u WHERE u.username LIKE 'org-admin-%' AND LENGTH(u.username) = 46)"
+  ),
   @NamedQuery(
       name = "getOrganizationMembershipsByUserId",
-      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.user.id = :userId")
+      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :userId")
 })
 @Table(
     name = "ORGANIZATION_MEMBER",
@@ -50,9 +53,8 @@ public class OrganizationMemberEntity {
   @JoinColumn(name = "ORGANIZATION_ID")
   protected ExtOrganizationEntity organization;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "USER_ID")
-  protected UserEntity user;
+  @Column(name = "USER_ID")
+  protected String userId;
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "CREATED_AT")
@@ -72,15 +74,11 @@ public class OrganizationMemberEntity {
   }
 
   public String getUserId() {
-    return user.getId();
+    return  userId;
   }
 
-  public UserEntity getUser() {
-    return user;
-  }
-
-  public void setUser(UserEntity user) {
-    this.user = user;
+  public void setUserId(String userId) {
+    this.userId = userId;
   }
 
   public ExtOrganizationEntity getOrganization() {
@@ -107,7 +105,7 @@ public class OrganizationMemberEntity {
 
     OrganizationMemberEntity key = (OrganizationMemberEntity) o;
 
-    if (!user.equals(key.user)) return false;
+    if (!userId.equals(key.userId)) return false;
     if (!organization.equals(key.organization)) return false;
 
     return true;
@@ -115,6 +113,6 @@ public class OrganizationMemberEntity {
 
   @Override
   public int hashCode() {
-    return Objects.hash(organization, user);
+    return Objects.hash(organization, userId);
   }
 }

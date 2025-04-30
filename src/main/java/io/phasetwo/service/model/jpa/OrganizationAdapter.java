@@ -22,11 +22,8 @@ import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +37,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
-import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
@@ -191,24 +187,36 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     // defining the organization search clause
     predicates.add(cb.equal(root.get("organization"), org));
 
-    // join tables
-    From<OrganizationMemberEntity, UserEntity> userJoin = root.join("user");
+    // search filter
     if (search != null && !search.isEmpty()) {
       List<Predicate> searchTermsPredicates = new ArrayList<>();
-      // define search terms
+      Subquery<String> subquery = criteriaQuery.subquery(String.class);
+      Root<UserEntity> subRoot = subquery.from(UserEntity.class);
+
+      // Add your search predicate
       for (String stringToSearch : search.trim().split(",")) {
         searchTermsPredicates.add(
-            cb.or(getSearchOptionPredicateArray(stringToSearch, cb, userJoin)));
+                cb.or(getSearchOptionPredicateArray(stringToSearch, cb, subRoot)));
       }
-      predicates.add(cb.or(searchTermsPredicates.toArray(Predicate[]::new)));
+
+      subquery.select(subRoot.get("id"));
+      subquery.where(cb.or(searchTermsPredicates.toArray(Predicate[]::new)));
+
+      // Now add the subquery-based predicate
+      predicates.add(root.get("userId").in(subquery));
     }
 
     if (excludeAdmin) {
       List<Predicate> excludeAdminsPredicates = new ArrayList<>();
-      excludeAdminsPredicates.add(cb.like(userJoin.get(USERNAME), "org-admin-%", ESCAPE_BACKSLASH));
-      excludeAdminsPredicates.add(cb.equal(cb.length(userJoin.get(USERNAME)), "46"));
+      Subquery<String> subquery = criteriaQuery.subquery(String.class);
+      Root<UserEntity> subRoot = subquery.from(UserEntity.class);
+      excludeAdminsPredicates.add(cb.like(subRoot.get(USERNAME), "org-admin-%", ESCAPE_BACKSLASH));
+      excludeAdminsPredicates.add(cb.equal(cb.length(subRoot.get(USERNAME)), "46"));
 
-      predicates.add(cb.not(cb.and(excludeAdminsPredicates.toArray(Predicate[]::new))));
+      subquery.select(subRoot.get("id"));
+      subquery.where(cb.not(cb.and(excludeAdminsPredicates.toArray(Predicate[]::new))));
+
+      predicates.add(root.get("userId").in(subquery));
     }
 
     criteriaQuery
@@ -218,7 +226,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   }
 
   private Predicate[] getSearchOptionPredicateArray(
-      String value, CriteriaBuilder builder, From<?, UserEntity> from) {
+          String value, CriteriaBuilder builder, Root<UserEntity> from) {
     value = value.trim().toLowerCase();
     List<Predicate> orPredicates = new ArrayList<>();
     if (!value.isEmpty()) {
@@ -275,19 +283,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     if (hasMembership(user)) return;
     OrganizationMemberEntity m = new OrganizationMemberEntity();
     m.setId(KeycloakModelUtils.generateId());
-    UserEntity u = entityFromModel(user);
-    m.setUser(u);
+    m.setUserId(user.getId());
     m.setOrganization(org);
     em.persist(m);
     org.getMembers().add(m);
-  }
-
-  private UserEntity entityFromModel(UserModel user) {
-    if (user instanceof UserAdapter) {
-      return ((UserAdapter) user).getEntity();
-    } else {
-      return em.find(UserEntity.class, user.getId());
-    }
   }
 
   @Override
@@ -361,8 +360,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   public Stream<OrganizationRoleModel> getRolesByUserStream(UserModel user) {
     TypedQuery<UserOrganizationRoleMappingEntity> query =
         em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
-    UserEntity u = entityFromModel(user);
-    query.setParameter("user", u);
+    query.setParameter("userId", user.getId());
     query.setParameter("orgId", org.getId());
     try {
       return query

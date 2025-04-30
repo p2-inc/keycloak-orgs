@@ -2249,7 +2249,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   }
 
   @Test
-  void tesCountMembersWithExcludeAdminParameter() throws IOException {
+  void testCountMembersWithExcludeAdminParameter() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
     String id = org.getId();
 
