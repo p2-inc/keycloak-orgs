@@ -7,6 +7,7 @@ import static io.phasetwo.service.Helpers.createUserWithCredentials;
 import static io.phasetwo.service.Helpers.createWebhook;
 import static io.phasetwo.service.Helpers.deleteUser;
 import static io.phasetwo.service.Helpers.deleteWebhook;
+import static io.phasetwo.service.Helpers.enableEvents;
 import static io.phasetwo.service.Helpers.objectMapper;
 import static io.phasetwo.service.Helpers.removeEventListener;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
@@ -14,6 +15,7 @@ import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
@@ -52,6 +54,7 @@ import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,11 +97,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(rep.getId(), is(id));
 
     // get list
-    Response response = getRequest();
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    List<OrganizationRepresentation> organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertNotNull(organizations);
+    List<OrganizationRepresentation> organizations = getListOfOrganizations(keycloak);
     assertThat(organizations.size(), is(1));
 
     rep = organizations.get(0);
@@ -115,7 +114,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
         .displayName("Example company")
         .attributes(ImmutableMap.of("foo", List.of("bar")));
 
-    response = putRequest(rep, id);
+    Response response = putRequest(rep, id);
     assertThat(response.statusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get single
@@ -143,13 +142,41 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
 
     // get list
-    response = getRequest();
-
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertNotNull(organizations);
+    organizations = getListOfOrganizations(keycloak);
     assertThat(organizations.size(), is(0));
+  }
+
+  @Test
+  void testDeleteAllOrganizations() throws Exception {
+    final int numberOfOrgs = 1000;
+    final String idpAlias = "idp-testDeleteAllOrganizations";
+    final org.keycloak.representations.idm.IdentityProviderRepresentation idp = createIdentityProvider(idpAlias);
+    for (int i = 0; i < numberOfOrgs; i++) {
+      OrganizationRepresentation org = createOrganization(
+          new OrganizationRepresentation().name("master" + i).domains(List.of("master" + i + ".com")));
+
+      linkIdpWithOrg(idpAlias, org.getId());
+    }
+    // get list before delete
+    List<OrganizationRepresentation> organizations1 = getListOfOrganizations(keycloak);
+    assertThat(organizations1.size(), greaterThanOrEqualTo(100)); // get orgs endpoint returns max 100 organizations
+
+    // delete
+    deleteAllOrganizations();
+
+    // get list after delete
+    List<OrganizationRepresentation> organizations1AfterDelete = getListOfOrganizations(keycloak);
+    assertThat(organizations1AfterDelete.size(), is(0));
+  }
+
+  private List<OrganizationRepresentation> getListOfOrganizations(Keycloak keycloak) throws IOException {
+    Response getOrgsListResponse = getRequest(keycloak);
+    assertThat(getOrgsListResponse.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationRepresentation> organizations = objectMapper().readValue(getOrgsListResponse.getBody().asString(),
+        new TypeReference<>() {
+        });
+    assertNotNull(organizations);
+    return organizations;
   }
 
   @Test
@@ -1362,41 +1389,13 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     String id = org.getId();
 
     String alias1 = "linking-provider-1";
-    org.keycloak.representations.idm.IdentityProviderRepresentation idp =
-        new org.keycloak.representations.idm.IdentityProviderRepresentation();
-    idp.setAlias(alias1);
-    idp.setProviderId("oidc");
-    idp.setEnabled(true);
-    idp.setFirstBrokerLoginFlowAlias("first broker login");
-    idp.setConfig(
-        new ImmutableMap.Builder<String, String>()
-            .put("useJwksUrl", "true")
-            .put("syncMode", "FORCE")
-            .put("authorizationUrl", "https://foo.com")
-            .put("hideOnLoginPage", "")
-            .put("loginHint", "")
-            .put("uiLocales", "")
-            .put("backchannelSupported", "")
-            .put("disableUserInfo", "")
-            .put("acceptsPromptNoneForwardFromClient", "")
-            .put("validateSignature", "")
-            .put("pkceEnabled", "")
-            .put("tokenUrl", "https://foo.com")
-            .put("clientAuthMethod", "client_secret_post")
-            .put("clientId", "aabbcc")
-            .put("clientSecret", "112233")
-            .build());
-    keycloak.realm(REALM).identityProviders().create(idp);
+    createIdentityProvider(alias1);
 
     // link it
-    LinkIdp link = new LinkIdp();
-    link.setAlias(alias1);
-    link.setSyncMode("IMPORT");
-    Response response = postRequest(link, org.getId(), "idps", "link");
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    linkIdpWithOrg(alias1, org.getId());
 
     // get it
-    response = getRequest(id, "idps");
+    Response response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps =
         objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
