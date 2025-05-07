@@ -3,6 +3,7 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.Orgs.*;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.util.IdentityProviders;
@@ -11,6 +12,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
@@ -56,22 +58,24 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<IdentityProviderRepresentation> getIdentityProviders() {
+    // loads only idps solely owned by this org, not shared
+    Stream<IdentityProviderModel> owned =
+        session
+            .identityProviders()
+            .getAllStream(ImmutableMap.of(ORG_OWNER_CONFIG_KEY, organization.getId()), null, null);
+    // loads all idps that are shared
+    Stream<IdentityProviderModel> shared =
+        session
+            .identityProviders()
+            .getAllStream(ImmutableMap.of(ORG_SHARED_IDP_KEY, "true"), null, null);
 
-    var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
-    Map<String, String> search = new HashMap<>();
-    if (!isSharedIdpsConfigEnabled){
-      search.put(ORG_OWNER_CONFIG_KEY, organization.getId());
-    }
-
-    return session
-        .identityProviders()
-        .getAllStream(search, null, null)
+    return Stream.concat(owned, shared)
         .filter(provider -> canViewIdp())
         .filter(this::idpInOrg)
         .map(
-            provider ->
-                StripSecretsUtils.stripSecrets(
-                    session, ModelToRepresentation.toRepresentation(realm, provider)));
+                provider ->
+                    StripSecretsUtils.stripSecrets(
+                        session, ModelToRepresentation.toRepresentation(realm, provider)));
   }
 
   protected void idpDefaults(
