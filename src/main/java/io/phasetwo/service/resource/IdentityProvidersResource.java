@@ -10,9 +10,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
@@ -58,9 +56,16 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<IdentityProviderRepresentation> getIdentityProviders() {
+
+    var isSharedIdpsConfigEnabled = realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false);
+    Map<String, String> search = new HashMap<>();
+    if (!isSharedIdpsConfigEnabled){
+      search.put(ORG_OWNER_CONFIG_KEY, organization.getId());
+    }
+
     return session
         .identityProviders()
-        .getAllStream()
+        .getAllStream(search, null, null)
         .filter(provider -> canViewIdp())
         .filter(this::idpInOrg)
         .map(
