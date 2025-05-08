@@ -70,12 +70,12 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
       @Override
       public boolean canManageIdentityProviders() {
         log.debugf(
-                "canManageIdentityProviders %b",
-                (realm.canManageIdentityProviders()
-                        || auth.hasOrgManageIdentityProviders(organization)));
+            "canManageIdentityProviders %b",
+            (realm.canManageIdentityProviders()
+                || auth.hasOrgManageIdentityProviders(organization)));
         // custom
         return (realm.canManageIdentityProviders()
-                || auth.hasOrgManageIdentityProviders(organization));
+            || auth.hasOrgManageIdentityProviders(organization));
       }
 
       @Override
@@ -96,8 +96,8 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
       @Override
       public boolean canViewIdentityProviders() {
         log.debugf(
-                "canViewIdentityProviders %b",
-                (realm.canViewIdentityProviders() || auth.hasOrgViewIdentityProviders(organization)));
+            "canViewIdentityProviders %b",
+            (realm.canViewIdentityProviders() || auth.hasOrgViewIdentityProviders(organization)));
         // custom
         return (realm.canViewIdentityProviders() || auth.hasOrgViewIdentityProviders(organization));
       }
