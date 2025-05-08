@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.authentication.InitiatedActionSupport;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.events.EventBuilder;
@@ -23,6 +24,11 @@ import org.keycloak.models.UserModel;
 public class InvitationRequiredAction implements RequiredActionProvider {
 
   public InvitationRequiredAction() {}
+
+  @Override
+  public InitiatedActionSupport initiatedActionSupport() {
+    return InitiatedActionSupport.SUPPORTED;
+  }
 
   @Override
   public void evaluateTriggers(RequiredActionContext context) {
