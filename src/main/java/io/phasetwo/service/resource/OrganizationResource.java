@@ -107,17 +107,20 @@ public class OrganizationResource extends OrganizationAdminResource {
   public Response deleteOrg() {
     log.debugf("Delete org for %s %s", realm.getName(), orgId);
 
-    auth.requireManageOrgs();
-
-    if (orgs.removeOrganization(realm, orgId)) {
-      adminEvent
-          .resource(ORGANIZATION.name())
-          .operation(OperationType.DELETE)
-          .resourcePath(session.getContext().getUri())
-          .representation(orgId)
-          .success();
+    if (auth.hasManageOrgs() || auth.hasOrgDeleteOrg(organization)) {
+      if (orgs.removeOrganization(realm, orgId)) {
+        adminEvent
+            .resource(ORGANIZATION.name())
+            .operation(OperationType.DELETE)
+            .resourcePath(session.getContext().getUri())
+            .representation(orgId)
+            .success();
+      }
+      return Response.status(204).build();
+    } else {
+      throw new NotAuthorizedException(
+          String.format("Insufficient permission to delete %s", organization.getId()));
     }
-    return Response.status(204).build();
   }
 
   @PUT

@@ -15,6 +15,9 @@
           "name": "view-organization"
         },
         {
+          "name": "delete-organization"
+        },
+        {
           "name": "manage-organization"
         },
         {
@@ -62,6 +65,9 @@
       "roles": [
         {
           "name": "view-organization"
+        },
+        {
+          "name": "delete-organization"
         },
         {
           "name": "manage-organization"

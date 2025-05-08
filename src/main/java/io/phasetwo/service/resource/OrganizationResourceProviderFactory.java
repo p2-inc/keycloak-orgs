@@ -3,6 +3,8 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.Orgs.KC_ORGS_SKIP_MIGRATION;
 import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
+import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES_DESC;
+import static io.phasetwo.service.resource.OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_CREATE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_MANAGE_ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.ROLE_VIEW_ORGANIZATION;
@@ -86,7 +88,6 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
   }
 
   private void initRoles(KeycloakSession session) {
-
     log.debug("OrganizationResourceProviderFactory::initRoles");
 
     RealmManager manager = new RealmManager(session);
@@ -109,7 +110,24 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
                   addRealmAdminRoles(manager, realm);
                 }
               }
+
+              // Update existing organizations with the new delete-organization role
+              updateExistingOrganizationsWithNewRoles(session, realm);
             });
+  }
+
+  private void updateExistingOrganizationsWithNewRoles(KeycloakSession session, RealmModel realm) {
+    log.debug("Updating existing organizations with new default roles");
+    session.getProvider(OrganizationProvider.class)
+        .getOrganizationsStream(realm)
+        .forEach(org -> {
+            // Check if the delete-organization role exists, if not add it
+            if (org.getRoleByName(ORG_ROLE_DELETE_ORGANIZATION) == null) {
+                OrganizationRoleModel role = org.addRole(ORG_ROLE_DELETE_ORGANIZATION);
+                role.setDescription(DEFAULT_ORG_ROLES_DESC.get(ORG_ROLE_DELETE_ORGANIZATION));
+                log.debugf("Added %s role to organization %s", ORG_ROLE_DELETE_ORGANIZATION, org.getId());
+            }
+        });
   }
 
   private void realmPostCreate(RealmModel.RealmPostCreateEvent event) {
