@@ -101,6 +101,12 @@
       ],
       "members": [],
       "invitations": []
+    },
+    {
+      "organization": {
+        "id": "0196afd7-8776-76aa-84d3-a7d7ec7f31a8",
+        "name": "Organization with custom ID"
+      }
     }
   ]
 }

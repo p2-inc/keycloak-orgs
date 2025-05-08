@@ -38,6 +38,7 @@ curl --location 'https://{$fqdn}/auth/realms/{{$realm}}/orgs/import?skipMissingM
     "organizations": [
         {
             "organization": {
+                "id": "0196afb8-60de-7838-91c1-092d8fe5e150",
                 "name": "test",
                 "displayName": "test",
                 "url": "test",
@@ -173,6 +174,7 @@ To import an organization use the following schema.
 
 | Organization attribute | Required |
 |------------------------|----------|
+| `id`                   | `false`  |
 | `name`                 | `true`   |
 | `displayName`          | `false`  |
 | `url`                  | `false`  |

@@ -93,6 +93,16 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(rep.getName(), is("example"));
     assertThat(rep.getId(), is(id));
 
+    // create with custom id
+    String customId = "0196afb8-60de-7838-91c1-092d8fe5e150";
+    OrganizationRepresentation customIdOrganizationRep =
+        createOrganization(
+            new OrganizationRepresentation().id(customId).name("exampleWithCustomId"));
+
+    assertThat(customIdOrganizationRep, notNullValue());
+    assertThat(customIdOrganizationRep.getId(), is(customId));
+    deleteOrganization(customId);
+
     // get list
     Response response = getRequest();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
