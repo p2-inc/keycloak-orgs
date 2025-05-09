@@ -7,28 +7,23 @@ import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_IMPORT;
+import static org.keycloak.events.EventType.CUSTOM_REQUIRED_ACTION;
+import static org.keycloak.events.EventType.UPDATE_PROFILE;
 
 import com.google.common.collect.Maps;
 import io.phasetwo.service.importexport.KeycloakOrgsExportConverter;
 import io.phasetwo.service.importexport.KeycloakOrgsImportConverter;
 import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
 import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
+import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationsConfig;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotAuthorizedException;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
@@ -37,11 +32,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.common.util.CollectionUtil;
+import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
-import org.keycloak.models.Constants;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.ModelDuplicateException;
-import org.keycloak.models.ModelException;
+import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -85,6 +78,131 @@ public class OrganizationsResource extends OrganizationAdminResource {
               claim.put(o.getId(), org);
             });
     return Response.ok(claim).build();
+  }
+
+  @GET
+  @Path("me/invitations")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Stream<Invitation> invitations() {
+    var accessToken = auth.getToken();
+    var emailVerified = accessToken.getEmailVerified();
+    if (emailVerified == null ){
+      log.errorf("`emailVerified` access token claim not found");
+      throw new BadRequestException("`emailVerified` access token claim not found");
+    }
+
+    if (!emailVerified) {
+      log.errorf("`emailVerified`needs to be true");
+      throw new BadRequestException("`emailVerified`needs to be true");
+    }
+
+    var email = accessToken.getEmail();
+    if (email == null ){
+      log.errorf("`email` access token claim not found");
+      throw new BadRequestException("`email` access token claim not found");
+    }
+
+    return orgs.getUserInvitationsStream(realm, email)
+            .map(Converters::convertInvitationModelToInvitation);
+  }
+
+  @POST
+  @Path("me/invitations/{invitationId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response acceptInvitation(@PathParam("invitationId") String invitationId) {
+    var accessToken = auth.getToken();
+    var emailVerified = accessToken.getEmailVerified();
+    if (emailVerified == null ){
+      log.errorf("`emailVerified` access token claim not found");
+      throw new BadRequestException("`emailVerified` access token claim not found");
+    }
+
+    if (!emailVerified) {
+      log.errorf("`emailVerified`needs to be true");
+      throw new BadRequestException("`emailVerified`needs to be true");
+    }
+
+    var email = accessToken.getEmail();
+    if (email == null ){
+      log.errorf("`email` access token claim not found");
+      throw new BadRequestException("`email` access token claim not found");
+    }
+
+    var invitation = orgs.getInvitationById(realm, invitationId);
+    if (invitation == null){
+      log.errorf("invitation with id: {} not found", invitationId);
+      throw new BadRequestException("invitation not found");
+    }
+
+    if (!email.equals(invitation.getEmail())){
+      log.errorf("`email` claim differ from invitation email");
+      throw new BadRequestException("`email` claim differ from invitation email");
+    }
+
+    KeycloakModelUtils.runJobInTransaction(
+            session.getKeycloakSessionFactory(),
+            (session) -> {
+              memberFromInvitation(invitation, auth.getUser());
+              invitation.getOrganization().revokeInvitation(invitationId);
+              EventBuilder event = new EventBuilder(realm, session, connection);
+
+              event
+                      .event(CUSTOM_REQUIRED_ACTION)
+                      .user(user)
+                      .detail("org_id", invitation.getOrganization().getId())
+                      .detail("invitation_id", invitation.getId())
+                      .success();
+            });
+
+    return Response.noContent().build();
+  }
+
+  @DELETE
+  @Path("me/invitations/{invitationId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response rejectInvitation(@PathParam("invitationId") String invitationId) {
+    var accessToken = auth.getToken();
+    var emailVerified = accessToken.getEmailVerified();
+    if (emailVerified == null ){
+      log.errorf("`emailVerified` access token claim not found");
+      throw new BadRequestException("`emailVerified` access token claim not found");
+    }
+
+    if (!emailVerified) {
+      log.errorf("`emailVerified`needs to be true");
+      throw new BadRequestException("`emailVerified`needs to be true");
+    }
+
+    var email = accessToken.getEmail();
+    if (email == null ){
+      log.errorf("`email` access token claim not found");
+      throw new BadRequestException("`email` access token claim not found");
+    }
+
+    var invitation = orgs.getInvitationById(realm, invitationId);
+
+    if (invitation == null){
+      log.errorf("invitation with id: {} not found", invitationId);
+      throw new BadRequestException("invitation not found");
+    }
+
+    if (!email.equals(invitation.getEmail())){
+      log.errorf("`email` claim differ from invitation email");
+      throw new BadRequestException("`email` claim differ from invitation email");
+    }
+
+    invitation.getOrganization().revokeInvitation(invitationId);
+
+    EventBuilder event = new EventBuilder(realm, session, connection);
+
+    event
+            .event(CUSTOM_REQUIRED_ACTION)
+            .detail("org_id", invitation.getOrganization().getId())
+            .detail("invitation_id", invitation.getId())
+            .user(user)
+            .error("User invitation revoked.");
+
+    return Response.noContent().build();
   }
 
   @GET
@@ -344,5 +462,21 @@ public class OrganizationsResource extends OrganizationAdminResource {
       log.error("Error: {}", e);
       throw ErrorResponse.error(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  void memberFromInvitation(InvitationModel invitation, UserModel user) {
+    // membership
+    invitation.getOrganization().grantMembership(user);
+    // roles
+    invitation.getRoles().stream()
+            .forEach(
+                    r -> {
+                      OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
+                      if (role == null) {
+                        log.debugf("No org role found for invitation role %s. Skipping...", r);
+                      } else {
+                        role.grantRole(user);
+                      }
+                    });
   }
 }
