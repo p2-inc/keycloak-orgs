@@ -38,6 +38,10 @@ public interface OrganizationProvider extends Provider {
 
   Stream<InvitationModel> getUserInvitationsStream(RealmModel realm, UserModel user);
 
+  Stream<InvitationModel> getUserInvitationsStream(RealmModel realm, String email);
+
+  InvitationModel getInvitationById(RealmModel realm, String id);
+
   // deprecated methods
 
   /**
