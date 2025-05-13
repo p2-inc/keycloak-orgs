@@ -55,12 +55,11 @@ public class JpaOrganizationProvider implements OrganizationProvider {
       RealmModel realm, String id, String name, UserModel createdBy, boolean admin) {
     ExtOrganizationEntity e = new ExtOrganizationEntity();
     if (id == null) {
-      id = KeycloakModelUtils.generateId();
+      throw new IllegalArgumentException("id must be not null");
     }
     e.setId(id);
 
     e.setRealmId(realm.getId());
-   
     e.setName(name);
     e.setCreatedBy(createdBy.getId());
     em.persist(e);

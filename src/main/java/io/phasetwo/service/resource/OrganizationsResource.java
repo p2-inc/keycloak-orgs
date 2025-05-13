@@ -157,8 +157,13 @@ public class OrganizationsResource extends OrganizationAdminResource {
       throw new NotAuthorizedException("Insufficient permission to create organization.");
     }
 
-    OrganizationModel org =
-        orgs.createOrganization(realm, body.getId(), body.getName(), auth.getUser(), auth.hasCreateOrg());
+    OrganizationModel org;
+    if (body.getId() != null && !body.getId().isEmpty()) {
+      org = orgs.createOrganization(realm, body.getId(), body.getName(), auth.getUser(), auth.hasCreateOrg());
+    } else {
+      org = orgs.createOrganization(realm, body.getName(), auth.getUser(), auth.hasCreateOrg());
+    }
+
     org.setDisplayName(body.getDisplayName());
     org.setUrl(body.getUrl());
     if (body.getAttributes() != null) body.getAttributes().forEach(org::setAttribute);
@@ -315,11 +320,19 @@ public class OrganizationsResource extends OrganizationAdminResource {
       KeycloakSession session,
       OrganizationRepresentation organizationRepresentation) {
     try {
-      var org =
-          session
-              .getProvider(OrganizationProvider.class)
-              .createOrganization(
-                  realm, organizationRepresentation.getOrganization().getId(), organizationRepresentation.getOrganization().getName(), user, false);
+      var organizationProvider = session.getProvider(OrganizationProvider.class);
+      OrganizationModel org;
+
+      if (organizationRepresentation.getOrganization().getId() != null &&
+          !organizationRepresentation.getOrganization().getId().isEmpty()) {
+
+        org = organizationProvider.createOrganization(
+            realm, organizationRepresentation.getOrganization().getId(), organizationRepresentation.getOrganization().getName(), user, false);
+      } else {
+          org = organizationProvider.createOrganization(
+              realm, organizationRepresentation.getOrganization().getName(), user, false);
+      }
+
       KeycloakOrgsImportConverter.setOrganizationAttributes(
           organizationRepresentation.getOrganization(), org);
 
