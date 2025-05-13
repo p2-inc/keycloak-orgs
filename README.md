@@ -100,6 +100,9 @@ We've adopted a similar model that Keycloak uses for making the Organization dat
   OrganizationModel createOrganization(
       RealmModel realm, String name, UserModel createdBy, boolean admin);
 
+  OrganizationModel createOrganization(
+      RealmModel realm, String id, String name, UserModel createdBy, boolean admin);
+
   OrganizationModel getOrganizationById(RealmModel realm, String id);
 
   Stream<OrganizationModel> searchForOrganizationStream(
