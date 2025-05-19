@@ -8,20 +8,19 @@ import static io.phasetwo.service.resource.Converters.convertOrganizationModelTo
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_IMPORT;
 import static org.keycloak.events.EventType.CUSTOM_REQUIRED_ACTION;
-import static org.keycloak.events.EventType.UPDATE_PROFILE;
 
 import com.google.common.collect.Maps;
 import io.phasetwo.service.importexport.KeycloakOrgsExportConverter;
 import io.phasetwo.service.importexport.KeycloakOrgsImportConverter;
 import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
 import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
-import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationsConfig;
+import io.phasetwo.service.util.Invitations;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -36,6 +35,7 @@ import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.*;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.utils.SearchQueryUtils;
@@ -85,24 +85,10 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<Invitation> invitations() {
     var accessToken = auth.getToken();
-    var emailVerified = accessToken.getEmailVerified();
-    if (emailVerified == null ){
-      log.errorf("`emailVerified` access token claim not found");
-      throw new BadRequestException("`emailVerified` access token claim not found");
-    }
 
-    if (!emailVerified) {
-      log.errorf("`emailVerified`needs to be true");
-      throw new BadRequestException("`emailVerified`needs to be true");
-    }
+    canManageInvitations(accessToken);
 
-    var email = accessToken.getEmail();
-    if (email == null ){
-      log.errorf("`email` access token claim not found");
-      throw new BadRequestException("`email` access token claim not found");
-    }
-
-    return orgs.getUserInvitationsStream(realm, email)
+    return orgs.getUserInvitationsStream(realm,  accessToken.getEmail())
             .map(Converters::convertInvitationModelToInvitation);
   }
 
@@ -111,22 +97,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response acceptInvitation(@PathParam("invitationId") String invitationId) {
     var accessToken = auth.getToken();
-    var emailVerified = accessToken.getEmailVerified();
-    if (emailVerified == null ){
-      log.errorf("`emailVerified` access token claim not found");
-      throw new BadRequestException("`emailVerified` access token claim not found");
-    }
 
-    if (!emailVerified) {
-      log.errorf("`emailVerified`needs to be true");
-      throw new BadRequestException("`emailVerified`needs to be true");
-    }
-
-    var email = accessToken.getEmail();
-    if (email == null ){
-      log.errorf("`email` access token claim not found");
-      throw new BadRequestException("`email` access token claim not found");
-    }
+    canManageInvitations(accessToken);
 
     var invitation = orgs.getInvitationById(realm, invitationId);
     if (invitation == null){
@@ -134,15 +106,15 @@ public class OrganizationsResource extends OrganizationAdminResource {
       throw new BadRequestException("invitation not found");
     }
 
-    if (!email.equals(invitation.getEmail())){
-      log.errorf("`email` claim differ from invitation email");
-      throw new BadRequestException("`email` claim differ from invitation email");
+    if (!accessToken.getEmail().equals(invitation.getEmail())){
+      log.errorf("email claim differ from invitation email");
+      throw new BadRequestException("email claim differ from invitation email");
     }
 
     KeycloakModelUtils.runJobInTransaction(
             session.getKeycloakSessionFactory(),
             (session) -> {
-              memberFromInvitation(invitation, auth.getUser());
+              Invitations.memberFromInvitation(invitation, auth.getUser());
               invitation.getOrganization().revokeInvitation(invitationId);
               EventBuilder event = new EventBuilder(realm, session, connection);
 
@@ -162,22 +134,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response rejectInvitation(@PathParam("invitationId") String invitationId) {
     var accessToken = auth.getToken();
-    var emailVerified = accessToken.getEmailVerified();
-    if (emailVerified == null ){
-      log.errorf("`emailVerified` access token claim not found");
-      throw new BadRequestException("`emailVerified` access token claim not found");
-    }
-
-    if (!emailVerified) {
-      log.errorf("`emailVerified`needs to be true");
-      throw new BadRequestException("`emailVerified`needs to be true");
-    }
-
-    var email = accessToken.getEmail();
-    if (email == null ){
-      log.errorf("`email` access token claim not found");
-      throw new BadRequestException("`email` access token claim not found");
-    }
+    canManageInvitations(accessToken);
 
     var invitation = orgs.getInvitationById(realm, invitationId);
 
@@ -186,7 +143,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
       throw new BadRequestException("invitation not found");
     }
 
-    if (!email.equals(invitation.getEmail())){
+    if (!accessToken.getEmail().equals(invitation.getEmail())){
       log.errorf("`email` claim differ from invitation email");
       throw new BadRequestException("`email` claim differ from invitation email");
     }
@@ -464,19 +421,22 @@ public class OrganizationsResource extends OrganizationAdminResource {
     }
   }
 
-  void memberFromInvitation(InvitationModel invitation, UserModel user) {
-    // membership
-    invitation.getOrganization().grantMembership(user);
-    // roles
-    invitation.getRoles().stream()
-            .forEach(
-                    r -> {
-                      OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
-                      if (role == null) {
-                        log.debugf("No org role found for invitation role %s. Skipping...", r);
-                      } else {
-                        role.grantRole(user);
-                      }
-                    });
+  private void canManageInvitations(AccessToken accessToken) {
+    var emailVerified = accessToken.getEmailVerified();
+    if (emailVerified == null) {
+      log.errorf("emailVerified access token claim not found");
+      throw new BadRequestException("emailVerified access token claim not found");
+    }
+
+    if (!emailVerified) {
+      log.errorf("emailVerified needs to be true");
+      throw new BadRequestException("emailVerified needs to be true");
+    }
+
+    var email = accessToken.getEmail();
+    if (email == null) {
+      log.errorf("email access token claim not found");
+      throw new BadRequestException("email access token claim not found");
+    }
   }
 }

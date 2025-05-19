@@ -4,7 +4,7 @@ import static org.keycloak.events.EventType.CUSTOM_REQUIRED_ACTION;
 
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.util.Invitations;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
@@ -91,7 +91,7 @@ public class InvitationRequiredAction implements RequiredActionProvider {
               if (selected != null && selected.contains(i.getOrganization().getId())) {
                 // add membership
                 log.debugf("selected %s", i.getOrganization().getId());
-                memberFromInvitation(i, user);
+                Invitations.memberFromInvitation(i, user);
                 event
                     .clone()
                     .event(CUSTOM_REQUIRED_ACTION)
@@ -112,22 +112,6 @@ public class InvitationRequiredAction implements RequiredActionProvider {
             });
 
     context.success();
-  }
-
-  void memberFromInvitation(InvitationModel invitation, UserModel user) {
-    // membership
-    invitation.getOrganization().grantMembership(user);
-    // roles
-    invitation.getRoles().stream()
-        .forEach(
-            r -> {
-              OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
-              if (role == null) {
-                log.debugf("No org role found for invitation role %s. Skipping...", r);
-              } else {
-                role.grantRole(user);
-              }
-            });
   }
 
   @Override
