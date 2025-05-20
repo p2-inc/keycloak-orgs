@@ -198,11 +198,31 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
   @Override
   public Stream<InvitationModel> getUserInvitationsStream(RealmModel realm, UserModel user) {
+    return getUserInvitationsStream(realm, user.getEmail());
+  }
+
+  @Override
+  public Stream<InvitationModel> getUserInvitationsStream(RealmModel realm, String email) {
     TypedQuery<InvitationEntity> query =
-        em.createNamedQuery("getInvitationsByRealmAndEmail", InvitationEntity.class);
+            em.createNamedQuery("getInvitationsByRealmAndEmail", InvitationEntity.class);
     query.setParameter("realmId", realm.getId());
-    query.setParameter("search", user.getEmail());
+    query.setParameter("search", email);
+
     return query.getResultStream().map(i -> new InvitationAdapter(session, realm, em, i));
+  }
+
+  @Override
+  public InvitationModel getInvitationById(RealmModel realm, String id) {
+    TypedQuery<InvitationEntity> query =
+            em.createNamedQuery("getInvitationById", InvitationEntity.class);
+    query.setParameter("realmId", realm.getId());
+    query.setParameter("id", id);
+
+    var entity = query.getSingleResult();
+    if (entity != null) {
+      return new InvitationAdapter(session, realm, em, entity);
+    }
+    return null;
   }
 
   @Override

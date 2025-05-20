@@ -17,6 +17,10 @@ import java.util.Set;
       query =
           "SELECT t FROM InvitationEntity t WHERE t.organization = :organization AND t.id = :id"),
   @NamedQuery(
+          name = "getInvitationById",
+          query =
+                  "SELECT t FROM InvitationEntity t WHERE t.id = :id AND t.organization.realmId = :realmId"),
+  @NamedQuery(
       name = "getInvitationsByOrganizationAndEmail",
       query =
           "SELECT t FROM InvitationEntity t WHERE t.organization = :organization AND lower(t.email) LIKE lower(:search) ORDER BY t.email"),
