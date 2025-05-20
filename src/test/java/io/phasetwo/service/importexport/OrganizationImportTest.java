@@ -107,7 +107,7 @@ public class OrganizationImportTest extends AbstractOrganizationTest {
 
     List<OrganizationRepresentation> organizations =
         objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertThat(organizations, hasSize(2));
+    assertThat(organizations, hasSize(3));
 
     // test org1
     var org1 =
@@ -142,9 +142,18 @@ public class OrganizationImportTest extends AbstractOrganizationTest {
               validateRoles(org2, organizationRepresentation, realm);
             });
 
+    // test organization with custom id
+    String customId = "0196afd7-8776-76aa-84d3-a7d7ec7f31a8";
+    var organizationWithCustomId =
+        orgsRepresentation.getOrganizations().stream()
+            .filter(organization -> organization.getOrganization().getName().equals("Organization with custom ID"))
+            .findFirst()
+            .orElseThrow();
+    assertThat(organizationWithCustomId.getOrganization().getId(), is(customId));
+
     // users
-    assertThat(keycloak.realm(realm).users().count(), Matchers.is(2));
-    assertThat(keycloak.realm(realm).users().search("org-"), hasSize(2));
+    assertThat(keycloak.realm(realm).users().count(), Matchers.is(3));
+    assertThat(keycloak.realm(realm).users().search("org-"), hasSize(3));
   }
 
   @Test
@@ -201,7 +210,7 @@ public class OrganizationImportTest extends AbstractOrganizationTest {
 
     List<OrganizationRepresentation> organizations =
         objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertThat(organizations, hasSize(2));
+    assertThat(organizations, hasSize(3));
 
     // test org1
     var org1 =
@@ -236,8 +245,8 @@ public class OrganizationImportTest extends AbstractOrganizationTest {
             });
 
     // users
-    assertThat(keycloak.realm(realm).users().count(), Matchers.is(2));
-    assertThat(keycloak.realm(realm).users().search("org-"), hasSize(2));
+    assertThat(keycloak.realm(realm).users().count(), Matchers.is(3));
+    assertThat(keycloak.realm(realm).users().search("org-"), hasSize(3));
   }
 
   private void validateIdpLink(

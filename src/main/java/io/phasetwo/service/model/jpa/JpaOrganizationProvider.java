@@ -47,8 +47,18 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   @Override
   public OrganizationModel createOrganization(
       RealmModel realm, String name, UserModel createdBy, boolean admin) {
+    return createOrganization(realm, KeycloakModelUtils.generateId(), name, createdBy, admin);
+  }
+
+  @Override
+  public OrganizationModel createOrganization(
+      RealmModel realm, String id, String name, UserModel createdBy, boolean admin) {
     ExtOrganizationEntity e = new ExtOrganizationEntity();
-    e.setId(KeycloakModelUtils.generateId());
+    if (id == null) {
+      throw new IllegalArgumentException("id must be not null");
+    }
+    e.setId(id);
+
     e.setRealmId(realm.getId());
     e.setName(name);
     e.setCreatedBy(createdBy.getId());
