@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -795,10 +798,19 @@ public abstract class AbstractOrganizationTest {
       var managedUsers = getOrgMembers(organizationRepresentation, realm);
 
       assertThat(managedUsers, hasSize(exportedMembers.size()));
-      assertThat(
-          managedUsers.stream().map(UserRepresentation::getUsername).toList(),
-          containsInAnyOrder(
-              exportedMembers.stream().map(UserRolesRepresentation::getUsername).toArray()));
+      List<String> expectedIdentifiers = exportedMembers.stream()
+          .map(member -> {
+              String id = member.getId();
+              // We're suffixing the items here to prevent matching a ID value against a username value or the other way around
+              return (id != null && !id.isEmpty()) ? "ID:" + id : "USERNAME:" + member.getUsername();
+          })
+          .toList();
+      List<String> actualIdentifiers = managedUsers.stream()
+          .flatMap(user ->
+              Stream.of("ID:" + user.getId(), "USERNAME:" + user.getUsername())
+          )
+          .toList();
+      assertThat(actualIdentifiers, hasItems(expectedIdentifiers.toArray(new String[0])));
 
       // validate roles
       managedUsers.forEach(

@@ -260,6 +260,10 @@ If the `skipMissingMember` is set to `true`:
     {
       "username": "test2",
       "enabled": true
+    },
+    {
+      "id": "28092759-818c-4bb7-b83e-bded01a4227e",
+      "enabled": true
     }
     .......
   ],
@@ -296,8 +300,10 @@ If the `skipMissingMember` is set to `true`:
 
 | Member attribute | Required |
 |------------------|----------|
-| `username`       | `true`   |
-| `roles`          | `false`  |
+| `id`             | `true` if `username` is not provided * |
+| `username`       | `true` if `id` is not provided *       |
+| `roles`          | `false`                                |
+\* one of the two should be provided, providing both will result in an error
 
 ### Invitations import/export schema
 
