@@ -54,8 +54,8 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   public OrganizationModel createOrganization(
       RealmModel realm, String id, String name, UserModel createdBy, boolean admin) {
     ExtOrganizationEntity e = new ExtOrganizationEntity();
-    if (id == null) {
-      throw new IllegalArgumentException("id must be not null");
+    if (Strings.isNullOrEmpty(id)) {
+      throw new IllegalArgumentException("id must be not null or empty");
     }
     e.setId(id);
 
