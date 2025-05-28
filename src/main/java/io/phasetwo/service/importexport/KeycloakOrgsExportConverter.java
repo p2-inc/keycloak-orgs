@@ -57,7 +57,7 @@ public final class KeycloakOrgsExportConverter {
                             .map(OrganizationRoleModel::getName)
                             .toList();
 
-                    return new UserRolesRepresentation(userModel.getUsername(), userRoles);
+                    return new UserRolesRepresentation(null, userModel.getUsername(), userRoles);
                   })
               .toList();
       organizationRepresentation.setMembers(members);
