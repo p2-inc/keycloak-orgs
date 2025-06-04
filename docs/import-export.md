@@ -22,6 +22,7 @@ This documents describes the functionality for importing and exporting organizat
 
 Organizations can be imported, by performing a `POST` http call to `orgs/import` endpoint.  <br>
 The endpoint support two query parameters `skipMissingMember` and `skipMissingIdp`. <br>
+You can set a custom ID for an organization — for example, if you want to reuse an existing ID. If the `id` property is not specified, one will be generated automatically. <br>
 
 
 The import functionality is transactional meaning that all elements in the `organizations` array must be imported in order to complete successfully.
