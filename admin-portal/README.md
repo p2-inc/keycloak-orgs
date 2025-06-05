@@ -93,7 +93,7 @@ Then, start a Keycloak server (use hosted [Phase Two](https://phasetwo.io/dashbo
 Finally, run the development server:
 
 ```bash
-yarn start
+yarn dev
 ```
 
 You mill most likely need to use the fully qualified portal url [http://localhost:3000/auth/realms/master/portal](http://localhost:3000/auth/realms/master/portal).
