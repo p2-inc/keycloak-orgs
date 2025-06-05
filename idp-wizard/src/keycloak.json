@@ -1,6 +1,6 @@
 {
-  "realm": "authit_stage",
-  "auth-server-url": "http://localhost:8080/",
+  "realm": "cloud",
+  "auth-server-url": "https://app.phasetwo.io/auth",
   "ssl-required": "external",
   "resource": "idp-wizard",
   "public-client": true,
