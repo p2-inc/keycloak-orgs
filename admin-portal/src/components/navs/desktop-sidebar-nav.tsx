@@ -1,9 +1,9 @@
 import { Popover } from "@headlessui/react";
 import cs from "classnames";
-import Button from "components/elements/forms/buttons/button";
-import { config } from "config";
-import useUser from "components/utils/useUser";
-import { keycloak, keycloakService } from "keycloak";
+import Button from "@/components/elements/forms/buttons/button";
+import { config } from "@/config";
+import useUser from "@/components/utils/useUser";
+import { keycloak, keycloakService } from "@/keycloak";
 import { ExternalLink } from "lucide-react";
 import { NavLink, Link } from "react-router-dom";
 import { ChevronIcon, DoubleSlashBrandIcon, FullBrandIcon } from "../icons";
@@ -11,7 +11,7 @@ import { NavigationItem } from "../layouts/layout";
 
 import { useTranslation } from "react-i18next";
 import ThemePicker from "./components/theme-picker";
-import { useTheme } from "components/utils/useTheme";
+import { useTheme } from "@/components/utils/useTheme";
 
 type Props = {
   menuCollapsed: boolean;

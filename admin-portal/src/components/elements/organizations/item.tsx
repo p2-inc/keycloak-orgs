@@ -2,9 +2,9 @@ import cs from "classnames";
 import { FC } from "react";
 import { Link } from "react-router-dom";
 import { ViewLayoutOptions } from "../forms/switches/view-switch";
-import { config } from "config";
-import { OrganizationRepresentation } from "store/apis/orgs";
-import useUser from "components/utils/useUser";
+import { config } from "@/config";
+import { OrganizationRepresentation } from "@/store/apis/orgs";
+import useUser from "@/components/utils/useUser";
 import { useTranslation } from "react-i18next";
 const { features: featureFlags } = config.env;
 

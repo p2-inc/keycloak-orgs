@@ -1,21 +1,21 @@
-import Button from "components/elements/forms/buttons/button";
-import SectionHeader from "components/navs/section-header";
-import { config } from "config";
+import Button from "@/components/elements/forms/buttons/button";
+import SectionHeader from "@/components/navs/section-header";
+import { config } from "@/config";
 import {
   useBuildLinkingUriQuery,
   useGetLinkedAccountsQuery,
   useDeleteLinkedProviderMutation,
   LinkedAccountRepresentation,
   BuildLinkingUriApiArg,
-} from "store/apis/profile";
+} from "@/store/apis/profile";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useState, useEffect } from "react";
 import Table, {
   TableColumns,
   TableRows,
-} from "components/elements/table/table";
-import * as icons from "components/icons/providers";
-import P2Toast from "components/utils/toast";
+} from "@/components/elements/table/table";
+import * as icons from "@/components/icons/providers";
+import P2Toast from "@/components/utils/toast";
 import { useTranslation } from "react-i18next";
 import { useUserOrgIdps } from "./useUserOrgIdps";
 

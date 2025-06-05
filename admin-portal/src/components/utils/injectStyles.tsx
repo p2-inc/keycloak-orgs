@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { config } from "config";
+import { config } from "@/config";
 
 function generateColorStyles(colorName: string, colorValue?: string) {
   return colorValue

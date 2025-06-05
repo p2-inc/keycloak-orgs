@@ -1,5 +1,5 @@
 import Keycloak from "keycloak-js";
-import { KeycloakService } from "services/keycloak.service";
+import { KeycloakService } from "@/services/keycloak.service";
 
 const kc = new Keycloak("keycloak.json");
 

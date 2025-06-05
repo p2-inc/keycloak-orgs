@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import Button from "components/elements/forms/buttons/button";
-import SectionHeader from "components/navs/section-header";
-import { config } from "config";
+import Button from "@/components/elements/forms/buttons/button";
+import SectionHeader from "@/components/navs/section-header";
+import { config } from "@/config";
 import {
   useGetAccountQuery,
   useUpdateAccountMutation,
-} from "store/apis/profile";
+} from "@/store/apis/profile";
 import { useTranslation } from "react-i18next";
-import P2Toast from "components/utils/toast";
-import Dropdown from "components/elements/forms/dropdown/hui-dropdown";
+import P2Toast from "@/components/utils/toast";
+import Dropdown from "@/components/elements/forms/dropdown/hui-dropdown";
 import { first } from "lodash";
 import { setLanguage } from "../../../i18n";
 

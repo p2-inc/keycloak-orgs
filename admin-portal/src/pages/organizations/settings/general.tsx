@@ -1,8 +1,8 @@
-import Button from "components/elements/forms/buttons/button";
-import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
-import SectionHeader from "components/navs/section-header";
-import P2Toast from "components/utils/toast";
-import { config } from "config";
+import Button from "@/components/elements/forms/buttons/button";
+import RHFFormTextInputWithLabel from "@/components/elements/forms/inputs/rhf-text-input-with-label";
+import SectionHeader from "@/components/navs/section-header";
+import P2Toast from "@/components/utils/toast";
+import { config } from "@/config";
 import { t } from "i18next";
 import { P2Params } from "index";
 import { useEffect } from "react";
@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom";
 import {
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import { SettingsProps } from ".";
 
 const SettingsGeneral = ({ hasManageOrganizationRole }: SettingsProps) => {

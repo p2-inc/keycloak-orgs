@@ -1,27 +1,27 @@
-import Button from "components/elements/forms/buttons/button";
+import Button from "@/components/elements/forms/buttons/button";
 import cs from "classnames";
-import SectionHeader from "components/navs/section-header";
-import OpenSSOLink from "components/utils/ssoLink";
+import SectionHeader from "@/components/navs/section-header";
+import OpenSSOLink from "@/components/utils/ssoLink";
 import { P2Params } from "index";
 import { useParams } from "react-router-dom";
 import { SettingsProps } from ".";
 import { useTranslation } from "react-i18next";
-import { config } from "config";
+import { config } from "@/config";
 import {
   IdentityProviderRepresentation,
   useDeleteIdpMutation,
   useGetIdpsQuery,
   useUpdateIdpMutation,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import Table, {
   TableColumns,
   TableRows,
-} from "components/elements/table/table";
-import { FindIdpIcon } from "pages/profile/linked";
-import SquareBadge from "components/elements/badges/square-badge";
+} from "@/components/elements/table/table";
+import { FindIdpIcon } from "@/pages/profile/linked";
+import SquareBadge from "@/components/elements/badges/square-badge";
 import { useState } from "react";
-import ConfirmationModal from "components/elements/confirmation-modal";
-import P2Toast from "components/utils/toast";
+import ConfirmationModal from "@/components/elements/confirmation-modal";
+import P2Toast from "@/components/utils/toast";
 import { TrashIcon } from "lucide-react";
 
 const SettingsSSO = ({ hasManageIDPRole }: SettingsProps) => {

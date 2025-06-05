@@ -1,26 +1,26 @@
-import Button from "components/elements/forms/buttons/button";
+import Button from "@/components/elements/forms/buttons/button";
 import Table, {
   TableColumns,
   TableRows,
-} from "components/elements/table/table";
-import { PlusIcon } from "components/icons";
-import SectionHeader from "components/navs/section-header";
+} from "@/components/elements/table/table";
+import { PlusIcon } from "@/components/icons";
+import SectionHeader from "@/components/navs/section-header";
 import { Link, useParams } from "react-router-dom";
-import { config } from "config";
+import { config } from "@/config";
 import {
   OrganizationDomainRepresentation,
   useGetOrganizationByIdQuery,
   useGetOrganizationDomainsQuery,
   useUpdateOrganizationMutation,
   useVerifyDomainMutation,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import { SettingsProps } from ".";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import ConfirmationModal from "components/elements/confirmation-modal";
-import P2Toast from "components/utils/toast";
-import CopyInline from "components/elements/organizations/copy-inline";
-import { SpinnerIcon } from "components/icons/spinner";
+import ConfirmationModal from "@/components/elements/confirmation-modal";
+import P2Toast from "@/components/utils/toast";
+import CopyInline from "@/components/elements/organizations/copy-inline";
+import { SpinnerIcon } from "@/components/icons/spinner";
 
 const { realm } = config.env;
 

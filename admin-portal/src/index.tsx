@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
 import "./i18n";
 import App from "./App";
 import {
@@ -9,33 +8,35 @@ import {
   redirect,
   RouterProvider,
 } from "react-router-dom";
-import ErrorPage from "./pages/error-page";
-import Organizations from "pages/organizations";
-import OrganizationDetail from "pages/organizations/detail";
-import OrganizationSettings from "pages/organizations/settings";
-import Profile from "pages/profile";
-import { config } from "config";
-import { keycloak } from "keycloak";
+import ErrorPage from "@/pages/error-page";
+import Organizations from "@/pages/organizations";
+import OrganizationDetail from "@/pages/organizations/detail";
+import OrganizationSettings from "@/pages/organizations/settings";
+import Profile from "@/pages/profile";
+import { config } from "@/config";
+import { keycloak } from "@/keycloak";
 import { ReactKeycloakProvider } from "@react-keycloak/web";
-import Loading from "components/elements/loading";
-import SigninProfile from "pages/profile/signin";
-import GeneralProfile from "pages/profile/general";
-import ActivityProfile from "pages/profile/activity";
-import LinkedProfile from "pages/profile/linked";
+import Loading from "@/components/elements/loading";
+import SigninProfile from "@/pages/profile/signin";
+import GeneralProfile from "@/pages/profile/general";
+import ActivityProfile from "@/pages/profile/activity";
+import LinkedProfile from "@/pages/profile/linked";
 import { store } from "./store/";
 import { Provider } from "react-redux";
-import Invitation from "pages/invitation/index";
-import NewInvitation from "pages/invitation/new";
-import DomainsAdd from "pages/organizations/domains/add";
-import DomainContainer from "pages/organizations/domains";
+import Invitation from "@/pages/invitation/index";
+import NewInvitation from "@/pages/invitation/new";
+import DomainsAdd from "@/pages/organizations/domains/add";
+import DomainContainer from "@/pages/organizations/domains";
 import { Toaster } from "react-hot-toast";
-import Roles from "pages/member/roles";
-import Member from "pages/member";
-import ProfileDelete from "pages/profile-delete";
-import InjectStyles from "components/utils/injectStyles";
-import NotAuthorized from "pages/not-authorized";
+import Roles from "@/pages/member/roles";
+import Member from "@/pages/member";
+import ProfileDelete from "@/pages/profile-delete";
+import InjectStyles from "@/components/utils/injectStyles";
+import NotAuthorized from "@/pages/not-authorized";
 import { Tooltip } from "react-tooltip";
-import PendingInvitations from "pages/invitation/pending";
+import PendingInvitations from "@/pages/invitation/pending";
+import "./index.css";
+
 const { features: featureFlags } = config.env;
 
 export type P2Params = {

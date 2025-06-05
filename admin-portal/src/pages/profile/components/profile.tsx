@@ -1,15 +1,15 @@
 import { useEffect } from "react";
-import Button from "components/elements/forms/buttons/button";
-import SectionHeader from "components/navs/section-header";
-import { config } from "config";
+import Button from "@/components/elements/forms/buttons/button";
+import SectionHeader from "@/components/navs/section-header";
+import { config } from "@/config";
 import {
   useGetAccountQuery,
   useUpdateAccountMutation,
-} from "store/apis/profile";
+} from "@/store/apis/profile";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
-import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
-import P2Toast from "components/utils/toast";
+import RHFFormTextInputWithLabel from "@/components/elements/forms/inputs/rhf-text-input-with-label";
+import P2Toast from "@/components/utils/toast";
 
 const ProfileData = () => {
   const { t } = useTranslation();

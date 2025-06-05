@@ -1,6 +1,6 @@
-import MainContentArea from "components/layouts/main-content-area";
-import PrimaryContentArea from "components/layouts/primary-content-area";
-import TopHeader from "components/navs/top-header";
+import MainContentArea from "@/components/layouts/main-content-area";
+import PrimaryContentArea from "@/components/layouts/primary-content-area";
+import TopHeader from "@/components/navs/top-header";
 
 export default function NotAuthorized() {
   return (

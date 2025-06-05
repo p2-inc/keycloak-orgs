@@ -1,9 +1,9 @@
-import Stat from "components/elements/cards/stat";
+import Stat from "@/components/elements/cards/stat";
 import {
   OrganizationRepresentation,
   useGetOrganizationMembershipsQuery,
-} from "store/apis/orgs";
-import {useTranslation} from "react-i18next";
+} from "@/store/apis/orgs";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   org: OrganizationRepresentation;

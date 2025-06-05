@@ -4,14 +4,14 @@ import { EllipsisVerticalIcon } from "@heroicons/react/20/solid";
 import {
   useRemoveOrganizationMemberMutation,
   UserRepresentation,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import { KeycloakProfile } from "keycloak-js";
 import MemberRemovalConfirmationDialog from "./member-removal-confirmation-dialog";
-import P2Toast from "components/utils/toast";
-import useUser from "components/utils/useUser";
-import fullName from "components/utils/fullName";
+import P2Toast from "@/components/utils/toast";
+import useUser from "@/components/utils/useUser";
+import fullName from "@/components/utils/fullName";
 import { Link } from "react-router-dom";
-import MenuItemButton from "components/elements/menu/button";
+import MenuItemButton from "@/components/elements/menu/button";
 import { useTranslation } from "react-i18next";
 
 type Props = {

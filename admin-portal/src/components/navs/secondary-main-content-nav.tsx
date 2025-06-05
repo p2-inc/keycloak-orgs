@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import cs from "classnames";
 import { useState } from "react";
-import { ChevronIcon } from "components/icons";
+import { ChevronIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 
 export type NavigationItem = {

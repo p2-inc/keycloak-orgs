@@ -1,5 +1,5 @@
 import { Listbox } from "@headlessui/react";
-import { Theme as ThemeType, Themes } from "components/utils/useTheme";
+import { Theme as ThemeType, Themes } from "@/components/utils/useTheme";
 import { useTranslation } from "react-i18next";
 
 export default function ThemePicker({

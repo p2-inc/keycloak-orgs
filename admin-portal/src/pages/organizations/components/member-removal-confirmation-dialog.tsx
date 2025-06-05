@@ -1,8 +1,8 @@
 import { Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { UserRepresentation } from "store/apis/orgs";
-import fullName from "components/utils/fullName";
+import { UserRepresentation } from "@/store/apis/orgs";
+import fullName from "@/components/utils/fullName";
 
 type Props = {
   open: boolean;

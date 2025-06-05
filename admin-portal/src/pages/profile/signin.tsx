@@ -1,22 +1,22 @@
-import Button from "components/elements/forms/buttons/button";
-import SectionHeader from "components/navs/section-header";
+import Button from "@/components/elements/forms/buttons/button";
+import SectionHeader from "@/components/navs/section-header";
 import {
   useGetCredentialsQuery,
   useDeleteCredentialMutation,
   UserCredentialMetadataRepresentation,
   CredentialRepresentation,
   CredentialMetadataRepresentation,
-} from "store/apis/profile";
-import { config } from "config";
+} from "@/store/apis/profile";
+import { config } from "@/config";
 import Table, {
   TableColumns,
   TableRows,
-} from "components/elements/table/table";
-import TimeUtil from "services/time-util";
-import { keycloakService } from "keycloak";
+} from "@/components/elements/table/table";
+import TimeUtil from "@/services/time-util";
+import { keycloakService } from "@/keycloak";
 import { t } from "i18next";
-import { AIACommand } from "services/aia-command";
-import P2Toast from "components/utils/toast";
+import { AIACommand } from "@/services/aia-command";
+import P2Toast from "@/components/utils/toast";
 import { Key, Lock, Smartphone } from "lucide-react";
 
 enum CredentialType {

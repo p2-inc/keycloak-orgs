@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { getRoleSettings } from "services/role";
+import { getRoleSettings } from "@/services/role";
 
 type Props = {
   name: string;

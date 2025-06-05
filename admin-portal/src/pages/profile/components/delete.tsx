@@ -1,5 +1,5 @@
-import Button from "components/elements/forms/buttons/button";
-import SectionHeader from "components/navs/section-header";
+import Button from "@/components/elements/forms/buttons/button";
+import SectionHeader from "@/components/navs/section-header";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 

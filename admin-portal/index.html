@@ -8,12 +8,13 @@
       content="${displayName} Admin Portal"
     />
     <meta name="description" content="${displayName} Admin Portal" />
-    <base href="%PUBLIC_URL%/" />
+    <base href="%VITE_PUBLIC_URL%/" />
+    <link rel="manifest" href="%VITE_PUBLIC_URL%/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <link rel="icon" href="${faviconUrl}" />
     <link rel="apple-touch-icon" href="${appiconUrl}" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <script type="module" src="/src/index.tsx"></script>
     <title>${displayName} Admin Portal</title>
     <script>
       var environment = {};

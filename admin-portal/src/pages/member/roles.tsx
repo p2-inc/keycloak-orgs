@@ -1,22 +1,22 @@
-import SectionHeader from "components/navs/section-header";
+import SectionHeader from "@/components/navs/section-header";
 import {
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   useGetOrganizationMembershipsQuery,
   useGetOrganizationRolesQuery,
   useGrantUserOrganizationRoleMutation,
   useRevokeUserOrganizationRoleMutation,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import { useState } from "react";
-import { config } from "config";
+import { config } from "@/config";
 import { Link, useParams } from "react-router-dom";
-import P2Toast from "components/utils/toast";
-import fullName from "components/utils/fullName";
-import useUser from "components/utils/useUser";
-import Alert from "components/elements/alerts/alert";
+import P2Toast from "@/components/utils/toast";
+import fullName from "@/components/utils/fullName";
+import useUser from "@/components/utils/useUser";
+import Alert from "@/components/elements/alerts/alert";
 import {
   Roles as StandardRoles,
   OrgRoles as StandardOrgRoles,
-} from "services/role";
+} from "@/services/role";
 import { useTranslation } from "react-i18next";
 import { union } from "lodash";
 import { Loader, LoadingIcon, SwitchItem, Button } from "./components";

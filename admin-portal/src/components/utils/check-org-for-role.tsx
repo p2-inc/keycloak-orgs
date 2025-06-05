@@ -1,5 +1,5 @@
-import { Roles } from "services/role";
-import { OrganizationRoleRepresentation } from "store/apis/orgs";
+import { Roles } from "@/services/role";
+import { OrganizationRoleRepresentation } from "@/store/apis/orgs";
 import { isObject } from "lodash";
 
 export function checkOrgForRole(

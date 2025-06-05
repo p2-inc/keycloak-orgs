@@ -1,5 +1,5 @@
-import Stat from "components/elements/cards/stat";
-import { OrganizationRepresentation, useGetIdpsQuery } from "store/apis/orgs";
+import Stat from "@/components/elements/cards/stat";
+import { OrganizationRepresentation, useGetIdpsQuery } from "@/store/apis/orgs";
 import { useTranslation } from "react-i18next";
 
 type Props = {

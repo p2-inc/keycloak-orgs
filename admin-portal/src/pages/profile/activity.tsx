@@ -1,8 +1,8 @@
 import { Fragment, useState } from "react";
-import SectionHeader from "components/navs/section-header";
-import ActivityLoader from "components/loaders/activity";
-import ActivityItem from "components/elements/activity/item";
-import ConfirmationModal from "components/elements/confirmation-modal";
+import SectionHeader from "@/components/navs/section-header";
+import ActivityLoader from "@/components/loaders/activity";
+import ActivityItem from "@/components/elements/activity/item";
+import ConfirmationModal from "@/components/elements/confirmation-modal";
 import {
   useDeleteCurrentSessionMutation,
   useDeleteSessionMutation,
@@ -10,11 +10,11 @@ import {
   DeviceRepresentation,
   SessionRepresentation,
   ClientRepresentation,
-} from "store/apis/profile";
-import { config } from "config";
-import { keycloakService } from "keycloak";
-import TimeUtil from "services/time-util";
-import Button from "components/elements/forms/buttons/button";
+} from "@/store/apis/profile";
+import { config } from "@/config";
+import { keycloakService } from "@/keycloak";
+import TimeUtil from "@/services/time-util";
+import Button from "@/components/elements/forms/buttons/button";
 import { Smartphone, Monitor } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TFuncKey } from "i18next";

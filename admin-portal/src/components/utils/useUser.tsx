@@ -1,8 +1,8 @@
-import { OrganizationRepresentation, useGetMeQuery } from "store/apis/orgs";
-import { config } from "config";
+import { OrganizationRepresentation, useGetMeQuery } from "@/store/apis/orgs";
+import { config } from "@/config";
 import { get } from "lodash";
-import { Roles } from "services/role";
-import { useGetAccountQuery } from "store/apis/profile";
+import { Roles } from "@/services/role";
+import { useGetAccountQuery } from "@/store/apis/profile";
 
 export default function useUser() {
   const { realm } = config.env;

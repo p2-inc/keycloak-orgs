@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import DesktopSidebarNav from "../navs/desktop-sidebar-nav";
 import { IconType } from "../icons";
 import { Building2, User } from "lucide-react";
-import { config } from "config";
+import { config } from "@/config";
 const { features: featureFlags } = config.env;
 
 export type NavigationItem = {
