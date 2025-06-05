@@ -1,23 +1,23 @@
-import SectionHeader from "components/navs/section-header";
+import SectionHeader from "@/components/navs/section-header";
 import cs from "classnames";
-import Button from "components/elements/forms/buttons/button";
+import Button from "@/components/elements/forms/buttons/button";
 import {
   useAddOrganizationInvitationMutation,
   useGetOrganizationByIdQuery,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import { useState } from "react";
-import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
+import RHFFormTextInputWithLabel from "@/components/elements/forms/inputs/rhf-text-input-with-label";
 import { useForm } from "react-hook-form";
-import { config } from "config";
+import { config } from "@/config";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
-import P2Toast from "components/utils/toast";
+import P2Toast from "@/components/utils/toast";
 import { User } from "lucide-react";
-import useUser from "components/utils/useUser";
-import Alert from "components/elements/alerts/alert";
+import useUser from "@/components/utils/useUser";
+import Alert from "@/components/elements/alerts/alert";
 import { useTranslation } from "react-i18next";
-import { DecoratedRole, RolesList } from "pages/member/components";
-import useOrgDisplayName from "components/utils/org-display-name";
+import { DecoratedRole, RolesList } from "@/pages/member/components";
+import useOrgDisplayName from "@/components/utils/org-display-name";
 
 const { realm } = config.env;
 

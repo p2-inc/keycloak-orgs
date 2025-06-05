@@ -1,23 +1,23 @@
-import Button from "components/elements/forms/buttons/button";
-import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
-import RoundedIcon from "components/elements/rounded-icon";
-import SectionHeader from "components/navs/section-header";
-import P2Toast from "components/utils/toast";
+import Button from "@/components/elements/forms/buttons/button";
+import RHFFormTextInputWithLabel from "@/components/elements/forms/inputs/rhf-text-input-with-label";
+import RoundedIcon from "@/components/elements/rounded-icon";
+import SectionHeader from "@/components/navs/section-header";
+import P2Toast from "@/components/utils/toast";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { config } from "config";
+import { config } from "@/config";
 import {
   useGetOrganizationByIdQuery,
   useGetOrganizationDomainsQuery,
   useUpdateOrganizationMutation,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import isValidDomain from "is-valid-domain";
 import { Globe } from "lucide-react";
-import useUser from "components/utils/useUser";
+import useUser from "@/components/utils/useUser";
 import { useTranslation } from "react-i18next";
-import TopHeader from "components/navs/top-header";
-import Breadcrumbs from "components/navs/breadcrumbs";
-import RoundBadge from "components/elements/badges/round-badge";
+import TopHeader from "@/components/navs/top-header";
+import Breadcrumbs from "@/components/navs/breadcrumbs";
+import RoundBadge from "@/components/elements/badges/round-badge";
 
 const addIcon = (
   <RoundedIcon className="my-4">

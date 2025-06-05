@@ -1,19 +1,19 @@
-import FormTextInputWithIcon from "components/elements/forms/inputs/text-input-with-icon";
-import MainContentArea from "components/layouts/main-content-area";
-import TopHeader from "components/navs/top-header";
-import PrimaryContentArea from "components/layouts/primary-content-area";
-import { useGetByRealmUsersAndUserIdOrgsQuery } from "store/apis/orgs";
-import { config } from "config";
-import OrganizationsLoader from "components/loaders/organizations";
-import OrganizationItem from "components/elements/organizations/item";
+import FormTextInputWithIcon from "@/components/elements/forms/inputs/text-input-with-icon";
+import MainContentArea from "@/components/layouts/main-content-area";
+import TopHeader from "@/components/navs/top-header";
+import PrimaryContentArea from "@/components/layouts/primary-content-area";
+import { useGetByRealmUsersAndUserIdOrgsQuery } from "@/store/apis/orgs";
+import { config } from "@/config";
+import OrganizationsLoader from "@/components/loaders/organizations";
+import OrganizationItem from "@/components/elements/organizations/item";
 import ViewSwitch, {
   ViewLayoutOptions,
-} from "components/elements/forms/switches/view-switch";
+} from "@/components/elements/forms/switches/view-switch";
 import { useEffect, useState } from "react";
 import cs from "classnames";
 import DomainStat from "./components/domain-stat";
 import MembersStat from "./components/members-stat";
-import useUser from "components/utils/useUser";
+import useUser from "@/components/utils/useUser";
 import Fuse from "fuse.js";
 import { useTranslation } from "react-i18next";
 import SsoConnections from "./components/sso-connections-stat";

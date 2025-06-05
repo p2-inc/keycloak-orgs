@@ -1,4 +1,4 @@
-import { keycloak } from "keycloak";
+import { keycloak } from "@/keycloak";
 
 export function createPortalLink({ orgId }: { orgId: string }) {
   var base = keycloak.authServerUrl;

@@ -1,8 +1,8 @@
-import { config } from "config";
-import Breadcrumbs from "components/navs/breadcrumbs";
-import TopHeader from "components/navs/top-header";
-import Button from "components/elements/forms/buttons/button";
-import useOrgDisplayName from "components/utils/org-display-name";
+import { config } from "@/config";
+import Breadcrumbs from "@/components/navs/breadcrumbs";
+import TopHeader from "@/components/navs/top-header";
+import Button from "@/components/elements/forms/buttons/button";
+import useOrgDisplayName from "@/components/utils/org-display-name";
 import { Link, useParams } from "react-router-dom";
 import {
   InvitationRepresentation,
@@ -11,20 +11,20 @@ import {
   useGetOrganizationInvitationsQuery,
   useRemoveOrganizationInvitationMutation,
   useResendOrganizationInvitationMutation,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import { useTranslation } from "react-i18next";
-import MainContentArea from "components/layouts/main-content-area";
-import PrimaryContentArea from "components/layouts/primary-content-area";
-import SectionHeader from "components/navs/section-header";
-import HeaderLayout from "components/navs/components/header-layout";
-import RoundBadge from "components/elements/badges/round-badge";
-import Table from "components/elements/table/table";
-import useUser from "components/utils/useUser";
-import NotAuthorized from "pages/not-authorized";
+import MainContentArea from "@/components/layouts/main-content-area";
+import PrimaryContentArea from "@/components/layouts/primary-content-area";
+import SectionHeader from "@/components/navs/section-header";
+import HeaderLayout from "@/components/navs/components/header-layout";
+import RoundBadge from "@/components/elements/badges/round-badge";
+import Table from "@/components/elements/table/table";
+import useUser from "@/components/utils/useUser";
+import NotAuthorized from "@/pages/not-authorized";
 import { Plus } from "lucide-react";
-import TimeUtil from "services/time-util";
-import P2Toast from "components/utils/toast";
-import ConfirmationModal from "components/elements/confirmation-modal";
+import TimeUtil from "@/services/time-util";
+import P2Toast from "@/components/utils/toast";
+import ConfirmationModal from "@/components/elements/confirmation-modal";
 import { useState } from "react";
 
 const time = (time: string | undefined): string => {

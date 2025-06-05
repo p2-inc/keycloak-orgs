@@ -1,17 +1,17 @@
-import Button from "components/elements/forms/buttons/button";
-import TopHeader from "components/navs/top-header";
-import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
-import PrimaryContentArea from "components/layouts/primary-content-area";
-import { config } from "config";
+import Button from "@/components/elements/forms/buttons/button";
+import TopHeader from "@/components/navs/top-header";
+import FixedWidthMainContent from "@/components/layouts/fixed-width-main-content-area";
+import PrimaryContentArea from "@/components/layouts/primary-content-area";
+import { config } from "@/config";
 import { Link, useParams } from "react-router-dom";
-import Breadcrumbs from "components/navs/breadcrumbs";
-import { useGetOrganizationByIdQuery } from "store/apis/orgs";
+import Breadcrumbs from "@/components/navs/breadcrumbs";
+import { useGetOrganizationByIdQuery } from "@/store/apis/orgs";
 import SettingsGeneral from "./general";
 import SettingsDomain from "./domains";
 import SettingsSSO from "./sso";
-import useUser from "components/utils/useUser";
+import useUser from "@/components/utils/useUser";
 import { useTranslation } from "react-i18next";
-import useOrgDisplayName from "components/utils/org-display-name";
+import useOrgDisplayName from "@/components/utils/org-display-name";
 const { features: featureFlags } = config.env;
 
 export type SettingsProps = {

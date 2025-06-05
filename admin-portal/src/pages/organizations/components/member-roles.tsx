@@ -2,13 +2,13 @@ import { Menu } from "@headlessui/react";
 import {
   useGetByRealmUsersAndUserIdOrgsOrgIdRolesQuery,
   UserRepresentation,
-} from "store/apis/orgs";
-import { Roles, roleSettings } from "services/role";
-import RoleBadge from "components/elements/badges/role-badge";
+} from "@/store/apis/orgs";
+import { Roles, roleSettings } from "@/services/role";
+import RoleBadge from "@/components/elements/badges/role-badge";
 import { Link } from "react-router-dom";
-import Button from "components/elements/forms/buttons/button";
-import { checkOrgForRole } from "components/utils/check-org-for-role";
-import useUser from "components/utils/useUser";
+import Button from "@/components/elements/forms/buttons/button";
+import { checkOrgForRole } from "@/components/utils/check-org-for-role";
+import useUser from "@/components/utils/useUser";
 import { useTranslation } from "react-i18next";
 
 type Props = {

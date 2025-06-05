@@ -1,14 +1,14 @@
-import RHFFormTextInputWithLabel from "components/elements/forms/inputs/rhf-text-input-with-label";
-import SectionHeader from "components/navs/section-header";
+import RHFFormTextInputWithLabel from "@/components/elements/forms/inputs/rhf-text-input-with-label";
+import SectionHeader from "@/components/navs/section-header";
 import { User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import cs from "classnames";
-import Button from "components/elements/forms/buttons/button";
+import Button from "@/components/elements/forms/buttons/button";
 import { useTranslation } from "react-i18next";
 import { toLower } from "lodash";
-import { AIACommand } from "services/aia-command";
-import { keycloakService } from "keycloak";
+import { AIACommand } from "@/services/aia-command";
+import { keycloakService } from "@/keycloak";
 
 const deleteAccount = new AIACommand(keycloakService, "delete_account");
 
@@ -27,7 +27,9 @@ const ProfileDelete = () => {
   const { t } = useTranslation();
   const { register, watch, handleSubmit } = useForm();
   const watchConfirmDelete = watch("delete");
-  const confirmDelete = ["delete", "supprimer"].includes(toLower(watchConfirmDelete));
+  const confirmDelete = ["delete", "supprimer"].includes(
+    toLower(watchConfirmDelete)
+  );
 
   const onSubmit = () => {
     if (confirmDelete) {
@@ -40,7 +42,9 @@ const ProfileDelete = () => {
       <div className="space-y-4">
         <SectionHeader
           title={t("profile-delete-title")}
-          description={t("permanentlyRemoveYourProfileAndAllOfItsContentsThisActionIsNotReversibleSoPleaseContinueWithCaution")}
+          description={t(
+            "permanentlyRemoveYourProfileAndAllOfItsContentsThisActionIsNotReversibleSoPleaseContinueWithCaution"
+          )}
           icon={loadingIcon}
           rightContent={
             <Link

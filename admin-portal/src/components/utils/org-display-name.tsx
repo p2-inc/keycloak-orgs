@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { OrganizationRepresentation } from "store/apis/orgs";
+import { OrganizationRepresentation } from "@/store/apis/orgs";
 
 function useOrgDisplayName(org?: OrganizationRepresentation) {
   const { t } = useTranslation();

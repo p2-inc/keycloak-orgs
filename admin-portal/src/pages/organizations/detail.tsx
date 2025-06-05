@@ -1,38 +1,38 @@
-import Button from "components/elements/forms/buttons/button";
-import MainContentArea from "components/layouts/main-content-area";
-import TopHeader from "components/navs/top-header";
-import SectionHeader from "components/navs/section-header";
+import Button from "@/components/elements/forms/buttons/button";
+import MainContentArea from "@/components/layouts/main-content-area";
+import TopHeader from "@/components/navs/top-header";
+import SectionHeader from "@/components/navs/section-header";
 import { Link, useParams } from "react-router-dom";
-import { config } from "config";
+import { config } from "@/config";
 import {
   useGetIdpsQuery,
   useGetOrganizationByIdQuery,
   useGetOrganizationDomainsQuery,
   useGetOrganizationInvitationCountQuery,
   useGetOrganizationMembershipsQuery,
-} from "store/apis/orgs";
-import RoundBadge from "components/elements/badges/round-badge";
-import FormTextInputWithIcon from "components/elements/forms/inputs/text-input-with-icon";
-import HeaderLayout from "components/navs/components/header-layout";
-import { TableRows } from "components/elements/table/table";
+} from "@/store/apis/orgs";
+import RoundBadge from "@/components/elements/badges/round-badge";
+import FormTextInputWithIcon from "@/components/elements/forms/inputs/text-input-with-icon";
+import HeaderLayout from "@/components/navs/components/header-layout";
+import { TableRows } from "@/components/elements/table/table";
 import OrganizationActionCard, {
   OACTopRow,
-} from "components/elements/organizations/action-card";
-import PrimaryContentArea from "components/layouts/primary-content-area";
-import Stat from "components/elements/cards/stat";
-import RoundedIcon from "components/elements/rounded-icon";
+} from "@/components/elements/organizations/action-card";
+import PrimaryContentArea from "@/components/layouts/primary-content-area";
+import Stat from "@/components/elements/cards/stat";
+import RoundedIcon from "@/components/elements/rounded-icon";
 import MemberRoles from "./components/member-roles";
 import MembersActionMenu from "./components/member-action-menu";
-import Breadcrumbs from "components/navs/breadcrumbs";
-import OpenSSOLink from "components/utils/ssoLink";
-import MembersTable from "components/elements/table/members-table";
+import Breadcrumbs from "@/components/navs/breadcrumbs";
+import OpenSSOLink from "@/components/utils/ssoLink";
+import MembersTable from "@/components/elements/table/members-table";
 import { Globe, Network, Plus, User } from "lucide-react";
-import useUser from "components/utils/useUser";
+import useUser from "@/components/utils/useUser";
 import { useTranslation } from "react-i18next";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toNumber } from "lodash";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import useOrgDisplayName from "components/utils/org-display-name";
+import useOrgDisplayName from "@/components/utils/org-display-name";
 
 export default function OrganizationDetail() {
   const { t } = useTranslation();

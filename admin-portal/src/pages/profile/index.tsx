@@ -1,18 +1,18 @@
-import SecondaryMainContentMenuArea from "components/layouts/secondary-main-content-menu-area";
-import TopHeader from "components/navs/top-header";
+import SecondaryMainContentMenuArea from "@/components/layouts/secondary-main-content-menu-area";
+import TopHeader from "@/components/navs/top-header";
 import {
   KeyIcon,
   SquaresPlusIcon,
   UserCircleIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
-import FixedWidthMainContent from "components/layouts/fixed-width-main-content-area";
-import PrimaryContentArea from "components/layouts/primary-content-area";
+import FixedWidthMainContent from "@/components/layouts/fixed-width-main-content-area";
+import PrimaryContentArea from "@/components/layouts/primary-content-area";
 import SecondaryMainContentNav, {
   NavigationItem,
-} from "components/navs/secondary-main-content-nav";
+} from "@/components/navs/secondary-main-content-nav";
 import { Outlet } from "react-router-dom";
-import { config } from "config";
+import { config } from "@/config";
 import { useTranslation } from "react-i18next";
 const { features: featureFlags } = config.env;
 

@@ -1,10 +1,10 @@
-import { config } from "config";
+import { config } from "@/config";
 import { sortBy } from "lodash";
 import {
   OrgRoles as StandardOrgRoles,
   Roles as StandardRoles,
-} from "services/role";
-import { useGetOrganizationRolesQuery } from "store/apis/orgs";
+} from "@/services/role";
+import { useGetOrganizationRolesQuery } from "@/store/apis/orgs";
 import { Loader } from "./loader";
 import { SwitchItem } from "./switch";
 import { useTranslation } from "react-i18next";

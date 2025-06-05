@@ -5,10 +5,10 @@ import {
   orgsApi,
   OrganizationRepresentation,
   IdentityProviderRepresentation,
-} from "store/apis/orgs";
+} from "@/store/apis/orgs";
 import { useKeycloak } from "@react-keycloak/web";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "store";
+import { AppDispatch } from "@/store";
 
 export const useUserOrgIdps = (realm: string) => {
   const { keycloak } = useKeycloak();

@@ -1,6 +1,6 @@
 import { FC, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import Button from "components/elements/forms/buttons/button";
+import Button from "@/components/elements/forms/buttons/button";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
 
@@ -75,7 +75,7 @@ const ConfirmationModal: FC<ConfirmationModalProps> = ({
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                 <div className="sm:flex sm:items-start">
-                  <div className="bg-primary-200 mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10">
+                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-200 sm:mx-0 sm:h-10 sm:w-10">
                     <CheckCircleIcon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">

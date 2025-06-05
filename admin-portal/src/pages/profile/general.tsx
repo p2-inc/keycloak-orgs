@@ -1,6 +1,6 @@
 import ProfileData from "./components/profile";
 import DeleteProfile from "./components/delete";
-import { config } from "config";
+import { config } from "@/config";
 import Internationalization from "./components/internationalization";
 
 const GeneralProfile = () => {

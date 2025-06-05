@@ -1,5 +1,5 @@
-import RoleBadge from "components/elements/badges/role-badge";
-import SquareBadge from "components/elements/badges/square-badge";
+import RoleBadge from "@/components/elements/badges/role-badge";
+import SquareBadge from "@/components/elements/badges/square-badge";
 import { Switch } from "@headlessui/react";
 
 export const SwitchItem = ({

@@ -1,10 +1,10 @@
-import Layout from "components/layouts/layout";
-import { setLanguage } from "i18n";
+import Layout from "@/components/layouts/layout";
+import { setLanguage } from "@/i18n";
 import { Outlet } from "react-router-dom";
-import { useGetAccountQuery } from "store/apis/profile";
-import { config } from "config";
+import { useGetAccountQuery } from "@/store/apis/profile";
+import { config } from "@/config";
 import { useEffect } from "react";
-import { useTheme } from "components/utils/useTheme";
+import { useTheme } from "@/components/utils/useTheme";
 
 const { supportedLocales, realm } = config.env;
 

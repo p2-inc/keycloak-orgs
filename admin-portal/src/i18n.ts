@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import HttpBackend from "i18next-http-backend";
 import { initReactI18next } from "react-i18next";
-import { joinPath } from "services/join-path";
+import { joinPath } from "@/services/join-path";
 
 const ENGLISH_LOCALE = "en";
 const FRENCH_LOCALE = "fr";

@@ -2,8 +2,8 @@ import { FC, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "../forms/buttons/button";
 import { CopyIcon } from "lucide-react";
-import { CopyCheckIcon } from "components/icons/copy-check";
-import { CopyXIcon } from "components/icons/copy-x";
+import { CopyCheckIcon } from "@/components/icons/copy-check";
+import { CopyXIcon } from "@/components/icons/copy-x";
 
 type Props = {
   label: string;

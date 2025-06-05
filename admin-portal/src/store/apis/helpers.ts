@@ -1,4 +1,4 @@
-import { keycloak } from "keycloak";
+import { keycloak } from "@/keycloak";
 
 export const getAccessToken = () => {
   if (keycloak.isTokenExpired(10)) {
