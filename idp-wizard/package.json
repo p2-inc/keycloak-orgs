@@ -17,7 +17,7 @@
     "format": "prettier --check --write ./src/**/*.{tsx,ts}",
     "type-check": "tsc --noEmit",
     "build:bundle-profile": "webpack --config webpack.prod.js --profile --json > stats.json",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@keycloak/keycloak-admin-client": "^26.2.5",
