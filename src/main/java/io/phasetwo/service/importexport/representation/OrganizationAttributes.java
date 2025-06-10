@@ -13,6 +13,9 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrganizationAttributes {
 
+  @JsonProperty("id")
+  private String id;
+
   @JsonProperty("name")
   private String name;
 
