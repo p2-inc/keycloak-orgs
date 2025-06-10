@@ -3,7 +3,7 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.105</version>
+  <version>0.106-SNAPSHOT</version>
 
   <parent>
     <groupId>com.github.xgp</groupId>
@@ -43,7 +43,7 @@
   <scm>
     <url>https://github.com/p2-inc/keycloak-orgs</url>
     <connection>scm:git:git@github.com:p2-inc/keycloak-orgs.git</connection>
-    <tag>v0.105</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <profiles>
