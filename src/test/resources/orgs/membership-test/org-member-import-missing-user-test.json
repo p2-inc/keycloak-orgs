@@ -16,8 +16,11 @@
         },
         {
           "username": "test2",
-          "roles": [
-          ]
+          "roles": []
+        },
+        {
+          "id": "non-existing-should-not-fail-because-skip-missing-members",
+          "roles": []
         }
       ],
       "invitations": []
