@@ -8,8 +8,6 @@ import static org.keycloak.models.UserModel.USERNAME;
 import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
 import static org.keycloak.utils.StreamsUtil.closing;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
 import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationMemberModel;
@@ -25,22 +23,19 @@ import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrganizationEntity> {
@@ -442,11 +437,16 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public OrganizationMemberModel getMembershipDetails(UserModel user) {
-    TypedQuery<OrganizationMemberModel> query =
-        em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberModel.class);
+    TypedQuery<OrganizationMemberEntity> query =
+        em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberEntity.class);
     query.setParameter("organization", org);
-    query.setParameter("id", user.getId());
-    return query.getSingleResult();
+    query.setParameter("userId", user.getId());
+    try {
+      OrganizationMemberEntity organizationMemberEntity = query.getSingleResult();
+      return new OrganizationMemberAdapter(session, realm, em, organizationMemberEntity);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   @Override

@@ -6,19 +6,25 @@ import static org.keycloak.events.EventType.UPDATE_PROFILE;
 import static org.keycloak.models.utils.ModelToRepresentation.*;
 
 import com.google.common.base.Strings;
+import io.phasetwo.service.model.OrganizationMemberModel;
 import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.representation.OrganizationMemberAttribute;
+import io.phasetwo.service.representation.UserOrganizationMember;
+import io.phasetwo.service.representation.UserWithOrgs;
 import io.phasetwo.service.util.ActiveOrganization;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.Constants;
 import org.keycloak.models.UserModel;
-import org.keycloak.representations.idm.UserRepresentation;
 
 @JBossLog
 public class MembersResource extends OrganizationAdminResource {
@@ -60,6 +66,54 @@ public class MembersResource extends OrganizationAdminResource {
               }
               return u;
             });
+  }
+
+  @GET
+  @Path("org-members")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Stream<UserOrganizationMember> getOrganizationMembers(
+          @QueryParam("search") String searchQuery,
+          @QueryParam("first") Integer firstResult,
+          @QueryParam("max") Integer maxResults) {
+    log.debugf("Get organization members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
+    firstResult = firstResult != null ? firstResult : 0;
+    maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
+
+    return organization
+            .searchForOrganizationMembersStream(searchQuery, firstResult, maxResults)
+            .map(m -> UserOrganizationMemberConverter.toRepresentation(session, realm, m));
+  }
+
+  @PUT
+  @Path("org-members/{userId}/attributes")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response addOrganizationMemberAttributes(@PathParam("userId") String userId,
+                                                 @Valid OrganizationMemberAttribute body ) {
+    canManage();
+    log.debugf("Add organization member attribute to user %s from %s %s", userId, realm.getName(), organization.getId());
+    UserModel member = session.users().getUserById(realm, userId);
+    if (member != null) {
+      if (!organization.hasMembership(member)) {
+        throw new BadRequestException(
+                String.format(
+                        "User %s must be a member of %s to be granted role.",
+                        userId, organization.getName()));
+    }
+
+      OrganizationMemberModel orgMembership = organization.getMembershipDetails(member);
+      if (body.getAttributes() != null) {
+        orgMembership.removeAttributes();
+        for (Map.Entry<String, List<String>> entry : body.getAttributes().entrySet()) {
+          orgMembership.setAttribute(entry.getKey(), entry.getValue());
+        }
+      }
+
+      return Response.ok()
+              .entity(UserOrganizationMemberConverter.toRepresentation(session, realm, orgMembership))
+              .build();
+    } else {
+      throw new NotFoundException(String.format("User %s doesn't exist", userId));
+    }
   }
 
   @GET
