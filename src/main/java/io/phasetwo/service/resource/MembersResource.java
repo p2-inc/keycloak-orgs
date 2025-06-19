@@ -117,6 +117,31 @@ public class MembersResource extends OrganizationAdminResource {
   }
 
   @GET
+  @Path("org-members/{userId}/attributes")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getOrganizationMemberAttributes(@PathParam("userId") String userId) {
+    canManage();
+    log.debugf("Get organization member attribute to user %s from %s %s", userId, realm.getName(), organization.getId());
+    UserModel member = session.users().getUserById(realm, userId);
+    if (member != null) {
+      if (!organization.hasMembership(member)) {
+        throw new BadRequestException(
+                String.format(
+                        "User %s must be a member of %s to be granted role.",
+                        userId, organization.getName()));
+      }
+
+      OrganizationMemberModel orgMembership = organization.getMembershipDetails(member);
+
+      return Response.ok()
+              .entity(UserOrganizationMemberConverter.toRepresentation(session, realm, orgMembership))
+              .build();
+    } else {
+      throw new NotFoundException(String.format("User %s doesn't exist", userId));
+    }
+  }
+
+  @GET
   @Path("count")
   @Produces(MediaType.APPLICATION_JSON)
   public Long getMembersCount(@QueryParam("excludeAdminAccounts") Boolean excludeAdminAccounts) {

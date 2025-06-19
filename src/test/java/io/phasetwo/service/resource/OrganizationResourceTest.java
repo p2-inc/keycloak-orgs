@@ -483,6 +483,45 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // delete org
     deleteOrganization(id);
   }
+
+  @Test
+  void testOrgMemberships() throws IOException {
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+
+    Response response = getRequest(id, "members");
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+
+    // create a user
+    UserRepresentation user1 = createUser(keycloak, REALM, "johndoe");
+
+    OrganizationMemberAttribute attributes = new OrganizationMemberAttribute();
+    attributes.setAttributes(Map.of(
+            "TestAttribute", List.of("value"),
+            "TestAttribute2", List.of("value", "values2")
+    ));
+
+    // add membership
+    response = putRequest("foo", org.getId(), "members", user1.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+
+    // add membership attributes
+    response = putRequest(attributes, org.getId(), "members", "org-members", user1.getId(), "attributes");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+
+    // get membership and attributes
+    response = getRequest( org.getId(), "members", "org-members", user1.getId(), "attributes");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    UserOrganizationMember member =
+            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(member, notNullValue());
+    assertThat(member.getId(), is(user1.getId()));
+    assertTrue(areMapsEqual(member.getOrganizationMemberAttributes(), attributes.getAttributes()));
+
+    // delete org
+    deleteOrganization(id);
+  }
+
   @Test
   void testSearchOrgMembersWithMultipleNameParameter() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
