@@ -9,7 +9,6 @@ import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationMemberModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.OrganizationMemberAttribute;
-import io.phasetwo.service.representation.UserOrganizationMember;
 import io.phasetwo.service.representation.UserWithOrgs;
 import io.phasetwo.service.util.ActiveOrganization;
 import jakarta.validation.Valid;
@@ -68,27 +67,11 @@ public class MembersResource extends OrganizationAdminResource {
             });
   }
 
-  @GET
-  @Path("org-members")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Stream<UserOrganizationMember> getOrganizationMembers(
-          @QueryParam("search") String searchQuery,
-          @QueryParam("first") Integer firstResult,
-          @QueryParam("max") Integer maxResults) {
-    log.debugf("Get organization members for %s %s [%s]", realm.getName(), organization.getId(), searchQuery);
-    firstResult = firstResult != null ? firstResult : 0;
-    maxResults = maxResults != null ? maxResults : Constants.DEFAULT_MAX_RESULTS;
-
-    return organization
-            .searchForOrganizationMembersStream(searchQuery, firstResult, maxResults)
-            .map(m -> UserOrganizationMemberConverter.toRepresentation(session, realm, m));
-  }
-
   @PUT
-  @Path("org-members/{userId}/attributes")
+  @Path("{userId}/attributes")
   @Produces(MediaType.APPLICATION_JSON)
   public Response addOrganizationMemberAttributes(@PathParam("userId") String userId,
-                                                 @Valid OrganizationMemberAttribute body ) {
+                                                  @Valid OrganizationMemberAttribute body) {
     canManage();
     log.debugf("Add organization member attribute to user %s from %s %s", userId, realm.getName(), organization.getId());
     UserModel member = session.users().getUserById(realm, userId);
@@ -109,7 +92,7 @@ public class MembersResource extends OrganizationAdminResource {
       }
 
       return Response.ok()
-              .entity(UserOrganizationMemberConverter.toRepresentation(session, realm, orgMembership))
+              .entity(orgMembership.getAttributes())
               .build();
     } else {
       throw new NotFoundException(String.format("User %s doesn't exist", userId));
@@ -117,7 +100,7 @@ public class MembersResource extends OrganizationAdminResource {
   }
 
   @GET
-  @Path("org-members/{userId}/attributes")
+  @Path("{userId}/attributes")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getOrganizationMemberAttributes(@PathParam("userId") String userId) {
     canManage();
@@ -134,7 +117,7 @@ public class MembersResource extends OrganizationAdminResource {
       OrganizationMemberModel orgMembership = organization.getMembershipDetails(member);
 
       return Response.ok()
-              .entity(UserOrganizationMemberConverter.toRepresentation(session, realm, orgMembership))
+              .entity(orgMembership.getAttributes())
               .build();
     } else {
       throw new NotFoundException(String.format("User %s doesn't exist", userId));

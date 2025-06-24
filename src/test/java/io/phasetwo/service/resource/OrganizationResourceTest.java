@@ -54,7 +54,6 @@ import lombok.extern.jbosslog.JBossLog;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.TokenVerifier;
@@ -175,7 +174,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     Map<String, Object> claim =
         objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
 
-    assertThat(claim.keySet().size(), is(1));
+    assertThat(claim.size(), is(1));
     assertThat(claim.containsKey(org.getId()), is(true));
     Map<String, String> valueMap = (Map<String, String>) claim.values().stream().toList().get(0);
     assertThat(valueMap, hasEntry("name", "example"));
@@ -506,112 +505,16 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
     // add membership attributes
-    response = putRequest(attributes, org.getId(), "members", "org-members", user1.getId(), "attributes");
+    response = putRequest(attributes, org.getId(), "members", user1.getId(), "attributes");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     // get membership and attributes
-    response = getRequest( org.getId(), "members", "org-members", user1.getId(), "attributes");
+    response = getRequest( org.getId(), "members", user1.getId(), "attributes");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    UserOrganizationMember member =
+    Map<String, List<String>> attributesResponse =
             objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertThat(member, notNullValue());
-    assertThat(member.getId(), is(user1.getId()));
-    assertTrue(areMapsEqual(member.getOrganizationMemberAttributes(), attributes.getAttributes()));
-
-    // delete org
-    deleteOrganization(id);
-  }
-
-  @Test
-  void testSearchOrgMembersWithMultipleNameParameter() throws IOException {
-    OrganizationRepresentation org = createDefaultOrg();
-    String id = org.getId();
-
-    Response response = getRequest(id, "members");
-    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-
-    // create a user
-    UserRepresentation user1 = createUser(keycloak, REALM, "johndoe");
-    UserRepresentation user2 = createUser(keycloak, REALM, "johndow");
-    UserRepresentation user3 = createUser(keycloak, REALM, "jack");
-    UserRepresentation user4 = createUser(keycloak, REALM, "jill");
-
-    OrganizationMemberAttribute attributes =new OrganizationMemberAttribute();
-    attributes.setAttributes(Map.of(
-            "TestAttribute", List.of("value"),
-            "TestAttribute2", List.of("value", "values2")
-    ));
-
-    // add membership
-    response = putRequest("foo", org.getId(), "members", user1.getId());
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-    response = putRequest("foo", org.getId(), "members", user2.getId());
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-    response = putRequest("foo", org.getId(), "members", user3.getId());
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-    response = putRequest("foo", org.getId(), "members", user4.getId());
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-
-    // add membership attributes
-    response = putRequest(attributes, org.getId(), "members", "org-members", user1.getId(), "attributes");
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    response = putRequest(attributes, org.getId(), "members", "org-members", user2.getId(), "attributes");
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    response = putRequest(attributes, org.getId(), "members", "org-members", user3.getId(), "attributes");
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-    response = putRequest(attributes, org.getId(), "members", "org-members", user4.getId(), "attributes");
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-
-    response = getRequest(id, "members", "org-members");
-    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    List<UserOrganizationMember> members =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {
-            });
-    assertThat(members, notNullValue());
-    assertThat(members, hasSize(5)); // includingOrgAdmin
-
-    members.stream()
-            .filter(m -> !m.getUsername().startsWith("org-admin-"))
-            .forEach(userOrganizationMember ->
-                    assertTrue(areMapsEqual(userOrganizationMember.getOrganizationMemberAttributes(), attributes.getAttributes()))
-            );
-
-    // search members with query parameter
-    response = getRequest(id, "members",  "org-members", "?search=john");
-    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertThat(members, notNullValue());
-    assertThat(members, hasSize(2));
-    assertThat(members, hasItem(hasProperty("username", is("johndoe"))));
-    assertThat(members, hasItem(hasProperty("username", is("johndow"))));
-
-    members.stream()
-            .filter(m -> !m.getUsername().startsWith("org-admin-"))
-            .forEach(userOrganizationMember ->
-                    assertTrue(areMapsEqual(userOrganizationMember.getOrganizationMemberAttributes(), attributes.getAttributes()))
-            );
-
-    // change attributes for user jack
-    OrganizationMemberAttribute attributes2 =new OrganizationMemberAttribute();
-    attributes2.setAttributes(Map.of(
-            "TestAttribute3", List.of("value")
-    ));
-
-    response = putRequest(attributes2, org.getId(), "members", "org-members", user3.getId(), "attributes");
-    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-
-    // search by user jack
-    response = getRequest(id, "members",  "org-members", "?search=jack");
-    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
-    members = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
-    assertThat(members, notNullValue());
-    assertThat(members, hasSize(1));
-    assertThat(members, hasItem(hasProperty("username", is("jack"))));
-
-    members.stream()
-            .forEach(userOrganizationMember ->
-                    assertTrue(areMapsEqual(userOrganizationMember.getOrganizationMemberAttributes(), attributes2.getAttributes()))
-            );
+    assertThat(attributesResponse, notNullValue());
+    assertTrue(areMapsEqual(attributesResponse, attributes.getAttributes()));
 
     // delete org
     deleteOrganization(id);
