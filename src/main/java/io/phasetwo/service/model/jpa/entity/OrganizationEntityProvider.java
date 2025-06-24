@@ -12,6 +12,7 @@ public class OrganizationEntityProvider implements JpaEntityProvider {
     ExtOrganizationEntity.class,
     OrganizationAttributeEntity.class,
     OrganizationMemberEntity.class,
+    OrganizationMemberAttributeEntity.class,
     OrganizationRoleEntity.class,
     UserOrganizationRoleMappingEntity.class,
     InvitationEntity.class,
