@@ -14,6 +14,9 @@ public interface OrganizationProvider extends Provider {
   OrganizationModel createOrganization(
       RealmModel realm, String name, UserModel createdBy, boolean admin);
 
+  OrganizationModel createOrganization(
+      RealmModel realm, String id, String name, UserModel createdBy, boolean admin);
+
   OrganizationModel getOrganizationById(RealmModel realm, String id);
 
   OrganizationModel getOrganizationByName(RealmModel realm, String name);

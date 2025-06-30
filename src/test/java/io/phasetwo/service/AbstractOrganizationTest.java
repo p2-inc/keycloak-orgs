@@ -96,8 +96,9 @@ public abstract class AbstractOrganizationTest {
           .withContextPath("/auth")
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
+          .withExposedPorts(8787, 9000, 8080)
           .withProviderLibsFrom(getDeps())
-          .withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m")
+          .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8787,server=y,suspend=n -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m ")
           .withAccessToHost(true);
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
