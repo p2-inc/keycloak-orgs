@@ -799,19 +799,27 @@ public abstract class AbstractOrganizationTest {
       var managedUsers = getOrgMembers(organizationRepresentation, realm);
 
       assertThat(managedUsers, hasSize(exportedMembers.size()));
-      List<String> expectedIdentifiers = exportedMembers.stream()
-          .map(member -> {
-              String id = member.getId();
-              // We're suffixing the items here to prevent matching a ID value against a username value or the other way around
-              return (id != null && !id.isEmpty()) ? "ID:" + id : "USERNAME:" + member.getUsername();
-          })
+
+      List<String> expectedImportedById = exportedMembers.stream()
+          .map(UserRolesRepresentation::getId)
+          .filter(id -> id != null && !id.isEmpty())
           .toList();
-      List<String> actualIdentifiers = managedUsers.stream()
-          .flatMap(user ->
-              Stream.of("ID:" + user.getId(), "USERNAME:" + user.getUsername())
-          )
+
+      List<String> expectedImportedByUsername = exportedMembers.stream()
+          .map(UserRolesRepresentation::getUsername)
+          .filter(username -> username != null && !username.isEmpty())
           .toList();
-      assertThat(actualIdentifiers, hasItems(expectedIdentifiers.toArray(new String[0])));
+
+      List<String> importedById = managedUsers.stream()
+          .map(UserRepresentation::getId)
+          .toList();
+
+      List<String> importedByUsername = managedUsers.stream()
+          .map(UserRepresentation::getUsername)
+          .toList();
+
+      assertThat(importedById, hasItems(expectedImportedById.toArray(String[]::new)));
+      assertThat(importedByUsername, hasItems(expectedImportedByUsername.toArray(String[]::new)));
 
       // validate roles
       managedUsers.forEach(
@@ -819,8 +827,21 @@ public abstract class AbstractOrganizationTest {
             var member =
                 exportedMembers.stream()
                     .filter(
-                        importedMember ->
-                            importedMember.getUsername().equals(userRepresentation.getUsername()))
+                        importedMember -> {
+                            // Either match against ID or username
+                            String importedId = importedMember.getId();
+                            String importedUsername = importedMember.getUsername();
+                            String userId = userRepresentation.getId();
+                            String userUsername = userRepresentation.getUsername();
+
+                            if (importedId != null && !importedId.isEmpty()) {
+                                return importedId.equals(userId);
+                            } else if (importedUsername != null && !importedUsername.isEmpty()) {
+                                return importedUsername.equals(userUsername);
+                            }
+
+                            return false;
+                        })
                     .findFirst()
                     .orElseThrow();
             validateOrgRoles(userRepresentation, member, organizationRepresentation.getId(), realm);
