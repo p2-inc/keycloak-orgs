@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -796,10 +799,27 @@ public abstract class AbstractOrganizationTest {
       var managedUsers = getOrgMembers(organizationRepresentation, realm);
 
       assertThat(managedUsers, hasSize(exportedMembers.size()));
-      assertThat(
-          managedUsers.stream().map(UserRepresentation::getUsername).toList(),
-          containsInAnyOrder(
-              exportedMembers.stream().map(UserRolesRepresentation::getUsername).toArray()));
+
+      List<String> expectedImportedById = exportedMembers.stream()
+          .map(UserRolesRepresentation::getId)
+          .filter(id -> id != null && !id.isEmpty())
+          .toList();
+
+      List<String> expectedImportedByUsername = exportedMembers.stream()
+          .map(UserRolesRepresentation::getUsername)
+          .filter(username -> username != null && !username.isEmpty())
+          .toList();
+
+      List<String> importedById = managedUsers.stream()
+          .map(UserRepresentation::getId)
+          .toList();
+
+      List<String> importedByUsername = managedUsers.stream()
+          .map(UserRepresentation::getUsername)
+          .toList();
+
+      assertThat(importedById, hasItems(expectedImportedById.toArray(String[]::new)));
+      assertThat(importedByUsername, hasItems(expectedImportedByUsername.toArray(String[]::new)));
 
       // validate roles
       managedUsers.forEach(
@@ -807,8 +827,21 @@ public abstract class AbstractOrganizationTest {
             var member =
                 exportedMembers.stream()
                     .filter(
-                        importedMember ->
-                            importedMember.getUsername().equals(userRepresentation.getUsername()))
+                        importedMember -> {
+                            // Either match against ID or username
+                            String importedId = importedMember.getId();
+                            String importedUsername = importedMember.getUsername();
+                            String userId = userRepresentation.getId();
+                            String userUsername = userRepresentation.getUsername();
+
+                            if (importedId != null && !importedId.isEmpty()) {
+                                return importedId.equals(userId);
+                            } else if (importedUsername != null && !importedUsername.isEmpty()) {
+                                return importedUsername.equals(userUsername);
+                            }
+
+                            return false;
+                        })
                     .findFirst()
                     .orElseThrow();
             validateOrgRoles(userRepresentation, member, organizationRepresentation.getId(), realm);
