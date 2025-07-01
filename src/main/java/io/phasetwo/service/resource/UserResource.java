@@ -60,6 +60,11 @@ public class UserResource extends OrganizationAdminResource {
 
     UserModel user = session.users().getUserById(realm, userId);
     OrganizationModel org = orgs.getOrganizationById(realm, orgId);
+    
+    if (org == null) {
+      throw new NotFoundException(String.format("%s not found", orgId));
+    }
+    
     if (auth.hasViewOrgs() || auth.hasOrgViewRoles(org)) {
       if (org.hasMembership(user)) {
         return org.getRolesByUserStream(user).map(r -> convertOrganizationRole(r));
