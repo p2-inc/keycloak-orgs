@@ -357,14 +357,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   public void revokeMembership(UserModel user) {
     if (!hasMembership(user)) return;
     org.getMembers().removeIf(m -> m.getUserId().equals(user.getId()));
-    Stream<UserOrganizationRoleMappingEntity> rolesEntityByUserStream = getRolesEntityByUserStream(user);
-    if (rolesEntityByUserStream != null) {
-      rolesEntityByUserStream.forEach(e -> {
-        e.getRole().getUserMappings().remove(e);
-        em.remove(e);
-        em.flush();
-      });
-    }
+    getRolesEntityByUserStream(user).forEach(e -> {
+      e.getRole().getUserMappings().remove(e);
+      em.remove(e);
+    });
     if (user.getEmail() != null) revokeInvitations(user.getEmail());
   }
 
@@ -429,9 +425,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<OrganizationRoleModel> getRolesByUserStream(UserModel user) {
-    Stream<UserOrganizationRoleMappingEntity> entityStream = getRolesEntityByUserStream(user);
-    return entityStream != null ? entityStream.map(
-            r -> new OrganizationRoleAdapter(session, realm, em, this, r.getRole())) : null;
+    return getRolesEntityByUserStream(user).map(
+            r -> new OrganizationRoleAdapter(session, realm, em, this, r.getRole()));
   }
 
   @Override
@@ -502,7 +497,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
       return query.getResultStream();
     }
     catch (Exception ignore) {
-      return null;
+      return Stream.empty();
     }
   }
 }
