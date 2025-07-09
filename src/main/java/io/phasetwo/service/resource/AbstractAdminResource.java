@@ -24,7 +24,8 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.Permissions;
 
 /** */
 @JBossLog
@@ -165,7 +166,7 @@ public abstract class AbstractAdminResource<T extends AdminAuth> {
   private void setupPermissions() {
     //    permissions = AdminPermissions.evaluator(session, realm, adminRealm, user);
     permissions =
-        org.keycloak.services.resources.admin.permissions.Permissions.evaluator(
+        Permissions.evaluator(
             session, realm, adminRealm, user);
   }
 
