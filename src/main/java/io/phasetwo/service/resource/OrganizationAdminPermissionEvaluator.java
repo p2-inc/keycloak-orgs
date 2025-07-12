@@ -5,7 +5,7 @@ import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authorization.model.ResourceServer;
 import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.permissions.*;
+import org.keycloak.services.resources.admin.fgap.*;
 
 @JBossLog
 public class OrganizationAdminPermissionEvaluator implements AdminPermissionEvaluator {

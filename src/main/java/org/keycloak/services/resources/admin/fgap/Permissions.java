@@ -1,4 +1,4 @@
-package org.keycloak.services.resources.admin.permissions;
+package org.keycloak.services.resources.admin.fgap;
 
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authorization.identity.UserModelIdentity;
