@@ -3,7 +3,11 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.108-SNAPSHOT</version>
+  <version>0.107-SNAPSHOT</version>
+
+  <name>Phase Two Keycloak Organizations</name>
+  <description>The original organizations implementation for single-realm, multi-tenancy in Keycloak.</description>
+  <url>https://github.com/p2-inc/keycloak-orgs</url>
 
   <parent>
     <groupId>com.github.xgp</groupId>
