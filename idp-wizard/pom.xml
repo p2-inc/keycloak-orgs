@@ -37,7 +37,7 @@
     <guava.version>33.0.0-jre</guava.version>
     <lombok.version>1.18.38</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
-    <ossrh.url>https://s01.oss.sonatype.org</ossrh.url>
+    <ossrh.url>https://ossrh-staging-api.central.sonatype.com</ossrh.url>
   </properties>
 
   <scm>
@@ -115,7 +115,7 @@
           </execution>
 	</executions>
         <configuration>
-          <nodeVersion>v20.14.0</nodeVersion>
+          <nodeVersion>v20.19.4</nodeVersion>
           <yarnVersion>v1.22.22</yarnVersion>
 	  <workingDirectory>.</workingDirectory>
         </configuration>
