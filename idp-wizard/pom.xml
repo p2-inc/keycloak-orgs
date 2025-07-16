@@ -115,7 +115,7 @@
           </execution>
 	</executions>
         <configuration>
-          <nodeVersion>v20.14.0</nodeVersion>
+          <nodeVersion>v20.19.4</nodeVersion>
           <yarnVersion>v1.22.22</yarnVersion>
 	  <workingDirectory>.</workingDirectory>
         </configuration>
