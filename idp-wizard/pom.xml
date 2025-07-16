@@ -5,6 +5,10 @@
   <packaging>jar</packaging>
   <version>0.25-SNAPSHOT</version>
 
+  <name>Phase Two IDP wizard</name>
+  <description>Phase Two SSO and Directory Sync setup wizards.</description>
+  <url>https://github.com/p2-inc/idp-wizard</url>
+
   <parent>
     <groupId>com.github.xgp</groupId>
     <artifactId>oss-parent</artifactId>
@@ -29,7 +33,7 @@
     <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.wizard</main.java.package>
-    <keycloak.version>26.2.5</keycloak.version>
+    <keycloak.version>26.3.1</keycloak.version>
     <guava.version>33.0.0-jre</guava.version>
     <lombok.version>1.18.38</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
