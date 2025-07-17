@@ -117,7 +117,7 @@ public class PortalResourceProvider implements AccountResourceProvider, RealmRes
     }
 
     // staticResources
-    if (Pattern.matches("^(asset-manifest|logo|manifest|static|locales|favicon).*", path)) {
+    if (Pattern.matches("^(asset-manifest|logo|manifest|static|assets|locales|favicon).*", path)) {
       Response response = staticResources(path);
       if (response != null) {
         log.debugf("returning response %d for path %s", response.getStatus(), path);
@@ -309,7 +309,7 @@ public class PortalResourceProvider implements AccountResourceProvider, RealmRes
   }
 
   @GET
-  @Path("{path: ^(asset-manifest|logo|manifest|static|locales|favicon).*}")
+  @Path("{path: ^(asset-manifest|logo|manifest|static|locales|favicon|assets).*}")
   public Response staticResources(@PathParam("path") final String path) throws IOException {
     String fileName = getLastPathSegment(session.getContext().getUri());
     Theme theme = getTheme("portal");
