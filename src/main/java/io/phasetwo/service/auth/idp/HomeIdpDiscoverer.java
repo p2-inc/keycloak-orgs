@@ -157,7 +157,7 @@ final class HomeIdpDiscoverer {
                     else return 1;
                 })
                 .sorted((o1, o2) -> {
-                    String accountHint = authSession.getAuthNote(
+                    String accountHint = authSession.getClientNote(
                         ACCOUNT_HINT_QUERY_PARAM
                     );
                     String customerID = o1.getFirstAttribute("customer_id");
