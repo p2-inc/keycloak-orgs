@@ -4,6 +4,7 @@ import static io.phasetwo.service.Orgs.ORG_CONFIG_SHARED_IDPS_KEY;
 import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 
+import com.google.common.base.Strings;
 import io.phasetwo.service.importexport.representation.OrganizationAttributes;
 import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
 import io.phasetwo.service.importexport.representation.OrganizationRoleRepresentation;
@@ -19,6 +20,7 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelException;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.models.utils.ModelToRepresentation;
@@ -94,7 +96,17 @@ public final class KeycloakOrgsImportConverter {
         .getMembers()
         .forEach(
             member -> {
-              var userModel = session.users().getUserByUsername(newRealm, member.getUsername());
+              if (!Strings.isNullOrEmpty(member.getId()) && !Strings.isNullOrEmpty(member.getUsername())) {
+                throw new IllegalArgumentException("Can't provide both id and username");
+              }
+
+              UserModel userModel;
+              if (!Strings.isNullOrEmpty(member.getId())) {
+                userModel = session.users().getUserById(newRealm, member.getId());
+              } else {
+                userModel = session.users().getUserByUsername(newRealm, member.getUsername());
+              }
+
               if (Objects.nonNull(userModel)) {
                 org.grantMembership(userModel);
                 member.getRoles().stream()
@@ -107,7 +119,11 @@ public final class KeycloakOrgsImportConverter {
                           + member.getUsername()
                           + ". No user found.");
                 } else {
-                  throw new ModelException("No user with username: " + member.getUsername());
+                  if (!Strings.isNullOrEmpty(member.getId())) {
+                    throw new ModelException("No user with ID: " + member.getId());
+                  } else {
+                    throw new ModelException("No user with username: " + member.getUsername());
+                  }
                 }
               }
             });
