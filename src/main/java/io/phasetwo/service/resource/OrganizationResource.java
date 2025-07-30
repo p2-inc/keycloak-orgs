@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
@@ -235,7 +236,7 @@ public class OrganizationResource extends OrganizationAdminResource {
       }
 
       // build the action token
-      int validityInSecs = 60 * 60 * 24; // 1 day
+      int validityInSecs = realm.getAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, 86400); //1 day
       int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
       PortalLinkActionToken token =
           new PortalLinkActionToken(

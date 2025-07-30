@@ -1,9 +1,6 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
-import static io.phasetwo.service.Orgs.ORG_CONFIG_SHARED_IDPS_KEY;
-import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
-import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
+import static io.phasetwo.service.Orgs.*;
 import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_IMPORT;
@@ -271,6 +268,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
 
     realm.setAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, body.isCreateAdminUser());
     realm.setAttribute(ORG_CONFIG_SHARED_IDPS_KEY, body.isSharedIdps());
+    realm.setAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, body.getExpirationInSecs());
 
     return Response.ok(body).build();
   }
@@ -303,6 +301,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     var representation = new OrganizationsConfig();
     representation.setCreateAdminUser(realm.getAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, true));
     representation.setSharedIdps(realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false));
+    representation.setExpirationInSecs(realm.getAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, 86400));
 
     return Response.ok(representation).build();
   }
