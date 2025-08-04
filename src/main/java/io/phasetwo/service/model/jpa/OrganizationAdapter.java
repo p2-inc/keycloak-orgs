@@ -357,7 +357,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   public void revokeMembership(UserModel user) {
     if (!hasMembership(user)) return;
     org.getMembers().removeIf(m -> m.getUserId().equals(user.getId()));
-    getRolesStream().forEach(r -> r.revokeRole(user));
+    getRolesEntityByUserStream(user).forEach(e -> {
+      e.getRole().getUserMappings().remove(e);
+      em.remove(e);
+    });
     if (user.getEmail() != null) revokeInvitations(user.getEmail());
   }
 
@@ -422,17 +425,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<OrganizationRoleModel> getRolesByUserStream(UserModel user) {
-    TypedQuery<UserOrganizationRoleMappingEntity> query =
-        em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
-    query.setParameter("userId", user.getId());
-    query.setParameter("orgId", org.getId());
-    try {
-      return query
-          .getResultStream()
-          .map(r -> new OrganizationRoleAdapter(session, realm, em, this, r.getRole()));
-    } catch (Exception ignore) {
-      return null;
-    }
+    return getRolesEntityByUserStream(user).map(
+            r -> new OrganizationRoleAdapter(session, realm, em, this, r.getRole()));
   }
 
   @Override
@@ -492,5 +486,18 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
       orPredicates.add(builder.like(builder.lower(from.get(LAST_NAME)), value, ESCAPE_BACKSLASH));
     }
     return orPredicates.toArray(Predicate[]::new);
+  }
+
+  private Stream<UserOrganizationRoleMappingEntity> getRolesEntityByUserStream(UserModel user) {
+    TypedQuery<UserOrganizationRoleMappingEntity> query =
+            em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
+    query.setParameter("userId", user.getId());
+    query.setParameter("orgId", org.getId());
+    try {
+      return query.getResultStream();
+    }
+    catch (Exception ignore) {
+      return Stream.empty();
+    }
   }
 }
