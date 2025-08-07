@@ -8,6 +8,7 @@ import static org.keycloak.events.EventType.UPDATE_PROFILE;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.BulkResponseItem;
+import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationRole;
 import io.phasetwo.service.representation.SwitchOrganization;
@@ -74,6 +75,28 @@ public class UserResource extends OrganizationAdminResource {
     } else {
       throw new NotAuthorizedException("Insufficient permissions");
     }
+  }
+
+  @GET
+  @Path("/{userId}/invitations")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Stream<Invitation> listUserInvitations(@PathParam("userId") String userId) {
+    log.debugv("Get invitations for user %s in realm %s", userId, realm.getName());
+
+    // Validate user exists
+    UserModel user = session.users().getUserById(realm, userId);
+    if (user == null) {
+      throw new NotFoundException(String.format("User %s doesn't exist", userId));
+    }
+
+    // Authorization check - users can view their own invitations or admins can view any user's invitations
+    if (!auth.hasViewOrgs() && !auth.getUser().getId().equals(userId)) {
+      throw new NotAuthorizedException("Insufficient permissions to view user invitations");
+    }
+
+    // Get all invitations for this user across all organizations
+    return orgs.getUserInvitationsStream(realm, user)
+        .map(i -> convertInvitationModelToInvitation(i));
   }
 
   @PUT
