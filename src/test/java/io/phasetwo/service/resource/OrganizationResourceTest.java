@@ -1928,6 +1928,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // delete org
     deleteOrganization(id);
+    //delete client
+    keycloak.realm(REALM).clients().get("idp-wizard").remove();
   }
 
   @Test

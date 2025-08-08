@@ -75,6 +75,8 @@ public class PortalLinkExpirationTest extends AbstractOrganizationTest {
 
     // delete org
     deleteOrganization(id);
+    //delete client
+    keycloak.realm(REALM).clients().get("idp-wizard").remove();
   }
 
   public static Optional<String> getQueryParamValue(String urlString, String paramName) throws URISyntaxException {
