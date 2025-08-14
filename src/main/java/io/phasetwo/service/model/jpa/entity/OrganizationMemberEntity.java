@@ -44,7 +44,11 @@ import java.util.Objects;
           query = "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :userId AND m.organization = :organization"),
   @NamedQuery(
       name = "getOrganizationMembershipsByUserId",
-      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :userId")
+      query = "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :userId"),
+  @NamedQuery(
+      name = "getOrganizationMembershipsByUserFederationLink",
+      query = "SELECT m FROM OrganizationMemberEntity m INNER JOIN UserEntity u on m.user_id = u.id WHERE u.realmId = :realmId AND u.federationLink=:link"
+  )
 })
 @Table(
     name = "ORGANIZATION_MEMBER",
