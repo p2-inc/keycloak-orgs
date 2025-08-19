@@ -15,8 +15,11 @@ public class Orgs {
   public static final String ORG_CONFIG_CREATE_ADMIN_USER_KEY =
       "_providerConfig.orgs.config.createAdminUser";
   public static final String ORG_CONFIG_SHARED_IDPS_KEY = "_providerConfig.orgs.config.sharedIdps";
-  public static final String ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY = "_providerConfig.orgs.portalLink.expirationInSecs";
+  public static final String ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY =
+      "_providerConfig.orgs.portalLink.expirationInSecs";
   public static final String ORG_SHARED_IDP_KEY = "home.idp.discovery.shared";
 
   public static final String REQUIRE_VERIFIED_DOMAIN = "requireVerifiedDomain";
+  public static final String REQUIRE_VALID_EMAIL = "requireValidEmail";
+  public static final String SET_USER_IN_CONTEXT = "setUserInContext";
 }

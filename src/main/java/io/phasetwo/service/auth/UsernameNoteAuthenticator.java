@@ -1,11 +1,15 @@
 package io.phasetwo.service.auth;
 
+import static io.phasetwo.service.Orgs.REQUIRE_VALID_EMAIL;
+import static io.phasetwo.service.Orgs.SET_USER_IN_CONTEXT;
+import static org.keycloak.protocol.oidc.OIDCLoginProtocol.LOGIN_HINT_PARAM;
 import static org.keycloak.services.validation.Validation.FIELD_USERNAME;
 
 import io.phasetwo.service.util.Emails;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import java.util.Optional;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -14,7 +18,7 @@ import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
-import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.managers.AuthenticationManager;
 
@@ -92,7 +96,7 @@ class UsernameNoteAuthenticator extends AbstractUsernameFormAuthenticator
       return null;
     }
 
-    if (!Emails.isValidEmail(username)) {
+    if (isRequireValidEmail(context.getAuthenticatorConfig()) && !Emails.isValidEmail(username)) {
       context.getEvent().error(Errors.INVALID_EMAIL);
       Response challengeResponse =
           challenge(context, getDefaultChallengeMessage(context), FIELD_USERNAME);
@@ -104,6 +108,24 @@ class UsernameNoteAuthenticator extends AbstractUsernameFormAuthenticator
     context
         .getAuthenticationSession()
         .setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, username);
+    context.getAuthenticationSession().setClientNote(LOGIN_HINT_PARAM, username);
+
+    if (isSetUserInContext(context.getAuthenticatorConfig())) {
+      try {
+        UserModel user =
+            KeycloakModelUtils.findUserByNameOrEmail(
+                context.getSession(), context.getRealm(), username);
+        if (user != null) {
+          log.debugf("Setting user '%s' in context", user.getId());
+          context.setUser(user);
+        }
+      } catch (ModelDuplicateException e) {
+        log.warnf(
+            e,
+            "Could not uniquely identify the user. Multiple users with name or email '%s' found.",
+            username);
+      }
+    }
 
     return username;
   }
@@ -118,5 +140,17 @@ class UsernameNoteAuthenticator extends AbstractUsernameFormAuthenticator
     return context.getRealm().isLoginWithEmailAllowed()
         ? "invalidUsernameOrEmailMessage"
         : "invalidUsernameMessage";
+  }
+
+  private boolean isSetUserInContext(AuthenticatorConfigModel authenticatorConfigModel) {
+    return Optional.ofNullable(authenticatorConfigModel)
+        .map(it -> Boolean.parseBoolean(it.getConfig().getOrDefault(SET_USER_IN_CONTEXT, "false")))
+        .orElse(false);
+  }
+
+  private boolean isRequireValidEmail(AuthenticatorConfigModel authenticatorConfigModel) {
+    return Optional.ofNullable(authenticatorConfigModel)
+        .map(it -> Boolean.parseBoolean(it.getConfig().getOrDefault(REQUIRE_VALID_EMAIL, "true")))
+        .orElse(false);
   }
 }
