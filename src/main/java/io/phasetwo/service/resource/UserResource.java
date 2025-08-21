@@ -27,8 +27,6 @@ import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
-import org.keycloak.representations.AccessToken;
-
 /** */
 @JBossLog
 public class UserResource extends OrganizationAdminResource {
@@ -83,9 +81,9 @@ public class UserResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<Invitation> listUserInvitations(@PathParam("userId") String userId) {
     log.debugv("Get invitations for user %s in realm %s", userId, realm.getName());
-
+    
     // Authorization check - users can view their own invitations or admins can view any user's invitations
-    if (!(auth.hasViewOrgs() || canManageInvitations(auth.getToken()))) {
+    if (!(auth.hasViewOrgs() || OrganizationsResource.canManageInvitations(auth.getToken()))) {
       throw new NotAuthorizedException("Insufficient permissions to view user invitations");
     }
 
@@ -274,22 +272,4 @@ public class UserResource extends OrganizationAdminResource {
       return Response.ok().entity(teams).build();
     }
     */
-
-  private boolean canManageInvitations(AccessToken accessToken) {
-    try {
-      var emailVerified = accessToken.getEmailVerified();
-      if (emailVerified == null || !emailVerified) {
-        return false;
-      }
-
-      var email = accessToken.getEmail();
-      if (email == null) {
-        return false;
-      }
-
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
-  }
 }
