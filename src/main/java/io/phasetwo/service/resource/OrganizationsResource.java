@@ -83,7 +83,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
   public Stream<Invitation> invitations() {
     var accessToken = auth.getToken();
 
-    canManageInvitations(accessToken);
+    if (!canManageInvitations(accessToken)) {
+      throw new BadRequestException("User needs to be email verified");
+    }
 
     return orgs.getUserInvitationsStream(realm,  accessToken.getEmail())
             .map(Converters::convertInvitationModelToInvitation);
@@ -95,7 +97,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
   public Response acceptInvitation(@PathParam("invitationId") String invitationId) {
     var accessToken = auth.getToken();
 
-    canManageInvitations(accessToken);
+    if (!canManageInvitations(accessToken)) {
+      throw new BadRequestException("User needs to be email verified");
+    }
 
     var invitation = orgs.getInvitationById(realm, invitationId);
     if (invitation == null){
@@ -131,7 +135,10 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response rejectInvitation(@PathParam("invitationId") String invitationId) {
     var accessToken = auth.getToken();
-    canManageInvitations(accessToken);
+
+    if (!canManageInvitations(accessToken)) {
+      throw new BadRequestException("User needs to be email verified");
+    }
 
     var invitation = orgs.getInvitationById(realm, invitationId);
 
@@ -433,22 +440,25 @@ public class OrganizationsResource extends OrganizationAdminResource {
     }
   }
 
-  private void canManageInvitations(AccessToken accessToken) {
+  public static boolean canManageInvitations(AccessToken accessToken) {
     var emailVerified = accessToken.getEmailVerified();
     if (emailVerified == null) {
       log.errorf("emailVerified access token claim not found");
-      throw new BadRequestException("emailVerified access token claim not found");
+
+      return false;
     }
 
     if (!emailVerified) {
       log.errorf("emailVerified needs to be true");
-      throw new BadRequestException("emailVerified needs to be true");
+      return false;
     }
 
     var email = accessToken.getEmail();
     if (email == null) {
       log.errorf("email access token claim not found");
-      throw new BadRequestException("email access token claim not found");
+      return false;
     }
+
+    return true;
   }
 }
