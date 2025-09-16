@@ -98,18 +98,18 @@ public class OrganizationsResource extends OrganizationAdminResource {
     var accessToken = auth.getToken();
 
     if (!canManageInvitations(accessToken)) {
-      throw new BadRequestException("User needs to be email verified");
+      throw new BadRequestException("User needs to have a verified email");
     }
 
     var invitation = orgs.getInvitationById(realm, invitationId);
     if (invitation == null){
       log.errorf("invitation with id: {} not found", invitationId);
-      throw new BadRequestException("invitation not found");
+      throw new NotFoundException(String.format("Invitation %s not found", invitationId));
     }
 
     if (!accessToken.getEmail().equals(invitation.getEmail())){
       log.errorf("email claim differ from invitation email");
-      throw new BadRequestException("email claim differ from invitation email");
+      throw new BadRequestException("Email claim differs from invitation email");
     }
 
     KeycloakModelUtils.runJobInTransaction(

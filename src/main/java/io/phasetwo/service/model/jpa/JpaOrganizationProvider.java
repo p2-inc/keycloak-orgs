@@ -16,6 +16,7 @@ import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.resource.OrganizationAdminAuth;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -228,10 +229,12 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     query.setParameter("realmId", realm.getId());
     query.setParameter("id", id);
 
-    var entity = query.getSingleResult();
-    if (entity != null) {
-      return new InvitationAdapter(session, realm, em, entity);
-    }
+    try {
+      var entity = query.getSingleResult();
+      if (entity != null) {
+        return new InvitationAdapter(session, realm, em, entity);
+      }
+    } catch (PersistenceException ignore) {}
     return null;
   }
 
