@@ -35,8 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -98,7 +96,9 @@ public abstract class AbstractOrganizationTest {
           .withProviderClassesFrom("target/classes")
           .withExposedPorts(8787, 9000, 8080)
           .withProviderLibsFrom(getDeps())
-          .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8787,server=y,suspend=n -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m ")
+          .withEnv(
+              "JAVA_OPTS",
+              "-agentlib:jdwp=transport=dt_socket,address=*:8787,server=y,suspend=n -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m ")
           .withAccessToHost(true);
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
@@ -800,23 +800,22 @@ public abstract class AbstractOrganizationTest {
 
       assertThat(managedUsers, hasSize(exportedMembers.size()));
 
-      List<String> expectedImportedById = exportedMembers.stream()
-          .map(UserRolesRepresentation::getId)
-          .filter(id -> id != null && !id.isEmpty())
-          .toList();
+      List<String> expectedImportedById =
+          exportedMembers.stream()
+              .map(UserRolesRepresentation::getId)
+              .filter(id -> id != null && !id.isEmpty())
+              .toList();
 
-      List<String> expectedImportedByUsername = exportedMembers.stream()
-          .map(UserRolesRepresentation::getUsername)
-          .filter(username -> username != null && !username.isEmpty())
-          .toList();
+      List<String> expectedImportedByUsername =
+          exportedMembers.stream()
+              .map(UserRolesRepresentation::getUsername)
+              .filter(username -> username != null && !username.isEmpty())
+              .toList();
 
-      List<String> importedById = managedUsers.stream()
-          .map(UserRepresentation::getId)
-          .toList();
+      List<String> importedById = managedUsers.stream().map(UserRepresentation::getId).toList();
 
-      List<String> importedByUsername = managedUsers.stream()
-          .map(UserRepresentation::getUsername)
-          .toList();
+      List<String> importedByUsername =
+          managedUsers.stream().map(UserRepresentation::getUsername).toList();
 
       assertThat(importedById, hasItems(expectedImportedById.toArray(String[]::new)));
       assertThat(importedByUsername, hasItems(expectedImportedByUsername.toArray(String[]::new)));
@@ -828,19 +827,19 @@ public abstract class AbstractOrganizationTest {
                 exportedMembers.stream()
                     .filter(
                         importedMember -> {
-                            // Either match against ID or username
-                            String importedId = importedMember.getId();
-                            String importedUsername = importedMember.getUsername();
-                            String userId = userRepresentation.getId();
-                            String userUsername = userRepresentation.getUsername();
+                          // Either match against ID or username
+                          String importedId = importedMember.getId();
+                          String importedUsername = importedMember.getUsername();
+                          String userId = userRepresentation.getId();
+                          String userUsername = userRepresentation.getUsername();
 
-                            if (importedId != null && !importedId.isEmpty()) {
-                                return importedId.equals(userId);
-                            } else if (importedUsername != null && !importedUsername.isEmpty()) {
-                                return importedUsername.equals(userUsername);
-                            }
+                          if (importedId != null && !importedId.isEmpty()) {
+                            return importedId.equals(userId);
+                          } else if (importedUsername != null && !importedUsername.isEmpty()) {
+                            return importedUsername.equals(userUsername);
+                          }
 
-                            return false;
+                          return false;
                         })
                     .findFirst()
                     .orElseThrow();

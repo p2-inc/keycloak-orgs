@@ -22,12 +22,10 @@ import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
+import jakarta.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import jakarta.persistence.criteria.*;
 import org.hibernate.Session;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
@@ -195,7 +193,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
       // Add your search predicate
       for (String stringToSearch : search.trim().split(",")) {
         searchTermsPredicates.add(
-                cb.or(getSearchOptionPredicateArray(stringToSearch, cb, subRoot)));
+            cb.or(getSearchOptionPredicateArray(stringToSearch, cb, subRoot)));
       }
 
       subquery.select(subRoot.get("id"));
@@ -225,7 +223,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   }
 
   private Predicate[] getSearchOptionPredicateArray(
-          String value, CriteriaBuilder builder, Root<UserEntity> from) {
+      String value, CriteriaBuilder builder, Root<UserEntity> from) {
     value = value.trim().toLowerCase();
     List<Predicate> orPredicates = new ArrayList<>();
     if (!value.isEmpty()) {
@@ -358,10 +356,12 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   public void revokeMembership(UserModel user) {
     if (!hasMembership(user)) return;
     org.getMembers().removeIf(m -> m.getUserId().equals(user.getId()));
-    getRolesEntityByUserStream(user).forEach(e -> {
-      e.getRole().getUserMappings().remove(e);
-      em.remove(e);
-    });
+    getRolesEntityByUserStream(user)
+        .forEach(
+            e -> {
+              e.getRole().getUserMappings().remove(e);
+              em.remove(e);
+            });
     if (user.getEmail() != null) revokeInvitations(user.getEmail());
   }
 
@@ -426,8 +426,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<OrganizationRoleModel> getRolesByUserStream(UserModel user) {
-    return getRolesEntityByUserStream(user).map(
-            r -> new OrganizationRoleAdapter(session, realm, em, this, r.getRole()));
+    return getRolesEntityByUserStream(user)
+        .map(r -> new OrganizationRoleAdapter(session, realm, em, this, r.getRole()));
   }
 
   @Override
@@ -469,20 +469,28 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     Root<IdentityProviderEntity> idp = query.from(IdentityProviderEntity.class);
     List<Predicate> predicates = new ArrayList<>();
     predicates.add(builder.equal(idp.get("realmId"), this.getRealm().getId()));
-    String dbProductName = this.em.unwrap(Session.class).doReturningWork((connection) -> connection.getMetaData().getDatabaseProductName());
+    String dbProductName =
+        this.em
+            .unwrap(Session.class)
+            .doReturningWork((connection) -> connection.getMetaData().getDatabaseProductName());
     MapJoin<IdentityProviderEntity, String, String> configJoin = idp.joinMap("config");
     Predicate configNamePredicate = builder.equal(configJoin.key(), "home.idp.discovery.org");
 
     var value = "%" + orgId + "%";
     if (dbProductName.equals("Oracle")) {
-      Predicate configValuePredicate = builder.equal(builder.function("DBMS_LOB.COMPARE", Integer.class, configJoin.value(), builder.literal(value)), 0);
+      Predicate configValuePredicate =
+          builder.equal(
+              builder.function(
+                  "DBMS_LOB.COMPARE", Integer.class, configJoin.value(), builder.literal(value)),
+              0);
       predicates.add(builder.and(configNamePredicate, configValuePredicate));
     } else {
       predicates.add(builder.and(configNamePredicate, builder.like(configJoin.value(), value)));
     }
 
     query.orderBy(builder.asc(idp.get("alias")));
-    TypedQuery<IdentityProviderEntity> typedQuery = this.em.createQuery(query.select(idp).where(predicates.toArray(Predicate[]::new)));
+    TypedQuery<IdentityProviderEntity> typedQuery =
+        this.em.createQuery(query.select(idp).where(predicates.toArray(Predicate[]::new)));
     return typedQuery.getResultStream().map(e -> IdentityProviders.toModel(e, session));
   }
 
@@ -502,13 +510,12 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   private Stream<UserOrganizationRoleMappingEntity> getRolesEntityByUserStream(UserModel user) {
     TypedQuery<UserOrganizationRoleMappingEntity> query =
-            em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
+        em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
     query.setParameter("userId", user.getId());
     query.setParameter("orgId", org.getId());
     try {
       return query.getResultStream();
-    }
-    catch (Exception ignore) {
+    } catch (Exception ignore) {
       return Stream.empty();
     }
   }

@@ -1,5 +1,10 @@
 package io.phasetwo.service.globalconfig;
 
+import static io.phasetwo.service.Helpers.objectMapper;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,6 +15,11 @@ import io.phasetwo.service.representation.OrganizationsConfig;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Optional;
 import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,17 +28,6 @@ import org.keycloak.common.util.Base64Url;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.JsonSerialization;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Optional;
-
-import static io.phasetwo.service.Helpers.objectMapper;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @JBossLog
 public class PortalLinkExpirationTest extends AbstractOrganizationTest {
@@ -44,22 +43,22 @@ public class PortalLinkExpirationTest extends AbstractOrganizationTest {
     clientRepresentation.setId("idp-wizard");
     keycloak.realm(REALM).clients().create(clientRepresentation);
     Response response =
-            givenSpec()
-                    .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
-                    .formParam("baseUri", "foobar")
-                    .when()
-                    .post("/%s/portal-link".formatted(id))
-                    .then()
-                    .extract()
-                    .response();
+        givenSpec()
+            .header(new Header("content-type", MediaType.APPLICATION_FORM_URLENCODED))
+            .formParam("baseUri", "foobar")
+            .when()
+            .post("/%s/portal-link".formatted(id))
+            .then()
+            .extract()
+            .response();
 
     assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
 
     UserRepresentation orgAdmin =
-            keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).get(0);
+        keycloak.realm(REALM).users().search("org-admin-%s".formatted(id)).get(0);
 
     PortalLinkRepresentation link =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
 
     assertThat(link, notNullValue());
     assertThat(link.getLink(), notNullValue());
@@ -75,11 +74,12 @@ public class PortalLinkExpirationTest extends AbstractOrganizationTest {
 
     // delete org
     deleteOrganization(id);
-    //delete client
+    // delete client
     keycloak.realm(REALM).clients().get("idp-wizard").remove();
   }
 
-  public static Optional<String> getQueryParamValue(String urlString, String paramName) throws URISyntaxException {
+  public static Optional<String> getQueryParamValue(String urlString, String paramName)
+      throws URISyntaxException {
     URI uri = new URI(urlString);
     String query = uri.getQuery();
 
@@ -88,10 +88,10 @@ public class PortalLinkExpirationTest extends AbstractOrganizationTest {
     }
 
     return Arrays.stream(query.split("&"))
-            .map(param -> param.split("=", 2))
-            .filter(pair -> pair.length == 2 && pair[0].equals(paramName))
-            .map(pair -> pair[1])
-            .findFirst();
+        .map(param -> param.split("=", 2))
+        .filter(pair -> pair.length == 2 && pair[0].equals(paramName))
+        .map(pair -> pair[1])
+        .findFirst();
   }
 
   @BeforeEach

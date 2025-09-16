@@ -118,16 +118,19 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
 
   private void updateExistingOrganizationsWithNewRoles(KeycloakSession session, RealmModel realm) {
     log.debug("Updating existing organizations with new default roles");
-    session.getProvider(OrganizationProvider.class)
+    session
+        .getProvider(OrganizationProvider.class)
         .getOrganizationsStream(realm)
-        .forEach(org -> {
-            // Check if the delete-organization role exists, if not add it
-            if (org.getRoleByName(ORG_ROLE_DELETE_ORGANIZATION) == null) {
+        .forEach(
+            org -> {
+              // Check if the delete-organization role exists, if not add it
+              if (org.getRoleByName(ORG_ROLE_DELETE_ORGANIZATION) == null) {
                 OrganizationRoleModel role = org.addRole(ORG_ROLE_DELETE_ORGANIZATION);
                 role.setDescription(DEFAULT_ORG_ROLES_DESC.get(ORG_ROLE_DELETE_ORGANIZATION));
-                log.debugf("Added %s role to organization %s", ORG_ROLE_DELETE_ORGANIZATION, org.getId());
-            }
-        });
+                log.debugf(
+                    "Added %s role to organization %s", ORG_ROLE_DELETE_ORGANIZATION, org.getId());
+              }
+            });
   }
 
   private void realmPostCreate(RealmModel.RealmPostCreateEvent event) {

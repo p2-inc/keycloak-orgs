@@ -20,8 +20,8 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelException;
-import org.keycloak.models.UserModel;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.models.utils.RepresentationToModel;
@@ -96,7 +96,8 @@ public final class KeycloakOrgsImportConverter {
         .getMembers()
         .forEach(
             member -> {
-              if (!Strings.isNullOrEmpty(member.getId()) && !Strings.isNullOrEmpty(member.getUsername())) {
+              if (!Strings.isNullOrEmpty(member.getId())
+                  && !Strings.isNullOrEmpty(member.getUsername())) {
                 throw new IllegalArgumentException("Can't provide both id and username");
               }
 

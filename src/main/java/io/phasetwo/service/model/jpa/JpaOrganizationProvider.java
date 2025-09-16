@@ -138,7 +138,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public Stream<OrganizationModel>searchForOrganizationStream(
+  public Stream<OrganizationModel> searchForOrganizationStream(
       RealmModel realm,
       Map<String, String> attributes,
       Integer firstResult,
@@ -215,7 +215,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   @Override
   public Stream<InvitationModel> getUserInvitationsStream(RealmModel realm, String email) {
     TypedQuery<InvitationEntity> query =
-            em.createNamedQuery("getInvitationsByRealmAndEmail", InvitationEntity.class);
+        em.createNamedQuery("getInvitationsByRealmAndEmail", InvitationEntity.class);
     query.setParameter("realmId", realm.getId());
     query.setParameter("search", email);
 
@@ -225,7 +225,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   @Override
   public InvitationModel getInvitationById(RealmModel realm, String id) {
     TypedQuery<InvitationEntity> query =
-            em.createNamedQuery("getInvitationById", InvitationEntity.class);
+        em.createNamedQuery("getInvitationById", InvitationEntity.class);
     query.setParameter("realmId", realm.getId());
     query.setParameter("id", id);
 
@@ -234,7 +234,8 @@ public class JpaOrganizationProvider implements OrganizationProvider {
       if (entity != null) {
         return new InvitationAdapter(session, realm, em, entity);
       }
-    } catch (PersistenceException ignore) {}
+    } catch (PersistenceException ignore) {
+    }
     return null;
   }
 

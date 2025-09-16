@@ -27,6 +27,7 @@ import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
+
 /** */
 @JBossLog
 public class UserResource extends OrganizationAdminResource {
@@ -60,11 +61,11 @@ public class UserResource extends OrganizationAdminResource {
 
     UserModel user = session.users().getUserById(realm, userId);
     OrganizationModel org = orgs.getOrganizationById(realm, orgId);
-    
+
     if (org == null) {
       throw new NotFoundException(String.format("%s not found", orgId));
     }
-    
+
     if (auth.hasViewOrgs() || auth.hasOrgViewRoles(org)) {
       if (org.hasMembership(user)) {
         return org.getRolesByUserStream(user).map(r -> convertOrganizationRole(r));
@@ -81,8 +82,9 @@ public class UserResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<Invitation> listUserInvitations(@PathParam("userId") String userId) {
     log.debugv("Get invitations for user %s in realm %s", userId, realm.getName());
-    
-    // Authorization check - users can view their own invitations or admins can view any user's invitations
+
+    // Authorization check - users can view their own invitations or admins can view any user's
+    // invitations
     if (!(auth.hasViewOrgs() || OrganizationsResource.canManageInvitations(auth.getToken()))) {
       throw new NotAuthorizedException("Insufficient permissions to view user invitations");
     }

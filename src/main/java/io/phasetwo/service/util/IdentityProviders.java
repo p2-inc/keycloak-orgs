@@ -4,9 +4,7 @@ import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 
 import io.phasetwo.service.model.OrganizationModel;
-
 import java.util.*;
-
 import org.keycloak.broker.provider.IdentityProvider;
 import org.keycloak.broker.provider.IdentityProviderFactory;
 import org.keycloak.broker.social.SocialIdentityProvider;
@@ -70,11 +68,13 @@ public final class IdentityProviders {
   }
 
   /* code copied from keycloak */
-  public static IdentityProviderModel toModel(IdentityProviderEntity entity, KeycloakSession session) {
+  public static IdentityProviderModel toModel(
+      IdentityProviderEntity entity, KeycloakSession session) {
     if (entity == null) {
       return null;
     } else {
-      IdentityProviderModel identityProviderModel = getModelFromProviderFactory(entity.getProviderId(), session);
+      IdentityProviderModel identityProviderModel =
+          getModelFromProviderFactory(entity.getProviderId(), session);
       identityProviderModel.setProviderId(entity.getProviderId());
       identityProviderModel.setAlias(entity.getAlias());
       identityProviderModel.setDisplayName(entity.getDisplayName());
@@ -96,10 +96,19 @@ public final class IdentityProviders {
   }
 
   /* code copied from keycloak */
-  private static IdentityProviderModel getModelFromProviderFactory(String providerId, KeycloakSession session) {
-    IdentityProviderFactory factory = (IdentityProviderFactory)session.getKeycloakSessionFactory().getProviderFactory(IdentityProvider.class, providerId);
+  private static IdentityProviderModel getModelFromProviderFactory(
+      String providerId, KeycloakSession session) {
+    IdentityProviderFactory factory =
+        (IdentityProviderFactory)
+            session
+                .getKeycloakSessionFactory()
+                .getProviderFactory(IdentityProvider.class, providerId);
     if (factory == null) {
-      factory = (IdentityProviderFactory) session.getKeycloakSessionFactory().getProviderFactory(SocialIdentityProvider.class, providerId);
+      factory =
+          (IdentityProviderFactory)
+              session
+                  .getKeycloakSessionFactory()
+                  .getProviderFactory(SocialIdentityProvider.class, providerId);
     }
 
     if (factory != null) {

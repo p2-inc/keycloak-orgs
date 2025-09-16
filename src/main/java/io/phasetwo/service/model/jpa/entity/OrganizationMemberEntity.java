@@ -35,13 +35,13 @@ import java.util.Objects;
   @NamedQuery(
       name = "getOrganizationMembersCountExcludeAdmin",
       query =
-          "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization" +
-          " AND m.userId NOT IN " +
-          " (SELECT u.id FROM UserEntity u WHERE u.username LIKE 'org-admin-%' AND LENGTH(u.username) = 46)"
-  ),
+          "SELECT COUNT(m) FROM OrganizationMemberEntity m WHERE m.organization = :organization"
+              + " AND m.userId NOT IN "
+              + " (SELECT u.id FROM UserEntity u WHERE u.username LIKE 'org-admin-%' AND LENGTH(u.username) = 46)"),
   @NamedQuery(
-          name = "getOrganizationMemberByUserId",
-          query = "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :userId AND m.organization = :organization"),
+      name = "getOrganizationMemberByUserId",
+      query =
+          "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :userId AND m.organization = :organization"),
   @NamedQuery(
       name = "getOrganizationMembershipsByUserId",
       query = "SELECT m FROM OrganizationMemberEntity m WHERE m.userId = :userId")

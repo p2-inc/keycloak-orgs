@@ -146,7 +146,9 @@ public class OrganizationImportTest extends AbstractOrganizationTest {
     String customId = "0196afd7-8776-76aa-84d3-a7d7ec7f31a8";
     var organizationWithCustomId =
         orgsRepresentation.getOrganizations().stream()
-            .filter(organization -> organization.getOrganization().getName().equals("Organization with custom ID"))
+            .filter(
+                organization ->
+                    organization.getOrganization().getName().equals("Organization with custom ID"))
             .findFirst()
             .orElseThrow();
     assertThat(organizationWithCustomId.getOrganization().getId(), is(customId));

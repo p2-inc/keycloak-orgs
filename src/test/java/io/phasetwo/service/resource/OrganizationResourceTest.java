@@ -22,10 +22,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.oneOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -49,7 +49,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.util.*;
-
 import lombok.extern.jbosslog.JBossLog;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -495,10 +494,10 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     UserRepresentation user1 = createUser(keycloak, REALM, "johndoe");
 
     OrganizationMemberAttribute attributes = new OrganizationMemberAttribute();
-    attributes.setAttributes(Map.of(
+    attributes.setAttributes(
+        Map.of(
             "TestAttribute", List.of("value"),
-            "TestAttribute2", List.of("value", "values2")
-    ));
+            "TestAttribute2", List.of("value", "values2")));
 
     // add membership
     response = putRequest("foo", org.getId(), "members", user1.getId());
@@ -509,10 +508,10 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
 
     // get membership and attributes
-    response = getRequest( org.getId(), "members", user1.getId(), "attributes");
+    response = getRequest(org.getId(), "members", user1.getId(), "attributes");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     Map<String, List<String>> attributesResponse =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(attributesResponse, notNullValue());
     assertTrue(areMapsEqual(attributesResponse, attributes.getAttributes()));
 
@@ -520,7 +519,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     deleteOrganization(id);
   }
 
-  public static boolean areMapsEqual(Map<String, List<String>> map1, Map<String, List<String>> map2) {
+  public static boolean areMapsEqual(
+      Map<String, List<String>> map1, Map<String, List<String>> map2) {
     if (!map1.keySet().equals(map2.keySet())) {
       return false;
     }
@@ -660,8 +660,6 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // delete org
     deleteOrganization(id);
   }
-
-
 
   @Test
   void testAddGetDeleteRoles() throws IOException {
@@ -1928,7 +1926,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // delete org
     deleteOrganization(id);
-    //delete client
+    // delete client
     keycloak.realm(REALM).clients().get("idp-wizard").remove();
   }
 
@@ -2389,19 +2387,22 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   @Test
   void testDeleteOrganizationRoleInDefaultRoles() {
     // Verify that ORG_ROLE_DELETE_ORGANIZATION is included in DEFAULT_ORG_ROLES
-    boolean containsDeleteRole = Arrays.asList(OrganizationAdminAuth.DEFAULT_ORG_ROLES)
-        .contains(OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION);
+    boolean containsDeleteRole =
+        Arrays.asList(OrganizationAdminAuth.DEFAULT_ORG_ROLES)
+            .contains(OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION);
 
     assertTrue(containsDeleteRole, "DEFAULT_ORG_ROLES should include the delete-organization role");
 
     // Verify that DEFAULT_ORG_ROLES_DESC contains the description for ORG_ROLE_DELETE_ORGANIZATION
     assertTrue(
-        OrganizationAdminAuth.DEFAULT_ORG_ROLES_DESC.containsKey(OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION),
+        OrganizationAdminAuth.DEFAULT_ORG_ROLES_DESC.containsKey(
+            OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION),
         "DEFAULT_ORG_ROLES_DESC should include the delete-organization role");
 
     assertEquals(
         OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION_DESC,
-        OrganizationAdminAuth.DEFAULT_ORG_ROLES_DESC.get(OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION),
+        OrganizationAdminAuth.DEFAULT_ORG_ROLES_DESC.get(
+            OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION),
         "DEFAULT_ORG_ROLES_DESC should have the correct description for delete-organization role");
   }
 
@@ -2419,16 +2420,21 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
           objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
 
       // Verify the delete-organization role exists
-      boolean hasDeleteRole = roles.stream()
-          .anyMatch(role -> role.getName().equals(OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION));
+      boolean hasDeleteRole =
+          roles.stream()
+              .anyMatch(
+                  role ->
+                      role.getName().equals(OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION));
 
-      assertTrue(hasDeleteRole, "New organizations should have the delete-organization role by default");
+      assertTrue(
+          hasDeleteRole, "New organizations should have the delete-organization role by default");
 
       // Verify the role has the correct description
       response = getRequest(orgId, "roles", OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION);
       assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
       OrganizationRoleRepresentation roleRep =
-          objectMapper().readValue(response.getBody().asString(), OrganizationRoleRepresentation.class);
+          objectMapper()
+              .readValue(response.getBody().asString(), OrganizationRoleRepresentation.class);
 
       assertEquals(
           OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION_DESC,
@@ -2454,11 +2460,15 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
           objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
 
       // Verify the delete-organization role exists
-      boolean hasDeleteRole = roles.stream()
-          .anyMatch(role -> role.getName().equals(OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION));
+      boolean hasDeleteRole =
+          roles.stream()
+              .anyMatch(
+                  role ->
+                      role.getName().equals(OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION));
       assertTrue(hasDeleteRole, "The delete-organization role should exist by default");
 
-      // Instead of trying to delete the role (which might be protected), let's just verify it exists
+      // Instead of trying to delete the role (which might be protected), let's just verify it
+      // exists
       // and has the correct description
 
       // Verify the organization exists via the REST API
@@ -2466,11 +2476,13 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       assertThat(checkResponse.getStatusCode(), is(Status.OK.getStatusCode()));
 
       // Verify the role exists and has the correct description
-      Response roleResponse = getRequest(orgId, "roles", OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION);
+      Response roleResponse =
+          getRequest(orgId, "roles", OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION);
       assertThat(roleResponse.getStatusCode(), is(Status.OK.getStatusCode()));
 
       OrganizationRoleRepresentation roleRep =
-          objectMapper().readValue(roleResponse.getBody().asString(), OrganizationRoleRepresentation.class);
+          objectMapper()
+              .readValue(roleResponse.getBody().asString(), OrganizationRoleRepresentation.class);
 
       assertEquals(
           OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION_DESC,
@@ -2493,7 +2505,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     try {
       // Create two test users
       UserRepresentation user1 = createUserWithCredentials(keycloak, REALM, "delete-user", "pass");
-      UserRepresentation user2 = createUserWithCredentials(keycloak, REALM, "no-delete-user", "pass");
+      UserRepresentation user2 =
+          createUserWithCredentials(keycloak, REALM, "no-delete-user", "pass");
 
       // Add both users as members of the organization
       Response response = putRequest("foo", orgId, "members", user1.getId());
@@ -2506,15 +2519,20 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       grantUserRole(orgId, OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION, user1.getId());
 
       // Verify user1 has the delete-organization role
-      checkUserRole(orgId, OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION, user1.getId(), Status.NO_CONTENT.getStatusCode());
+      checkUserRole(
+          orgId,
+          OrganizationAdminAuth.ORG_ROLE_DELETE_ORGANIZATION,
+          user1.getId(),
+          Status.NO_CONTENT.getStatusCode());
 
       // Create Keycloak instances for both users
       Keycloak kc1 = getKeycloak(REALM, "admin-cli", "delete-user", "pass");
       Keycloak kc2 = getKeycloak(REALM, "admin-cli", "no-delete-user", "pass");
 
       // Create a second organization to test with
-      OrganizationRepresentation org2 = createOrganization(
-          new OrganizationRepresentation().name("test-org-2").domains(List.of("test2.com")));
+      OrganizationRepresentation org2 =
+          createOrganization(
+              new OrganizationRepresentation().name("test-org-2").domains(List.of("test2.com")));
 
       // Add both users to the second organization
       response = putRequest("foo", org2.getId(), "members", user1.getId());
