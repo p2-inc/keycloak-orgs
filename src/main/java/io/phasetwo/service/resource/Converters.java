@@ -9,10 +9,8 @@ import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationRole;
-
 import java.util.List;
 import java.util.Map;
-
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.account.UserRepresentation;
 

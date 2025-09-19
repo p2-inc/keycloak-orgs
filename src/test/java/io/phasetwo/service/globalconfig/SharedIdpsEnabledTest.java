@@ -17,13 +17,12 @@ import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.Orgs;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.representation.OrganizationsConfig;
+import io.restassured.response.Response;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import io.restassured.response.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,64 +34,59 @@ public class SharedIdpsEnabledTest extends AbstractOrganizationTest {
 
   @Test
   void testIdpOrganizationLinkCapacity() throws IOException {
-    //create a mock list of 1000 orgId
-    var uuids = Stream.generate(UUID::randomUUID)
-            .limit(1000)
-            .map(UUID::toString)
-            .toList();
+    // create a mock list of 1000 orgId
+    var uuids = Stream.generate(UUID::randomUUID).limit(1000).map(UUID::toString).toList();
     String orgIds = String.join(Constants.CFG_DELIMITER, uuids);
 
     // create identity provider
     String alias1 = "linking-provider-1";
     org.keycloak.representations.idm.IdentityProviderRepresentation idp =
-            new org.keycloak.representations.idm.IdentityProviderRepresentation();
+        new org.keycloak.representations.idm.IdentityProviderRepresentation();
     idp.setAlias(alias1);
     idp.setProviderId("oidc");
     idp.setEnabled(true);
     idp.setFirstBrokerLoginFlowAlias("first broker login");
     idp.setConfig(
-            new ImmutableMap.Builder<String, String>()
-                    .put("useJwksUrl", "true")
-                    .put("syncMode", "FORCE")
-                    .put("authorizationUrl", "https://foo.com")
-                    .put("hideOnLoginPage", "")
-                    .put("loginHint", "")
-                    .put("uiLocales", "")
-                    .put("backchannelSupported", "")
-                    .put("disableUserInfo", "")
-                    .put("acceptsPromptNoneForwardFromClient", "")
-                    .put("validateSignature", "")
-                    .put("pkceEnabled", "")
-                    .put("tokenUrl", "https://foo.com")
-                    .put("clientAuthMethod", "client_secret_post")
-                    .put("clientId", "aabbcc")
-                    .put("clientSecret", "112233")
-                    .put(ORG_OWNER_CONFIG_KEY, orgIds)
-                    .put(ORG_SHARED_IDP_KEY, "true")
-                    .build());
+        new ImmutableMap.Builder<String, String>()
+            .put("useJwksUrl", "true")
+            .put("syncMode", "FORCE")
+            .put("authorizationUrl", "https://foo.com")
+            .put("hideOnLoginPage", "")
+            .put("loginHint", "")
+            .put("uiLocales", "")
+            .put("backchannelSupported", "")
+            .put("disableUserInfo", "")
+            .put("acceptsPromptNoneForwardFromClient", "")
+            .put("validateSignature", "")
+            .put("pkceEnabled", "")
+            .put("tokenUrl", "https://foo.com")
+            .put("clientAuthMethod", "client_secret_post")
+            .put("clientId", "aabbcc")
+            .put("clientSecret", "112233")
+            .put(ORG_OWNER_CONFIG_KEY, orgIds)
+            .put(ORG_SHARED_IDP_KEY, "true")
+            .build());
 
     var response = keycloak.realm(REALM).identityProviders().create(idp);
     assertThat(
-            response.getStatus(),
-            is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+        response.getStatus(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
 
     // get IDP for org1
     Response idpResponse =
-            givenSpec(keycloak)
-                    .baseUri(container.getAuthServerUrl())
-                    .basePath("/admin/realms/" + REALM + "/")
-                    .and()
-                    .when()
-                    .get(String.join("/","identity-provider/instances", idp.getAlias()))
-                    .andReturn();
+        givenSpec(keycloak)
+            .baseUri(container.getAuthServerUrl())
+            .basePath("/admin/realms/" + REALM + "/")
+            .and()
+            .when()
+            .get(String.join("/", "identity-provider/instances", idp.getAlias()))
+            .andReturn();
     assertThat(
-            idpResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+        idpResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
     IdentityProviderRepresentation idpValue =
-            objectMapper().readValue(idpResponse.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(idpResponse.getBody().asString(), new TypeReference<>() {});
     assertThat(idpValue, notNullValue());
 
-    var discoveredOrgsConfig =
-            idpValue.getConfig().get(ORG_OWNER_CONFIG_KEY).toString();
+    var discoveredOrgsConfig = idpValue.getConfig().get(ORG_OWNER_CONFIG_KEY).toString();
     var orgs = Arrays.asList(Constants.CFG_DELIMITER_PATTERN.split(discoveredOrgsConfig));
     assertThat(orgs.size(), is(uuids.size()));
 
@@ -178,8 +172,7 @@ public class SharedIdpsEnabledTest extends AbstractOrganizationTest {
     assertThat(representation1.getConfig().get(Orgs.ORG_SHARED_IDP_KEY), is("true"));
 
     // check if there are 2 organizations linked to the IDP
-    var discoveredOrg1Config =
-        representation1.getConfig().get(ORG_OWNER_CONFIG_KEY).toString();
+    var discoveredOrg1Config = representation1.getConfig().get(ORG_OWNER_CONFIG_KEY).toString();
     var discoveredOrg1 = Arrays.asList(Constants.CFG_DELIMITER_PATTERN.split(discoveredOrg1Config));
     assertThat(discoveredOrg1.size(), is(2));
 
@@ -200,8 +193,7 @@ public class SharedIdpsEnabledTest extends AbstractOrganizationTest {
     assertThat(representation2.getConfig().get(Orgs.ORG_SHARED_IDP_KEY), is("true"));
 
     // check if there are 2 organizations linked to the IDP
-    var discoveredOrg2Config =
-        representation2.getConfig().get(ORG_OWNER_CONFIG_KEY).toString();
+    var discoveredOrg2Config = representation2.getConfig().get(ORG_OWNER_CONFIG_KEY).toString();
     var discoveredOrg2 = Arrays.asList(Constants.CFG_DELIMITER_PATTERN.split(discoveredOrg2Config));
     assertThat(discoveredOrg2.size(), is(2));
 

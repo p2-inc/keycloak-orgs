@@ -165,9 +165,7 @@ public abstract class AbstractAdminResource<T extends AdminAuth> {
 
   private void setupPermissions() {
     //    permissions = AdminPermissions.evaluator(session, realm, adminRealm, user);
-    permissions =
-        Permissions.evaluator(
-            session, realm, adminRealm, user);
+    permissions = Permissions.evaluator(session, realm, adminRealm, user);
   }
 
   private AuthenticationManager.AuthResult authenticateBearerToken(

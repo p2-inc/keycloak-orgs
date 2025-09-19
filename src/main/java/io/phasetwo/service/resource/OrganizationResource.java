@@ -236,7 +236,8 @@ public class OrganizationResource extends OrganizationAdminResource {
       }
 
       // build the action token
-      int validityInSecs = realm.getAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, 86400); //1 day
+      int validityInSecs =
+          realm.getAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, 86400); // 1 day
       int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
       PortalLinkActionToken token =
           new PortalLinkActionToken(

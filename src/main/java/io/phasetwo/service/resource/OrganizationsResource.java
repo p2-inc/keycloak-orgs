@@ -87,8 +87,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
       throw new BadRequestException("User needs to be email verified");
     }
 
-    return orgs.getUserInvitationsStream(realm,  accessToken.getEmail())
-            .map(Converters::convertInvitationModelToInvitation);
+    return orgs.getUserInvitationsStream(realm, accessToken.getEmail())
+        .map(Converters::convertInvitationModelToInvitation);
   }
 
   @POST
@@ -98,34 +98,34 @@ public class OrganizationsResource extends OrganizationAdminResource {
     var accessToken = auth.getToken();
 
     if (!canManageInvitations(accessToken)) {
-      throw new BadRequestException("User needs to be email verified");
+      throw new BadRequestException("User needs to have a verified email");
     }
 
     var invitation = orgs.getInvitationById(realm, invitationId);
-    if (invitation == null){
+    if (invitation == null) {
       log.errorf("invitation with id: {} not found", invitationId);
-      throw new BadRequestException("invitation not found");
+      throw new NotFoundException(String.format("Invitation %s not found", invitationId));
     }
 
-    if (!accessToken.getEmail().equals(invitation.getEmail())){
+    if (!accessToken.getEmail().equals(invitation.getEmail())) {
       log.errorf("email claim differ from invitation email");
-      throw new BadRequestException("email claim differ from invitation email");
+      throw new BadRequestException("Email claim differs from invitation email");
     }
 
     KeycloakModelUtils.runJobInTransaction(
-            session.getKeycloakSessionFactory(),
-            (session) -> {
-              Invitations.memberFromInvitation(invitation, auth.getUser());
-              invitation.getOrganization().revokeInvitation(invitationId);
-              EventBuilder event = new EventBuilder(realm, session, connection);
+        session.getKeycloakSessionFactory(),
+        (session) -> {
+          Invitations.memberFromInvitation(invitation, auth.getUser());
+          invitation.getOrganization().revokeInvitation(invitationId);
+          EventBuilder event = new EventBuilder(realm, session, connection);
 
-              event
-                      .event(CUSTOM_REQUIRED_ACTION)
-                      .user(user)
-                      .detail("org_id", invitation.getOrganization().getId())
-                      .detail("invitation_id", invitation.getId())
-                      .success();
-            });
+          event
+              .event(CUSTOM_REQUIRED_ACTION)
+              .user(user)
+              .detail("org_id", invitation.getOrganization().getId())
+              .detail("invitation_id", invitation.getId())
+              .success();
+        });
 
     return Response.noContent().build();
   }
@@ -142,12 +142,12 @@ public class OrganizationsResource extends OrganizationAdminResource {
 
     var invitation = orgs.getInvitationById(realm, invitationId);
 
-    if (invitation == null){
+    if (invitation == null) {
       log.errorf("invitation with id: {} not found", invitationId);
       throw new BadRequestException("invitation not found");
     }
 
-    if (!accessToken.getEmail().equals(invitation.getEmail())){
+    if (!accessToken.getEmail().equals(invitation.getEmail())) {
       log.errorf("`email` claim differ from invitation email");
       throw new BadRequestException("`email` claim differ from invitation email");
     }
@@ -157,11 +157,11 @@ public class OrganizationsResource extends OrganizationAdminResource {
     EventBuilder event = new EventBuilder(realm, session, connection);
 
     event
-            .event(CUSTOM_REQUIRED_ACTION)
-            .detail("org_id", invitation.getOrganization().getId())
-            .detail("invitation_id", invitation.getId())
-            .user(user)
-            .error("User invitation revoked.");
+        .event(CUSTOM_REQUIRED_ACTION)
+        .detail("org_id", invitation.getOrganization().getId())
+        .detail("invitation_id", invitation.getId())
+        .user(user)
+        .error("User invitation revoked.");
 
     return Response.noContent().build();
   }
@@ -238,7 +238,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
 
     OrganizationModel org;
     if (body.getId() != null && !body.getId().isEmpty()) {
-      org = orgs.createOrganization(realm, body.getId(), body.getName(), auth.getUser(), auth.hasCreateOrg());
+      org =
+          orgs.createOrganization(
+              realm, body.getId(), body.getName(), auth.getUser(), auth.hasCreateOrg());
     } else {
       org = orgs.createOrganization(realm, body.getName(), auth.getUser(), auth.hasCreateOrg());
     }
@@ -308,7 +310,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
     var representation = new OrganizationsConfig();
     representation.setCreateAdminUser(realm.getAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, true));
     representation.setSharedIdps(realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false));
-    representation.setExpirationInSecs(realm.getAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, 86400));
+    representation.setExpirationInSecs(
+        realm.getAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, 86400));
 
     return Response.ok(representation).build();
   }
@@ -404,14 +407,20 @@ public class OrganizationsResource extends OrganizationAdminResource {
       var organizationProvider = session.getProvider(OrganizationProvider.class);
       OrganizationModel org;
 
-      if (organizationRepresentation.getOrganization().getId() != null &&
-          !organizationRepresentation.getOrganization().getId().isEmpty()) {
+      if (organizationRepresentation.getOrganization().getId() != null
+          && !organizationRepresentation.getOrganization().getId().isEmpty()) {
 
-        org = organizationProvider.createOrganization(
-            realm, organizationRepresentation.getOrganization().getId(), organizationRepresentation.getOrganization().getName(), user, false);
+        org =
+            organizationProvider.createOrganization(
+                realm,
+                organizationRepresentation.getOrganization().getId(),
+                organizationRepresentation.getOrganization().getName(),
+                user,
+                false);
       } else {
-          org = organizationProvider.createOrganization(
-              realm, organizationRepresentation.getOrganization().getName(), user, false);
+        org =
+            organizationProvider.createOrganization(
+                realm, organizationRepresentation.getOrganization().getName(), user, false);
       }
 
       KeycloakOrgsImportConverter.setOrganizationAttributes(
@@ -431,7 +440,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
     } catch (ModelDuplicateException e) {
       throw ErrorResponse.exists(
           "Duplicate organization with id: %s or name: %s"
-              .formatted(organizationRepresentation.getOrganization().getId(), organizationRepresentation.getOrganization().getName()));
+              .formatted(
+                  organizationRepresentation.getOrganization().getId(),
+                  organizationRepresentation.getOrganization().getName()));
     } catch (ModelException e) {
       throw ErrorResponse.error(e.getMessage(), Response.Status.BAD_REQUEST);
     } catch (Exception e) {

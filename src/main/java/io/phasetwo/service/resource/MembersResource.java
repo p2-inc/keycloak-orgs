@@ -70,18 +70,20 @@ public class MembersResource extends OrganizationAdminResource {
   @PUT
   @Path("{userId}/attributes")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response addOrganizationMemberAttributes(@PathParam("userId") String userId,
-                                                  @Valid OrganizationMemberAttribute body) {
+  public Response addOrganizationMemberAttributes(
+      @PathParam("userId") String userId, @Valid OrganizationMemberAttribute body) {
     canManage();
-    log.debugf("Add organization member attribute to user %s from %s %s", userId, realm.getName(), organization.getId());
+    log.debugf(
+        "Add organization member attribute to user %s from %s %s",
+        userId, realm.getName(), organization.getId());
     UserModel member = session.users().getUserById(realm, userId);
     if (member != null) {
       if (!organization.hasMembership(member)) {
         throw new BadRequestException(
-                String.format(
-                        "User %s must be a member of %s to be granted role.",
-                        userId, organization.getName()));
-    }
+            String.format(
+                "User %s must be a member of %s to be granted role.",
+                userId, organization.getName()));
+      }
 
       OrganizationMemberModel orgMembership = organization.getMembershipDetails(member);
       if (body.getAttributes() != null) {
@@ -91,9 +93,7 @@ public class MembersResource extends OrganizationAdminResource {
         }
       }
 
-      return Response.ok()
-              .entity(orgMembership.getAttributes())
-              .build();
+      return Response.ok().entity(orgMembership.getAttributes()).build();
     } else {
       throw new NotFoundException(String.format("User %s doesn't exist", userId));
     }
@@ -104,21 +104,21 @@ public class MembersResource extends OrganizationAdminResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getOrganizationMemberAttributes(@PathParam("userId") String userId) {
     canManage();
-    log.debugf("Get organization member attribute to user %s from %s %s", userId, realm.getName(), organization.getId());
+    log.debugf(
+        "Get organization member attribute to user %s from %s %s",
+        userId, realm.getName(), organization.getId());
     UserModel member = session.users().getUserById(realm, userId);
     if (member != null) {
       if (!organization.hasMembership(member)) {
         throw new BadRequestException(
-                String.format(
-                        "User %s must be a member of %s to be granted role.",
-                        userId, organization.getName()));
+            String.format(
+                "User %s must be a member of %s to be granted role.",
+                userId, organization.getName()));
       }
 
       OrganizationMemberModel orgMembership = organization.getMembershipDetails(member);
 
-      return Response.ok()
-              .entity(orgMembership.getAttributes())
-              .build();
+      return Response.ok().entity(orgMembership.getAttributes()).build();
     } else {
       throw new NotFoundException(String.format("User %s doesn't exist", userId));
     }

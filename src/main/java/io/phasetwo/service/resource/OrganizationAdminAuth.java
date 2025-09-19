@@ -213,7 +213,7 @@ public class OrganizationAdminAuth extends AdminAuth {
 
   /**
    * @param org The selected organization
-   * @return true if the logged-in user has the delete-organization permission *IN* the specified 
+   * @return true if the logged-in user has the delete-organization permission *IN* the specified
    *     org
    */
   boolean hasOrgDeleteOrg(OrganizationModel org) {

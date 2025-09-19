@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.IdentityProviderModel;
@@ -73,9 +72,9 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
         .filter(provider -> canViewIdp())
         .filter(this::idpInOrg)
         .map(
-                provider ->
-                    StripSecretsUtils.stripSecrets(
-                        session, ModelToRepresentation.toRepresentation(realm, provider)));
+            provider ->
+                StripSecretsUtils.stripSecrets(
+                    session, ModelToRepresentation.toRepresentation(realm, provider)));
   }
 
   protected void idpDefaults(

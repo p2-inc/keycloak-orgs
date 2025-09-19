@@ -17,7 +17,6 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Date;
 import java.util.Objects;
-import org.keycloak.models.jpa.entities.UserEntity;
 
 /**
  * Maps a User within a specific Organization to a Role. This is different than
@@ -31,10 +30,9 @@ import org.keycloak.models.jpa.entities.UserEntity;
   @NamedQuery(
       name = "getMappingByRoleExcludeAdmin",
       query =
-          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.role=:role" +
-        " AND m.userId NOT IN " +
-                " (SELECT u.id FROM UserEntity u WHERE u.username LIKE 'org-admin-%' AND LENGTH(u.username) = 46)"
-  ),
+          "SELECT m FROM UserOrganizationRoleMappingEntity m WHERE m.role=:role"
+              + " AND m.userId NOT IN "
+              + " (SELECT u.id FROM UserEntity u WHERE u.username LIKE 'org-admin-%' AND LENGTH(u.username) = 46)"),
   @NamedQuery(
       name = "getMappingByRoleAndUser",
       query =
