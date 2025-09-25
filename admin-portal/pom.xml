@@ -3,7 +3,7 @@
   <groupId>io.phasetwo</groupId>
   <artifactId>phasetwo-admin-portal</artifactId>
   <packaging>jar</packaging>
-  <version>0.44</version>
+  <version>0.45-SNAPSHOT</version>
 
   <name>Phase Two Admin Portal</name>
   <description>Allows users to self-manage as much of their account and organization functionality as is possible.</description>
@@ -44,7 +44,7 @@
   <scm>
     <url>https://github.com/p2-inc/admin-portal</url>
     <connection>scm:git:git@github.com:p2-inc/admin-portal.git</connection>
-    <tag>v0.44</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <build>
