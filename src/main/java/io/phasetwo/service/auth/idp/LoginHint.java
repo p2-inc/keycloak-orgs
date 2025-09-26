@@ -1,4 +1,3 @@
-//package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -17,26 +16,30 @@ import static org.keycloak.protocol.oidc.OIDCLoginProtocol.LOGIN_HINT_PARAM;
 final class LoginHint {
 
     private final AuthenticationFlowContext context;
+    private final Users users;
 
-    LoginHint(AuthenticationFlowContext context) {
+    LoginHint(AuthenticationFlowContext context, Users users) {
         this.context = context;
+        this.users = users;
     }
 
-    void setInAuthSession(IdentityProviderModel homeIdp, String defaultUsername) {
-        if (homeIdp == null) {
-            return;
-        }
-        String loginHint;
-        UserModel user = context.getUser();
+    void setInAuthSession(IdentityProviderModel homeIdp, String username) {
+        String loginHint = username;
+        UserModel user = users.lookupBy(username);
         if (user != null) {
             Map<String, String> idpToUsername = context.getSession().users()
                 .getFederatedIdentitiesStream(context.getRealm(), user)
                 .collect(
                     Collectors.toMap(FederatedIdentityModel::getIdentityProvider,
                         FederatedIdentityModel::getUserName));
-            loginHint = idpToUsername.getOrDefault(homeIdp.getAlias(), defaultUsername);
-            context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, loginHint);
+            String alias = homeIdp == null ? "" : homeIdp.getAlias();
+            loginHint = idpToUsername.getOrDefault(alias, username);
         }
+        setInAuthSession(loginHint);
+    }
+
+    void setInAuthSession(String loginHint) {
+        context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, loginHint);
     }
 
     String getFromSession() {

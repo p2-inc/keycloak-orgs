@@ -1,19 +1,27 @@
-//package de.sventorben.keycloak.authentication.hidpd;
-package io.phasetwo.service.auth.idp;
+package io.phasetwo.service.auth.idp.discovery.extemail;
+
+//import de.sventorben.keycloak.authentication.hidpd.PublicAPI;
+
+import io.phasetwo.service.auth.idp.PublicAPI;
 
 import java.util.Objects;
 
-class Domain {
+@PublicAPI(unstable = true)
+public final class Domain {
 
     private final String value;
 
-    Domain(String value) {
+    public Domain(String value) {
         Objects.requireNonNull(value);
         this.value = value.toLowerCase();
     }
 
-    boolean isSubDomainOf(Domain domain) {
+    public boolean isSubDomainOf(Domain domain) {
         return this.value.endsWith("." + domain.value);
+    }
+
+    public String getRawValue() {
+        return this.value;
     }
 
     @Override
