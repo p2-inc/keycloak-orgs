@@ -1,6 +1,6 @@
-//package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
+import io.phasetwo.service.auth.idp.discovery.spi.HomeIdpDiscoverer;
 import org.keycloak.authentication.AuthenticationFlowContext;
 
 final class HomeIdpAuthenticationFlowContext {
@@ -15,6 +15,7 @@ final class HomeIdpAuthenticationFlowContext {
     private Redirector redirector;
     private BaseUriLoginFormsProvider loginFormsProvider;
     private LoginForm loginForm;
+    private Reauthentication reauthentication;
 
     HomeIdpAuthenticationFlowContext(AuthenticationFlowContext context) {
         this.context = context;
@@ -29,21 +30,21 @@ final class HomeIdpAuthenticationFlowContext {
 
     LoginPage loginPage() {
         if (loginPage == null) {
-            loginPage = new LoginPage(context, config());
+            loginPage = new LoginPage(context, config(), reauthentication());
         }
         return  loginPage;
     }
 
     LoginHint loginHint() {
         if (loginHint == null) {
-            loginHint = new LoginHint(context);
+            loginHint = new LoginHint(context, new Users(context.getSession()));
         }
         return loginHint;
     }
 
-    HomeIdpDiscoverer discoverer() {
+    HomeIdpDiscoverer discoverer(AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig) {
         if (discoverer == null) {
-            discoverer = new HomeIdpDiscoverer(context);
+            discoverer = context.getSession().getProvider(HomeIdpDiscoverer.class, discovererConfig.getProviderId());
         }
         return  discoverer;
     }
@@ -57,7 +58,7 @@ final class HomeIdpAuthenticationFlowContext {
 
     AuthenticationChallenge authenticationChallenge() {
         if (authenticationChallenge == null) {
-            authenticationChallenge = new AuthenticationChallenge(context, rememberMe(), loginHint(), loginForm());
+            authenticationChallenge = new AuthenticationChallenge(context, rememberMe(), loginHint(), loginForm(), reauthentication());
         }
         return authenticationChallenge;
     }
@@ -81,5 +82,12 @@ final class HomeIdpAuthenticationFlowContext {
             loginFormsProvider = new BaseUriLoginFormsProvider(context);
         }
         return loginFormsProvider;
+    }
+
+    Reauthentication reauthentication() {
+        if (reauthentication == null) {
+            reauthentication = new Reauthentication(context);
+        }
+        return reauthentication;
     }
 }

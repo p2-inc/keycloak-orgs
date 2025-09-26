@@ -1,4 +1,3 @@
-//package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -11,7 +10,7 @@ final class RememberMe {
 
     private final AuthenticationFlowContext context;
 
-    public RememberMe(AuthenticationFlowContext context) {
+    RememberMe(AuthenticationFlowContext context) {
         this.context = context;
     }
 
@@ -41,6 +40,6 @@ final class RememberMe {
     }
 
     String getUserName() {
-      return AuthenticationManager.getRememberMeUsername(context.getSession());
+        return AuthenticationManager.getRememberMeUsername(context.getSession());
     }
 }
