@@ -1,7 +1,5 @@
-//package de.sventorben.keycloak.authentication.hidpd;
-package io.phasetwo.service.auth.idp;
+package io.phasetwo.service.auth.idp.discovery.email;
 
-import io.phasetwo.service.auth.idp.discovery.email.Domain;
 import org.keycloak.models.Constants;
 import org.keycloak.models.IdentityProviderModel;
 
