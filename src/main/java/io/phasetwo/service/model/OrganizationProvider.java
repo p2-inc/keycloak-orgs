@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.provider.Provider;
+import org.keycloak.models.IdentityProviderModel;
 
 public interface OrganizationProvider extends Provider {
 
@@ -45,6 +46,8 @@ public interface OrganizationProvider extends Provider {
 
   InvitationModel getInvitationById(RealmModel realm, String id);
 
+  Stream<IdentityProviderModel> getIdentityProvidersStream(RealmModel realm, String configKey, String configValue, boolean exact);
+  
   // deprecated methods
 
   /**

@@ -15,6 +15,7 @@ import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.resource.OrganizationAdminAuth;
+import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
@@ -34,6 +35,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.jpa.entities.IdentityProviderEntity;
 
 public class JpaOrganizationProvider implements OrganizationProvider {
 
@@ -237,6 +240,11 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     } catch (PersistenceException ignore) {
     }
     return null;
+  }
+
+  @Override
+  public Stream<IdentityProviderModel> getIdentityProvidersStream(RealmModel realm, String configKey, String configValue, boolean exact) {
+    return IdentityProviders.getIdentityProvidersStream(session, em, realm, configKey, configValue, exact); 
   }
 
   @Override

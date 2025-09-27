@@ -5,6 +5,8 @@ import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 
 import io.phasetwo.service.model.OrganizationModel;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.keycloak.broker.provider.IdentityProvider;
 import org.keycloak.broker.provider.IdentityProviderFactory;
 import org.keycloak.broker.social.SocialIdentityProvider;
@@ -13,6 +15,21 @@ import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.jpa.entities.IdentityProviderEntity;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.MapJoin;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.jpa.entities.IdentityProviderEntity;
+import org.hibernate.Session;
 
 public final class IdentityProviders {
 
@@ -116,5 +133,52 @@ public final class IdentityProviders {
     } else {
       return new IdentityProviderModel();
     }
+  }
+
+  public static Stream<IdentityProviderModel> getIdentityProvidersStream(KeycloakSession session, EntityManager em, RealmModel realm, String configKey, String configValue, boolean exact) {
+    CriteriaBuilder builder = em.getCriteriaBuilder();
+    CriteriaQuery<IdentityProviderEntity> query = builder.createQuery(IdentityProviderEntity.class);
+    Root<IdentityProviderEntity> idp = query.from(IdentityProviderEntity.class);
+    List<Predicate> predicates = new ArrayList<>();
+    predicates.add(builder.equal(idp.get("realmId"), realm.getId()));
+    String dbProductName =  em.unwrap(Session.class).doReturningWork((connection) -> connection.getMetaData().getDatabaseProductName());
+    MapJoin<IdentityProviderEntity, String, String> configJoin = idp.joinMap("config");
+    Predicate configNamePredicate = builder.equal(configJoin.key(), configKey);
+
+    var value = exact ? configValue : "%" + configValue + "%";
+    if (dbProductName.equals("Oracle")) {
+      //TODO update this for exact match
+      Predicate configValuePredicate =
+          builder.equal(
+              builder.function(
+                  "DBMS_LOB.COMPARE", Integer.class, configJoin.value(), builder.literal(value)),
+              0);
+      predicates.add(builder.and(configNamePredicate, configValuePredicate));
+    } else {
+      if (exact) {
+        predicates.add(builder.and(configNamePredicate, builder.equal(configJoin.value(), value)));
+      } else {
+        predicates.add(builder.and(configNamePredicate, builder.like(configJoin.value(), value)));
+      }
+    }
+
+    query.orderBy(builder.asc(idp.get("alias")));
+    TypedQuery<IdentityProviderEntity> typedQuery =
+        em.createQuery(query.select(idp).where(predicates.toArray(Predicate[]::new)));
+    return typedQuery.getResultStream().map(e -> toModel(e, session));
+  }
+
+  public static Set<String> strListToSet(String input) {
+    if (input == null || input.isEmpty()) {
+      return Collections.emptySet();
+    }
+    return Arrays.stream(input.split("##"))
+        .map(String::trim)
+        .filter(s -> !s.isEmpty())
+        .collect(Collectors.toSet());
+  }
+
+  public static boolean strListContains(String input, String match) {
+    return strListToSet(input).contains(match);
   }
 }
