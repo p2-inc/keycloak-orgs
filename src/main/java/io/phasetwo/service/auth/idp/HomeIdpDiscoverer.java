@@ -131,7 +131,7 @@ final class HomeIdpDiscoverer {
                 .collect(Collectors.toList());
 
         // If multi-idps is turned on, get a subset of that list with domain matches in the config.
-        if (isMultipleIdpsConfigEnabled(context.getRealm())) {
+        if (IdentityProviders.isMultipleIdpsConfigEnabled(context.getRealm())) {
           List<IdentityProviderModel> domainMatchingIdps =
               enabledIdpsWithMatchingDomain
               .stream()
@@ -212,9 +212,5 @@ final class HomeIdpDiscoverer {
             enabledIdps.stream().map(IdentityProviderModel::getAlias).collect(Collectors.joining(",")));
         return enabledIdps;
     }
-
-  private static boolean isMultipleIdpsConfigEnabled(RealmModel realm) {
-    return realm.getAttribute(ORG_CONFIG_MULTIPLE_IDPS_KEY, false);
-  }
 
 }

@@ -2,6 +2,7 @@ package io.phasetwo.service.representation;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Set;
 import lombok.Data;
 
 @Data
@@ -16,4 +17,7 @@ public class LinkIdp {
 
   @JsonProperty("sync_mode")
   private String syncMode;
+
+  @JsonProperty("domains")
+  private Set<String> domains;
 }

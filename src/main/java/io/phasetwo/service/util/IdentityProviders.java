@@ -2,6 +2,7 @@ package io.phasetwo.service.util;
 
 import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_MULTIPLE_IDPS_KEY;
 
 import io.phasetwo.service.model.OrganizationModel;
 import java.util.*;
@@ -166,6 +167,10 @@ public final class IdentityProviders {
     TypedQuery<IdentityProviderEntity> typedQuery =
         em.createQuery(query.select(idp).where(predicates.toArray(Predicate[]::new)));
     return typedQuery.getResultStream().map(e -> toModel(e, session));
+  }
+
+  public static boolean isMultipleIdpsConfigEnabled(RealmModel realm) {
+    return realm.getAttribute(ORG_CONFIG_MULTIPLE_IDPS_KEY, false);
   }
 
   public static Set<String> strListToSet(String input) {
