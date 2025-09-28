@@ -73,6 +73,11 @@ final class HomeIdpDiscoverer {
             if (homeIdps.isEmpty()) {
                 LOG.debugf("Could not find home IdP for domain '%s' and user '%s' in realm '%s'",
                     domain, username, realmName);
+            } else {
+              String homeIdpsString = homeIdps.stream()
+                                      .map(IdentityProviderModel::getAlias)
+                                      .collect(Collectors.joining(","));
+              LOG.infof("Found IdPs [%s] with domain '%s' for user '%s'", homeIdpsString, domain, username);
             }
         } else {
             LOG.warnf("Could not extract domain from email address '%s'", username);
