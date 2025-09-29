@@ -9,10 +9,8 @@ import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAu
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.models.IdentityProviderModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.managers.AuthenticationManager;
 
 import java.util.List;
@@ -32,6 +30,17 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     @Override
     public void authenticate(AuthenticationFlowContext authenticationFlowContext) {
         HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
+        //backwards compatibilty with original keycloak-orgs port
+        String attemptedUsername = usernameHint(authenticationFlowContext, context);
+        if (attemptedUsername != null) {
+            if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
+                action(authenticationFlowContext);
+            } else {
+                authenticationFlowContext.attempted();
+            }
+            return;
+        }
+
         if (context.loginPage().shouldByPass()) {
             String usernameHint = usernameHint(authenticationFlowContext, context);
             if (usernameHint != null) {
@@ -92,8 +101,12 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
 
         final List<IdentityProviderModel> homeIdps = context.discoverer(discovererConfig).discoverForUser(authenticationFlowContext, username);
         if (homeIdps.isEmpty()) {
-            authenticationFlowContext.attempted();
-            context.loginHint().setInAuthSession(username);
+            if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
+                authenticationFlowContext.success();
+            } else {
+                authenticationFlowContext.attempted();
+                context.loginHint().setInAuthSession(username);
+            }
         } else {
             RememberMe rememberMe = context.rememberMe();
             rememberMe.handleAction(formData);
@@ -103,6 +116,8 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     }
 
     private String setUserInContext(AuthenticationFlowContext context, String username) {
+        context.clearUser();
+
         username = trimToNull(username);
 
         if (username == null) {
@@ -116,6 +131,18 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         LOG.debugf("Found username '%s' in request", username);
         context.getEvent().detail(Details.USERNAME, username);
         context.getAuthenticationSession().setAuthNote(ATTEMPTED_USERNAME, username);
+
+        try {
+            UserModel user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(),
+                    username);
+            if (user != null) {
+                LOG.tracef("Setting user '%s' in context", user.getId());
+                context.setUser(user);
+            }
+        } catch (ModelDuplicateException ex) {
+            LOG.warnf(ex, "Could not uniquely identify the user. Multiple users with name or email '%s' found.",
+                    username);
+        }
 
         return username;
     }
