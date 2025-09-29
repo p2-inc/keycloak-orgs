@@ -17,6 +17,7 @@ import { useNavigateToBasePath } from "@app/routes";
 import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 const forms = {
   URL: true,
@@ -42,6 +43,7 @@ export const GenericOIDC: FC = () => {
     createIdPUrl,
     loginRedirectURI: redirectUri,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   useEffect(() => {
     const genAlias = getAlias({
@@ -215,7 +217,7 @@ export const GenericOIDC: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `OIDC Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "oidc",
       hideOnLogin: true,
       config: {

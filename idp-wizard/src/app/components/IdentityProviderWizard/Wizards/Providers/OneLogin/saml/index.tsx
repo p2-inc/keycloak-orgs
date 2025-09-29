@@ -26,6 +26,7 @@ import {
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const OneLoginWizard: FC = () => {
   const idpCommonName = "OneLogin IdP";
@@ -43,6 +44,7 @@ export const OneLoginWizard: FC = () => {
     identifierURL,
     createIdPUrl,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const acsUrlValidator = acsUrl.replace(/\//g, "\\/");
 
@@ -133,7 +135,7 @@ export const OneLoginWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `OneLogin Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       hideOnLogin: true,
       providerId: "saml",
       config: metadata!,

@@ -21,6 +21,7 @@ import {
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const LastPassWizard: FC = () => {
   const idpCommonName = "LastPass SAML IdP";
@@ -42,6 +43,7 @@ export const LastPassWizard: FC = () => {
     identifierURL,
     createIdPUrl,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
 
@@ -113,7 +115,7 @@ export const LastPassWizard: FC = () => {
     const payload: IdentityProviderRepresentation = {
       alias,
       hideOnLogin: true,
-      displayName: `LastPass SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "saml",
       config: metadata!,
     };

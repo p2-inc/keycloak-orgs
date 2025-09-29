@@ -26,6 +26,7 @@ import {
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const EntraIdWizard: FC = () => {
   const idpCommonName = "EntraId SAML IdP";
@@ -49,7 +50,7 @@ export const EntraIdWizard: FC = () => {
     loginRedirectURL: acsUrl,
     entityId,
   } = useApi();
-
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
 
@@ -131,7 +132,7 @@ export const EntraIdWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `EntraId SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       hideOnLogin: true,
       providerId: "saml",
       config: metadata!,

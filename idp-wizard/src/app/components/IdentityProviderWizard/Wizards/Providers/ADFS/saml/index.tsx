@@ -25,6 +25,7 @@ import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const ADFSWizard: FC = () => {
   const idpCommonName = "ADFS IdP";
@@ -42,6 +43,7 @@ export const ADFSWizard: FC = () => {
     createIdPUrl,
     updateIdPUrl,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const [issuerUrl, setIssuerUrl] = useState(
     "https://HOSTNAME/federationmetadata/2007-06/federationmetadata.xml"
@@ -122,7 +124,7 @@ export const ADFSWizard: FC = () => {
         // Create the IDP
         const payload: IdentityProviderRepresentation = {
           alias,
-          displayName: `ADFS Single Sign-on`,
+          displayName: generateIdpDisplayName(alias),
           providerId: "saml",
           config: newMetadata,
           enabled: false,

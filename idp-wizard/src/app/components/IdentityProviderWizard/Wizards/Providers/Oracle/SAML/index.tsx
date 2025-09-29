@@ -10,10 +10,7 @@ import oracleLogo from "@app/images/oracle/oracle-logo.png";
 import { WizardConfirmation, Header } from "@wizardComponents";
 import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import { useNavigateToBasePath } from "@app/routes";
-import {
-  API_STATUS,
-  METADATA_CONFIG,
-} from "@app/configurations/api-status";
+import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import {
   getAlias,
@@ -24,6 +21,7 @@ import {
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const OracleWizard: FC = () => {
   const idpCommonName = "Oracle Cloud SAML IdP";
@@ -44,6 +42,7 @@ export const OracleWizard: FC = () => {
     identifierURL,
     createIdPUrl,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
 
@@ -121,8 +120,7 @@ export const OracleWizard: FC = () => {
     const payload: IdentityProviderRepresentation = {
       alias,
       hideOnLogin: true,
-      hideOnLogin: true,
-      displayName: `Oracle Cloud SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "saml",
       config: metadata!,
     };
@@ -168,11 +166,7 @@ export const OracleWizard: FC = () => {
     {
       id: 2,
       name: "Upload SAML Metadata",
-      component: (
-        <Steps.OracleStepTwo
-          handleFormSubmit={handleFormSubmit}
-        />
-      ),
+      component: <Steps.OracleStepTwo handleFormSubmit={handleFormSubmit} />,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
       enableNext: isFormValid,

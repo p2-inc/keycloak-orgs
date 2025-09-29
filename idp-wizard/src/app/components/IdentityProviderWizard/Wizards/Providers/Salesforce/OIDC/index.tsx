@@ -17,6 +17,7 @@ import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { Axios, clearAlias, getAlias, CreateIdp } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const SalesforceWizardOIDC: FC = () => {
   const idpCommonName = "Salesforce OIDC IdP";
@@ -32,6 +33,7 @@ export const SalesforceWizardOIDC: FC = () => {
     createIdPUrl,
     adminLinkOidc: adminLink,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const [results, setResults] = useState("");
@@ -124,7 +126,7 @@ export const SalesforceWizardOIDC: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `Salesforce OIDC Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "oidc",
       hideOnLogin: true,
       config: {
@@ -137,7 +139,6 @@ export const SalesforceWizardOIDC: FC = () => {
 
     try {
       await CreateIdp({ createIdPUrl, payload, featureFlags });
-      // TODO emailAsUsername, Mapper?
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
@@ -168,7 +169,9 @@ export const SalesforceWizardOIDC: FC = () => {
     {
       id: 2,
       name: "Configure OAuth Settings",
-      component: <Steps.SalesforceStepTwo loginRedirectURL={loginRedirectURL} />,
+      component: (
+        <Steps.SalesforceStepTwo loginRedirectURL={loginRedirectURL} />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
     },

@@ -26,6 +26,7 @@ import {
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const CyberArkWizard: FC = () => {
   const idpCommonName = "CyberArk SAML IdP";
@@ -47,6 +48,7 @@ export const CyberArkWizard: FC = () => {
     identifierURL,
     createIdPUrl,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
@@ -127,7 +129,7 @@ export const CyberArkWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `CyberArk SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "saml",
       hideOnLogin: true,
       config: metadata!,
@@ -187,7 +189,9 @@ export const CyberArkWizard: FC = () => {
     {
       id: 3,
       name: "Enter Service Provider Details",
-      component: <Steps.CyberArkStepThree acsUrl={acsUrl} entityId={entityId} />,
+      component: (
+        <Steps.CyberArkStepThree acsUrl={acsUrl} entityId={entityId} />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 3,
     },

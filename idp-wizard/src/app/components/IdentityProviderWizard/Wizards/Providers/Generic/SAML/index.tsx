@@ -21,6 +21,7 @@ import { getAlias, CreateIdp, SamlAttributeMapper } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const GenericSAML: FC = () => {
   const idpCommonName = "Saml IdP";
@@ -38,6 +39,7 @@ export const GenericSAML: FC = () => {
     identifierURL,
     createIdPUrl,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const samlMetadata = `${getServerUrl()}/realms/${getRealm()}/protocol/saml/descriptor`;
 
@@ -91,7 +93,7 @@ export const GenericSAML: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "saml",
       hideOnLogin: true,
       config: metadata!,

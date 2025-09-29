@@ -16,6 +16,7 @@ import { getAlias, clearAlias } from "@wizardServices";
 import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const OktaWizardSaml: FC = () => {
   const idpCommonName = "Okta SAML IdP";
@@ -34,6 +35,7 @@ export const OktaWizardSaml: FC = () => {
     identifierURL,
     createIdPUrl,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   // Complete
   const [isValidating, setIsValidating] = useState(false);
@@ -106,7 +108,7 @@ export const OktaWizardSaml: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias: alias,
-      displayName: `Okta SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       hideOnLogin: true,
       providerId: "saml",
       config: metadata!,

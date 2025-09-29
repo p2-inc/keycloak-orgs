@@ -21,12 +21,14 @@ import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const GoogleWizard: FC = () => {
   const idpCommonName = "Google SAML IdP";
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const [stepIdReached, setStepIdReached] = useState(1);
   const {
@@ -119,7 +121,7 @@ export const GoogleWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: "Google SAML Single Sign-on",
+      displayName: generateIdpDisplayName(alias),
       hideOnLogin: true,
       providerId: "saml",
       config: metadata!,

@@ -26,9 +26,11 @@ import {
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const CloudflareWizard: FC = () => {
   const idpCommonName = "Cloudflare SAML IdP";
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -128,7 +130,7 @@ export const CloudflareWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `Cloudflare SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "saml",
       hideOnLogin: true,
       config: metadata!,
@@ -175,7 +177,9 @@ export const CloudflareWizard: FC = () => {
     {
       id: 2,
       name: "Enter Service Provider Details",
-      component: <Steps.CloudflareStepTwo acsUrl={acsUrl} entityId={entityId} />,
+      component: (
+        <Steps.CloudflareStepTwo acsUrl={acsUrl} entityId={entityId} />
+      ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 2,
     },

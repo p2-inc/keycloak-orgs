@@ -1,27 +1,26 @@
-import React, { FC, useState, useEffect } from "react";
-import {
-  PageSection,
-  PageSectionVariants,
-  PageSectionTypes,
-  Wizard,
-} from "@patternfly/react-core";
-import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
-import { Axios, clearAlias } from "@wizardServices";
-import * as Steps from "./Steps";
-import * as SharedSteps from "../shared/Steps";
-import authoLogo from "@app/images/auth0/auth0-logo.png";
-import { WizardConfirmation, Header } from "@wizardComponents";
-import { useKeycloakAdminApi } from "@app/hooks/useKeycloakAdminApi";
-import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import {
   CreateIdp,
   SamlAttributeMapper,
 } from "@app/components/IdentityProviderWizard/Wizards/services";
-import { useNavigateToBasePath } from "@app/routes";
-import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
+import { API_STATUS, METADATA_CONFIG } from "@app/configurations/api-status";
 import { useApi, usePrompt } from "@app/hooks";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
+import authoLogo from "@app/images/auth0/auth0-logo.png";
+import { useNavigateToBasePath } from "@app/routes";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
+import {
+  PageSection,
+  PageSectionTypes,
+  PageSectionVariants,
+  Wizard,
+} from "@patternfly/react-core";
+import { Header, WizardConfirmation } from "@wizardComponents";
+import { Axios, clearAlias, getAlias } from "@wizardServices";
+import React, { FC, useEffect, useState } from "react";
+import * as SharedSteps from "../shared/Steps";
+import * as Steps from "./Steps";
 
 export const Auth0WizardSAML: FC = () => {
   const idpCommonName = "Auth0 SAML IdP";
@@ -36,6 +35,7 @@ export const Auth0WizardSAML: FC = () => {
     createIdPUrl,
     loginRedirectURL,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   useEffect(() => {
     const genAlias = getAlias({
@@ -110,7 +110,7 @@ export const Auth0WizardSAML: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `Auth0 SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "saml",
       hideOnLogin: true,
       config: configData!,

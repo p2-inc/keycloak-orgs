@@ -5,7 +5,11 @@ import {
   PageSectionTypes,
   Wizard,
 } from "@patternfly/react-core";
-import { API_STATUS, METADATA_CONFIG, API_RETURN } from "@app/configurations/api-status";
+import {
+  API_STATUS,
+  METADATA_CONFIG,
+  API_RETURN,
+} from "@app/configurations/api-status";
 import { Axios, clearAlias } from "@wizardServices";
 import * as Steps from "./Steps";
 import * as SharedSteps from "../shared/Steps";
@@ -22,6 +26,7 @@ import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const SalesforceWizardSAML: FC = () => {
   const idpCommonName = "Salesforce SAML IdP";
@@ -37,6 +42,7 @@ export const SalesforceWizardSAML: FC = () => {
     loginRedirectURL: acsUrl,
     entityId,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   useEffect(() => {
     const genAlias = getAlias({
@@ -121,7 +127,7 @@ export const SalesforceWizardSAML: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `Salesforce SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       hideOnLogin: true,
       providerId: "saml",
       config: configData!,
@@ -178,7 +184,9 @@ export const SalesforceWizardSAML: FC = () => {
     {
       id: 3,
       name: "Enter Service Provider Details",
-      component: <Steps.SalesforceStepThree entityId={entityId} acsUrl={acsUrl} />,
+      component: (
+        <Steps.SalesforceStepThree entityId={entityId} acsUrl={acsUrl} />
+      ),
       hideCancelButton: true,
       enableNext: true,
       canJumpTo: stepIdReached >= 3,
@@ -187,7 +195,10 @@ export const SalesforceWizardSAML: FC = () => {
       id: 4,
       name: "Upload Salesforce IdP Information",
       component: (
-        <Steps.SalesforceStepFour handleFormSubmit={handleFormSubmit} url={metadataUrl} />
+        <Steps.SalesforceStepFour
+          handleFormSubmit={handleFormSubmit}
+          url={metadataUrl}
+        />
       ),
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 4,

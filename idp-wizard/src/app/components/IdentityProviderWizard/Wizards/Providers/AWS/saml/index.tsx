@@ -26,6 +26,7 @@ import { getAlias } from "@wizardServices";
 import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const AWSSamlWizard: FC = () => {
   const idpCommonName = "AWS SSO IdP";
@@ -35,6 +36,7 @@ export const AWSSamlWizard: FC = () => {
   const title = "AWS wizard";
   const [stepIdReached, setStepIdReached] = useState(1);
   const { getRealm } = useKeycloakAdminApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const {
     alias,
@@ -139,10 +141,10 @@ export const AWSSamlWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: "AWS SSO Saml",
+      displayName: generateIdpDisplayName(alias),
       providerId: "saml",
       config: metadata!,
-      hideOnLogin: true
+      hideOnLogin: true,
     };
 
     try {

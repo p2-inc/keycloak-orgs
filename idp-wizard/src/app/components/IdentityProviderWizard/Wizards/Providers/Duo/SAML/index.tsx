@@ -26,6 +26,7 @@ import {
 } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const DuoWizard: FC = () => {
   const idpCommonName = "Duo SAML IdP";
@@ -48,6 +49,7 @@ export const DuoWizard: FC = () => {
     createIdPUrl,
     baseServerRealmsUrl,
   } = useApi();
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [metadataUrl, setMetadataUrl] = useState("");
@@ -128,7 +130,7 @@ export const DuoWizard: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `Duo SAML Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "saml",
       hideOnLogin: true,
       config: metadata!,

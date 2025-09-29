@@ -17,9 +17,11 @@ import { OidcDefaults, Protocols, Providers } from "@app/configurations";
 import { Axios, clearAlias, getAlias, CreateIdp } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
+import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
 
 export const Auth0WizardOIDC: FC = () => {
   const idpCommonName = "Auth0 OIDC IdP";
+  const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
@@ -124,7 +126,7 @@ export const Auth0WizardOIDC: FC = () => {
 
     const payload: IdentityProviderRepresentation = {
       alias,
-      displayName: `Auth0 OIDC Single Sign-on`,
+      displayName: generateIdpDisplayName(alias),
       providerId: "oidc",
       hideOnLogin: true,
       config: {
@@ -137,7 +139,6 @@ export const Auth0WizardOIDC: FC = () => {
 
     try {
       await CreateIdp({ createIdPUrl, payload, featureFlags });
-      // TODO emailAsUsername, Mapper?
 
       setResults(`${idpCommonName} created successfully. Click finish.`);
       setStepIdReached(finishStep);
