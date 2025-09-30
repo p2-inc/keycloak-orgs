@@ -30,16 +30,6 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     @Override
     public void authenticate(AuthenticationFlowContext authenticationFlowContext) {
         HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
-        //backwards compatibilty with original keycloak-orgs port
-        String attemptedUsername = usernameHint(authenticationFlowContext, context);
-        if (attemptedUsername != null) {
-            if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
-                action(authenticationFlowContext);
-            } else {
-                authenticationFlowContext.attempted();
-            }
-            return;
-        }
 
         if (context.loginPage().shouldByPass()) {
             String usernameHint = usernameHint(authenticationFlowContext, context);
@@ -101,12 +91,8 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
 
         final List<IdentityProviderModel> homeIdps = context.discoverer(discovererConfig).discoverForUser(authenticationFlowContext, username);
         if (homeIdps.isEmpty()) {
-            if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
-                authenticationFlowContext.success();
-            } else {
-                authenticationFlowContext.attempted();
-                context.loginHint().setInAuthSession(username);
-            }
+            authenticationFlowContext.attempted();
+            context.loginHint().setInAuthSession(username);
         } else {
             RememberMe rememberMe = context.rememberMe();
             rememberMe.handleAction(formData);
