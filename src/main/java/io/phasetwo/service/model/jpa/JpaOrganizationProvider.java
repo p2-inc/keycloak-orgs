@@ -31,12 +31,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.models.IdentityProviderModel;
-import org.keycloak.models.jpa.entities.IdentityProviderEntity;
 
 public class JpaOrganizationProvider implements OrganizationProvider {
 
@@ -243,8 +242,10 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public Stream<IdentityProviderModel> getIdentityProvidersStream(RealmModel realm, String configKey, String configValue, boolean exact) {
-    return IdentityProviders.getIdentityProvidersStream(session, em, realm, configKey, configValue, exact); 
+  public Stream<IdentityProviderModel> getIdentityProvidersStream(
+      RealmModel realm, String configKey, String configValue, boolean exact) {
+    return IdentityProviders.getIdentityProvidersStream(
+        session, em, realm, configKey, configValue, exact);
   }
 
   @Override

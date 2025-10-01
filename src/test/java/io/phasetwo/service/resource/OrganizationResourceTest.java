@@ -1545,9 +1545,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(2));
+    int cnt = 0;
     for (IdentityProviderRepresentation i : idps) {
-      assertThat(i.getEnabled(), is(i.getAlias().equals(alias2)));
+      assertTrue(i.getEnabled());
+      cnt++;
     }
+    assertThat(cnt, is(2));
 
     // get mappers for idp
     response = getRequest(id, "idps", alias1, "mappers");

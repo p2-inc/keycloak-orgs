@@ -311,6 +311,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     var representation = new OrganizationsConfig();
     representation.setCreateAdminUser(realm.getAttribute(ORG_CONFIG_CREATE_ADMIN_USER_KEY, true));
     representation.setSharedIdps(realm.getAttribute(ORG_CONFIG_SHARED_IDPS_KEY, false));
+    representation.setMultipleIdps(realm.getAttribute(ORG_CONFIG_MULTIPLE_IDPS_KEY, false));
     representation.setExpirationInSecs(
         realm.getAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, 86400));
 

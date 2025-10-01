@@ -26,14 +26,12 @@ import jakarta.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.hibernate.Session;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
-import org.keycloak.models.jpa.entities.IdentityProviderEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
@@ -462,7 +460,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<IdentityProviderModel> getIdentityProvidersStream() {
-    return IdentityProviders.getIdentityProvidersStream(session, em, getRealm(), "home.idp.discovery.org", getId(), false); 
+    return IdentityProviders.getIdentityProvidersStream(
+        session, em, getRealm(), "home.idp.discovery.org", getId(), false);
   }
 
   private Predicate[] getSearchOptionPredicateArray(
