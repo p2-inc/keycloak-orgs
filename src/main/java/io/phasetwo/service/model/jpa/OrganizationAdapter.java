@@ -26,14 +26,12 @@ import jakarta.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.hibernate.Session;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.JpaModel;
-import org.keycloak.models.jpa.entities.IdentityProviderEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
@@ -462,36 +460,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public Stream<IdentityProviderModel> getIdentityProvidersStream() {
-    var orgId = getId();
-
-    CriteriaBuilder builder = this.em.getCriteriaBuilder();
-    CriteriaQuery<IdentityProviderEntity> query = builder.createQuery(IdentityProviderEntity.class);
-    Root<IdentityProviderEntity> idp = query.from(IdentityProviderEntity.class);
-    List<Predicate> predicates = new ArrayList<>();
-    predicates.add(builder.equal(idp.get("realmId"), this.getRealm().getId()));
-    String dbProductName =
-        this.em
-            .unwrap(Session.class)
-            .doReturningWork((connection) -> connection.getMetaData().getDatabaseProductName());
-    MapJoin<IdentityProviderEntity, String, String> configJoin = idp.joinMap("config");
-    Predicate configNamePredicate = builder.equal(configJoin.key(), "home.idp.discovery.org");
-
-    var value = "%" + orgId + "%";
-    if (dbProductName.equals("Oracle")) {
-      Predicate configValuePredicate =
-          builder.equal(
-              builder.function(
-                  "DBMS_LOB.COMPARE", Integer.class, configJoin.value(), builder.literal(value)),
-              0);
-      predicates.add(builder.and(configNamePredicate, configValuePredicate));
-    } else {
-      predicates.add(builder.and(configNamePredicate, builder.like(configJoin.value(), value)));
-    }
-
-    query.orderBy(builder.asc(idp.get("alias")));
-    TypedQuery<IdentityProviderEntity> typedQuery =
-        this.em.createQuery(query.select(idp).where(predicates.toArray(Predicate[]::new)));
-    return typedQuery.getResultStream().map(e -> IdentityProviders.toModel(e, session));
+    return IdentityProviders.getIdentityProvidersStream(
+        session, em, getRealm(), "home.idp.discovery.org", getId(), false);
   }
 
   private Predicate[] getSearchOptionPredicateArray(

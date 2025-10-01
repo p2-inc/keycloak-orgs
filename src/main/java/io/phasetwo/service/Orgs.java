@@ -2,6 +2,8 @@ package io.phasetwo.service;
 
 public class Orgs {
 
+  public static final String ORG_DOMAIN_CONFIG_KEY =
+      "home.idp.discovery.domains"; // also the default in sven-torben impl
   public static final String ORG_OWNER_CONFIG_KEY = "home.idp.discovery.org";
   public static final String FIELD_ORG_ID = "org_id";
   public static final String ORG_AUTH_FLOW_ALIAS = "post org broker login";
@@ -15,6 +17,8 @@ public class Orgs {
   public static final String ORG_CONFIG_CREATE_ADMIN_USER_KEY =
       "_providerConfig.orgs.config.createAdminUser";
   public static final String ORG_CONFIG_SHARED_IDPS_KEY = "_providerConfig.orgs.config.sharedIdps";
+  public static final String ORG_CONFIG_MULTIPLE_IDPS_KEY =
+      "_providerConfig.orgs.config.multipleIdps";
   public static final String ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY =
       "_providerConfig.orgs.portalLink.expirationInSecs";
   public static final String ORG_SHARED_IDP_KEY = "home.idp.discovery.shared";

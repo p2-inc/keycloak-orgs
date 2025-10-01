@@ -3,7 +3,6 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.Orgs.*;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.util.IdentityProviders;
@@ -57,18 +56,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Stream<IdentityProviderRepresentation> getIdentityProviders() {
-    // loads only idps solely owned by this org, not shared
     Stream<IdentityProviderModel> owned =
-        session
-            .identityProviders()
-            .getAllStream(ImmutableMap.of(ORG_OWNER_CONFIG_KEY, organization.getId()), null, null);
-    // loads all idps that are shared
-    Stream<IdentityProviderModel> shared =
-        session
-            .identityProviders()
-            .getAllStream(ImmutableMap.of(ORG_SHARED_IDP_KEY, "true"), null, null);
+        orgs.getIdentityProvidersStream(realm, ORG_OWNER_CONFIG_KEY, organization.getId(), false);
 
-    return Stream.concat(owned, shared)
+    return owned
         .filter(provider -> canViewIdp())
         .filter(this::idpInOrg)
         .map(
@@ -106,6 +97,16 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       IdentityProviders.setAttributeMultivalued(
           representation.getConfig(), ORG_OWNER_CONFIG_KEY, Set.of(organization.getId()));
     }
+
+    // add the domains, if present in the link rep
+    linkIdp.ifPresent(
+        link -> {
+          Set<String> domains = link.getDomains();
+          if (domains != null && domains.size() > 0) {
+            IdentityProviders.setAttributeMultivalued(
+                representation.getConfig(), ORG_DOMAIN_CONFIG_KEY, domains);
+          }
+        });
   }
 
   private void deactivateOtherIdps(
@@ -113,11 +114,10 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       boolean unlink,
       boolean disable,
       String orgId) {
+    if (!unlink && !disable) return; // nothing to do
     if (representation.isEnabled()) {
-      session
-          .identityProviders()
-          .getAllStream()
-          .filter(this::idpInOrg)
+      orgs.getIdentityProvidersStream(realm, ORG_OWNER_CONFIG_KEY, organization.getId(), false)
+          .filter(this::idpInOrg) // maybe don't need to keep
           .forEach(
               provider -> {
                 if (disable) provider.setEnabled(false);
@@ -161,7 +161,11 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     idpDefaults(representation, Optional.of(linkFromRep(representation)));
-    deactivateOtherIdps(representation, false, true, organization.getId());
+    deactivateOtherIdps(
+        representation,
+        IdentityProviders.isMultipleIdpsConfigEnabled(realm),
+        false,
+        organization.getId());
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
@@ -203,7 +207,11 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       representation.setPostBrokerLoginFlowAlias(linkIdp.getPostBrokerFlow());
     }
 
-    deactivateOtherIdps(representation, true, false, organization.getId());
+    deactivateOtherIdps(
+        representation,
+        IdentityProviders.isMultipleIdpsConfigEnabled(realm),
+        false,
+        organization.getId());
 
     try {
       IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
@@ -214,6 +222,8 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
           String.format("Error updating IdP %s", representation.getAlias()), e);
     }
   }
+
+  // xxx
 
   @POST
   @Path("import-config")

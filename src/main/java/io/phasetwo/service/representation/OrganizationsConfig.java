@@ -9,6 +9,9 @@ public class OrganizationsConfig {
   @JsonProperty("sharedIdpsEnabled")
   private boolean sharedIdps = false;
 
+  @JsonProperty("multipleIdpsEnabled")
+  private boolean multipleIdps = false;
+
   @JsonProperty("expirationInSecs")
   private int expirationInSecs = 86400; // 1 day
 
@@ -26,6 +29,14 @@ public class OrganizationsConfig {
 
   public void setSharedIdps(boolean sharedIdps) {
     this.sharedIdps = sharedIdps;
+  }
+
+  public boolean isMultipleIdps() {
+    return multipleIdps;
+  }
+
+  public void setMultipleIdps(boolean multipleIdps) {
+    this.multipleIdps = multipleIdps;
   }
 
   public int getExpirationInSecs() {
