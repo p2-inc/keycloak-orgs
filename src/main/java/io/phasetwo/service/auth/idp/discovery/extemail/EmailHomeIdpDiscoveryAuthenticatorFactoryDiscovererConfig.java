@@ -1,8 +1,6 @@
 package io.phasetwo.service.auth.idp.discovery.extemail;
 
-import com.google.auto.service.AutoService;
 import io.phasetwo.service.auth.idp.AbstractHomeIdpDiscoveryAuthenticatorFactory;
-import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 
 import java.util.List;
