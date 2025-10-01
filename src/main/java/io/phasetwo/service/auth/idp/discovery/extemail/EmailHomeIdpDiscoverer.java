@@ -52,20 +52,14 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
         } else {
             LOG.tracef("User found in AuthenticationFlowContext. Extracting domain from stored user '%s'.",
                     user.getId());
-            if (EMAIL_ATTRIBUTE.equalsIgnoreCase(config.userAttribute()) && !user.isEmailVerified()
-                    && !config.forwardUserWithUnverifiedEmail()) {
+            if (EMAIL_ATTRIBUTE.equalsIgnoreCase(config.userAttribute())
+                    && !user.isEmailVerified()
+                    && config.requireVerifiedEmail()) {
                 LOG.warnf("Email address of user '%s' is not verified and forwarding not enabled", user.getId());
                 emailDomain = Optional.empty();
             } else {
                 emailDomain = domainExtractor.extractFrom(user);
             }
-        }
-
-        if (config.requireVerifiedEmail()
-                && "email".equalsIgnoreCase(config.userAttribute())
-                && !user.isEmailVerified()) {
-            LOG.debugf("Email of user %s not verified. Skipping discovery of linked IdPs", user.getId());
-            return homeIdps;
         }
 
         if (emailDomain.isPresent()) {

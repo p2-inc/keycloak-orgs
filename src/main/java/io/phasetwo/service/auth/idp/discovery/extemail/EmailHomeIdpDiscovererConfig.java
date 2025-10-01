@@ -14,7 +14,6 @@ final class EmailHomeIdpDiscovererConfig {
 
     private static final String FORWARD_TO_LINKED_IDP = "forwardToLinkedIdp";
     private static final String USER_ATTRIBUTE = "userAttribute";
-    private static final String FORWARD_UNVERIFIED_ATTRIBUTE = "forwardUnverifiedEmail";
     private static final String REQUIRE_VERIFIED_EMAIL = "requireVerifiedEmail";
     private static final String REQUIRE_VERIFIED_DOMAIN = "requireVerifiedDomain";
 
@@ -32,14 +31,6 @@ final class EmailHomeIdpDiscovererConfig {
         "The user attribute used to lookup the email address of the user.",
         STRING_TYPE,
         "email",
-        false);
-
-    private static final ProviderConfigProperty FORWARD_UNVERIFIED_PROPERTY = new ProviderConfigProperty(
-        FORWARD_UNVERIFIED_ATTRIBUTE,
-        "Forward users with unverified email",
-        "If 'User attribute' is set to 'email', whether to forward existing user if user's email is not verified.",
-        BOOLEAN_TYPE,
-        false,
         false);
 
     private static final ProviderConfigProperty REQUIRE_VERIFIED_EMAIL_PROPERTY =
@@ -64,7 +55,6 @@ final class EmailHomeIdpDiscovererConfig {
 
     static final List<ProviderConfigProperty> CONFIG_PROPERTIES = ProviderConfigurationBuilder.create()
         .property(USER_ATTRIBUTE_PROPERTY)
-        .property(FORWARD_UNVERIFIED_PROPERTY)
         .property(FORWARD_TO_LINKED_IDP_PROPERTY)
         .property(REQUIRE_VERIFIED_EMAIL_PROPERTY)
         .property(REQUIRE_VERIFIED_DOMAIN_PROPERTY)
@@ -85,12 +75,6 @@ final class EmailHomeIdpDiscovererConfig {
         return Optional.ofNullable(authenticatorConfigModel)
             .map(it -> it.getConfig().getOrDefault(USER_ATTRIBUTE, "email").trim())
             .orElse("email");
-    }
-
-    boolean forwardUserWithUnverifiedEmail() {
-        return Optional.ofNullable(authenticatorConfigModel)
-            .map(it -> Boolean.parseBoolean(it.getConfig().getOrDefault(FORWARD_UNVERIFIED_ATTRIBUTE, "false")))
-            .orElse(false);
     }
 
     boolean requireVerifiedEmail() {
