@@ -40,7 +40,6 @@ final class LoginForm {
         return forms;
     }
 
-    /*
     Response create(List<IdentityProviderModel> idps) {
         URI baseUriWithCodeAndClientId = loginFormsProvider.getBaseUriWithCodeAndClientId();
         LoginFormsProvider forms = context.form();
@@ -61,27 +60,4 @@ final class LoginForm {
         );
         return forms.createForm("hidpd-select-idp.ftl");
     }
-    */
-
-    Response create(List<IdentityProviderModel> idps) {
-        URI baseUriWithCodeAndClientId = loginFormsProvider.getBaseUriWithCodeAndClientId();
-        LoginFormsProvider forms = context.form();
-        forms.setAttribute("hidpd", new IdentityProviderBean(
-            context.getSession(),
-            context.getRealm(),
-            baseUriWithCodeAndClientId,
-            context
-            ) {
-                @Override
-                public List<IdentityProvider> getProviders() {
-                    return idps.stream()
-                        .map(AlwaysSelectableIdentityProviderModel::new)
-                        .map(idp -> createIdentityProvider(this.realm, this.baseURI, idp))
-                        .toList();
-                }
-            }
-        );
-        return forms.createForm("hidpd-select-idp.ftl");
-    }
-
 }
