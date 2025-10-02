@@ -145,6 +145,7 @@ final class HomeIdpDiscoverer {
                   if (Strings.isNullOrEmpty(domains)) return false;
                   return IdentityProviders.strListContains(domains, domain.toString());
                 })
+              .distinct() // for shared IDP case
               .collect(Collectors.toList());
           // If there are _any_ matches, use that list. If there are none, use the original list.
           if (domainMatchingIdps.size() > 0) {
