@@ -1,5 +1,6 @@
 package io.phasetwo.service.auth.idp.discovery.extemail;
 
+import com.google.common.base.Strings;
 import io.phasetwo.service.auth.idp.PublicAPI;
 import io.phasetwo.service.auth.idp.Users;
 import io.phasetwo.service.auth.idp.discovery.spi.HomeIdpDiscoverer;
@@ -13,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.phasetwo.service.Orgs.ORG_CONFIG_VALIDATE_IDP_KEY;
+import static io.phasetwo.service.Orgs.ORG_DOMAIN_CONFIG_KEY;
 import static io.phasetwo.service.Orgs.ORG_VALIDATION_PENDING_CONFIG_KEY;
 
 @PublicAPI(unstable = true)
@@ -68,6 +70,11 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
             if (homeIdps.isEmpty()) {
                 LOG.debugf("Could not find home IdP for domain '%s' and user '%s' in realm '%s'",
                         domain, username, realmName);
+            } else {
+                String homeIdpsString = homeIdps.stream()
+                        .map(IdentityProviderModel::getAlias)
+                        .collect(Collectors.joining(","));
+                LOG.infof("Found IdPs [%s] with domain '%s' for user '%s'", homeIdpsString, domain, username);
             }
         } else {
             LOG.warnf("Could not extract domain from email address '%s'", username);
@@ -76,6 +83,20 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
         return homeIdps;
     }
 
+    /**
+     * Get a list of idps given an email domain, user and username.
+     * 1. If the user is set in the context, initially look up the set of federated identities that match the user.
+     * 2. Look up all enabled idps for the realm. This seems unneccessary and a performance risk.
+     * 3. Get a stream of organizations with a matching email domain. Map those to idps.
+     * 3a. If multi-idps is turned on, get a subset of that list with domain matches in the config.
+     * 4. Get a subset of the list that match the user's federated identities. Return that if it's non-empty.
+     * 5. If empty, but user has linked idps, prefer linked and enabled IdPs without matching domain in favor of not linked IdPs with matching domain
+     * 6. If empty, but user doesn't have linked idps, fallback to not linked IdPs with matching domain (general case if user logs in for the first time)
+     * @param domain Email domain
+     * @param user User if set in the context
+     * @param username Username or email
+     * @returns A list of Identity Providers
+     */
     private List<IdentityProviderModel> discoverHomeIdps(AuthenticationFlowContext context, Domain domain, UserModel user, String username) {
         final Map<String, String> linkedIdps;
 
@@ -89,7 +110,9 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
             LOG.tracef(
                     "Found local user '%s' and forwarding to linked IdP is enabled. Discovering linked IdPs.",
                     username);
-            linkedIdps = context.getSession().users()
+            linkedIdps = context
+                    .getSession()
+                    .users()
                     .getFederatedIdentitiesStream(context.getRealm(), user)
                     .collect(
                             Collectors.toMap(FederatedIdentityModel::getIdentityProvider, FederatedIdentityModel::getUserName));
@@ -115,6 +138,24 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
                                         !validateIdpEnabled
                                                 || !isIdpValidationPending(idp))
                         .collect(Collectors.toList());
+
+        // If multi-idps is turned on, get a subset of that list with domain matches in the config.
+        if (io.phasetwo.service.util.IdentityProviders.isMultipleIdpsConfigEnabled(context.getRealm())) {
+            List<IdentityProviderModel> domainMatchingIdps =
+                    enabledIdpsWithMatchingDomain
+                            .stream()
+                            .filter(idp -> {
+                                String domains = idp.getConfig().get(ORG_DOMAIN_CONFIG_KEY);
+                                if (Strings.isNullOrEmpty(domains)) return false;
+                                return io.phasetwo.service.util.IdentityProviders.strListContains(domains, domain.toString());
+                            })
+                            .distinct()
+                            .collect(Collectors.toList());
+            // If there are _any_ matches, use that list. If there are none, use the original list.
+            if (!domainMatchingIdps.isEmpty()) {
+                enabledIdpsWithMatchingDomain = domainMatchingIdps;
+            }
+        }
 
         // Prefer linked IdP with matching domain first
         List<IdentityProviderModel> homeIdps = getLinkedIdpsFrom(enabledIdpsWithMatchingDomain, linkedIdps);
@@ -146,6 +187,12 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
                 idpQualifier, homeIdpsString, domainQualifier, domain, username);
     }
 
+    /**
+     * Given a list of idps and a map of idp alias to federated username, return a subset of the list that are contained in the map keys.
+     * @param enabledIdpsWithMatchingDomain A list of identity providers
+     * @param linkedIdps A map of idp alias to federated username
+     * @returns A subset of the list that are contained in the map keys
+     */
     private List<IdentityProviderModel> getLinkedIdpsFrom(List<IdentityProviderModel> enabledIdpsWithMatchingDomain, Map<String, String> linkedIdps) {
         return enabledIdpsWithMatchingDomain.stream()
                 .filter(it -> linkedIdps.containsKey(it.getAlias()))
@@ -170,6 +217,9 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
 //        return idpsWithMatchingDomain;
 //    }
 
+    /**
+     * @returns A list of all enabled idps for a realm.
+     */
     private List<IdentityProviderModel> determineEnabledIdps(AuthenticationFlowContext context) {
         RealmModel realm = context.getRealm();
         List<IdentityProviderModel> enabledIdps = context.getSession().identityProviders().getAllStream()
