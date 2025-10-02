@@ -1544,16 +1544,13 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     idps = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
-    assertThat(idps, hasSize(2));
-    int cnt = 0;
+    assertThat(idps, hasSize(1));
     for (IdentityProviderRepresentation i : idps) {
-      assertTrue(i.getEnabled());
-      cnt++;
+      assertThat(i.getEnabled(), is(i.getAlias().equals(alias2)));
     }
-    assertThat(cnt, is(2));
 
     // get mappers for idp
-    response = getRequest(id, "idps", alias1, "mappers");
+    response = getRequest(id, "idps", alias2, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     List<IdentityProviderMapperRepresentation> mappers =
         objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
@@ -1562,7 +1559,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     // add a mapper to the idp
     // {"identityProviderAlias":"oidc","config":
     IdentityProviderMapperRepresentation mapper = new IdentityProviderMapperRepresentation();
-    mapper.setIdentityProviderAlias(alias1);
+    mapper.setIdentityProviderAlias(alias2);
     mapper.setName("name");
     mapper.setIdentityProviderMapper("oidc-user-attribute-idp-mapper");
     mapper.setConfig(
@@ -1571,12 +1568,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
             .put("user.attribute", "name")
             .put("claim", "name")
             .build());
-    response = postRequest(mapper, id, "idps", alias1, "mappers");
+    response = postRequest(mapper, id, "idps", alias2, "mappers");
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
 
     // get mappers for idp
 
-    response = getRequest(id, "idps", alias1, "mappers");
+    response = getRequest(id, "idps", alias2, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, hasSize(1));
@@ -1584,12 +1581,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(mapperId, notNullValue());
 
     // get single mapper for idp
-    response = getRequest(id, "idps", alias1, "mappers", mapperId);
+    response = getRequest(id, "idps", alias2, "mappers", mapperId);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     mapper = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mapper, notNullValue());
     assertThat(mapper.getName(), is("name"));
-    assertThat(mapper.getIdentityProviderAlias(), is(alias1));
+    assertThat(mapper.getIdentityProviderAlias(), is(alias2));
     assertThat(mapper.getIdentityProviderMapper(), is("oidc-user-attribute-idp-mapper"));
 
     // update mapper for idp
@@ -1600,11 +1597,11 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
             .put("claim", "familyName")
             .build());
 
-    response = putRequest(mapper, id, "idps", alias1, "mappers", mapperId);
+    response = putRequest(mapper, id, "idps", alias2, "mappers", mapperId);
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get single mapper for idp
-    response = getRequest(id, "idps", alias1, "mappers", mapperId);
+    response = getRequest(id, "idps", alias2, "mappers", mapperId);
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     mapper = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mapper, notNullValue());
@@ -1612,18 +1609,16 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(mapper.getConfig().get("claim"), is("familyName"));
 
     // delete mappers for idp
-    response = deleteRequest(id, "idps", alias1, "mappers", mapperId);
+    response = deleteRequest(id, "idps", alias2, "mappers", mapperId);
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
     // get mappers for idp
-    response = getRequest(id, "idps", alias1, "mappers");
+    response = getRequest(id, "idps", alias2, "mappers");
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
     mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, empty());
 
     // delete idps
-    response = deleteRequest(id, "idps", alias1);
-    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
     response = deleteRequest(id, "idps", alias2);
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 

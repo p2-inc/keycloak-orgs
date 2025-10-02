@@ -112,19 +112,14 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   private void deactivateOtherIdps(
       IdentityProviderRepresentation representation,
       boolean unlink,
-      boolean disable,
       String orgId) {
-    if (!unlink && !disable) return; // nothing to do
+    if (!unlink ) return; // nothing to do
     if (representation.isEnabled()) {
       orgs.getIdentityProvidersStream(realm, ORG_OWNER_CONFIG_KEY, organization.getId(), false)
-          .filter(this::idpInOrg) // maybe don't need to keep
           .forEach(
               provider -> {
-                if (disable) provider.setEnabled(false);
-                if (unlink) {
                   IdentityProviders.removeOrganization(orgId, provider);
-                }
-                session.identityProviders().update(provider); // weird that this is necessary
+                  session.identityProviders().update(provider); // weird that this is necessary
               });
     }
   }
@@ -163,9 +158,9 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     idpDefaults(representation, Optional.of(linkFromRep(representation)));
     deactivateOtherIdps(
         representation,
-        IdentityProviders.isMultipleIdpsConfigEnabled(realm),
-        false,
-        organization.getId());
+        !IdentityProviders.isMultipleIdpsConfigEnabled(realm),
+            organization.getId()
+    );
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
@@ -209,9 +204,9 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
 
     deactivateOtherIdps(
         representation,
-        IdentityProviders.isMultipleIdpsConfigEnabled(realm),
-        false,
-        organization.getId());
+        !IdentityProviders.isMultipleIdpsConfigEnabled(realm),
+            organization.getId()
+    );
 
     try {
       IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
