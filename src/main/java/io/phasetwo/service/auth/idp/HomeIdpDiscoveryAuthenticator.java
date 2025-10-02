@@ -31,6 +31,7 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     public void authenticate(AuthenticationFlowContext authenticationFlowContext) {
         HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
 
+
         if (context.loginPage().shouldByPass()) {
             String usernameHint = usernameHint(authenticationFlowContext, context);
             if (usernameHint != null) {
@@ -41,9 +42,16 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
                     redirectOrChallenge(context, username, homeIdps);
                     return;
                 }
+                //set attempted in order to bypass the need to multi input username/email in case the identity doesn't exist
+                authenticationFlowContext.attempted();
+            } else {
+                //if no username hint force challenge
+                context.authenticationChallenge().forceChallenge();
             }
+        } else {
+            //if no bypass login force challenge
+            context.authenticationChallenge().forceChallenge();
         }
-        context.authenticationChallenge().forceChallenge();
     }
 
     private String usernameHint(AuthenticationFlowContext authenticationFlowContext, HomeIdpAuthenticationFlowContext context) {
