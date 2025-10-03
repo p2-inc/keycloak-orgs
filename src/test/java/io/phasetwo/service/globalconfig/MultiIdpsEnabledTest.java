@@ -7,7 +7,6 @@ import io.phasetwo.client.openapi.model.IdentityProviderMapperRepresentation;
 import io.phasetwo.client.openapi.model.IdentityProviderRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
-import io.phasetwo.service.Orgs;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.representation.OrganizationsConfig;
 import io.restassured.response.Response;
@@ -16,20 +15,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.keycloak.models.Constants;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 import static io.phasetwo.service.Helpers.objectMapper;
-import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
-import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertTrue;
 
 @JBossLog
 public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
