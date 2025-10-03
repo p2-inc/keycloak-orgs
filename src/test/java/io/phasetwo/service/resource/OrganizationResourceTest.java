@@ -1618,9 +1618,12 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     mappers = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, empty());
 
-    // delete idps
+    // delete idps linked to org
     response = deleteRequest(id, "idps", alias2);
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+    //delete non linked idp
+    keycloak.realm(REALM).identityProviders().get(alias1).remove();
 
     // get idps
     response = getRequest(id, "idps");
