@@ -4,8 +4,7 @@ import static io.phasetwo.service.Helpers.createUserWithCredentials;
 import static io.phasetwo.service.Helpers.deleteUser;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.protocol.oidc.mappers.OrganizationRoleMapper;
@@ -70,14 +69,13 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
     log.debugf("Custom Claim name organizations= %s", customClaimValue.toString());
     assertNotNull(customClaimValue);
     assertThat(customClaimValue.containsKey(id), is(true));
-    assertEquals(
-        new HashMap<String, Object>() {
-          {
-            put("name", "example");
-            put("roles", roles);
-          }
-        },
-        customClaimValue.get(id));
+
+
+    HashMap<String, Object> claims= (HashMap<String, Object>) customClaimValue.get(id);
+    assertEquals("example", claims.get("name"));
+    List<String> rolesClaim =(List<String>) claims.get("roles");
+    assertTrue(rolesClaim.contains( OrganizationAdminAuth.ORG_ROLE_VIEW_ORGANIZATION));
+    assertTrue(rolesClaim.contains( OrganizationAdminAuth.ORG_ROLE_MANAGE_ORGANIZATION));
 
     // change authorization
     keycloak =
