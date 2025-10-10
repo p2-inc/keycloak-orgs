@@ -14,4 +14,14 @@ const loginUri = authUri.concat(
 const loginUriSelectAccount = loginUri.concat('&prompt=select_account');
 const loginUriAccountHint = loginUri.concat('&account_hint=')
 
-export { tokenUri, orgsUri, accountUri, activeOrganizationUri, loginUriSelectAccount, loginUriAccountHint }
+
+const testRealmUri = Cypress.config('baseUrl') + "realms/test-realm";
+const testRealmAuthUri = testRealmUri.concat("/protocol/openid-connect/auth");
+const testRealmLoginUri = testRealmAuthUri.concat(
+    '?response_type=code',
+    '&client_id=account',
+    '&scope=openid',
+    '&redirect_uri=', testRealmUri.concat("/account")
+);
+
+export { tokenUri, orgsUri, accountUri, activeOrganizationUri, loginUriSelectAccount, loginUriAccountHint, testRealmLoginUri}
