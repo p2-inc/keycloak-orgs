@@ -7,6 +7,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.RealmManager;
+import org.keycloak.services.resources.admin.AdminAuth;
 
 @JBossLog
 public class Permissions {
@@ -36,6 +37,34 @@ public class Permissions {
       return perm;
     } else {
       return AdminPermissions.evaluator(session, realm, adminRealm, admin);
+    }
+  }
+
+  public static <T extends AdminAuth> AdminPermissionEvaluator evaluator(
+      KeycloakSession session, RealmModel realm, RealmModel adminRealm, AdminAuth auth) {
+    if (log.isTraceEnabled()) {
+      log.tracef("realm %s adminRealm %s", realm.getName(), auth.getRealm().getName());
+      String clientId = null;
+      RealmManager realmManager = new RealmManager(session);
+      if (RealmManager.isAdministrationRealm(auth.getRealm())) {
+        log.tracef("isAdministrationRealm %s", auth.getRealm().getName());
+        clientId = realm.getMasterAdminClient().getClientId();
+      } else if (auth.getRealm().equals(realm)) {
+        log.tracef("adminRealm.equals(realm)) %s", realm.getName());
+        clientId =
+            realm.getClientByClientId(realmManager.getRealmAdminClientId(realm)).getClientId();
+      }
+      log.tracef("permissions clientId %s", clientId);
+      ClientModel client = realm.getClientByClientId(clientId);
+      log.tracef("permissions clientId model is %s", client);
+    }
+
+    if (RealmManager.isAdministrationRealm(adminRealm) || !adminRealm.equals(realm)) {
+      MgmtPermissions perm = new MgmtPermissions(session, realm, adminRealm, auth.getUser());
+      perm.identity = new UserModelIdentity(adminRealm, auth.getUser());
+      return perm;
+    } else {
+      return AdminPermissions.evaluator(session, realm, auth);
     }
   }
 }
