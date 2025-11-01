@@ -1,4 +1,3 @@
-//package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -10,7 +9,6 @@ import org.keycloak.models.IdentityProviderModel;
 
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
 
 final class LoginForm {
 
@@ -22,25 +20,25 @@ final class LoginForm {
         this.loginFormsProvider = loginFormsProvider;
     }
 
+    Response createWithSignInButtonOnly(MultivaluedMap<String, String> formData) {
+        LoginFormsProvider form = createForm(formData);
+        form.setAttribute(LoginFormsProvider.USERNAME_HIDDEN, "true");
+        form.setAttribute(LoginFormsProvider.REGISTRATION_DISABLED, "true");
+        return form.createLoginUsername();
+    }
+
     Response create(MultivaluedMap<String, String> formData) {
+        LoginFormsProvider forms = createForm(formData);
+        return forms.createLoginUsername();
+    }
+
+    private LoginFormsProvider createForm(MultivaluedMap<String, String> formData) {
         LoginFormsProvider forms = context.form();
         if (!formData.isEmpty()) {
             forms.setFormData(formData);
         }
-        return forms.createLoginUsername();
+        return forms;
     }
-
-    /*
-    Response create(List<IdentityProviderModel> idps) {
-        URI baseUriWithCodeAndClientId = loginFormsProvider.getBaseUriWithCodeAndClientId();
-        LoginFormsProvider forms = context.form();
-        forms.setAttribute("hidpd", new IdentityProviderBean(context.getSession(),
-            context.getRealm(),
-            baseUriWithCodeAndClientId,
-            context));
-        return forms.createForm("hidpd-select-idp.ftl");
-    }
-    */
 
     Response create(List<IdentityProviderModel> idps) {
         URI baseUriWithCodeAndClientId = loginFormsProvider.getBaseUriWithCodeAndClientId();
@@ -62,5 +60,4 @@ final class LoginForm {
         );
         return forms.createForm("hidpd-select-idp.ftl");
     }
-
 }
