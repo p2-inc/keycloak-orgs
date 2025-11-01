@@ -10,10 +10,14 @@ import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.forms.login.freemarker.FreeMarkerLoginFormsProvider;
@@ -54,6 +58,29 @@ public class WizardResourceProvider implements RealmResourceProvider {
     return Cors.builder().auth().allowedMethods(METHODS).preflight().add(Response.ok());
   }
 
+  private static Optional<String> getPathSegments(URI uri) {
+    if (uri == null) {
+      return Optional.empty();
+    }
+
+    String path = uri.getPath();
+    if (path == null || path.isBlank() || path.equals("/")) {
+      return Optional.empty();
+    }
+
+    // Normalize: remove leading/trailing slashes and split
+    String cleaned =
+        Arrays.stream(path.split("/"))
+            .filter(segment -> !segment.isBlank())
+            .collect(Collectors.joining("/"));
+
+    if (cleaned.isEmpty()) {
+      return Optional.empty();
+    }
+
+    return Optional.of("/" + cleaned);
+  }
+
   /**
    * something is seriously wrong since resteasy reactive upgrade. catch-all and regex paths no
    * longer work from annotations. This is a hack to get v23 working in the meantime.
@@ -68,6 +95,7 @@ public class WizardResourceProvider implements RealmResourceProvider {
     log.tracef("baseUri %s", uriInfo.getBaseUri());
     log.tracef("segments %s", uriInfo.getPathSegments());
     log.tracef("requestUri %s", uriInfo.getRequestUri());
+    log.tracef("relativePath %s", getPathSegments(uriInfo.getBaseUri()).orElse("<empty>"));
 
     if (path == null || "".equals(path) || "/".equals(path)) return wizard();
     if (path.startsWith("/")) {
@@ -89,12 +117,15 @@ public class WizardResourceProvider implements RealmResourceProvider {
   @Produces(MediaType.TEXT_HTML)
   public Response wizard() {
     log.trace("wizard index file");
+    UriInfo uriInfo = session.getContext().getUri();
+    String relativePath = getPathSegments(uriInfo.getBaseUri()).orElse("");
     String wizardResources = ".";
     Theme theme = getTheme("wizard");
     RealmModel realm = session.getContext().getRealm();
     LoginFormsProvider form =
         session
             .getProvider(LoginFormsProvider.class)
+            .setAttribute("relativePath", relativePath)
             .setAttribute("wizardResources", wizardResources)
             .setAttribute("realmName", realm.getName());
     FreeMarkerLoginFormsProvider fm = (FreeMarkerLoginFormsProvider) form;
