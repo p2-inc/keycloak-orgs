@@ -2,7 +2,7 @@
 
 # Organizations for Keycloak
 
-*Single realm, multi-tenancy for SaaS apps*
+_Single realm, multi-tenancy for SaaS apps_
 
 This project intends to provide a range of Keycloak extensions focused on solving several of the common use cases of multi-tenant SaaS applications that Keycloak does not solve out of the box.
 
@@ -84,9 +84,9 @@ During the first run, some initial migrations steps will occur:
 
 ### Admin UI
 
-If you are using the extension as bundled in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak) or by building our [Admin UI theme](https://github.com/p2-inc/keycloak-ui), you must take an additional step in order to show that theme. In the Admin Console UI, go to the *Realm Settings* -> *Themes* page and select `phasetwo.v2`. Then, the "Organizations" section will be available in the left navigation. 
+If you are using the extension as bundled in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak) or by building our [Admin UI theme](https://github.com/p2-inc/keycloak-ui), you must take an additional step in order to show that theme. In the Admin Console UI, go to the _Realm Settings_ -> _Themes_ page and select `phasetwo.v2`. Then, the "Organizations" section will be available in the left navigation.
 
-**Because of a quirk in Keycloak, if you are logging in to the `master` realm, the theme must be set in *that* realm, rather than the realm you wish to administer.**
+**Because of a quirk in Keycloak, if you are logging in to the `master` realm, the theme must be set in _that_ realm, rather than the realm you wish to administer.**
 
 ### Compatibility
 
@@ -180,7 +180,7 @@ There are currently two OIDC mapper that adds either Organization attributes or 
   }
 ```
 
-You can configure the mapper, by going to **Clients** > ***your-client-name*** > **Client scopes** > ***your-client-name*-dedicated** and choosing to add a new mapper **By configuration**. Once selected, choose the **Organization Role** mapper from the list and specify the details like the following:
+You can configure the mapper, by going to **Clients** > **_your-client-name_** > **Client scopes** > **_your-client-name_-dedicated** and choosing to add a new mapper **By configuration**. Once selected, choose the **Organization Role** mapper from the list and specify the details like the following:
 
 ![mapper](./docs/assets/mapper.png)
 
@@ -188,21 +188,31 @@ You can configure the mapper, by going to **Clients** > ***your-client-name*** >
 
 #### Invitations
 
-For most use cases, set the `Invitation` required action to `Enabled` in *Authentication*->*Required Actions*. It does not need to be set as a default. It will automatically check on each login if the user has outstanding Invitations to Organizations, and enable itself.
+**General Invite Flow for a User**
+
+Understanding Invitation flow is key to using Organizations effectively. When you create an invitation, it does not automatically send the user a notification. It creates an Invitation object, which is then associated with a user upon next login. In order to send an email, include the `send=true` value during Invitation creation (via API).
+
+When the user next logs in, the `Invitation` required action (see below) will be added to their account if they have any outstanding Invitations. In order to complete the required action, they will be presented with a list of Invitations, and can accept or reject each one. Accepting adds them as a Member of the Organization with the default Role specified in the Invitation.
+
+If you issue an invite via the Admin UI in the Keycloak console, you must include a `redirectUri` in order to ensure a link is include in the email that is sent to the user. Unless you have customized the email template to ensure there is a link, the email will only act as a notification but not tell them where to go. The `redirectUri` should be a URL that points to your application, which will allow the user to enter the registration flow.
+
+**Configuration of Required Action**
+
+For most use cases, set the `Invitation` required action to `Enabled` in _Authentication_->_Required Actions_. It does not need to be set as a default. It will automatically check on each login if the user has outstanding Invitations to Organizations, and enable itself.
 
 ![Install and enable Invitation Required Action](https://github.com/p2-inc/keycloak-orgs/assets/244253/c454cfaa-e50f-4a3c-94b4-87e9e85801d6)
 
 There are some non-standard flows where the required action does not do this detection. For these cases, there is a custom Authenticator you can add to a copy of the standard browser flow. Add the `Invitation` authenticator as a "REQUIRED" execution following the "Username Password Form" as a child of the forms group. Both the Required Action and the Authenticator check to see if the authenticated user has outstanding Invitations to Organizations, and then adds the Required Action that they must complete to accept or reject their Invitations following a successful authentication.
 
-Note that it is a default to require that an email address be _verified_, as it would present a security issue to allow anyone who uses an email address to register to join an organization without verifying that the user is the owner of that email address. Because of that, it is assumed that you are using invitations in conjunction with setting *Verify Email* as a _default_ Required Action.
+Note that it is a default to require that an email address be _verified_, as it would present a security issue to allow anyone who uses an email address to register to join an organization without verifying that the user is the owner of that email address. Because of that, it is assumed that you are using invitations in conjunction with setting _Verify Email_ as a _default_ Required Action.
 
 #### IdP Discovery
 
-Organizations may optionally be given permission to manage their own IdP. The custom resources that allow this write a configuration in the IdP entities that is compatible with a 3rd party extension that allows for IdP discovery based on email domain configured for the Organization. It works by writing the `home.idp.discovery.orgs` value into the `config` map for the IdP. Information on further configuration is available at [sventorben/keycloak-home-idp-discovery](https://github.com/sventorben/keycloak-home-idp-discovery). However, please note that the internal discovery portion has been *forked* from his version, and does not look up IdPs in the same way.
+Organizations may optionally be given permission to manage their own IdP. The custom resources that allow this write a configuration in the IdP entities that is compatible with a 3rd party extension that allows for IdP discovery based on email domain configured for the Organization. It works by writing the `home.idp.discovery.orgs` value into the `config` map for the IdP. Information on further configuration is available at [sventorben/keycloak-home-idp-discovery](https://github.com/sventorben/keycloak-home-idp-discovery). However, please note that the internal discovery portion has been _forked_ from his version, and does not look up IdPs in the same way.
 
 ![mapper](./docs/assets/home-idp-discovery-config.png)
 
-These are the configuration options for the "Home IdP Discovery" Authenticator. It will need to be placed in your flow as a replacement for a "Username form", or after another Authenticator/Form that sets the `ATTEMPTED_USERNAME` note. 
+These are the configuration options for the "Home IdP Discovery" Authenticator. It will need to be placed in your flow as a replacement for a "Username form", or after another Authenticator/Form that sets the `ATTEMPTED_USERNAME` note.
 
 #### Conditional Attributes
 
@@ -217,26 +227,25 @@ For more information you can refer to [active-organization](./docs/active-organi
 
 In the `Organizations` tab it is possible to switch between two master configuration settings: "Create Admin User" and "Shared IDPs"
 
-The `Create Admin User` setting controls the creation of the initial administrator when a new organization is created.    
+The `Create Admin User` setting controls the creation of the initial administrator when a new organization is created.  
 The `Shared IDPs` will give a keycloak admin user the possibility to control the assignment of a Keycloak identity provider in the context of multiple organization. If turned `on`the same IDP can be shared between multiple organizations. If turned `off` a IDP can be assigned to one organization. Switching this setting from `on` to `off` will erase all the IDP settings the current organizations have.  
 These configs are persisted in the realm config under the flags `_providerConfig.orgs.config.createAdminUser` and `_providerConfig.orgs.config.sharedIdps`
 
 ### Organizations shared IDPs
 
-It is possible to share the same IDP between multiple organizations by switching `on` the `Shared IDPs` config.   
-This offers the possibility to login using the same IDP to different organizations by using the [IdP Discovery](#idp-discovery) method.   
+It is possible to share the same IDP between multiple organizations by switching `on` the `Shared IDPs` config.  
+This offers the possibility to login using the same IDP to different organizations by using the [IdP Discovery](#idp-discovery) method.  
 For a shared IdP if the `Post login flow` authentication flow is set to `post org broker login` the `Add User to Org` authenticator will add the new member to all organizations which contain the user email domain in their domains configuration list.
 
 ## License
 
-We’ve changed the license of our core extensions from the AGPL v3 to the [Elastic License v2](https://github.com/elastic/elasticsearch/blob/main/licenses/ELASTIC-LICENSE-2.0.txt). 
+We’ve changed the license of our core extensions from the AGPL v3 to the [Elastic License v2](https://github.com/elastic/elasticsearch/blob/main/licenses/ELASTIC-LICENSE-2.0.txt).
 
 - Our blog post on the subject https://phasetwo.io/blog/licensing-change/
 - An attempt at a clarification https://github.com/p2-inc/keycloak-orgs/issues/81#issuecomment-1554683102
 
------
+---
 
 Portions of the [Home IdP Discovery](https://github.com/p2-inc/keycloak-orgs/tree/main/src/main/java/io/phasetwo/service/auth/idp) code are Copyright (c) 2021-2024 Sven-Torben Janus, and are licensed under the [MIT License](https://github.com/p2-inc/keycloak-orgs/blob/main/src/main/java/io/phasetwo/service/auth/idp/LICENSE.md).
 
 All other documentation, source code and other files in this repository are Copyright 2025 Phase Two, Inc.
-
