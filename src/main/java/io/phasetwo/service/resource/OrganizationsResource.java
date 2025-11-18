@@ -280,7 +280,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     realm.setAttribute(ORG_CONFIG_MULTIPLE_IDPS_KEY, body.isMultipleIdps());
     realm.setAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, body.getExpirationInSecs());
     realm.setAttribute(ORG_CONFIG_DEFAULT_APPLICATION_URI, body.getDefaultApplicationUri());
-    
+
     return Response.ok(body).build();
   }
 

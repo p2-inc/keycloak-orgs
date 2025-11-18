@@ -17,7 +17,7 @@ public class OrganizationsConfig {
 
   @JsonProperty("defaultApplicationUri")
   private String defaultApplicationUri = null;
-  
+
   public boolean isCreateAdminUser() {
     return createAdminUser;
   }
