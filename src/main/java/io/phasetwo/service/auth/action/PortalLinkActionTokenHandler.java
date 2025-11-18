@@ -63,6 +63,10 @@ public class PortalLinkActionTokenHandler
         token.getIssuedFor(), token.getOrgId(), token.getUserId(), token.getRedirectUri());
     UserModel user = tokenContext.getAuthenticationSession().getAuthenticatedUser();
 
+    if (tokenContext.isAuthenticationSessionFresh()) {
+      log.infof("###### tokenContext.isAuthenticationSessionFresh() = %b", true);
+    }
+
     final AuthenticationSessionModel authSession = tokenContext.getAuthenticationSession();
     final ClientModel client = authSession.getClient();
     final String redirectUri =

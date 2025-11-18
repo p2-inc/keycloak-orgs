@@ -26,8 +26,6 @@ import jakarta.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
