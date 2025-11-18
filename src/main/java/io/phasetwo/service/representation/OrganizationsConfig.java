@@ -15,6 +15,9 @@ public class OrganizationsConfig {
   @JsonProperty("expirationInSecs")
   private int expirationInSecs = 86400; // 1 day
 
+  @JsonProperty("defaultApplicationUri")
+  private String defaultApplicationUri = null;
+  
   public boolean isCreateAdminUser() {
     return createAdminUser;
   }
@@ -45,5 +48,13 @@ public class OrganizationsConfig {
 
   public void setExpirationInSecs(int expirationInSecs) {
     this.expirationInSecs = expirationInSecs;
+  }
+
+  public String getDefaultApplicationUri() {
+    return defaultApplicationUri;
+  }
+
+  public void setDefaultApplicationUri(String defaultApplicationUri) {
+    this.defaultApplicationUri = defaultApplicationUri;
   }
 }

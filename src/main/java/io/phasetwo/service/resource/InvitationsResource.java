@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.*;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
@@ -64,8 +65,6 @@ public class InvitationsResource extends OrganizationAdminResource {
     }
     email = email.toLowerCase();
 
-    String link = Optional.ofNullable(invitation.getRedirectUri()).orElse("");
-
     if (organization.getInvitationsByEmail(email).count() > 0) {
       log.debugf(
           "invitation for %s %s %s already exists. .",
@@ -73,6 +72,14 @@ public class InvitationsResource extends OrganizationAdminResource {
       throw new ClientErrorException(
           String.format("Invitation for %s already exists.", email), Response.Status.CONFLICT);
     }
+
+    String link = realm.getAttribute(ORG_CONFIG_DEFAULT_APPLICATION_URI);
+    if (!Strings.isNullOrEmpty(invitation.getRedirectUri())) {
+      link = invitation.getRedirectUri();
+    } else {
+      link = "";
+    }
+    log.debugf("invitation link is %s", link);
 
     UserModel user = KeycloakModelUtils.findUserByNameOrEmail(session, realm, email);
     if (user != null && organization.hasMembership(user)) {
