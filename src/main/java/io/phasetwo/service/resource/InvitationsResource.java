@@ -76,7 +76,8 @@ public class InvitationsResource extends OrganizationAdminResource {
     String link = realm.getAttribute(ORG_CONFIG_DEFAULT_APPLICATION_URI);
     if (!Strings.isNullOrEmpty(invitation.getRedirectUri())) {
       link = invitation.getRedirectUri();
-    } else {
+    }
+    if (Strings.isNullOrEmpty(link)) {
       link = "";
     }
     log.debugf("invitation link is %s", link);
