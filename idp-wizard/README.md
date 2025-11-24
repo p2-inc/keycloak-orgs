@@ -73,7 +73,7 @@ Note: By submitting any code, documentation, or other materials submitted to thi
 Run the latest version of the Phase Two enhanced Keycloak distribution:
 
 ```bash
-docker run --name phasetwo_test --rm -p 8080:8081 \
+docker run --name phasetwo_test --rm -p 8080:8080 \
     -e KEYCLOAK_ADMIN=admin \
     -e KEYCLOAK_ADMIN_PASSWORD=admin \
     -e KC_HTTP_RELATIVE_PATH=/auth \
