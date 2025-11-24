@@ -42,10 +42,11 @@ const App: React.FC = () => {
   useEffect(() => {
     // Organization already selected and is still locally saved
     // and still in token
+    const urlParams = new URLSearchParams(window.location.search);
+    const orgParam = urlParams.get("org_id") as string;
+
     if (organization && orgsArr.includes(organization)) {
       // Set organization to a specific org if present in the URL as a query param
-      const urlParams = new URLSearchParams(window.location.search);
-      const orgParam = urlParams.get("org_id") as string;
 
       if (orgParam && orgsArr.includes(orgParam)) {
         dispatch(setOrganization(orgParam as string));
@@ -72,6 +73,14 @@ const App: React.FC = () => {
     // Must pick an org or global
     // Global option presented in picker
     if (orgsArr.length > 1) {
+      // org_id present in URL query param
+      // no organization has been selected yet
+      // want to set organization to the org_id param
+      if (!organization && orgParam && orgsArr.includes(orgParam)) {
+        dispatch(setOrganization(orgParam as string));
+        return;
+      }
+
       dispatch(setMustPickOrg(true));
       return;
     }
