@@ -47,9 +47,13 @@ public class UserResource extends OrganizationAdminResource {
     log.debugv("Get org memberships for %s %s", realm.getName(), userId);
 
     UserModel user = session.users().getUserById(realm, userId);
+    if (user == null) {
+      throw new NotFoundException(String.format("User with id %s not found", userId));
+    }
+
     return orgs.getUserOrganizationsStream(realm, user)
         .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
-        .map(m -> convertOrganizationModelToOrganization(m));
+        .map(Converters::convertOrganizationModelToOrganization);
   }
 
   @GET
