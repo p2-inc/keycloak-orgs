@@ -110,16 +110,14 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
   }
 
   private void deactivateOtherIdps(
-      IdentityProviderRepresentation representation,
-      boolean unlink,
-      String orgId) {
-    if (!unlink ) return; // nothing to do
+      IdentityProviderRepresentation representation, boolean unlink, String orgId) {
+    if (!unlink) return; // nothing to do
     if (representation.isEnabled()) {
       orgs.getIdentityProvidersStream(realm, ORG_OWNER_CONFIG_KEY, organization.getId(), false)
           .forEach(
               provider -> {
-                  IdentityProviders.removeOrganization(orgId, provider);
-                  session.identityProviders().update(provider); // weird that this is necessary
+                IdentityProviders.removeOrganization(orgId, provider);
+                session.identityProviders().update(provider); // weird that this is necessary
               });
     }
   }
@@ -159,8 +157,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     deactivateOtherIdps(
         representation,
         !IdentityProviders.isMultipleIdpsConfigEnabled(realm),
-            organization.getId()
-    );
+        organization.getId());
 
     Response resp = getIdpResource().create(representation);
     if (resp.getStatus() == Response.Status.CREATED.getStatusCode()) {
@@ -205,8 +202,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     deactivateOtherIdps(
         representation,
         !IdentityProviders.isMultipleIdpsConfigEnabled(realm),
-            organization.getId()
-    );
+        organization.getId());
 
     try {
       IdentityProviderModel updated = RepresentationToModel.toModel(realm, representation, session);
