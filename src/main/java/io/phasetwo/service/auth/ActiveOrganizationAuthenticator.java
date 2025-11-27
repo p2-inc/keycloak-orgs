@@ -1,6 +1,7 @@
 package io.phasetwo.service.auth;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
+import static org.keycloak.authentication.AuthenticationProcessor.CURRENT_FLOW_PATH;
 
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
@@ -13,6 +14,8 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
+import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.http.HttpRequest;
 import org.keycloak.models.KeycloakSession;
@@ -23,6 +26,7 @@ import org.keycloak.sessions.AuthenticationSessionModel;
 
 @JBossLog
 public class ActiveOrganizationAuthenticator implements Authenticator {
+  public static final String POST_BROKER_FLOW = "post-broker-login";
   private final OrganizationProvider provider;
   private static final String BROWSER_ACCOUNT_HINT_PARAM = "client_request_param_account_hint";
   private static final String DIRECT_ACCOUNT_HINT = "account_hint";
@@ -34,7 +38,9 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
 
   @Override
   public void authenticate(AuthenticationFlowContext context) {
-    if (requestHasAccountHintParam(context)) {
+    if (wasPostBrokerLogin(context)) {
+      tryOrganizationSelectionChallenge(context);
+    } else if (requestHasAccountHintParam(context)) {
       evaluateAuthenticationWithAccountHint(context);
     } else if (shouldChallengeForOrganizationSelection(context)) {
       tryOrganizationSelectionChallenge(context);
@@ -115,9 +121,15 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
   }
 
   private boolean shouldChallengeForOrganizationSelection(AuthenticationFlowContext context) {
+
     AuthenticationSessionModel authSession = context.getAuthenticationSession();
     String prompt = authSession.getClientNote(OIDCLoginProtocol.PROMPT_PARAM);
     return prompt != null && prompt.contains(OIDCLoginProtocol.PROMPT_VALUE_SELECT_ACCOUNT);
+  }
+
+  private boolean wasPostBrokerLogin(AuthenticationFlowContext context){
+      String currentFlow = context.getAuthenticationSession().getAuthNote(CURRENT_FLOW_PATH);
+      return POST_BROKER_FLOW.equals(currentFlow);
   }
 
   private void tryOrganizationSelectionChallenge(AuthenticationFlowContext context) {
