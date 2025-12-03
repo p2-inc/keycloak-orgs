@@ -114,10 +114,11 @@ public class OrganizationsResource extends OrganizationAdminResource {
 
     KeycloakModelUtils.runJobInTransaction(
         session.getKeycloakSessionFactory(),
+        session.getContext(),
         (session) -> {
           Invitations.memberFromInvitation(invitation, auth.getUser());
           invitation.getOrganization().revokeInvitation(invitationId);
-          EventBuilder event = new EventBuilder(realm, this.session, connection);
+          EventBuilder event = new EventBuilder(realm, session, connection);
 
           event
               .event(CUSTOM_REQUIRED_ACTION)
