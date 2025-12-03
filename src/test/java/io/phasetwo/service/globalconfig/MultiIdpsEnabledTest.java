@@ -1,5 +1,9 @@
 package io.phasetwo.service.globalconfig;
 
+import static io.phasetwo.service.Helpers.objectMapper;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableMap;
@@ -10,18 +14,13 @@ import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.representation.OrganizationsConfig;
 import io.restassured.response.Response;
+import java.io.IOException;
+import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.util.List;
-
-import static io.phasetwo.service.Helpers.objectMapper;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 @JBossLog
 public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
@@ -62,33 +61,34 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
     idp.setEnabled(true);
     idp.setFirstBrokerLoginFlowAlias("first broker login");
     idp.setConfig(
-            new ImmutableMap.Builder<String, Object>()
-                    .put("useJwksUrl", "true")
-                    .put("syncMode", "IMPORT")
-                    .put("authorizationUrl", "https://foo.com")
-                    .put("hideOnLoginPage", "")
-                    .put("loginHint", "")
-                    .put("uiLocales", "")
-                    .put("backchannelSupported", "")
-                    .put("disableUserInfo", "")
-                    .put("acceptsPromptNoneForwardFromClient", "")
-                    .put("validateSignature", "")
-                    .put("pkceEnabled", "")
-                    .put("tokenUrl", "https://foo.com")
-                    .put("clientAuthMethod", "client_secret_post")
-                    .put("clientId", "aabbcc")
-                    .put("clientSecret", "112233")
-                    .build());
+        new ImmutableMap.Builder<String, Object>()
+            .put("useJwksUrl", "true")
+            .put("syncMode", "IMPORT")
+            .put("authorizationUrl", "https://foo.com")
+            .put("hideOnLoginPage", "")
+            .put("loginHint", "")
+            .put("uiLocales", "")
+            .put("backchannelSupported", "")
+            .put("disableUserInfo", "")
+            .put("acceptsPromptNoneForwardFromClient", "")
+            .put("validateSignature", "")
+            .put("pkceEnabled", "")
+            .put("tokenUrl", "https://foo.com")
+            .put("clientAuthMethod", "client_secret_post")
+            .put("clientId", "aabbcc")
+            .put("clientSecret", "112233")
+            .build());
 
     // create idp
     Response response = postRequest(idp, id, "idps");
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    assertThat(
+        response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
 
     // get idps
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
 
@@ -102,7 +102,8 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
     representation.setAlias(alias2);
     representation.setInternalId(null);
     response = postRequest(representation, id, "idps");
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    assertThat(
+        response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
 
     // get idps
     response = getRequest(id, "idps");
@@ -116,9 +117,10 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
 
     // get mappers for idp2
     var mapperResponse = getRequest(id, "idps", alias2, "mappers");
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    assertThat(
+        mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
     List<IdentityProviderMapperRepresentation> mappers =
-            objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, empty());
 
     // add a mapper to the idp
@@ -128,27 +130,33 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
     mapper.setName("name");
     mapper.setIdentityProviderMapper("oidc-user-attribute-idp-mapper");
     mapper.setConfig(
-            new ImmutableMap.Builder<String, Object>()
-                    .put("syncMode", "INHERIT")
-                    .put("user.attribute", "name")
-                    .put("claim", "name")
-                    .build());
+        new ImmutableMap.Builder<String, Object>()
+            .put("syncMode", "INHERIT")
+            .put("user.attribute", "name")
+            .put("claim", "name")
+            .build());
     mapperResponse = postRequest(mapper, id, "idps", alias2, "mappers");
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    assertThat(
+        mapperResponse.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
 
     // get mappers for idp2
 
     mapperResponse = getRequest(id, "idps", alias2, "mappers");
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
-    mappers = objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
+    assertThat(
+        mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    mappers =
+        objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, hasSize(1));
     String mapperId = mappers.get(0).getId();
     assertThat(mapperId, notNullValue());
 
     // get single mapper for idp2
     mapperResponse = getRequest(id, "idps", alias2, "mappers", mapperId);
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
-    mapper = objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
+    assertThat(
+        mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    mapper =
+        objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
     assertThat(mapper, notNullValue());
     assertThat(mapper.getName(), is("name"));
     assertThat(mapper.getIdentityProviderAlias(), is(alias2));
@@ -156,51 +164,67 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
 
     // update mapper for idp2
     mapper.setConfig(
-            new ImmutableMap.Builder<String, Object>()
-                    .put("syncMode", "INHERIT")
-                    .put("user.attribute", "lastName")
-                    .put("claim", "familyName")
-                    .build());
+        new ImmutableMap.Builder<String, Object>()
+            .put("syncMode", "INHERIT")
+            .put("user.attribute", "lastName")
+            .put("claim", "familyName")
+            .build());
 
     mapperResponse = putRequest(mapper, id, "idps", alias2, "mappers", mapperId);
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
+    assertThat(
+        mapperResponse.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
 
     // get single mapper for idp2
     mapperResponse = getRequest(id, "idps", alias2, "mappers", mapperId);
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
-    mapper = objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
+    assertThat(
+        mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    mapper =
+        objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
     assertThat(mapper, notNullValue());
     assertThat(mapper.getConfig().get("user.attribute"), is("lastName"));
     assertThat(mapper.getConfig().get("claim"), is("familyName"));
 
     // delete mappers for idp2
     mapperResponse = deleteRequest(id, "idps", alias2, "mappers", mapperId);
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
+    assertThat(
+        mapperResponse.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
 
     // get mappers for idp2
     mapperResponse = getRequest(id, "idps", alias2, "mappers");
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
-    mappers = objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
+    assertThat(
+        mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    mappers =
+        objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, empty());
 
     // get mappers for idp2
     mapperResponse = getRequest(id, "idps", alias2, "mappers");
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
-    mappers = objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
+    assertThat(
+        mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    mappers =
+        objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, empty());
 
     // get mappers for idp1
 
     mapperResponse = getRequest(id, "idps", alias1, "mappers");
-    assertThat(mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
-    mappers = objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
+    assertThat(
+        mapperResponse.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    mappers =
+        objectMapper().readValue(mapperResponse.getBody().asString(), new TypeReference<>() {});
     assertThat(mappers, hasSize(0));
 
     // delete idps
     response = deleteRequest(id, "idps", alias1);
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
+    assertThat(
+        response.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
     response = deleteRequest(id, "idps", alias2);
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
+    assertThat(
+        response.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
 
     // get idps
     response = getRequest(id, "idps");
@@ -213,7 +237,6 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
     deleteOrganization(id);
   }
 
-
   @Test
   void testLinkMultiIdps() throws IOException {
     OrganizationRepresentation org = createDefaultOrg();
@@ -221,29 +244,29 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
 
     String alias1 = "linking-provider-1";
     org.keycloak.representations.idm.IdentityProviderRepresentation idp =
-            new org.keycloak.representations.idm.IdentityProviderRepresentation();
+        new org.keycloak.representations.idm.IdentityProviderRepresentation();
     idp.setAlias(alias1);
     idp.setProviderId("oidc");
     idp.setEnabled(true);
     idp.setFirstBrokerLoginFlowAlias("first broker login");
     idp.setConfig(
-            new ImmutableMap.Builder<String, String>()
-                    .put("useJwksUrl", "true")
-                    .put("syncMode", "FORCE")
-                    .put("authorizationUrl", "https://foo.com")
-                    .put("hideOnLoginPage", "")
-                    .put("loginHint", "")
-                    .put("uiLocales", "")
-                    .put("backchannelSupported", "")
-                    .put("disableUserInfo", "")
-                    .put("acceptsPromptNoneForwardFromClient", "")
-                    .put("validateSignature", "")
-                    .put("pkceEnabled", "")
-                    .put("tokenUrl", "https://foo.com")
-                    .put("clientAuthMethod", "client_secret_post")
-                    .put("clientId", "aabbcc")
-                    .put("clientSecret", "112233")
-                    .build());
+        new ImmutableMap.Builder<String, String>()
+            .put("useJwksUrl", "true")
+            .put("syncMode", "FORCE")
+            .put("authorizationUrl", "https://foo.com")
+            .put("hideOnLoginPage", "")
+            .put("loginHint", "")
+            .put("uiLocales", "")
+            .put("backchannelSupported", "")
+            .put("disableUserInfo", "")
+            .put("acceptsPromptNoneForwardFromClient", "")
+            .put("validateSignature", "")
+            .put("pkceEnabled", "")
+            .put("tokenUrl", "https://foo.com")
+            .put("clientAuthMethod", "client_secret_post")
+            .put("clientId", "aabbcc")
+            .put("clientSecret", "112233")
+            .build());
     keycloak.realm(REALM).identityProviders().create(idp);
 
     // link it
@@ -251,13 +274,14 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
     link.setAlias(alias1);
     link.setSyncMode("IMPORT");
     Response response = postRequest(link, org.getId(), "idps", "link");
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    assertThat(
+        response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
 
     // get it
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps, notNullValue());
     assertThat(idps, hasSize(1));
 
@@ -267,33 +291,32 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
     assertThat(representation.getProviderId(), is("oidc"));
     assertThat(representation.getConfig().get("syncMode"), is("IMPORT"));
 
-
     // create another IDP
     String alias2 = "linking-provider-2";
     org.keycloak.representations.idm.IdentityProviderRepresentation idp2 =
-            new org.keycloak.representations.idm.IdentityProviderRepresentation();
+        new org.keycloak.representations.idm.IdentityProviderRepresentation();
     idp2.setAlias(alias2);
     idp2.setProviderId("oidc");
     idp2.setEnabled(true);
     idp2.setFirstBrokerLoginFlowAlias("first broker login");
     idp2.setConfig(
-            new ImmutableMap.Builder<String, String>()
-                    .put("useJwksUrl", "true")
-                    .put("syncMode", "FORCE")
-                    .put("authorizationUrl", "https://foo.com")
-                    .put("hideOnLoginPage", "")
-                    .put("loginHint", "")
-                    .put("uiLocales", "")
-                    .put("backchannelSupported", "")
-                    .put("disableUserInfo", "")
-                    .put("acceptsPromptNoneForwardFromClient", "")
-                    .put("validateSignature", "")
-                    .put("pkceEnabled", "")
-                    .put("tokenUrl", "https://foo.com")
-                    .put("clientAuthMethod", "client_secret_post")
-                    .put("clientId", "aabbcc")
-                    .put("clientSecret", "112233")
-                    .build());
+        new ImmutableMap.Builder<String, String>()
+            .put("useJwksUrl", "true")
+            .put("syncMode", "FORCE")
+            .put("authorizationUrl", "https://foo.com")
+            .put("hideOnLoginPage", "")
+            .put("loginHint", "")
+            .put("uiLocales", "")
+            .put("backchannelSupported", "")
+            .put("disableUserInfo", "")
+            .put("acceptsPromptNoneForwardFromClient", "")
+            .put("validateSignature", "")
+            .put("pkceEnabled", "")
+            .put("tokenUrl", "https://foo.com")
+            .put("clientAuthMethod", "client_secret_post")
+            .put("clientId", "aabbcc")
+            .put("clientSecret", "112233")
+            .build());
     keycloak.realm(REALM).identityProviders().create(idp2);
 
     // link it
@@ -301,13 +324,14 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
     link2.setAlias(alias2);
     link2.setSyncMode("IMPORT");
     Response response2 = postRequest(link2, org.getId(), "idps", "link");
-    assertThat(response2.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    assertThat(
+        response2.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
 
     // get it
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps2 =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps2, notNullValue());
     assertThat(idps2, hasSize(2));
 
@@ -325,33 +349,39 @@ public class MultiIdpsEnabledTest extends AbstractOrganizationTest {
 
     // unlink alias1
     response = postRequest("foo", org.getId(), "idps", representation1.getAlias(), "unlink");
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
+    assertThat(
+        response.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
 
     // check it alias1
     response = getRequest(id, "idps", representation1.getAlias());
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode()));
+    assertThat(
+        response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode()));
 
     // get it alias1
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps3 =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps3, notNullValue());
     assertThat(idps3, hasSize(1));
 
     // unlink alias2
     response = postRequest("foo", org.getId(), "idps", representation2.getAlias(), "unlink");
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
+    assertThat(
+        response.getStatusCode(),
+        is(jakarta.ws.rs.core.Response.Status.NO_CONTENT.getStatusCode()));
 
     // check it alias2
     response = getRequest(id, "idps", representation2.getAlias());
-    assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode()));
+    assertThat(
+        response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode()));
 
     // get it alias2
     response = getRequest(id, "idps");
     assertThat(response.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
     List<IdentityProviderRepresentation> idps4 =
-            objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(idps4, notNullValue());
     assertThat(idps4, hasSize(0));
 

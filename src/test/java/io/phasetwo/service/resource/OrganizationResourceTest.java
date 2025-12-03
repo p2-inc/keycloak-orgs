@@ -1622,7 +1622,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     response = deleteRequest(id, "idps", alias2);
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
 
-    //delete non linked idp
+    // delete non linked idp
     keycloak.realm(REALM).identityProviders().get(alias1).remove();
 
     // get idps

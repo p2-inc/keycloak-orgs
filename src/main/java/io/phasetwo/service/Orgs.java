@@ -21,6 +21,8 @@ public class Orgs {
       "_providerConfig.orgs.config.multipleIdps";
   public static final String ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY =
       "_providerConfig.orgs.portalLink.expirationInSecs";
+  public static final String ORG_CONFIG_DEFAULT_APPLICATION_URI =
+      "_providerConfig.orgs.config.defaultApplicationUri";
   public static final String ORG_SHARED_IDP_KEY = "home.idp.discovery.shared";
 
   public static final String REQUIRE_VERIFIED_DOMAIN = "requireVerifiedDomain";

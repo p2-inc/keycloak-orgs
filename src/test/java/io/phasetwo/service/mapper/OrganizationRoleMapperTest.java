@@ -70,12 +70,11 @@ class OrganizationRoleMapperTest extends AbstractOrganizationTest {
     assertNotNull(customClaimValue);
     assertThat(customClaimValue.containsKey(id), is(true));
 
-
-    HashMap<String, Object> claims= (HashMap<String, Object>) customClaimValue.get(id);
+    HashMap<String, Object> claims = (HashMap<String, Object>) customClaimValue.get(id);
     assertEquals("example", claims.get("name"));
-    List<String> rolesClaim =(List<String>) claims.get("roles");
-    assertTrue(rolesClaim.contains( OrganizationAdminAuth.ORG_ROLE_VIEW_ORGANIZATION));
-    assertTrue(rolesClaim.contains( OrganizationAdminAuth.ORG_ROLE_MANAGE_ORGANIZATION));
+    List<String> rolesClaim = (List<String>) claims.get("roles");
+    assertTrue(rolesClaim.contains(OrganizationAdminAuth.ORG_ROLE_VIEW_ORGANIZATION));
+    assertTrue(rolesClaim.contains(OrganizationAdminAuth.ORG_ROLE_MANAGE_ORGANIZATION));
 
     // change authorization
     keycloak =
