@@ -16,6 +16,7 @@
     * [Select Org Direct Grant Flow](#select-org-direct-grant-flow)
       * [Configuration](#configuration-1)
       * [Flow](#flow-1)
+    *[Post Broker Login Flow](#post-broker-login-flow)
   * [Configuration & Example](#configuration--example)
     * [Browser Flow (Configuration)](#browser-flow-configuration)
       * [Examples (Tests)](#examples-tests)
@@ -27,12 +28,14 @@ This documentation is dedicated to the use of "Select Organization" Authenticato
 Note that to have the active_organization information into tokens, you still need the "Active Organization" mapper.
 
 ## Explanation
-You can add the `Select Organization` authenticator into the user authentication flow.  
+You can add the `Select Organization` authenticator into the user authentication flow. 
 With this authenticator enabled, you can pass the query parameters:
 - `prompt=select_account`
 - `account_hint={ORG-ID}`
 
 In all case, if the use try to access an organization where he isn't a member, an error will be returned.
+
+The `Select Organization` authenticator can also be added to a `Post broker flow` of a Identity Provider.
 
 
 ### prompt=select_account
@@ -84,6 +87,11 @@ A **browser flow** and **direct grant flow** have been added. They are similar t
 #### Flow
 ![direct-grant-flow](assets/active-organization-authenticator/direct-grant-flow.png)
 
+### Post Broker Login Flow
+
+For the Post Broker Login Flow, there is no need to add the `prompt` query param. The behaviour of the `Select organization` in this case will prompt the user to select a organization if he is member to more than one.
+
+![post-broker-login-flow](assets/active-organization-authenticator/post-broker-login-flow.png)
 
 ## Configuration & Example
 
