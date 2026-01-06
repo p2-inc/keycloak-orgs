@@ -35,7 +35,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
       <div className="flex h-full flex-shrink-0">
         <div
           className={cs(
-            "flex w-[70px] flex-col border-r border-r-gray-100 transition-[width] duration-150 ease-in-out dark:border-r-zinc-800",
+            "flex flex-col border-r border-r-gray-100 transition-[width] duration-150 ease-in-out dark:border-r-zinc-800",
             {
               "w-64": !menuCollapsed,
             }
@@ -140,7 +140,7 @@ const DesktopSidebarNav: React.FC<Props> = ({
                     <div className="font-semibold dark:text-gray-200">
                       {fullName()}
                     </div>
-                    <div className="text-sm text-gray-500">{user?.email}</div>
+                    <div className="text-sm text-gray-500" style={{ overflow : 'hidden', textOverflow : 'ellipsis', whiteSpace : 'nowrap'}} >{user?.email}</div>
                   </div>
                   <div className="py-1">
                     <Link
