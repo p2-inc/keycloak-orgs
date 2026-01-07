@@ -41,7 +41,7 @@
     "typescript": "^4.4.2"
   },
   "devDependencies": {
-    "@rtk-query/codegen-openapi": "^2.0.0",
+    "@rtk-query/codegen-openapi": "^2.2.0",
     "@tailwindcss/forms": "^0.5.10",
     "@vitejs/plugin-react": "^4.5.1",
     "autoprefixer": "^10.4.21",
@@ -51,7 +51,7 @@
     "prettier-plugin-tailwindcss": "^0.6.12",
     "tailwindcss": "3",
     "ts-node": "^10.9.1",
-    "vite": "^6.3.5"
+    "vite": "^7.3.1"
   },
   "eslintConfig": {
     "extends": [
@@ -69,5 +69,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "packageManager": "yarn@4.12.0+sha512.f45ab632439a67f8bc759bf32ead036a1f413287b9042726b7cc4818b7b49e14e9423ba49b18f9e06ea4941c1ad062385b1d8760a8d5091a1a31e5f6219afca8"
 }
