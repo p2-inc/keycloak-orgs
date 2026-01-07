@@ -109,7 +109,7 @@
 	</executions>
         <configuration>
           <nodeVersion>v20.14.0</nodeVersion>
-          <yarnVersion>v1.22.22</yarnVersion>
+          <yarnVersion>v4.12.0</yarnVersion>
 	  <workingDirectory>.</workingDirectory>
         </configuration>
       </plugin>
