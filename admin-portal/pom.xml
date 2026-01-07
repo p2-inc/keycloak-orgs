@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.phasetwo</groupId>
   <artifactId>phasetwo-admin-portal</artifactId>
@@ -55,14 +57,14 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
-	  <compilerArgument>-Xlint:unchecked</compilerArgument>
-	  <compilerArgument>-Xlint:deprecation</compilerArgument>
+          <compilerArgument>-Xlint:unchecked</compilerArgument>
+          <compilerArgument>-Xlint:deprecation</compilerArgument>
           <useIncrementalCompilation>false</useIncrementalCompilation>
-	  <annotationProcessorPaths>
+          <annotationProcessorPaths>
             <path>
-	      <groupId>com.google.auto.service</groupId>
-	      <artifactId>auto-service</artifactId>
-	      <version>${auto-service.version}</version>
+              <groupId>com.google.auto.service</groupId>
+              <artifactId>auto-service</artifactId>
+              <version>${auto-service.version}</version>
             </path>
             <path>
               <groupId>org.projectlombok</groupId>
@@ -75,43 +77,50 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-	<version>3.3.0</version>
+        <version>3.3.0</version>
       </plugin>
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
-	<version>1.15.0</version>
+        <version>2.0.0</version>
+
+        <configuration>
+          <nodeVersion>v24.12.0</nodeVersion>
+          <workingDirectory>.</workingDirectory>
+          <!-- optional: only if you need to pin/override corepack -->
+          <!-- <corepackVersion>v0.25.2</corepackVersion> -->
+        </configuration>
+
         <executions>
           <execution>
-	    <id>setup-node-and-yarn</id>
-	    <goals>
-	      <goal>install-node-and-yarn</goal>
-	    </goals>
-	    <phase>initialize</phase>
+            <id>setup-node-and-corepack</id>
+            <goals>
+              <goal>install-node-and-corepack</goal>
+            </goals>
+            <phase>initialize</phase>
           </execution>
-	  <execution>
-	    <id>yarn-install</id>
-	    <goals>
-	      <goal>yarn</goal>
-	    </goals>
-	    <phase>initialize</phase>
-          </execution>
+
           <execution>
-	    <id>yarn-build</id>
-	    <goals>
-	      <goal>yarn</goal>
-	    </goals>
-	    <configuration>
-	      <arguments>build-mvn</arguments>
-	    </configuration>
-	    <phase>generate-resources</phase>
+            <id>install</id>
+            <goals>
+              <goal>corepack</goal>
+            </goals>
+            <configuration>
+              <arguments>yarn install</arguments>
+            </configuration>
           </execution>
-	</executions>
-        <configuration>
-          <nodeVersion>v20.14.0</nodeVersion>
-          <yarnVersion>v4.12.0</yarnVersion>
-	  <workingDirectory>.</workingDirectory>
-        </configuration>
+
+          <execution>
+            <id>build</id>
+            <goals>
+              <goal>corepack</goal>
+            </goals>
+            <configuration>
+              <arguments>yarn build-mvn</arguments>
+            </configuration>
+          </execution>
+
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
@@ -125,16 +134,16 @@
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/classes/theme/portal/login/</outputDirectory>
-              <resources>          
+              <resources>
                 <resource>
                   <directory>build</directory>
                   <filtering>false</filtering>
-		  <includes>
-		    <include>index.html</include>
-		  </includes>
+                  <includes>
+                    <include>index.html</include>
+                  </includes>
                 </resource>
-              </resources>              
-            </configuration>            
+              </resources>
+            </configuration>
           </execution>
           <execution>
             <id>copy-resources</id>
@@ -144,33 +153,33 @@
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/classes/theme/portal/login/resources</outputDirectory>
-              <resources>          
+              <resources>
                 <resource>
                   <directory>build</directory>
                   <filtering>false</filtering>
                 </resource>
-              </resources>              
-            </configuration>            
+              </resources>
+            </configuration>
           </execution>
         </executions>
       </plugin>
       <plugin>
-	<groupId>com.coderplus.maven.plugins</groupId>
-	<artifactId>copy-rename-maven-plugin</artifactId>
-	<version>1.0.1</version>
-	<executions>
-	  <execution>
-	    <id>copy-and-rename-file</id>
-	    <phase>process-resources</phase>
-	    <goals>
-	      <goal>rename</goal>
-	    </goals>
-	    <configuration>
-	      <sourceFile>${project.build.directory}/classes/theme/portal/login/index.html</sourceFile>
-	      <destinationFile>${project.build.directory}/classes/theme/portal/login/portal.ftl</destinationFile>
-	    </configuration>
-	  </execution>
-	</executions>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>1.0.1</version>
+        <executions>
+          <execution>
+            <id>copy-and-rename-file</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/theme/portal/login/index.html</sourceFile>
+              <destinationFile>${project.build.directory}/classes/theme/portal/login/portal.ftl</destinationFile>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin> <!-- pretty up the code using google java standards `mvn fmt:format` -->
         <groupId>com.spotify.fmt</groupId>
@@ -185,7 +194,7 @@
       </resource>
     </resources>
   </build>
-  
+
   <dependencies>
     <!-- annotation processing helpers for logging and services -->
     <dependency>
@@ -200,24 +209,24 @@
       <version>${auto-service.version}</version>
       <scope>provided</scope>
     </dependency>
-    
+
     <!-- keycloak deps -->
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>
-      <version>${keycloak.version}</version>      
+      <version>${keycloak.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi-private</artifactId>
-      <version>${keycloak.version}</version>      
+      <version>${keycloak.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-services</artifactId>
-      <version>${keycloak.version}</version>      
+      <version>${keycloak.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
