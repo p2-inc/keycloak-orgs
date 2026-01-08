@@ -1,4 +1,5 @@
 import { useRoleAccess } from "@app/hooks";
+import { usePageTitle } from "@app/hooks/useTitle";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import Loading from "@app/utils/Loading";
 import {
@@ -9,16 +10,13 @@ import {
   StackItem,
 } from "@patternfly/react-core";
 import * as React from "react";
-import { useTitle } from "react-use";
 import { MainNav } from "../navigation";
 import { ActivityLog } from "./ActivityLog";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { DashboardSummary } from "./DashboardSummary";
-import { Navigate, generatePath, useParams } from "react-router-dom";
-import { PATHS } from "@app/routes";
 
 const Dashboard: React.FunctionComponent = () => {
-  useTitle("Dashboard | Phase Two");
+  usePageTitle("Dashboard");
   const { navigateToAccessDenied } = useRoleAccess();
   const { data: featureFlags, isLoading: isLoadingFeatureFlags } =
     useGetFeatureFlagsQuery();

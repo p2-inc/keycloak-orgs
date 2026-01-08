@@ -9,17 +9,18 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 
 @JsonPropertyOrder({
-  "domain",
-  "name",
-  "displayName",
-  "logoUrl",
-  "apiMode",
-  "enableGroupMapping",
-  "enableLdap",
-  "enableDashboard",
-  "emailAsUsername",
-  "trustEmail",
-  "usernameMapperImport"
+    "domain",
+    "name",
+    "displayName",
+    "logoUrl",
+    "apiMode",
+    "enableGroupMapping",
+    "enableLdap",
+    "enableDashboard",
+    "emailAsUsername",
+    "trustEmail",
+    "usernameMapperImport",
+    "appName"
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WizardConfig {
@@ -47,12 +48,15 @@ public class WizardConfig {
     Optional.ofNullable(realm.getAttribute(CONFIG_KEY("usernameMapperImport")))
         .ifPresent(a -> config.usernameMapperImport(a.toLowerCase().equals("true")));
     Optional.ofNullable(
-            realm.getAttribute(
-                String.format("_providerConfig.assets.logo.url"))) // from keycloak-orgs override
+        realm.getAttribute(
+            String.format("_providerConfig.assets.logo.url"))) // from keycloak-orgs override
         .ifPresent(a -> config.logoUrl(a));
     Optional.ofNullable(realm.getName()).ifPresent(a -> config.name(a));
     Optional.ofNullable(realm.getDisplayName()).ifPresent(a -> config.displayName(a));
-    if (uri != null) Optional.ofNullable(uri.getHost()).ifPresent(a -> config.domain(a));
+    Optional.ofNullable(realm.getAttribute(CONFIG_KEY("appName")))
+        .ifPresent(a -> config.appName(a));
+    if (uri != null)
+      Optional.ofNullable(uri.getHost()).ifPresent(a -> config.domain(a));
     return config;
   }
 
@@ -251,6 +255,24 @@ public class WizardConfig {
 
   public WizardConfig usernameMapperImport(boolean usernameMapperImport) {
     this.usernameMapperImport = usernameMapperImport;
+    return this;
+  }
+
+  @JsonProperty("appName")
+  private String appName = "";
+
+  @JsonProperty("appName")
+  public String getAppName() {
+    return appName;
+  }
+
+  @JsonProperty("appName")
+  public void setAppName(String appName) {
+    this.appName = appName;
+  }
+
+  public WizardConfig appName(String appName) {
+    this.appName = appName;
     return this;
   }
 }

@@ -4,20 +4,20 @@ import {
   Protocols,
   Providers,
 } from "@app/configurations";
-import { PATHS, RouterParams } from "@app/routes";
+import { RouterParams } from "@app/routes";
 import React from "react";
 import { useParams } from "react-router";
-import { useTitle } from "react-use";
 
+import { usePageTitle } from "@app/hooks/useTitle";
 import {
   ADFSWizard,
   Auth0WizardOIDC,
   Auth0WizardSAML,
   AWSSamlWizard,
-  CyberArkWizard,
   CloudflareWizard,
-  EntraIdWizard,
+  CyberArkWizard,
   DuoWizard,
+  EntraIdWizard,
   GenericLDAP,
   GenericOIDC,
   GenericSAML,
@@ -32,17 +32,15 @@ import {
   SalesforceWizardOIDC,
   SalesforceWizardSAML,
 } from "./Wizards";
-import { useRoleAccess } from "@app/hooks";
-import { Navigate, generatePath } from "react-router-dom";
 
 const Provider = () => {
-  const { provider, protocol, realm } = useParams<
+  const { provider, protocol } = useParams<
     keyof RouterParams
   >() as RouterParams;
 
   const providers = [...IdentityProviders, ...GenericIdentityProviders];
 
-  useTitle(`${providers.find((ip) => ip.id === provider)?.name} | Phase Two`);
+  usePageTitle(`${providers.find((ip) => ip.id === provider)?.name}`);
 
   switch (provider) {
     case Providers.OKTA:

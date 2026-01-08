@@ -21,6 +21,7 @@ export interface FeatureFlagsState {
   domain: string;
   logoUrl: string;
   name: string;
+  appName: string;
 }
 
 type FlagsResponse = FeatureFlagsState;
@@ -33,6 +34,7 @@ enum Flags {
   EnableDashboard = "enableDashboard",
   EmailAsUsername = "emailAsUsername",
   TrustEmail = "trustEmail",
+  AppName = "appName",
 }
 
 const initialState: FeatureFlagsState = {
@@ -71,7 +73,6 @@ const dynamicBaseQuery: BaseQueryFn<
     baseUrl: baseUrl(),
   });
 
-  // TODO: @xgp is this the correct realm to leverage? or should it be pathRealm?
   const pathRealm = keycloak.realm;
 
   // gracefully handle scenarios where data to generate the URL is missing
