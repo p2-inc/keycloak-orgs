@@ -7,10 +7,10 @@ import {
   EmptyStateIcon,
   EmptyStateBody,
 } from "@patternfly/react-core";
-import { useTitle } from "react-use";
+import { usePageTitle } from "@app/hooks/useTitle";
 
 const AccessDenied: React.FunctionComponent = () => {
-  useTitle("Access Denied | Phase Two");
+  usePageTitle("Access Denied");
 
   return (
     <PageSection>

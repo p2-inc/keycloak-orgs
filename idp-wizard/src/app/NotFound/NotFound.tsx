@@ -1,18 +1,18 @@
-import * as React from "react";
-import { ExclamationTriangleIcon } from "@patternfly/react-icons";
+import { usePageTitle } from "@app/hooks/useTitle";
+import { useNavigateToBasePath } from "@app/routes";
 import {
-  PageSection,
-  Title,
   Button,
   EmptyState,
-  EmptyStateIcon,
   EmptyStateBody,
+  EmptyStateIcon,
+  PageSection,
+  Title,
 } from "@patternfly/react-core";
-import { useTitle } from "react-use";
-import { useNavigateToBasePath } from "@app/routes";
+import { ExclamationTriangleIcon } from "@patternfly/react-icons";
+import * as React from "react";
 
 const NotFound: React.FunctionComponent = () => {
-  useTitle("404 Page Not Found | Phase Two");
+  usePageTitle("404 Page Not Found");
   const navigateToBasePath = useNavigateToBasePath();
 
   return (
