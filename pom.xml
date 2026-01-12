@@ -36,8 +36,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit-jupiter.version>5.12.1</junit-jupiter.version>
-    <keycloak.version>26.4.5</keycloak.version>
-    <keycloak-admin-client.version>26.0.7</keycloak-admin-client.version>
+    <keycloak.version>26.5.0</keycloak.version>
+    <keycloak-admin-client.version>26.0.8</keycloak-admin-client.version>
     <resteasy.version>6.2.12.Final</resteasy.version>
     <lombok.version>1.18.42</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>

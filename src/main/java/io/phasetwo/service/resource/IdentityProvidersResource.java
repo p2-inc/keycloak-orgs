@@ -65,7 +65,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
         .map(
             provider ->
                 StripSecretsUtils.stripSecrets(
-                    session, ModelToRepresentation.toRepresentation(realm, provider)));
+                    session, ModelToRepresentation.toRepresentation(session, realm, provider)));
   }
 
   protected void idpDefaults(
@@ -190,7 +190,7 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     IdentityProviderRepresentation representation =
-        ModelToRepresentation.toRepresentation(realm, idp);
+        ModelToRepresentation.toRepresentation(session, realm, idp);
     idpDefaults(representation, Optional.of(linkIdp));
     if (!Strings.isNullOrEmpty(linkIdp.getSyncMode())) {
       representation.getConfig().put("syncMode", linkIdp.getSyncMode());
