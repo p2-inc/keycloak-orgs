@@ -140,7 +140,7 @@ public final class KeycloakOrgsImportConverter {
       IdentityProviderModel idp = session.identityProviders().getByAlias(idpLink);
       if (Objects.nonNull(idp)) {
         IdentityProviderRepresentation representation =
-            ModelToRepresentation.toRepresentation(realm, idp);
+            ModelToRepresentation.toRepresentation(session, realm, idp);
         processsSharedIdps(realm, org, representation);
 
         IdentityProviderModel updated =
