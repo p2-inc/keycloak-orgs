@@ -45,14 +45,14 @@ export default function MembersActionMenu({ member, orgId, realm }: Props) {
       .then(() => {
         P2Toast({
           success: true,
-          title: `${fullName(member)} removed from organization.`,
+          title: t("member-toast-remove-success", [fullName(member)]),
         });
         setRemoveConfOpen(false);
       })
       .catch((e) => {
         P2Toast({
           error: true,
-          title: "Error during removal. Please try again.",
+          title: t("member-toast-remove-error"),
         });
         console.error(e);
       });

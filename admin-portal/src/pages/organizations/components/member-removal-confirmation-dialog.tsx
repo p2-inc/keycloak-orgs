@@ -3,6 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { UserRepresentation } from "@/store/apis/orgs";
 import fullName from "@/components/utils/fullName";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   open: boolean;
@@ -20,6 +21,7 @@ export default function MemberRemovalConfirmationDialog({
   isLoading,
 }: Props) {
   const cancelButtonRef = useRef(null);
+  const { t } = useTranslation();
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -69,9 +71,7 @@ export default function MemberRemovalConfirmationDialog({
                     </Dialog.Title>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
-                        Please confirm you wish to remove the following member
-                        from the organization. This action cannot be undone and
-                        the member would have to be re-added.
+                        {t("removeMemberModalMessage")}
                       </p>
                     </div>
                   </div>
