@@ -39,7 +39,7 @@ export const useApi = () => {
   const baseCloudUrl = `${realm}/orgs/${orgId}/idps`;
 
   let serverUrlSuffix = "/admin";
-  const aliasId = isString(alias) ? last(alias.split("-")) : "";
+  const aliasId = isString(alias) ? alias : "";
 
   // onprem endpoint
   const onPremEndpoints: Record<apiEndpointNames, endpoint> = {
