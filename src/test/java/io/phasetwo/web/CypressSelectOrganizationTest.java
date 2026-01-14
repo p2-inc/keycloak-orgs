@@ -3,32 +3,25 @@ package io.phasetwo.web;
 import static io.phasetwo.service.Helpers.createUserWithCredentials;
 
 import io.github.wimdeblauwe.testcontainers.cypress.CypressContainer;
-import io.github.wimdeblauwe.testcontainers.cypress.CypressTest;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
-import io.github.wimdeblauwe.testcontainers.cypress.CypressTestSuite;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import lombok.extern.jbosslog.JBossLog;
-import org.junit.jupiter.api.Assertions;
+
 import org.junit.jupiter.api.DynamicContainer;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.Testcontainers;
 
+@EnabledIfSystemProperty(named = "include.cypress", matches = "true")
 @org.testcontainers.junit.jupiter.Testcontainers
 class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
 
   @TestFactory
   List<DynamicContainer> runCypressTests()
       throws IOException, InterruptedException, TimeoutException {
-    if (!RUN_CYPRESS) {
-      return Collections.emptyList();
-    }
 
     Testcontainers.exposeHostPorts(container.getHttpPort());
 

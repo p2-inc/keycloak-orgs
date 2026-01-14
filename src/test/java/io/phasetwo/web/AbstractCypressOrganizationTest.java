@@ -41,11 +41,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.Testcontainers;
 
 @JBossLog
+@EnabledIfSystemProperty(named = "include.cypress", matches = "true")
 public class AbstractCypressOrganizationTest {
 
   protected static final boolean RUN_CYPRESS =
@@ -103,10 +105,6 @@ public class AbstractCypressOrganizationTest {
 
   @BeforeAll
   public static void beforeAll() {
-    if (!RUN_CYPRESS) {
-      return; // do nothing
-    }
-
     Testcontainers.exposeHostPorts(WEBHOOK_SERVER_PORT);
     resteasyClient =
         new ResteasyClientBuilderImpl()
