@@ -16,6 +16,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.services.Urls;
 import org.keycloak.services.managers.ClientSessionCode;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.util.Booleans;
 
 import static org.keycloak.services.resources.IdentityBrokerService.getIdentityProvider;
 
@@ -41,7 +42,7 @@ final class Redirector {
             LOG.warnf("Identity Provider %s is disabled.", providerAlias);
             return;
         }
-        if (idp.isLinkOnly()) {
+        if (Booleans.isTrue(idp.isLinkOnly())) {
             LOG.warnf("Identity Provider %s is not allowed to perform a login.", providerAlias);
             return;
         }
