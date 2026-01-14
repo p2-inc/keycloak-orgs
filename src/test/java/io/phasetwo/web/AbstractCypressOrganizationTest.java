@@ -1,4 +1,4 @@
-package io.phasetwo.service;
+package io.phasetwo.web;
 
 import static io.phasetwo.service.Helpers.enableEvents;
 import static io.phasetwo.service.Helpers.objectMapper;
@@ -17,6 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import io.github.wimdeblauwe.testcontainers.cypress.CypressTest;
+import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
+import io.github.wimdeblauwe.testcontainers.cypress.CypressTestSuite;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
@@ -27,14 +30,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import lombok.extern.jbosslog.JBossLog;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicContainer;
+import org.junit.jupiter.api.DynamicTest;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.Testcontainers;
 
+@JBossLog
 public class AbstractCypressOrganizationTest {
 
   protected static final boolean RUN_CYPRESS =
@@ -131,6 +142,21 @@ public class AbstractCypressOrganizationTest {
   protected Response putRequest(Keycloak keycloak, Object body, String path)
       throws JsonProcessingException {
     return givenSpec(keycloak).and().body(toJsonString(body)).put(path).then().extract().response();
+  }
+
+  protected Response postRequest(Object body, String... paths) throws JsonProcessingException {
+    return postRequest(keycloak, body, String.join("/", paths));
+  }
+
+  protected Response postRequest(Keycloak keycloak, Object body, String path)
+          throws JsonProcessingException {
+    return givenSpec(keycloak)
+            .and()
+            .body(toJsonString(body))
+            .post(path)
+            .then()
+            .extract()
+            .response();
   }
 
   protected OrganizationRepresentation createOrganization(OrganizationRepresentation representation)
@@ -292,4 +318,50 @@ public class AbstractCypressOrganizationTest {
     response = root.and().body(realm).when().put().then().extract().response();
     assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
   }
+
+  protected void importRealm(RealmRepresentation representation, Keycloak keycloak) {
+    var response =
+            given()
+                    .baseUri(container.getAuthServerUrl())
+                    .basePath("admin/realms/")
+                    .contentType("application/json")
+                    .auth()
+                    .oauth2(keycloak.tokenManager().getAccessTokenString())
+                    .and()
+                    .body(representation)
+                    .when()
+                    .post()
+                    .then()
+                    .extract()
+                    .response();
+    assertThat(response.getStatusCode(), CoreMatchers.is(Status.CREATED.getStatusCode()));
+  }
+
+
+  List<DynamicContainer> convertToJUnitDynamicTests(CypressTestResults testResults) {
+        List<DynamicContainer> dynamicContainers = new ArrayList<>();
+        List<CypressTestSuite> suites = testResults.getSuites();
+        for (CypressTestSuite suite : suites) {
+            createContainerFromSuite(dynamicContainers, suite);
+        }
+        return dynamicContainers;
+    }
+
+    void createContainerFromSuite(
+            List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
+        List<DynamicTest> dynamicTests = new ArrayList<>();
+        for (CypressTest test : suite.getTests()) {
+            dynamicTests.add(
+                    DynamicTest.dynamicTest(
+                            test.getDescription(),
+                            () -> {
+                                if (!test.isSuccess()) {
+                                    log.error(test.getErrorMessage());
+                                    log.error(test.getStackTrace());
+                                }
+                                Assertions.assertTrue(test.isSuccess());
+                            }));
+        }
+        dynamicContainers.add(DynamicContainer.dynamicContainer(suite.getTitle(), dynamicTests));
+    }
 }
