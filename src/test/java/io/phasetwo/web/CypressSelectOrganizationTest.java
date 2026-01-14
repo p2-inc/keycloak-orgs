@@ -20,7 +20,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.Testcontainers;
 
-@JBossLog
 @org.testcontainers.junit.jupiter.Testcontainers
 class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
 
@@ -45,33 +44,6 @@ class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
       CypressTestResults testResults = cypressContainer.getTestResults();
       return convertToJUnitDynamicTests(testResults);
     }
-  }
-
-  private List<DynamicContainer> convertToJUnitDynamicTests(CypressTestResults testResults) {
-    List<DynamicContainer> dynamicContainers = new ArrayList<>();
-    List<CypressTestSuite> suites = testResults.getSuites();
-    for (CypressTestSuite suite : suites) {
-      createContainerFromSuite(dynamicContainers, suite);
-    }
-    return dynamicContainers;
-  }
-
-  private void createContainerFromSuite(
-      List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
-    List<DynamicTest> dynamicTests = new ArrayList<>();
-    for (CypressTest test : suite.getTests()) {
-      dynamicTests.add(
-          DynamicTest.dynamicTest(
-              test.getDescription(),
-              () -> {
-                if (!test.isSuccess()) {
-                  log.error(test.getErrorMessage());
-                  log.error(test.getStackTrace());
-                }
-                Assertions.assertTrue(test.isSuccess());
-              }));
-    }
-    dynamicContainers.add(DynamicContainer.dynamicContainer(suite.getTitle(), dynamicTests));
   }
 
   private void setupSelectOrgTests() throws IOException {
