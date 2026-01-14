@@ -8,6 +8,7 @@ import io.phasetwo.service.representation.LinkIdp;
 import jakarta.ws.rs.core.Response;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -16,8 +17,10 @@ import org.testcontainers.Testcontainers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import static io.phasetwo.service.Helpers.*;
 import static io.restassured.RestAssured.given;
@@ -30,11 +33,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
 
     private static final String OIDC_IDP = "oidc-idp";
-
+    
     @TestFactory
-    List<DynamicContainer> runCypressTests()
-            throws IOException, InterruptedException, TimeoutException {
+    Stream<DynamicContainer> runCypressTests() throws IOException, InterruptedException, TimeoutException {
+        return Stream
+                .of(false, null)
+                .map(isIdpLinkOnlyValue -> {
+                            try {
+                                return setupKeycloakWithLinkOnlyValueAndRunTests(isIdpLinkOnlyValue);
+                            } catch (IOException | InterruptedException | TimeoutException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                )
+                .flatMap(Collection::stream);
+    }
 
+    private @NotNull List<DynamicContainer> setupKeycloakWithLinkOnlyValueAndRunTests(Boolean isIdpLinkOnlyValue)
+            throws IOException, InterruptedException, TimeoutException {
         Testcontainers.exposeHostPorts(container.getHttpPort());
 
         // import testRealm
@@ -62,7 +78,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         idp.setProviderId("oidc");
         idp.setEnabled(true);
         idp.setFirstBrokerLoginFlowAlias("first broker login");
-        idp.setLinkOnly(false);
+        idp.setLinkOnly(isIdpLinkOnlyValue);
         idp.setConfig(
                 new ImmutableMap.Builder<String, String>()
                         .put("useJwksUrl", "true")
@@ -139,7 +155,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                         .then()
                         .extract()
                         .response();
-        assertThat(response2.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+        assertThat(response2.getStatusCode(), is(Response.Status.CREATED.getStatusCode()));
 
 
         List<DynamicContainer> dynamicContainers = new ArrayList<>();
@@ -151,7 +167,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                              .withBrowser("electron")) {
             cypressContainer.start();
             CypressTestResults testResults = cypressContainer.getTestResults();
-            dynamicContainers.addAll(convertToJUnitDynamicTests(testResults));
+            dynamicContainers.addAll(convertToJUnitDynamicTests("IDP's isLinkOnly is: %s - ".formatted(isIdpLinkOnlyValue), testResults));
         }
 
         keycloak.realms().realm("test-realm").remove();

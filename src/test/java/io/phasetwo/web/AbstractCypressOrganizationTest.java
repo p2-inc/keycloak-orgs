@@ -335,18 +335,20 @@ public class AbstractCypressOrganizationTest {
     assertThat(response.getStatusCode(), CoreMatchers.is(Status.CREATED.getStatusCode()));
   }
 
-
   List<DynamicContainer> convertToJUnitDynamicTests(CypressTestResults testResults) {
+    return convertToJUnitDynamicTests("", testResults);
+  }
+
+  List<DynamicContainer> convertToJUnitDynamicTests(String namePrefix, CypressTestResults testResults) {
         List<DynamicContainer> dynamicContainers = new ArrayList<>();
         List<CypressTestSuite> suites = testResults.getSuites();
         for (CypressTestSuite suite : suites) {
-            createContainerFromSuite(dynamicContainers, suite);
+            createContainerFromSuite(namePrefix, dynamicContainers, suite);
         }
         return dynamicContainers;
     }
 
-    void createContainerFromSuite(
-            List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
+    void createContainerFromSuite(String namePrefix, List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
         List<DynamicTest> dynamicTests = new ArrayList<>();
         for (CypressTest test : suite.getTests()) {
             dynamicTests.add(
@@ -360,6 +362,6 @@ public class AbstractCypressOrganizationTest {
                                 Assertions.assertTrue(test.isSuccess());
                             }));
         }
-        dynamicContainers.add(DynamicContainer.dynamicContainer(suite.getTitle(), dynamicTests));
+        dynamicContainers.add(DynamicContainer.dynamicContainer(namePrefix + suite.getTitle(), dynamicTests));
     }
 }
