@@ -26,6 +26,7 @@ describe('user login via home idp provider', () => {
          cy.visit(testRealmLoginUri);
          cy.get('#username').type(idpUser.email);
          cy.get('#kc-login').click();
+         cy.url().should('contain', 'external-idp');
          cy.get('#username').type(idpUser.username);
          cy.get('#password').type(idpUser.password);
          cy.get('#kc-login').click();

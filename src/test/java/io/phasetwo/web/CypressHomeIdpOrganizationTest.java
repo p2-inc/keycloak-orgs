@@ -69,6 +69,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         idp.setProviderId("oidc");
         idp.setEnabled(true);
         idp.setFirstBrokerLoginFlowAlias("first broker login");
+        idp.setLinkOnly(false);
         idp.setConfig(
                 new ImmutableMap.Builder<String, String>()
                         .put("useJwksUrl", "true")
