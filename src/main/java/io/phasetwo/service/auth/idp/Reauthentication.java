@@ -1,3 +1,4 @@
+//package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -17,7 +18,7 @@ final class Reauthentication {
         AuthenticationManager.AuthResult authResult = AuthenticationManager.authenticateIdentityCookie(context.getSession(), context.getRealm(), true);
         UserSessionModel userSessionModel = null;
         if (authResult != null) {
-            userSessionModel = authResult.getSession();
+            userSessionModel = authResult.session();
         }
         LoginProtocol protocol = context.getSession().getProvider(LoginProtocol.class, context.getAuthenticationSession().getProtocol());
         return protocol.requireReauthentication(userSessionModel, context.getAuthenticationSession());

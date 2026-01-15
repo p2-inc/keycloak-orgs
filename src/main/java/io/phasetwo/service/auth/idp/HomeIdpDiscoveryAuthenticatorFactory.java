@@ -1,6 +1,5 @@
+//package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
-
-//import de.sventorben.keycloak.authentication.hidpd.discovery.email.EmailHomeIdpDiscoveryAuthenticatorFactoryDiscovererConfig;
 
 import com.google.auto.service.AutoService;
 import io.phasetwo.service.auth.idp.discovery.extemail.EmailHomeIdpDiscoveryAuthenticatorFactoryDiscovererConfig;

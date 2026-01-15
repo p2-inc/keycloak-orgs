@@ -1,7 +1,6 @@
+//package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
-//import de.sventorben.keycloak.authentication.hidpd.discovery.spi.HomeIdpDiscoverer;
-import com.google.auto.service.AutoService;
 import io.phasetwo.service.auth.idp.discovery.spi.HomeIdpDiscoverer;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
