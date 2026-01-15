@@ -44,7 +44,7 @@ public final class UserAttributeHomeIdpDiscoverer implements HomeIdpDiscoverer {
                     username);
             return List.of();
         } else {
-            LOG.tracef("User found in AuthenticationFlowContext. Extracting domain from stored user '%s'.",
+            LOG.tracef("User found in AuthenticationFlowContext. Extracting attribute from stored user '%s'.",
                     user.getId());
             var userAttributeName = config.userAttribute();
             attribute = user.getFirstAttribute(userAttributeName);
