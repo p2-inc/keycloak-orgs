@@ -5,7 +5,7 @@
   "keywords": [],
   "author": "mgll@egdm.fr",
   "devDependencies": {
-    "cypress": "^13.6.4",
+    "cypress": "^13.17.0",
     "cypress-multi-reporters": "^1.6.4",
     "mocha": "^10.3.0",
     "mochawesome": "^7.1.3",
