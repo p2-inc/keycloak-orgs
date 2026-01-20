@@ -2,27 +2,25 @@ package io.phasetwo.web;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressContainer;
-import io.github.wimdeblauwe.testcontainers.cypress.CypressTest;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
-import io.github.wimdeblauwe.testcontainers.cypress.CypressTestSuite;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.representation.LinkIdp;
 import jakarta.ws.rs.core.Response;
-import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DynamicContainer;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.Testcontainers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import static io.phasetwo.service.Helpers.*;
 import static io.restassured.RestAssured.given;
@@ -30,18 +28,29 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@EnabledIfSystemProperty(named = "include.cypress", matches = "true")
 @org.testcontainers.junit.jupiter.Testcontainers
 class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
 
     private static final String OIDC_IDP = "oidc-idp";
-
+    
     @TestFactory
-    List<DynamicContainer> runCypressTests()
-            throws IOException, InterruptedException, TimeoutException {
-    if (!RUN_CYPRESS) {
-      return Collections.emptyList();
+    Stream<DynamicContainer> runCypressTests() throws IOException, InterruptedException, TimeoutException {
+        return Stream
+                .of(false, null)
+                .map(isIdpLinkOnlyValue -> {
+                            try {
+                                return setupKeycloakWithLinkOnlyValueAndRunTests(isIdpLinkOnlyValue);
+                            } catch (IOException | InterruptedException | TimeoutException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                )
+                .flatMap(Collection::stream);
     }
 
+    private @NotNull List<DynamicContainer> setupKeycloakWithLinkOnlyValueAndRunTests(Boolean isIdpLinkOnlyValue)
+            throws IOException, InterruptedException, TimeoutException {
         Testcontainers.exposeHostPorts(container.getHttpPort());
 
         // import testRealm
@@ -69,7 +78,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         idp.setProviderId("oidc");
         idp.setEnabled(true);
         idp.setFirstBrokerLoginFlowAlias("first broker login");
-        idp.setLinkOnly(false);
+        idp.setLinkOnly(isIdpLinkOnlyValue);
         idp.setConfig(
                 new ImmutableMap.Builder<String, String>()
                         .put("useJwksUrl", "true")
@@ -146,7 +155,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                         .then()
                         .extract()
                         .response();
-        assertThat(response2.getStatusCode(), is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+        assertThat(response2.getStatusCode(), is(Response.Status.CREATED.getStatusCode()));
 
 
         List<DynamicContainer> dynamicContainers = new ArrayList<>();
@@ -158,7 +167,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                              .withBrowser("electron")) {
             cypressContainer.start();
             CypressTestResults testResults = cypressContainer.getTestResults();
-            dynamicContainers.addAll(convertToJUnitDynamicTests(testResults));
+            dynamicContainers.addAll(convertToJUnitDynamicTests("IDP's isLinkOnly is: %s - ".formatted(isIdpLinkOnlyValue), testResults));
         }
 
         keycloak.realms().realm("test-realm").remove();
