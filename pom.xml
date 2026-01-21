@@ -42,6 +42,7 @@
     <lombok.version>1.18.42</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
     <ossrh.url>https://ossrh-staging-api.central.sonatype.com</ossrh.url>
+    <jacoco.version>0.8.14</jacoco.version>
   </properties>
 
   <scm>
@@ -56,6 +57,66 @@
       <properties>
         <include.cypress>true</include.cypress>
       </properties>
+      <build>
+        <plugins>
+          <!--   copy the jacoco agent to target build  -->
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-jacoco</id>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <phase>compile</phase>
+                <configuration>
+                  <includeArtifactIds>org.jacoco.agent</includeArtifactIds>
+                  <includeClassifiers>runtime</includeClassifiers>
+                  <outputDirectory>${project.build.directory}/jacoco-agent</outputDirectory>
+                  <stripVersion>true</stripVersion>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!--   set up jacoco plugin to generate report  -->
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <executions>
+              <execution>
+                <id>merge</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>merge</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+                      <directory>${project.build.directory}/jacoco-report/</directory>
+                      <includes>
+                        <include>*.exec</include>
+                      </includes>
+                    </fileSet>
+                  </fileSets>
+                  <destFile>${project.build.directory}/jacoco-report/jacoco-all.exec</destFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>report</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/jacoco-report/jacoco-all.exec</dataFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
@@ -362,6 +423,13 @@
       <groupId>io.github.wimdeblauwe</groupId>
       <artifactId>testcontainers-cypress</artifactId>
       <version>1.9.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jacoco</groupId>
+      <artifactId>org.jacoco.agent</artifactId>
+      <version>${jacoco.version}</version>
+      <classifier>runtime</classifier>
       <scope>test</scope>
     </dependency>
   </dependencies>
