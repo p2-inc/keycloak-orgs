@@ -41,7 +41,7 @@ export const GenericOIDC: FC = () => {
     adminLinkOidc: adminLink,
     identifierURL,
     createIdPUrl,
-    loginRedirectURI: redirectUri,
+    loginRedirectURL: redirectUri,
   } = useApi();
   const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 

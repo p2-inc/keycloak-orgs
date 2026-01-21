@@ -119,7 +119,6 @@ export const useApi = () => {
 
   let entityId = `${serverUrl}/realms/${realm}`;
   let loginRedirectURL = `${entityId}/broker/${alias}/endpoint`;
-  let loginRedirectURI = `${entityId}/broker/${aliasId}/endpoint`;
   let federationMetadataAddressUrl = `${loginRedirectURL}/descriptor`;
 
   return {
@@ -133,7 +132,6 @@ export const useApi = () => {
     createIdPUrl,
     updateIdPUrl,
     loginRedirectURL,
-    loginRedirectURI,
     federationMetadataAddressUrl,
     entityId,
   };
