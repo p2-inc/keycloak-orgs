@@ -39,7 +39,7 @@ export const useApi = () => {
   const baseCloudUrl = `${realm}/orgs/${orgId}/idps`;
 
   let serverUrlSuffix = "/admin";
-  const aliasId = isString(alias) ? alias : "";
+  const aliasId = isString(alias) ? last(alias.split("-")) : "";
 
   // onprem endpoint
   const onPremEndpoints: Record<apiEndpointNames, endpoint> = {
@@ -119,7 +119,7 @@ export const useApi = () => {
 
   let entityId = `${serverUrl}/realms/${realm}`;
   let loginRedirectURL = `${entityId}/broker/${alias}/endpoint`;
-  let loginRedirectURI = `${entityId}/broker/${aliasId}/endpoint`;
+  // let loginRedirectURI = `${entityId}/broker/${aliasId}/endpoint`;
   let federationMetadataAddressUrl = `${loginRedirectURL}/descriptor`;
 
   return {
@@ -133,7 +133,7 @@ export const useApi = () => {
     createIdPUrl,
     updateIdPUrl,
     loginRedirectURL,
-    loginRedirectURI,
+    // loginRedirectURI,
     federationMetadataAddressUrl,
     entityId,
   };
