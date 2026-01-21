@@ -1,5 +1,6 @@
 package io.phasetwo.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressContainer;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.Testcontainers;
 
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -33,14 +36,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
 
     private static final String OIDC_IDP = "oidc-idp";
-    
+
     @TestFactory
     Stream<DynamicContainer> runCypressTests() throws IOException, InterruptedException, TimeoutException {
         return Stream
                 .of(false, null)
                 .map(isIdpLinkOnlyValue -> {
                             try {
-                                return setupKeycloakWithLinkOnlyValueAndRunTests(isIdpLinkOnlyValue);
+                                setupTestKeycloakInstance(isIdpLinkOnlyValue);
+                                List<DynamicContainer> dynamicContainers = runCypressTests("IDP's isLinkOnly is: %s - ".formatted(isIdpLinkOnlyValue), "cypress/e2e/home-idp-organization/base.cy.ts");
+                                cleanupKeycloakInstance();
+                                return dynamicContainers;
                             } catch (IOException | InterruptedException | TimeoutException e) {
                                 throw new RuntimeException(e);
                             }
@@ -49,8 +55,32 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                 .flatMap(Collection::stream);
     }
 
-    private @NotNull List<DynamicContainer> setupKeycloakWithLinkOnlyValueAndRunTests(Boolean isIdpLinkOnlyValue)
-            throws IOException, InterruptedException, TimeoutException {
+    @TestFactory
+    public List<DynamicContainer> bypassLoginEnabledTests() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false);
+        final var realm = keycloak
+                .realms()
+                .realm("test-realm");
+
+        final var homeIdpDiscoveryExecution = realm
+                .flows()
+                .getExecutions("Copy of browser forms")
+                .stream()
+                .filter(execution -> Objects.equals(execution.getProviderId(), "ext-auth-home-idp-discovery"))
+                .findFirst()
+                .orElseThrow();
+        final var homeIdpDiscoveryConfig = realm.flows().getAuthenticatorConfig(homeIdpDiscoveryExecution.getAuthenticationConfig());
+        homeIdpDiscoveryConfig.getConfig().put("bypassLoginPage", "true");
+        realm.flows().updateAuthenticatorConfig(homeIdpDiscoveryConfig.getId(), homeIdpDiscoveryConfig);
+        List<DynamicContainer> dynamicContainers = runCypressTests(
+                "Bypass Login Page enabled",
+                "cypress/e2e/home-idp-organization/bypass-login-enabled.cy.ts"
+        );
+        cleanupKeycloakInstance();
+        return dynamicContainers;
+    }
+
+    private void setupTestKeycloakInstance(Boolean isIdpLinkOnlyValue) throws JsonProcessingException {
         Testcontainers.exposeHostPorts(container.getHttpPort());
 
         // import testRealm
@@ -132,10 +162,10 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                         .then()
                         .extract()
                         .response();
-       assertThat(response.statusCode(), Matchers.is(Response.Status.OK.getStatusCode()));
-       OrganizationRepresentation orgRep =
+        assertThat(response.statusCode(), Matchers.is(Response.Status.OK.getStatusCode()));
+        OrganizationRepresentation orgRep =
                 objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
-       assertThat(orgRep.getId(), CoreMatchers.is(id));
+        assertThat(orgRep.getId(), CoreMatchers.is(id));
 
         // link it
         LinkIdp link = new LinkIdp();
@@ -156,22 +186,25 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                         .extract()
                         .response();
         assertThat(response2.getStatusCode(), is(Response.Status.CREATED.getStatusCode()));
+    }
 
+    private void cleanupKeycloakInstance() {
+        keycloak.realms().realm("test-realm").remove();
+        keycloak.realms().realm("external-idp").remove();
+    }
 
+    private @NotNull List<DynamicContainer> runCypressTests(String testContainerNamePrefix, String cypressTestFile) throws InterruptedException, TimeoutException, IOException {
         List<DynamicContainer> dynamicContainers = new ArrayList<>();
         try (CypressContainer cypressContainer =
                      new CypressContainer()
                              .withBaseUrl(
                                      "http://host.testcontainers.internal:" + container.getHttpPort() + "/auth/")
-                             .withSpec("cypress/e2e/home-idp-organization.cy.ts")
+                             .withSpec(cypressTestFile)
                              .withBrowser("electron")) {
             cypressContainer.start();
             CypressTestResults testResults = cypressContainer.getTestResults();
-            dynamicContainers.addAll(convertToJUnitDynamicTests("IDP's isLinkOnly is: %s - ".formatted(isIdpLinkOnlyValue), testResults));
+            dynamicContainers.addAll(convertToJUnitDynamicTests(testContainerNamePrefix, testResults));
         }
-
-        keycloak.realms().realm("test-realm").remove();
-        keycloak.realms().realm("external-idp").remove();
         return dynamicContainers;
     }
 }

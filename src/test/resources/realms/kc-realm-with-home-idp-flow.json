@@ -51,7 +51,7 @@
       "builtIn": false,
       "authenticationExecutions": [
         {
-          "authenticatorConfig": "test",
+          "authenticatorConfig": "ext-auth-home-idp-discovery",
           "authenticator": "ext-auth-home-idp-discovery",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
@@ -72,7 +72,7 @@
   ],
   "authenticatorConfig": [
     {
-      "alias": "test",
+      "alias": "ext-auth-home-idp-discovery",
       "config": {
         "requireVerifiedDomain": "false",
         "requireVerifiedEmail": "false",
