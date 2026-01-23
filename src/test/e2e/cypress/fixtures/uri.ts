@@ -24,4 +24,13 @@ const testRealmLoginUri = testRealmAuthUri.concat(
     '&redirect_uri=', testRealmUri.concat("/account")
 );
 
-export { tokenUri, orgsUri, accountUri, activeOrganizationUri, loginUriSelectAccount, loginUriAccountHint, testRealmLoginUri}
+export {
+    tokenUri,
+    orgsUri,
+    accountUri,
+    activeOrganizationUri,
+    loginUriSelectAccount,
+    loginUriAccountHint,
+    testRealmLoginUri,
+    testRealmUri,
+}
