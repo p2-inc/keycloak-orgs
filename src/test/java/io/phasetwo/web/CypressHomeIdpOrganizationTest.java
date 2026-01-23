@@ -38,7 +38,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
     private static final String OIDC_IDP = "oidc-idp";
 
     @TestFactory
-    Stream<DynamicContainer> runCypressTests() throws IOException, InterruptedException, TimeoutException {
+    Stream<DynamicContainer> baseHomeIdpTests() {
         return Stream
                 .of(false, null)
                 .map(isIdpLinkOnlyValue -> {
@@ -134,6 +134,17 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         }).flatMap(Collection::stream);
     }
 
+    @TestFactory
+    @DisplayName("The UsernameNoteAuthenticator should ask the username, handle extra steps, and continue with HomeIDP Authentication")
+    public List<DynamicContainer> testUsernameInAuthNoteFormWithHomeIdpIfTheresExtraAuthenticationFormPartsBetween() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false, "/realms/kc-realm-with-home-idp-with-username-auth-note-flow.json");
+        final var cypressResult = runCypressTests(
+                "",
+                "cypress/e2e/home-idp-organization/auth-note-form-with-home-idp.cy.ts");
+        cleanupKeycloakInstance();
+        return cypressResult;
+    }
+
     private void modifyAuthenticatorConfig(String realmName, String flowAlias, String providerId, Map.Entry<String, String> modifiedConfig) {
         final var realm = keycloak
                 .realms()
@@ -152,11 +163,15 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
     }
 
     private void setupTestKeycloakInstance(Boolean isIdpLinkOnlyValue) throws JsonProcessingException {
+        setupTestKeycloakInstance(isIdpLinkOnlyValue, "/realms/kc-realm-with-home-idp-flow.json");
+    }
+
+    private void setupTestKeycloakInstance(Boolean isIdpLinkOnlyValue, String testRealmRepresentationLocation) throws JsonProcessingException {
         Testcontainers.exposeHostPorts(container.getHttpPort());
 
         // import testRealm
         RealmRepresentation testRealm =
-                loadJson(getClass().getResourceAsStream("/realms/kc-realm-with-home-idp-flow.json"),
+                loadJson(getClass().getResourceAsStream(testRealmRepresentationLocation),
                         RealmRepresentation.class);
         importRealm(testRealm, keycloak);
 
