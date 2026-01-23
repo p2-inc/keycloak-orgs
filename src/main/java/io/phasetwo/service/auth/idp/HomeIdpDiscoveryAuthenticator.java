@@ -32,6 +32,16 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     public void authenticate(AuthenticationFlowContext authenticationFlowContext) {
         HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
 
+        //backwards compatibilty with original keycloak-orgs port
+        String attemptedUsername = getAttemptedUsername(authenticationFlowContext);
+        if (attemptedUsername != null) {
+            if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
+                action(authenticationFlowContext);
+            } else {
+                authenticationFlowContext.attempted();
+            }
+            return;
+        }
 
         if (context.loginPage().shouldByPass()) {
             String usernameHint = usernameHint(authenticationFlowContext, context);
@@ -53,6 +63,10 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
             //if no bypass login force challenge
             context.authenticationChallenge().forceChallenge();
         }
+    }
+
+    private String getAttemptedUsername(AuthenticationFlowContext context) {
+        return trimToNull(context.getAuthenticationSession().getAuthNote(ATTEMPTED_USERNAME));
     }
 
     private String usernameHint(AuthenticationFlowContext authenticationFlowContext, HomeIdpAuthenticationFlowContext context) {
