@@ -1,3 +1,4 @@
+//package de.sventorben.keycloak.authentication.hidpd.discovery.spi;
 package io.phasetwo.service.auth.idp.discovery.spi;
 
 //import de.sventorben.keycloak.authentication.hidpd.PublicAPI;
