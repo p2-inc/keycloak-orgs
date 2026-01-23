@@ -1,3 +1,4 @@
+//package de.sventorben.keycloak.authentication.hidpd.discovery.email;
 package io.phasetwo.service.auth.idp.discovery.extemail;
 
 import io.phasetwo.service.auth.idp.PublicAPI;

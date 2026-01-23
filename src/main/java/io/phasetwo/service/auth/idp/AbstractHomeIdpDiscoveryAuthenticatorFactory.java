@@ -38,6 +38,7 @@ import static org.keycloak.models.AuthenticationExecutionModel.Requirement.*;
  *
  * @see DiscovererConfig
  */
+@PublicAPI(unstable = true)
 public abstract class AbstractHomeIdpDiscoveryAuthenticatorFactory implements AuthenticatorFactory, ServerInfoAwareProviderFactory {
     private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = new AuthenticationExecutionModel.Requirement[]{REQUIRED, ALTERNATIVE, DISABLED};
 

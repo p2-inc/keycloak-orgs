@@ -1,6 +1,5 @@
+//package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp.discovery.extemail;
-
-//import de.sventorben.keycloak.authentication.hidpd.PublicAPI;
 
 import io.phasetwo.service.auth.idp.PublicAPI;
 
@@ -11,17 +10,13 @@ public final class Domain {
 
     private final String value;
 
-    public Domain(String value) {
+    Domain(String value) {
         Objects.requireNonNull(value);
         this.value = value.toLowerCase();
     }
 
-    public boolean isSubDomainOf(Domain domain) {
+    boolean isSubDomainOf(Domain domain) {
         return this.value.endsWith("." + domain.value);
-    }
-
-    public String getRawValue() {
-        return this.value;
     }
 
     @Override
