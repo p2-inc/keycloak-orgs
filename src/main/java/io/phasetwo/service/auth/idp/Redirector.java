@@ -48,7 +48,7 @@ final class Redirector {
             return;
         }
         new HomeIdpAuthenticationFlowContext(context).loginHint().copyTo(clientSessionCode);
-        UserAuthenticationIdentityProvider identityProvider = getIdentityProvider(keycloakSession, idp.getAlias());
+        UserAuthenticationIdentityProvider<?> identityProvider = getIdentityProvider(keycloakSession, idp.getAlias());
 
         Response response = identityProvider.performLogin(createAuthenticationRequest(providerAlias, identityProvider, clientSessionCode));
         context.forceChallenge(response);
