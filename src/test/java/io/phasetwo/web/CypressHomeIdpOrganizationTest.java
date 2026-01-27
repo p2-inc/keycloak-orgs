@@ -174,6 +174,18 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         );
     }
 
+    @TestFactory
+    @DisplayName("When a user tries to log in without an organizational idp, but has a linked idp to their user, we should show that")
+    public List<DynamicContainer> testIdpsLinkedToUserWhenNoOrgIdpIsSelected() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false);
+        List<DynamicContainer> dynamicContainers = runCypressTests(
+                "User without organization links his account:",
+                "cypress/e2e/home-idp-organization/user-without-org-links-account.cy.ts"
+        );
+        final var i = 0;
+        return dynamicContainers;
+    }
+
     private void setupKeycloakInstanceWithMultipleIdpsEnabledAtOrganization() throws JsonProcessingException {
         setupTestKeycloakInstance(false);
         final var secondClientRealm = importRealm("/realms/external-idp.json", "second-external-idp");
@@ -289,6 +301,28 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
 
         // link it
         linkIdentityProviderToOrganization(testRealm, orgRep, OIDC_IDP);
+        assignEachUserAccountManagementRoles(testRealm);
+    }
+
+    private void assignEachUserAccountManagementRoles(RealmRepresentation realmRepresentation) {
+        var realm = keycloak.realm(realmRepresentation.getRealm());
+        var client = realm
+                .clients()
+                .findByClientId("account")
+                .getFirst();
+        var roles = realm
+                .clients()
+                .get(client.getId())
+                .roles()
+                .list();
+        realm.users().list().forEach(user -> {
+            realm
+                    .users()
+                    .get(user.getId())
+                    .roles()
+                    .clientLevel(client.getId())
+                    .add(roles);
+        });
     }
 
     private static void updateRedirectUriInClientRealm(RealmRepresentation clientRealm, IdentityProviderRepresentation identityProvider) {

@@ -92,6 +92,21 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "username": "user-without-org@auth.it",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user-without-org@auth.it",
+      "firstName": "R",
+      "lastName": "T",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
     }
   ]
 }
