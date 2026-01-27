@@ -8,6 +8,7 @@ import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.representation.LinkIdp;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +19,11 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.Testcontainers;
+import org.testcontainers.containers.BindMode;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
@@ -31,6 +35,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@JBossLog
 @EnabledIfSystemProperty(named = "include.cypress", matches = "true")
 @org.testcontainers.junit.jupiter.Testcontainers
 class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
@@ -38,6 +43,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
     private static final String OIDC_IDP = "oidc-idp";
 
     @TestFactory
+    @DisplayName("Base testcases")
     Stream<DynamicContainer> baseHomeIdpTests() {
         return Stream
                 .of(false, null)
@@ -56,6 +62,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
     }
 
     @TestFactory
+    @DisplayName("Testcases when the bypassLoginPage is true")
     public List<DynamicContainer> bypassLoginEnabledTests() throws IOException, InterruptedException, TimeoutException {
         setupTestKeycloakInstance(false);
         final var realm = keycloak
@@ -141,6 +148,17 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         final var cypressResult = runCypressTests(
                 "",
                 "cypress/e2e/home-idp-organization/auth-note-form-with-home-idp.cy.ts");
+        cleanupKeycloakInstance();
+        return cypressResult;
+    }
+
+    @TestFactory
+    @DisplayName("When the HomeIdp requires the verified email config then no home IDP should be presented to them")
+    public List<DynamicContainer> testVerifiedEmailOnHomeIdpConfig() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false, "/realms/kc-realm-with-home-idp-flow-and-preregistered-users.json");
+        final var cypressResult = runCypressTests(
+                "",
+                "cypress/e2e/home-idp-organization/home-idp-require-verified-email-test.cy.ts");
         cleanupKeycloakInstance();
         return cypressResult;
     }
@@ -321,16 +339,53 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
 
     private @NotNull List<DynamicContainer> runCypressTests(String testContainerNamePrefix, String cypressTestFile) throws InterruptedException, TimeoutException, IOException {
         List<DynamicContainer> dynamicContainers = new ArrayList<>();
+        Path screenshotDirectory = Path.of("target", "cypress-output", "screenshots");
+        Files.createDirectories(screenshotDirectory);
         try (CypressContainer cypressContainer =
                      new CypressContainer()
                              .withBaseUrl(
                                      "http://host.testcontainers.internal:" + container.getHttpPort() + "/auth/")
+                             .withLogConsumer(new JbossLogConsumer(log))
                              .withSpec(cypressTestFile)
+                             .withFileSystemBind(screenshotDirectory.toAbsolutePath().toString(), "/e2e/cypress/screenshots/", BindMode.READ_WRITE)
                              .withBrowser("electron")) {
             cypressContainer.start();
             CypressTestResults testResults = cypressContainer.getTestResults();
             dynamicContainers.addAll(convertToJUnitDynamicTests(testContainerNamePrefix, testResults));
         }
         return dynamicContainers;
+    }
+
+    private void saveArtifactsFromCypressContainer(CypressContainer cypressContainer) throws IOException, InterruptedException {
+        String containerId = cypressContainer.getContainerId();
+        String containerShortId;
+        if (containerId.length() > 12) {
+            containerShortId = containerId.substring(0, 12);
+        } else {
+            containerShortId = containerId;
+        }
+//        container.getDockerClient().stopContainerCmd(containerId).exec();
+        Files.createDirectories(Path.of("target", "cypress-output", "screenshots"));
+        copyDirFromContainer(cypressContainer, "/e2e/cypress/screenshots/");
+    }
+
+    private static void copyDirFromContainer(CypressContainer cypressContainer, String directoryName) {
+        try {
+            Files.createDirectories(Path.of("./target/cypress-output", directoryName));
+            cypressContainer
+                    .execInContainer("ls", "-p", "-1", directoryName)
+                    .getStdout()
+                    .lines()
+                    .forEach(filepath -> {
+                        String fullFilePath = directoryName + filepath;
+                        if (filepath.endsWith("/")) {
+                            copyDirFromContainer(cypressContainer, fullFilePath);
+                        } else {
+                            cypressContainer.copyFileFromContainer(fullFilePath, "./target/cypress-output/%s".formatted(fullFilePath));
+                        }
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
