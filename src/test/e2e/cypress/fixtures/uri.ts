@@ -23,5 +23,21 @@ const testRealmLoginUri = testRealmAuthUri.concat(
     '&scope=openid',
     '&redirect_uri=', testRealmUri.concat("/account")
 );
+const testWizardLoginUri = testRealmAuthUri.concat(
+    '?response_type=code',
+    '&client_id=idp-wizard',
+    '&scope=openid',
+    '&redirect_uri=', testRealmUri.concat("/wizard")
+);
 
-export { tokenUri, orgsUri, accountUri, activeOrganizationUri, loginUriSelectAccount, loginUriAccountHint, testRealmLoginUri}
+export {
+    tokenUri,
+    orgsUri,
+    accountUri,
+    activeOrganizationUri,
+    loginUriSelectAccount,
+    loginUriAccountHint,
+    testRealmLoginUri,
+    testWizardLoginUri,
+    testRealmUri,
+}

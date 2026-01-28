@@ -1,6 +1,7 @@
 {
   "realm": "test-realm",
   "enabled": true,
+  "verifyEmail": false,
   "authenticationFlows": [
     {
       "alias": "Copy of browser",
@@ -75,7 +76,7 @@
       "alias": "ext-auth-home-idp-discovery",
       "config": {
         "requireVerifiedDomain": "false",
-        "requireVerifiedEmail": "false",
+        "requireVerifiedEmail": "true",
         "forwardToFirstMatch": "true",
         "bypassLoginPage": "false",
         "userAttribute": "email",
@@ -101,16 +102,31 @@
       ]
     },
     {
-      "username": "user-without-org@auth.it",
+      "username": "test@phasetwo.io",
+      "email": "test@phasetwo.io",
       "enabled": true,
       "emailVerified": true,
-      "email": "user-without-org@auth.it",
       "firstName": "R",
       "lastName": "T",
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "unverified@phasetwo.io",
+      "email": "unverified@phasetwo.io",
+      "enabled": true,
+      "emailVerified": false,
+      "firstName": "R",
+      "lastName": "T",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
           "temporary": false
         }
       ]
