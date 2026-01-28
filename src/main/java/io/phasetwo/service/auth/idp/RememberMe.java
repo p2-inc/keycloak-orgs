@@ -11,7 +11,7 @@ final class RememberMe {
 
     private final AuthenticationFlowContext context;
 
-    public RememberMe(AuthenticationFlowContext context) {
+    RememberMe(AuthenticationFlowContext context) {
         this.context = context;
     }
 
@@ -41,6 +41,6 @@ final class RememberMe {
     }
 
     String getUserName() {
-      return AuthenticationManager.getRememberMeUsername(context.getSession());
+        return AuthenticationManager.getRememberMeUsername(context.getSession());
     }
 }
