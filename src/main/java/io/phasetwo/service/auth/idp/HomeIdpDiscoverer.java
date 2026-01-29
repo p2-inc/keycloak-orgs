@@ -128,11 +128,19 @@ final class HomeIdpDiscoverer {
         */
         // Overidden lookup mechanism to lookup via organization domain
         OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
+        boolean validateIdpEnabled = context.getRealm().getAttribute(ORG_CONFIG_VALIDATE_IDP_KEY, false);
         List<IdentityProviderModel> enabledIdpsWithMatchingDomain =
             orgs.getOrganizationsStreamForDomain(
                     context.getRealm(), domain.toString(), config.requireVerifiedDomain())
                 .flatMap(OrganizationModel::getIdentityProvidersStream)
                 .filter(IdentityProviderModel::isEnabled)
+                .filter(
+                    idp ->
+                        !validateIdpEnabled
+                            || !Boolean.parseBoolean(
+                                Optional.ofNullable(idp.getConfig())
+                                    .map(cfg -> cfg.get(ORG_VALIDATION_PENDING_CONFIG_KEY))
+                                    .orElse(null)))
                 .collect(Collectors.toList());
 
         // If multi-idps is turned on, get a subset of that list with domain matches in the config.
