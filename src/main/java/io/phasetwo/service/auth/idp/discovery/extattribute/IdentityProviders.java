@@ -28,6 +28,8 @@ public interface IdentityProviders {
 
     Logger LOG = Logger.getLogger(IdentityProviders.class);
 
+    public static final String USER_ATTRIBUTE_KEY = "home.idp.discovery.user-attributes";
+
     /**
      * Filters the given list of identity provider candidates to return those that match a specified
      * attribute within the context of an authentication flow.
