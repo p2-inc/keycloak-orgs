@@ -1,14 +1,13 @@
 package io.phasetwo.service.auth.idp.discovery.extattribute;
 
-import io.phasetwo.service.auth.idp.discovery.extemail.Domain;
 import org.keycloak.models.Constants;
 import org.keycloak.models.IdentityProviderModel;
 
 import java.util.Arrays;
 
-final class IdentityProviderModelConfig {
+import static io.phasetwo.service.auth.idp.discovery.extattribute.IdentityProviders.USER_ATTRIBUTE_KEY;
 
-    private static final String USER_ATTRIBUTE_KEY = "home.idp.discovery.user-attributes";
+final class IdentityProviderModelConfig {
 
     private final IdentityProviderModel identityProviderModel;
 

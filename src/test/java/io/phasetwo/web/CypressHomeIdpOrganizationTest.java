@@ -19,6 +19,8 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.representations.userprofile.config.UPAttribute;
+import org.keycloak.representations.userprofile.config.UPAttributePermissions;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.BindMode;
 
@@ -31,6 +33,7 @@ import java.util.stream.Stream;
 
 import static io.phasetwo.service.Helpers.*;
 import static io.phasetwo.service.Orgs.*;
+import static io.phasetwo.service.auth.idp.discovery.extattribute.IdentityProviders.USER_ATTRIBUTE_KEY;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -167,6 +170,45 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                 "cypress/e2e/home-idp-organization/bypass-login-enabled.cy.ts"
         );
         return dynamicContainers;
+    }
+
+    @TestFactory
+    @DisplayName("IDP lookup based on user attribute works as expected when the user-attribute based IDP lookup is enabled on the IDP")
+    public List<DynamicContainer> testIdpLookupBasedOnUserAttribute() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false, "/realms/kc-realm-with-home-idp-extattribute-flow.json");
+        final var realm = findRealmByName("test-realm");
+        addAttributeToUserProfile(realm, "idpId");
+        updateUserAttribute(realm, "test@phasetwo.io", "idpId", OIDC_IDP);
+        final var idp = realm.identityProviders().get(OIDC_IDP).toRepresentation();
+        idp.getConfig().put(USER_ATTRIBUTE_KEY, OIDC_IDP);
+        realm.identityProviders().get(OIDC_IDP).update(idp);
+        return runCypressTests("", "cypress/e2e/home-idp-organization/user-attribute-based-idp.cy.ts");
+    }
+
+    @TestFactory
+    @DisplayName("IDP lookup based on user attribute works as expected when the user-attribute based IDP lookup is NOT enabled on the IDP")
+    public List<DynamicContainer> testIdpLookupBasedOnUserAttributeWhenNotEnabled() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false, "/realms/kc-realm-with-home-idp-extattribute-flow.json");
+        final var realm = findRealmByName("test-realm");
+        addAttributeToUserProfile(realm, "idpId");
+        updateUserAttribute(realm, "test@phasetwo.io", "idpId", OIDC_IDP);
+        return runCypressTests("", "cypress/e2e/home-idp-organization/user-attribute-based-idp-when-not-enabled-on-idp.cy.ts");
+    }
+
+    private void updateUserAttribute(RealmResource realm, String username, String userProfileAttributeName, String userProfileAttributeValue) {
+        final var user = realm.users().searchByUsername(username, true).getFirst();
+        user.singleAttribute(userProfileAttributeName, userProfileAttributeValue);
+        realm.users().get(user.getId()).update(user);
+    }
+
+    private void addAttributeToUserProfile(RealmResource realm, String userProfileAttributeName) {
+        final var userProfileResource = realm.users().userProfile();
+        final var upConfig = userProfileResource.getConfiguration();
+        upConfig.addOrReplaceAttribute(new UPAttribute(
+                userProfileAttributeName,
+                new UPAttributePermissions(Set.of("admin"), Set.of("admin"))
+        ));
+        userProfileResource.update(upConfig);
     }
 
     @TestFactory
