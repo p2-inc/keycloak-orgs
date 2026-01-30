@@ -54,7 +54,11 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
                     return;
                 }
                 //set attempted in order to bypass the need to multi input username/email in case the identity doesn't exist
-                authenticationFlowContext.attempted();
+                if (authenticationFlowContext.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
+                    authenticationFlowContext.success();
+                } else {
+                    authenticationFlowContext.attempted();
+                }
             } else {
                 //if no username hint force challenge
                 context.authenticationChallenge().forceChallenge();
