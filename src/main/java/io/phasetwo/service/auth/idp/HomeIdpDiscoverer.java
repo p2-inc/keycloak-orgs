@@ -137,10 +137,7 @@ final class HomeIdpDiscoverer {
                 .filter(
                     idp ->
                         !validateIdpEnabled
-                            || !Boolean.parseBoolean(
-                                Optional.ofNullable(idp.getConfig())
-                                    .map(cfg -> cfg.get(ORG_VALIDATION_PENDING_CONFIG_KEY))
-                                    .orElse(null)))
+                            || !isIdpValidationPending(idp))
                 .collect(Collectors.toList());
 
         // If multi-idps is turned on, get a subset of that list with domain matches in the config.
@@ -201,6 +198,13 @@ final class HomeIdpDiscoverer {
         return enabledIdpsWithMatchingDomain.stream()
             .filter(it -> linkedIdps.containsKey(it.getAlias()))
             .collect(Collectors.toList());
+    }
+
+    private boolean isIdpValidationPending(IdentityProviderModel idp) {
+        return Boolean.parseBoolean(
+            Optional.ofNullable(idp.getConfig())
+                .map(cfg -> cfg.get(ORG_VALIDATION_PENDING_CONFIG_KEY))
+                .orElse(null));
     }
 
     private List<IdentityProviderModel> filterIdpsWithMatchingDomainFrom(List<IdentityProviderModel> enabledIdps, Domain domain, HomeIdpDiscoveryConfig config) {
