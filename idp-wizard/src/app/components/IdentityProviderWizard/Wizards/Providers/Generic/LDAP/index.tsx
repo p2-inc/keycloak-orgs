@@ -47,7 +47,7 @@ export const GenericLDAP: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
 
   const onNext = (newStep) => {
@@ -64,7 +64,7 @@ export const GenericLDAP: FC = () => {
   const validateFn = async () => {
     setIsValidating(true);
     setDisableButton(false);
-    setResults("Creating LDAP IdP...");
+    setResults("Creating LDAP Identity Provider...");
 
     const { host, sslPort, baseDn } = serverConfig;
 
@@ -131,12 +131,15 @@ export const GenericLDAP: FC = () => {
     try {
       createResp = await kcAdminClient.components.create(payload);
     } catch (e) {
-      setResults("Failure to create LDAP IdP. Check values and try again.");
+      setResults(
+        "Failure to create LDAP identity provider. Check values and try again.",
+      );
       setError(true);
       setIsValidating(false);
       return {
         status: API_STATUS.ERROR,
-        message: "Failure to create LDAP IdP. Check values and try again.",
+        message:
+          "Failure to create LDAP identity provider. Check values and try again.",
       };
     }
 
@@ -148,7 +151,7 @@ export const GenericLDAP: FC = () => {
       });
     } catch (e) {
       setResults(
-        "LDAP IdP created but failed to sync contacts with LDAP instance. Try sync again at a later time."
+        "LDAP identity provider created but failed to sync contacts with LDAP instance. Try sync again at a later time.",
       );
       setError(true);
       setIsValidating(false);
@@ -160,7 +163,7 @@ export const GenericLDAP: FC = () => {
     }
 
     setResults(
-      "LDAP IdP created and contacts synced. Click finish to complete."
+      "LDAP identity provider created and contacts synced. Click finish to complete.",
     );
     setStepIdReached(finishStep);
     setError(false);
@@ -170,7 +173,7 @@ export const GenericLDAP: FC = () => {
     return {
       status: API_STATUS.SUCCESS,
       message:
-        "LDAP IdP created and contacts synced. Click finish to complete.",
+        "LDAP identity provider created and contacts synced. Click finish to complete.",
     };
   };
 
@@ -179,13 +182,13 @@ export const GenericLDAP: FC = () => {
 
   const handleServerConfigValidation = async (
     ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION,
-    serverConfig: ServerConfig
+    serverConfig: ServerConfig,
   ) => {
     setServerConfigValid(false);
     try {
       await kcAdminClient.realms.testLDAPConnection(
         { realm: getRealm()! },
-        ldapServerConfig
+        ldapServerConfig,
       );
       setServerConfig(serverConfig);
       setServerConfigValid(true);
@@ -221,7 +224,7 @@ export const GenericLDAP: FC = () => {
     try {
       await kcAdminClient.realms.testLDAPConnection(
         { realm: getRealm()! },
-        credentialConfig
+        credentialConfig,
       );
       setBindCreds({ bindDn, bindPassword });
       setBindCredsValid(true);
@@ -290,7 +293,7 @@ export const GenericLDAP: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with LDAP."
-          buttonText="Create LDAP IdP in Keycloak"
+          buttonText="Create LDAP identity provider"
           disableButton={disableButton}
           resultsText={results}
           error={error}

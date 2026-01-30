@@ -20,12 +20,12 @@ export const Step6: FC<Props> = ({ handleFormSubmit }) => {
       component: <StepImage src={Images.OktaSaml8} alt="Step 6.1" />,
     },
     {
-      text: 'A second window will open with the SAML setup instructions. Find the "Optional" section with the textbox containing the IDP metadata. Copy the entire contents of the text box and paste it below.',
+      text: 'A second window will open with the SAML setup instructions. Find the "Optional" section with the textbox containing the identity provider metadata. Copy the entire contents of the text box and paste it below.',
       component: <StepImage src={Images.OktaSaml9} alt="Step 6.1" />,
     },
     {
       component: (
-        <FileCard title="Validate IDP Metadata">
+        <FileCard title="Validate Identity Provider Metadata">
           <FileText handleFormSubmit={handleFormSubmit} />
         </FileCard>
       ),
@@ -34,7 +34,7 @@ export const Step6: FC<Props> = ({ handleFormSubmit }) => {
 
   return (
     <Step
-      title="Step 6: Upload Okta IdP Information"
+      title="Step 6: Upload Okta Identity Provider Information"
       instructionList={instructions}
     />
   );

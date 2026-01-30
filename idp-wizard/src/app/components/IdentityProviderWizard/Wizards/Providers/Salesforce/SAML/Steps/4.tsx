@@ -20,7 +20,8 @@ export const SalesforceStepFour: FC<Props> = ({ url, handleFormSubmit }) => {
     {
       text: (
         <div>
-          On the next page, click the <b>Manage</b> button to view your app's SAML settings.
+          On the next page, click the <b>Manage</b> button to view your app's
+          SAML settings.
         </div>
       ),
       component: <StepImage src={SalesforceCommonStep3Image} alt="Step 4.1" />,
@@ -28,8 +29,9 @@ export const SalesforceStepFour: FC<Props> = ({ url, handleFormSubmit }) => {
     {
       text: (
         <div>
-          Under the <b>SAML Login Information</b> section, copy the <b>Metadata Discovery Endpoint</b> URL{" "}
-          and paste it into the field below.
+          Under the <b>SAML Login Information</b> section, copy the{" "}
+          <b>Metadata Discovery Endpoint</b> URL and paste it into the field
+          below.
         </div>
       ),
       component: <StepImage src={SalesforceSamlStep2Image} alt="Step 4.2" />,
@@ -45,7 +47,7 @@ export const SalesforceStepFour: FC<Props> = ({ url, handleFormSubmit }) => {
 
   return (
     <Step
-      title="Step 4: Upload Salesforce IdP Information"
+      title="Step 4: Upload Salesforce Identity Provider Information"
       instructionList={instructions}
     />
   );

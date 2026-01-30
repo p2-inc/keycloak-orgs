@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "dr:surge": "node dr-surge.js",
-    "build": "yarn clean && webpack --config webpack.prod.js && yarn dr:surge",
+    "build": "pnpm clean && webpack --config webpack.prod.js && pnpm dr:surge",
     "start": "sirv dist --cors --single --host --port 8080",
     "start:dev": "webpack serve --color --progress --config webpack.dev.js",
     "test": "jest --watch",
@@ -94,5 +94,5 @@
     "webpack-dev-server": "^5.2.3",
     "webpack-merge": "^5.8.0"
   },
-  "packageManager": "yarn@4.12.0+sha512.f45ab632439a67f8bc759bf32ead036a1f413287b9042726b7cc4818b7b49e14e9423ba49b18f9e06ea4941c1ad062385b1d8760a8d5091a1a31e5f6219afca8"
+  "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264"
 }

@@ -24,6 +24,15 @@ export const TemplateWizardProtocol: FC = () => {
   const [error, setError] = useState<null | boolean>(null);
   const [disableButton, setDisableButton] = useState(false);
 
+  const { isValidationPendingForAlias } = useCreateTestIdpLink();
+  const [idpTestLink, setIdpTestLink] = useState<string>("");
+  const checkPendingValidationStatus = async () => {
+    const pendingLink = await isValidationPendingForAlias(alias);
+    if (pendingLink) {
+      setIdpTestLink(pendingLink);
+    }
+  };
+
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
       navigateToBasePath();
@@ -60,6 +69,11 @@ export const TemplateWizardProtocol: FC = () => {
     //   setStepIdReached(6);
     //   setError(false);
     //   setDisableButton(true);
+    //   await checkPendingValidationStatus();
+    // clearAlias({
+    //     provider: Providers.JUMP_CLOUD,
+    //     protocol: Protocols.SAML,
+    //   });
     // } catch (e) {
     //   setResults(
     //     "Error creating SAML IdP. Please confirm there is no SAML configured already."
@@ -86,7 +100,7 @@ export const TemplateWizardProtocol: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with {{Provider}}."
-          buttonText="Create {{Provider}} IdP in Keycloak"
+          buttonText="Create {{Provider}} Identity Provider"
           disableButton={disableButton}
           resultsText={results}
           error={error}

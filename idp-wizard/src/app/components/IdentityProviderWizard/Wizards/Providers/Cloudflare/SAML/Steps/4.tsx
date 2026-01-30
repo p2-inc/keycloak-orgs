@@ -12,9 +12,10 @@ export function CloudflareStepFour() {
     {
       text: (
         <div>
-          In the <b>SAML attribute statements</b> section, provide the following attribute
-          statements by clicking <b>+ Add Statement</b> for each attribute. Set the{" "}
-          <b>Name Format</b> for each attribute to <b>Basic</b>. Copy the following
+          In the <b>SAML attribute statements</b> section, provide the following
+          attribute statements by clicking <b>+ Add Statement</b> for each
+          attribute. Set the <b>Name Format</b> for each attribute to{" "}
+          <b>Basic</b>. Copy the following
         </div>
       ),
       component: <StepImage src={Images.CloudflareSaml5} alt="Step 4.1" />,
@@ -22,9 +23,12 @@ export function CloudflareStepFour() {
     {
       component: (
         <div>
-          Note that Cloudflare passes attributes directly from the identity providers configured in your Cloudflare Zero Trust organization.{" "}
-          Ensure that your IdP is configured to provide these attributes to Cloudflare or adjust the attribute mapping as needed.{" "}
-          The built-in OTP identity provider does not provide <b>firstName</b> or <b>lastName</b> attributes.
+          Note that Cloudflare passes attributes directly from the identity
+          providers configured in your Cloudflare Zero Trust organization.{" "}
+          Ensure that your identity provider is configured to provide these
+          attributes to Cloudflare or adjust the attribute mapping as needed.{" "}
+          The built-in OTP identity provider does not provide <b>firstName</b>{" "}
+          or <b>lastName</b> attributes.
         </div>
       ),
     },
@@ -55,14 +59,14 @@ export function CloudflareStepFour() {
             leftLabel="Name"
             rightLabel="IdP Attribute"
           />
-          
         </>
       ),
     },
     {
       component: (
         <div>
-          Select <b>Save configuration</b> at the bottom of the page to save your changes.
+          Select <b>Save configuration</b> at the bottom of the page to save
+          your changes.
         </div>
       ),
     },

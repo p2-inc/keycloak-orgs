@@ -27,9 +27,10 @@ import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
+import { useCreateTestIdpLink } from "@app/hooks/useCreateTestIdpLink";
 
 export const AWSSamlWizard: FC = () => {
-  const idpCommonName = "AWS SSO IdP";
+  const idpCommonName = "AWS SSO Identity Provider";
 
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
@@ -71,8 +72,17 @@ export const AWSSamlWizard: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
+
+  const { isValidationPendingForAlias } = useCreateTestIdpLink();
+  const [idpTestLink, setIdpTestLink] = useState<string>("");
+  const checkPendingValidationStatus = async () => {
+    const pendingLink = await isValidationPendingForAlias(alias);
+    if (pendingLink) {
+      setIdpTestLink(pendingLink);
+    }
+  };
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
@@ -164,6 +174,7 @@ export const AWSSamlWizard: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      await checkPendingValidationStatus();
       clearAlias({
         provider: Providers.AWS,
         protocol: Protocols.SAML,
@@ -171,7 +182,7 @@ export const AWSSamlWizard: FC = () => {
     } catch (e) {
       console.error(e);
       setResults(
-        "Error creating AWS SAML IdP. Please check values or confirm there is no SAML configured already."
+        "Error creating AWS SAML IdP. Please check values or confirm there is no SAML configured already.",
       );
       setError(true);
     } finally {
@@ -230,14 +241,15 @@ export const AWSSamlWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with AWS SSO."
-          buttonText={`Create ${idpCommonName} in Keycloak`}
+          buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createIdP}
           adminLink={adminLink}
-          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
+          adminButtonText={`Manage ${idpCommonName}`}
+          idpTestLink={idpTestLink}
         />
       ),
       nextButtonText: "Finish",

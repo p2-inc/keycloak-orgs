@@ -27,8 +27,8 @@ export const LastPassStepFour: FC<Props> = ({ uploadMetadataFile }) => {
     {
       text: (
         <div>
-          Click the <b>Export SAML IdP Metadata</b> button,{" "}
-          then select <b>Download</b> to save the metadata file.
+          Click the <b>Export SAML Identity Provider Metadata</b> button, then
+          select <b>Download</b> to save the metadata file.
         </div>
       ),
       component: <StepImage src={Images.LastPassSaml5} alt="Step 4.1" />,

@@ -22,9 +22,10 @@ import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
+import { useCreateTestIdpLink } from "@app/hooks/useCreateTestIdpLink";
 
 export const PingOneWizard: FC = () => {
-  const idpCommonName = "PingOne IdP";
+  const idpCommonName = "PingOne Identity Provider";
 
   const navigateToBasePath = useNavigateToBasePath();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
@@ -63,8 +64,17 @@ export const PingOneWizard: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
+
+  const { isValidationPendingForAlias } = useCreateTestIdpLink();
+  const [idpTestLink, setIdpTestLink] = useState<string>("");
+  const checkPendingValidationStatus = async () => {
+    const pendingLink = await isValidationPendingForAlias(alias);
+    if (pendingLink) {
+      setIdpTestLink(pendingLink);
+    }
+  };
 
   const onNext = (newStep) => {
     if (stepIdReached === steps.length + 1) {
@@ -154,14 +164,14 @@ export const PingOneWizard: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
-
+      await checkPendingValidationStatus();
       clearAlias({
         provider: Providers.PING_ONE,
         protocol: Protocols.SAML,
       });
     } catch (e) {
       setResults(
-        `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`
+        `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`,
       );
       setError(true);
     } finally {
@@ -217,14 +227,15 @@ export const PingOneWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with PingOne."
-          buttonText={`Create ${idpCommonName} in Keycloak`}
+          buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={validateFn}
           adminLink={adminLink}
-          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
+          adminButtonText={`Manage ${idpCommonName}`}
+          idpTestLink={idpTestLink}
         />
       ),
       nextButtonText: "Finish",

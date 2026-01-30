@@ -44,7 +44,7 @@ export function DuoStepFour() {
       component: <StepImage src={Images.DuoSaml3} alt="Step 4.1" />,
     },
     {
-      text: "Copy the following IdP attributes and SAML response attributes",
+      text: "Copy the following identity provider attributes and SAML response attributes",
       component: <StepImage src={Images.DuoSaml4} alt="Step 4.2" />,
     },
     {
@@ -55,7 +55,7 @@ export function DuoStepFour() {
             rightValue={rightValue}
             key={index}
           />
-        )
+        ),
       ),
     },
   ];

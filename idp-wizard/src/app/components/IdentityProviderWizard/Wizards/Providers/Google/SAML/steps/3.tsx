@@ -34,7 +34,7 @@ export const Step3: FC<Step3Props> = ({ handleFormSubmit }) => {
 
   return (
     <Step
-      title="Step 3: Upload Google IdP Information"
+      title="Step 3: Upload Google Identity Provider Information"
       instructionList={instructions}
     />
   );

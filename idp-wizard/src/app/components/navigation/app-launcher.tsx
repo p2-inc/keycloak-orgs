@@ -92,7 +92,7 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
       <ApplicationLauncherItem
         key="switchOrganization"
         onClick={() => toggleOrgPicker(true)}
-        title="Change the active organization for IdP creation."
+        title="Change the active organization for identity provider creation."
         className={cs({
           "pf-u-display-none": showOrgPicker,
         })}
@@ -120,7 +120,7 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
         title="Close the window."
       >
         Close window
-      </ApplicationLauncherItem>
+      </ApplicationLauncherItem>,
     );
   }
 

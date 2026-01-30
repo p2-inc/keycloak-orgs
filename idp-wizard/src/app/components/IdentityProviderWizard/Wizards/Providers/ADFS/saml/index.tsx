@@ -26,9 +26,10 @@ import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
+import { useCreateTestIdpLink } from "@app/hooks/useCreateTestIdpLink";
 
 export const ADFSWizard: FC = () => {
-  const idpCommonName = "ADFS IdP";
+  const idpCommonName = "ADFS Identity Provider";
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const title = "ADFS wizard";
@@ -46,7 +47,7 @@ export const ADFSWizard: FC = () => {
   const { generateIdpDisplayName } = useGenerateIdpDisplayName();
 
   const [issuerUrl, setIssuerUrl] = useState(
-    "https://HOSTNAME/federationmetadata/2007-06/federationmetadata.xml"
+    "https://HOSTNAME/federationmetadata/2007-06/federationmetadata.xml",
   );
   const [metadata, setMetadata] = useState<METADATA_CONFIG>();
   const [isFormValid, setIsFormValid] = useState(false);
@@ -73,8 +74,17 @@ export const ADFSWizard: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
+
+  const { isValidationPendingForAlias } = useCreateTestIdpLink();
+  const [idpTestLink, setIdpTestLink] = useState<string>("");
+  const checkPendingValidationStatus = async () => {
+    const pendingLink = await isValidationPendingForAlias(alias);
+    if (pendingLink) {
+      setIdpTestLink(pendingLink);
+    }
+  };
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
@@ -198,13 +208,16 @@ export const ADFSWizard: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+
+      await checkPendingValidationStatus();
+
       clearAlias({
         provider: Providers.ADFS,
         protocol: Protocols.SAML,
       });
     } catch (e) {
       setResults(
-        `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`
+        `Error creating ${idpCommonName}. Please confirm there is no ${idpCommonName} configured already.`,
       );
       setError(true);
     } finally {
@@ -253,14 +266,15 @@ export const ADFSWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with ADFS."
-          buttonText={`Create ${idpCommonName} in Keycloak`}
+          buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={validateFn}
           adminLink={adminLink}
-          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
+          adminButtonText={`Manage ${idpCommonName}`}
+          idpTestLink={idpTestLink}
         />
       ),
       nextButtonText: "Finish",

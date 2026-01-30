@@ -18,9 +18,10 @@ import { Axios, clearAlias, getAlias, CreateIdp } from "@wizardServices";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
+import { useCreateTestIdpLink } from "@app/hooks/useCreateTestIdpLink";
 
 export const SalesforceWizardOIDC: FC = () => {
-  const idpCommonName = "Salesforce OIDC IdP";
+  const idpCommonName = "Salesforce OIDC Identity Provider";
 
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
@@ -64,8 +65,17 @@ export const SalesforceWizardOIDC: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
+
+  const { isValidationPendingForAlias } = useCreateTestIdpLink();
+  const [idpTestLink, setIdpTestLink] = useState<string>("");
+  const checkPendingValidationStatus = async () => {
+    const pendingLink = await isValidationPendingForAlias(alias);
+    if (pendingLink) {
+      setIdpTestLink(pendingLink);
+    }
+  };
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
@@ -144,6 +154,7 @@ export const SalesforceWizardOIDC: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      await checkPendingValidationStatus();
       clearAlias({
         provider: Providers.SALESFORCE,
         protocol: Protocols.OPEN_ID,
@@ -195,14 +206,15 @@ export const SalesforceWizardOIDC: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Salesforce."
-          buttonText={`Create ${idpCommonName} in Keycloak`}
+          buttonText={`Create ${idpCommonName}`}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createIdP}
           disableButton={disableButton}
           adminLink={adminLink}
-          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
+          adminButtonText={`Manage ${idpCommonName}`}
+          idpTestLink={idpTestLink}
         />
       ),
       nextButtonText: "Finish",

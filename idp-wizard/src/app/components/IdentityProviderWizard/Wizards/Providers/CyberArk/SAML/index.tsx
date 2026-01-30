@@ -27,9 +27,10 @@ import {
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
+import { useCreateTestIdpLink } from "@app/hooks/useCreateTestIdpLink";
 
 export const CyberArkWizard: FC = () => {
-  const idpCommonName = "CyberArk SAML IdP";
+  const idpCommonName = "CyberArk SAML Identity Provider";
   const { data: featureFlags } = useGetFeatureFlagsQuery();
   const navigateToBasePath = useNavigateToBasePath();
   const [stepIdReached, setStepIdReached] = useState(1);
@@ -66,8 +67,17 @@ export const CyberArkWizard: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
+
+  const { isValidationPendingForAlias } = useCreateTestIdpLink();
+  const [idpTestLink, setIdpTestLink] = useState<string>("");
+  const checkPendingValidationStatus = async () => {
+    const pendingLink = await isValidationPendingForAlias(alias);
+    if (pendingLink) {
+      setIdpTestLink(pendingLink);
+    }
+  };
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
@@ -152,13 +162,14 @@ export const CyberArkWizard: FC = () => {
       setStepIdReached(finishStep);
       setError(false);
       setDisableButton(true);
+      await checkPendingValidationStatus();
       clearAlias({
         provider: Providers.CYBERARK,
         protocol: Protocols.SAML,
       });
     } catch (e) {
       setResults(
-        `Error creating ${idpCommonName}. Please confirm there is no CyberArk SAML configured already.`
+        `Error creating ${idpCommonName}. Please confirm there is no CyberArk SAML configured already.`,
       );
       setError(true);
     } finally {
@@ -215,14 +226,15 @@ export const CyberArkWizard: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with CyberArk."
-          buttonText={`Create ${idpCommonName} in Keycloak`}
+          buttonText={`Create ${idpCommonName}`}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createCyberarkSamlIdP}
           disableButton={disableButton}
           adminLink={adminLink}
-          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
+          adminButtonText={`Manage ${idpCommonName}`}
+          idpTestLink={idpTestLink}
         />
       ),
       nextButtonText: "Finish",

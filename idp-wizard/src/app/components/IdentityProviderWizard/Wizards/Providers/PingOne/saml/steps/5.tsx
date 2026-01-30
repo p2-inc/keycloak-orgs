@@ -34,7 +34,7 @@ export const Step5: FC<Props> = ({ handleFormSubmit }) => {
 
   return (
     <Step
-      title="Step 5: Upload PingOne IdP Information"
+      title="Step 5: Upload PingOne Identity Provider Information"
       instructionList={instructions}
     />
   );

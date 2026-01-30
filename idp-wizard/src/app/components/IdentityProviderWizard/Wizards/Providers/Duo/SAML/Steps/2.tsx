@@ -20,8 +20,8 @@ export const DuoStepTwo: FC<Props> = ({ url, handleFormSubmit }) => {
       text: (
         <div>
           Click the <b>Copy</b> link next to the <b>Metadata URL</b> field, and
-          paste it into the field below. This will load the Duo IdP
-          configuration.
+          paste it into the field below. This will load the Duo identity
+          provider configuration.
         </div>
       ),
       component: <StepImage src={Images.DuoSaml1} alt="Step 2.1" />,

@@ -17,9 +17,10 @@ import { Providers, Protocols, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
+import { useCreateTestIdpLink } from "@app/hooks/useCreateTestIdpLink";
 
 export const OktaWizardSaml: FC = () => {
-  const idpCommonName = "Okta SAML IdP";
+  const idpCommonName = "Okta SAML Identity Provider";
   const title = "Okta wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
@@ -56,8 +57,17 @@ export const OktaWizardSaml: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
+
+  const { isValidationPendingForAlias } = useCreateTestIdpLink();
+  const [idpTestLink, setIdpTestLink] = useState<string>("");
+  const checkPendingValidationStatus = async () => {
+    const pendingLink = await isValidationPendingForAlias(alias);
+    if (pendingLink) {
+      setIdpTestLink(pendingLink);
+    }
+  };
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
@@ -132,6 +142,8 @@ export const OktaWizardSaml: FC = () => {
       setError(false);
       setDisableButton(true);
 
+      await checkPendingValidationStatus();
+
       clearAlias({
         provider: Providers.OKTA,
         protocol: Protocols.SAML,
@@ -183,10 +195,7 @@ export const OktaWizardSaml: FC = () => {
     {
       id: 6,
       name: "Upload Okta IdP Information",
-      component: (
-        // <Step6 handleFormSubmit={handleFormSubmit} url={metadataUrl} />
-        <Step6 handleFormSubmit={handleFormSubmit} />
-      ),
+      component: <Step6 handleFormSubmit={handleFormSubmit} />,
       enableNext: isFormValid,
       hideCancelButton: true,
       canJumpTo: stepIdReached >= 6,
@@ -198,14 +207,15 @@ export const OktaWizardSaml: FC = () => {
         <WizardConfirmation
           title="SSO Configuration Complete"
           message="Your users can now sign-in with Okta SAML."
-          buttonText={`Create ${idpCommonName} in Keycloak`}
+          buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createIdP}
           adminLink={adminLink}
-          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
+          adminButtonText={`Manage ${idpCommonName}`}
+          idpTestLink={idpTestLink}
         />
       ),
       nextButtonText: "Finish",

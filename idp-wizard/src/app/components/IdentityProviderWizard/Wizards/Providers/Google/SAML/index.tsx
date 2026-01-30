@@ -22,9 +22,10 @@ import { Protocols, Providers, SamlIDPDefaults } from "@app/configurations";
 import { useApi, usePrompt } from "@app/hooks";
 import { useGetFeatureFlagsQuery } from "@app/services";
 import { useGenerateIdpDisplayName } from "@app/hooks/useGenerateIdpDisplayName";
+import { useCreateTestIdpLink } from "@app/hooks/useCreateTestIdpLink";
 
 export const GoogleWizard: FC = () => {
-  const idpCommonName = "Google SAML IdP";
+  const idpCommonName = "Google SAML Identity Provider";
   const title = "Google wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const { data: featureFlags } = useGetFeatureFlagsQuery();
@@ -39,7 +40,6 @@ export const GoogleWizard: FC = () => {
     adminLinkSaml: adminLink,
     identifierURL,
     createIdPUrl,
-    baseServerRealmsUrl,
   } = useApi();
 
   const [metadata, setMetadata] = useState<METADATA_CONFIG | null>(null);
@@ -63,8 +63,17 @@ export const GoogleWizard: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
+
+  const { isValidationPendingForAlias } = useCreateTestIdpLink();
+  const [idpTestLink, setIdpTestLink] = useState<string>("");
+  const checkPendingValidationStatus = async () => {
+    const pendingLink = await isValidationPendingForAlias(alias);
+    if (pendingLink) {
+      setIdpTestLink(pendingLink);
+    }
+  };
 
   const onNext = (newStep) => {
     if (stepIdReached === finishStep) {
@@ -145,6 +154,8 @@ export const GoogleWizard: FC = () => {
       setError(false);
       setDisableButton(true);
 
+      checkPendingValidationStatus();
+
       clearAlias({
         provider: Providers.GOOGLE_SAML,
         protocol: Protocols.SAML,
@@ -215,6 +226,7 @@ export const GoogleWizard: FC = () => {
           validationFunction={createIdP}
           adminLink={adminLink}
           adminButtonText={`Manage ${idpCommonName} in Keycloak`}
+          idpTestLink={idpTestLink}
         />
       ),
       nextButtonText: "Finish",

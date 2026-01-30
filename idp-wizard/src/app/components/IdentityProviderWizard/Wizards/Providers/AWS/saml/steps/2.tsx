@@ -35,7 +35,7 @@ export const Step2: FC<Props> = ({ url, handleFormSubmit }) => {
 
   return (
     <Step
-      title="Step 2: Upload AWS SSO IdP Information"
+      title="Step 2: Upload AWS SSO Identity Provider Information"
       instructionList={instructions}
     />
   );

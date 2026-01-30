@@ -1,8 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { apiSlice, settingsSlice } from "../services/";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { combineReducers } from "redux";
-
 import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 

@@ -81,7 +81,7 @@ export const FileText: FC<Props> = ({
         fieldId="idpMetadata"
         validated={hasError}
         helperTextInvalid={errors.idpMetadata}
-        helperText="Paste IDP Metadata."
+        helperText="Paste identity provider metadata."
       >
         <TextArea
           id="idpMetadata"
@@ -90,7 +90,7 @@ export const FileText: FC<Props> = ({
           value={values.idpMetadata}
           onChange={(val, e) => handleChange(e)}
           validated={hasError}
-          aria-label="IDP Metadata"
+          aria-label="Identity Provider Metadata"
           isDisabled={!formActive}
         />
       </FormGroup>

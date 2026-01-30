@@ -6,7 +6,7 @@ import {
 } from "@app/configurations";
 import { RouterParams } from "@app/routes";
 import React from "react";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 
 import { usePageTitle } from "@app/hooks/useTitle";
 import {

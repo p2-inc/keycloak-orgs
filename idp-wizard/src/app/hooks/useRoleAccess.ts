@@ -61,7 +61,7 @@ export function useRoleAccess() {
     window.location.assign(
       generatePath(PATHS.accessDenied, {
         realm: realm || window.location.pathname.split("/")[3],
-      })
+      }),
     );
   }
 
@@ -151,6 +151,7 @@ export function useRoleAccess() {
   }, []);
 
   return {
+    hasOrganizationRole,
     hasOrgAccess,
     hasOrganizationRoles,
     hasRealmRoles,

@@ -42,7 +42,7 @@ export const Auth0StepThree: FC<Step3Props> = ({ uploadMetadataFile }) => {
 
   return (
     <Step
-      title="Step 3: Upload Auth0 IdP Information"
+      title="Step 3: Upload Auth0 Identity Provider Information"
       instructionList={instructions}
     />
   );

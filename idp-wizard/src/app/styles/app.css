@@ -181,3 +181,33 @@ body,
   padding: var(--pf-global--spacer--md);
   margin-bottom: var(--pf-global--spacer--sm);
 }
+
+.customExpansion {
+  border: 1px solid lightgray;
+  border-radius: 5px;
+  padding: var(--pf-global--spacer--sm);
+  margin-top: var(--pf-global--spacer--sm);
+  margin-bottom: var(--pf-global--spacer--xl);
+}
+
+.infoBox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--pf-global--spacer--sm);
+  padding-left: var(--pf-global--spacer--md);
+}
+.infoText {
+  color: var(--pf-global--palette--black-700);
+  font-size: var(--pf-global--FontSize--sm);
+}
+.infoBoxWarning {
+  color: var(--pf-global--palette--gold-400);
+}
+.icon-success {
+  color: var(--pf-global--palette--green-400);
+}
+
+.existingIdpsTable.pf-c-table tbody > tr > * {
+  vertical-align: middle;
+}

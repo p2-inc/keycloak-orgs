@@ -1,5 +1,13 @@
 import { useAppSelector } from "@app/hooks/hooks";
-import { Button, Stack, StackItem, Title } from "@patternfly/react-core";
+import {
+  Alert,
+  Button,
+  ClipboardCopy,
+  Stack,
+  StackItem,
+  Text,
+  Title,
+} from "@patternfly/react-core";
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -17,6 +25,7 @@ interface SuccessProps {
   validationFunction: () => void;
   adminLink?: string;
   adminButtonText?: string;
+  idpTestLink?: string;
 }
 
 // States should be
@@ -35,6 +44,7 @@ export const WizardConfirmation: FC<SuccessProps> = ({
   disableButton = false,
   adminLink,
   adminButtonText,
+  idpTestLink,
 }) => {
   const apiMode = useAppSelector((state) => state.settings.apiMode);
   const isCloud = apiMode === "cloud";
@@ -64,6 +74,30 @@ export const WizardConfirmation: FC<SuccessProps> = ({
             {isCloud ? "Create Identity Provider" : buttonText}
           </Button>
         </StackItem>
+        {idpTestLink && (
+          <StackItem>
+            <Alert
+              variant="warning"
+              title="Testing Single Sign-On"
+              style={{ textAlign: "left" }}
+            >
+              <Text style={{ marginBottom: ".8rem" }}>
+                Test signing in with SSO configuration to verify that the single
+                sign-on connection was configured correctly. Copy the link below
+                and open in another browser or an incognito window to avoid
+                being logged out of the wizard.
+              </Text>
+              <ClipboardCopy
+                hoverTip="Copy and open in another browser or incognito window, or you will be logged out of the wizard."
+                clickTip="Copied. Open in another browser or incognito window, or you will be logged out of the wizard."
+                className="clipboard-copy"
+                style={{ fontSize: "8px" }}
+              >
+                {idpTestLink}
+              </ClipboardCopy>
+            </Alert>
+          </StackItem>
+        )}
         {!isCloud && disableButton && adminLink && (
           <StackItem>
             <Button component="a" href={adminLink}>

@@ -16,7 +16,8 @@ type apiEndpointNames =
   | "createIdP"
   | "updateIdP"
   | "importConfig"
-  | "addMapperToIdP";
+  | "addMapperToIdP"
+  | "getOrgsConfig";
 
 type endpoint = {
   method: HTTP_METHODS;
@@ -67,6 +68,10 @@ export const useApi = () => {
       method: HTTP_METHODS.POST,
       endpoint: `${baseOPUrlInstances}/${alias}/mappers`,
     },
+    getOrgsConfig: {
+      method: HTTP_METHODS.GET,
+      endpoint: `${baseOPUrl}/orgs/config`,
+    },
   };
 
   // cloud endpoints
@@ -95,6 +100,10 @@ export const useApi = () => {
       method: HTTP_METHODS.POST,
       endpoint: `${baseCloudUrl}/${alias}/mappers`,
     },
+    getOrgsConfig: {
+      method: HTTP_METHODS.GET,
+      endpoint: `${realm}/orgs/config`,
+    },
   };
 
   let endpoints: Record<apiEndpointNames, endpoint> | undefined;
@@ -113,26 +122,32 @@ export const useApi = () => {
   let adminLinkSaml = `${baseServerUrl}/${authRealm}/console/#/${realm}/identity-providers/saml/${alias}/settings`;
   let adminLinkOidc = `${baseServerUrl}/${authRealm}/console/#/${realm}/identity-providers/oidc/${alias}/settings`;
 
+  let idpsListUrl = `${baseServerRealmsUrl}/${endpoints?.getIdPs.endpoint}`;
+  let idpDetailUrl = `${baseServerRealmsUrl}/${endpoints?.getIdP.endpoint}`;
   let identifierURL = `${baseServerRealmsUrl}/${endpoints?.importConfig.endpoint}`;
   let createIdPUrl = `${baseServerRealmsUrl}/${endpoints?.createIdP.endpoint!}`;
   let updateIdPUrl = `${baseServerRealmsUrl}/${endpoints?.updateIdP.endpoint!}`;
+  let orgsConfigUrl = `${baseServerRealmsUrl}/${endpoints?.getOrgsConfig.endpoint}`;
 
   let entityId = `${serverUrl}/realms/${realm}`;
   let loginRedirectURL = `${entityId}/broker/${alias}/endpoint`;
   let federationMetadataAddressUrl = `${loginRedirectURL}/descriptor`;
 
   return {
-    alias,
-    setAlias,
-    endpoints,
-    baseServerRealmsUrl,
-    adminLinkSaml,
     adminLinkOidc,
-    identifierURL,
+    adminLinkSaml,
+    alias,
+    baseServerRealmsUrl,
     createIdPUrl,
-    updateIdPUrl,
-    loginRedirectURL,
-    federationMetadataAddressUrl,
+    endpoints,
     entityId,
+    federationMetadataAddressUrl,
+    identifierURL,
+    idpDetailUrl,
+    idpsListUrl,
+    loginRedirectURL,
+    orgsConfigUrl,
+    setAlias,
+    updateIdPUrl,
   };
 };

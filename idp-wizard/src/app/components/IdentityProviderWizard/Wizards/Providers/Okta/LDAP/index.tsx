@@ -21,7 +21,7 @@ import { useKeycloakAdminApi, usePrompt } from "@app/hooks";
 import { API_STATUS } from "@app/configurations";
 
 export const OktaWizardLDAP: FC = () => {
-  const idpCommonName = "Okta LDAP IdP";
+  const idpCommonName = "Okta LDAP Identity Provider";
   const title = "Okta LDAP Wizard";
   const navigateToBasePath = useNavigateToBasePath();
   const { kcAdminClient, getRealm } = useKeycloakAdminApi();
@@ -46,7 +46,7 @@ export const OktaWizardLDAP: FC = () => {
 
   usePrompt(
     "The wizard is incomplete. Leaving will lose any saved progress. Are you sure?",
-    stepIdReached < finishStep
+    stepIdReached < finishStep,
   );
 
   const onNext = (newStep) => {
@@ -62,13 +62,13 @@ export const OktaWizardLDAP: FC = () => {
 
   const handleServerConfigValidation = async (
     ldapServerConfig: LDAP_SERVER_CONFIG_TEST_CONNECTION,
-    serverConfig: ServerConfig
+    serverConfig: ServerConfig,
   ) => {
     setServerConfigValid(false);
     try {
       await kcAdminClient.realms.testLDAPConnection(
         { realm: getRealm()! },
-        ldapServerConfig
+        ldapServerConfig,
       );
       setServerConfig(serverConfig);
       setServerConfigValid(true);
@@ -104,7 +104,7 @@ export const OktaWizardLDAP: FC = () => {
     try {
       await kcAdminClient.realms.testLDAPConnection(
         { realm: getRealm()! },
-        credentialConfig
+        credentialConfig,
       );
       setBindCreds({ bindDn, bindPassword });
       setBindCredsValid(true);
@@ -196,7 +196,7 @@ export const OktaWizardLDAP: FC = () => {
       createResp = await kcAdminClient.components.create(payload);
     } catch (e) {
       setResults(
-        `Failure to create ${idpCommonName}. Check values and try again.`
+        `Failure to create ${idpCommonName}. Check values and try again.`,
       );
       setError(true);
       setIsValidating(false);
@@ -214,7 +214,7 @@ export const OktaWizardLDAP: FC = () => {
       });
     } catch (e) {
       setResults(
-        `${idpCommonName} created but failed to sync contacts with LDAP instance. Try sync again at a later time.`
+        `${idpCommonName} created but failed to sync contacts with LDAP instance. Try sync again at a later time.`,
       );
       setError(true);
       setIsValidating(false);
@@ -226,7 +226,7 @@ export const OktaWizardLDAP: FC = () => {
     }
 
     setResults(
-      `${idpCommonName} created and contacts synced. Click finish to complete.`
+      `${idpCommonName} created and contacts synced. Click finish to complete.`,
     );
     setStepIdReached(finishStep);
     setError(false);

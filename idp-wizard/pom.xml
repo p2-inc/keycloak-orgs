@@ -111,7 +111,7 @@
               <goal>corepack</goal>
             </goals>
             <configuration>
-              <arguments>yarn install</arguments>
+              <arguments>pnpm install</arguments>
             </configuration>
           </execution>
 
@@ -121,7 +121,7 @@
               <goal>corepack</goal>
             </goals>
             <configuration>
-              <arguments>yarn build</arguments>
+              <arguments>pnpm build</arguments>
             </configuration>
           </execution>
 

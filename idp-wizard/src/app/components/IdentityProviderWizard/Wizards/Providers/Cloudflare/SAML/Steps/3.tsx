@@ -19,9 +19,9 @@ export const CloudflareStepThree: FC<Props> = ({ url, handleFormSubmit }) => {
     {
       text: (
         <div>
-          Click the <b>Copy</b> button next to the <b>SAML Metadata endpoint</b> field, and
-          paste it into the field below. This will load the Cloudflare IdP
-          configuration.
+          Click the <b>Copy</b> button next to the <b>SAML Metadata endpoint</b>{" "}
+          field, and paste it into the field below. This will load the
+          Cloudflare identity provider configuration.
         </div>
       ),
       component: <StepImage src={Images.CloudflareSaml4} alt="Step 3.1" />,

@@ -35,7 +35,7 @@ export const Step5: FC<Props> = ({ url, handleFormSubmit }) => {
 
   return (
     <Step
-      title="Step 5: Upload OneLogin IdP Information"
+      title="Step 5: Upload OneLogin Identity Provider Information"
       instructionList={instructions}
     />
   );
