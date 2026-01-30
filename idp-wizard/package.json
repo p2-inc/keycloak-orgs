@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "dr:surge": "node dr-surge.js",
-    "build": "pnpm clean && webpack --config webpack.prod.js && pnpm dr:surge",
+    "build": "rimraf dist && webpack --config webpack.prod.js && node dr-surge.js",
     "start": "sirv dist --cors --single --host --port 8080",
     "start:dev": "webpack serve --color --progress --config webpack.dev.js",
     "test": "jest --watch",
