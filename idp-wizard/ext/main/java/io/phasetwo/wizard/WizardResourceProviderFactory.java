@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config.Scope;
+import org.keycloak.models.AuthenticationFlowModel;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -65,7 +66,7 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
           .getRealmsStream()
           .forEach(
               realm -> {
-                createClient(realm, session);
+                createClients(realm, session);
               });
     } catch (Exception e) {
       log.warnf(
@@ -77,57 +78,78 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   private void realmPostCreate(RealmModel.RealmPostCreateEvent event) {
     RealmModel realm = event.getCreatedRealm();
     KeycloakSession session = event.getKeycloakSession();
-    createClient(realm, session);
+    createClients(realm, session);
   }
 
-  private void createClient(RealmModel realm, KeycloakSession session) {
+  private void createClients(RealmModel realm, KeycloakSession session) {
+    createIdpWizardClient(realm, session);
+    createIdpTesterClient(realm, session);
+  }
+
+  private void createIdpWizardClient(RealmModel realm, KeycloakSession session) {
     log.debugf("Creating %s realm idp-wizard client.", realm.getName());
     ClientModel idpWizard = session.clients().getClientByClientId(realm, "idp-wizard");
     if (idpWizard == null) {
       log.debugf("No idp-wizard client for %s realm. Creating...", realm.getName());
       if ("master".equals(realm.getName())) {
-        idpWizard = createClientForMaster(realm, session);
+        idpWizard = createClientForMaster(realm, session, "idp-wizard");
       } else {
-        idpWizard = createClientForRealm(realm, session);
+        idpWizard = createClientForRealm(realm, session, "idp-wizard");
       }
     }
     setClientScopeDefaults(realm, session, idpWizard);
+  }
+
+  private void createIdpTesterClient(RealmModel realm, KeycloakSession session) {
+    log.debugf("Creating %s realm idp-tester client.", realm.getName());
+    ClientModel idpTester = session.clients().getClientByClientId(realm, "idp-tester");
+    if (idpTester == null) {
+      log.debugf("No idp-tester client for %s realm. Creating...", realm.getName());
+      if ("master".equals(realm.getName())) {
+        idpTester = createClientForMaster(realm, session, "idp-tester");
+      } else {
+        idpTester = createClientForRealm(realm, session, "idp-tester");
+      }
+    }
+    setAuthFlow(realm, idpTester, "browser", "idp validate");
   }
 
   private String getRedirectPath(RealmModel realm) {
     return String.format("/realms/%s/%s/", realm.getName(), ID);
   }
 
-  private ClientModel createClientForRealm(RealmModel realm, KeycloakSession session) {
+  private ClientModel createClientForRealm(
+      RealmModel realm, KeycloakSession session, String clientId) {
     String path = getRedirectPath(realm);
-    ClientModel idpWizard = session.clients().addClient(realm, "idp-wizard");
-    setDefaults(realm, idpWizard);
-    idpWizard.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
-    idpWizard.setWebOrigins(ImmutableSet.of("/*"));
-    idpWizard.setAttribute("post.logout.redirect.uris", "+");
-    return idpWizard;
+    ClientModel client = session.clients().addClient(realm, clientId);
+    setDefaults(realm, client);
+    client.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
+    client.setWebOrigins(ImmutableSet.of("/*"));
+    client.setAttribute("post.logout.redirect.uris", "+");
+    return client;
   }
 
-  private ClientModel createClientForMaster(RealmModel realm, KeycloakSession session) {
-    ClientModel idpWizard = session.clients().addClient(realm, "idp-wizard");
-    setDefaults(realm, idpWizard);
-    idpWizard.setRedirectUris(ImmutableSet.of("/*"));
-    idpWizard.setWebOrigins(ImmutableSet.of("/*"));
-    idpWizard.setAttribute("post.logout.redirect.uris", "+");
-    return idpWizard;
+  private ClientModel createClientForMaster(
+      RealmModel realm, KeycloakSession session, String clientId) {
+    ClientModel client = session.clients().addClient(realm, clientId);
+    setDefaults(realm, client);
+    client.setRedirectUris(ImmutableSet.of("/*"));
+    client.setWebOrigins(ImmutableSet.of("/*"));
+    client.setAttribute("post.logout.redirect.uris", "+");
+    return client;
   }
 
-  private void setDefaults(RealmModel realm, ClientModel idpWizard) {
-    idpWizard.setProtocol("openid-connect");
-    idpWizard.setPublicClient(true);
-    idpWizard.setRootUrl("${authBaseUrl}");
-    idpWizard.setName(NAME);
-    idpWizard.setDescription(DESCRIPTION);
-    idpWizard.setBaseUrl(getRedirectPath(realm));
+  private void setDefaults(RealmModel realm, ClientModel client) {
+    client.setProtocol("openid-connect");
+    client.setPublicClient(true);
+    client.setRootUrl("${authBaseUrl}");
+    client.setName(NAME);
+    client.setDescription(DESCRIPTION);
+    client.setBaseUrl(getRedirectPath(realm));
   }
 
-  private void setOrganizationRoleMapper(ClientModel idpWizard) {
-    ProtocolMapperModel pro = idpWizard.getProtocolMapperByName("openid-connect", "organizations");
+  private void setOrganizationRoleMapper(ClientModel client) {
+    ProtocolMapperModel pro = client.getProtocolMapperByName("openid-connect", "organizations");
     if (pro != null) {
       return;
     } else {
@@ -145,12 +167,11 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
             .put("userinfo.token.claim", "true")
             .build();
     pro.setConfig(config);
-    //      "consentRequired": false,
-    idpWizard.addProtocolMapper(pro);
+    client.addProtocolMapper(pro);
   }
 
-  private void setOrganizationIdMapper(ClientModel idpWizard) {
-    ProtocolMapperModel pro = idpWizard.getProtocolMapperByName("openid-connect", "org_id");
+  private void setOrganizationIdMapper(ClientModel client) {
+    ProtocolMapperModel pro = client.getProtocolMapperByName("openid-connect", "org_id");
     if (pro != null) {
       return;
     } else {
@@ -169,13 +190,12 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
             .put("userinfo.token.claim", "true")
             .build();
     pro.setConfig(config);
-    //      "consentRequired": false,
-    idpWizard.addProtocolMapper(pro);
+    client.addProtocolMapper(pro);
   }
 
   private void setClientScopeDefaults(
-      RealmModel realm, KeycloakSession session, ClientModel idpWizard) {
-    idpWizard.setFullScopeAllowed(true);
+      RealmModel realm, KeycloakSession session, ClientModel client) {
+    client.setFullScopeAllowed(true);
     session
         .clientScopes()
         .getClientScopesStream(realm)
@@ -184,13 +204,23 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
             c -> {
               log.debugf("Found 'roles' client scope. Adding as default...");
               try {
-                idpWizard.addClientScope(c, true);
+                client.addClientScope(c, true);
               } catch (Exception e) {
                 log.warn("'roles' client scope already exists. skipping...");
               }
             });
-    setOrganizationRoleMapper(idpWizard);
-    setOrganizationIdMapper(idpWizard);
+    setOrganizationRoleMapper(client);
+    setOrganizationIdMapper(client);
+  }
+
+  private void setAuthFlow(RealmModel realm, ClientModel client, String binding, String flowAlias) {
+    AuthenticationFlowModel flow = realm.getFlowByAlias(flowAlias);
+    if (flow != null) {
+      log.infof("Flow for %s %s %s", flowAlias, flow.getId(), binding);
+      client.setAuthenticationFlowBindingOverride(binding, flow.getId());
+    } else {
+      log.warnf("Flow for %s alias doesn't exist. Skipping assiging to %s", flowAlias, binding);
+    }
   }
 
   @Override
