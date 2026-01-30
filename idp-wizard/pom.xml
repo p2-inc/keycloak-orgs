@@ -3,7 +3,7 @@
   <groupId>io.phasetwo</groupId>
   <artifactId>phasetwo-idp-wizard</artifactId>
   <packaging>jar</packaging>
-  <version>0.34</version>
+  <version>0.35-SNAPSHOT</version>
 
   <name>Phase Two IDP wizard</name>
   <description>Phase Two SSO and Directory Sync setup wizards.</description>
@@ -43,7 +43,7 @@
   <scm>
     <url>https://github.com/p2-inc/idp-wizard</url>
     <connection>scm:git:git@github.com:p2-inc/idp-wizard.git</connection>
-    <tag>v0.34</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <build>
