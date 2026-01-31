@@ -154,6 +154,9 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
 
     idpDefaults(representation, Optional.of(linkFromRep(representation)));
+    if (realm.getAttribute(ORG_CONFIG_VALIDATE_IDP_KEY, false)) {
+      representation.getConfig().put(ORG_VALIDATION_PENDING_CONFIG_KEY, "true");
+    }
     deactivateOtherIdps(
         representation,
         !IdentityProviders.isMultipleIdpsConfigEnabled(realm),
