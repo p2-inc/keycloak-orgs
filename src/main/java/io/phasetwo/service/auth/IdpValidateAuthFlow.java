@@ -39,8 +39,7 @@ public class IdpValidateAuthFlow {
     if (!hasExecution) {
       log.infof(
           "adding execution %s for auth flow for %s",
-          "identity-provider-redirector",
-          IDP_VALIDATE_FLOW_ALIAS);
+          "identity-provider-redirector", IDP_VALIDATE_FLOW_ALIAS);
       ProviderFactory f =
           session
               .getKeycloakSessionFactory()

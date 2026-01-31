@@ -25,6 +25,7 @@ public class ValidateIdpAuthenticatorFactory extends BaseAuthenticatorFactory
     implements DefaultAuthenticator {
 
   public static final String PROVIDER_ID = "ext-auth-validate-idp";
+  private static final String IDP_VALIATION_FORM = "idp-validation.ftl";
 
   public ValidateIdpAuthenticatorFactory() {
     super(PROVIDER_ID);
@@ -71,7 +72,7 @@ public class ValidateIdpAuthenticatorFactory extends BaseAuthenticatorFactory
         String.format(
             "Successful validation. You logged in as %s %s %s. You can close this window now.",
             firstName, lastName, email);
-    context.challenge(context.form().setInfo(message).createInfoPage());
+    context.challenge(context.form().setInfo(message).createForm(IDP_VALIATION_FORM));
   }
 
   @Override
@@ -110,6 +111,11 @@ public class ValidateIdpAuthenticatorFactory extends BaseAuthenticatorFactory
         (ProviderEvent ev) -> {
           if (ev instanceof RealmModel.RealmPostCreateEvent) {
             IdpValidateAuthFlow.realmPostCreate((RealmModel.RealmPostCreateEvent) ev);
+            PostOrgAuthFlow.realmPostCreate(
+                (RealmModel.RealmPostCreateEvent) ev,
+                PROVIDER_ID,
+                AuthenticationExecutionModel.Requirement.REQUIRED,
+                new Integer(0));
           }
         });
   }
