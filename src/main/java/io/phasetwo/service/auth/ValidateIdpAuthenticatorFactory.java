@@ -70,7 +70,7 @@ public class ValidateIdpAuthenticatorFactory extends BaseAuthenticatorFactory
     String email = Optional.ofNullable(brokerContext.getEmail()).orElse("");
     String message =
         String.format(
-            "Successful validation. You logged in as %s %s %s. You can close this window now.",
+            "You logged in as %s %s %s.",
             firstName, lastName, email);
     context.challenge(context.form().setInfo(message).createForm(IDP_VALIATION_FORM));
   }

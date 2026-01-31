@@ -1,11 +1,11 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout displayMessage=false; section>
+<@layout.registrationLayout displayMessage=false displayInfo=false; section>
     <#if section = "header">
-        ${kcSanitize(msg("validationSuccess"))?no_esc}
+        ${kcSanitize(msg("validationSuccessTitle"))?no_esc}
     <#elseif section = "form">
         <div id="kc-validation-message">
             <p class="instruction">${message.summary}</p>
-	    <p>${kcSanitize(msg("validationCloseWindow"))}</p>
+	    <p class="instruction">${kcSanitize(msg("validationCloseWindow"))}</p>
         </div>
     </#if>
 </@layout.registrationLayout>
