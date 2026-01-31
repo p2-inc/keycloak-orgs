@@ -205,8 +205,8 @@ export const OktaWizardSaml: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with Okta SAML."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="Okta SAML."
           buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}

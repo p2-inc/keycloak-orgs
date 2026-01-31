@@ -243,8 +243,8 @@ export const EntraIdWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with EntraId AD."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="EntraId AD."
           buttonText={`Create ${idpCommonName}`}
           resultsText={results}
           error={error}

@@ -264,8 +264,8 @@ export const ADFSWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with ADFS."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="ADFS."
           buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}

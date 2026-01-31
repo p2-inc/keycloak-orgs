@@ -225,8 +225,8 @@ export const PingOneWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with PingOne."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="PingOne."
           buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}

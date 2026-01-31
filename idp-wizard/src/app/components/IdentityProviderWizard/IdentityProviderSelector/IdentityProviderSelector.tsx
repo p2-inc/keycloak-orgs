@@ -271,7 +271,7 @@ export const IdentityProviderSelector: FC = () => {
           )}
         </StackItem>
         <StackItem isFilled>
-          <div className="container">
+          <div className="container ta-center">
             <div className="vertical-center">
               <h1>Select Your Identity Provider</h1>
               <h2 className="description">
@@ -297,7 +297,12 @@ export const IdentityProviderSelector: FC = () => {
 
                       const linkTo = active ? genLink : "#";
                       return (
-                        <Link to={linkTo} key={provider} title={name}>
+                        <Link
+                          to={linkTo}
+                          key={provider}
+                          title={name}
+                          className="selection-item"
+                        >
                           <IdPButton
                             key={name}
                             text={name}
@@ -329,7 +334,7 @@ export const IdentityProviderSelector: FC = () => {
                     protocol: protocols[0],
                   });
                   return (
-                    <Link to={pth} key={id}>
+                    <Link to={pth} key={id} className="selection-item">
                       <IdPButton
                         key={name}
                         text={name}

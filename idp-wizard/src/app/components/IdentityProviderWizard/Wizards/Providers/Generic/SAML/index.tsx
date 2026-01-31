@@ -307,8 +307,8 @@ export const GenericSAML: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with SAML."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="SAML."
           buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}

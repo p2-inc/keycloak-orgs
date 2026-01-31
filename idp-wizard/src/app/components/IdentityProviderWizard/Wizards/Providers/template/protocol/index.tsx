@@ -98,8 +98,8 @@ export const TemplateWizardProtocol: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with {{Provider}}."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="{{Provider}}."
           buttonText="Create {{Provider}} Identity Provider"
           disableButton={disableButton}
           resultsText={results}

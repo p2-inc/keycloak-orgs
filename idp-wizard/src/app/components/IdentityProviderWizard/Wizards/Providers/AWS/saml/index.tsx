@@ -239,8 +239,8 @@ export const AWSSamlWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with AWS SSO."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="AWS SSO."
           buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}

@@ -291,8 +291,8 @@ export const GenericLDAP: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with LDAP."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="LDAP."
           buttonText="Create LDAP identity provider"
           disableButton={disableButton}
           resultsText={results}

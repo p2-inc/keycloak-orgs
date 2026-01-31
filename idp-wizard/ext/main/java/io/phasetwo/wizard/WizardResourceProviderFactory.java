@@ -22,8 +22,12 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 public class WizardResourceProviderFactory implements RealmResourceProviderFactory {
 
   public static final String ID = "wizard";
-  public static final String NAME = "IdP Config Wizard";
-  public static final String DESCRIPTION = "Wizards for configuring various vendor IdPs.";
+  public static final String CONFIG_CLIENT_ID = "idp-wizard";
+  public static final String CONFIG_NAME = "IdP Config Wizard";
+  public static final String CONFIG_DESCRIPTION = "Wizards for configuring various vendor IdPs.";
+  public static final String TESTER_CLIENT_ID = "idp-tester";
+  public static final String TESTER_NAME = "IdP Tester";
+  public static final String TESTER_DESCRIPTION = "Testing for validating vendor IdPs.";
 
   public static final String AUTH_REALM_OVERRIDE_CONFIG_KEY =
       "_providerConfig.wizard.auth-realm-override";
@@ -88,13 +92,16 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
 
   private void createIdpWizardClient(RealmModel realm, KeycloakSession session) {
     log.debugf("Creating %s realm idp-wizard client.", realm.getName());
-    ClientModel idpWizard = session.clients().getClientByClientId(realm, "idp-wizard");
+    ClientModel idpWizard = session.clients().getClientByClientId(realm, CONFIG_CLIENT_ID);
     if (idpWizard == null) {
       log.debugf("No idp-wizard client for %s realm. Creating...", realm.getName());
       if ("master".equals(realm.getName())) {
-        idpWizard = createClientForMaster(realm, session, "idp-wizard");
+        idpWizard =
+            createClientForMaster(
+                realm, session, CONFIG_CLIENT_ID, CONFIG_NAME, CONFIG_DESCRIPTION);
       } else {
-        idpWizard = createClientForRealm(realm, session, "idp-wizard");
+        idpWizard =
+            createClientForRealm(realm, session, CONFIG_CLIENT_ID, CONFIG_NAME, CONFIG_DESCRIPTION);
       }
     }
     setClientScopeDefaults(realm, session, idpWizard);
@@ -102,13 +109,16 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
 
   private void createIdpTesterClient(RealmModel realm, KeycloakSession session) {
     log.debugf("Creating %s realm idp-tester client.", realm.getName());
-    ClientModel idpTester = session.clients().getClientByClientId(realm, "idp-tester");
+    ClientModel idpTester = session.clients().getClientByClientId(realm, TESTER_CLIENT_ID);
     if (idpTester == null) {
       log.debugf("No idp-tester client for %s realm. Creating...", realm.getName());
       if ("master".equals(realm.getName())) {
-        idpTester = createClientForMaster(realm, session, "idp-tester");
+        idpTester =
+            createClientForMaster(
+                realm, session, TESTER_CLIENT_ID, TESTER_NAME, TESTER_DESCRIPTION);
       } else {
-        idpTester = createClientForRealm(realm, session, "idp-tester");
+        idpTester =
+            createClientForRealm(realm, session, TESTER_CLIENT_ID, TESTER_NAME, TESTER_DESCRIPTION);
       }
     }
     setAuthFlow(realm, idpTester, "browser", "idp validate");
@@ -119,10 +129,10 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private ClientModel createClientForRealm(
-      RealmModel realm, KeycloakSession session, String clientId) {
+      RealmModel realm, KeycloakSession session, String clientId, String name, String description) {
     String path = getRedirectPath(realm);
     ClientModel client = session.clients().addClient(realm, clientId);
-    setDefaults(realm, client);
+    setDefaults(realm, client, name, description);
     client.setRedirectUris(ImmutableSet.of(String.format("%s*", path)));
     client.setWebOrigins(ImmutableSet.of("/*"));
     client.setAttribute("post.logout.redirect.uris", "+");
@@ -130,21 +140,22 @@ public class WizardResourceProviderFactory implements RealmResourceProviderFacto
   }
 
   private ClientModel createClientForMaster(
-      RealmModel realm, KeycloakSession session, String clientId) {
+      RealmModel realm, KeycloakSession session, String clientId, String name, String description) {
     ClientModel client = session.clients().addClient(realm, clientId);
-    setDefaults(realm, client);
+    setDefaults(realm, client, name, description);
+    ;
     client.setRedirectUris(ImmutableSet.of("/*"));
     client.setWebOrigins(ImmutableSet.of("/*"));
     client.setAttribute("post.logout.redirect.uris", "+");
     return client;
   }
 
-  private void setDefaults(RealmModel realm, ClientModel client) {
+  private void setDefaults(RealmModel realm, ClientModel client, String name, String description) {
     client.setProtocol("openid-connect");
     client.setPublicClient(true);
     client.setRootUrl("${authBaseUrl}");
-    client.setName(NAME);
-    client.setDescription(DESCRIPTION);
+    client.setName(name);
+    client.setDescription(description);
     client.setBaseUrl(getRedirectPath(realm));
   }
 

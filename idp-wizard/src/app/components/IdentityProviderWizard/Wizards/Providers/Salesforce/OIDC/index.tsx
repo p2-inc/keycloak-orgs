@@ -204,8 +204,8 @@ export const SalesforceWizardOIDC: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with Salesforce."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="Salesforce."
           buttonText={`Create ${idpCommonName}`}
           resultsText={results}
           error={error}

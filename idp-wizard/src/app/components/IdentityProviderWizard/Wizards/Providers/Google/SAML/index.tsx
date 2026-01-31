@@ -216,16 +216,16 @@ export const GoogleWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with Google Cloud SAML."
-          buttonText={`Create ${idpCommonName} in Keycloak`}
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="Google Workplace SAML"
+          buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}
           error={error}
           isValidating={isValidating}
           validationFunction={createIdP}
           adminLink={adminLink}
-          adminButtonText={`Manage ${idpCommonName} in Keycloak`}
+          adminButtonText={`Manage ${idpCommonName}`}
           idpTestLink={idpTestLink}
         />
       ),

@@ -36,15 +36,29 @@ body,
   flex: 0 0 33.333333%;
 }
 
-.container {
-  margin: auto;
-  width: 80%;
-  height: calc(100% - 100px);
-  padding: 5px;
-  text-align: center;
-  top: 50%;
-  border-radius: 5px;
+@media (max-width: 640px) {
+  .selection-container {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .selection-item {
+    list-style: none;
+    flex: 0 0 33.333333%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 
+  .selection-item .idp-button {
+    width: min(320px, 98vw);
+    height: 90px;
+  }
+}
+
+.ta-center {
+  text-align: center;
+}
+.container {
   h1 {
     font-size: 36px;
     padding: 10px;
@@ -61,14 +75,6 @@ body,
       border-radius: 5px;
     }
   }
-}
-
-.vertical-center {
-  position: relative;
-  /* left: 40%; */
-  top: 50%;
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
 }
 
 .step {

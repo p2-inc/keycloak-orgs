@@ -225,8 +225,8 @@ export const CloudflareWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with Cloudflare."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="Cloudflare."
           buttonText={`Create ${idpCommonName}`}
           resultsText={results}
           error={error}

@@ -217,8 +217,8 @@ export const JumpCloudWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with JumpCloud."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="JumpCloud."
           buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}

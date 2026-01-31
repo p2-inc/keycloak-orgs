@@ -239,8 +239,8 @@ export const DuoWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with Duo AD."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="Duo AD."
           buttonText={`Create ${idpCommonName}`}
           resultsText={results}
           error={error}

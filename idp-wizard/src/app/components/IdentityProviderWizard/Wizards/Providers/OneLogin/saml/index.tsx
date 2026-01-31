@@ -240,8 +240,8 @@ export const OneLoginWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with OneLogin."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="OneLogin."
           buttonText={`Create ${idpCommonName}`}
           disableButton={disableButton}
           resultsText={results}

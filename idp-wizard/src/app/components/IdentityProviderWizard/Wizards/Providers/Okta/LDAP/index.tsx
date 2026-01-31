@@ -283,7 +283,7 @@ export const OktaWizardLDAP: FC = () => {
       component: (
         <WizardConfirmation
           title="OKTA LDAP Configuration Complete"
-          message="Your users can now sign-in with Okta."
+          message="Okta."
           buttonText="Create OKTA LDAP IdP"
           disableButton={disableButton}
           resultsText={results}

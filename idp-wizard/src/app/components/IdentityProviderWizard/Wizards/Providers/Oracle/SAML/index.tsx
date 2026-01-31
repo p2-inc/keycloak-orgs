@@ -208,8 +208,8 @@ export const OracleWizard: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with Oracle Cloud."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="Oracle Cloud."
           buttonText={`Create ${idpCommonName}`}
           resultsText={results}
           error={error}

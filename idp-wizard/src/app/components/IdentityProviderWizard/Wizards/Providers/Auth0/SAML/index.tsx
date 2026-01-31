@@ -210,8 +210,8 @@ export const Auth0WizardSAML: FC = () => {
       name: "Confirmation",
       component: (
         <WizardConfirmation
-          title="SSO Configuration Complete"
-          message="Your users can now sign-in with Auth0."
+          title="SSO Configuration Complete. Create Identity Provider."
+          message="Auth0."
           buttonText={`Create ${idpCommonName}`}
           resultsText={results}
           error={error}

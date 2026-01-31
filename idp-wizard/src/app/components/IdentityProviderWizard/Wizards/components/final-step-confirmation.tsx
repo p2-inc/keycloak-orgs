@@ -50,15 +50,22 @@ export const WizardConfirmation: FC<SuccessProps> = ({
   const isCloud = apiMode === "cloud";
 
   return (
-    <div className="container" style={{ border: 0 }}>
+    <div className="container">
       <Stack hasGutter>
         <StackItem>
           {error === true && <ExclamationCircleIcon size="xl" color="red" />}
           {error === false && <CheckCircleIcon size="xl" color="green" />}
-          <Title headingLevel="h1">{title}</Title>
+          <Title headingLevel="h1" style={{ paddingLeft: 0 }}>
+            {title}
+          </Title>
         </StackItem>
         <StackItem>
-          <Title headingLevel="h2">{message}</Title>
+          <Title headingLevel="h2">
+            Finish by creating the identity provider.{" "}
+            <u>The wizard is not complete until you do so.</u> After creating
+            the identity provider, your users will be able to sign-in with{" "}
+            <u>{message}</u>.
+          </Title>
         </StackItem>
         <StackItem>
           <Title headingLevel="h3" style={{ color: error ? "red" : "inherit" }}>
