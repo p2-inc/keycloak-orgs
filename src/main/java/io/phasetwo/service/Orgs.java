@@ -14,15 +14,20 @@ public class Orgs {
   public static final String KC_ORGS_SKIP_MIGRATION = System.getenv("KC_ORGS_SKIP_MIGRATION");
   public static final String ORG_BROWSER_AUTH_FLOW_ALIAS = "Org Browser Flow";
   public static final String ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS = "Org Direct Grant Flow";
+  public static final String IDP_VALIDATE_FLOW_ALIAS = "idp validate";
   public static final String ORG_CONFIG_CREATE_ADMIN_USER_KEY =
       "_providerConfig.orgs.config.createAdminUser";
   public static final String ORG_CONFIG_SHARED_IDPS_KEY = "_providerConfig.orgs.config.sharedIdps";
   public static final String ORG_CONFIG_MULTIPLE_IDPS_KEY =
       "_providerConfig.orgs.config.multipleIdps";
+  public static final String ORG_CONFIG_VALIDATE_IDP_KEY =
+      "_providerConfig.orgs.config.validateIdp";
   public static final String ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY =
       "_providerConfig.orgs.portalLink.expirationInSecs";
   public static final String ORG_CONFIG_DEFAULT_APPLICATION_URI =
       "_providerConfig.orgs.config.defaultApplicationUri";
+  public static final String ORG_VALIDATION_PENDING_CONFIG_KEY =
+      "home.idp.discovery.validationPending";
   public static final String ORG_SHARED_IDP_KEY = "home.idp.discovery.shared";
 
   public static final String REQUIRE_VERIFIED_DOMAIN = "requireVerifiedDomain";

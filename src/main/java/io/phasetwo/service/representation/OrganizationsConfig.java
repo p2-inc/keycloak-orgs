@@ -12,6 +12,9 @@ public class OrganizationsConfig {
   @JsonProperty("multipleIdpsEnabled")
   private boolean multipleIdps = false;
 
+  @JsonProperty("validateIdpEnabled")
+  private boolean validateIdp = false;
+
   @JsonProperty("expirationInSecs")
   private int expirationInSecs = 86400; // 1 day
 
@@ -40,6 +43,14 @@ public class OrganizationsConfig {
 
   public void setMultipleIdps(boolean multipleIdps) {
     this.multipleIdps = multipleIdps;
+  }
+
+  public boolean isValidateIdp() {
+    return validateIdp;
+  }
+
+  public void setValidateIdp(boolean validateIdp) {
+    this.validateIdp = validateIdp;
   }
 
   public int getExpirationInSecs() {
