@@ -32,6 +32,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         primaryContentContainer && primaryContentContainer.focus();
       }}
       href={`#${pageId}`}
+      style={{ position: "absolute" }}
     >
       Skip to Content
     </SkipToContent>

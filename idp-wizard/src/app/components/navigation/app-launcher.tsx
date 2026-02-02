@@ -83,7 +83,7 @@ const AppLauncher: React.FC<Props> = ({ toggleOrgPicker }) => {
             ...(window.location.pathname === idpPath ? activeStyle : {}),
           }}
         >
-          IDP Selector
+          Identity Provider Selector
         </Link>
       }
     />,

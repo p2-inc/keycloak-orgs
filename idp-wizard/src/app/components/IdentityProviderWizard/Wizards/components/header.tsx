@@ -34,7 +34,7 @@ export const Header: FC<Props> = ({ logo, logoStyles = {} }) => {
         <FlexItem align={{ default: "alignRight" }}>
           <Link to={generatePath(PATHS.idpSelector, { realm })}>
             <Button variant="link" isInline>
-              IDP Selector
+              Identity Provider Selector
             </Button>
           </Link>
         </FlexItem>

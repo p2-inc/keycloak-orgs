@@ -22,7 +22,7 @@ export function useCreateTestIdpLink() {
   };
 
   const generateValidationUrl = (alias: string) => {
-    return `${baseServerRealmsUrl}/${realm}/protocol/openid-connect/auth?client_id=idp-tester&redirect_uri=${window.location.href}&response_type=code&scope=openid&kc_idp_hint=${alias}`;
+    return `${baseServerRealmsUrl}/${realm}/protocol/openid-connect/auth?client_id=idp-tester&redirect_uri=${window.location.href}&response_type=code&scope=openid&kc_idp_hint=${alias}&prompt=login`;
   };
 
   const isValidationPendingForAlias = async (alias: string) => {
