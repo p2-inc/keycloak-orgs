@@ -30,8 +30,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import static io.phasetwo.service.Helpers.*;
-import static io.phasetwo.service.Orgs.ORG_CONFIG_MULTIPLE_IDPS_KEY;
-import static io.phasetwo.service.Orgs.ORG_DOMAIN_CONFIG_KEY;
+import static io.phasetwo.service.Orgs.*;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -76,6 +75,75 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                         }
                 )
                 .flatMap(Collection::stream);
+    }
+
+    @TestFactory
+    @DisplayName("Should not redirect the user when the IDP is disabled for the org")
+    public List<DynamicContainer> redirectorWithDisabledIdp() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false);
+        final var realm = findRealmByName("test-realm");
+        final var idp = realm.identityProviders().get("oidc-idp").toRepresentation();
+        idp.setEnabled(false);
+        realm.identityProviders().get(idp.getAlias()).update(idp);
+        List<DynamicContainer> dynamicContainers = runCypressTests("", "cypress/e2e/home-idp-organization/base-with-disabled-org-idp.cy.ts");
+        return dynamicContainers;
+    }
+
+    @TestFactory
+    @DisplayName("Test the IDP Validation attributes when pending IDPs could be present")
+    public Stream<DynamicContainer> idpValidationEnabledWithUnvalidatedIdp() throws IOException, InterruptedException, TimeoutException {
+        enum ThirdIdentityProviderValidated {
+            FALSE("There is an unvalidated IDP ", "cypress/e2e/home-idp-organization/base-with-idp-validation-enabled-and-unvalidated-idp.cy.ts"),
+            TRUE("All the IDPs are validated ", "cypress/e2e/home-idp-organization/base-with-idp-validation-enabled-and-validated-idp.cy.ts");
+
+            private final String testPrefix;
+            final String testFile;
+
+            ThirdIdentityProviderValidated(String testPrefix, String testFile) {
+                this.testPrefix = testPrefix;
+                this.testFile = testFile;
+            }
+        }
+
+        return Stream
+                .of(ThirdIdentityProviderValidated.values())
+                .map(thirdIdentityProviderValidated -> {
+                    try {
+                        setupKeycloakInstanceWithMultipleIdpsEnabledAtOrganization(); // sets up the keycloak with ~2 IDP configs
+                        final var realm = findRealmByName("test-realm");
+                        final var thirdClientRealm = importRealm("/realms/external-idp.json", "third-external-idp");
+
+                        final var thirdIdentityProvider = createIdentityProviderIn(realm, "third-oidc", false, "third-external-idp");
+                        String isIdpPending = Boolean.valueOf(!Boolean.parseBoolean(thirdIdentityProviderValidated.name().toLowerCase())).toString();
+                        thirdIdentityProvider.getConfig().put(ORG_VALIDATION_PENDING_CONFIG_KEY, isIdpPending);
+                        updateRedirectUriInClientRealm(thirdClientRealm, thirdIdentityProvider);
+                        realm.identityProviders().get(thirdIdentityProvider.getAlias()).update(thirdIdentityProvider);
+
+                        final var organization = findOrganizationRepresentationByName(realm.toRepresentation(), "org-home");
+                        linkIdentityProviderToOrganization(realm.toRepresentation(), organization, "third-oidc");
+
+                        modifyAuthenticatorConfig(
+                                "test-realm",
+                                "Copy of browser forms",
+                                "ext-auth-home-idp-discovery",
+                                Map.entry("forwardToFirstMatch", "false")
+                        );
+
+
+                        final var realmRepresentation = realm.toRepresentation();
+                        realmRepresentation.getAttributes().put(ORG_CONFIG_VALIDATE_IDP_KEY, "true");
+                        realm.update(realmRepresentation);
+
+                        List<DynamicContainer> dynamicContainers = runCypressTests(
+                                thirdIdentityProviderValidated.testPrefix,
+                                thirdIdentityProviderValidated.testFile
+                        );
+                        cleanupKeycloakInstance();
+                        return dynamicContainers;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+        }).flatMap(List::stream);
     }
 
     @TestFactory
@@ -243,6 +311,28 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         final var cypressResult = runCypressTests(
                 "",
                 "cypress/e2e/home-idp-organization/home-idp-require-verified-email-test.cy.ts");
+        return cypressResult;
+    }
+
+    @TestFactory
+    @DisplayName("Basic tests for the IdpSelectorAuthenticator Authenticator")
+    public List<DynamicContainer> testIdpSelectorAuthenticator() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false, "/realms/kc-realm-idp-selector.json");
+        final var realm = findRealmByName("test-realm");
+        final var linkOnlyIdp = realm.identityProviders().get("oidc-idp").toRepresentation();
+        linkOnlyIdp.setAlias("link-only-oidc-idp");
+        linkOnlyIdp.setInternalId(null);
+        linkOnlyIdp.setLinkOnly(true);
+        final var responseLinkOnly = realm.identityProviders().create(linkOnlyIdp);
+        assertThat(responseLinkOnly.getStatus(), Matchers.is(Response.Status.CREATED.getStatusCode()));
+        final var disabledIdp = realm.identityProviders().get("oidc-idp").toRepresentation();
+        disabledIdp.setAlias("disabled-oidc-idp");
+        disabledIdp.setInternalId(null);
+        disabledIdp.setEnabled(false);
+        realm.identityProviders().create(disabledIdp);
+        final var cypressResult = runCypressTests(
+                "",
+                "cypress/e2e/home-idp-organization/idp-selector-authenticator-test.cy.ts");
         return cypressResult;
     }
 
@@ -468,19 +558,6 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
             dynamicContainers.addAll(convertToJUnitDynamicTests(testContainerNamePrefix, testResults));
         }
         return dynamicContainers;
-    }
-
-    private void saveArtifactsFromCypressContainer(CypressContainer cypressContainer) throws IOException, InterruptedException {
-        String containerId = cypressContainer.getContainerId();
-        String containerShortId;
-        if (containerId.length() > 12) {
-            containerShortId = containerId.substring(0, 12);
-        } else {
-            containerShortId = containerId;
-        }
-//        container.getDockerClient().stopContainerCmd(containerId).exec();
-        Files.createDirectories(Path.of("target", "cypress-output", "screenshots"));
-        copyDirFromContainer(cypressContainer, "/e2e/cypress/screenshots/");
     }
 
     private static void copyDirFromContainer(CypressContainer cypressContainer, String directoryName) {
