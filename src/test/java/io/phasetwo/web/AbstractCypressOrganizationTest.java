@@ -44,6 +44,7 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.Testcontainers;
+import org.testcontainers.images.PullPolicy;
 import org.testcontainers.utility.MountableFile;
 
 @JBossLog
@@ -87,19 +88,33 @@ public class AbstractCypressOrganizationTest {
   public static Keycloak keycloak;
   public static ResteasyClient resteasyClient;
 
-  public static final KeycloakContainer container =
-      new KeycloakContainer(KEYCLOAK_IMAGE)
-          .withImagePullPolicy(org.testcontainers.images.PullPolicy.alwaysPull())
-          .withContextPath("/auth")
-          .withReuse(true)
-          .withProviderClassesFrom("target/classes")
-          .withProviderLibsFrom(getDeps())
-          .withCopyFileToContainer(
-                  MountableFile.forHostPath("target/jacoco-agent/"),
-                  "/jacoco-agent"
-          )
-          .withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -javaagent:/jacoco-agent/org.jacoco.agent-runtime.jar=destfile=/tmp/jacoco.exec")
-          .withAccessToHost(true);
+  public static final KeycloakContainer container = initKeycloakContainer();
+
+  private static KeycloakContainer initKeycloakContainer() {
+    KeycloakContainer keycloakContainer = new KeycloakContainer(KEYCLOAK_IMAGE)
+            .withImagePullPolicy(PullPolicy.alwaysPull())
+            .withContextPath("/auth")
+            .withReuse(true)
+            .withProviderClassesFrom("target/classes")
+            .withDebugFixedPort(8787, false)
+            .withProviderLibsFrom(getDeps())
+            .withAccessToHost(true);
+    if (isJacocoPresent()) {
+      keycloakContainer = keycloakContainer.withCopyFileToContainer(
+                      MountableFile.forHostPath("target/jacoco-agent/"),
+                      "/jacoco-agent"
+              )
+              .withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -javaagent:/jacoco-agent/org.jacoco.agent-runtime.jar=destfile=/tmp/jacoco.exec");
+    } else {
+      keycloakContainer = keycloakContainer.withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m");
+    }
+
+    return keycloakContainer;
+  }
+
+  private static boolean isJacocoPresent() {
+    return Files.exists(Path.of("target/jacoco-agent/org.jacoco.agent-runtime.jar"));
+  }
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
 
@@ -113,8 +128,10 @@ public class AbstractCypressOrganizationTest {
       containerShortId = containerId;
     }
     container.getDockerClient().stopContainerCmd(containerId).exec();
-    Files.createDirectories(Path.of("target", "jacoco-report"));
-    container.copyFileFromContainer("/tmp/jacoco.exec", "./target/jacoco-report/jacoco-%s.exec".formatted(containerShortId));
+    if (isJacocoPresent()) {
+      Files.createDirectories(Path.of("target", "jacoco-report"));
+      container.copyFileFromContainer("/tmp/jacoco.exec", "./target/jacoco-report/jacoco-%s.exec".formatted(containerShortId));
+    }
     container.stop();
   }
 
