@@ -96,7 +96,6 @@ public class AbstractCypressOrganizationTest {
             .withContextPath("/auth")
             .withReuse(true)
             .withProviderClassesFrom("target/classes")
-            .withDebugFixedPort(8787, false)
             .withProviderLibsFrom(getDeps())
             .withAccessToHost(true);
     if (isJacocoPresent()) {
