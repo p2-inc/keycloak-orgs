@@ -72,6 +72,10 @@ public class ValidateIdpAuthenticatorFactory extends BaseAuthenticatorFactory
         String.format(
             "You logged in as %s %s %s.",
             firstName, lastName, email);
+
+    // log the user out
+    context.clearUser();
+
     context.challenge(context.form().setInfo(message).createForm(IDP_VALIATION_FORM));
   }
 

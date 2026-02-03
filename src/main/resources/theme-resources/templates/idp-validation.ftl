@@ -7,5 +7,7 @@
             <p class="instruction">${message.summary}</p>
 	    <p class="instruction">${kcSanitize(msg("validationCloseWindow"))}</p>
         </div>
+    <#elseif section == "info">
+        <#-- intentionally empty: suppress username + restart login -->
     </#if>
 </@layout.registrationLayout>
