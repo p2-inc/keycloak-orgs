@@ -1,0 +1,16 @@
+services:
+  keycloak:
+    build: .
+    image: phasetwo-idp-wizard:local
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_RELATIVE_PATH: /auth
+    command: ["start-dev"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+
+volumes:
+  keycloak_data:
