@@ -1,8 +1,0 @@
-{
-  "themes": [
-    {
-      "name": "portal",
-      "types": ["account", "login"]
-    }
-  ]
-}

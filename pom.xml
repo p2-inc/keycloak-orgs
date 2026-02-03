@@ -3,7 +3,7 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.133-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
 
   <name>Phase Two Keycloak Organizations</name>
   <description>The original organizations implementation for single-realm, multi-tenancy in Keycloak.</description>
@@ -36,11 +36,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit-jupiter.version>5.12.1</junit-jupiter.version>
-    <keycloak.version>26.5.0</keycloak.version>
+    <keycloak.version>26.5.2</keycloak.version>
     <keycloak-admin-client.version>26.0.8</keycloak-admin-client.version>
     <resteasy.version>6.2.12.Final</resteasy.version>
     <lombok.version>1.18.42</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
+    <guava.version>33.0.0-jre</guava.version>
+    <commons-lang3.version>3.11</commons-lang3.version>
     <ossrh.url>https://ossrh-staging-api.central.sonatype.com</ossrh.url>
     <jacoco.version>0.8.14</jacoco.version>
   </properties>
@@ -127,6 +129,155 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Dependencies>
+              <![CDATA[org.keycloak.keycloak-common,org.keycloak.keycloak-core,org.keycloak.keycloak-server-spi,org.keycloak.keycloak-server-spi-private,org.keycloak.keycloak-services,com.google.guava]]></Dependencies>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>2.0.0</version>
+        <configuration>
+          <nodeVersion>v24.12.0</nodeVersion>
+          <installDirectory>${project.build.directory}/node</installDirectory>
+          <!-- optional: only if you need to pin/override corepack -->
+          <!-- <corepackVersion>v0.25.2</corepackVersion> -->
+        </configuration>
+        <executions>
+          <execution>
+            <id>setup-node-and-corepack</id>
+            <goals>
+              <goal>install-node-and-corepack</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+
+          <execution>
+            <id>admin-portal-install</id>
+            <goals>
+              <goal>corepack</goal>
+            </goals>
+            <configuration>
+              <workingDirectory>admin-portal</workingDirectory>
+              <installDirectory>${project.build.directory}/node</installDirectory>
+              <arguments>yarn install</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>admin-portal-build</id>
+            <goals>
+              <goal>corepack</goal>
+            </goals>
+            <configuration>
+              <workingDirectory>admin-portal</workingDirectory>
+              <installDirectory>${project.build.directory}/node</installDirectory>
+              <arguments>yarn build-mvn</arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>idp-wizard-install</id>
+            <goals>
+              <goal>corepack</goal>
+            </goals>
+            <configuration>
+              <workingDirectory>idp-wizard</workingDirectory>
+              <installDirectory>${project.build.directory}/node</installDirectory>
+              <arguments>pnpm install</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>idp-wizard-build</id>
+            <goals>
+              <goal>corepack</goal>
+            </goals>
+            <configuration>
+              <workingDirectory>idp-wizard</workingDirectory>
+              <installDirectory>${project.build.directory}/node</installDirectory>
+              <arguments>pnpm build</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>copy-portal-resources-index</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/classes/theme/portal/login/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>admin-portal/build</directory>
+                  <filtering>false</filtering>
+                  <includes>
+                    <include>index.html</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-portal-resources</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/classes/theme/portal/login/resources</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>admin-portal/build</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-idp-wizard-resources</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/classes/theme/wizard/login/resources</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>idp-wizard/dist</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>1.0.1</version>
+        <executions>
+          <execution>
+            <id>copy-and-rename-portal-file</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/theme/portal/login/index.html</sourceFile>
+              <destinationFile>${project.build.directory}/classes/theme/portal/login/portal.ftl</destinationFile>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -320,6 +471,18 @@
       <artifactId>dnsjava</artifactId>
       <version>3.6.4</version>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- testing -->
