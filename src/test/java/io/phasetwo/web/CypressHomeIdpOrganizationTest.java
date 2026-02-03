@@ -79,6 +79,18 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
     }
 
     @TestFactory
+    @DisplayName("Should not redirect the user when the IDP is disabled for the org")
+    public List<DynamicContainer> redirectorWithDisabledIdp() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false);
+        final var realm = findRealmByName("test-realm");
+        final var idp = realm.identityProviders().get("oidc-idp").toRepresentation();
+        idp.setEnabled(false);
+        realm.identityProviders().get(idp.getAlias()).update(idp);
+        List<DynamicContainer> dynamicContainers = runCypressTests("", "cypress/e2e/home-idp-organization/base-with-disabled-org-idp.cy.ts");
+        return dynamicContainers;
+    }
+
+    @TestFactory
     @DisplayName("Testcases when the bypassLoginPage is true")
     public List<DynamicContainer> bypassLoginEnabledTests() throws IOException, InterruptedException, TimeoutException {
         setupTestKeycloakInstance(false);
@@ -243,6 +255,28 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         final var cypressResult = runCypressTests(
                 "",
                 "cypress/e2e/home-idp-organization/home-idp-require-verified-email-test.cy.ts");
+        return cypressResult;
+    }
+
+    @TestFactory
+    @DisplayName("Basic tests for the IdpSelectorAuthenticator Authenticator")
+    public List<DynamicContainer> testIdpSelectorAuthenticator() throws IOException, InterruptedException, TimeoutException {
+        setupTestKeycloakInstance(false, "/realms/kc-realm-idp-selector.json");
+        final var realm = findRealmByName("test-realm");
+        final var linkOnlyIdp = realm.identityProviders().get("oidc-idp").toRepresentation();
+        linkOnlyIdp.setAlias("link-only-oidc-idp");
+        linkOnlyIdp.setInternalId(null);
+        linkOnlyIdp.setLinkOnly(true);
+        final var responseLinkOnly = realm.identityProviders().create(linkOnlyIdp);
+        assertThat(responseLinkOnly.getStatus(), Matchers.is(Response.Status.CREATED.getStatusCode()));
+        final var disabledIdp = realm.identityProviders().get("oidc-idp").toRepresentation();
+        disabledIdp.setAlias("disabled-oidc-idp");
+        disabledIdp.setInternalId(null);
+        disabledIdp.setEnabled(false);
+        realm.identityProviders().create(disabledIdp);
+        final var cypressResult = runCypressTests(
+                "",
+                "cypress/e2e/home-idp-organization/idp-selector-authenticator-test.cy.ts");
         return cypressResult;
     }
 
@@ -468,19 +502,6 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
             dynamicContainers.addAll(convertToJUnitDynamicTests(testContainerNamePrefix, testResults));
         }
         return dynamicContainers;
-    }
-
-    private void saveArtifactsFromCypressContainer(CypressContainer cypressContainer) throws IOException, InterruptedException {
-        String containerId = cypressContainer.getContainerId();
-        String containerShortId;
-        if (containerId.length() > 12) {
-            containerShortId = containerId.substring(0, 12);
-        } else {
-            containerShortId = containerId;
-        }
-//        container.getDockerClient().stopContainerCmd(containerId).exec();
-        Files.createDirectories(Path.of("target", "cypress-output", "screenshots"));
-        copyDirFromContainer(cypressContainer, "/e2e/cypress/screenshots/");
     }
 
     private static void copyDirFromContainer(CypressContainer cypressContainer, String directoryName) {
