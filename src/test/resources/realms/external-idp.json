@@ -77,6 +77,36 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "username": "test@auth.it",
+      "email": "test@auth.it",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "R",
+      "lastName": "T",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "user-without-org@auth.it",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user-without-org@auth.it",
+      "firstName": "R",
+      "lastName": "T",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
     }
   ]
 }

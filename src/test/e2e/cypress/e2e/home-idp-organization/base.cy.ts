@@ -1,6 +1,6 @@
-import { loginUriSelectAccount, tokenUri, testRealmLoginUri } from "../fixtures/uri";
-import { user1, user2, user3, idpUser } from "../fixtures/users";
-import { getRealmOrganizations, org1Name, org2Name } from "../utils/organizations";
+import { loginUriSelectAccount, tokenUri, testRealmLoginUri } from "../../fixtures/uri";
+import { user1, user2, user3, idpUser } from "../../fixtures/users";
+import { getRealmOrganizations, org1Name, org2Name } from "../../utils/organizations";
 
 describe('user login via home idp provider', () => {
    it('user which doesnt exists in the realm should receive an error ', () => {

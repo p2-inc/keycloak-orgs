@@ -27,6 +27,8 @@ import io.restassured.specification.RequestSpecification;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,15 +39,15 @@ import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DynamicContainer;
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
 @JBossLog
+@EnabledIfSystemProperty(named = "include.cypress", matches = "true")
 public class AbstractCypressOrganizationTest {
 
   protected static final boolean RUN_CYPRESS =
@@ -92,20 +94,33 @@ public class AbstractCypressOrganizationTest {
           .withReuse(true)
           .withProviderClassesFrom("target/classes")
           .withProviderLibsFrom(getDeps())
-          .withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m")
+          .withCopyFileToContainer(
+                  MountableFile.forHostPath("target/jacoco-agent/"),
+                  "/jacoco-agent"
+          )
+          .withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -javaagent:/jacoco-agent/org.jacoco.agent-runtime.jar=destfile=/tmp/jacoco.exec")
           .withAccessToHost(true);
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
 
-  static {
-    container.start();
+  @AfterAll
+  public static void tearDown() throws IOException {
+    String containerId = container.getContainerId();
+    String containerShortId;
+    if (containerId.length() > 12) {
+      containerShortId = containerId.substring(0, 12);
+    } else {
+      containerShortId = containerId;
+    }
+    container.getDockerClient().stopContainerCmd(containerId).exec();
+    Files.createDirectories(Path.of("target", "jacoco-report"));
+    container.copyFileFromContainer("/tmp/jacoco.exec", "./target/jacoco-report/jacoco-%s.exec".formatted(containerShortId));
+    container.stop();
   }
 
   @BeforeAll
   public static void beforeAll() {
-    if (!RUN_CYPRESS) {
-      return; // do nothing
-    }
+    container.start();
 
     Testcontainers.exposeHostPorts(WEBHOOK_SERVER_PORT);
     resteasyClient =
@@ -337,18 +352,20 @@ public class AbstractCypressOrganizationTest {
     assertThat(response.getStatusCode(), CoreMatchers.is(Status.CREATED.getStatusCode()));
   }
 
-
   List<DynamicContainer> convertToJUnitDynamicTests(CypressTestResults testResults) {
+    return convertToJUnitDynamicTests("", testResults);
+  }
+
+  List<DynamicContainer> convertToJUnitDynamicTests(String namePrefix, CypressTestResults testResults) {
         List<DynamicContainer> dynamicContainers = new ArrayList<>();
         List<CypressTestSuite> suites = testResults.getSuites();
         for (CypressTestSuite suite : suites) {
-            createContainerFromSuite(dynamicContainers, suite);
+            createContainerFromSuite(namePrefix, dynamicContainers, suite);
         }
         return dynamicContainers;
     }
 
-    void createContainerFromSuite(
-            List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
+    void createContainerFromSuite(String namePrefix, List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
         List<DynamicTest> dynamicTests = new ArrayList<>();
         for (CypressTest test : suite.getTests()) {
             dynamicTests.add(
@@ -362,6 +379,6 @@ public class AbstractCypressOrganizationTest {
                                 Assertions.assertTrue(test.isSuccess());
                             }));
         }
-        dynamicContainers.add(DynamicContainer.dynamicContainer(suite.getTitle(), dynamicTests));
+        dynamicContainers.add(DynamicContainer.dynamicContainer(namePrefix + suite.getTitle(), dynamicTests));
     }
 }

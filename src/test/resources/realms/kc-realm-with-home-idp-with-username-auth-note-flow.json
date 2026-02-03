@@ -1,6 +1,40 @@
 {
   "realm": "test-realm",
   "enabled": true,
+  "clients": [
+    {
+      "clientId": "idp-wizard",
+      "name": "IdP Config Wizard",
+      "description": "Wizards for configuring various vendor IdPs.",
+      "rootUrl": "${authBaseUrl}",
+      "baseUrl": "/realms/test-realm/wizard/",
+      "redirectUris": [
+        "/realms/test-realm/wizard/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
+      "protocol": "openid-connect",
+      "attributes": {
+        "realm_client": "false",
+        "post.logout.redirect.uris": "+"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "phone",
+        "profile",
+        "roles",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    }
+  ],
   "authenticationFlows": [
     {
       "alias": "Copy of browser",
@@ -51,8 +85,7 @@
       "builtIn": false,
       "authenticationExecutions": [
         {
-          "authenticatorConfig": "ext-auth-home-idp-discovery",
-          "authenticator": "ext-auth-home-idp-discovery",
+          "authenticator": "ext-auth-username-auth-note",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
           "priority": 0,
@@ -60,7 +93,51 @@
           "userSetupAllowed": false
         },
         {
+          "authenticatorFlow": true,
+          "requirement": "CONDITIONAL",
+          "priority": 4,
+          "autheticatorFlow": true,
+          "flowAlias": "conditional deny",
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorConfig": "ext-auth-home-idp-discovery",
+          "authenticator": "ext-auth-home-idp-discovery",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 5,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
           "authenticator": "auth-password-form",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 6,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "id": "8818d66d-8d18-4b52-865f-3f6e53bff5fd",
+      "alias": "conditional deny",
+      "description": "",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorConfig": "phone-deny",
+          "authenticator": "conditional-client-scope",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 0,
+          "autheticatorFlow": false,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "deny-access-authenticator",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
           "priority": 1,
@@ -81,6 +158,13 @@
         "userAttribute": "email",
         "forwardToLinkedIdp": "true"
       }
+    },
+    {
+      "alias": "phone-deny",
+      "config": {
+        "client_scope": "phone",
+        "negate": "false"
+      }
     }
   ],
   "browserFlow": "Copy of browser",
@@ -96,21 +180,6 @@
         {
           "type": "password",
           "value": "user-1",
-          "temporary": false
-        }
-      ]
-    },
-    {
-      "username": "user-without-org@auth.it",
-      "enabled": true,
-      "emailVerified": true,
-      "email": "user-without-org@auth.it",
-      "firstName": "R",
-      "lastName": "T",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "password",
           "temporary": false
         }
       ]
