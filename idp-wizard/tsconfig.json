@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "dist",
+    "module": "esnext",
+    "target": "es5",
+    "lib": ["es6", "dom"],
+    "sourceMap": true,
+    "jsx": "react",
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": false,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@store": ["src/app/store/*"],
+      "@assets/*": ["node_modules/@patternfly/react-core/dist/styles/assets/*"],
+      "@wizardComponents": [
+        "src/app/components/IdentityProviderWizard/Wizards/components"
+      ],
+      "@wizardServices": [
+        "src/app/components/IdentityProviderWizard/Wizards/services"
+      ]
+    },
+    "importHelpers": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.js"],
+  "exclude": ["node_modules"]
+}

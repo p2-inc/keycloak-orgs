@@ -1,0 +1,12 @@
+{
+  "themes": [
+    {
+      "name": "wizard",
+      "types": [ "login" ]
+    },
+    {
+      "name": "portal",
+      "types": ["account", "login"]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      id="appName"
+      name="application-name"
+      content="${displayName} Admin Portal"
+    />
+    <meta name="description" content="${displayName} Admin Portal" />
+    <base href="%VITE_PUBLIC_URL%/" />
+    <link rel="manifest" href="%VITE_PUBLIC_URL%/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="${faviconUrl}" />
+    <link rel="apple-touch-icon" href="${appiconUrl}" />
+    <script type="module" src="/src/index.tsx"></script>
+    <title>${displayName} Admin Portal</title>
+    <script>
+      var environment = {};
+      try {
+        environment = JSON.parse("${environment?no_esc}");
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

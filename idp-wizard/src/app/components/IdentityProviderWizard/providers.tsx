@@ -1,0 +1,90 @@
+import {
+  GenericIdentityProviders,
+  IdentityProviders,
+  Protocols,
+  Providers,
+} from "@app/configurations";
+import { RouterParams } from "@app/routes";
+import React from "react";
+import { useParams } from "react-router-dom";
+
+import { usePageTitle } from "@app/hooks/useTitle";
+import {
+  ADFSWizard,
+  Auth0WizardOIDC,
+  Auth0WizardSAML,
+  AWSSamlWizard,
+  CloudflareWizard,
+  CyberArkWizard,
+  DuoWizard,
+  EntraIdWizard,
+  GenericLDAP,
+  GenericOIDC,
+  GenericSAML,
+  GoogleWizard,
+  JumpCloudWizard,
+  LastPassWizard,
+  OktaWizardLDAP,
+  OktaWizardSaml,
+  OneLoginWizard,
+  OracleWizard,
+  PingOneWizard,
+  SalesforceWizardOIDC,
+  SalesforceWizardSAML,
+} from "./Wizards";
+
+const Provider = () => {
+  const { provider, protocol } = useParams<
+    keyof RouterParams
+  >() as RouterParams;
+
+  const providers = [...IdentityProviders, ...GenericIdentityProviders];
+
+  usePageTitle(`${providers.find((ip) => ip.id === provider)?.name}`);
+
+  switch (provider) {
+    case Providers.OKTA:
+      if (protocol === Protocols.LDAP) return <OktaWizardLDAP />;
+      if (protocol === Protocols.SAML) return <OktaWizardSaml />;
+    case Providers.ENTRAID:
+      return <EntraIdWizard />;
+    case Providers.GOOGLE_SAML:
+      return <GoogleWizard />;
+    case Providers.AUTH0:
+      if (protocol === Protocols.OPEN_ID) return <Auth0WizardOIDC />;
+      if (protocol === Protocols.SAML) return <Auth0WizardSAML />;
+    case Providers.SAML:
+      return <GenericSAML />;
+    case Providers.OPEN_ID:
+      return <GenericOIDC />;
+    case Providers.LDAP:
+      return <GenericLDAP />;
+    case Providers.AWS:
+      return <AWSSamlWizard />;
+    case Providers.ONE_LOGIN:
+      return <OneLoginWizard />;
+    case Providers.PING_ONE:
+      return <PingOneWizard />;
+    case Providers.JUMP_CLOUD:
+      return <JumpCloudWizard />;
+    case Providers.ADFS:
+      return <ADFSWizard />;
+    case Providers.DUO:
+      return <DuoWizard />;
+    case Providers.CYBERARK:
+      return <CyberArkWizard />;
+    case Providers.SALESFORCE:
+      if (protocol === Protocols.SAML) return <SalesforceWizardSAML />;
+      if (protocol === Protocols.OPEN_ID) return <SalesforceWizardOIDC />;
+    case Providers.LAST_PASS:
+      return <LastPassWizard />;
+    case Providers.CLOUDFLARE:
+      return <CloudflareWizard />;
+    case Providers.ORACLE:
+      return <OracleWizard />;
+    default:
+      return <div>No provider found</div>;
+  }
+};
+
+export default Provider;
