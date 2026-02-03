@@ -2,9 +2,11 @@
   "themes": [
     {
       "name": "wizard",
-      "types": [
-        "login"
-      ]
+      "types": [ "login" ]
+    },
+    {
+      "name": "portal",
+      "types": ["account", "login"]
     }
   ]
 }

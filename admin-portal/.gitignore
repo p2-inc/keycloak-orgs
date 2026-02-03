@@ -27,6 +27,7 @@ yarn-error.log*
 /node
 /target
 /keycloak.v2
+/.yarn
 
 /.idea
 /phasetwo-admin-portal.iml
