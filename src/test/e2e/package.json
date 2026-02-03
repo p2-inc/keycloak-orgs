@@ -5,10 +5,10 @@
   "keywords": [],
   "author": "mgll@egdm.fr",
   "devDependencies": {
-    "cypress": "^13.6.4",
-    "cypress-multi-reporters": "^1.6.4",
-    "mocha": "^10.3.0",
-    "mochawesome": "^7.1.3",
-    "typescript": "^5.3.3"
+    "cypress": "^15.9.0",
+    "cypress-multi-reporters": "^2.0.5",
+    "mocha": "^11.7.5",
+    "mochawesome": "^7.1.4",
+    "typescript": "^5.9.3"
   }
 }
