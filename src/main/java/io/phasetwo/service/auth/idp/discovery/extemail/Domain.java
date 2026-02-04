@@ -1,9 +1,12 @@
 //package de.sventorben.keycloak.authentication.hidpd;
-package io.phasetwo.service.auth.idp;
+package io.phasetwo.service.auth.idp.discovery.extemail;
+
+import io.phasetwo.service.auth.idp.PublicAPI;
 
 import java.util.Objects;
 
-class Domain {
+@PublicAPI(unstable = true)
+public final class Domain {
 
     private final String value;
 
