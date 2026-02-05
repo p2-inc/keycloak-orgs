@@ -12,6 +12,7 @@ import static io.phasetwo.service.Helpers.removeEventListener;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasEntry;
@@ -54,6 +55,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.Keycloak;
@@ -2491,6 +2493,71 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
           "The delete-organization role should have the correct description");
 
       // We've already verified the role exists and has the correct description above
+    } finally {
+      // Clean up
+      deleteOrganization(orgId);
+    }
+  }
+
+  @Test
+  @DisplayName("Should ignore empty entries in org domain list")
+  void testUpdateExistingOrganizationsWithEmptyDomainsInDomainList() throws Exception {
+    // Create an organization
+    OrganizationRepresentation org = createDefaultOrg();
+    String orgId = org.getId();
+
+    try {
+      // Get the list of roles to verify the delete-organization role exists by default
+      Response response = getRequest(orgId);
+      assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+      final var orgRep = objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
+      final var currentDomainList = orgRep.getDomains();
+      final var updatedDomainList = new ArrayList<>(currentDomainList);
+      updatedDomainList.add("");
+      updatedDomainList.add("vnagy.eu");
+      orgRep.setDomains(updatedDomainList);
+      final var updateRequest = putRequest(orgRep, orgId);
+      assertThat(updateRequest.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+      Response responseAfterModification = getRequest(orgId);
+      assertThat(responseAfterModification.getStatusCode(), is(Status.OK.getStatusCode()));
+      final var orgRepAfterModification = objectMapper().readValue(responseAfterModification.getBody().asString(), OrganizationRepresentation.class);
+      final var expectedDomains = new HashSet<>(currentDomainList);
+      expectedDomains.add("vnagy.eu");
+      assertThat(orgRepAfterModification.getDomains(), containsInAnyOrder(expectedDomains.toArray()));
+    } finally {
+      // Clean up
+      deleteOrganization(orgId);
+    }
+  }
+
+  @Test
+  @DisplayName("Should ignore null entries in org domain list")
+  void testUpdateExistingOrganizationsWithNullDomainsInDomainList() throws Exception {
+    // Create an organization
+    OrganizationRepresentation org = createDefaultOrg();
+    String orgId = org.getId();
+
+    try {
+      // Get the list of roles to verify the delete-organization role exists by default
+      Response response = getRequest(orgId);
+      assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+      final var orgRep = objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
+      final var currentDomainList = orgRep.getDomains();
+      final var updatedDomainList = new ArrayList<>(currentDomainList);
+      updatedDomainList.add("");
+      updatedDomainList.add("vnagy.eu");
+      updatedDomainList.add(null);
+      orgRep.setDomains(updatedDomainList);
+      final var updateRequest = putRequest(orgRep, orgId);
+      assertThat(updateRequest.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+      Response responseAfterModification = getRequest(orgId);
+      assertThat(responseAfterModification.getStatusCode(), is(Status.OK.getStatusCode()));
+      final var orgRepAfterModification = objectMapper().readValue(responseAfterModification.getBody().asString(), OrganizationRepresentation.class);
+      final var expectedDomains = new HashSet<>(currentDomainList);
+      expectedDomains.add("vnagy.eu");
+      assertThat(orgRepAfterModification.getDomains(), containsInAnyOrder(expectedDomains.toArray()));
     } finally {
       // Clean up
       deleteOrganization(orgId);
