@@ -10,12 +10,11 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
-import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.http.HttpRequest;
 import org.keycloak.models.KeycloakSession;
@@ -68,8 +67,8 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
   }
 
   private void evaluateAuthenticationWithAccountHint(AuthenticationFlowContext context) {
-    String organizationId = getOrganizationIdFromAccountHint(context);
-    evaluateAuthenticationChallenge(context, organizationId);
+    String accountHint = getOrganizationIdFromAccountHint(context);
+    evaluateAccountHint(context, accountHint);
   }
 
   private String getOrganizationIdFromAccountHint(AuthenticationFlowContext context) {
@@ -81,23 +80,55 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
     }
   }
 
-  private void evaluateAuthenticationChallenge(
+  private void processSelectedOrganization(
       AuthenticationFlowContext context, String organizationId) {
-    if (hasMembership(context, organizationId)) {
-      updateActiveOrganizationAttributeAndSucceedChallenge(context, organizationId);
-    } else {
-      failChallenge(context, "invalidOrganizationError");
-    }
+    provider
+        .getUserOrganizationsStream(context.getRealm(), context.getUser())
+        .filter(org -> org.getId().equals(organizationId))
+        .findFirst()
+        .ifPresentOrElse(
+            organizationModel ->
+                updateActiveOrganizationAttributeAndSucceedChallenge(
+                    context, organizationModel.getId()),
+            () -> failChallenge(context, "invalidOrganizationError"));
   }
 
-  private boolean hasMembership(AuthenticationFlowContext context, String organizationId) {
-    if (provider
+  private void evaluateAccountHint(
+      AuthenticationFlowContext context, String accountHint) {
+    findMembershipByAccountHint(context, accountHint)
+        .ifPresentOrElse(
+            organizationModel ->
+                updateActiveOrganizationAttributeAndSucceedChallenge(
+                    context, organizationModel.getId()),
+            () -> failChallenge(context, "invalidOrganizationError"));
+  }
+
+  private Optional<OrganizationModel> findMembershipByAccountHint(
+      AuthenticationFlowContext context, String accountHint) {
+    return provider
         .getUserOrganizationsStream(context.getRealm(), context.getUser())
-        .noneMatch(org -> org.getId().equals(organizationId))) {
-      log.errorf("User isn't a member of this organization");
-      return false;
-    }
-    return true;
+        .filter(org -> match(accountHint, context, org))
+        .findFirst();
+  }
+
+  private static boolean match(
+      String organizationId, AuthenticationFlowContext context, OrganizationModel org) {
+    boolean matchByOrganizationName = isMatchByOrganizationName(context);
+
+    return matchByOrganizationName
+        ? org.getName().equals(organizationId)
+        : org.getId().equals(organizationId);
+  }
+
+  private static boolean isMatchByOrganizationName(AuthenticationFlowContext context) {
+    return Optional.ofNullable(context.getAuthenticatorConfig())
+        .map(
+            it ->
+                Boolean.parseBoolean(
+                    it.getConfig()
+                        .getOrDefault(
+                            ActiveOrganizationAuthenticatorFactory.CONF_ORG_NAME, "false")))
+        .orElse(false);
   }
 
   private void updateActiveOrganizationAttributeAndSucceedChallenge(
@@ -127,9 +158,9 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
     return prompt != null && prompt.contains(OIDCLoginProtocol.PROMPT_VALUE_SELECT_ACCOUNT);
   }
 
-  private boolean wasPostBrokerLogin(AuthenticationFlowContext context){
-      String currentFlow = context.getAuthenticationSession().getAuthNote(CURRENT_FLOW_PATH);
-      return POST_BROKER_FLOW.equals(currentFlow);
+  private boolean wasPostBrokerLogin(AuthenticationFlowContext context) {
+    String currentFlow = context.getAuthenticationSession().getAuthNote(CURRENT_FLOW_PATH);
+    return POST_BROKER_FLOW.equals(currentFlow);
   }
 
   private void tryOrganizationSelectionChallenge(AuthenticationFlowContext context) {
@@ -160,7 +191,7 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
       log.errorf("No selected organization");
       failChallenge(context, "invalidOrganizationError");
     } else {
-      evaluateAuthenticationChallenge(context, organizationId);
+      processSelectedOrganization(context, organizationId);
     }
   }
 
