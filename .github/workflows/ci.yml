@@ -1,0 +1,31 @@
+name: CI Build
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+jobs:
+  build:
+    name: Build Project with Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Java 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Build with Maven and run Cypress Integration Tests
+        run: mvn --batch-mode --update-snapshots verify -Pcypress-tests
+      - name: Upload JaCoCo Coverage Report as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: ${{ github.workspace }}/target/site/jacoco/
+          retention-days: 30
+      - name: Add JaCoCo Coverage to Action Summary
+        uses: jjmrocha/jacoco-summary@v1.1.1
+        with:
+          jacoco-csv-file: target/site/jacoco/jacoco.csv
