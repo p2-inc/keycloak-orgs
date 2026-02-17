@@ -10,23 +10,57 @@ permissions:
   contents: read
 
 jobs:
+  # see the discussion here: https://github.com/orgs/community/discussions/25220#discussioncomment-11285971
+  # and here: https://github.com/docker-mailserver/docker-mailserver/pull/4267#issuecomment-2484565209
+  pr-context:
+    name: 'Acquire PR Context'
+    runs-on: ubuntu-24.04
+    outputs:
+      PR_HEADSHA: ${{ steps.set-pr-context.outputs.head-sha }}
+      PR_NUMBER: ${{ steps.set-pr-context.outputs.number   }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
+    steps:
+      - name: 'Get PR context'
+        id: set-pr-context
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_TARGET_REPO: ${{ github.repository }}
+          PR_BRANCH: |-
+            ${{
+              (github.event.workflow_run.head_repository.owner.login != github.event.workflow_run.repository.owner.login)
+                && format('{0}:{1}', github.event.workflow_run.head_repository.owner.login, github.event.workflow_run.head_branch)
+                || github.event.workflow_run.head_branch
+            }}
+        run: |
+          gh pr view --repo "${PR_TARGET_REPO}" "${PR_BRANCH}" \
+            --json 'number,headRefOid' \
+            --jq '"number=\(.number)\nhead-sha=\(.headRefOid)"' \
+            >> $GITHUB_OUTPUT
+
   comment:
     name: Comment Jacoco Report to PR safely
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    needs: [pr-context]
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        id: download-artifact
+        uses: actions/download-artifact@v6
         with:
           name: jacoco-report
           run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ github.workspace }}/jacoco
 
       - name: Add JaCoCo coverage to PR
         id: jacoco
-        uses: madrapps/jacoco-report@v1.7.2
+        uses:  vilmosnagy/jacoco-report@1.7.2-v2
         with:
           paths: |
-            ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+            ${{ steps.download-artifact.outputs.download-path }}/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Code Coverage
           update-comment: true
+          debug-mode: true
+          pr-number: ${{ needs.pr-context.outputs.PR_NUMBER  }}
+          head-sha: ${{ needs.pr-context.outputs.PR_HEADSHA }}
