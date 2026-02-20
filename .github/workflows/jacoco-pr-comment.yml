@@ -54,7 +54,7 @@ jobs:
 
       - name: Add JaCoCo coverage to PR
         id: jacoco
-        uses:  vilmosnagy/jacoco-report@1.7.2-v2
+        uses: vilmosnagy/jacoco-report@1.7.2-v2
         with:
           paths: |
             ${{ steps.download-artifact.outputs.download-path }}/jacoco.xml
