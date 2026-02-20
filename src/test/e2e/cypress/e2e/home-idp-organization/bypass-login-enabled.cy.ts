@@ -17,7 +17,7 @@ describe('when bypass login is true, and login hint is provided then ', () => {
    it('if the user is not linked to an org, then the flow should prompt their username & password', () => {
       cy.visit(testRealmLoginUri + "&login_hint=" + user1.email);
       cy.url().should('contain', 'test-realm');
-      cy.get('#kc-login').click();
+      // cy.get('#kc-login').click(); // since the HomeIDP update (see #379) this click is no longer necessary
       cy.get('#password').type(user1.password);
       cy.get('#kc-login').click();
 

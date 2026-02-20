@@ -4,6 +4,7 @@ package io.phasetwo.service.auth.idp;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.broker.provider.AuthenticationRequest;
 import org.keycloak.broker.provider.IdentityProvider;
 import org.keycloak.broker.provider.IdentityProviderFactory;
@@ -47,26 +48,27 @@ final class Redirector {
             return;
         }
         new HomeIdpAuthenticationFlowContext(context).loginHint().copyTo(clientSessionCode);
-        UserAuthenticationIdentityProvider identityProvider = getIdentityProvider(keycloakSession, idp.getAlias());
+        UserAuthenticationIdentityProvider<?> identityProvider = getIdentityProvider(keycloakSession, idp.getAlias());
 
-        Response response = identityProvider.performLogin(createAuthenticationRequest(providerAlias, clientSessionCode));
+        Response response = identityProvider.performLogin(createAuthenticationRequest(providerAlias, identityProvider, clientSessionCode));
         context.forceChallenge(response);
     }
 
-    private AuthenticationRequest createAuthenticationRequest(String providerId, ClientSessionCode<AuthenticationSessionModel> clientSessionCode) {
+    private AuthenticationRequest createAuthenticationRequest(String providerAlias, UserAuthenticationIdentityProvider<?> identityProvider, ClientSessionCode<AuthenticationSessionModel> clientSessionCode) {
         AuthenticationSessionModel authSession = null;
         IdentityBrokerState encodedState = null;
 
         if (clientSessionCode != null) {
             authSession = clientSessionCode.getClientSession();
             String relayState = clientSessionCode.getOrGenerateCode();
-            encodedState = IdentityBrokerState.decoded(relayState, authSession.getClient().getId(), authSession.getClient().getClientId(), authSession.getTabId(), null);
+            String clientData = identityProvider.supportsLongStateParameter() ? AuthenticationProcessor.getClientData(context.getSession(), authSession) : null;
+            encodedState = IdentityBrokerState.decoded(relayState, authSession.getClient().getId(), authSession.getClient().getClientId(), authSession.getTabId(), clientData);
         }
 
         KeycloakSession keycloakSession = context.getSession();
         KeycloakUriInfo keycloakUriInfo = keycloakSession.getContext().getUri();
         RealmModel realm = context.getRealm();
-        String redirectUri = Urls.identityProviderAuthnResponse(keycloakUriInfo.getBaseUri(), providerId, realm.getName()).toString();
+        String redirectUri = Urls.identityProviderAuthnResponse(keycloakUriInfo.getBaseUri(), providerAlias, realm.getName()).toString();
         return new AuthenticationRequest(keycloakSession, realm, authSession, context.getHttpRequest(), keycloakUriInfo, encodedState, redirectUri);
     }
 
