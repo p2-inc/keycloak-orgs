@@ -3,7 +3,7 @@
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.141-SNAPSHOT</version>
+  <version>0.139-SNAPSHOT</version>
 
   <name>Phase Two Keycloak Organizations</name>
   <description>The original organizations implementation for single-realm, multi-tenancy in Keycloak.</description>
@@ -123,6 +123,15 @@
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <plugins>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.4.1</version>
+          <configuration>
+              <source>11</source>
+              <doclint>none</doclint>
+          </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
