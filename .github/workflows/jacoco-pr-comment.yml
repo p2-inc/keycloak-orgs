@@ -1,7 +1,9 @@
-name: PR Coverage Comment
+name: Post Coverage Report to PR
 on:
   workflow_run:
     workflows: ["CI Build"]
+    branches-ignore:
+      - 'main'
     types:
       - completed
 
