@@ -2,7 +2,7 @@ name: CI Build
 on:
   push:
     branches:
-      - '**'
+      - 'main'
   pull_request:
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
       - name: Build with Maven and run Cypress Integration Tests
         run: mvn --batch-mode --update-snapshots verify -Pcypress-tests
       - name: Upload JaCoCo Coverage Report as an artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: jacoco-report
           path: ${{ github.workspace }}/target/site/jacoco/
