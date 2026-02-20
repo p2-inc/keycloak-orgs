@@ -34,8 +34,6 @@ import static org.keycloak.models.AuthenticationExecutionModel.Requirement.*;
  * without worrying about the boilerplate associated with UI integration and redirection logic.
  * </p>
  *
- * @apiNote This interface is part of the public API, but is currently unstable and may change in future releases.
- *
  * @see DiscovererConfig
  */
 @PublicAPI(unstable = true)
@@ -99,8 +97,6 @@ public abstract class AbstractHomeIdpDiscoveryAuthenticatorFactory implements Au
      * discovery of home Identity Providers (IdPs). The configurations defined by an implementation of
      * this interface provide the parameters and metadata required by a discoverer to properly integrate
      * with {@link HomeIdpDiscoveryAuthenticator}.
-     *
-     * @apiNote This interface is part of the public API, but is currently unstable and may change in future releases.
      *
      * @see HomeIdpDiscoverer
      */

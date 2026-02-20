@@ -23,9 +23,7 @@ import java.util.List;
  * or other factors, and an automated method is required to direct the user to their
  * respective IdP for authentication.
  * </p>
- *
- * @apiNote This interface is part of the public API, but is currently unstable and may change in future releases.
- *
+ **
  * @see IdentityProviderModel
  * @see AuthenticationFlowContext
  */
