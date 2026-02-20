@@ -10,6 +10,7 @@ import static io.phasetwo.service.Helpers.deleteWebhook;
 import static io.phasetwo.service.Helpers.objectMapper;
 import static io.phasetwo.service.Helpers.removeEventListener;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
+import static io.phasetwo.service.Orgs.ORG_DNS_RECORD_KEY;
 import static io.phasetwo.service.protocol.oidc.mappers.ActiveOrganizationMapper.INCLUDED_ORGANIZATION_PROPERTIES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -57,6 +58,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.ClientRepresentation;
@@ -338,7 +340,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     OrganizationDomainRepresentation domain = domains.get(0);
     assertThat(domain.getDomainName(), is("example.com"));
     assertThat(domain.getVerified(), is(false));
-    assertThat(domain.getRecordKey(), notNullValue());
+    assertThat(domain.getRecordKey(), is("_org-domain-ownership"));
     assertThat(domain.getRecordValue(), notNullValue());
     log.infof(
         "domain %s %s %s", domain.getDomainName(), domain.getRecordKey(), domain.getRecordValue());
@@ -357,7 +359,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     for (OrganizationDomainRepresentation d : domains) {
       assertThat(d.getDomainName(), oneOf("foo.com", "bar.net"));
       assertThat(d.getVerified(), is(false));
-      assertThat(d.getRecordKey(), notNullValue());
+      assertThat(d.getRecordKey(), is("_org-domain-ownership"));
       assertThat(d.getRecordValue(), notNullValue());
       log.infof("domain %s %s %s", d.getDomainName(), d.getRecordKey(), d.getRecordValue());
     }
@@ -368,6 +370,35 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // delete org
     deleteOrganization(id);
+  }
+
+  @Test
+  void testGetDomainsWithCustomRecordKey() throws IOException {
+    String customRecordKey = "_custom-dns-verify";
+    RealmRepresentation realmRep = keycloak.realm(REALM).toRepresentation();
+    try {
+      realmRep.getAttributes().put(ORG_DNS_RECORD_KEY, customRecordKey);
+      keycloak.realm(REALM).update(realmRep);
+
+      OrganizationRepresentation org = createDefaultOrg();
+      String id = org.getId();
+
+      Response response = getRequest(id, "domains");
+      assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+      List<OrganizationDomainRepresentation> domains =
+          objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+      assertThat(domains, notNullValue());
+      assertThat(domains, hasSize(1));
+      OrganizationDomainRepresentation domain = domains.get(0);
+      assertThat(domain.getDomainName(), is("example.com"));
+      assertThat(domain.getRecordKey(), is(customRecordKey));
+      assertThat(domain.getRecordValue(), notNullValue());
+
+      deleteOrganization(id);
+    } finally {
+      realmRep.getAttributes().remove(ORG_DNS_RECORD_KEY);
+      keycloak.realm(REALM).update(realmRep);
+    }
   }
 
   @Test
