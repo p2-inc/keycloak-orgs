@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
  * custom criteria such as the domain associated with the user or other relevant factors.
  * </p>
  *
- * @apiNote This interface is part of the public API but is marked as unstable and may be subject
  * to changes in future releases.
  */
 @PublicAPI(unstable = true)
