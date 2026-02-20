@@ -69,7 +69,7 @@ public abstract class AbstractOrganizationTest {
     "io.phasetwo.keycloak:keycloak-events"
   };
 
-  static List<File> getDeps() {
+  public static List<File> getDeps() {
     List<File> dependencies = new ArrayList<File>();
     for (String dep : deps) {
       dependencies.addAll(getDep(dep));

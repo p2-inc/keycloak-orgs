@@ -1,9 +1,13 @@
 package io.phasetwo.service.representation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.phasetwo.service.util.EmptyStringAsNullDeserializer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.util.List;
@@ -69,6 +73,8 @@ public class Organization {
   }
 
   @JsonProperty("domains")
+  @JsonDeserialize(contentUsing = EmptyStringAsNullDeserializer.class)
+  @JsonSetter(contentNulls = Nulls.SKIP)
   public Set<String> getDomains() {
     return domains;
   }
