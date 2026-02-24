@@ -68,10 +68,7 @@ public class ValidateIdpAuthenticatorFactory extends BaseAuthenticatorFactory
     String firstName = Optional.ofNullable(brokerContext.getFirstName()).orElse("");
     String lastName = Optional.ofNullable(brokerContext.getLastName()).orElse("");
     String email = Optional.ofNullable(brokerContext.getEmail()).orElse("");
-    String message =
-        String.format(
-            "You logged in as %s %s %s.",
-            firstName, lastName, email);
+    String message = String.format("You logged in as %s %s %s.", firstName, lastName, email);
 
     // log the user out
     context.clearUser();

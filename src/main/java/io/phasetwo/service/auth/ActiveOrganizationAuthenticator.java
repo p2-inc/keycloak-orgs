@@ -14,8 +14,6 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.authenticators.broker.util.PostBrokerLoginConstants;
-import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.http.HttpRequest;
 import org.keycloak.models.KeycloakSession;
@@ -127,9 +125,9 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
     return prompt != null && prompt.contains(OIDCLoginProtocol.PROMPT_VALUE_SELECT_ACCOUNT);
   }
 
-  private boolean wasPostBrokerLogin(AuthenticationFlowContext context){
-      String currentFlow = context.getAuthenticationSession().getAuthNote(CURRENT_FLOW_PATH);
-      return POST_BROKER_FLOW.equals(currentFlow);
+  private boolean wasPostBrokerLogin(AuthenticationFlowContext context) {
+    String currentFlow = context.getAuthenticationSession().getAuthNote(CURRENT_FLOW_PATH);
+    return POST_BROKER_FLOW.equals(currentFlow);
   }
 
   private void tryOrganizationSelectionChallenge(AuthenticationFlowContext context) {
