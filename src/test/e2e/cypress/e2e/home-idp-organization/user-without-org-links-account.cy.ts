@@ -2,11 +2,12 @@ import {testRealmLoginUri, testRealmUri} from "../../fixtures/uri";
 import { organizationlessAuthItUser } from "../../fixtures/users";
 
 describe('Organiationless IDP Linked user login', () => {
+    // using force: true, cause flakyness https://github.com/cypress-io/cypress/issues/5830
     it('a user registers their own idp & logs in with that', () => {
         cy.visit(testRealmLoginUri);
-        cy.get('#username').type(organizationlessAuthItUser.username);
+        cy.get('#username').type(organizationlessAuthItUser.username, {force: true});
         cy.get('#kc-login').click();
-        cy.get('#password').type(organizationlessAuthItUser.password);
+        cy.get('#password').type(organizationlessAuthItUser.password, {force: true});
         cy.get('#kc-login').click();
         cy.contains('Personal');
         cy.get("#nav-toggle").click();
@@ -24,8 +25,8 @@ describe('Organiationless IDP Linked user login', () => {
 
         cy.url().should('contain', 'external-idp');
 
-        cy.get('#username').type(organizationlessAuthItUser.username);
-        cy.get('#password').type(organizationlessAuthItUser.password);
+        cy.get('#username').type(organizationlessAuthItUser.username, {force: true});
+        cy.get('#password').type(organizationlessAuthItUser.password, {force: true});
         cy.get('#kc-login').click();
 
         cy.url().should('contain', 'test-realm/account');
@@ -38,7 +39,7 @@ describe('Organiationless IDP Linked user login', () => {
         cy.clearCookies()
 
         cy.visit(testRealmLoginUri);
-        cy.get('#username').type(organizationlessAuthItUser.username);
+        cy.get('#username').type(organizationlessAuthItUser.username, {force: true});
         cy.get('#kc-login').click();
         // after linking the account to the user on the next log-in we are automatically redirected to the external idp's login page
         cy.url().should('contain', 'external-idp');
