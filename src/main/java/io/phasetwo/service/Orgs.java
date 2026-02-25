@@ -29,6 +29,7 @@ public class Orgs {
   public static final String ORG_VALIDATION_PENDING_CONFIG_KEY =
       "home.idp.discovery.validationPending";
   public static final String ORG_SHARED_IDP_KEY = "home.idp.discovery.shared";
+  public static final String ORG_DNS_RECORD_KEY = "_providerConfig.orgs.dnsRecordKey";
 
   public static final String REQUIRE_VERIFIED_DOMAIN = "requireVerifiedDomain";
   public static final String REQUIRE_VALID_EMAIL = "requireValidEmail";
