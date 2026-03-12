@@ -1,7 +1,9 @@
 package io.phasetwo.service.auth;
 
+import com.google.auto.service.AutoService;
 import java.util.List;
 import org.keycloak.Config;
+import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.authentication.authenticators.conditional.ConditionalAuthenticator;
 import org.keycloak.authentication.authenticators.conditional.ConditionalAuthenticatorFactory;
 import org.keycloak.models.AuthenticationExecutionModel;
@@ -14,6 +16,7 @@ import org.keycloak.provider.ProviderConfigProperty;
  * <p>Registers a conditional authenticator that compares a Phase Two organization attribute
  * against a value read from the current OIDC client's attributes at runtime.
  */
+@AutoService(AuthenticatorFactory.class)
 public class ConditionalOrgAttributeMatchesClientAttributeFactory
     implements ConditionalAuthenticatorFactory {
 
