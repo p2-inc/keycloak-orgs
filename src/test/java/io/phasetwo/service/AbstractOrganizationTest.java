@@ -209,7 +209,13 @@ public abstract class AbstractOrganizationTest {
     return createOrganization(keycloak, representation);
   }
 
-  // create an organization, fet the created organization and returns it
+  protected List<OrganizationRepresentation> listOrganizations() throws JsonProcessingException {
+    Response response = givenSpec(keycloak).get();
+    assertThat(response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
+    return objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+  }
+
+  // create an organization, fetch the created organization and returns it
   protected OrganizationRepresentation createOrganization(
       Keycloak keycloak, OrganizationRepresentation representation) throws IOException {
     Response response =

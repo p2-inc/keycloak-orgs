@@ -9,7 +9,6 @@ public class Domain {
   private String recordKey;
   private String recordValue;
   private boolean verified = false;
-  private String type;
 
   public Domain domainName(String domainName) {
     this.domainName = domainName;
@@ -24,20 +23,6 @@ public class Domain {
 
   public void setDomainName(String domainName) {
     this.domainName = domainName;
-  }
-
-  public Domain type(String type) {
-    this.type = type;
-    return this;
-  }
-
-  @JsonProperty("type")
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
   }
 
   public Domain recordKey(String recordKey) {
