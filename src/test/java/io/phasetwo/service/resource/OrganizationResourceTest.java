@@ -53,6 +53,7 @@ import lombok.extern.jbosslog.JBossLog;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.keycloak.TokenVerifier;
@@ -68,6 +69,14 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
   private static String ACTIVE_ORG_CLAIM = "active_organization";
   private static String ACCESS_TOKEN = "access_token";
+
+  @AfterEach
+  public void afterEach() throws JsonProcessingException {
+    final var orgs = listOrganizations();
+    for (final var org : orgs) {
+      deleteOrganization(org.getId());
+    }
+  }
 
   @Test
   void testAddGetUpdateDeleteOrg() throws Exception {

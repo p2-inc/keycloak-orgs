@@ -418,7 +418,7 @@
     <dependency>
       <groupId>io.phasetwo</groupId>
       <artifactId>phasetwo-admin-client</artifactId>
-      <version>[0.1.11,)</version>
+      <version>[0.1.14,)</version>
       <scope>test</scope>
     </dependency>
     <dependency>
