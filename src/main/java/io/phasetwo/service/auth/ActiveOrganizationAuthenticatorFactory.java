@@ -38,7 +38,7 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
   public static final String PROVIDER_DISPLAY = "Select Organization";
   public static final String PROVIDER_HELP_TEXT = "Select the current Organization on Login";
 
-  public static final String CONF_ORG_NAME = "org_name";
+  public static final String CONFIG_MATCH_BY_ORG_NAME = "match_by_org_name";
 
   private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
     AuthenticationExecutionModel.Requirement.REQUIRED,
@@ -84,7 +84,7 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
   public List<ProviderConfigProperty> getConfigProperties() {
     ProviderConfigProperty organizationNameConfig = new ProviderConfigProperty();
     organizationNameConfig.setType(ProviderConfigProperty.BOOLEAN_TYPE);
-    organizationNameConfig.setName(CONF_ORG_NAME);
+    organizationNameConfig.setName(CONFIG_MATCH_BY_ORG_NAME);
     organizationNameConfig.setDefaultValue(false);
     organizationNameConfig.setLabel("Match by organization name");
     organizationNameConfig.setHelpText("account_hint will use organization name instead of organization id to match exact organization");
