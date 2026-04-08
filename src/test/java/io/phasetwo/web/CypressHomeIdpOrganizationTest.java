@@ -313,29 +313,6 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         linkIdentityProviderToOrganization(realm.toRepresentation(), organization, "second-oidc");
     }
 
-    private RealmRepresentation importRealm(String jsonRepresentationPath) {
-        return importRealm(jsonRepresentationPath, null);
-    }
-
-    private RealmRepresentation importRealm(String jsonRepresentationPath, @Nullable String realmOverride) {
-        RealmRepresentation realm =
-                loadJson(getClass().getResourceAsStream(jsonRepresentationPath),
-                        RealmRepresentation.class);
-        if (realmOverride != null) {
-            realm.setRealm(realmOverride);
-        }
-        importRealm(realm, keycloak);
-        knownRealms.add(realm.getRealm());
-        log.info("realm imported successfully:" + realm.getRealm());
-        return realm;
-    }
-
-    private static RealmResource findRealmByName(String realm) {
-        return keycloak
-                .realms()
-                .realm(realm);
-    }
-
     @TestFactory
     @DisplayName("The UsernameNoteAuthenticator should ask the username, handle extra steps, and continue with HomeIDP Authentication")
     public List<DynamicContainer> testUsernameInAuthNoteFormWithHomeIdpIfTheresExtraAuthenticationFormPartsBetween() throws IOException, InterruptedException, TimeoutException {
@@ -620,5 +597,13 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private RealmRepresentation importRealm(String jsonRepresentationPath) {
+        var realmRepresentation = importRealm(jsonRepresentationPath, null);
+
+        knownRealms.add(realmRepresentation.getRealm());
+
+        return realmRepresentation;
     }
 }

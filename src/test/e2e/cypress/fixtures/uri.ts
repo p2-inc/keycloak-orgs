@@ -11,11 +11,10 @@ const loginUri = authUri.concat(
     '&scope=openid',
     '&redirect_uri=', realmUri.concat("/account")
 );
-const loginUriSelectAccount = loginUri.concat('&prompt=select_account');
-const loginUriAccountHint = loginUri.concat('&account_hint=')
-
-
 const testRealmUri = Cypress.config('baseUrl') + "realms/test-realm";
+const loginUriSelectAccount = testRealmUri.concat('&prompt=select_account');
+const loginUriAccountHint = testRealmUri.concat('&account_hint=')
+
 const testRealmAuthUri = testRealmUri.concat("/protocol/openid-connect/auth");
 const testRealmLoginUri = testRealmAuthUri.concat(
     '?response_type=code',
