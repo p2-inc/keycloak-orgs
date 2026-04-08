@@ -3,6 +3,7 @@ package io.phasetwo.service.auth;
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static org.keycloak.authentication.AuthenticationProcessor.CURRENT_FLOW_PATH;
 
+import com.google.common.collect.MoreCollectors;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -108,7 +109,7 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
     return provider
         .getUserOrganizationsStream(context.getRealm(), context.getUser())
         .filter(org -> match(accountHint, context, org))
-        .findFirst();
+        .collect(MoreCollectors.toOptional());
   }
 
   private static boolean match(
@@ -127,7 +128,7 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
                 Boolean.parseBoolean(
                     it.getConfig()
                         .getOrDefault(
-                            ActiveOrganizationAuthenticatorFactory.CONF_ORG_NAME, "false")))
+                            ActiveOrganizationAuthenticatorFactory.CONFIG_MATCH_BY_ORG_NAME, "false")))
         .orElse(false);
   }
 
