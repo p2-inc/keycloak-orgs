@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.ORG_DNS_RECORD_KEY;
 import static io.phasetwo.service.resource.OrganizationResourceType.DOMAIN;
 
 import com.google.common.base.Joiner;
@@ -17,6 +18,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.events.admin.OperationType;
@@ -31,9 +33,13 @@ public class DomainsResource extends OrganizationAdminResource {
 
   private final OrganizationModel organization;
 
+  private final String recordKey;
+
   public DomainsResource(OrganizationAdminResource parent, OrganizationModel organization) {
     super(parent);
     this.organization = organization;
+    this.recordKey =
+        Optional.ofNullable(realm.getAttribute(ORG_DNS_RECORD_KEY)).orElse("_org-domain-ownership");
   }
 
   @GET
@@ -56,14 +62,12 @@ public class DomainsResource extends OrganizationAdminResource {
     return new Domain()
         .domainName(d.getDomain())
         .verified(d.isVerified())
-        .recordKey(RECORD_KEY)
+        .recordKey(recordKey)
         .recordValue(getRecordValue(d.getDomain()));
   }
 
-  private static final String RECORD_KEY = "_org-domain-ownership";
-
   private String getRecordKey(String domainName) {
-    return String.format("%s.%s", RECORD_KEY, domainName);
+    return String.format("%s.%s", recordKey, domainName);
   }
 
   private String getRecordValue(String domainName) {
