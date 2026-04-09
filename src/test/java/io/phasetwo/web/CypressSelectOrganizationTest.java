@@ -30,22 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @org.testcontainers.junit.jupiter.Testcontainers
 class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
 
-  private List<String> knownRealms;
-
-    @BeforeEach
-    public void setup() {
-        knownRealms = new ArrayList<>();
-    }
-
-    @AfterEach
-    public void cleanupKeycloakInstance() {
-        List.copyOf(knownRealms)
-                .forEach(realmName -> {
-                    findRealmByName(realmName).remove();
-                    knownRealms.remove(realmName);
-                });
-    }
-
   @TestFactory
   List<DynamicContainer> runCypressTests()
       throws IOException, InterruptedException, TimeoutException {
@@ -53,7 +37,7 @@ class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
     Testcontainers.exposeHostPorts(container.getHttpPort());
 
       // import client realm
-    importRealm();
+    importRealm("/realms/kc-realm-org-browser-flow.json", null);
     setupSelectOrgTests();
 
     try (CypressContainer cypressContainer =
@@ -70,19 +54,20 @@ class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
   }
 
   private void setupSelectOrgTests() throws IOException {
-    var realm = findRealmByName("test-realm");
+    final var realm = findRealmByName(getKnownRealms().getFirst());
+    final var realmRep = realm.toRepresentation();
     OrganizationRepresentation org1 =
-        createOrganization("test-realm",
+        createOrganization(realmRep,
             new OrganizationRepresentation().name("org-1").domains(List.of("org1.com")));
     OrganizationRepresentation org2 =
-        createOrganization("test-realm",
+        createOrganization(realmRep,
             new OrganizationRepresentation().name("org-2").domains(List.of("org2.com")));
-    var user1 = keycloak.realm(knownRealms.getFirst()).users().search("user1", true).getFirst();
-    createMembership("test-realm", org1.getId(), "members", user1.getId());
-    createMembership("test-realm", org2.getId(), "members", user1.getId());
+    var user1 = realm.users().search("user-1", true).getFirst();
+    createMembership(realmRep.getRealm(), org1.getId(), "members", user1.getId());
+    createMembership(realmRep.getRealm(), org2.getId(), "members", user1.getId());
 
-    var user2 = keycloak.realm(knownRealms.getFirst()).users().search("user2", true).getFirst();
-    createMembership("test-realm", org1.getId(), "members", user2.getId());
+    var user2 = realm.users().search("user-2", true).getFirst();
+    createMembership(realmRep.getRealm(), org1.getId(), "members", user2.getId());
 
     createClient();
   }
@@ -118,39 +103,6 @@ class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
         // Create a public client
         keycloak.realm("test-realm").clients()
                 .create(client);
-    }
-
-    private void importRealm() {
-      var realmRepresentation = importRealm("/realms/kc-realm-org-browser-flow.json", null);
-      knownRealms.add(realmRepresentation.getRealm());
-  }
-
-    // create an organization, fet the created organization and returns it
-    protected OrganizationRepresentation createOrganization(String realm,OrganizationRepresentation representation) throws IOException {
-        var response = given()
-                .baseUri(container.getAuthServerUrl())
-                .basePath("realms/" + realm + "/" + OrganizationResourceProviderFactory.ID)
-                .contentType("application/json")
-                .auth()
-                .oauth2(keycloak.tokenManager().getAccessTokenString())
-                .and()
-                .body(toJsonString(representation))
-                .when()
-                .post()
-                .then()
-                .extract()
-                .response();
-        assertThat(response.getStatusCode(), Matchers.is(Response.Status.CREATED.getStatusCode()));
-        assertNotNull(response.getHeader("Location"));
-        String loc = response.getHeader("Location");
-        String id = loc.substring(loc.lastIndexOf("/") + 1);
-
-        response = getRequest(id);
-        assertThat(response.statusCode(), Matchers.is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
-        OrganizationRepresentation orgRep =
-                objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
-        assertThat(orgRep.getId(), is(id));
-        return orgRep;
     }
 
     protected void createMembership(String realm, String... paths) throws IOException {

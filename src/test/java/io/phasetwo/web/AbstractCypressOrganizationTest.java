@@ -3,12 +3,14 @@ package io.phasetwo.web;
 import static io.phasetwo.service.Helpers.*;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTest;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestSuite;
+import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -23,9 +25,11 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -39,6 +43,25 @@ import org.testcontainers.utility.MountableFile;
 @JBossLog
 @EnabledIfSystemProperty(named = "include.cypress", matches = "true")
 public class AbstractCypressOrganizationTest {
+
+  private List<String> knownRealms;
+
+  @BeforeEach
+  public void setup() {
+    knownRealms = new ArrayList<>();
+  }
+
+  @AfterEach
+  public void cleanupKeycloakInstance() {
+    List.copyOf(knownRealms).forEach(realmName -> {
+      findRealmByName(realmName).remove();
+      knownRealms.remove(realmName);
+    });
+  }
+
+  protected List<String> getKnownRealms() {
+    return List.copyOf(knownRealms);
+  }
 
   protected static final boolean RUN_CYPRESS =
       Boolean.parseBoolean(System.getProperty("include.cypress", "false"));
@@ -212,6 +235,7 @@ public class AbstractCypressOrganizationTest {
                     .extract()
                     .response();
     assertThat(response.getStatusCode(), CoreMatchers.is(Status.CREATED.getStatusCode()));
+    knownRealms.add(representation.getRealm());
   }
 
   List<DynamicContainer> convertToJUnitDynamicTests(CypressTestResults testResults) {
@@ -261,4 +285,48 @@ public class AbstractCypressOrganizationTest {
                 .realms()
                 .realm(realm);
     }
+
+  protected @NotNull OrganizationRepresentation createOrganization(RealmRepresentation testRealm, OrganizationRepresentation representation) throws JsonProcessingException {
+    var createOrgResponse =
+            given()
+                    .baseUri(container.getAuthServerUrl())
+                    .basePath("realms/" + testRealm.getRealm() + "/orgs")
+                    .contentType("application/json")
+                    .auth()
+                    .oauth2(keycloak.tokenManager().getAccessTokenString())
+                    .body(toJsonString(representation))
+                    .when()
+                    .post()
+                    .andReturn();
+
+    assertThat(createOrgResponse.getStatusCode(), CoreMatchers.is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    assertNotNull(createOrgResponse.getHeader("Location"));
+    String loc = createOrgResponse.getHeader("Location");
+    String id = loc.substring(loc.lastIndexOf("/") + 1);
+
+    OrganizationRepresentation orgRep = findOrganizationRepresentationById(testRealm, id);
+    return orgRep;
+  }
+
+  protected @NotNull OrganizationRepresentation findOrganizationRepresentationById(RealmRepresentation testRealm, String id) throws JsonProcessingException {
+    // get organization
+    var response =
+            given()
+                    .baseUri(container.getAuthServerUrl())
+                    .basePath("realms/" + testRealm.getRealm() + "/orgs/" + id)
+                    .contentType("application/json")
+                    .auth()
+                    .oauth2(keycloak.tokenManager().getAccessTokenString())
+                    .and()
+                    .when()
+                    .get()
+                    .then()
+                    .extract()
+                    .response();
+    assertThat(response.statusCode(), Matchers.is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+    OrganizationRepresentation orgRep =
+            objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
+    assertThat(orgRep.getId(), CoreMatchers.is(id));
+    return orgRep;
+  }
 }
