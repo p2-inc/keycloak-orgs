@@ -1,4 +1,4 @@
-import {tokenUri, orgsUri, activeOrganizationUri} from "../fixtures/uri";
+import {testRealmTokenUri, tokenUri, orgsUri, activeOrganizationUri} from "../fixtures/uri";
 import {User} from "../fixtures/users";
 
 const org1Name = 'org-1';
@@ -62,7 +62,7 @@ const getRealmOrganizations = () => {
 const getActiveOrganization = (user: User) => {
   return cy.request({
     method: 'POST',
-    url: tokenUri,
+    url: testRealmTokenUri,
     form: true,
     body: {
       client_id: 'public-client',

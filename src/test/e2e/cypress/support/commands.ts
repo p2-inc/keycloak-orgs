@@ -65,6 +65,15 @@ Cypress.Commands.add('login', (user: User) => {
 Cypress.Commands.add('validateActiveOrgAttributeNotVisible', (user: User) => {
   getAccount(user).then((account) => {
     let hasActiveOrgAttribute = false;
+   // 1. Check the console NOW
+     console.log('DEBUG: Account object is:', account);
+
+     // 2. Add a fallback to an empty array so it doesn't crash here
+     const metadata = account?.userProfileMetadata?.attributes || [];
+
+     // 3. Log specifically what's inside the metadata
+     console.log('DEBUG: Attributes found:', metadata);
+
     for (let attribute of account.userProfileMetadata.attributes) {
       if (attribute.name == 'org.ro.active') {
         hasActiveOrgAttribute = true;

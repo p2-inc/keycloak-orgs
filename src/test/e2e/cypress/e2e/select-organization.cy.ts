@@ -1,4 +1,4 @@
-import { loginUriSelectAccount, tokenUri } from "../fixtures/uri";
+import { loginUriSelectAccount, testRealmTokenUri } from "../fixtures/uri";
 import { user1, user2, user3 } from "../fixtures/users";
 import { getRealmOrganizations, org1Name, org2Name } from "../utils/organizations";
 
@@ -11,6 +11,7 @@ describe('user having no organizations', () => {
   })
 
   it('account_hint should get error message', () => {
+     cy.visit(loginUriSelectAccount);
     cy.accountHint(org1Name);
     cy.login(user3);
     cy.get('#kc-error-message').should('exist');
@@ -99,7 +100,7 @@ describe('direct grant test', () => {
 
       cy.request({
         method: 'POST',
-        url: tokenUri + "?account_hint=".concat(org.id),
+        url: testRealmTokenUri + "?account_hint=".concat(org.id),
         form: true,
         body: {
           client_id: 'public-client',

@@ -1,9 +1,6 @@
 const realmUri = Cypress.config('baseUrl') + "realms/master";
 const authUri = realmUri.concat("/protocol/openid-connect/auth");
 const tokenUri = realmUri.concat("/protocol/openid-connect/token");
-const accountUri = realmUri.concat("/account?userProfileMetadata=true");
-const orgsUri = realmUri.concat("/orgs");
-const activeOrganizationUri = realmUri.concat("/users/active-organization");
 
 const loginUri = authUri.concat(
     '?response_type=code',
@@ -12,9 +9,12 @@ const loginUri = authUri.concat(
     '&redirect_uri=', realmUri.concat("/account")
 );
 const testRealmUri = Cypress.config('baseUrl') + "realms/test-realm";
-const loginUriSelectAccount = testRealmUri.concat('&prompt=select_account');
-const loginUriAccountHint = testRealmUri.concat('&account_hint=')
 
+const orgsUri = testRealmUri.concat("/orgs");
+const accountUri = testRealmUri.concat("/account?userProfileMetadata=true");
+const activeOrganizationUri = testRealmUri.concat("/users/active-organization");
+
+const testRealmTokenUri = testRealmUri.concat("/protocol/openid-connect/token");
 const testRealmAuthUri = testRealmUri.concat("/protocol/openid-connect/auth");
 const testRealmLoginUri = testRealmAuthUri.concat(
     '?response_type=code',
@@ -29,6 +29,9 @@ const testWizardLoginUri = testRealmAuthUri.concat(
     '&redirect_uri=', testRealmUri.concat("/wizard")
 );
 
+const loginUriSelectAccount = testRealmLoginUri.concat('&prompt=select_account');
+const loginUriAccountHint = testRealmLoginUri.concat('&account_hint=');
+
 export {
     tokenUri,
     orgsUri,
@@ -39,4 +42,5 @@ export {
     testRealmLoginUri,
     testWizardLoginUri,
     testRealmUri,
+    testRealmTokenUri
 }
