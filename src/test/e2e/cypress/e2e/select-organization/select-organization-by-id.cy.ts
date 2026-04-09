@@ -1,6 +1,6 @@
-import { loginUriSelectAccount, testRealmTokenUri } from "../fixtures/uri";
-import { user1, user2, user3 } from "../fixtures/users";
-import { getRealmOrganizations, org1Name, org2Name } from "../utils/organizations";
+import { loginUriSelectAccount, testRealmTokenUri } from "../../fixtures/uri";
+import { user1, user2, user3 } from "../../fixtures/users";
+import { getRealmOrganizations, org1Name, org2Name } from "../../utils/organizations";
 
 describe('user having no organizations', () => {
   it('select_account should get error message', () => {
