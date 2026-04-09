@@ -24,7 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
 
   @TestFactory
-  List<DynamicContainer> runCypressTests()
+  List<DynamicContainer> runOrganizationBrowserFlowByIdTests()
       throws IOException, InterruptedException, TimeoutException {
 
     Testcontainers.exposeHostPorts(container.getHttpPort());
@@ -37,7 +37,7 @@ class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
         new CypressContainer()
             .withBaseUrl(
                 "http://host.testcontainers.internal:" + container.getHttpPort() + "/auth/")
-            .withSpec("cypress/e2e/select-organization.cy.ts")
+            .withSpec("cypress/e2e/select-organization/select-organization-by-id.cy.ts")
             .withBrowser("electron")) {
       cypressContainer.start();
       CypressTestResults testResults = cypressContainer.getTestResults();
@@ -45,6 +45,30 @@ class CypressSelectOrganizationTest extends AbstractCypressOrganizationTest {
       return convertToJUnitDynamicTests(testResults);
     }
   }
+
+
+    @TestFactory
+    List<DynamicContainer> runOrganizationBrowserFlowByNameTests()
+            throws IOException, InterruptedException, TimeoutException {
+
+        Testcontainers.exposeHostPorts(container.getHttpPort());
+
+        // import client realm
+        importRealm("/realms/kc-realm-org-browser-flow-by-name.json", null);
+        setupSelectOrgTests();
+
+        try (CypressContainer cypressContainer =
+                     new CypressContainer()
+                             .withBaseUrl(
+                                     "http://host.testcontainers.internal:" + container.getHttpPort() + "/auth/")
+                             .withSpec("cypress/e2e/select-organization/select-organization-by-name.cy.ts")
+                             .withBrowser("electron")) {
+            cypressContainer.start();
+            CypressTestResults testResults = cypressContainer.getTestResults();
+            cleanupKeycloakInstance();
+            return convertToJUnitDynamicTests(testResults);
+        }
+    }
 
   private void setupSelectOrgTests() throws IOException {
     final var realm = findRealmByName(getKnownRealms().getFirst());

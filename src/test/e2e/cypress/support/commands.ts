@@ -52,6 +52,7 @@ declare global {
       validateActiveOrgAttributeNotVisible(user: User): Chainable<JQuery<HTMLElement>>
       validateActiveOrganization(user: User, orgName: string): Chainable<JQuery<HTMLElement>>
       accountHint(orgName: string): Chainable<JQuery<HTMLElement>>
+      accountHintOrgName(orgName: string): Chainable<JQuery<HTMLElement>>
     }
   }
 }
@@ -99,6 +100,9 @@ Cypress.Commands.add('accountHint', (orgName: string) => {
   })
 });
 
+Cypress.Commands.add('accountHintOrgName', (orgName: string) => {
+    cy.visit(loginUriAccountHint.concat(orgName));
+});
 
 Cypress.Commands.add('updatePersonalInformation', (firstName: string, lastName:string, email:string) => {
   cy.get('#firstName').type(firstName);
