@@ -67,7 +67,8 @@ public abstract class AbstractOrganizationTest {
     "org.jboss.resteasy:resteasy-client-api",
     "org.keycloak:keycloak-admin-client",
     "io.phasetwo.keycloak:keycloak-events",
-    "fi.metatavu.keycloak.scim.server:keycloak-scim-server"
+    "fi.metatavu.keycloak.scim.server:keycloak-scim-server",
+    "io.phasetwo:phasetwo-org-scim"
   };
 
   static List<File> getDeps() {
