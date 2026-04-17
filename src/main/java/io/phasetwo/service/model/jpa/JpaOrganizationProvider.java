@@ -26,11 +26,15 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -246,6 +250,22 @@ public class JpaOrganizationProvider implements OrganizationProvider {
       RealmModel realm, String configKey, String configValue, boolean exact) {
     return IdentityProviders.getIdentityProvidersStream(
         session, em, realm, configKey, configValue, exact);
+  }
+
+  @Override
+  public Collection<? extends OrganizationModel> getOrganizationsMissingRole(String roleName, int batchSize) {
+    EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+    final var orgs = em.createNamedQuery("getOrganizationsMissingRole", ExtOrganizationEntity.class)
+                    .setParameter("roleName", roleName)
+                    .setMaxResults(batchSize)
+                    .getResultList();
+
+    Set<String> realmIds = orgs.stream().map(ExtOrganizationEntity::getRealmId).collect(Collectors.toSet());
+    Map<String, RealmModel> realms = realmIds.stream().collect(Collectors.toMap(id -> id, id -> session.realms().getRealm(id)));
+    return orgs
+            .stream()
+            .map(org -> new OrganizationAdapter(session, realms.get(org.getRealmId()), em, org))
+            .toList();
   }
 
   @Override

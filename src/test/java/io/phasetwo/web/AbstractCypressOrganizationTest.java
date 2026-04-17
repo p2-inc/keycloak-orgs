@@ -21,6 +21,7 @@ import io.github.wimdeblauwe.testcontainers.cypress.CypressTest;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestSuite;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
+import io.phasetwo.service.KeycloakOrgsAdminAPI;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -195,23 +196,10 @@ public class AbstractCypressOrganizationTest {
     return createOrganization(keycloak, representation);
   }
 
-  // create an organization, fet the created organization and returns it
   protected OrganizationRepresentation createOrganization(
       Keycloak keycloak, OrganizationRepresentation representation) throws IOException {
-    Response response =
-        givenSpec(keycloak).and().body(toJsonString(representation)).when().post().andReturn();
-
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-    assertNotNull(response.getHeader("Location"));
-    String loc = response.getHeader("Location");
-    String id = loc.substring(loc.lastIndexOf("/") + 1);
-
-    response = getRequest(id);
-    assertThat(response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
-    OrganizationRepresentation orgRep =
-        objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
-    assertThat(orgRep.getId(), is(id));
-    return orgRep;
+    return new KeycloakOrgsAdminAPI(container.getAuthServerUrl(), REALM, keycloak)
+        .createOrganization(representation);
   }
 
   protected RequestSpecification givenSpec(Keycloak keycloak, String... paths) {
