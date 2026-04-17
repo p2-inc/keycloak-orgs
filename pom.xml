@@ -296,6 +296,14 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- scim extension -->
+    <dependency>
+      <groupId>fi.metatavu.keycloak.scim.server</groupId>
+      <artifactId>keycloak-scim-server</artifactId>
+      <version>1.5.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- javax/jakarta apis -->
     <dependency>
       <groupId>jakarta.persistence</groupId>
