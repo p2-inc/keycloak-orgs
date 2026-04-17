@@ -84,6 +84,17 @@ public class OrganizationResource extends OrganizationAdminResource {
     }
   }
 
+  @Path("scim")
+  public ScimProviderResource scim() {
+    if (auth.hasViewOrgs() || auth.hasOrgViewIdentityProviders(organization)) {
+      return new ScimProviderResource(this, organization);
+    } else {
+      throw new NotAuthorizedException(
+          String.format(
+              "Insufficient permission to access SCIM config for %s", organization.getId()));
+    }
+  }
+
   @Path("domains")
   public DomainsResource domains() {
     if (auth.hasViewOrgs() || auth.hasOrgViewOrg(organization)) {
