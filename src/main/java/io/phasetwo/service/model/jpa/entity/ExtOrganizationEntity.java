@@ -32,7 +32,15 @@ import org.hibernate.annotations.Nationalized;
       query = "select count(o) from ExtOrganizationEntity o where o.realmId = :realmId"),
   @NamedQuery(
       name = "removeAllOrganizations",
-      query = "delete from ExtOrganizationEntity o where o.realmId = :realmId")
+      query = "delete from ExtOrganizationEntity o where o.realmId = :realmId"),
+  @NamedQuery(
+      name = "getOrganizationsMissingRole",
+      query =
+          "SELECT o FROM ExtOrganizationEntity o"
+              + " WHERE NOT EXISTS ("
+              + "   SELECT r FROM OrganizationRoleEntity r"
+              + "   WHERE r.organization = o AND r.name = :roleName"
+              + ")")
 })
 @Entity
 @Table(

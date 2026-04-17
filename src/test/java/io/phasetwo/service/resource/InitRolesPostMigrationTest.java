@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.images.PullPolicy;
@@ -161,6 +162,37 @@ public class InitRolesPostMigrationTest {
     return new KeycloakOrgsAdminAPI(keycloak.getAuthServerUrl(), REALM, adminClient);
   }
 
+  private KeycloakOrgsAdminAPI orgsApi(String realm) {
+    return new KeycloakOrgsAdminAPI(keycloak.getAuthServerUrl(), realm, adminClient);
+  }
+
+  private static void restartKeycloakWithBatchSize(int batchSize) throws IOException {
+    stopKeycloak(keycloak);
+    keycloak =
+        buildKeycloakContainer()
+            .withEnv("KC_ORGS_MIGRATION_BATCH_SIZE", String.valueOf(batchSize));
+    keycloak.start();
+    adminClient = buildAdminClient();
+  }
+
+  private List<String> createOrgsInRealm(String realm, int count) throws IOException {
+    List<String> ids = new ArrayList<>();
+    for (int i = 0; i < count; i++) {
+      OrganizationRepresentation org =
+          orgsApi(realm)
+              .createOrganization(new OrganizationRepresentation().name("test-org-" + i));
+      ids.add(org.getId());
+    }
+    return ids;
+  }
+
+  private void assertAllOrgsHaveRole(String realm, List<String> orgIds, String roleName)
+      throws IOException {
+    for (String orgId : orgIds) {
+      orgsApi(realm).assertOrgHasRole(orgId, roleName);
+    }
+  }
+
   @Test
   void testUpdateExistingOrganizationsWithNewRoles() throws Exception {
     int orgCount = 3;
@@ -194,6 +226,54 @@ public class InitRolesPostMigrationTest {
     // Second restart verifies idempotency — no duplicate roles
     restartKeycloak();
     assertDbRoleCount(orgIds, ORG_ROLE_DELETE_ORGANIZATION, orgCount);
+  }
+
+  @Test
+  void testMultiRealmMigrationWithBatching() throws Exception {
+    // Create 3 additional realms alongside master
+    String realmA = "migration-realm-a";
+    String realmB = "migration-realm-b";
+    String realmC = "migration-realm-c";
+    for (String realm : List.of(realmA, realmB, realmC)) {
+      RealmRepresentation rep = new RealmRepresentation();
+      rep.setRealm(realm);
+      rep.setEnabled(true);
+      adminClient.realms().create(rep);
+    }
+
+    // Create 12+15+16+23 = 66 orgs spread across 4 realms
+    List<String> masterOrgIds = createOrgsInRealm(REALM, 12);
+    List<String> realmAOrgIds = createOrgsInRealm(realmA, 15);
+    List<String> realmBOrgIds = createOrgsInRealm(realmB, 16);
+    List<String> realmCOrgIds = createOrgsInRealm(realmC, 23);
+
+    List<String> allOrgIds = new ArrayList<>();
+    allOrgIds.addAll(masterOrgIds);
+    allOrgIds.addAll(realmAOrgIds);
+    allOrgIds.addAll(realmBOrgIds);
+    allOrgIds.addAll(realmCOrgIds);
+    int totalOrgs = allOrgIds.size(); // 66
+
+    // All orgs get delete-organization by default
+    assertDbRoleCount(allOrgIds, ORG_ROLE_DELETE_ORGANIZATION, totalOrgs);
+
+    // Strip the role via JDBC to simulate pre-PR#331 state across all realms
+    deleteOrgRoleFromDb(allOrgIds, ORG_ROLE_DELETE_ORGANIZATION);
+    assertDbRoleCount(allOrgIds, ORG_ROLE_DELETE_ORGANIZATION, 0);
+
+    // Restart with batch size 6 — 66 orgs require ceil(66/6)=11 batches
+    restartKeycloakWithBatchSize(6);
+
+    // All 66 orgs should have the role restored, across all 4 realms
+    assertDbRoleCount(allOrgIds, ORG_ROLE_DELETE_ORGANIZATION, totalOrgs);
+    assertAllOrgsHaveRole(REALM, masterOrgIds, ORG_ROLE_DELETE_ORGANIZATION);
+    assertAllOrgsHaveRole(realmA, realmAOrgIds, ORG_ROLE_DELETE_ORGANIZATION);
+    assertAllOrgsHaveRole(realmB, realmBOrgIds, ORG_ROLE_DELETE_ORGANIZATION);
+    assertAllOrgsHaveRole(realmC, realmCOrgIds, ORG_ROLE_DELETE_ORGANIZATION);
+
+    // Second restart: idempotency — no duplicate roles should be created
+    restartKeycloakWithBatchSize(6);
+    assertDbRoleCount(allOrgIds, ORG_ROLE_DELETE_ORGANIZATION, totalOrgs);
   }
 
   private void deleteOrgRoleFromDb(List<String> orgIds, String roleName) throws SQLException {

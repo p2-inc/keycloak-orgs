@@ -1,5 +1,6 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.KC_ORGS_MIGRATION_BATCH_SIZE;
 import static io.phasetwo.service.Orgs.KC_ORGS_SKIP_MIGRATION;
 import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
@@ -14,10 +15,16 @@ import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.util.IdentityProviders;
+import jakarta.persistence.EntityManager;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
+import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.AdminRoles;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
@@ -70,6 +77,7 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
             if (KC_ORGS_SKIP_MIGRATION == null) {
               log.info("initializing organization roles following migration");
               KeycloakModelUtils.runJobInTransaction(factory, this::initRoles);
+              migrateOrganizationWithNewDefaultRolesBatched(factory, ORG_ROLE_DELETE_ORGANIZATION);
             }
           } else if (event instanceof RealmModel.RealmRemovedEvent) {
             log.debug("RealmRemovedEvent");
@@ -110,27 +118,43 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
                   addRealmAdminRoles(manager, realm);
                 }
               }
-
-              // Update existing organizations with the new delete-organization role
-              updateExistingOrganizationsWithNewRoles(session, realm);
             });
   }
 
-  private void updateExistingOrganizationsWithNewRoles(KeycloakSession session, RealmModel realm) {
-    log.debug("Updating existing organizations with new default roles");
-    session
-        .getProvider(OrganizationProvider.class)
-        .getOrganizationsStream(realm)
-        .forEach(
-            org -> {
-              // Check if the delete-organization role exists, if not add it
-              if (org.getRoleByName(ORG_ROLE_DELETE_ORGANIZATION) == null) {
-                OrganizationRoleModel role = org.addRole(ORG_ROLE_DELETE_ORGANIZATION);
-                role.setDescription(DEFAULT_ORG_ROLES_DESC.get(ORG_ROLE_DELETE_ORGANIZATION));
-                log.debugf(
-                    "Added %s role to organization %s", ORG_ROLE_DELETE_ORGANIZATION, org.getId());
-              }
-            });
+  private void migrateOrganizationWithNewDefaultRolesBatched(KeycloakSessionFactory factory, String roleName) {
+    log.infof("Migrating missing org roles across all realms (batch size: %d)", KC_ORGS_MIGRATION_BATCH_SIZE);
+    int[] batchCount = {KC_ORGS_MIGRATION_BATCH_SIZE};
+    while (batchCount[0] == KC_ORGS_MIGRATION_BATCH_SIZE) {
+      KeycloakModelUtils.runJobInTransaction(factory, session -> batchCount[0] = processOrgRoleMigrationBatch(session, roleName));
+      log.infof("Migrated %d organizations with the added role %s...", batchCount[0], roleName);
+    }
+    log.info("Organization role migration complete");
+  }
+
+  private int processOrgRoleMigrationBatch(KeycloakSession session, String roleName) {
+    EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+    List<ExtOrganizationEntity> orgs =
+        em.createNamedQuery("getOrganizationsMissingRole", ExtOrganizationEntity.class)
+            .setParameter("roleName", roleName)
+            .setMaxResults(KC_ORGS_MIGRATION_BATCH_SIZE)
+            .getResultList();
+
+    Map<String, List<ExtOrganizationEntity>> orgsByRealm = orgs
+            .stream()
+            .collect(Collectors.groupingBy(ExtOrganizationEntity::getRealmId));
+
+    for (var orgsGroupedByRealm : orgsByRealm.entrySet()) {
+      final var realmId = orgsGroupedByRealm.getKey();
+      final var realm = session.realms().getRealm(realmId);
+      final var orgsInRealm = orgsGroupedByRealm.getValue();
+      for (ExtOrganizationEntity orgEntity : orgsInRealm) {
+        final var org = session.getProvider(OrganizationProvider.class).getOrganizationById(realm, orgEntity.getId());
+        OrganizationRoleModel role = org.addRole(roleName);
+        role.setDescription(DEFAULT_ORG_ROLES_DESC.get(roleName));
+        log.debugf("Added %s role to organization %s", roleName, org.getId());
+      }
+    }
+    return orgs.size();
   }
 
   private void realmPostCreate(RealmModel.RealmPostCreateEvent event) {
