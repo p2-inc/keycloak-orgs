@@ -303,6 +303,12 @@
       <version>1.5.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>io.phasetwo</groupId>
+      <artifactId>phasetwo-org-scim</artifactId>
+      <version>0.1</version>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- javax/jakarta apis -->
     <dependency>
