@@ -15,9 +15,9 @@ import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
+import io.phasetwo.service.model.jpa.JpaOrganizationProvider;
 import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.util.IdentityProviders;
-import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -132,27 +132,14 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
   }
 
   private int processOrgRoleMigrationBatch(KeycloakSession session, String roleName) {
-    EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
-    List<ExtOrganizationEntity> orgs =
-        em.createNamedQuery("getOrganizationsMissingRole", ExtOrganizationEntity.class)
-            .setParameter("roleName", roleName)
-            .setMaxResults(KC_ORGS_MIGRATION_BATCH_SIZE)
-            .getResultList();
+    final var orgs = session
+            .getProvider(OrganizationProvider.class)
+            .getOrganizationsMissingRole(roleName, KC_ORGS_MIGRATION_BATCH_SIZE);
 
-    Map<String, List<ExtOrganizationEntity>> orgsByRealm = orgs
-            .stream()
-            .collect(Collectors.groupingBy(ExtOrganizationEntity::getRealmId));
-
-    for (var orgsGroupedByRealm : orgsByRealm.entrySet()) {
-      final var realmId = orgsGroupedByRealm.getKey();
-      final var realm = session.realms().getRealm(realmId);
-      final var orgsInRealm = orgsGroupedByRealm.getValue();
-      for (ExtOrganizationEntity orgEntity : orgsInRealm) {
-        final var org = session.getProvider(OrganizationProvider.class).getOrganizationById(realm, orgEntity.getId());
-        OrganizationRoleModel role = org.addRole(roleName);
-        role.setDescription(DEFAULT_ORG_ROLES_DESC.get(roleName));
-        log.debugf("Added %s role to organization %s", roleName, org.getId());
-      }
+    for (final var org : orgs) {
+      OrganizationRoleModel role = org.addRole(roleName);
+      role.setDescription(DEFAULT_ORG_ROLES_DESC.get(roleName));
+      log.debugf("Added %s role to organization %s", roleName, org.getId());
     }
     return orgs.size();
   }
