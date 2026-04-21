@@ -318,8 +318,8 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
         attributePredicates.add(
             builder.and(
-                builder.equal(builder.lower(attributesJoin.get("name")), key.toLowerCase()),
-                builder.equal(builder.lower(attributesJoin.get("value")), value.toLowerCase())));
+                builder.equal(attributesJoin.get("name"), key),
+                builder.equal(attributesJoin.get("value"), value)));
       }
     }
 
