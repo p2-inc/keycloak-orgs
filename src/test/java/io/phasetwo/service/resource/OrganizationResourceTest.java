@@ -268,6 +268,17 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
     assertThat(orgs, notNullValue());
     assertThat(orgs, hasSize(2));
 
+    // attribute search is case-sensitive
+    response = givenSpec().when().queryParam("q", "FOO:bar").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(orgs, hasSize(0));
+
+    response = givenSpec().when().queryParam("q", "foo:BAR").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(orgs, hasSize(0));
+
     // Search attributes and name
     response =
         givenSpec().when().queryParam("search", "qu").queryParam("q", "foo:bar").get().andReturn();
