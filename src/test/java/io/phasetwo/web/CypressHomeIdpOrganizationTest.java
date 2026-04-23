@@ -8,6 +8,7 @@ import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.util.IdentityProviders;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
@@ -45,21 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
 
     private static final String OIDC_IDP = "oidc-idp";
-    private List<String> knownRealms;
-
-    @BeforeEach
-    public void setup() {
-        knownRealms = new ArrayList<>();
-    }
-
-    @AfterEach
-    public void cleanupKeycloakInstance() {
-        List.copyOf(knownRealms)
-                .forEach(realmName -> {
-                    findRealmByName(realmName).remove();
-                    knownRealms.remove(realmName);
-                });
-    }
 
     @TestFactory
     @DisplayName("Base testcases")
@@ -146,7 +132,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-        }).flatMap(List::stream);
+                }).flatMap(List::stream);
     }
 
     @TestFactory
@@ -313,29 +299,6 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         linkIdentityProviderToOrganization(realm.toRepresentation(), organization, "second-oidc");
     }
 
-    private RealmRepresentation importRealm(String jsonRepresentationPath) {
-        return importRealm(jsonRepresentationPath, null);
-    }
-
-    private RealmRepresentation importRealm(String jsonRepresentationPath, @Nullable String realmOverride) {
-        RealmRepresentation realm =
-                loadJson(getClass().getResourceAsStream(jsonRepresentationPath),
-                        RealmRepresentation.class);
-        if (realmOverride != null) {
-            realm.setRealm(realmOverride);
-        }
-        importRealm(realm, keycloak);
-        knownRealms.add(realm.getRealm());
-        log.info("realm imported successfully:" + realm.getRealm());
-        return realm;
-    }
-
-    private static RealmResource findRealmByName(String realm) {
-        return keycloak
-                .realms()
-                .realm(realm);
-    }
-
     @TestFactory
     @DisplayName("The UsernameNoteAuthenticator should ask the username, handle extra steps, and continue with HomeIDP Authentication")
     public List<DynamicContainer> testUsernameInAuthNoteFormWithHomeIdpIfTheresExtraAuthenticationFormPartsBetween() throws IOException, InterruptedException, TimeoutException {
@@ -401,10 +364,10 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         Testcontainers.exposeHostPorts(container.getHttpPort());
 
         // import testRealm
-        RealmRepresentation testRealm = importRealm(testRealmRepresentationLocation);
+        RealmRepresentation testRealm = importRealm(testRealmRepresentationLocation, null);
 
         // import client realm
-        RealmRepresentation clientRealm = importRealm("/realms/external-idp.json");
+        RealmRepresentation clientRealm = importRealm("/realms/external-idp.json", null);
 
         //create idp
         final var idp = createIdentityProviderIn(keycloak.realm("test-realm"), OIDC_IDP, isIdpLinkOnlyValue, "external-idp");
@@ -412,24 +375,7 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
 
         //create organization with domain
         var representation = new OrganizationRepresentation().name("org-home").domains(List.of("phasetwo.io"));
-        var createOrgResponse =
-                given()
-                        .baseUri(container.getAuthServerUrl())
-                        .basePath("realms/" + testRealm.getRealm() + "/orgs")
-                        .contentType("application/json")
-                        .auth()
-                        .oauth2(keycloak.tokenManager().getAccessTokenString())
-                        .body(toJsonString(representation))
-                        .when()
-                        .post()
-                        .andReturn();
-
-        assertThat(createOrgResponse.getStatusCode(), CoreMatchers.is(Response.Status.CREATED.getStatusCode()));
-        assertNotNull(createOrgResponse.getHeader("Location"));
-        String loc = createOrgResponse.getHeader("Location");
-        String id = loc.substring(loc.lastIndexOf("/") + 1);
-
-        OrganizationRepresentation orgRep = findOrganizationRepresentationById(testRealm, id);
+        OrganizationRepresentation orgRep = createOrganization(testRealm, representation);
 
         // link it
         linkIdentityProviderToOrganization(testRealm, orgRep, OIDC_IDP);
@@ -463,28 +409,6 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
         var clientRep = keycloak.realm(clientRealm.getRealm()).clients().findByClientId("test-realm-client").get(0);
         clientRep.setRedirectUris(List.of(redirectUri));
         keycloak.realm(clientRealm.getRealm()).clients().get(clientRep.getId()).update(clientRep);
-    }
-
-    private @NotNull OrganizationRepresentation findOrganizationRepresentationById(RealmRepresentation testRealm, String id) throws JsonProcessingException {
-        // get organization
-        var response =
-                given()
-                        .baseUri(container.getAuthServerUrl())
-                        .basePath("realms/" + testRealm.getRealm() + "/orgs/" + id)
-                        .contentType("application/json")
-                        .auth()
-                        .oauth2(keycloak.tokenManager().getAccessTokenString())
-                        .and()
-                        .when()
-                        .get()
-                        .then()
-                        .extract()
-                        .response();
-        assertThat(response.statusCode(), Matchers.is(Response.Status.OK.getStatusCode()));
-        OrganizationRepresentation orgRep =
-                objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
-        assertThat(orgRep.getId(), CoreMatchers.is(id));
-        return orgRep;
     }
 
     private @NotNull OrganizationRepresentation findOrganizationRepresentationByName(RealmRepresentation testRealm, String name) throws JsonProcessingException {
@@ -621,4 +545,5 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
             throw new RuntimeException(e);
         }
     }
+
 }

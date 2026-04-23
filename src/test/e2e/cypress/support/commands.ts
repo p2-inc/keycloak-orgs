@@ -52,6 +52,7 @@ declare global {
       validateActiveOrgAttributeNotVisible(user: User): Chainable<JQuery<HTMLElement>>
       validateActiveOrganization(user: User, orgName: string): Chainable<JQuery<HTMLElement>>
       accountHint(orgName: string): Chainable<JQuery<HTMLElement>>
+      accountHintOrgName(orgName: string): Chainable<JQuery<HTMLElement>>
     }
   }
 }
@@ -65,6 +66,15 @@ Cypress.Commands.add('login', (user: User) => {
 Cypress.Commands.add('validateActiveOrgAttributeNotVisible', (user: User) => {
   getAccount(user).then((account) => {
     let hasActiveOrgAttribute = false;
+   // 1. Check the console NOW
+     console.log('DEBUG: Account object is:', account);
+
+     // 2. Add a fallback to an empty array so it doesn't crash here
+     const metadata = account?.userProfileMetadata?.attributes || [];
+
+     // 3. Log specifically what's inside the metadata
+     console.log('DEBUG: Attributes found:', metadata);
+
     for (let attribute of account.userProfileMetadata.attributes) {
       if (attribute.name == 'org.ro.active') {
         hasActiveOrgAttribute = true;
@@ -90,6 +100,9 @@ Cypress.Commands.add('accountHint', (orgName: string) => {
   })
 });
 
+Cypress.Commands.add('accountHintOrgName', (orgName: string) => {
+    cy.visit(loginUriAccountHint.concat(orgName));
+});
 
 Cypress.Commands.add('updatePersonalInformation', (firstName: string, lastName:string, email:string) => {
   cy.get('#firstName').type(firstName);
