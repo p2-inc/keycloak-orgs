@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
+import io.phasetwo.service.KeycloakOrgsAdminAPI;
 import io.phasetwo.service.importexport.representation.InvitationRepresentation;
 import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
 import io.phasetwo.service.importexport.representation.UserRolesRepresentation;
@@ -43,6 +44,7 @@ import org.hamcrest.Matchers;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -210,108 +212,36 @@ public abstract class AbstractOrganizationTest {
   }
 
   protected List<OrganizationRepresentation> listOrganizations() throws JsonProcessingException {
-    Response response = givenSpec(keycloak).get();
-    assertThat(response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
-    return objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    return getKeycloakOrgsAdminAPI(REALM, keycloak).listOrganizations();
   }
 
-  // create an organization, fetch the created organization and returns it
+  private static @NotNull KeycloakOrgsAdminAPI getKeycloakOrgsAdminAPI(String realm, Keycloak keycloak) {
+    return new KeycloakOrgsAdminAPI(container.getAuthServerUrl(), realm, keycloak);
+  }
+
   protected OrganizationRepresentation createOrganization(
       Keycloak keycloak, OrganizationRepresentation representation) throws IOException {
-    Response response =
-        givenSpec(keycloak).and().body(toJsonString(representation)).when().post().andReturn();
-
-    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
-    assertNotNull(response.getHeader("Location"));
-    String loc = response.getHeader("Location");
-    String id = loc.substring(loc.lastIndexOf("/") + 1);
-
-    response = getRequest(id);
-    assertThat(response.statusCode(), Matchers.is(Status.OK.getStatusCode()));
-    OrganizationRepresentation orgRep =
-        objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
-    assertThat(orgRep.getId(), is(id));
-    return orgRep;
+    return getKeycloakOrgsAdminAPI(REALM, keycloak).createOrganization(representation);
   }
 
   protected KeycloakOrgsRepresentation exportOrgs(
       Keycloak keycloak, boolean exportMembersAndInvitations) throws IOException {
-    var response =
-        given()
-            .baseUri(container.getAuthServerUrl())
-            .basePath("realms/" + REALM + "/orgs")
-            .contentType("application/json")
-            .auth()
-            .oauth2(keycloak.tokenManager().getAccessTokenString())
-            .queryParam("exportMembersAndInvitations", exportMembersAndInvitations)
-            .when()
-            .get("export")
-            .then()
-            .extract()
-            .response();
-
-    return objectMapper()
-        .readValue(response.getBody().asString(), KeycloakOrgsRepresentation.class);
+    return getKeycloakOrgsAdminAPI(REALM, keycloak).exportOrgs(exportMembersAndInvitations);
   }
 
   protected Response importOrgs(
       KeycloakOrgsRepresentation representation, Keycloak keycloak, String realm) {
-    return given()
-        .baseUri(container.getAuthServerUrl())
-        .basePath("realms/" + realm + "/orgs")
-        .contentType("application/json")
-        .auth()
-        .oauth2(keycloak.tokenManager().getAccessTokenString())
-        .queryParam("skipMissingMember", false)
-        .queryParam("skipMissingIdp", false)
-        .when()
-        .and()
-        .body(representation)
-        .when()
-        .post("import")
-        .then()
-        .extract()
-        .response();
+    return getKeycloakOrgsAdminAPI(realm, keycloak).importOrgs(representation, false, false);
   }
 
   protected Response importOrgsSkipMissingMembers(
       KeycloakOrgsRepresentation representation, Keycloak keycloak, String realm) {
-    return given()
-        .baseUri(container.getAuthServerUrl())
-        .basePath("realms/" + realm + "/orgs")
-        .contentType("application/json")
-        .auth()
-        .oauth2(keycloak.tokenManager().getAccessTokenString())
-        .queryParam("skipMissingMember", true)
-        .queryParam("skipMissingIdp", false)
-        .when()
-        .and()
-        .body(representation)
-        .when()
-        .post("import")
-        .then()
-        .extract()
-        .response();
+    return getKeycloakOrgsAdminAPI(realm, keycloak).importOrgs(representation, true, false);
   }
 
   protected Response importOrgSkipMissingIdp(
       KeycloakOrgsRepresentation representation, Keycloak keycloak, String realm) {
-    return given()
-        .baseUri(container.getAuthServerUrl())
-        .basePath("realms/" + realm + "/orgs")
-        .contentType("application/json")
-        .auth()
-        .oauth2(keycloak.tokenManager().getAccessTokenString())
-        .queryParam("skipMissingMember", false)
-        .queryParam("skipMissingIdp", true)
-        .when()
-        .and()
-        .body(representation)
-        .when()
-        .post("import")
-        .then()
-        .extract()
-        .response();
+    return getKeycloakOrgsAdminAPI(realm, keycloak).importOrgs(representation, false, true);
   }
 
   protected void importRealm(RealmRepresentation representation, Keycloak keycloak) {
