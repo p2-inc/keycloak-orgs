@@ -53,6 +53,8 @@ public interface OrganizationProvider extends Provider {
 
   Collection<? extends OrganizationModel> getOrganizationsMissingRole(String roleName, int batchSize);
 
+  long countOrphanedOrganizations();
+
   // deprecated methods
 
   /**

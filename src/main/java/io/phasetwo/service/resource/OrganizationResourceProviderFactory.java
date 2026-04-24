@@ -122,6 +122,15 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
   }
 
   private void migrateOrganizationWithNewDefaultRolesBatched(KeycloakSessionFactory factory, String roleName) {
+    KeycloakModelUtils.runJobInTransaction(factory, session -> {
+      long orphanCount = session.getProvider(OrganizationProvider.class).countOrphanedOrganizations();
+      if (orphanCount > 0) {
+        log.warnf(
+            "%d organization(s) reference a realm that no longer exists and will be skipped during migration."
+                + " Consider cleaning up orphaned rows in the ORGANIZATION table.",
+            orphanCount);
+      }
+    });
     log.infof("Migrating missing org roles across all realms (batch size: %d)", KC_ORGS_MIGRATION_BATCH_SIZE);
     int[] batchCount = {KC_ORGS_MIGRATION_BATCH_SIZE};
     while (batchCount[0] == KC_ORGS_MIGRATION_BATCH_SIZE) {
