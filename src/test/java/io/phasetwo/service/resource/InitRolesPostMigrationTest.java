@@ -18,6 +18,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import lombok.extern.jbosslog.JBossLog;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.AfterAll;
@@ -152,6 +155,10 @@ public class InitRolesPostMigrationTest {
   }
 
   private static void restartKeycloak() throws IOException {
+    restartKeycloak(Map.of());
+  }
+
+  private static void restartKeycloak(Map<String, String> additionalEnvvars) throws IOException {
     stopKeycloak(keycloak);
     keycloak = buildKeycloakContainer();
     keycloak.start();
@@ -302,6 +309,86 @@ public class InitRolesPostMigrationTest {
         }
         int deleted = ps.executeUpdate();
         assertThat("should have deleted one row per org", deleted, is(orgIds.size()));
+      }
+    }
+  }
+
+  @Test
+  void testMigrationSkipsOrphanedOrgs() throws Exception {
+    // Create 3 real orgs and strip their delete-organization role so migration picks them up.
+    int realOrgCount = 3;
+    List<String> realOrgIds = new ArrayList<>();
+    for (int i = 0; i < realOrgCount; i++) {
+      OrganizationRepresentation org =
+          orgsApi().createOrganization(new OrganizationRepresentation().name("orphan-test-org-" + i));
+      realOrgIds.add(org.getId());
+    }
+    deleteOrgRoleFromDb(realOrgIds, ORG_ROLE_DELETE_ORGANIZATION);
+    assertDbRoleCount(realOrgIds, ORG_ROLE_DELETE_ORGANIZATION, 0);
+
+    // Insert an orphaned org row directly — 'ghost-realm' has no row in the REALM table.
+    // This reproduces the production scenario where realm deletion left org rows behind.
+    String orphanOrgId = insertOrphanedOrgDirectly("ghost-realm");
+
+    // Sanity-check: Keycloak must start cleanly with orphaned orgs present when migration
+    // is skipped — this isolates the startup problem to the migration code path, not the
+    // orphaned row itself.
+    restartKeycloak(Map.of("KC_ORGS_SKIP_MIGRATION", "true"));
+    assertThat(
+        "Keycloak should start without errors when migration is skipped",
+        adminClient.realms().findAll().isEmpty(),
+        is(false));
+
+    // Now restart with migration enabled.
+    // Before the fix, Collectors.toMap throws NPE when getRealm("ghost-realm") returns null,
+    // aborting the batch before any role is restored.
+    restartKeycloak();
+
+    // Verify Keycloak started and the migration ran to completion.
+    // Before the fix this assertion fails: the NPE aborts the migration so the completion
+    // log line is never emitted (or Keycloak fails to start entirely).
+    assertThat(
+        "migration should complete without errors even with orphaned orgs present",
+        keycloak.getLogs().contains("Organization role migration complete"),
+        is(true));
+    assertThat(
+        "Keycloak admin API should be reachable after restart",
+        adminClient.realms().findAll().isEmpty(),
+        is(false));
+
+    // Real orgs must have their role back even though an orphaned org shared the same batch.
+    assertDbRoleCount(realOrgIds, ORG_ROLE_DELETE_ORGANIZATION, realOrgCount);
+
+    // Orphaned org should remain in DB — migration skipped it, did not crash on it.
+    assertOrphanedOrgStillExists(orphanOrgId);
+  }
+
+  private String insertOrphanedOrgDirectly(String ghostRealmId) throws SQLException {
+    String orgId = UUID.randomUUID().toString();
+    try (Connection conn =
+            DriverManager.getConnection(
+                postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        PreparedStatement ps =
+            conn.prepareStatement(
+                "INSERT INTO organization (id, realm_id, name) VALUES (?, ?, ?)")) {
+      ps.setString(1, orgId);
+      ps.setString(2, ghostRealmId);
+      ps.setString(3, "orphaned-org");
+      ps.executeUpdate();
+    }
+    return orgId;
+  }
+
+  private void assertOrphanedOrgStillExists(String orgId) throws SQLException {
+    try (Connection conn =
+            DriverManager.getConnection(
+                postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        PreparedStatement ps =
+            conn.prepareStatement("SELECT COUNT(*) FROM organization WHERE id = ?")) {
+      ps.setString(1, orgId);
+      try (ResultSet rs = ps.executeQuery()) {
+        rs.next();
+        assertThat("orphaned org should remain in DB after migration", rs.getInt(1), is(1));
       }
     }
   }
