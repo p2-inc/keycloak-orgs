@@ -429,7 +429,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
                 realm, organizationRepresentation.getOrganization().getName(), user, false);
       }
 
-      KeycloakOrgsImportConverter.setOrganizationAttributes(
+      KeycloakOrgsImportConverter.setOrganizationImportRepresentation(
           organizationRepresentation.getOrganization(), org);
 
       KeycloakOrgsImportConverter.createOrganizationRoles(
