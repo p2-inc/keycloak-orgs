@@ -443,7 +443,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
         org = organizationProvider.createOrganization(realm, name, user, false);
       }
 
-      KeycloakOrgsImportConverter.setOrganizationAttributes(
+      KeycloakOrgsImportConverter.setOrganizationImportRepresentation(
           organizationRepresentation.getOrganization(), org);
 
       KeycloakOrgsImportConverter.createOrganizationRoles(

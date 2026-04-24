@@ -15,7 +15,7 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OrganizationAttributes {
+public class OrganizationImportRepresentation {
 
   @JsonProperty("id")
   private String id;
