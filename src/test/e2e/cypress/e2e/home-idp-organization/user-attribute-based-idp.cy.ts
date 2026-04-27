@@ -27,8 +27,8 @@ describe('user login via home idp provider', () => {
         cy.get('#username').type(idpUser.email);
         cy.get('#kc-login').click();
         cy.url().should('contain', 'external-idp');
-        cy.get('#username').type(idpUser.username);
-        cy.get('#password').type(idpUser.password);
+        cy.get('#username').should('be.visible').type(idpUser.username);
+        cy.get('#password').should('be.visible').type(idpUser.password);
         cy.get('#kc-login').click();
 
         cy.url().should('contain', 'test-realm');
@@ -50,8 +50,8 @@ describe('user login via home idp provider', () => {
         cy.get('#username').type(idpUser.email);
         cy.get('#kc-login').click();
         cy.url().should('contain', 'external-idp');
-        cy.get('#username').type(idpUser.username);
-        cy.get('#password').type(idpUser.password);
+        cy.get('#username').should('be.visible').type(idpUser.username);
+        cy.get('#password').should('be.visible').type(idpUser.password);
         cy.get('#kc-login').click();
         cy.url().should('contain', 'test-realm');
         cy.contains('Personal');
