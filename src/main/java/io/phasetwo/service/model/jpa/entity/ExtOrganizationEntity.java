@@ -40,6 +40,9 @@ import org.hibernate.annotations.Nationalized;
               + " WHERE NOT EXISTS ("
               + "   SELECT r FROM OrganizationRoleEntity r"
               + "   WHERE r.organization = o AND r.name = :roleName"
+              + ")"
+              + " AND EXISTS ("
+              + "   SELECT re FROM RealmEntity re WHERE re.id = o.realmId"
               + ")")
 })
 @Entity

@@ -269,6 +269,17 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
+  public long countOrphanedOrganizations() {
+    return em.createQuery(
+            "SELECT COUNT(o) FROM ExtOrganizationEntity o"
+                + " WHERE NOT EXISTS ("
+                + "   SELECT re FROM RealmEntity re WHERE re.id = o.realmId"
+                + ")",
+            Long.class)
+        .getSingleResult();
+  }
+
+  @Override
   public void close() {}
 
   public OrganizationModel.OrganizationCreationEvent orgCreationEvent(
