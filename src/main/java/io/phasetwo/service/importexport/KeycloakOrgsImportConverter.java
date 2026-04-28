@@ -5,7 +5,7 @@ import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 
 import com.google.common.base.Strings;
-import io.phasetwo.service.importexport.representation.OrganizationAttributes;
+import io.phasetwo.service.importexport.representation.OrganizationImportRepresentation;
 import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
 import io.phasetwo.service.importexport.representation.OrganizationRoleRepresentation;
 import io.phasetwo.service.model.InvitationModel;
@@ -30,15 +30,15 @@ import org.keycloak.representations.idm.IdentityProviderRepresentation;
 @JBossLog
 public final class KeycloakOrgsImportConverter {
 
-  public static void setOrganizationAttributes(
-      OrganizationAttributes organizationAttributes, OrganizationModel org) {
-    org.setDisplayName(organizationAttributes.getDisplayName());
-    org.setUrl(organizationAttributes.getUrl());
-    if (organizationAttributes.getAttributes() != null) {
-      organizationAttributes.getAttributes().forEach(org::setAttribute);
+  public static void setOrganizationImportRepresentation(
+      OrganizationImportRepresentation organizationImportRepresentation, OrganizationModel org) {
+    org.setDisplayName(organizationImportRepresentation.getDisplayName());
+    org.setUrl(organizationImportRepresentation.getUrl());
+    if (organizationImportRepresentation.getAttributes() != null) {
+      organizationImportRepresentation.getAttributes().forEach(org::setAttribute);
     }
-    if (organizationAttributes.getDomains() != null) {
-      org.setDomains(organizationAttributes.getDomains());
+    if (organizationImportRepresentation.getDomains() != null) {
+      org.setDomains(organizationImportRepresentation.getDomains());
     }
   }
 
