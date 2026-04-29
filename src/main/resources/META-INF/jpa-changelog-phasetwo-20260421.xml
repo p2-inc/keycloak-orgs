@@ -1,6 +1,18 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
+    <changeSet author="aespunto" id="add-organization-attribute-name-value-index-mariadb" dbms="mariadb">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX_ORG_ATTR_NAME_VALUE"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX IDX_ORG_ATTR_NAME_VALUE
+                ON ORGANIZATION_ATTRIBUTE (NAME, VALUE(100))
+        </sql>
+    </changeSet>
+
     <changeSet author="phasetwo" id="add-organization-attribute-name-value-index">
         <preConditions onFail="MARK_RAN">
             <not>
