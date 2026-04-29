@@ -6,6 +6,14 @@ export default defineConfig({
     reporter: 'cypress-multi-reporters',
     reporterOptions: {
       configFile: 'reporter-config.json'
-    }
+    },
+    setupNodeEvents(on) {
+      on('task', {
+        log(message) {
+          console.log(message)
+          return null
+        },
+      })
+    },
   },
 });
