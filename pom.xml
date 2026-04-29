@@ -59,6 +59,24 @@
       </properties>
       <build>
         <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>warn-cypress-tests-deprecated</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <echo level="warn" message="[DEPRECATED] The cypress-tests profile is deprecated. Please use -Pintegration-tests instead, which runs Cypress and the database-compatibility smoke tests."/>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
           <!--   copy the jacoco agent to target build  -->
           <plugin>
             <artifactId>maven-dependency-plugin</artifactId>
@@ -80,6 +98,76 @@
           </plugin>
 
           <!--   set up jacoco plugin to generate report  -->
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <executions>
+              <execution>
+                <id>merge</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>merge</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+                      <directory>${project.build.directory}/jacoco-report/</directory>
+                      <includes>
+                        <include>*.exec</include>
+                      </includes>
+                    </fileSet>
+                  </fileSets>
+                  <destFile>${project.build.directory}/jacoco-report/jacoco-all.exec</destFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>report</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+                <configuration>
+                  <dataFile>${project.build.directory}/jacoco-report/jacoco-all.exec</dataFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- integration-tests activates both the Cypress E2E suite and the
+         MySQL/MariaDB database-compatibility smoke tests. The cypress-tests
+         profile is intentionally kept for backwards compatibility: any
+         external scripts, local workflows, or documentation that reference
+         -Pcypress-tests will continue to work unchanged. CI uses
+         -Pintegration-tests so the full suite runs on every push/PR. -->
+    <profile>
+      <id>integration-tests</id>
+      <properties>
+        <include.cypress>true</include.cypress>
+        <include.integration>true</include.integration>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-jacoco</id>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <phase>compile</phase>
+                <configuration>
+                  <includeArtifactIds>org.jacoco.agent</includeArtifactIds>
+                  <includeClassifiers>runtime</includeClassifiers>
+                  <outputDirectory>${project.build.directory}/jacoco-agent</outputDirectory>
+                  <stripVersion>true</stripVersion>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
@@ -215,6 +303,7 @@
           <systemPropertyVariables>
             <keycloak-version>${keycloak.version}</keycloak-version>
             <include.cypress>${include.cypress}</include.cypress>
+            <include.integration>${include.integration}</include.integration>
           </systemPropertyVariables>
         </configuration>
       </plugin>
@@ -371,6 +460,30 @@
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
       <version>1.21.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mysql</artifactId>
+      <version>1.21.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>8.4.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mariadb</artifactId>
+      <version>1.21.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mariadb.jdbc</groupId>
+      <artifactId>mariadb-java-client</artifactId>
+      <version>3.5.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
