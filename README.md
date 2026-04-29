@@ -92,6 +92,20 @@ If you are using the extension as bundled in the [Docker image](https://quay.io/
 
 Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Additionally, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak).
 
+We officially support CockroachDB, PostgreSQL, and MySQL. We welcome PRs that add compatibility with other databases.
+
+The following database versions are covered by CI smoke tests on every push:
+
+| Database   | Version tested |
+|------------|---------------|
+| PostgreSQL | 18            |
+| MySQL      | 8.4           |
+| MariaDB    | 11.8          |
+
+CockroachDB is tested manually rather than in CI: DDL operations (including Keycloak's schema startup) can take a long time in CockroachDB and are difficult to run reliably in an automated pipeline.
+
+If you are opening a PR that adds or restores compatibility with a database, please include a corresponding test that extends [`AbstractDbCompatibilityTest`](src/test/java/io/phasetwo/service/resource/AbstractDbCompatibilityTest.java) — see the existing [`MySQLCompatibilityTest`](src/test/java/io/phasetwo/service/resource/MySQLCompatibilityTest.java), [`MariaDBCompatibilityTest`](src/test/java/io/phasetwo/service/resource/MariaDBCompatibilityTest.java), and [`PostgreSQLCompatibilityTest`](src/test/java/io/phasetwo/service/resource/PostgreSQLCompatibilityTest.java) for reference.
+
 ## Extensions
 
 ### Data

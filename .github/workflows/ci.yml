@@ -17,8 +17,12 @@ jobs:
           java-version: 21
           distribution: 'temurin'
           cache: 'maven'
-      - name: Build with Maven and run Cypress Integration Tests
-        run: mvn --batch-mode --update-snapshots verify -Pcypress-tests
+      # Uses -Pintegration-tests, which activates both Cypress E2E tests and the
+      # MySQL/MariaDB database-compatibility smoke tests. The cypress-tests profile
+      # is kept in pom.xml for backwards compatibility so existing local scripts or
+      # external workflows that reference it continue to work unchanged.
+      - name: Build with Maven and run Integration Tests
+        run: mvn --batch-mode --update-snapshots verify -Pintegration-tests
       - name: Upload JaCoCo Coverage Report as an artifact
         uses: actions/upload-artifact@v6
         with:

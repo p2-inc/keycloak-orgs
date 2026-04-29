@@ -9,8 +9,6 @@ import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.KeycloakOrgsAdminAPI;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -97,10 +95,6 @@ public class InitRolesPostMigrationTest {
     if (network != null) network.close();
   }
 
-  private static boolean isJacocoPresent() {
-    return Files.exists(Path.of("target/jacoco-agent/org.jacoco.agent-runtime.jar"));
-  }
-
   private static KeycloakContainer buildKeycloakContainer() {
     KeycloakContainer kc =
         new KeycloakContainer(KEYCLOAK_IMAGE)
@@ -113,7 +107,7 @@ public class InitRolesPostMigrationTest {
             .withEnv("KC_DB_URL", "jdbc:postgresql://postgres:5432/keycloak")
             .withEnv("KC_DB_USERNAME", "keycloak")
             .withEnv("KC_DB_PASSWORD", "keycloak");
-    if (isJacocoPresent()) {
+    if (AbstractDbCompatibilityTest.isJacocoPresent()) {
       kc =
           kc.withCopyFileToContainer(
                   MountableFile.forHostPath("target/jacoco-agent/"), "/jacoco-agent")
@@ -140,15 +134,7 @@ public class InitRolesPostMigrationTest {
   // Each container gets its own .exec file (keyed by short container ID); the maven jacoco:merge
   // goal combines all .exec files in target/jacoco-report/ into a single report.
   private static void stopKeycloak(KeycloakContainer kc) throws IOException {
-    if (isJacocoPresent()) {
-      String containerId = kc.getContainerId();
-      String shortId = containerId.length() > 12 ? containerId.substring(0, 12) : containerId;
-      kc.getDockerClient().stopContainerCmd(containerId).exec();
-      Files.createDirectories(Path.of("target", "jacoco-report"));
-      kc.copyFileFromContainer(
-          "/tmp/jacoco.exec", "./target/jacoco-report/jacoco-%s.exec".formatted(shortId));
-    }
-    kc.stop();
+    AbstractDbCompatibilityTest.stopKeycloak(kc);
   }
 
   private static void restartKeycloak() throws IOException {

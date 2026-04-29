@@ -13,6 +13,18 @@
         </sql>
     </changeSet>
 
+    <changeSet author="vilmos.nagy" id="add-organization-attribute-name-value-index-mysql" dbms="mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX_ORG_ATTR_NAME_VALUE"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX IDX_ORG_ATTR_NAME_VALUE
+                ON ORGANIZATION_ATTRIBUTE (NAME, VALUE(100))
+        </sql>
+    </changeSet>
+
     <changeSet author="phasetwo" id="add-organization-attribute-name-value-index">
         <preConditions onFail="MARK_RAN">
             <not>
