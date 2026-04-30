@@ -13,14 +13,28 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
+import org.keycloak.client.clienttype.ClientTypeException;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.models.ClientModel;
 import org.keycloak.models.IdentityProviderModel;
+import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.models.ModelValidationException;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.models.utils.RepresentationToModel;
 import org.keycloak.models.utils.StripSecretsUtils;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.ComponentRepresentation;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 import org.keycloak.representations.idm.TestLdapConnectionRepresentation;
+import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.ErrorResponseException;
+import org.keycloak.services.clientpolicy.ClientPolicyException;
+import org.keycloak.services.clientpolicy.context.AdminClientRegisterContext;
+import org.keycloak.services.clientpolicy.context.AdminClientRegisteredContext;
+import org.keycloak.services.managers.ClientManager;
 import org.keycloak.services.managers.LDAPServerCapabilitiesManager;
+import org.keycloak.services.resources.admin.AdminRoot;
+import org.keycloak.validation.ValidationUtil;
 
 @JBossLog
 public class IdentityProvidersResource extends OrganizationAdminResource {
@@ -169,6 +183,50 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
       return resp;
     }
   }
+
+    @POST
+    @Path("clients")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createIdentityProviderClient(ClientRepresentation representation) {
+        if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
+            throw new NotAuthorizedException(
+                    String.format(
+                            "Insufficient permission to create identity providers for %s", organization.getId()));
+        }
+
+        try {
+            this.session.clientPolicy().triggerOnEvent(new AdminClientRegisterContext(representation, this.auth));
+
+            ClientModel clientModel = ClientManager.createClient(this.session, this.realm, representation);
+
+            this.adminEvent.operation(OperationType.CREATE).resourcePath(this.session.getContext().getUri(), clientModel.getId()).representation(representation).success();
+
+            ValidationUtil.validateClient(this.session, clientModel, true, (r) -> {
+                this.session.getTransactionManager().setRollbackOnly();
+                throw new ErrorResponseException("invalid_input", r.getAllLocalizedErrorsAsString(AdminRoot.getMessages(this.session, this.realm, this.auth.getToken().getLocale())), Response.Status.BAD_REQUEST);
+            });
+
+            this.session.clientPolicy().triggerOnEvent(new AdminClientRegisteredContext(clientModel, this.auth));
+
+        } catch (ModelDuplicateException var5) {
+            throw ErrorResponse.exists("Client " + representation.getClientId() + " already exists");
+        } catch (ClientPolicyException cpe) {
+            throw new ErrorResponseException(cpe.getError(), cpe.getErrorDetail(), Response.Status.BAD_REQUEST);
+        } catch (ModelValidationException e) {
+            throw new ErrorResponseException("validation error", e.getMessage(), Response.Status.BAD_REQUEST);
+        } catch (ClientTypeException cte) {
+            throw ErrorResponse.error(cte.getMessage(), cte.getParameters(), Response.Status.BAD_REQUEST);
+        }
+        return Response.created(
+                            session
+                                    .getContext()
+                                    .getUri()
+                                    .getAbsolutePathBuilder()
+                                    .path(representation.getId())
+                                    .build())
+                    .build();
+    }
 
   @POST
   @Path("link")
