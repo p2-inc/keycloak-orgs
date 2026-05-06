@@ -1,4 +1,4 @@
-import { accountUri, tokenUri } from "../fixtures/uri";
+import { accountUri, testRealmTokenUri } from "../fixtures/uri";
 import {User } from "../fixtures/users";
 
 type Attribute = {
@@ -24,7 +24,7 @@ type Account = {
 const getAccount = (user: User) => {
   return cy.request({
     method: 'POST',
-    url: tokenUri,
+    url: testRealmTokenUri,
     form: true,
     body: {
       client_id: 'public-client',

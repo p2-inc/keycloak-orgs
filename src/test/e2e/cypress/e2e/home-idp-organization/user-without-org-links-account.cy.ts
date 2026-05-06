@@ -25,8 +25,8 @@ describe('Organiationless IDP Linked user login', () => {
 
         cy.url().should('contain', 'external-idp');
 
-        cy.get('#username').type(organizationlessAuthItUser.username, {force: true});
-        cy.get('#password').type(organizationlessAuthItUser.password, {force: true});
+        cy.get('#username').should('be.visible').type(organizationlessAuthItUser.username, {force: true});
+        cy.get('#password').should('be.visible').type(organizationlessAuthItUser.password, {force: true});
         cy.get('#kc-login').click();
 
         cy.url().should('contain', 'test-realm/account');

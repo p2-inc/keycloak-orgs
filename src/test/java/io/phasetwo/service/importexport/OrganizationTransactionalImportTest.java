@@ -1,19 +1,17 @@
 package io.phasetwo.service.importexport;
 
 import static io.phasetwo.service.Helpers.loadJson;
-import static io.phasetwo.service.Helpers.objectMapper;
-import static io.phasetwo.service.Helpers.toJsonString;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
+import io.phasetwo.service.KeycloakOrgsAdminAPI;
 import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
 import jakarta.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
@@ -35,20 +33,8 @@ public class OrganizationTransactionalImportTest extends AbstractOrganizationTes
     importRealm(testRealm, keycloak);
 
     // create second organization which exists in the import json
-    var organizationRepresentation = new OrganizationRepresentation().name("test3");
-    var createOrgResponse =
-        given()
-            .baseUri(container.getAuthServerUrl())
-            .basePath("realms/" + realm + "/orgs")
-            .contentType("application/json")
-            .auth()
-            .oauth2(keycloak.tokenManager().getAccessTokenString())
-            .body(toJsonString(organizationRepresentation))
-            .when()
-            .post()
-            .andReturn();
-
-    assertThat(createOrgResponse.getStatusCode(), is(Response.Status.CREATED.getStatusCode()));
+    new KeycloakOrgsAdminAPI(container.getAuthServerUrl(), realm, keycloak)
+        .createOrganization(new OrganizationRepresentation().name("test3"));
 
     // prepare data
     KeycloakOrgsRepresentation orgsRepresentation =
@@ -60,23 +46,8 @@ public class OrganizationTransactionalImportTest extends AbstractOrganizationTes
         orgsResponse.getStatusCode(), CoreMatchers.is(Response.Status.CONFLICT.getStatusCode()));
 
     // validate
-    // get organizations
-    var response =
-        given()
-            .baseUri(container.getAuthServerUrl())
-            .basePath("realms/" + realm + "/orgs")
-            .contentType("application/json")
-            .auth()
-            .oauth2(keycloak.tokenManager().getAccessTokenString())
-            .and()
-            .when()
-            .get()
-            .then()
-            .extract()
-            .response();
-
     List<OrganizationRepresentation> organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        new KeycloakOrgsAdminAPI(container.getAuthServerUrl(), realm, keycloak).listOrganizations();
     assertThat(organizations, hasSize(1));
   }
 

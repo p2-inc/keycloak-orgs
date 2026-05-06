@@ -1,0 +1,179 @@
+{
+  "realm": "test-realm",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "public-client",
+      "name": "public-client",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "rootUrl": "http://localhost:3000",
+      "baseUrl": "http://localhost:3000",
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ]
+    }
+  ],
+  "authenticationFlows": [
+    {
+      "alias": "Test-Realm Browser Flow",
+      "description": "Top-level browser flow with organization selection.",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "flowAlias": "Browser-Cookies-Subflow",
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 20,
+          "flowAlias": "Browser-IDP-Subflow",
+          "userSetupAllowed": false
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 30,
+          "flowAlias": "Browser-Forms-Subflow",
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "alias": "Browser-Cookies-Subflow",
+      "description": "Cookie sub-flow for org switching.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-cookie",
+          "requirement": "REQUIRED",
+          "priority": 10
+        },
+        {
+          "authenticatorConfig": "test-config",
+          "authenticator": "ext-select-org",
+          "requirement": "REQUIRED",
+          "priority": 20
+        }
+      ]
+    },
+    {
+      "alias": "Browser-IDP-Subflow",
+      "description": "IDP sub-flow to select org.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "identity-provider-redirector",
+          "requirement": "REQUIRED",
+          "priority": 10
+        },
+        {
+          "authenticatorConfig": "test-config-1",
+          "authenticator": "ext-select-org",
+          "requirement": "REQUIRED",
+          "priority": 20
+        }
+      ]
+    },
+    {
+      "alias": "Browser-Forms-Subflow",
+      "description": "Username, password, and org selection.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-username-password-form",
+          "requirement": "REQUIRED",
+          "priority": 10
+        },
+        {
+          "authenticatorFlow": true,
+          "requirement": "CONDITIONAL",
+          "priority": 20,
+          "flowAlias": "Browser-Conditional-OTP-Subflow"
+        },
+        {
+          "authenticatorConfig": "test-config-2",
+          "authenticator": "ext-select-org",
+          "requirement": "REQUIRED",
+          "priority": 30
+        }
+      ]
+    },
+    {
+      "alias": "Browser-Conditional-OTP-Subflow",
+      "description": "Conditional OTP logic for Browser.",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "conditional-user-configured",
+          "requirement": "REQUIRED",
+          "priority": 10
+        },
+        {
+          "authenticator": "auth-otp-form",
+          "requirement": "REQUIRED",
+          "priority": 20
+        }
+      ]
+    }
+  ],
+  "browserFlow": "Test-Realm Browser Flow",
+  "users": [
+    {
+      "username": "user-1",
+      "enabled": true,
+      "firstName": "R",
+      "lastName": "T",
+      "emailVerified": true,
+      "email": "user-1@yahoo.com",
+      "credentials": [{ "type": "password", "value": "user-1", "temporary": false }]
+    },
+    {
+      "username": "user-2",
+      "enabled": true,
+      "firstName": "R",
+      "emailVerified": true,
+      "lastName": "T",
+      "email": "user-2@yahoo.com",
+      "credentials": [{ "type": "password", "value": "user-2", "temporary": false }]
+    }
+  ],
+  "authenticatorConfig": [
+    {
+      "alias": "test-config",
+      "config": { "match_by_org_name": "true" }
+    },
+    {
+      "alias": "test-config-2",
+      "config": { "match_by_org_name": "true" }
+    },
+    {
+      "alias": "test-config-1",
+      "config": { "match_by_org_name": "true" }
+    }
+  ]
+}

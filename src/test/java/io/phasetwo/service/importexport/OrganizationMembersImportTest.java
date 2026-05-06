@@ -1,16 +1,14 @@
 package io.phasetwo.service.importexport;
 
 import static io.phasetwo.service.Helpers.loadJson;
-import static io.phasetwo.service.Helpers.objectMapper;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
+import io.phasetwo.service.KeycloakOrgsAdminAPI;
 import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
@@ -46,23 +44,8 @@ public class OrganizationMembersImportTest extends AbstractOrganizationTest {
     assertThat(importRealmResponse.getStatusCode(), is(Response.Status.OK.getStatusCode()));
 
     // validate
-    // get organizations
-    var response =
-        given()
-            .baseUri(container.getAuthServerUrl())
-            .basePath("realms/" + realm + "/orgs")
-            .contentType("application/json")
-            .auth()
-            .oauth2(keycloak.tokenManager().getAccessTokenString())
-            .and()
-            .when()
-            .get()
-            .then()
-            .extract()
-            .response();
-
     List<OrganizationRepresentation> organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        new KeycloakOrgsAdminAPI(container.getAuthServerUrl(), realm, keycloak).listOrganizations();
     assertThat(organizations, hasSize(2));
 
     // test org1
@@ -148,23 +131,8 @@ public class OrganizationMembersImportTest extends AbstractOrganizationTest {
     assertThat(orgResponse.getStatusCode(), is(Response.Status.OK.getStatusCode()));
 
     // validate
-    // get organizations
-    var response =
-        given()
-            .baseUri(container.getAuthServerUrl())
-            .basePath("realms/" + realm + "/orgs")
-            .contentType("application/json")
-            .auth()
-            .oauth2(keycloak.tokenManager().getAccessTokenString())
-            .and()
-            .when()
-            .get()
-            .then()
-            .extract()
-            .response();
-
     List<OrganizationRepresentation> organizations =
-        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+        new KeycloakOrgsAdminAPI(container.getAuthServerUrl(), realm, keycloak).listOrganizations();
     assertThat(organizations, hasSize(1));
 
     // test org1

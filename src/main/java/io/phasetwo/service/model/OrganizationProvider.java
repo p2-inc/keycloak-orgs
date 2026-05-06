@@ -2,6 +2,8 @@ package io.phasetwo.service.model;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -48,6 +50,11 @@ public interface OrganizationProvider extends Provider {
 
   Stream<IdentityProviderModel> getIdentityProvidersStream(
       RealmModel realm, String configKey, String configValue, boolean exact);
+
+  Collection<? extends OrganizationModel> getOrganizationsMissingRole(String roleName, int batchSize);
+
+  // https://github.com/p2-inc/keycloak-orgs/issues/454
+  long countOrphanedOrganizations();
 
   // deprecated methods
 

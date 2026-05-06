@@ -12,6 +12,8 @@ public class Orgs {
   public static final String ORG_DEFAULT_SYNC_MODE_KEY = "_providerConfig.orgs.defaults.syncMode";
   public static final String ACTIVE_ORGANIZATION = "org.ro.active";
   public static final String KC_ORGS_SKIP_MIGRATION = System.getenv("KC_ORGS_SKIP_MIGRATION");
+  public static final int KC_ORGS_MIGRATION_BATCH_SIZE =
+      Integer.parseInt(System.getenv().getOrDefault("KC_ORGS_MIGRATION_BATCH_SIZE", "500"));
   public static final String ORG_BROWSER_AUTH_FLOW_ALIAS = "Org Browser Flow";
   public static final String ORG_DIRECT_GRANT_AUTH_FLOW_ALIAS = "Org Direct Grant Flow";
   public static final String IDP_VALIDATE_FLOW_ALIAS = "idp validate";
@@ -29,6 +31,7 @@ public class Orgs {
   public static final String ORG_VALIDATION_PENDING_CONFIG_KEY =
       "home.idp.discovery.validationPending";
   public static final String ORG_SHARED_IDP_KEY = "home.idp.discovery.shared";
+  public static final String ORG_DNS_RECORD_KEY = "_providerConfig.orgs.dnsRecordKey";
 
   public static final String REQUIRE_VERIFIED_DOMAIN = "requireVerifiedDomain";
   public static final String REQUIRE_VALID_EMAIL = "requireValidEmail";
