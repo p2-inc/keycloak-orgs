@@ -22,7 +22,7 @@ jobs:
           git-release-bot-name: "phasetwo-bot"
           git-release-bot-email: "support@phasetwo.io"
 
-          maven-args: "-B -DskipITs -Dmaven.deploy.skip=true"
+          maven-args: "-B -Dmaven.test.skip=true -DskipITs -Dmaven.deploy.skip=true"
 
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
