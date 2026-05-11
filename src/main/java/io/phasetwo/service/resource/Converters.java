@@ -2,8 +2,7 @@ package io.phasetwo.service.resource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fi.metatavu.keycloak.scim.server.organization.ComponentScimConfig;
-import fi.metatavu.keycloak.scim.server.organization.OrganizationScimConfig;
+import io.phasetwo.keycloak.orgs.scim.ComponentScimConfig;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -80,9 +79,8 @@ public class Converters {
     return i;
   }
 
-  public static OrganizationScimRepresentation convertComponentModelToScimRepresentation(
-      ComponentModel component) {
-    ComponentScimConfig config = new ComponentScimConfig(component);
+  public static OrganizationScimRepresentation convertScimConfigToRepresentation(
+      ComponentScimConfig config) {
     OrganizationScimRepresentation rep = new OrganizationScimRepresentation();
     rep.setEnabled(config.isEnabled());
     rep.setEmailAsUsername(config.getEmailAsUsername());
@@ -121,106 +119,44 @@ public class Converters {
     return rep;
   }
 
-  public static ComponentModel convertScimRepresentationToComponentModel(
-      OrganizationScimRepresentation rep, String organizationId) {
+  public static ComponentScimConfig convertRepresentationToScimConfig(
+      OrganizationScimRepresentation rep) {
     ComponentModel model = new ComponentModel();
-    model.setId(organizationId);
-    model.setName("Organization SCIM");
-    model.setProviderId("Organization SCIM");
-    model.setProviderType("org.keycloak.storage.UserStorageProvider");
-    model.put(ComponentScimConfig.ORGANIZATION_ID, organizationId);
 
     if (rep.getEnabled() != null) {
       model.put(ComponentScimConfig.ENABLED_PROPERTY, rep.getEnabled().toString());
     }
     if (rep.getEmailAsUsername() != null) {
-      model.put(
-          OrganizationScimConfig.SCIM_EMAIL_AS_USERNAME, rep.getEmailAsUsername().toString());
+      model.put(ComponentScimConfig.SCIM_EMAIL_AS_USERNAME, rep.getEmailAsUsername().toString());
     }
     if (rep.getLinkIdp() != null) {
-      model.put(OrganizationScimConfig.SCIM_LINK_IDP, rep.getLinkIdp().toString());
+      model.put(ComponentScimConfig.SCIM_LINK_IDP, rep.getLinkIdp().toString());
     }
 
     OrganizationScimAuth auth = rep.getAuth();
     if (auth instanceof KeycloakScimAuth) {
-      model.put(OrganizationScimConfig.SCIM_AUTHENTICATION_MODE, "KEYCLOAK");
+      model.put(ComponentScimConfig.SCIM_AUTHENTICATION_MODE, "KEYCLOAK");
     } else if (auth instanceof JwtScimAuth jwt) {
-      model.put(OrganizationScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
-      if (jwt.getIssuer() != null) {
-        model.put(OrganizationScimConfig.SCIM_EXTERNAL_ISSUER, jwt.getIssuer());
-      }
-      if (jwt.getAudience() != null) {
-        model.put(OrganizationScimConfig.SCIM_EXTERNAL_AUDIENCE, jwt.getAudience());
-      }
-      if (jwt.getJwksUri() != null) {
-        model.put(OrganizationScimConfig.SCIM_EXTERNAL_JWKS_URI, jwt.getJwksUri());
-      }
+      model.put(ComponentScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
+      if (jwt.getIssuer() != null)
+        model.put(ComponentScimConfig.SCIM_EXTERNAL_ISSUER, jwt.getIssuer());
+      if (jwt.getAudience() != null)
+        model.put(ComponentScimConfig.SCIM_EXTERNAL_AUDIENCE, jwt.getAudience());
+      if (jwt.getJwksUri() != null)
+        model.put(ComponentScimConfig.SCIM_EXTERNAL_JWKS_URI, jwt.getJwksUri());
     } else if (auth instanceof SharedSecretScimAuth secret) {
-      model.put(OrganizationScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
-      if (secret.getSharedSecret() != null) {
-        model.put(OrganizationScimConfig.SCIM_EXTERNAL_SHARED_SECRET, secret.getSharedSecret());
-      }
+      model.put(ComponentScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
+      if (secret.getSharedSecret() != null)
+        model.put(ComponentScimConfig.SCIM_EXTERNAL_SHARED_SECRET, secret.getSharedSecret());
     } else if (auth instanceof BasicAuthScimAuth basic) {
-      model.put(OrganizationScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
-      if (basic.getUsername() != null) {
-        model.put(OrganizationScimConfig.SCIM_BASIC_AUTH_USERNAME, basic.getUsername());
-      }
-      if (basic.getPassword() != null) {
-        model.put(OrganizationScimConfig.SCIM_BASIC_AUTH_PASSWORD, basic.getPassword());
-      }
+      model.put(ComponentScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
+      if (basic.getUsername() != null)
+        model.put(ComponentScimConfig.SCIM_BASIC_AUTH_USERNAME, basic.getUsername());
+      if (basic.getPassword() != null)
+        model.put(ComponentScimConfig.SCIM_BASIC_AUTH_PASSWORD, basic.getPassword());
     }
 
-    return model;
-  }
-
-  public static void updateComponentModelFromScimRepresentation(
-      ComponentModel model, OrganizationScimRepresentation rep) {
-    if (rep.getEnabled() != null) {
-      model.put(ComponentScimConfig.ENABLED_PROPERTY, rep.getEnabled().toString());
-    }
-    if (rep.getEmailAsUsername() != null) {
-      model.put(
-          OrganizationScimConfig.SCIM_EMAIL_AS_USERNAME, rep.getEmailAsUsername().toString());
-    }
-    if (rep.getLinkIdp() != null) {
-      model.put(OrganizationScimConfig.SCIM_LINK_IDP, rep.getLinkIdp().toString());
-    }
-
-    OrganizationScimAuth auth = rep.getAuth();
-    if (auth instanceof KeycloakScimAuth) {
-      model.put(OrganizationScimConfig.SCIM_AUTHENTICATION_MODE, "KEYCLOAK");
-      // Clear external fields
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_ISSUER);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_AUDIENCE);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_JWKS_URI);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_SHARED_SECRET);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_BASIC_AUTH_USERNAME);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_BASIC_AUTH_PASSWORD);
-    } else if (auth instanceof JwtScimAuth jwt) {
-      model.put(OrganizationScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
-      model.put(OrganizationScimConfig.SCIM_EXTERNAL_ISSUER, jwt.getIssuer());
-      model.put(OrganizationScimConfig.SCIM_EXTERNAL_AUDIENCE, jwt.getAudience());
-      model.put(OrganizationScimConfig.SCIM_EXTERNAL_JWKS_URI, jwt.getJwksUri());
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_SHARED_SECRET);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_BASIC_AUTH_USERNAME);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_BASIC_AUTH_PASSWORD);
-    } else if (auth instanceof SharedSecretScimAuth secret) {
-      model.put(OrganizationScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
-      model.put(OrganizationScimConfig.SCIM_EXTERNAL_SHARED_SECRET, secret.getSharedSecret());
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_ISSUER);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_AUDIENCE);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_JWKS_URI);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_BASIC_AUTH_USERNAME);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_BASIC_AUTH_PASSWORD);
-    } else if (auth instanceof BasicAuthScimAuth basic) {
-      model.put(OrganizationScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
-      model.put(OrganizationScimConfig.SCIM_BASIC_AUTH_USERNAME, basic.getUsername());
-      model.put(OrganizationScimConfig.SCIM_BASIC_AUTH_PASSWORD, basic.getPassword());
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_ISSUER);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_AUDIENCE);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_JWKS_URI);
-      model.getConfig().remove(OrganizationScimConfig.SCIM_EXTERNAL_SHARED_SECRET);
-    }
+    return new ComponentScimConfig(model);
   }
 
   public static Invitation convertInvitationModelToInvitation(InvitationModel e) {

@@ -3,6 +3,8 @@ package io.phasetwo.service.resource;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
+import io.phasetwo.keycloak.orgs.scim.ComponentScimConfig;
+import io.phasetwo.keycloak.orgs.scim.spi.ScimConfigurationProvider;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.OrganizationScimRepresentation;
 import jakarta.ws.rs.*;
@@ -11,7 +13,6 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.events.admin.OperationType;
-import org.keycloak.models.RealmModel;
 
 @JBossLog
 public class ScimProviderResource extends OrganizationAdminResource {
@@ -21,6 +22,10 @@ public class ScimProviderResource extends OrganizationAdminResource {
   public ScimProviderResource(OrganizationAdminResource parent, OrganizationModel organization) {
     super(parent);
     this.organization = organization;
+  }
+
+  private ScimConfigurationProvider getConfigProvider() {
+    return session.getProvider(ScimConfigurationProvider.class);
   }
 
   @GET
@@ -33,13 +38,12 @@ public class ScimProviderResource extends OrganizationAdminResource {
               "Insufficient permission to view SCIM config for %s", organization.getId()));
     }
 
-    RealmModel realm = session.getContext().getRealm();
-    ComponentModel component = realm.getComponent(organization.getId());
-    if (component == null) {
+    ComponentScimConfig config = getConfigProvider().getConfiguration(organization.getId());
+    if (config == null) {
       throw new NotFoundException("No SCIM configuration found for organization");
     }
 
-    OrganizationScimRepresentation rep = convertComponentModelToScimRepresentation(component);
+    OrganizationScimRepresentation rep = convertScimConfigToRepresentation(config);
     return Response.ok(rep).build();
   }
 
@@ -54,31 +58,28 @@ public class ScimProviderResource extends OrganizationAdminResource {
               "Insufficient permission to manage SCIM config for %s", organization.getId()));
     }
 
-    RealmModel realm = session.getContext().getRealm();
-
-    ComponentModel existing = realm.getComponent(organization.getId());
-    if (existing != null) {
+    ScimConfigurationProvider configProvider = getConfigProvider();
+    if (configProvider.hasConfiguration(organization.getId())) {
       return Response.status(Response.Status.CONFLICT)
           .entity("SCIM configuration already exists for this organization")
           .build();
     }
 
-    ComponentModel model =
-        convertScimRepresentationToComponentModel(rep, organization.getId());
-    model.setParentId(realm.getId());
-    realm.addComponentModel(model);
+    ComponentScimConfig newConfig =
+        convertRepresentationToScimConfig(rep);
+    ComponentScimConfig created =
+        configProvider.createConfiguration(organization.getId(), newConfig);
 
-    OrganizationScimRepresentation created =
-        convertComponentModelToScimRepresentation(realm.getComponent(organization.getId()));
+    OrganizationScimRepresentation createdRep = convertScimConfigToRepresentation(created);
 
     adminEvent
         .resource(ORGANIZATION.name())
         .operation(OperationType.CREATE)
         .resourcePath(session.getContext().getUri())
-        .representation(created)
+        .representation(createdRep)
         .success();
 
-    return Response.status(Response.Status.CREATED).entity(created).build();
+    return Response.status(Response.Status.CREATED).entity(createdRep).build();
   }
 
   @PUT
@@ -92,26 +93,26 @@ public class ScimProviderResource extends OrganizationAdminResource {
               "Insufficient permission to manage SCIM config for %s", organization.getId()));
     }
 
-    RealmModel realm = session.getContext().getRealm();
-    ComponentModel existing = realm.getComponent(organization.getId());
-    if (existing == null) {
+    ScimConfigurationProvider configProvider = getConfigProvider();
+    if (!configProvider.hasConfiguration(organization.getId())) {
       throw new NotFoundException("No SCIM configuration found for organization");
     }
 
-    updateComponentModelFromScimRepresentation(existing, rep);
-    realm.updateComponent(existing);
+    ComponentScimConfig updateConfig =
+        convertRepresentationToScimConfig(rep);
+    ComponentScimConfig updated =
+        configProvider.updateConfiguration(organization.getId(), updateConfig);
 
-    OrganizationScimRepresentation updated =
-        convertComponentModelToScimRepresentation(realm.getComponent(organization.getId()));
+    OrganizationScimRepresentation updatedRep = convertScimConfigToRepresentation(updated);
 
     adminEvent
         .resource(ORGANIZATION.name())
         .operation(OperationType.UPDATE)
         .resourcePath(session.getContext().getUri())
-        .representation(updated)
+        .representation(updatedRep)
         .success();
 
-    return Response.ok(updated).build();
+    return Response.ok(updatedRep).build();
   }
 
   @DELETE
@@ -123,13 +124,12 @@ public class ScimProviderResource extends OrganizationAdminResource {
               "Insufficient permission to manage SCIM config for %s", organization.getId()));
     }
 
-    RealmModel realm = session.getContext().getRealm();
-    ComponentModel existing = realm.getComponent(organization.getId());
-    if (existing == null) {
+    ScimConfigurationProvider configProvider = getConfigProvider();
+    if (!configProvider.hasConfiguration(organization.getId())) {
       throw new NotFoundException("No SCIM configuration found for organization");
     }
 
-    realm.removeComponent(existing);
+    configProvider.deleteConfiguration(organization.getId());
 
     adminEvent
         .resource(ORGANIZATION.name())
