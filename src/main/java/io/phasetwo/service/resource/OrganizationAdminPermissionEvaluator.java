@@ -24,6 +24,16 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
   }
 
   @Override
+  public boolean isRealmAdmin() {
+    return permissions.isRealmAdmin();
+  }
+
+  @Override
+  public void requireRealmAdmin() {
+    permissions.requireRealmAdmin();
+  }
+
+  @Override
   public AdminAuth adminAuth() {
     return permissions.adminAuth();
   }
