@@ -18,7 +18,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build with Maven and run Cypress Integration Tests
-        run: mvn --batch-mode --update-snapshots verify -Pcypress-tests
+        run: mvn --batch-mode --update-snapshots verify -Pcypress-tests,integration-tests
       - name: Upload JaCoCo Coverage Report as an artifact
         uses: actions/upload-artifact@v7
         with:
