@@ -25,13 +25,8 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -279,7 +274,21 @@ public class JpaOrganizationProvider implements OrganizationProvider {
         .getSingleResult();
   }
 
-  @Override
+    @Override
+    public Stream<ExtOrganizationEntity> findByNames(RealmModel realm, Set<String> names) {
+        if (names == null || names.isEmpty()) return Stream.empty();
+
+        return em.createQuery(
+                        "SELECT o FROM ExtOrganizationEntity o"
+                                + " WHERE o.realmId = :realmId"
+                                + " AND o.name IN :names",
+                        ExtOrganizationEntity.class)
+                .setParameter("realmId", realm.getId())
+                .setParameter("names", names)
+                .getResultStream();
+    }
+
+    @Override
   public void close() {}
 
   public OrganizationModel.OrganizationCreationEvent orgCreationEvent(
