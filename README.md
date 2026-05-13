@@ -92,6 +92,17 @@ If you are using the extension as bundled in the [Docker image](https://quay.io/
 
 Although it has been developed and working since Keycloak 9.0.0, the extensions are currently known to work with Keycloak > 17.0.0. Other versions may work also. Additionally, because of the fast pace of breaking changes since Keycloak "X" (Quarkus version), we don't make any guaranteed that this will work with any version other than it is packaged with in the [Docker image](https://quay.io/repository/phasetwo/phasetwo-keycloak).
 
+#### Hibernate 7.2 / Quarkus 3.31
+
+The [Quarkus 3.31 migration guide](https://github.com/quarkusio/quarkus/wiki/Migration-Guide-3.31) upgrades Hibernate ORM to 7.2. The [Hibernate 7.2 migration guide](https://docs.hibernate.org/orm/7.2/migration-guide/#AzureSQLServerDialect) introduces a behavioral change in **Child Session Flush/Close**:
+
+- When the parent session is flushed, the child session is now also flushed.
+- When the parent session is closed, the child session is now also closed.
+
+As a result, explicit `em.flush()` calls inside a `runJobInTransaction` lambda (or any code path that uses a child session sharing the parent's transactional context) can cascade to sibling child sessions and interfere with transaction rollback semantics. Specifically, this affected `JpaOrganizationProvider.createOrganization` where an explicit `em.flush()` after `em.persist()` causes partial writes to survive a rollback triggered by a duplicate-detection exception during organization import.
+
+An idea is to remove unnecessary explicit flushes and rely on JPA auto-flush-before-query and transaction-commit ordering.
+
 ## Extensions
 
 ### Data
