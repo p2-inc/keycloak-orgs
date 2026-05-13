@@ -25,7 +25,16 @@ jobs:
           name: jacoco-report
           path: ${{ github.workspace }}/target/site/jacoco/
           retention-days: 30
+      - name: Check if JaCoCo CSV exists
+        id: check-jacoco
+        run: |
+          if [ -f "target/site/jacoco/jacoco.csv" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
       - name: Add JaCoCo Coverage to Action Summary
+        if: steps.check-jacoco.outputs.exists == 'true'
         uses: jjmrocha/jacoco-summary@v1.1.1
         with:
           jacoco-csv-file: target/site/jacoco/jacoco.csv
