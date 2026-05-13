@@ -274,21 +274,21 @@ public class JpaOrganizationProvider implements OrganizationProvider {
         .getSingleResult();
   }
 
-    @Override
-    public Stream<ExtOrganizationEntity> findByNames(RealmModel realm, Set<String> names) {
-        if (names == null || names.isEmpty()) return Stream.empty();
+  @Override
+  public Stream<ExtOrganizationEntity> findByNames(RealmModel realm, Set<String> names) {
+      if (names == null || names.isEmpty()) return Stream.empty();
 
-        return em.createQuery(
-                        "SELECT o FROM ExtOrganizationEntity o"
-                                + " WHERE o.realmId = :realmId"
-                                + " AND o.name IN :names",
-                        ExtOrganizationEntity.class)
-                .setParameter("realmId", realm.getId())
-                .setParameter("names", names)
-                .getResultStream();
-    }
+      return em.createQuery(
+                      "SELECT o FROM ExtOrganizationEntity o"
+                              + " WHERE o.realmId = :realmId"
+                              + " AND o.name IN :names",
+                      ExtOrganizationEntity.class)
+              .setParameter("realmId", realm.getId())
+              .setParameter("names", names)
+              .getResultStream();
+  }
 
-    @Override
+  @Override
   public void close() {}
 
   public OrganizationModel.OrganizationCreationEvent orgCreationEvent(
