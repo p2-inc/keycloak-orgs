@@ -3,6 +3,7 @@ package io.phasetwo.service.resource;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.phasetwo.keycloak.orgs.scim.ComponentScimConfig;
+import io.phasetwo.service.util.Argon2idEncoder;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
@@ -147,13 +148,17 @@ public class Converters {
     } else if (auth instanceof SharedSecretScimAuth secret) {
       model.put(ComponentScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
       if (secret.getSharedSecret() != null)
-        model.put(ComponentScimConfig.SCIM_EXTERNAL_SHARED_SECRET, secret.getSharedSecret());
+        model.put(
+            ComponentScimConfig.SCIM_EXTERNAL_SHARED_SECRET,
+            Argon2idEncoder.encode(secret.getSharedSecret()));
     } else if (auth instanceof BasicAuthScimAuth basic) {
       model.put(ComponentScimConfig.SCIM_AUTHENTICATION_MODE, "EXTERNAL");
       if (basic.getUsername() != null)
         model.put(ComponentScimConfig.SCIM_BASIC_AUTH_USERNAME, basic.getUsername());
       if (basic.getPassword() != null)
-        model.put(ComponentScimConfig.SCIM_BASIC_AUTH_PASSWORD, basic.getPassword());
+        model.put(
+            ComponentScimConfig.SCIM_BASIC_AUTH_PASSWORD,
+            Argon2idEncoder.encode(basic.getPassword()));
     }
 
     return new ComponentScimConfig(model);
