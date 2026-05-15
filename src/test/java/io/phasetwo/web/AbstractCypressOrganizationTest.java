@@ -11,6 +11,7 @@ import io.github.wimdeblauwe.testcontainers.cypress.CypressTest;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestResults;
 import io.github.wimdeblauwe.testcontainers.cypress.CypressTestSuite;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
+import io.phasetwo.keycloak.events.MdcLoggerEventStoreProviderFactory;
 import io.phasetwo.service.resource.OrganizationResourceProviderFactory;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -109,6 +110,12 @@ public class AbstractCypressOrganizationTest {
             .withReuse(true)
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(getDeps())
+            .withCustomCommand(
+                    "--spi-events-store-provider=" + MdcLoggerEventStoreProviderFactory.PROVIDER_ID)
+            .withCustomCommand(
+                    "--spi-events-store-"
+                            + MdcLoggerEventStoreProviderFactory.PROVIDER_ID
+                            + "-use-jpa=true")
             .withAccessToHost(true);
     if (isJacocoPresent()) {
       keycloakContainer = keycloakContainer.withCopyFileToContainer(
