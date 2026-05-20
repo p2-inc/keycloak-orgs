@@ -1,5 +1,5 @@
 import { testRealmLoginUri } from "../../fixtures/uri";
-import { idpUser, unverifiedIdpUser } from "../../fixtures/users";
+import { idpUser, unverifiedIdpUser, internetDomainNameError } from "../../fixtures/users";
 
 describe('Logging in into the Account client when the HomeIdpDiscovery requires verified email', () => {
     it('user with verified email tries to log in, and redirected to the relevant realm', () => {
@@ -30,4 +30,17 @@ describe('Logging in into the Account client when the HomeIdpDiscovery requires 
 
         cy.contains('Personal');
     })
+
+    it('user with internetDomainName error email tries to log in, and prompted for username & password', () => {
+          cy.visit(testRealmLoginUri);
+          cy.get('#username').type(internetDomainNameError.username);
+          cy.get('#kc-login').click();
+
+          cy.url().should('contain', 'test-realm');
+
+          cy.get('#password').type(internetDomainNameError.password);
+          cy.get('#kc-login').click();
+
+          cy.contains('Personal');
+      })
 });
