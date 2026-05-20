@@ -14,5 +14,7 @@ const idpUser: User = { username: "test@phasetwo.io", password: "test123", first
 const unverifiedIdpUser: User = { username: "unverified@phasetwo.io", password: "test123", firstName: "Ben", lastName: "Big", email: "unverified@phasetwo.io" };
 const authItIdpUser: User = { username: "test@auth.it", password: "test123", firstName: "Ben", lastName: "Big", email: "test@auth.it" };
 const organizationlessAuthItUser: User = { username: "user-without-org@auth.it", password: "password", firstName: "Ben", lastName: "Big", email: "user-without-org@auth.it" };
+const internetDomainNameError: User = { username: "unverified@phasetwo+111.io", password: "test123", firstName: "R", lastName: "T", email: "unverified@phasetwo+111.io" };
 
-export { User, user1, user2, user3, idpUser, unverifiedIdpUser, authItIdpUser, organizationlessAuthItUser }
+
+export { User, user1, user2, user3, idpUser, unverifiedIdpUser, authItIdpUser, organizationlessAuthItUser, internetDomainNameError }
