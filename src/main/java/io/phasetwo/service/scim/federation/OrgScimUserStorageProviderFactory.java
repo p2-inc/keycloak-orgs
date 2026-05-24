@@ -6,54 +6,43 @@ import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.scim.ComponentScimConfig;
 import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.Config;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.component.ComponentValidationException;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.provider.EnvironmentDependentProviderFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.storage.UserStorageProviderFactory;
 
 /**
- * Registers an "Organization SCIM" User Federation provider so SCIM
- * configurations can be created directly from the Keycloak Admin
- * Console's User Federation page. This is an alternative entry point to
- * the {@code /{realm}/orgs/{orgId}/scim} REST endpoint / Admin UI tab
- * and exists primarily for power users.
+ * Registers an "Organization SCIM" User Federation provider. Its sole
+ * purpose is to make Keycloak's ComponentModel infrastructure accept
+ * SCIM-config persistence: the SCIM-tab REST endpoint creates a
+ * {@code ComponentModel} with
+ * {@code providerType=org.keycloak.storage.UserStorageProvider} and
+ * {@code providerId="Organization SCIM"}, and Keycloak validates that
+ * combo against a registered factory at add/update time.
  *
- * <p>Disabled by default. Opt-in via either:
- * <ul>
- *   <li>JVM system property {@code phasetwo.scim.userFederationUi=true}, or
- *   <li>Keycloak SPI config
- *       {@code --spi-storage-organization-scim-user-federation-ui-enabled=true}
- *       (env: {@code KC_SPI_STORAGE_ORGANIZATION_SCIM_USER_FEDERATION_UI_ENABLED=true}).
- * </ul>
+ * <p>Side effect: the entry appears in the Keycloak Admin Console's
+ * User Federation page. That's accepted as a cosmetic compromise — the
+ * canonical UI for managing SCIM configs is the per-org SCIM tab.
  *
- * <p>The {@link EnvironmentDependentProviderFactory#isSupported(Config.Scope)}
- * check is consulted at Keycloak startup; when it returns false the
- * factory is not registered at all and the User Federation page does not
- * list "Organization SCIM".
+ * <p>An earlier iteration tried to gate this factory behind
+ * {@code EnvironmentDependentProviderFactory#isSupported} so it could
+ * be hidden from the User Federation list by default, but that broke
+ * storage entirely (no registered factory means
+ * {@code realm.addComponentModel} throws "No such provider"). Hiding
+ * just the UI listing without breaking storage would require turning
+ * {@code ScimConfigurationProviderFactory} into a full
+ * {@link org.keycloak.component.ComponentFactory} and switching the
+ * storage providerType to our SPI's FQCN.
  */
 @SuppressWarnings("rawtypes")
 @JBossLog
 @AutoService(UserStorageProviderFactory.class)
 public class OrgScimUserStorageProviderFactory
-    implements UserStorageProviderFactory<OrgScimUserStorageProvider>,
-        EnvironmentDependentProviderFactory {
+    implements UserStorageProviderFactory<OrgScimUserStorageProvider> {
 
   public static final String PROVIDER_ID = "Organization SCIM";
-
-  public static final String SYS_PROP_USER_FEDERATION_UI = "phasetwo.scim.userFederationUi";
-  public static final String SPI_CONFIG_USER_FEDERATION_UI = "userFederationUiEnabled";
-
-  @Override
-  public boolean isSupported(Config.Scope config) {
-    if (Boolean.parseBoolean(System.getProperty(SYS_PROP_USER_FEDERATION_UI, "false"))) {
-      return true;
-    }
-    return config != null && config.getBoolean(SPI_CONFIG_USER_FEDERATION_UI, false);
-  }
 
   @Override
   public List<ProviderConfigProperty> getConfigProperties() {

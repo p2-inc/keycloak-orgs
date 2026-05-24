@@ -5,18 +5,20 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.storage.UserStorageProvider;
 
 /**
- * Empty UserStorageProvider whose only purpose is to make
- * {@link OrgScimUserStorageProviderFactory} discoverable from the Keycloak
- * Admin Console "User Federation" page. That GUI is how operators can
- * configure per-organization SCIM settings when the
- * `phasetwo.scim.userFederationUi=true` system property (or the equivalent
- * SPI config flag) is set. By default the factory is hidden, so this
- * provider is never instantiated.
+ * Empty UserStorageProvider. Its existence makes
+ * {@link OrgScimUserStorageProviderFactory} a valid registered
+ * {@link org.keycloak.storage.UserStorageProviderFactory}, which is
+ * what Keycloak's {@code realm.addComponentModel} requires to accept
+ * the {@code ComponentModel}s used for per-organization SCIM
+ * configuration storage.
  *
- * <p>Per-organization SCIM configuration is normally managed through the
- * {@code /{realm}/orgs/{orgId}/scim} REST endpoint and the Admin UI tab
- * exposed by keycloak-themes, both backed by the
- * {@link io.phasetwo.service.scim.spi.ScimConfigurationProvider} SPI.
+ * <p>This provider itself does nothing at runtime; the SCIM config
+ * data is read/written by
+ * {@link io.phasetwo.service.scim.spi.DefaultScimConfigurationProvider}
+ * directly against the realm's components container. Per-organization
+ * SCIM configuration is normally managed through the
+ * {@code /{realm}/orgs/{orgId}/scim} REST endpoint and the Admin UI
+ * tab exposed by keycloak-themes.
  */
 public class OrgScimUserStorageProvider implements UserStorageProvider {
 
