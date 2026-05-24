@@ -37,6 +37,7 @@ The extensions herein are used in the [Phase Two](https://phasetwo.io) cloud off
     - [Active Organization](#active-organization)
     - [Global organization settings](#global-organization-settings)
     - [Organizations shared IDPs](#organizations-shared-idps)
+    - [SCIM (experimental)](#scim-experimental)
   - [License](#license)
 
 ## Overview
@@ -236,6 +237,12 @@ These configs are persisted in the realm config under the flags `_providerConfig
 It is possible to share the same IDP between multiple organizations by switching `on` the `Shared IDPs` config.  
 This offers the possibility to login using the same IDP to different organizations by using the [IdP Discovery](#idp-discovery) method.  
 For a shared IdP if the `Post login flow` authentication flow is set to `post org broker login` the `Add User to Org` authenticator will add the new member to all organizations which contain the user email domain in their domains configuration list.
+
+### SCIM (experimental)
+
+Each organization can act as its own SCIM 2.0 service provider, exposing an endpoint at `/realms/{realm}/scim/v2/organizations/{orgId}/` that external IdPs (Okta, Azure AD, etc.) can call to provision and de-provision users into the organization. The feature is disabled by default at the realm level; once turned on, each organization is configured independently via the **SCIM** tab in the org detail UI or the `/realms/{realm}/orgs/{orgId}/scim` REST endpoint. Supports Keycloak token, external JWT, shared secret, and HTTP Basic authentication of the inbound SCIM traffic.
+
+This capability is **experimental** — the configuration schema and surface may change before it stabilizes. For details, see [scim](./docs/scim.md).
 
 ## License
 
