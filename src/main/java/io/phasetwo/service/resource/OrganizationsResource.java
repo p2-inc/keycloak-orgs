@@ -282,6 +282,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     realm.setAttribute(ORG_CONFIG_VALIDATE_IDP_KEY, body.isValidateIdp());
     realm.setAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, body.getExpirationInSecs());
     realm.setAttribute(ORG_CONFIG_DEFAULT_APPLICATION_URI, body.getDefaultApplicationUri());
+    realm.setAttribute(ORG_CONFIG_SCIM_ENABLED_KEY, body.isScimEnabled());
 
     return Response.ok(body).build();
   }
@@ -318,6 +319,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     representation.setValidateIdp(realm.getAttribute(ORG_CONFIG_VALIDATE_IDP_KEY, false));
     representation.setExpirationInSecs(
         realm.getAttribute(ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY, 86400));
+    representation.setScimEnabled(realm.getAttribute(ORG_CONFIG_SCIM_ENABLED_KEY, false));
 
     return Response.ok(representation).build();
   }

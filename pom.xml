@@ -298,9 +298,9 @@
 
     <!-- scim extension -->
     <dependency>
-      <groupId>fi.metatavu.keycloak.scim.server</groupId>
+      <groupId>io.phasetwo.keycloak</groupId>
       <artifactId>keycloak-scim-server</artifactId>
-      <version>1.5.0-SNAPSHOT</version>
+      <version>1.5.0.2</version>
       <scope>provided</scope>
     </dependency>
     <!-- argon2id hashing for SCIM secrets/passwords (provided by Keycloak runtime) -->
@@ -308,12 +308,6 @@
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
       <version>1.78.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.phasetwo</groupId>
-      <artifactId>phasetwo-org-scim</artifactId>
-      <version>0.1</version>
       <scope>provided</scope>
     </dependency>
 

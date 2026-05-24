@@ -28,6 +28,8 @@ public class Orgs {
       "_providerConfig.orgs.portalLink.expirationInSecs";
   public static final String ORG_CONFIG_DEFAULT_APPLICATION_URI =
       "_providerConfig.orgs.config.defaultApplicationUri";
+  public static final String ORG_CONFIG_SCIM_ENABLED_KEY =
+      "_providerConfig.orgs.config.scimEnabled";
   public static final String ORG_VALIDATION_PENDING_CONFIG_KEY =
       "home.idp.discovery.validationPending";
   public static final String ORG_SHARED_IDP_KEY = "home.idp.discovery.shared";

@@ -1,17 +1,17 @@
 package io.phasetwo.service.resource;
 
+import static io.phasetwo.service.Orgs.ORG_CONFIG_SCIM_ENABLED_KEY;
 import static io.phasetwo.service.resource.Converters.*;
 import static io.phasetwo.service.resource.OrganizationResourceType.*;
 
-import io.phasetwo.keycloak.orgs.scim.ComponentScimConfig;
-import io.phasetwo.keycloak.orgs.scim.spi.ScimConfigurationProvider;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.OrganizationScimRepresentation;
+import io.phasetwo.service.scim.ComponentScimConfig;
+import io.phasetwo.service.scim.spi.ScimConfigurationProvider;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.component.ComponentModel;
 import org.keycloak.events.admin.OperationType;
 
 @JBossLog
@@ -28,10 +28,22 @@ public class ScimProviderResource extends OrganizationAdminResource {
     return session.getProvider(ScimConfigurationProvider.class);
   }
 
+  /**
+   * If the realm-level SCIM feature flag is disabled, the entire resource pretends
+   * not to exist (404). The flag defaults to false; flip it on via the
+   * Organization Settings UI or {@code /realms/{realm}/orgs/config}.
+   */
+  private void requireScimEnabled() {
+    if (!session.getContext().getRealm().getAttribute(ORG_CONFIG_SCIM_ENABLED_KEY, false)) {
+      throw new NotFoundException();
+    }
+  }
+
   @GET
   @Path("")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getScimConfig() {
+    requireScimEnabled();
     if (!auth.hasViewOrgs() && !auth.hasOrgViewIdentityProviders(organization)) {
       throw new NotAuthorizedException(
           String.format(
@@ -52,6 +64,7 @@ public class ScimProviderResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response createScimConfig(OrganizationScimRepresentation rep) {
+    requireScimEnabled();
     if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
       throw new NotAuthorizedException(
           String.format(
@@ -87,6 +100,7 @@ public class ScimProviderResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response updateScimConfig(OrganizationScimRepresentation rep) {
+    requireScimEnabled();
     if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
       throw new NotAuthorizedException(
           String.format(
@@ -118,6 +132,7 @@ public class ScimProviderResource extends OrganizationAdminResource {
   @DELETE
   @Path("")
   public Response deleteScimConfig() {
+    requireScimEnabled();
     if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
       throw new NotAuthorizedException(
           String.format(

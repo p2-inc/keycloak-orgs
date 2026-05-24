@@ -21,6 +21,9 @@ public class OrganizationsConfig {
   @JsonProperty("defaultApplicationUri")
   private String defaultApplicationUri = null;
 
+  @JsonProperty("scimEnabled")
+  private boolean scimEnabled = false;
+
   public boolean isCreateAdminUser() {
     return createAdminUser;
   }
@@ -67,5 +70,13 @@ public class OrganizationsConfig {
 
   public void setDefaultApplicationUri(String defaultApplicationUri) {
     this.defaultApplicationUri = defaultApplicationUri;
+  }
+
+  public boolean isScimEnabled() {
+    return scimEnabled;
+  }
+
+  public void setScimEnabled(boolean scimEnabled) {
+    this.scimEnabled = scimEnabled;
   }
 }
