@@ -15,16 +15,10 @@ import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
-import io.phasetwo.service.model.jpa.JpaOrganizationProvider;
-import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
 import io.phasetwo.service.util.IdentityProviders;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
-import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.AdminRoles;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
@@ -121,28 +115,36 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
             });
   }
 
-  private void migrateOrganizationWithNewDefaultRolesBatched(KeycloakSessionFactory factory, String roleName) {
-    KeycloakModelUtils.runJobInTransaction(factory, session -> {
-      // https://github.com/p2-inc/keycloak-orgs/issues/454
-      long orphanCount = session.getProvider(OrganizationProvider.class).countOrphanedOrganizations();
-      if (orphanCount > 0) {
-        log.warnf(
-            "%d organization(s) reference a realm that no longer exists and will be skipped during migration."
-                + " Consider cleaning up orphaned rows in the ORGANIZATION table.",
-            orphanCount);
-      }
-    });
-    log.infof("Migrating missing org roles across all realms (batch size: %d)", KC_ORGS_MIGRATION_BATCH_SIZE);
+  private void migrateOrganizationWithNewDefaultRolesBatched(
+      KeycloakSessionFactory factory, String roleName) {
+    KeycloakModelUtils.runJobInTransaction(
+        factory,
+        session -> {
+          // https://github.com/p2-inc/keycloak-orgs/issues/454
+          long orphanCount =
+              session.getProvider(OrganizationProvider.class).countOrphanedOrganizations();
+          if (orphanCount > 0) {
+            log.warnf(
+                "%d organization(s) reference a realm that no longer exists and will be skipped during migration."
+                    + " Consider cleaning up orphaned rows in the ORGANIZATION table.",
+                orphanCount);
+          }
+        });
+    log.infof(
+        "Migrating missing org roles across all realms (batch size: %d)",
+        KC_ORGS_MIGRATION_BATCH_SIZE);
     int[] batchCount = {KC_ORGS_MIGRATION_BATCH_SIZE};
     while (batchCount[0] == KC_ORGS_MIGRATION_BATCH_SIZE) {
-      KeycloakModelUtils.runJobInTransaction(factory, session -> batchCount[0] = processOrgRoleMigrationBatch(session, roleName));
+      KeycloakModelUtils.runJobInTransaction(
+          factory, session -> batchCount[0] = processOrgRoleMigrationBatch(session, roleName));
       log.infof("Migrated %d organizations with the added role %s...", batchCount[0], roleName);
     }
     log.info("Organization role migration complete");
   }
 
   private int processOrgRoleMigrationBatch(KeycloakSession session, String roleName) {
-    final var orgs = session
+    final var orgs =
+        session
             .getProvider(OrganizationProvider.class)
             .getOrganizationsMissingRole(roleName, KC_ORGS_MIGRATION_BATCH_SIZE);
 

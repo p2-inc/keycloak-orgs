@@ -94,8 +94,7 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
             () -> failChallenge(context, "invalidOrganizationError"));
   }
 
-  private void evaluateAccountHint(
-      AuthenticationFlowContext context, String accountHint) {
+  private void evaluateAccountHint(AuthenticationFlowContext context, String accountHint) {
     findMembershipByAccountHint(context, accountHint)
         .ifPresentOrElse(
             organizationModel ->
@@ -128,7 +127,8 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
                 Boolean.parseBoolean(
                     it.getConfig()
                         .getOrDefault(
-                            ActiveOrganizationAuthenticatorFactory.CONFIG_MATCH_BY_ORG_NAME, "false")))
+                            ActiveOrganizationAuthenticatorFactory.CONFIG_MATCH_BY_ORG_NAME,
+                            "false")))
         .orElse(false);
   }
 

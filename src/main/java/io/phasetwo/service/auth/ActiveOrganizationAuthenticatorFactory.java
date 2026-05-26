@@ -87,7 +87,8 @@ public class ActiveOrganizationAuthenticatorFactory implements AuthenticatorFact
     organizationNameConfig.setName(CONFIG_MATCH_BY_ORG_NAME);
     organizationNameConfig.setDefaultValue(false);
     organizationNameConfig.setLabel("Match by organization name");
-    organizationNameConfig.setHelpText("account_hint will use organization name instead of organization id to match exact organization");
+    organizationNameConfig.setHelpText(
+        "account_hint will use organization name instead of organization id to match exact organization");
 
     return List.of(organizationNameConfig);
   }

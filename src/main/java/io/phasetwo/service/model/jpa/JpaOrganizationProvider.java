@@ -25,7 +25,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -248,19 +247,22 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   @Override
-  public Collection<? extends OrganizationModel> getOrganizationsMissingRole(String roleName, int batchSize) {
+  public Collection<? extends OrganizationModel> getOrganizationsMissingRole(
+      String roleName, int batchSize) {
     EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
-    final var orgs = em.createNamedQuery("getOrganizationsMissingRole", ExtOrganizationEntity.class)
-                    .setParameter("roleName", roleName)
-                    .setMaxResults(batchSize)
-                    .getResultList();
+    final var orgs =
+        em.createNamedQuery("getOrganizationsMissingRole", ExtOrganizationEntity.class)
+            .setParameter("roleName", roleName)
+            .setMaxResults(batchSize)
+            .getResultList();
 
-    Set<String> realmIds = orgs.stream().map(ExtOrganizationEntity::getRealmId).collect(Collectors.toSet());
-    Map<String, RealmModel> realms = realmIds.stream().collect(Collectors.toMap(id -> id, id -> session.realms().getRealm(id)));
-    return orgs
-            .stream()
-            .map(org -> new OrganizationAdapter(session, realms.get(org.getRealmId()), em, org))
-            .toList();
+    Set<String> realmIds =
+        orgs.stream().map(ExtOrganizationEntity::getRealmId).collect(Collectors.toSet());
+    Map<String, RealmModel> realms =
+        realmIds.stream().collect(Collectors.toMap(id -> id, id -> session.realms().getRealm(id)));
+    return orgs.stream()
+        .map(org -> new OrganizationAdapter(session, realms.get(org.getRealmId()), em, org))
+        .toList();
   }
 
   @Override
@@ -276,16 +278,16 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
   @Override
   public Stream<ExtOrganizationEntity> findByNames(RealmModel realm, Set<String> names) {
-      if (names == null || names.isEmpty()) return Stream.empty();
+    if (names == null || names.isEmpty()) return Stream.empty();
 
-      return em.createQuery(
-                      "SELECT o FROM ExtOrganizationEntity o"
-                              + " WHERE o.realmId = :realmId"
-                              + " AND o.name IN :names",
-                      ExtOrganizationEntity.class)
-              .setParameter("realmId", realm.getId())
-              .setParameter("names", names)
-              .getResultStream();
+    return em.createQuery(
+            "SELECT o FROM ExtOrganizationEntity o"
+                + " WHERE o.realmId = :realmId"
+                + " AND o.name IN :names",
+            ExtOrganizationEntity.class)
+        .setParameter("realmId", realm.getId())
+        .setParameter("names", names)
+        .getResultStream();
   }
 
   @Override

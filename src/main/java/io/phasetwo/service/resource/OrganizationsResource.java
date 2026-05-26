@@ -380,8 +380,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
       return response.build();
     }
 
-    if (organizationsExists(session, organizations)){
-      throw  ErrorResponse.exists("Imported organizations duplicate.");
+    if (organizationsExists(session, organizations)) {
+      throw ErrorResponse.exists("Imported organizations duplicate.");
     }
 
     KeycloakModelUtils.runJobInTransaction(
@@ -409,13 +409,15 @@ public class OrganizationsResource extends OrganizationAdminResource {
     return response.build();
   }
 
-    private boolean organizationsExists(
-            KeycloakSession session,
-            List<OrganizationRepresentation> organizationsRepresentation) {
-        var organizationProvider = session.getProvider(OrganizationProvider.class);
-        var names = organizationsRepresentation.stream().map(org -> org.getOrganization().getName()).collect(Collectors.toSet());
-        return organizationProvider.any(realm, names);
-    }
+  private boolean organizationsExists(
+      KeycloakSession session, List<OrganizationRepresentation> organizationsRepresentation) {
+    var organizationProvider = session.getProvider(OrganizationProvider.class);
+    var names =
+        organizationsRepresentation.stream()
+            .map(org -> org.getOrganization().getName())
+            .collect(Collectors.toSet());
+    return organizationProvider.any(realm, names);
+  }
 
   private void createOrganization(
       boolean skipMissingMember,
@@ -437,10 +439,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
                 user,
                 false);
       } else {
-        var name =   organizationRepresentation.getOrganization().getName();
-        org =
-            organizationProvider.createOrganization(
-                realm, name, user, false);
+        var name = organizationRepresentation.getOrganization().getName();
+        org = organizationProvider.createOrganization(realm, name, user, false);
       }
 
       KeycloakOrgsImportConverter.setOrganizationAttributes(
