@@ -36,10 +36,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.java.package>io.phasetwo.service</main.java.package>
     <junit-jupiter.version>5.12.1</junit-jupiter.version>
-    <keycloak.version>26.5.7</keycloak.version>
-    <keycloak-admin-client.version>26.0.8</keycloak-admin-client.version>
+    <keycloak.version>26.6.1</keycloak.version>
+    <keycloak-admin-client.version>26.0.9</keycloak-admin-client.version>
     <resteasy.version>6.2.12.Final</resteasy.version>
-    <lombok.version>1.18.42</lombok.version>
+    <lombok.version>1.18.46</lombok.version>
     <auto-service.version>1.1.1</auto-service.version>
     <ossrh.url>https://ossrh-staging-api.central.sonatype.com</ossrh.url>
     <jacoco.version>0.8.14</jacoco.version>
@@ -415,7 +415,7 @@
     <dependency>
       <groupId>dnsjava</groupId>
       <artifactId>dnsjava</artifactId>
-      <version>3.6.4</version>
+      <version>3.6.5</version>
       <optional>true</optional>
     </dependency>
 
@@ -495,19 +495,19 @@
     <dependency>
       <groupId>com.github.dasniko</groupId>
       <artifactId>testcontainers-keycloak</artifactId>
-      <version>4.1.1</version>
+      <version>4.2.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.shrinkwrap.resolver</groupId>
       <artifactId>shrinkwrap-resolver-impl-maven-archive</artifactId>
-      <version>3.3.3</version>
+      <version>3.3.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.5.16</version>
+      <version>1.5.32</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -13,14 +13,16 @@ import org.keycloak.provider.ProviderConfigProperty;
 /**
  * Factory for {@link ConditionalOrgAttributeMatchesClientAttribute}.
  *
- * <p>Registers a conditional authenticator that compares a Phase Two organization attribute
- * against a value read from the current OIDC client's attributes at runtime.
+ * <p>Registers a conditional authenticator that compares a Phase Two organization attribute against
+ * a value read from the current OIDC client's attributes at runtime.
  */
 @AutoService(AuthenticatorFactory.class)
 public class ConditionalOrgAttributeMatchesClientAttributeFactory
     implements ConditionalAuthenticatorFactory {
 
-  /** SPI provider ID — must be unique across all deployed providers. MAX 36 chars (DB column limit). */
+  /**
+   * SPI provider ID — must be unique across all deployed providers. MAX 36 chars (DB column limit).
+   */
   public static final String PROVIDER_ID = "conditional-org-client-attr";
 
   // --- Config property keys ---
@@ -34,7 +36,10 @@ public class ConditionalOrgAttributeMatchesClientAttributeFactory
    */
   public static final String CONF_CLIENT_ATTRIBUTE_NAME = "client_attribute_name";
 
-  /** Whether to invert the match result. When {@code true}, the subflow fires when the attribute does NOT match. */
+  /**
+   * Whether to invert the match result. When {@code true}, the subflow fires when the attribute
+   * does NOT match.
+   */
   public static final String CONF_NEGATE = "negate_output";
 
   // --- Config property definitions (rendered in the Admin Console) ---

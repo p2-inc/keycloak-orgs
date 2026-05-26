@@ -108,6 +108,12 @@ public abstract class AbstractOrganizationTest {
           .withEnv(
               "JAVA_OPTS",
               "-agentlib:jdwp=transport=dt_socket,address=*:8787,server=y,suspend=n -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m ")
+          // keycloak-events 0.55+ ships MdcLoggerEventStoreProviderFactory alongside Keycloak's
+          // built-in jpa factory; without an explicit selection Keycloak picks neither and admin
+          // event ops 500. Select the MDC store and enable JPA dual-write so AdminEventsTest
+          // assertions about persisted events still hold.
+          .withEnv("KC_SPI_EVENTS_STORE_PROVIDER", "ext-event-mdc-logger-store")
+          .withEnv("KC_SPI_EVENTS_STORE_EXT_EVENT_MDC_LOGGER_STORE_USE_JPA", "true")
           .withAccessToHost(true);
 
   protected static final int WEBHOOK_SERVER_PORT = 8083;
@@ -222,7 +228,8 @@ public abstract class AbstractOrganizationTest {
     return getKeycloakOrgsAdminAPI(REALM, keycloak).listOrganizations();
   }
 
-  private static @NotNull KeycloakOrgsAdminAPI getKeycloakOrgsAdminAPI(String realm, Keycloak keycloak) {
+  private static @NotNull KeycloakOrgsAdminAPI getKeycloakOrgsAdminAPI(
+      String realm, Keycloak keycloak) {
     return new KeycloakOrgsAdminAPI(container.getAuthServerUrl(), realm, keycloak);
   }
 

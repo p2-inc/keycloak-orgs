@@ -10,6 +10,7 @@ import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.KeycloakOrgsAdminAPI;
+import io.phasetwo.web.JbossLogConsumer;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -24,10 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
-
-import io.phasetwo.web.JbossLogConsumer;
 import lombok.extern.jbosslog.JBossLog;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.AfterAll;
@@ -102,10 +100,11 @@ public class InitRolesPostMigrationTest {
             .withPassword("keycloak");
     postgres.start();
 
-    toxiproxy = new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
-                    .withNetworkAliases("toxiproxy")
-                    .withLogConsumer(new JbossLogConsumer(log))
-                    .withNetwork(network);
+    toxiproxy =
+        new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
+            .withNetworkAliases("toxiproxy")
+            .withLogConsumer(new JbossLogConsumer(log))
+            .withNetwork(network);
     toxiproxy.start();
 
     toxiproxyClient = new ToxiproxyClient(toxiproxy.getHost(), toxiproxy.getMappedPort(8474));
@@ -195,8 +194,7 @@ public class InitRolesPostMigrationTest {
   private static void restartKeycloakWithBatchSize(int batchSize) throws IOException {
     stopKeycloak(keycloak);
     keycloak =
-        buildKeycloakContainer()
-            .withEnv("KC_ORGS_MIGRATION_BATCH_SIZE", String.valueOf(batchSize));
+        buildKeycloakContainer().withEnv("KC_ORGS_MIGRATION_BATCH_SIZE", String.valueOf(batchSize));
     keycloak.start();
     adminClient = buildAdminClient();
   }
@@ -205,8 +203,7 @@ public class InitRolesPostMigrationTest {
     List<String> ids = new ArrayList<>();
     for (int i = 0; i < count; i++) {
       OrganizationRepresentation org =
-          orgsApi(realm)
-              .createOrganization(new OrganizationRepresentation().name("test-org-" + i));
+          orgsApi(realm).createOrganization(new OrganizationRepresentation().name("test-org-" + i));
       ids.add(org.getId());
     }
     return ids;
@@ -226,8 +223,7 @@ public class InitRolesPostMigrationTest {
     for (int i = 0; i < orgCount; i++) {
       OrganizationRepresentation org =
           orgsApi()
-              .createOrganization(
-                  new OrganizationRepresentation().name("migration-test-org-" + i));
+              .createOrganization(new OrganizationRepresentation().name("migration-test-org-" + i));
       orgIds.add(org.getId());
     }
 
@@ -304,29 +300,29 @@ public class InitRolesPostMigrationTest {
 
   // ── high-load scenario descriptors ───────────────────────────────────────
 
-  private record LoadTestDescriptor(int realmCount,
-                                    int orgsPerRealm,
-                                    int roleDeletionPct) {
+  private record LoadTestDescriptor(int realmCount, int orgsPerRealm, int roleDeletionPct) {
     String scenarioName() {
       return "realms=%d, orgs/realm=%d, roleDeleted=%d%%"
           .formatted(realmCount, orgsPerRealm, roleDeletionPct);
     }
+
     String realmPrefix() {
       return "hl-%d-%d-%d".formatted(realmCount, orgsPerRealm, roleDeletionPct);
     }
   }
 
-  private record PerfResult(String scenario, int realmCount, int totalOrgs,
-                             long firstRestartMs, long secondRestartMs) {}
+  private record PerfResult(
+      String scenario, int realmCount, int totalOrgs, long firstRestartMs, long secondRestartMs) {}
 
-  static final List<LoadTestDescriptor> HIGH_LOAD_SCENARIOS = List.of(
+  static final List<LoadTestDescriptor> HIGH_LOAD_SCENARIOS =
+      List.of(
           // PreparedStatement can have at most 65,535 parameters
-      new LoadTestDescriptor(5, 400, 100),   // all roles deleted
-      new LoadTestDescriptor(5, 400,  95),   // 95% roles deleted
-      new LoadTestDescriptor(5, 400,  50),   // half roles deleted
-      new LoadTestDescriptor(5, 400, 5)      // 5% roles deleted
-//          new LoadTestDescriptor(1, 30, 5)
-  );
+          new LoadTestDescriptor(5, 400, 100), // all roles deleted
+          new LoadTestDescriptor(5, 400, 95), // 95% roles deleted
+          new LoadTestDescriptor(5, 400, 50), // half roles deleted
+          new LoadTestDescriptor(5, 400, 5) // 5% roles deleted
+          //          new LoadTestDescriptor(1, 30, 5)
+          );
 
   // ── high-load test ────────────────────────────────────────────────────────
 
@@ -347,22 +343,30 @@ public class InitRolesPostMigrationTest {
     createTestRealmsAndOrgs(d.realmPrefix(), d.realmCount(), d.orgsPerRealm());
 
     if (d.roleDeletionPct() > 0) {
-      deleteOrgRoleFromDbByPct(d.realmPrefix() + "-%", ORG_ROLE_DELETE_ORGANIZATION, d.roleDeletionPct());
+      deleteOrgRoleFromDbByPct(
+          d.realmPrefix() + "-%", ORG_ROLE_DELETE_ORGANIZATION, d.roleDeletionPct());
       log.infof("Deleted ~%d%% of delete-organization roles.", d.roleDeletionPct());
     }
 
     postgresProxy.toxics().latency("upstream", ToxicDirection.UPSTREAM, 5);
     postgresProxy.toxics().latency("downstream", ToxicDirection.DOWNSTREAM, 5);
     log.info("Starting first restart.");
-    long firstMs = timedRestart("Migrating missing org roles across all realms", "Organization role migration complete");
+    long firstMs =
+        timedRestart(
+            "Migrating missing org roles across all realms",
+            "Organization role migration complete");
     log.infof("First restart took %d ms.", firstMs);
 
     log.info("Starting second restart (idempotency check).");
-    long secondMs = timedRestart("Migrating missing org roles across all realms", "Organization role migration complete");
+    long secondMs =
+        timedRestart(
+            "Migrating missing org roles across all realms",
+            "Organization role migration complete");
     log.infof("Second restart took %d ms.", secondMs);
 
-    PerfResult result = new PerfResult(
-        d.scenarioName(), d.realmCount(), d.realmCount() * d.orgsPerRealm(), firstMs, secondMs);
+    PerfResult result =
+        new PerfResult(
+            d.scenarioName(), d.realmCount(), d.realmCount() * d.orgsPerRealm(), firstMs, secondMs);
     recordPerfResult(result);
     return result;
   }
@@ -372,14 +376,16 @@ public class InitRolesPostMigrationTest {
     stopKeycloak(keycloak);
     postgres.stop();
     toxiproxy.stop();
-    postgres = new PostgreSQLContainer<>("postgres:17")
-        .withNetwork(network)
-        .withNetworkAliases("postgres")
-        .withDatabaseName("keycloak")
-        .withUsername("keycloak")
-        .withPassword("keycloak");
+    postgres =
+        new PostgreSQLContainer<>("postgres:17")
+            .withNetwork(network)
+            .withNetworkAliases("postgres")
+            .withDatabaseName("keycloak")
+            .withUsername("keycloak")
+            .withPassword("keycloak");
     postgres.start();
-    toxiproxy = new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
+    toxiproxy =
+        new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
             .withNetworkAliases("toxiproxy")
             .withLogConsumer(new JbossLogConsumer(log))
             .withNetwork(network);
@@ -396,11 +402,10 @@ public class InitRolesPostMigrationTest {
 
   // ── high-load helpers ─────────────────────────────────────────────────────
 
-  private void createTestRealmsAndOrgs(String realmPrefix, int realmCount, int orgsPerRealmCount) throws IOException {
+  private void createTestRealmsAndOrgs(String realmPrefix, int realmCount, int orgsPerRealmCount)
+      throws IOException {
     List<String> realms =
-        IntStream.range(0, realmCount)
-            .mapToObj(i -> "%s-%02d".formatted(realmPrefix, i))
-            .toList();
+        IntStream.range(0, realmCount).mapToObj(i -> "%s-%02d".formatted(realmPrefix, i)).toList();
     for (String realm : realms) {
       RealmRepresentation rep = new RealmRepresentation();
       rep.setRealm(realm);
@@ -418,10 +423,13 @@ public class InitRolesPostMigrationTest {
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss,SSS");
 
   private long timedRestart(String startMarker, String endMarker) throws IOException {
-    restartKeycloak(Map.of("KC_LOG_LEVEL", "WARN,io.phasetwo.service.resource.OrganizationResourceProviderFactory:DEBUG"));
+    restartKeycloak(
+        Map.of(
+            "KC_LOG_LEVEL",
+            "WARN,io.phasetwo.service.resource.OrganizationResourceProviderFactory:DEBUG"));
     String[] lines = keycloak.getLogs().split("\n");
     LocalDateTime start = findLogTimestamp(lines, startMarker);
-    LocalDateTime end   = findLogTimestamp(lines, endMarker);
+    LocalDateTime end = findLogTimestamp(lines, endMarker);
     return Duration.between(start, end).toMillis();
   }
 
@@ -435,9 +443,9 @@ public class InitRolesPostMigrationTest {
   }
 
   /**
-   * Deletes approximately {@code pct}% of the {@code roleName} rows for every org whose
-   * {@code realm_id} matches {@code realmPattern} (SQL LIKE). Uses a server-side temp table
-   * so no org-ID list is sent over the wire.
+   * Deletes approximately {@code pct}% of the {@code roleName} rows for every org whose {@code
+   * realm_id} matches {@code realmPattern} (SQL LIKE). Uses a server-side temp table so no org-ID
+   * list is sent over the wire.
    */
   private void deleteOrgRoleFromDbByPct(String realmPattern, String roleName, int pct)
       throws SQLException {
@@ -445,21 +453,23 @@ public class InitRolesPostMigrationTest {
         DriverManager.getConnection(
             postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())) {
       conn.setAutoCommit(false);
-      try (PreparedStatement ps = conn.prepareStatement(
-          "CREATE TEMP TABLE __roles_to_delete ON COMMIT DROP AS"
-              + " SELECT r.id FROM organization_role r"
-              + " JOIN organization o ON o.id = r.organization_id"
-              + " WHERE r.name = ? AND o.realm_id LIKE ? AND random() < ?")) {
+      try (PreparedStatement ps =
+          conn.prepareStatement(
+              "CREATE TEMP TABLE __roles_to_delete ON COMMIT DROP AS"
+                  + " SELECT r.id FROM organization_role r"
+                  + " JOIN organization o ON o.id = r.organization_id"
+                  + " WHERE r.name = ? AND o.realm_id LIKE ? AND random() < ?")) {
         ps.setString(1, roleName);
         ps.setString(2, realmPattern);
         ps.setDouble(3, pct / 100.0);
         ps.executeUpdate();
       }
-      conn.createStatement().execute(
-          "DELETE FROM user_organization_role_mapping"
-              + " WHERE role_id IN (SELECT id FROM __roles_to_delete)");
-      conn.createStatement().execute(
-          "DELETE FROM organization_role WHERE id IN (SELECT id FROM __roles_to_delete)");
+      conn.createStatement()
+          .execute(
+              "DELETE FROM user_organization_role_mapping"
+                  + " WHERE role_id IN (SELECT id FROM __roles_to_delete)");
+      conn.createStatement()
+          .execute("DELETE FROM organization_role WHERE id IN (SELECT id FROM __roles_to_delete)");
       conn.commit();
     }
   }
@@ -468,20 +478,22 @@ public class InitRolesPostMigrationTest {
     try (Connection conn =
         DriverManager.getConnection(
             postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())) {
-      conn.createStatement().execute(
-          "CREATE TABLE IF NOT EXISTS migration_perf_results ("
-              + "  id                SERIAL PRIMARY KEY,"
-              + "  test_name         VARCHAR(200),"
-              + "  realm_count       INT,"
-              + "  total_org_count   INT,"
-              + "  first_restart_ms  BIGINT,"
-              + "  second_restart_ms BIGINT,"
-              + "  recorded_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
-              + ")");
-      try (PreparedStatement ps = conn.prepareStatement(
-          "INSERT INTO migration_perf_results"
-              + " (test_name, realm_count, total_org_count, first_restart_ms, second_restart_ms)"
-              + " VALUES (?, ?, ?, ?, ?)")) {
+      conn.createStatement()
+          .execute(
+              "CREATE TABLE IF NOT EXISTS migration_perf_results ("
+                  + "  id                SERIAL PRIMARY KEY,"
+                  + "  test_name         VARCHAR(200),"
+                  + "  realm_count       INT,"
+                  + "  total_org_count   INT,"
+                  + "  first_restart_ms  BIGINT,"
+                  + "  second_restart_ms BIGINT,"
+                  + "  recorded_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+                  + ")");
+      try (PreparedStatement ps =
+          conn.prepareStatement(
+              "INSERT INTO migration_perf_results"
+                  + " (test_name, realm_count, total_org_count, first_restart_ms, second_restart_ms)"
+                  + " VALUES (?, ?, ?, ?, ?)")) {
         ps.setString(1, r.scenario());
         ps.setInt(2, r.realmCount());
         ps.setInt(3, r.totalOrgs());
@@ -495,16 +507,24 @@ public class InitRolesPostMigrationTest {
   private void printPerfSummary(List<PerfResult> results) {
     int nameW = results.stream().mapToInt(r -> r.scenario().length()).max().orElse(10);
     String rowFmt = "%-" + nameW + "s | %6d | %9d | %12d ms | %12d ms";
-    String header  = ("%-" + nameW + "s | %6s | %9s | %14s | %14s")
-        .formatted("scenario", "realms", "totalOrgs", "1st restart", "2nd restart");
+    String header =
+        ("%-" + nameW + "s | %6s | %9s | %14s | %14s")
+            .formatted("scenario", "realms", "totalOrgs", "1st restart", "2nd restart");
     String separator = "-".repeat(header.length());
-    StringBuilder sb = new StringBuilder("\n=== HIGH-LOAD MIGRATION PERF SUMMARY ===\n")
-        .append(header).append("\n")
-        .append(separator).append("\n");
+    StringBuilder sb =
+        new StringBuilder("\n=== HIGH-LOAD MIGRATION PERF SUMMARY ===\n")
+            .append(header)
+            .append("\n")
+            .append(separator)
+            .append("\n");
     for (PerfResult r : results) {
-      sb.append(rowFmt.formatted(
-              r.scenario(), r.realmCount(), r.totalOrgs(),
-              r.firstRestartMs(), r.secondRestartMs()))
+      sb.append(
+              rowFmt.formatted(
+                  r.scenario(),
+                  r.realmCount(),
+                  r.totalOrgs(),
+                  r.firstRestartMs(),
+                  r.secondRestartMs()))
           .append("\n");
     }
     sb.append(separator);
@@ -519,7 +539,9 @@ public class InitRolesPostMigrationTest {
                 + "(SELECT id FROM organization_role WHERE name = ? AND organization_id IN (%s))")
             .formatted(placeholders);
     String deleteRoles =
-        "DELETE FROM organization_role WHERE name = ? AND organization_id IN (" + placeholders + ")";
+        "DELETE FROM organization_role WHERE name = ? AND organization_id IN ("
+            + placeholders
+            + ")";
     try (Connection conn =
         DriverManager.getConnection(
             postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())) {
@@ -548,7 +570,8 @@ public class InitRolesPostMigrationTest {
     List<String> realOrgIds = new ArrayList<>();
     for (int i = 0; i < realOrgCount; i++) {
       OrganizationRepresentation org =
-          orgsApi().createOrganization(new OrganizationRepresentation().name("orphan-test-org-" + i));
+          orgsApi()
+              .createOrganization(new OrganizationRepresentation().name("orphan-test-org-" + i));
       realOrgIds.add(org.getId());
     }
     deleteOrgRoleFromDb(realOrgIds, ORG_ROLE_DELETE_ORGANIZATION);
@@ -639,9 +662,7 @@ public class InitRolesPostMigrationTest {
       try (ResultSet rs = ps.executeQuery()) {
         rs.next();
         assertThat(
-            "DB count of role '" + roleName + "' for given orgs",
-            rs.getInt(1),
-            is(expectedCount));
+            "DB count of role '" + roleName + "' for given orgs", rs.getInt(1), is(expectedCount));
       }
     }
   }

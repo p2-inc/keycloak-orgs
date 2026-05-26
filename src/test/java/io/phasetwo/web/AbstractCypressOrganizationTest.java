@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
@@ -54,10 +53,12 @@ public class AbstractCypressOrganizationTest {
 
   @AfterEach
   public void cleanupKeycloakInstance() {
-    List.copyOf(knownRealms).forEach(realmName -> {
-      findRealmByName(realmName).remove();
-      knownRealms.remove(realmName);
-    });
+    List.copyOf(knownRealms)
+        .forEach(
+            realmName -> {
+              findRealmByName(realmName).remove();
+              knownRealms.remove(realmName);
+            });
   }
 
   protected List<String> getKnownRealms() {
@@ -104,7 +105,8 @@ public class AbstractCypressOrganizationTest {
   public static final KeycloakContainer container = initKeycloakContainer();
 
   private static KeycloakContainer initKeycloakContainer() {
-    KeycloakContainer keycloakContainer = new KeycloakContainer(KEYCLOAK_IMAGE)
+    KeycloakContainer keycloakContainer =
+        new KeycloakContainer(KEYCLOAK_IMAGE)
             .withImagePullPolicy(PullPolicy.alwaysPull())
             .withContextPath("/auth")
             .withReuse(true)
@@ -118,13 +120,16 @@ public class AbstractCypressOrganizationTest {
                             + "-use-jpa=true")
             .withAccessToHost(true);
     if (isJacocoPresent()) {
-      keycloakContainer = keycloakContainer.withCopyFileToContainer(
-                      MountableFile.forHostPath("target/jacoco-agent/"),
-                      "/jacoco-agent"
-              )
-              .withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -javaagent:/jacoco-agent/org.jacoco.agent-runtime.jar=destfile=/tmp/jacoco.exec");
+      keycloakContainer =
+          keycloakContainer
+              .withCopyFileToContainer(
+                  MountableFile.forHostPath("target/jacoco-agent/"), "/jacoco-agent")
+              .withEnv(
+                  "JAVA_OPTS",
+                  "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -javaagent:/jacoco-agent/org.jacoco.agent-runtime.jar=destfile=/tmp/jacoco.exec");
     } else {
-      keycloakContainer = keycloakContainer.withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m");
+      keycloakContainer =
+          keycloakContainer.withEnv("JAVA_OPTS", "-XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m");
     }
 
     return keycloakContainer;
@@ -148,7 +153,8 @@ public class AbstractCypressOrganizationTest {
     container.getDockerClient().stopContainerCmd(containerId).exec();
     if (isJacocoPresent()) {
       Files.createDirectories(Path.of("target", "jacoco-report"));
-      container.copyFileFromContainer("/tmp/jacoco.exec", "./target/jacoco-report/jacoco-%s.exec".formatted(containerShortId));
+      container.copyFileFromContainer(
+          "/tmp/jacoco.exec", "./target/jacoco-report/jacoco-%s.exec".formatted(containerShortId));
     }
     container.stop();
   }
@@ -199,14 +205,14 @@ public class AbstractCypressOrganizationTest {
   }
 
   protected Response postRequest(Keycloak keycloak, Object body, String path)
-          throws JsonProcessingException {
+      throws JsonProcessingException {
     return givenSpec(keycloak)
-            .and()
-            .body(toJsonString(body))
-            .post(path)
-            .then()
-            .extract()
-            .response();
+        .and()
+        .body(toJsonString(body))
+        .post(path)
+        .then()
+        .extract()
+        .response();
   }
 
   protected RequestSpecification givenSpec(Keycloak keycloak, String... paths) {
@@ -228,19 +234,19 @@ public class AbstractCypressOrganizationTest {
 
   protected void importRealm(RealmRepresentation representation, Keycloak keycloak) {
     var response =
-            given()
-                    .baseUri(container.getAuthServerUrl())
-                    .basePath("admin/realms/")
-                    .contentType("application/json")
-                    .auth()
-                    .oauth2(keycloak.tokenManager().getAccessTokenString())
-                    .and()
-                    .body(representation)
-                    .when()
-                    .post()
-                    .then()
-                    .extract()
-                    .response();
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath("admin/realms/")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
+            .and()
+            .body(representation)
+            .when()
+            .post()
+            .then()
+            .extract()
+            .response();
     assertThat(response.getStatusCode(), CoreMatchers.is(Status.CREATED.getStatusCode()));
     knownRealms.add(representation.getRealm());
   }
@@ -249,64 +255,69 @@ public class AbstractCypressOrganizationTest {
     return convertToJUnitDynamicTests("", testResults);
   }
 
-  List<DynamicContainer> convertToJUnitDynamicTests(String namePrefix, CypressTestResults testResults) {
-        List<DynamicContainer> dynamicContainers = new ArrayList<>();
-        List<CypressTestSuite> suites = testResults.getSuites();
-        for (CypressTestSuite suite : suites) {
-            createContainerFromSuite(namePrefix, dynamicContainers, suite);
-        }
-        return dynamicContainers;
+  List<DynamicContainer> convertToJUnitDynamicTests(
+      String namePrefix, CypressTestResults testResults) {
+    List<DynamicContainer> dynamicContainers = new ArrayList<>();
+    List<CypressTestSuite> suites = testResults.getSuites();
+    for (CypressTestSuite suite : suites) {
+      createContainerFromSuite(namePrefix, dynamicContainers, suite);
     }
+    return dynamicContainers;
+  }
 
-    void createContainerFromSuite(String namePrefix, List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
-        List<DynamicTest> dynamicTests = new ArrayList<>();
-        for (CypressTest test : suite.getTests()) {
-            dynamicTests.add(
-                    DynamicTest.dynamicTest(
-                            test.getDescription(),
-                            () -> {
-                                if (!test.isSuccess()) {
-                                    log.error(test.getErrorMessage());
-                                    log.error(test.getStackTrace());
-                                }
-                                Assertions.assertTrue(test.isSuccess());
-                            }));
-        }
-        dynamicContainers.add(DynamicContainer.dynamicContainer(namePrefix + suite.getTitle(), dynamicTests));
+  void createContainerFromSuite(
+      String namePrefix, List<DynamicContainer> dynamicContainers, CypressTestSuite suite) {
+    List<DynamicTest> dynamicTests = new ArrayList<>();
+    for (CypressTest test : suite.getTests()) {
+      dynamicTests.add(
+          DynamicTest.dynamicTest(
+              test.getDescription(),
+              () -> {
+                if (!test.isSuccess()) {
+                  log.error(test.getErrorMessage());
+                  log.error(test.getStackTrace());
+                }
+                Assertions.assertTrue(test.isSuccess());
+              }));
     }
+    dynamicContainers.add(
+        DynamicContainer.dynamicContainer(namePrefix + suite.getTitle(), dynamicTests));
+  }
 
-    protected RealmRepresentation importRealm(String jsonRepresentationPath, @Nullable String realmOverride) {
-        RealmRepresentation realm =
-                loadJson(getClass().getResourceAsStream(jsonRepresentationPath),
-                        RealmRepresentation.class);
-        if (realmOverride != null) {
-            realm.setRealm(realmOverride);
-        }
-        importRealm(realm, keycloak);
-        log.info("realm imported successfully:" + realm.getRealm());
-        return realm;
+  protected RealmRepresentation importRealm(
+      String jsonRepresentationPath, @Nullable String realmOverride) {
+    RealmRepresentation realm =
+        loadJson(getClass().getResourceAsStream(jsonRepresentationPath), RealmRepresentation.class);
+    if (realmOverride != null) {
+      realm.setRealm(realmOverride);
     }
+    importRealm(realm, keycloak);
+    log.info("realm imported successfully:" + realm.getRealm());
+    return realm;
+  }
 
-    protected static RealmResource findRealmByName(String realm) {
-        return keycloak
-                .realms()
-                .realm(realm);
-    }
+  protected static RealmResource findRealmByName(String realm) {
+    return keycloak.realms().realm(realm);
+  }
 
-  protected @NotNull OrganizationRepresentation createOrganization(RealmRepresentation testRealm, OrganizationRepresentation representation) throws JsonProcessingException {
+  protected @NotNull OrganizationRepresentation createOrganization(
+      RealmRepresentation testRealm, OrganizationRepresentation representation)
+      throws JsonProcessingException {
     var createOrgResponse =
-            given()
-                    .baseUri(container.getAuthServerUrl())
-                    .basePath("realms/" + testRealm.getRealm() + "/orgs")
-                    .contentType("application/json")
-                    .auth()
-                    .oauth2(keycloak.tokenManager().getAccessTokenString())
-                    .body(toJsonString(representation))
-                    .when()
-                    .post()
-                    .andReturn();
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath("realms/" + testRealm.getRealm() + "/orgs")
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
+            .body(toJsonString(representation))
+            .when()
+            .post()
+            .andReturn();
 
-    assertThat(createOrgResponse.getStatusCode(), CoreMatchers.is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
+    assertThat(
+        createOrgResponse.getStatusCode(),
+        CoreMatchers.is(jakarta.ws.rs.core.Response.Status.CREATED.getStatusCode()));
     assertNotNull(createOrgResponse.getHeader("Location"));
     String loc = createOrgResponse.getHeader("Location");
     String id = loc.substring(loc.lastIndexOf("/") + 1);
@@ -315,24 +326,26 @@ public class AbstractCypressOrganizationTest {
     return orgRep;
   }
 
-  protected @NotNull OrganizationRepresentation findOrganizationRepresentationById(RealmRepresentation testRealm, String id) throws JsonProcessingException {
+  protected @NotNull OrganizationRepresentation findOrganizationRepresentationById(
+      RealmRepresentation testRealm, String id) throws JsonProcessingException {
     // get organization
     var response =
-            given()
-                    .baseUri(container.getAuthServerUrl())
-                    .basePath("realms/" + testRealm.getRealm() + "/orgs/" + id)
-                    .contentType("application/json")
-                    .auth()
-                    .oauth2(keycloak.tokenManager().getAccessTokenString())
-                    .and()
-                    .when()
-                    .get()
-                    .then()
-                    .extract()
-                    .response();
-    assertThat(response.statusCode(), Matchers.is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
+        given()
+            .baseUri(container.getAuthServerUrl())
+            .basePath("realms/" + testRealm.getRealm() + "/orgs/" + id)
+            .contentType("application/json")
+            .auth()
+            .oauth2(keycloak.tokenManager().getAccessTokenString())
+            .and()
+            .when()
+            .get()
+            .then()
+            .extract()
+            .response();
+    assertThat(
+        response.statusCode(), Matchers.is(jakarta.ws.rs.core.Response.Status.OK.getStatusCode()));
     OrganizationRepresentation orgRep =
-            objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
+        objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
     assertThat(orgRep.getId(), CoreMatchers.is(id));
     return orgRep;
   }
