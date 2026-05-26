@@ -47,7 +47,7 @@ jobs:
     steps:
       - name: Download artifact
         id: download-artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: jacoco-report
           run-id: ${{ github.event.workflow_run.id }}
@@ -56,7 +56,7 @@ jobs:
 
       - name: Add JaCoCo coverage to PR
         id: jacoco
-        uses: vilmosnagy/jacoco-report@1.7.2-v2
+        uses: vilmosnagy/jacoco-report@1.8.0
         with:
           paths: |
             ${{ steps.download-artifact.outputs.download-path }}/jacoco.xml

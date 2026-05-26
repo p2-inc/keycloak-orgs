@@ -106,7 +106,12 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   @Override
   public Stream<OrganizationModel> getOrganizationsStreamForDomain(
       RealmModel realm, String domain, boolean verified) {
-    domain = InternetDomainName.from(domain).toString();
+    try {
+       domain = InternetDomainName.from(domain).toString();
+    } catch (IllegalArgumentException e){
+       return Stream.empty();
+    }
+
     TypedQuery<DomainEntity> query =
         em.createNamedQuery(
             verified ? "getVerifiedDomainsByName" : "getDomainsByName", DomainEntity.class);

@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
+import io.phasetwo.keycloak.events.MdcLoggerEventStoreProviderFactory;
+import io.phasetwo.service.KeycloakOrgsAdminAPI;
 import io.phasetwo.service.importexport.representation.InvitationRepresentation;
 import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
 import io.phasetwo.service.importexport.representation.UserRolesRepresentation;
@@ -97,6 +99,12 @@ public abstract class AbstractOrganizationTest {
           .withProviderClassesFrom("target/classes")
           .withExposedPorts(8787, 9000, 8080)
           .withProviderLibsFrom(getDeps())
+          .withCustomCommand(
+                  "--spi-events-store-provider=" + MdcLoggerEventStoreProviderFactory.PROVIDER_ID)
+          .withCustomCommand(
+                  "--spi-events-store-"
+                          + MdcLoggerEventStoreProviderFactory.PROVIDER_ID
+                          + "-use-jpa=true")
           .withEnv(
               "JAVA_OPTS",
               "-agentlib:jdwp=transport=dt_socket,address=*:8787,server=y,suspend=n -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m ")
