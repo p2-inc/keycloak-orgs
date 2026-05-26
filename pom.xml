@@ -326,7 +326,7 @@
     <dependency>
       <groupId>dnsjava</groupId>
       <artifactId>dnsjava</artifactId>
-      <version>3.6.4</version>
+      <version>3.6.5</version>
       <optional>true</optional>
     </dependency>
 
@@ -382,19 +382,19 @@
     <dependency>
       <groupId>com.github.dasniko</groupId>
       <artifactId>testcontainers-keycloak</artifactId>
-      <version>4.1.1</version>
+      <version>4.2.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.shrinkwrap.resolver</groupId>
       <artifactId>shrinkwrap-resolver-impl-maven-archive</artifactId>
-      <version>3.3.3</version>
+      <version>3.3.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.5.16</version>
+      <version>1.5.32</version>
       <scope>test</scope>
     </dependency>
     <dependency>
