@@ -1,7 +1,6 @@
 package io.phasetwo.service.importexport;
 
 import static io.phasetwo.service.Helpers.loadJson;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -11,7 +10,6 @@ import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.KeycloakOrgsAdminAPI;
 import io.phasetwo.service.importexport.representation.KeycloakOrgsRepresentation;
 import jakarta.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;

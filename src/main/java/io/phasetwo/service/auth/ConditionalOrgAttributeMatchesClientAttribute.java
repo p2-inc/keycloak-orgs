@@ -1,6 +1,5 @@
 package io.phasetwo.service.auth;
 
-import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 
 import io.phasetwo.service.model.OrganizationProvider;
 import java.util.Map;
@@ -32,17 +31,17 @@ public class ConditionalOrgAttributeMatchesClientAttribute implements Conditiona
     // Retrieve configuration
     Map<String, String> config = context.getAuthenticatorConfig().getConfig();
     String orgAttrName =
-        config.get(
-            ConditionalOrgAttributeMatchesClientAttributeFactory.CONF_ORG_ATTRIBUTE_NAME);
+        config.get(ConditionalOrgAttributeMatchesClientAttributeFactory.CONF_ORG_ATTRIBUTE_NAME);
     String clientAttrName =
-        config.get(
-            ConditionalOrgAttributeMatchesClientAttributeFactory.CONF_CLIENT_ATTRIBUTE_NAME);
+        config.get(ConditionalOrgAttributeMatchesClientAttributeFactory.CONF_CLIENT_ATTRIBUTE_NAME);
     boolean negateOutput =
         Boolean.parseBoolean(
             config.get(ConditionalOrgAttributeMatchesClientAttributeFactory.CONF_NEGATE));
 
     // Validate config — fail closed if misconfigured
-    if (orgAttrName == null || orgAttrName.isBlank() || clientAttrName == null
+    if (orgAttrName == null
+        || orgAttrName.isBlank()
+        || clientAttrName == null
         || clientAttrName.isBlank()) {
       log.warnf(
           "Condition config incomplete: orgAttr=[%s], clientAttr=[%s]. Returning no-match (fail closed).",

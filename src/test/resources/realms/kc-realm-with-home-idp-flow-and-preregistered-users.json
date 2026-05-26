@@ -130,6 +130,21 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "username": "unverified@phasetwo+111.io",
+      "email": "unverified@phasetwo+111.io",
+      "enabled": true,
+      "emailVerified": false,
+      "firstName": "R",
+      "lastName": "T",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
     }
   ]
 }

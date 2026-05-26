@@ -25,6 +25,7 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.common.util.CollectionUtil;
@@ -381,6 +382,10 @@ public class OrganizationsResource extends OrganizationAdminResource {
       return response.build();
     }
 
+    if (organizationsExists(session, organizations)) {
+      throw ErrorResponse.exists("Imported organizations duplicate.");
+    }
+
     KeycloakModelUtils.runJobInTransaction(
         session.getKeycloakSessionFactory(),
         (session) -> {
@@ -406,6 +411,16 @@ public class OrganizationsResource extends OrganizationAdminResource {
     return response.build();
   }
 
+  private boolean organizationsExists(
+      KeycloakSession session, List<OrganizationRepresentation> organizationsRepresentation) {
+    var organizationProvider = session.getProvider(OrganizationProvider.class);
+    var names =
+        organizationsRepresentation.stream()
+            .map(org -> org.getOrganization().getName())
+            .collect(Collectors.toSet());
+    return organizationProvider.any(realm, names);
+  }
+
   private void createOrganization(
       boolean skipMissingMember,
       boolean skipMissingIdp,
@@ -426,9 +441,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
                 user,
                 false);
       } else {
-        org =
-            organizationProvider.createOrganization(
-                realm, organizationRepresentation.getOrganization().getName(), user, false);
+        var name = organizationRepresentation.getOrganization().getName();
+        org = organizationProvider.createOrganization(realm, name, user, false);
       }
 
       KeycloakOrgsImportConverter.setOrganizationAttributes(

@@ -2,10 +2,8 @@ package io.phasetwo.service.model;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
+import java.util.*;
 import java.util.stream.Stream;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
@@ -51,7 +49,8 @@ public interface OrganizationProvider extends Provider {
   Stream<IdentityProviderModel> getIdentityProvidersStream(
       RealmModel realm, String configKey, String configValue, boolean exact);
 
-  Collection<? extends OrganizationModel> getOrganizationsMissingRole(String roleName, int batchSize);
+  Collection<? extends OrganizationModel> getOrganizationsMissingRole(
+      String roleName, int batchSize);
 
   // https://github.com/p2-inc/keycloak-orgs/issues/454
   long countOrphanedOrganizations();
@@ -107,5 +106,11 @@ public interface OrganizationProvider extends Provider {
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> getOrganizationsStream(RealmModel realm) {
     return searchForOrganizationStream(realm, null, null, null, Optional.empty());
+  }
+
+  Stream<ExtOrganizationEntity> findByNames(RealmModel realm, Set<String> names);
+
+  default boolean any(RealmModel realm, Set<String> names) {
+    return findByNames(realm, names).findAny().isPresent();
   }
 }

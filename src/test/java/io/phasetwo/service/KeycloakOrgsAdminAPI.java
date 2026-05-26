@@ -16,7 +16,6 @@ import io.phasetwo.service.representation.OrganizationRole;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import jakarta.ws.rs.core.Response.Status;
-import java.io.IOException;
 import java.util.List;
 import org.keycloak.admin.client.Keycloak;
 
@@ -46,8 +45,7 @@ public class KeycloakOrgsAdminAPI {
   /** Creates an organization and returns its full representation. */
   public OrganizationRepresentation createOrganization(OrganizationRepresentation representation)
       throws JsonProcessingException {
-    Response response =
-        givenSpec().body(toJsonString(representation)).post().andReturn();
+    Response response = givenSpec().body(toJsonString(representation)).post().andReturn();
     assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
     String loc = response.getHeader("Location");
     assertNotNull(loc);
@@ -82,7 +80,7 @@ public class KeycloakOrgsAdminAPI {
   public List<OrganizationRepresentation> listOrganizations() throws JsonProcessingException {
     Response response = givenSpec().get().andReturn();
     assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-      return objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    return objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
   }
 
   /** Returns all roles defined on an organization. */
