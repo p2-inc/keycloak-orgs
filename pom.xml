@@ -387,6 +387,21 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- scim extension -->
+    <dependency>
+      <groupId>io.phasetwo.keycloak</groupId>
+      <artifactId>keycloak-scim-server</artifactId>
+      <version>1.5.0.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- argon2id hashing for SCIM secrets/passwords (provided by Keycloak runtime) -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.78.1</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- javax/jakarta apis -->
     <dependency>
       <groupId>jakarta.persistence</groupId>
