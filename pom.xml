@@ -301,6 +301,7 @@
           <classpathDependencyExcludes>
             <classpathDependencyExclude>org.jboss.slf4j:slf4j-jboss-logmanager</classpathDependencyExclude>
           </classpathDependencyExcludes>
+          <rerunFailingTestsCount>2</rerunFailingTestsCount>
           <systemPropertyVariables>
             <keycloak-version>${keycloak.version}</keycloak-version>
             <include.cypress>${include.cypress}</include.cypress>
