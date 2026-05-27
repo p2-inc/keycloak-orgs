@@ -11,7 +11,7 @@ import lombok.Data;
 public class OrganizationRepresentation {
 
   @JsonProperty("organization")
-  private OrganizationAttributes organization;
+  private OrganizationImportRepresentation organization;
 
   @JsonProperty("roles")
   private List<OrganizationRoleRepresentation> roles = new ArrayList<>();

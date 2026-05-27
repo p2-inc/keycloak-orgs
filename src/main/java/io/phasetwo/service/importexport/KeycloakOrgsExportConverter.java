@@ -5,7 +5,7 @@ import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.importexport.representation.InvitationRepresentation;
-import io.phasetwo.service.importexport.representation.OrganizationAttributes;
+import io.phasetwo.service.importexport.representation.OrganizationImportRepresentation;
 import io.phasetwo.service.importexport.representation.OrganizationRepresentation;
 import io.phasetwo.service.importexport.representation.OrganizationRoleRepresentation;
 import io.phasetwo.service.importexport.representation.UserRolesRepresentation;
@@ -20,7 +20,7 @@ public final class KeycloakOrgsExportConverter {
   public static OrganizationRepresentation convertOrganizationModelToOrganizationRepresentation(
       OrganizationModel organizationModel, boolean exportMembersAndInvitations) {
     var organization =
-        KeycloakOrgsExportConverter.convertOrganizationModelToOrganizationAttributes(
+        KeycloakOrgsExportConverter.convertOrganizationModelToOrganizationImportRepresentation(
             organizationModel);
     var roles =
         organizationModel
@@ -92,9 +92,9 @@ public final class KeycloakOrgsExportConverter {
     return role;
   }
 
-  private static OrganizationAttributes convertOrganizationModelToOrganizationAttributes(
+  private static OrganizationImportRepresentation convertOrganizationModelToOrganizationImportRepresentation(
       OrganizationModel e) {
-    var o = new OrganizationAttributes();
+    var o = new OrganizationImportRepresentation();
 
     o.setName(e.getName());
     o.setDisplayName(e.getDisplayName());
