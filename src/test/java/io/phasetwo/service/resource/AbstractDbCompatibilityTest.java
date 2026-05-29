@@ -29,12 +29,12 @@ import org.testcontainers.images.PullPolicy;
 import org.testcontainers.utility.MountableFile;
 
 /**
- * Base class for database-compatibility smoke tests. To add support for a new database, extend
- * this class, annotate it with {@code @TestInstance(Lifecycle.PER_CLASS)}, and implement the three
+ * Base class for database-compatibility smoke tests. To add support for a new database, extend this
+ * class, annotate it with {@code @TestInstance(Lifecycle.PER_CLASS)}, and implement the three
  * abstract methods. The inherited {@code @Test} will run automatically.
  *
- * <p>Tests only execute when {@code -Dinclude.integration=true} is set (activated by the
- * {@code integration-tests} Maven profile).
+ * <p>Tests only execute when {@code -Dinclude.integration=true} is set (activated by the {@code
+ * integration-tests} Maven profile).
  */
 @JBossLog
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

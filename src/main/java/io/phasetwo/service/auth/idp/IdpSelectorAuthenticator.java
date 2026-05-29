@@ -31,55 +31,56 @@ public class IdpSelectorAuthenticator implements Authenticator {
   }
 
   private void redirect(AuthenticationFlowContext context, String providerId) {
-    IdentityProviderModel identityProvider = context.getSession()
-            .identityProviders().getByAlias(providerId);
+    IdentityProviderModel identityProvider =
+        context.getSession().identityProviders().getByAlias(providerId);
     if (identityProvider != null && identityProvider.isEnabled()) {
       new Redirector(context).redirectTo(identityProvider);
-        /*
-        String accessCode =
-            new ClientSessionCode<>(
-                    context.getSession(), context.getRealm(), context.getAuthenticationSession())
-                .getOrGenerateCode();
-        String clientId = context.getAuthenticationSession().getClient().getClientId();
-        String tabId = context.getAuthenticationSession().getTabId();
-        URI location =
-            Urls.identityProviderAuthnRequest(
-                context.getUriInfo().getBaseUri(),
-                providerId,
-                context.getRealm().getName(),
-                accessCode,
-                clientId,
-                tabId);
-        if (context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY) != null) {
-          location =
-              UriBuilder.fromUri(location)
-                  .queryParam(
-                      OAuth2Constants.DISPLAY,
-                      context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY))
-                  .build();
-        }
-        Response response = Response.seeOther(location).build();
-        // will forward the request to the IDP with prompt=none if the IDP accepts forwards with
-        // prompt=none.
-        if ("none"
-                .equals(
-                    context
-                        .getAuthenticationSession()
-                        .getClientNote(OIDCLoginProtocol.PROMPT_PARAM))
-            && Boolean.valueOf(identityProvider.getConfig().get(ACCEPTS_PROMPT_NONE))) {
-          context
-              .getAuthenticationSession()
-              .setAuthNote(AuthenticationProcessor.FORWARDED_PASSIVE_LOGIN, "true");
-        }
+      /*
+      String accessCode =
+          new ClientSessionCode<>(
+                  context.getSession(), context.getRealm(), context.getAuthenticationSession())
+              .getOrGenerateCode();
+      String clientId = context.getAuthenticationSession().getClient().getClientId();
+      String tabId = context.getAuthenticationSession().getTabId();
+      URI location =
+          Urls.identityProviderAuthnRequest(
+              context.getUriInfo().getBaseUri(),
+              providerId,
+              context.getRealm().getName(),
+              accessCode,
+              clientId,
+              tabId);
+      if (context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY) != null) {
+        location =
+            UriBuilder.fromUri(location)
+                .queryParam(
+                    OAuth2Constants.DISPLAY,
+                    context.getAuthenticationSession().getClientNote(OAuth2Constants.DISPLAY))
+                .build();
+      }
+      Response response = Response.seeOther(location).build();
+      // will forward the request to the IDP with prompt=none if the IDP accepts forwards with
+      // prompt=none.
+      if ("none"
+              .equals(
+                  context
+                      .getAuthenticationSession()
+                      .getClientNote(OIDCLoginProtocol.PROMPT_PARAM))
+          && Boolean.valueOf(identityProvider.getConfig().get(ACCEPTS_PROMPT_NONE))) {
+        context
+            .getAuthenticationSession()
+            .setAuthNote(AuthenticationProcessor.FORWARDED_PASSIVE_LOGIN, "true");
+      }
 
-        log.debugf("Redirecting to %s", providerId);
-        context.forceChallenge(response);
-        */
+      log.debugf("Redirecting to %s", providerId);
+      context.forceChallenge(response);
+      */
       return;
     }
 
     log.warnf("Provider not found or not enabled for realm %s", providerId);
-    if (context.getExecution().getRequirement() == AuthenticationExecutionModel.Requirement.REQUIRED) {
+    if (context.getExecution().getRequirement()
+        == AuthenticationExecutionModel.Requirement.REQUIRED) {
       context.success();
     } else {
       context.attempted();

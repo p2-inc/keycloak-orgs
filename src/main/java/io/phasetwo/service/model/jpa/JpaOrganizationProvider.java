@@ -107,9 +107,9 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   public Stream<OrganizationModel> getOrganizationsStreamForDomain(
       RealmModel realm, String domain, boolean verified) {
     try {
-       domain = InternetDomainName.from(domain).toString();
-    } catch (IllegalArgumentException e){
-       return Stream.empty();
+      domain = InternetDomainName.from(domain).toString();
+    } catch (IllegalArgumentException e) {
+      return Stream.empty();
     }
 
     TypedQuery<DomainEntity> query =

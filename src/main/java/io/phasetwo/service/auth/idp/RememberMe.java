@@ -1,4 +1,4 @@
-//package de.sventorben.keycloak.authentication.hidpd;
+// package de.sventorben.keycloak.authentication.hidpd;
 package io.phasetwo.service.auth.idp;
 
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -9,38 +9,39 @@ import org.keycloak.services.managers.AuthenticationManager;
 
 final class RememberMe {
 
-    private final AuthenticationFlowContext context;
+  private final AuthenticationFlowContext context;
 
-    RememberMe(AuthenticationFlowContext context) {
-        this.context = context;
-    }
+  RememberMe(AuthenticationFlowContext context) {
+    this.context = context;
+  }
 
-    void remember(String username) {
-        String rememberMe = context.getAuthenticationSession().getAuthNote(Details.REMEMBER_ME);
-        RealmModel realm = context.getRealm();
-        boolean remember = realm.isRememberMe() && "true".equalsIgnoreCase(rememberMe);
-        if (remember) {
-            AuthenticationManager.createRememberMeCookie(username, context.getUriInfo(), context.getSession());
-        } else {
-            AuthenticationManager.expireRememberMeCookie(context.getSession());
-        }
+  void remember(String username) {
+    String rememberMe = context.getAuthenticationSession().getAuthNote(Details.REMEMBER_ME);
+    RealmModel realm = context.getRealm();
+    boolean remember = realm.isRememberMe() && "true".equalsIgnoreCase(rememberMe);
+    if (remember) {
+      AuthenticationManager.createRememberMeCookie(
+          username, context.getUriInfo(), context.getSession());
+    } else {
+      AuthenticationManager.expireRememberMeCookie(context.getSession());
     }
+  }
 
-    /*
-     * Sets session notes for interoperability with other authenticators and Keycloak defaults
-     */
-    void handleAction(MultivaluedMap<String, String> formData) {
-        boolean remember = context.getRealm().isRememberMe() &&
-            "on".equalsIgnoreCase(formData.getFirst("rememberMe"));
-        if (remember) {
-            context.getAuthenticationSession().setAuthNote(Details.REMEMBER_ME, "true");
-            context.getEvent().detail(Details.REMEMBER_ME, "true");
-        } else {
-            context.getAuthenticationSession().removeAuthNote(Details.REMEMBER_ME);
-        }
+  /*
+   * Sets session notes for interoperability with other authenticators and Keycloak defaults
+   */
+  void handleAction(MultivaluedMap<String, String> formData) {
+    boolean remember =
+        context.getRealm().isRememberMe() && "on".equalsIgnoreCase(formData.getFirst("rememberMe"));
+    if (remember) {
+      context.getAuthenticationSession().setAuthNote(Details.REMEMBER_ME, "true");
+      context.getEvent().detail(Details.REMEMBER_ME, "true");
+    } else {
+      context.getAuthenticationSession().removeAuthNote(Details.REMEMBER_ME);
     }
+  }
 
-    String getUserName() {
-        return AuthenticationManager.getRememberMeUsername(context.getSession());
-    }
+  String getUserName() {
+    return AuthenticationManager.getRememberMeUsername(context.getSession());
+  }
 }
