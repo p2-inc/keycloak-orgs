@@ -68,7 +68,7 @@ The easiest way to get started is our [Docker image](https://quay.io/repository/
 
 ## Building and testing
 
-Checkout this project and run `mvn clean install`, which will build the source, run all unit/integration tests, and produce a jar in the `target/` directory.
+Checkout this project and run `mvn clean install`, which will build the source, run all unit/integration tests, and produce a jar in the `target/` directory. The build enforces Google Java formatting standards via the Spotify `fmt-maven-plugin`; run `mvn fmt:format` to auto-format your code before committing.
 
 ### Cypress tests
 

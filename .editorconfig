@@ -1,0 +1,106 @@
+# EditorConfig — Google Java Style Guide
+# Enforced at build time by fmt-maven-plugin (google-java-format).
+#
+# google-java-format is intentionally non-configurable; this file makes your
+# editor match what the formatter will produce so you see no diffs on save.
+#
+# References:
+#   https://google.github.io/styleguide/javaguide.html
+#   https://github.com/spotify/fmt-maven-plugin
+#   https://github.com/google/google-java-format
+
+root = true
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Defaults for every file in the project
+# ──────────────────────────────────────────────────────────────────────────────
+[*]
+charset                  = utf-8
+end_of_line              = lf
+insert_final_newline     = true
+trim_trailing_whitespace = true
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Java  — mirrors google-java-format output exactly
+#
+# Key rules from the Google Java Style Guide:
+#   § 2.3.1  UTF-8 source files
+#   § 3.1    One statement per line (handled by formatter)
+#   § 4.1    Braces: K&R style, always used (handled by formatter)
+#   § 4.2    Block indentation: +2 spaces (NOT tabs)
+#   § 4.3    One statement per line
+#   § 4.4    Column limit: 100 characters
+#   § 4.5.2  Continuation lines: +4 spaces (handled by formatter)
+#   § 4.6.1  Vertical whitespace (handled by formatter)
+#
+# Note: google-java-format hard-wraps at 100 columns and uses 2-space indent.
+#       There is no option to change either value — do not override them here.
+# ──────────────────────────────────────────────────────────────────────────────
+[*.java]
+indent_style             = space
+indent_size              = 2
+tab_width                = 2
+max_line_length          = 100
+insert_final_newline     = true
+trim_trailing_whitespace = true
+
+# IntelliJ IDEA — align with google-java-format output so saves don't produce diffs
+
+# Imports: prevent wildcard collapse (fmt always expands wildcards); static-first ordering
+ij_java_use_single_class_imports            = true
+ij_java_class_count_to_use_import_on_demand = 999
+ij_java_names_count_to_use_import_on_demand = 999
+ij_java_imports_layout                      = $*,|,*
+
+# Continuation indent: Google §4.5.2 specifies +4; IntelliJ defaults to 8
+ij_java_continuation_indent_size            = 4
+
+# Alignment: google-java-format never aligns params or chained calls; IntelliJ does by default
+ij_java_align_multiline_parameters          = false
+ij_java_align_multiline_chained_methods     = false
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Maven build files
+# ──────────────────────────────────────────────────────────────────────────────
+[*.xml]
+indent_style             = space
+indent_size              = 2
+max_line_length          = 120
+
+# ──────────────────────────────────────────────────────────────────────────────
+# IntelliJ IDEA project files
+# (keep consistent so VCS diffs stay clean)
+# ──────────────────────────────────────────────────────────────────────────────
+[*.iml]
+indent_style             = space
+indent_size              = 2
+
+[{.idea/**,*.ipr,*.iws}]
+indent_style             = space
+indent_size              = 2
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Properties & config files
+# ──────────────────────────────────────────────────────────────────────────────
+[*.properties]
+indent_style             = space
+indent_size              = 2
+
+[*.{yml,yaml}]
+indent_style             = space
+indent_size              = 2
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Shell scripts — keep LF even on Windows checkouts
+# ──────────────────────────────────────────────────────────────────────────────
+[*.sh]
+end_of_line              = lf
+indent_style             = space
+indent_size              = 2
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Markdown — trailing spaces are intentional line-breaks; don't trim them
+# ──────────────────────────────────────────────────────────────────────────────
+[*.md]
+trim_trailing_whitespace = false
+max_line_length          = off
