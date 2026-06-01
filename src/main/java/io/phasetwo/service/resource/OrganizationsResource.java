@@ -271,8 +271,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response addOrganizationsConfig(@Valid OrganizationsConfig body) {
-    log.debugf("Create org config for realm %s", realm.getName());
-    if (!auth.hasManageRealm()) {
+    log.debugf("Update org config for realm %s", realm.getName());
+    if (!permissions.realm().canManageRealm()) {
       throw new NotAuthorizedException("Insufficient permission to update organization config.");
     }
     resetIdentityProviders(body.isSharedIdps());
@@ -308,9 +308,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Path("config")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getOrganizationConfig() {
-    log.debugf("Create org config for realm %s", realm.getName());
-    if (!auth.hasManageRealm()) {
-      throw new NotAuthorizedException("Insufficient permission to update organization config.");
+    log.debugf("Get org config for realm %s", realm.getName());
+    if (!permissions.realm().canManageRealm()) {
+      throw new NotAuthorizedException("Insufficient permission to view organization config.");
     }
 
     var representation = new OrganizationsConfig();

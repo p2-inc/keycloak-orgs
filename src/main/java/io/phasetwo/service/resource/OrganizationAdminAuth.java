@@ -15,6 +15,7 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.models.AdminRoles;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RoleModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.AccessToken;
@@ -32,6 +33,29 @@ public class OrganizationAdminAuth extends AdminAuth {
       RealmModel realm, AccessToken token, UserModel user, ClientModel client) {
     super(realm, token, user, client);
     log.debugf("Realm passed to ctr is %s", realm.getName());
+  }
+
+  /**
+   * Override Keycloak's default {@code AdminAuth.hasAppRole(app, role)}, which returns
+   * {@code user.hasRole(role) && client.hasScope(role)}. The {@code client.hasScope}
+   * predicate is meaningful for OIDC clients calling admin endpoints with their own
+   * access token (it ensures the OP granted the role's scope to the calling client).
+   * It is not meaningful here, because {@link AbstractAdminResource} synthesizes the
+   * {@code client} field as the target realm's master-admin-client — its scope is an
+   * accident of which client we picked, not part of the actual authorization
+   * decision.
+   *
+   * In particular, master's master-admin-client ({@code master-realm}) and other
+   * realms' master-admin-clients ({@code <realm>-realm}) can have divergent scope
+   * configurations, causing realm-admin checks to succeed on non-master realms and
+   * 401 on master itself. Restricting the check to the model-side role mapping
+   * ({@code user.hasRole}) makes authorization uniform across realms.
+   */
+  @Override
+  public boolean hasAppRole(ClientModel app, String role) {
+    if (app == null) return false;
+    RoleModel roleModel = app.getRole(role);
+    return roleModel != null && getUser().hasRole(roleModel);
   }
 
   // create-organization
