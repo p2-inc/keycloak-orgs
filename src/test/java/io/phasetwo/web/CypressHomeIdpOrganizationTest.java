@@ -104,8 +104,8 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
             thirdIdentityProviderValidated -> {
               try {
                 setupKeycloakInstanceWithMultipleIdpsEnabledAtOrganization(); // sets up the
-                                                                              // keycloak with ~2
-                                                                              // IDP configs
+                // keycloak with ~2
+                // IDP configs
                 final var realm = findRealmByName("test-realm");
                 final var thirdClientRealm =
                     importRealm("/realms/external-idp.json", "third-external-idp");

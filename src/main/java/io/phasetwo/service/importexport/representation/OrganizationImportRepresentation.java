@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.phasetwo.service.util.EmptyStringAsNullDeserializer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import io.phasetwo.service.util.EmptyStringAsNullDeserializer;
 import lombok.Data;
 
 @Data

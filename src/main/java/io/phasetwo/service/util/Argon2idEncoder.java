@@ -29,16 +29,14 @@ public final class Argon2idEncoder {
 
   private Argon2idEncoder() {}
 
-  /**
-   * Returns true if the given value already looks like a PHC-formatted argon2 string.
-   */
+  /** Returns true if the given value already looks like a PHC-formatted argon2 string. */
   public static boolean isAlreadyHashed(String value) {
     return value != null && value.startsWith(PHC_PREFIX);
   }
 
   /**
-   * Encodes the given cleartext value into a PHC-formatted argon2id hash.
-   * Returns the input unchanged if it already looks like a PHC string.
+   * Encodes the given cleartext value into a PHC-formatted argon2id hash. Returns the input
+   * unchanged if it already looks like a PHC string.
    */
   public static String encode(String cleartext) {
     if (cleartext == null || cleartext.isEmpty() || isAlreadyHashed(cleartext)) {
@@ -65,7 +63,10 @@ public final class Argon2idEncoder {
 
     return String.format(
         "$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
-        VERSION, MEMORY_KB, ITERATIONS, PARALLELISM,
+        VERSION,
+        MEMORY_KB,
+        ITERATIONS,
+        PARALLELISM,
         ENCODER.encodeToString(salt),
         ENCODER.encodeToString(hash));
   }

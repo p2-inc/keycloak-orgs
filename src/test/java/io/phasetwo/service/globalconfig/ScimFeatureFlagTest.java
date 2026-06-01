@@ -15,8 +15,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Verifies the realm-level SCIM feature flag exposed at
- * {@code PUT/GET /realms/{realm}/orgs/config}.
+ * Verifies the realm-level SCIM feature flag exposed at {@code PUT/GET
+ * /realms/{realm}/orgs/config}.
  */
 @JBossLog
 public class ScimFeatureFlagTest extends AbstractOrganizationTest {

@@ -92,8 +92,8 @@ public final class KeycloakOrgsExportConverter {
     return role;
   }
 
-  private static OrganizationImportRepresentation convertOrganizationModelToOrganizationImportRepresentation(
-      OrganizationModel e) {
+  private static OrganizationImportRepresentation
+      convertOrganizationModelToOrganizationImportRepresentation(OrganizationModel e) {
     var o = new OrganizationImportRepresentation();
 
     o.setName(e.getName());

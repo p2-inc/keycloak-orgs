@@ -1,6 +1,5 @@
 package io.phasetwo.service.auth;
 
-
 import io.phasetwo.service.model.OrganizationProvider;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;

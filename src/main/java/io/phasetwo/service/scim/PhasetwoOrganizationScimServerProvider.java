@@ -65,8 +65,7 @@ public class PhasetwoOrganizationScimServerProvider implements OrganizationScimS
                 String.format(
                     "realms/%s/scim/v2/organizations/%s/", realm.getName(), organization.getId()));
 
-    ScimConfigurationProvider configProvider =
-        session.getProvider(ScimConfigurationProvider.class);
+    ScimConfigurationProvider configProvider = session.getProvider(ScimConfigurationProvider.class);
     ComponentScimConfig config = configProvider.getConfiguration(organizationId);
     if (config == null) {
       throw new NotFoundException(organizationId + " has no SCIM configuration");
