@@ -113,11 +113,11 @@ public class AbstractCypressOrganizationTest {
             .withProviderClassesFrom("target/classes")
             .withProviderLibsFrom(getDeps())
             .withCustomCommand(
-                    "--spi-events-store-provider=" + MdcLoggerEventStoreProviderFactory.PROVIDER_ID)
+                "--spi-events-store-provider=" + MdcLoggerEventStoreProviderFactory.PROVIDER_ID)
             .withCustomCommand(
-                    "--spi-events-store-"
-                            + MdcLoggerEventStoreProviderFactory.PROVIDER_ID
-                            + "-use-jpa=true")
+                "--spi-events-store-"
+                    + MdcLoggerEventStoreProviderFactory.PROVIDER_ID
+                    + "-use-jpa=true")
             .withAccessToHost(true);
     if (isJacocoPresent()) {
       keycloakContainer =

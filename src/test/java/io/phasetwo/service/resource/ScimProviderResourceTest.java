@@ -5,17 +5,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.phasetwo.client.openapi.model.OrganizationRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.representation.*;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
-import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -299,10 +296,8 @@ class ScimProviderResourceTest extends AbstractOrganizationTest {
 
     SharedSecretScimAuth resultAuth = (SharedSecretScimAuth) result.getAuth();
     String stored = resultAuth.getSharedSecret();
-    assertThat("server must not return the cleartext", stored,
-        not(is("super-secret-cleartext")));
-    assertThat("stored value must be a PHC argon2id hash", stored,
-        startsWith("$argon2id$"));
+    assertThat("server must not return the cleartext", stored, not(is("super-secret-cleartext")));
+    assertThat("stored value must be a PHC argon2id hash", stored, startsWith("$argon2id$"));
   }
 
   @Test
@@ -354,13 +349,10 @@ class ScimProviderResourceTest extends AbstractOrganizationTest {
             .readValue(response.getBody().asString(), OrganizationScimRepresentation.class);
     BasicAuthScimAuth resultAuth = (BasicAuthScimAuth) result.getAuth();
     assertThat(resultAuth.getUsername(), is("scim-admin"));
-    assertThat("username is never hashed", resultAuth.getUsername(),
-        not(startsWith("$argon2")));
-    assertThat("password is hashed before storage",
-        resultAuth.getPassword(),
-        startsWith("$argon2id$"));
-    assertThat(resultAuth.getPassword(),
-        not(is("plaintext-pass")));
+    assertThat("username is never hashed", resultAuth.getUsername(), not(startsWith("$argon2")));
+    assertThat(
+        "password is hashed before storage", resultAuth.getPassword(), startsWith("$argon2id$"));
+    assertThat(resultAuth.getPassword(), not(is("plaintext-pass")));
   }
 
   @Test
@@ -377,8 +369,7 @@ class ScimProviderResourceTest extends AbstractOrganizationTest {
     SharedSecretScimAuth secretAuth = new SharedSecretScimAuth();
     secretAuth.setSharedSecret("first-cleartext");
     rep.setAuth(secretAuth);
-    assertThat(
-        postRequest(rep, orgId, "scim").getStatusCode(), is(Status.CREATED.getStatusCode()));
+    assertThat(postRequest(rep, orgId, "scim").getStatusCode(), is(Status.CREATED.getStatusCode()));
 
     Response getResp = getRequest(orgId, "scim");
     String storedHash =
@@ -449,9 +440,7 @@ class ScimProviderResourceTest extends AbstractOrganizationTest {
 
     assertThat(secondHash, startsWith("$argon2id$"));
     assertThat(
-        "different cleartext should produce a different hash",
-        secondHash,
-        not(is(firstHash)));
+        "different cleartext should produce a different hash", secondHash, not(is(firstHash)));
   }
 
   @Test
@@ -467,16 +456,11 @@ class ScimProviderResourceTest extends AbstractOrganizationTest {
     rep.setAuth(new KeycloakScimAuth());
 
     // GET / POST / PUT / DELETE all return 404 when the feature is off.
+    assertThat(getRequest(orgId, "scim").getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
     assertThat(
-        getRequest(orgId, "scim").getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
+        postRequest(rep, orgId, "scim").getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
     assertThat(
-        postRequest(rep, orgId, "scim").getStatusCode(),
-        is(Status.NOT_FOUND.getStatusCode()));
-    assertThat(
-        putRequest(rep, orgId, "scim").getStatusCode(),
-        is(Status.NOT_FOUND.getStatusCode()));
-    assertThat(
-        deleteRequest(orgId, "scim").getStatusCode(),
-        is(Status.NOT_FOUND.getStatusCode()));
+        putRequest(rep, orgId, "scim").getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
+    assertThat(deleteRequest(orgId, "scim").getStatusCode(), is(Status.NOT_FOUND.getStatusCode()));
   }
 }

@@ -5,9 +5,7 @@ import org.keycloak.component.ComponentModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 
-/**
- * Default implementation of ScimConfigurationProvider backed by Keycloak ComponentModel.
- */
+/** Default implementation of ScimConfigurationProvider backed by Keycloak ComponentModel. */
 public class DefaultScimConfigurationProvider implements ScimConfigurationProvider {
 
   private final KeycloakSession session;
@@ -91,14 +89,12 @@ public class DefaultScimConfigurationProvider implements ScimConfigurationProvid
   private void copyConfigToModel(ComponentModel target, ComponentScimConfig source) {
     if (source.getAuthenticationMode() != null) {
       target.put(
-          ComponentScimConfig.SCIM_AUTHENTICATION_MODE,
-          source.getAuthenticationMode().name());
+          ComponentScimConfig.SCIM_AUTHENTICATION_MODE, source.getAuthenticationMode().name());
     }
     setOrRemove(target, ComponentScimConfig.SCIM_EXTERNAL_ISSUER, source.getExternalIssuer());
     setOrRemove(target, ComponentScimConfig.SCIM_EXTERNAL_AUDIENCE, source.getExternalAudience());
     setOrRemove(target, ComponentScimConfig.SCIM_EXTERNAL_JWKS_URI, source.getExternalJwksUri());
-    setOrRemove(
-        target, ComponentScimConfig.SCIM_EXTERNAL_SHARED_SECRET, source.getSharedSecret());
+    setOrRemove(target, ComponentScimConfig.SCIM_EXTERNAL_SHARED_SECRET, source.getSharedSecret());
     setOrRemove(
         target, ComponentScimConfig.SCIM_BASIC_AUTH_USERNAME, source.getBasicAuthUsername());
     setOrRemove(

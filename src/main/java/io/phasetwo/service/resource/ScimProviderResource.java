@@ -29,9 +29,9 @@ public class ScimProviderResource extends OrganizationAdminResource {
   }
 
   /**
-   * If the realm-level SCIM feature flag is disabled, the entire resource pretends
-   * not to exist (404). The flag defaults to false; flip it on via the
-   * Organization Settings UI or {@code /realms/{realm}/orgs/config}.
+   * If the realm-level SCIM feature flag is disabled, the entire resource pretends not to exist
+   * (404). The flag defaults to false; flip it on via the Organization Settings UI or {@code
+   * /realms/{realm}/orgs/config}.
    */
   private void requireScimEnabled() {
     if (!session.getContext().getRealm().getAttribute(ORG_CONFIG_SCIM_ENABLED_KEY, false)) {
@@ -78,8 +78,7 @@ public class ScimProviderResource extends OrganizationAdminResource {
           .build();
     }
 
-    ComponentScimConfig newConfig =
-        convertRepresentationToScimConfig(rep);
+    ComponentScimConfig newConfig = convertRepresentationToScimConfig(rep);
     ComponentScimConfig created =
         configProvider.createConfiguration(organization.getId(), newConfig);
 
@@ -112,8 +111,7 @@ public class ScimProviderResource extends OrganizationAdminResource {
       throw new NotFoundException("No SCIM configuration found for organization");
     }
 
-    ComponentScimConfig updateConfig =
-        convertRepresentationToScimConfig(rep);
+    ComponentScimConfig updateConfig = convertRepresentationToScimConfig(rep);
     ComponentScimConfig updated =
         configProvider.updateConfiguration(organization.getId(), updateConfig);
 

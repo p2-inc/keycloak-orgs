@@ -2561,7 +2561,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       // Get the list of roles to verify the delete-organization role exists by default
       Response response = getRequest(orgId);
       assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-      final var orgRep = objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
+      final var orgRep =
+          objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
       final var currentDomainList = orgRep.getDomains();
       final var updatedDomainList = new ArrayList<>(currentDomainList);
       updatedDomainList.add("");
@@ -2572,10 +2573,14 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
       Response responseAfterModification = getRequest(orgId);
       assertThat(responseAfterModification.getStatusCode(), is(Status.OK.getStatusCode()));
-      final var orgRepAfterModification = objectMapper().readValue(responseAfterModification.getBody().asString(), OrganizationRepresentation.class);
+      final var orgRepAfterModification =
+          objectMapper()
+              .readValue(
+                  responseAfterModification.getBody().asString(), OrganizationRepresentation.class);
       final var expectedDomains = new HashSet<>(currentDomainList);
       expectedDomains.add("vnagy.eu");
-      assertThat(orgRepAfterModification.getDomains(), containsInAnyOrder(expectedDomains.toArray()));
+      assertThat(
+          orgRepAfterModification.getDomains(), containsInAnyOrder(expectedDomains.toArray()));
     } finally {
       // Clean up
       deleteOrganization(orgId);
@@ -2593,7 +2598,8 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       // Get the list of roles to verify the delete-organization role exists by default
       Response response = getRequest(orgId);
       assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
-      final var orgRep = objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
+      final var orgRep =
+          objectMapper().readValue(response.getBody().asString(), OrganizationRepresentation.class);
       final var currentDomainList = orgRep.getDomains();
       final var updatedDomainList = new ArrayList<>(currentDomainList);
       updatedDomainList.add("");
@@ -2605,10 +2611,14 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
       Response responseAfterModification = getRequest(orgId);
       assertThat(responseAfterModification.getStatusCode(), is(Status.OK.getStatusCode()));
-      final var orgRepAfterModification = objectMapper().readValue(responseAfterModification.getBody().asString(), OrganizationRepresentation.class);
+      final var orgRepAfterModification =
+          objectMapper()
+              .readValue(
+                  responseAfterModification.getBody().asString(), OrganizationRepresentation.class);
       final var expectedDomains = new HashSet<>(currentDomainList);
       expectedDomains.add("vnagy.eu");
-      assertThat(orgRepAfterModification.getDomains(), containsInAnyOrder(expectedDomains.toArray()));
+      assertThat(
+          orgRepAfterModification.getDomains(), containsInAnyOrder(expectedDomains.toArray()));
     } finally {
       // Clean up
       deleteOrganization(orgId);

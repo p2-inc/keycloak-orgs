@@ -4,8 +4,8 @@ import io.phasetwo.service.scim.ComponentScimConfig;
 import org.keycloak.provider.Provider;
 
 /**
- * SPI for managing per-organization SCIM configurations.
- * Abstracts away the underlying persistence mechanism.
+ * SPI for managing per-organization SCIM configurations. Abstracts away the underlying persistence
+ * mechanism.
  */
 public interface ScimConfigurationProvider extends Provider {
 

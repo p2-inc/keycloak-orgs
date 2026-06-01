@@ -2,13 +2,13 @@ package io.phasetwo.service.resource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.phasetwo.service.scim.ComponentScimConfig;
-import io.phasetwo.service.util.Argon2idEncoder;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.representation.*;
+import io.phasetwo.service.scim.ComponentScimConfig;
+import io.phasetwo.service.util.Argon2idEncoder;
 import java.util.List;
 import java.util.Map;
 import org.keycloak.component.ComponentModel;

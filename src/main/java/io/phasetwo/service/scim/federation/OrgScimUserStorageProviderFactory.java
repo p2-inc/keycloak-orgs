@@ -14,27 +14,23 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.storage.UserStorageProviderFactory;
 
 /**
- * Registers an "Organization SCIM" User Federation provider. Its sole
- * purpose is to make Keycloak's ComponentModel infrastructure accept
- * SCIM-config persistence: the SCIM-tab REST endpoint creates a
- * {@code ComponentModel} with
- * {@code providerType=org.keycloak.storage.UserStorageProvider} and
- * {@code providerId="Organization SCIM"}, and Keycloak validates that
- * combo against a registered factory at add/update time.
+ * Registers an "Organization SCIM" User Federation provider. Its sole purpose is to make Keycloak's
+ * ComponentModel infrastructure accept SCIM-config persistence: the SCIM-tab REST endpoint creates
+ * a {@code ComponentModel} with {@code providerType=org.keycloak.storage.UserStorageProvider} and
+ * {@code providerId="Organization SCIM"}, and Keycloak validates that combo against a registered
+ * factory at add/update time.
  *
- * <p>Side effect: the entry appears in the Keycloak Admin Console's
- * User Federation page. That's accepted as a cosmetic compromise — the
- * canonical UI for managing SCIM configs is the per-org SCIM tab.
+ * <p>Side effect: the entry appears in the Keycloak Admin Console's User Federation page. That's
+ * accepted as a cosmetic compromise — the canonical UI for managing SCIM configs is the per-org
+ * SCIM tab.
  *
- * <p>An earlier iteration tried to gate this factory behind
- * {@code EnvironmentDependentProviderFactory#isSupported} so it could
- * be hidden from the User Federation list by default, but that broke
- * storage entirely (no registered factory means
- * {@code realm.addComponentModel} throws "No such provider"). Hiding
- * just the UI listing without breaking storage would require turning
- * {@code ScimConfigurationProviderFactory} into a full
- * {@link org.keycloak.component.ComponentFactory} and switching the
- * storage providerType to our SPI's FQCN.
+ * <p>An earlier iteration tried to gate this factory behind {@code
+ * EnvironmentDependentProviderFactory#isSupported} so it could be hidden from the User Federation
+ * list by default, but that broke storage entirely (no registered factory means {@code
+ * realm.addComponentModel} throws "No such provider"). Hiding just the UI listing without breaking
+ * storage would require turning {@code ScimConfigurationProviderFactory} into a full {@link
+ * org.keycloak.component.ComponentFactory} and switching the storage providerType to our SPI's
+ * FQCN.
  */
 @SuppressWarnings("rawtypes")
 @JBossLog

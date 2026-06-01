@@ -175,12 +175,30 @@ public abstract class AbstractAdminResource<T extends AdminAuth> {
       UriInfo uriInfo,
       ClientConnection connection,
       HttpHeaders headers) {
-    return new AppAuthManager.BearerTokenAuthenticator(session)
-        .setRealm(realm)
-        .setUriInfo(uriInfo)
-        .setTokenString(tokenString)
-        .setConnection(connection)
-        .setHeaders(headers)
-        .authenticate();
+    // For DPoP-bound tokens (`typ: DPoP`, `cnf.jkt` present), the Keycloak request
+    // pipeline for `/realms/<realm>/...` paths validates and consumes the DPoP
+    // proof's JTI before our resource handler runs. If we then call
+    // `BearerTokenAuthenticator.authenticate()`, it tries to re-validate the same
+    // proof inside `AuthenticationManager.verifyIdentityToken` via
+    // `DPoPUtil.withDPoPVerifier`, hits the replay-protection store ("DPoP proof
+    // has already been used"), and returns null. Stock admin endpoints under
+    // `/admin/...` don't hit this because they go through a different request
+    // pipeline that doesn't pre-validate the proof.
+    //
+    // Skip the DPoP wrapping by calling `verifyIdentityToken` directly with a
+    // no-op verifier consumer. Signature/issuer/audience/active checks still
+    // run; only DPoP's replay check is omitted (it ran upstream already).
+    return AuthenticationManager.verifyIdentityToken(
+        session,
+        realm,
+        uriInfo,
+        connection,
+        /* checkActive */ true,
+        /* checkTokenType */ true,
+        /* checkAudience */ null,
+        /* isCookie */ false,
+        tokenString,
+        headers,
+        /* verifierConsumer */ v -> {});
   }
 }
