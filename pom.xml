@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
@@ -10,9 +11,9 @@
   <url>https://github.com/p2-inc/keycloak-orgs</url>
 
   <parent>
-    <groupId>com.github.xgp</groupId>
+    <groupId>io.phasetwo</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>0.7</version>
+    <version>0.13</version>
   </parent>
 
   <developers>
@@ -71,7 +72,8 @@
                 </goals>
                 <configuration>
                   <target>
-                    <echo level="warn" message="[DEPRECATED] The cypress-tests profile is deprecated. Please use -Pintegration-tests instead, which runs Cypress and the database-compatibility smoke tests." />
+                    <echo level="warn"
+                          message="[DEPRECATED] The cypress-tests profile is deprecated. Please use -Pintegration-tests instead, which runs Cypress and the database-compatibility smoke tests."/>
                   </target>
                 </configuration>
               </execution>
@@ -211,24 +213,39 @@
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>3.6.0</version>
+          <configuration>
+            <java>
+              <excludes>
+                <exclude>src/main/java/io/phasetwo/service/auth/idp/*.java</exclude>
+                <exclude>src/main/java/io/phasetwo/service/auth/idp/**/*.java</exclude>
+              </excludes>
+            </java>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.12.0</version>
         <configuration>
-            <source>${java.version}</source>
+          <source>${java.version}</source>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
         <configuration>
           <forceJavacCompilerUse>true</forceJavacCompilerUse>
           <source>${java.version}</source>
@@ -253,7 +270,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>1.4</version>
         <executions>
           <execution>
             <id>detect-scm-revision</id>
@@ -287,11 +303,6 @@
           <javaPackage>${main.java.package}</javaPackage>
           <versionCommit>${buildNumber}</versionCommit>
         </configuration>
-      </plugin>
-      <plugin> <!-- pretty up the code using google java standards `mvn fmt:format` -->
-        <groupId>com.spotify.fmt</groupId>
-        <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.29</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
