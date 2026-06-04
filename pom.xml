@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.phasetwo.keycloak</groupId>
   <artifactId>keycloak-orgs</artifactId>
   <packaging>jar</packaging>
-  <version>0.166-SNAPSHOT</version>
+  <version>0.166</version>
 
   <name>Phase Two Keycloak Organizations</name>
   <description>The original organizations implementation for single-realm, multi-tenancy in Keycloak.</description>
@@ -50,7 +49,7 @@
   <scm>
     <url>https://github.com/p2-inc/keycloak-orgs</url>
     <connection>scm:git:git@github.com:p2-inc/keycloak-orgs.git</connection>
-    <tag>HEAD</tag>
+    <tag>v0.166</tag>
   </scm>
 
   <profiles>
@@ -72,8 +71,7 @@
                 </goals>
                 <configuration>
                   <target>
-                    <echo level="warn"
-                          message="[DEPRECATED] The cypress-tests profile is deprecated. Please use -Pintegration-tests instead, which runs Cypress and the database-compatibility smoke tests."/>
+                    <echo level="warn" message="[DEPRECATED] The cypress-tests profile is deprecated. Please use -Pintegration-tests instead, which runs Cypress and the database-compatibility smoke tests." />
                   </target>
                 </configuration>
               </execution>
