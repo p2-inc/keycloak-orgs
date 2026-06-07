@@ -71,7 +71,7 @@ public abstract class AbstractAdminResource<T extends AdminAuth> {
   private void setupCors() {
     Cors.builder()
         .preflight()
-        .allowedOrigins(auth.getToken())
+        .checkAllowedOrigins(auth.getToken())
         .allowedMethods(CorsResource.METHODS)
         .exposedHeaders("Location")
         .auth()
