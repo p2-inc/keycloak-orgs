@@ -15,7 +15,6 @@ import lombok.extern.jbosslog.JBossLog;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.Keycloak;
@@ -257,7 +256,6 @@ public class InitUserProfilePostMigrationTest {
   }
 
   @Test
-  @Disabled
   void testMigrationCompletesSuccessfullyAndLogsCompletion() throws Exception {
     // All realms already have the attribute before this restart, so
     // postMigrationInitUserProfile should skip all writes.
