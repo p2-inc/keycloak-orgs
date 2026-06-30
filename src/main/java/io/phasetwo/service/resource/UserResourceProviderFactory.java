@@ -4,11 +4,13 @@ import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
 import static io.phasetwo.service.Orgs.KC_ORGS_SKIP_MIGRATION;
 
 import com.google.auto.service.AutoService;
+import jakarta.persistence.EntityManager;
 import java.util.HashSet;
 import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
 import org.keycloak.component.ComponentValidationException;
+import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
@@ -28,6 +30,10 @@ import org.keycloak.userprofile.config.UPConfigUtils;
 public class UserResourceProviderFactory implements RealmResourceProviderFactory {
 
   static final String ID = "users";
+
+  // Key under which Keycloak's declarative user-profile provider stores its config JSON
+  // in the COMPONENT_CONFIG table.
+  private static final String UP_CONFIG_NAME = "kc.user.profile.config";
 
   @Override
   public RealmResourceProvider create(KeycloakSession session) {
@@ -69,14 +75,38 @@ public class UserResourceProviderFactory implements RealmResourceProviderFactory
 
   private void postMigrationInitUserProfile(KeycloakSession session) {
     log.debug("UserResourceProviderFactory::postMigrationInitUserProfile");
-    session
-        .realms()
-        .getRealmsStream()
-        .forEach(
-            realm -> {
-              session.getContext().setRealm(realm);
-              initUserProfile(session);
-            });
+
+    EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+
+    // Single query: find realm IDs whose user-profile config JSON does not yet contain
+    // the active_organization attribute. This covers two cases in one shot:
+    //   1. Realms with no user-profile component row at all.
+    //   2. Realms whose config JSON was written before this attribute was introduced.
+    // Only those realms are loaded and updated; all others are skipped entirely.
+    List<String> realmIds =
+        em.createQuery(
+                "SELECT r.id FROM RealmEntity r"
+                    + " WHERE NOT EXISTS ("
+                    + "   SELECT cc FROM ComponentConfigEntity cc"
+                    + "   WHERE cc.component.realm.id = r.id"
+                    + "   AND cc.component.providerType = :providerType"
+                    + "   AND cc.name = :configName"
+                    + "   AND cc.value LIKE :marker"
+                    + " )",
+                String.class)
+            .setParameter("providerType", UserProfileProvider.class.getName())
+            .setParameter("configName", UP_CONFIG_NAME)
+            .setParameter("marker", "%\"name\":\"" + ACTIVE_ORGANIZATION + "\"%")
+            .getResultList();
+
+    for (String realmId : realmIds) {
+      RealmModel realm = session.realms().getRealm(realmId);
+      if (realm == null) continue;
+      session.getContext().setRealm(realm);
+      initUserProfile(session);
+    }
+
+    log.infof("User profile migration complete: %d realm(s) updated", realmIds.size());
   }
 
   private void initUserProfile(KeycloakSession session) {
