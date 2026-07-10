@@ -38,10 +38,13 @@ public class ActiveOrganizationAuthenticator implements Authenticator {
 
   @Override
   public void authenticate(AuthenticationFlowContext context) {
-    if (wasPostBrokerLogin(context)) {
-      tryOrganizationSelectionChallenge(context);
-    } else if (requestHasAccountHintParam(context)) {
+    // account_hint must be checked before wasPostBrokerLogin(): the latter is always true for
+    // federated (IdP) logins, so checking it first would always force the org-selection
+    // challenge and silently ignore account_hint for any SSO login.
+    if (requestHasAccountHintParam(context)) {
       evaluateAuthenticationWithAccountHint(context);
+    } else if (wasPostBrokerLogin(context)) {
+      tryOrganizationSelectionChallenge(context);
     } else if (shouldChallengeForOrganizationSelection(context)) {
       tryOrganizationSelectionChallenge(context);
     } else {

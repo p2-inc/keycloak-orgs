@@ -539,7 +539,7 @@
     <dependency>
       <groupId>io.phasetwo.keycloak</groupId>
       <artifactId>keycloak-events</artifactId>
-      <version>[0.45,)</version>
+      <version>[0.45,0.61)</version>
       <scope>test</scope>
     </dependency>
     <dependency>
