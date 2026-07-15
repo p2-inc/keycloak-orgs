@@ -43,7 +43,7 @@ import org.testcontainers.Testcontainers;
  *   - org-1 (domain phasetwo.io) linked to oidc-idp, with postBrokerLoginFlowAlias set to a
  *     custom flow (createCustomPostBrokerLoginFlow) that adds ext-select-org after the default
  *     org bookkeeping steps -- without it, account_hint is never evaluated post-broker
- *   - org-2 (no domain)
+ *   - org-2 (domain org2.com)
  *   - idp-test-user member of both orgs, federated identity linked to oidc-idp by the external
  *     realm's actual user id (not email, which Keycloak doesn't recognize as pre-linked)
  *
@@ -111,7 +111,7 @@ class CypressAccountHintPostBrokerTest extends AbstractCypressOrganizationTest {
             testRealm,
             new OrganizationRepresentation().name("org-1").domains(List.of("phasetwo.io")));
 
-    // 5. create org-2 without domain
+    // 5. create org-2 with domain org2.com
     OrganizationRepresentation org2 =
         createOrganization(
             testRealm, new OrganizationRepresentation().name("org-2").domains(List.of("org2.com")));

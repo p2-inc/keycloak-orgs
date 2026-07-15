@@ -69,7 +69,7 @@ describe("account_hint with post-broker login — org auto-selection", () => {
 
 describe("account_hint with post-broker login — fallback behaviour", () => {
   it("no account_hint and user in 2 orgs shows org picker after IdP login", () => {
-    loginViaIdp(testRealmLoginUri + "&prompt=select_account");
+    loginViaIdp(testRealmLoginUri);
 
     // post-broker flow ran: no hint → picker shown because user has 2 orgs
     cy.get('[data-cy="select-org-label"]').should("exist");
