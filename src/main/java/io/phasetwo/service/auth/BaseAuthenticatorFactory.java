@@ -31,10 +31,6 @@ public abstract class BaseAuthenticatorFactory
     this.propsProvider = propsProvider;
   }
 
-  public AuthenticatorConfigProperties getPropsProvider() {
-    return this.propsProvider;
-  }
-
   @Override
   public abstract Authenticator create(KeycloakSession session);
 
@@ -56,7 +52,7 @@ public abstract class BaseAuthenticatorFactory
 
   @Override
   public boolean isConfigurable() {
-    return propsProvider.getConfigProperties().size() > 0;
+    return !propsProvider.getConfigProperties().isEmpty();
   }
 
   @Override

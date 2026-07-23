@@ -1,6 +1,9 @@
 package io.phasetwo.web;
 
-import static io.phasetwo.service.Helpers.*;
+import static io.phasetwo.service.Helpers.enableEvents;
+import static io.phasetwo.service.Helpers.loadJson;
+import static io.phasetwo.service.Helpers.objectMapper;
+import static io.phasetwo.service.Helpers.toJsonString;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,7 +34,13 @@ import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicContainer;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -118,6 +127,7 @@ public class AbstractCypressOrganizationTest {
                 "--spi-events-store-"
                     + MdcLoggerEventStoreProviderFactory.PROVIDER_ID
                     + "-use-jpa=true")
+            .withDebugFixedPort(8787, false)
             .withAccessToHost(true);
     if (isJacocoPresent()) {
       keycloakContainer =

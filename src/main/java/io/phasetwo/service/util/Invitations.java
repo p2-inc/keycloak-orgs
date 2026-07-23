@@ -12,7 +12,8 @@ public final class Invitations {
     // membership
     invitation.getOrganization().grantMembership(user);
     // roles
-    invitation.getRoles().stream()
+    invitation
+        .getRoles()
         .forEach(
             r -> {
               OrganizationRoleModel role = invitation.getOrganization().getRoleByName(r);
