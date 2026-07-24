@@ -1,17 +1,11 @@
 package io.phasetwo.service.auth.invitation;
 
-import static org.keycloak.events.EventType.CUSTOM_REQUIRED_ACTION;
-
 import com.google.auto.service.AutoService;
-import io.phasetwo.service.model.OrganizationProvider;
-import io.phasetwo.service.util.Invitations;
 import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
-import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
-import org.keycloak.events.EventBuilder;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
@@ -64,7 +58,7 @@ public class InvitationAutoJoinAuthenticatorFactory implements AuthenticatorFact
 
   @Override
   public String getDisplayType() {
-    return "Invitation Auto Join";
+    return "Auto Join Invitations";
   }
 
   @Override
