@@ -31,7 +31,7 @@ public class InvitationAuthenticatorFactory
     return new InvitationAuthenticator();
   }
 
-  private static AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+  private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
     AuthenticationExecutionModel.Requirement.REQUIRED,
     AuthenticationExecutionModel.Requirement.DISABLED
   };
