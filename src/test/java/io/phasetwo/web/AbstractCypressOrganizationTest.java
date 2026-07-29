@@ -127,7 +127,6 @@ public class AbstractCypressOrganizationTest {
                 "--spi-events-store-"
                     + MdcLoggerEventStoreProviderFactory.PROVIDER_ID
                     + "-use-jpa=true")
-            .withDebugFixedPort(8787, false)
             .withAccessToHost(true);
     if (isJacocoPresent()) {
       keycloakContainer =

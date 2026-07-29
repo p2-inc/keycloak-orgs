@@ -48,7 +48,7 @@ public class InvitationAutoJoinAuthenticatorFactory implements AuthenticatorFact
 
   @Override
   public String getHelpText() {
-    return "Adds a user to an organization if an invitation was send to the user corresponding email.";
+    return "Adds a user to an organization if an invitation was sent to the user's corresponding email.";
   }
 
   @Override
