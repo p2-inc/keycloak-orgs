@@ -22,10 +22,20 @@ import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
-import java.util.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jboss.logging.Logger;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
@@ -36,6 +46,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrganizationEntity> {
+
+  private static final Logger log = Logger.getLogger(OrganizationAdapter.class);
 
   protected final KeycloakSession session;
   protected final ExtOrganizationEntity org;
@@ -241,7 +253,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     return closing(paginateQuery(query, firstResult, maxResults).getResultStream())
         .filter(Objects::nonNull)
         .map(OrganizationMemberEntity::getUserId)
-        .map(userId -> session.users().getUserById(realm, userId))
+        .map(this::getMemberUserOrWarn)
         .filter(Objects::nonNull)
         .filter(u -> u.getServiceAccountClientLink() == null);
   }
@@ -331,8 +343,20 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
         .getResultStream()
         .filter(Objects::nonNull)
         .map(OrganizationMemberEntity::getUserId)
-        .map(userId -> session.users().getUserById(realm, userId))
+        .map(this::getMemberUserOrWarn)
+        .filter(Objects::nonNull)
         .filter(u -> u.getServiceAccountClientLink() == null);
+  }
+
+  private UserModel getMemberUserOrWarn(String userId) {
+    UserModel user = session.users().getUserById(realm, userId);
+    if (user == null) {
+      log.warnf(
+          "Organization %s has a membership record for user %s, but no user with that id exists."
+              + " Skipping this member.",
+          org.getId(), userId);
+    }
+    return user;
   }
 
   @Override
