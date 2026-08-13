@@ -28,13 +28,13 @@ public interface OrganizationProvider extends Provider {
   Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user);
 
   Stream<OrganizationModel> searchForOrganizationStream(
-      RealmModel realm,
-      Map<String, String> attributes,
-      Integer firstResult,
-      Integer maxResults,
-      Optional<UserModel> member);
+          RealmModel realm,
+          Map<String, String> attributes,
+          Integer firstResult,
+          Integer maxResults,
+          Optional<UserModel> member, Boolean exact);
 
-  Long getOrganizationsCount(RealmModel realm, String search, Map<String, String> attributes);
+  Long getOrganizationsCount(RealmModel realm, String search, Map<String, String> attributes, Boolean exact);
 
   boolean removeOrganization(RealmModel realm, String id);
 
@@ -68,7 +68,7 @@ public interface OrganizationProvider extends Provider {
       attributes.put("name", search);
     }
     return searchForOrganizationStream(
-        realm, attributes, firstResult, maxResults, Optional.empty());
+        realm, attributes, firstResult, maxResults, Optional.empty(), false);
   }
 
   /**
@@ -78,7 +78,7 @@ public interface OrganizationProvider extends Provider {
   default Stream<OrganizationModel> searchForOrganizationByAttributesStream(
       RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults) {
     return searchForOrganizationStream(
-        realm, attributes, firstResult, maxResults, Optional.empty());
+        realm, attributes, firstResult, maxResults, Optional.empty(), false);
   }
 
   /**
@@ -87,7 +87,7 @@ public interface OrganizationProvider extends Provider {
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> getOrganizationsStream(
       RealmModel realm, Integer firstResult, Integer maxResults) {
-    return searchForOrganizationStream(realm, null, firstResult, maxResults, Optional.empty());
+    return searchForOrganizationStream(realm, null, firstResult, maxResults, Optional.empty(), false);
   }
 
   /**
@@ -97,7 +97,7 @@ public interface OrganizationProvider extends Provider {
   default Stream<OrganizationModel> getOrganizationsStream(
       RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults) {
     return searchForOrganizationStream(
-        realm, attributes, firstResult, maxResults, Optional.empty());
+        realm, attributes, firstResult, maxResults, Optional.empty(), false);
   }
 
   /**
@@ -105,7 +105,7 @@ public interface OrganizationProvider extends Provider {
    */
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> getOrganizationsStream(RealmModel realm) {
-    return searchForOrganizationStream(realm, null, null, null, Optional.empty());
+    return searchForOrganizationStream(realm, null, null, null, Optional.empty(), false);
   }
 
   Stream<ExtOrganizationEntity> findByNames(RealmModel realm, Set<String> names);

@@ -175,7 +175,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
       @QueryParam("search") String search,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults,
-      @QueryParam("q") String searchQuery) {
+      @QueryParam("q") String searchQuery,
+      @QueryParam("exact") @DefaultValue("false") Boolean exact) {
     firstResult = firstResult != null ? firstResult : 0;
     maxResults =
         (maxResults != null && maxResults <= Constants.DEFAULT_MAX_RESULTS)
@@ -197,7 +198,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
             searchAttributes,
             firstResult,
             maxResults,
-            auth.hasViewOrgs() ? Optional.empty() : Optional.of(auth.getUser()))
+            auth.hasViewOrgs() ? Optional.empty() : Optional.of(auth.getUser()),
+            exact)
         .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
         .map(Converters::convertOrganizationModelToOrganization);
   }
@@ -206,7 +208,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Path("count")
   @Produces(MediaType.APPLICATION_JSON)
   public Long countOrgs(
-      @QueryParam("search") String searchQuery, @QueryParam("q") String searchAttributes) {
+      @QueryParam("search") String searchQuery,
+      @QueryParam("q") String searchAttributes,
+      @QueryParam("exact") @DefaultValue("false") Boolean exact) {
 
     log.debugf(
         "countOrgs realm: %s, search: %s, query: %s",
@@ -225,7 +229,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
       attributes.put("name", searchQuery.trim());
     }
 
-    return orgs.getOrganizationsCount(realm, searchQuery, attributes);
+    return orgs.getOrganizationsCount(realm, searchQuery, attributes, exact);
   }
 
   @POST
@@ -339,7 +343,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     }
 
     var organizations =
-        orgs.searchForOrganizationStream(realm, Map.of(), 0, Integer.MAX_VALUE, Optional.empty())
+        orgs.searchForOrganizationStream(realm, Map.of(), 0, Integer.MAX_VALUE, Optional.empty(), false)
             .map(
                 organization ->
                     KeycloakOrgsExportConverter

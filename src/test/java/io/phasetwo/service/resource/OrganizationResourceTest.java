@@ -348,6 +348,73 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   }
 
   @Test
+  void testSearchOrganizationsExactMatch() throws IOException {
+    // create some orgs, including one whose name is a prefix of another
+    List<String> ids = new ArrayList<>();
+    ids.add(
+        createOrganization(new OrganizationRepresentation().name("foo").domains(List.of("foo.com")))
+            .getId());
+    ids.add(
+        createOrganization(
+                new OrganizationRepresentation().name("foobar").domains(List.of("foobar.com")))
+            .getId());
+
+    // non-exact search matches both "foo" and "foobar"
+    Response response = givenSpec().when().queryParam("search", "foo").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    List<OrganizationRepresentation> orgs =
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(orgs, hasSize(2));
+
+    // exact search matches only "foo"
+    response =
+        givenSpec()
+            .when()
+            .queryParam("search", "foo")
+            .queryParam("exact", true)
+            .get()
+            .andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(orgs, hasSize(1));
+    assertThat(orgs.get(0).getName(), is("foo"));
+
+    // exact search is case-sensitive and finds no match for a differently-cased name
+    response =
+        givenSpec()
+            .when()
+            .queryParam("search", "FOO")
+            .queryParam("exact", true)
+            .get()
+            .andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(orgs, hasSize(0));
+
+    // count respects exact match too
+    response =
+        givenSpec("orgs", "count")
+            .when()
+            .queryParam("search", "foo")
+            .queryParam("exact", true)
+            .get()
+            .andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    Long cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
+    assertThat(cnt, is(1L));
+
+    // count without exact match counts both
+    response = givenSpec("orgs", "count").when().queryParam("search", "foo").get().andReturn();
+    assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
+    cnt = objectMapper().readValue(response.getBody().asString(), Long.class);
+    assertThat(cnt, is(2L));
+
+    for (String id : ids) {
+      deleteOrganization(id);
+    }
+  }
+
+  @Test
   void testGetDomains() throws IOException {
 
     OrganizationRepresentation org = createDefaultOrg();
