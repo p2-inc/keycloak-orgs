@@ -25,7 +25,13 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
@@ -144,12 +150,12 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
   @Override
   public Stream<OrganizationModel> searchForOrganizationStream(
-          RealmModel realm,
-          Map<String, String> attributes,
-          Integer firstResult,
-          Integer maxResults,
-          Optional<UserModel> member,
-          Boolean exact) {
+      RealmModel realm,
+      Map<String, String> attributes,
+      Integer firstResult,
+      Integer maxResults,
+      Optional<UserModel> member,
+      Boolean exact) {
     if (attributes == null) {
       attributes = ImmutableMap.of();
     }
@@ -175,7 +181,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
 
   @Override
   public Long getOrganizationsCount(
-          RealmModel realm, String search, Map<String, String> attributes, Boolean exact) {
+      RealmModel realm, String search, Map<String, String> attributes, Boolean exact) {
     if (attributes == null) {
       attributes = ImmutableMap.of();
     }
@@ -340,8 +346,7 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   }
 
   private List<Predicate> attributePredicates(
-          Map<String, String> attributes, Root<ExtOrganizationEntity> root,
-          Boolean exact) {
+      Map<String, String> attributes, Root<ExtOrganizationEntity> root, Boolean exact) {
     CriteriaBuilder builder = em.getCriteriaBuilder();
 
     List<Predicate> predicates = new ArrayList<>();
@@ -360,10 +365,10 @@ public class JpaOrganizationProvider implements OrganizationProvider {
           predicates.add(builder.equal(root.get("name"), value));
         } else {
           predicates.add(
-                  builder.or(
-                          builder.like(builder.lower(root.get("name")), "%" + value.toLowerCase() + "%"),
-                          builder.like(
-                                  builder.lower(root.get("displayName")), "%" + value.toLowerCase() + "%")));
+              builder.or(
+                  builder.like(builder.lower(root.get("name")), "%" + value.toLowerCase() + "%"),
+                  builder.like(
+                      builder.lower(root.get("displayName")), "%" + value.toLowerCase() + "%")));
         }
       } else {
         Join<ExtOrganizationEntity, OrganizationAttributeEntity> attributesJoin =

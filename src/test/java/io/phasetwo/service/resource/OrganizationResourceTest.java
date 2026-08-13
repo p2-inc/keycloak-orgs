@@ -44,13 +44,25 @@ import io.phasetwo.client.openapi.model.OrganizationRoleRepresentation;
 import io.phasetwo.client.openapi.model.PortalLinkRepresentation;
 import io.phasetwo.service.AbstractOrganizationTest;
 import io.phasetwo.service.LegacySimpleHttp;
-import io.phasetwo.service.representation.*;
+import io.phasetwo.service.representation.Invitation;
+import io.phasetwo.service.representation.InvitationRequest;
+import io.phasetwo.service.representation.LinkIdp;
+import io.phasetwo.service.representation.OrganizationMemberAttribute;
+import io.phasetwo.service.representation.OrganizationRole;
+import io.phasetwo.service.representation.SwitchOrganization;
+import io.phasetwo.service.representation.UserWithOrgs;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -368,12 +380,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // exact search matches only "foo"
     response =
-        givenSpec()
-            .when()
-            .queryParam("search", "foo")
-            .queryParam("exact", true)
-            .get()
-            .andReturn();
+        givenSpec().when().queryParam("search", "foo").queryParam("exact", true).get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs, hasSize(1));
@@ -381,12 +388,7 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
 
     // exact search is case-sensitive and finds no match for a differently-cased name
     response =
-        givenSpec()
-            .when()
-            .queryParam("search", "FOO")
-            .queryParam("exact", true)
-            .get()
-            .andReturn();
+        givenSpec().when().queryParam("search", "FOO").queryParam("exact", true).get().andReturn();
     assertThat(response.statusCode(), is(Status.OK.getStatusCode()));
     orgs = objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
     assertThat(orgs, hasSize(0));

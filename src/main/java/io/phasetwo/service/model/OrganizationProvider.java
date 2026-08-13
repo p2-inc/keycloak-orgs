@@ -3,7 +3,10 @@ package io.phasetwo.service.model;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
@@ -28,13 +31,15 @@ public interface OrganizationProvider extends Provider {
   Stream<OrganizationModel> getUserOrganizationsStream(RealmModel realm, UserModel user);
 
   Stream<OrganizationModel> searchForOrganizationStream(
-          RealmModel realm,
-          Map<String, String> attributes,
-          Integer firstResult,
-          Integer maxResults,
-          Optional<UserModel> member, Boolean exact);
+      RealmModel realm,
+      Map<String, String> attributes,
+      Integer firstResult,
+      Integer maxResults,
+      Optional<UserModel> member,
+      Boolean exact);
 
-  Long getOrganizationsCount(RealmModel realm, String search, Map<String, String> attributes, Boolean exact);
+  Long getOrganizationsCount(
+      RealmModel realm, String search, Map<String, String> attributes, Boolean exact);
 
   boolean removeOrganization(RealmModel realm, String id);
 
@@ -87,7 +92,8 @@ public interface OrganizationProvider extends Provider {
   @Deprecated(forRemoval = true)
   default Stream<OrganizationModel> getOrganizationsStream(
       RealmModel realm, Integer firstResult, Integer maxResults) {
-    return searchForOrganizationStream(realm, null, firstResult, maxResults, Optional.empty(), false);
+    return searchForOrganizationStream(
+        realm, null, firstResult, maxResults, Optional.empty(), false);
   }
 
   /**
