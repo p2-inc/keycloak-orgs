@@ -366,8 +366,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
     }
 
     var organizations =
-        orgs.searchForOrganizationStream(
-                realm, Map.of(), 0, Integer.MAX_VALUE, Optional.empty(), false)
+        orgs.searchForOrganizationStream(realm, Map.of(), 0, Integer.MAX_VALUE, Optional.empty())
             .map(
                 organization ->
                     KeycloakOrgsExportConverter
