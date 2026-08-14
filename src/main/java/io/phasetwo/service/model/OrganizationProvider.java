@@ -3,7 +3,10 @@ package io.phasetwo.service.model;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.model.jpa.entity.ExtOrganizationEntity;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
@@ -32,9 +35,17 @@ public interface OrganizationProvider extends Provider {
       Map<String, String> attributes,
       Integer firstResult,
       Integer maxResults,
-      Optional<UserModel> member);
+      Optional<UserModel> member,
+      Boolean exact);
 
-  Long getOrganizationsCount(RealmModel realm, String search, Map<String, String> attributes);
+  Long getOrganizationsCount(
+      RealmModel realm, String search, Map<String, String> attributes, Boolean exact);
+
+  @Deprecated(forRemoval = true)
+  default Long getOrganizationsCount(
+      RealmModel realm, String search, Map<String, String> attributes) {
+    return getOrganizationsCount(realm, search, attributes, false);
+  }
 
   boolean removeOrganization(RealmModel realm, String id);
 
@@ -71,6 +82,16 @@ public interface OrganizationProvider extends Provider {
         realm, attributes, firstResult, maxResults, Optional.empty());
   }
 
+  @Deprecated(forRemoval = true)
+  default Stream<OrganizationModel> searchForOrganizationStream(
+      RealmModel realm,
+      Map<String, String> attributes,
+      Integer firstResult,
+      Integer maxResults,
+      Optional<UserModel> member) {
+    return searchForOrganizationStream(realm, attributes, firstResult, maxResults, member, false);
+  }
+
   /**
    * @deprecated use {@link #searchForOrganizationStream searchForOrganizationStream} method instead
    */
@@ -97,7 +118,7 @@ public interface OrganizationProvider extends Provider {
   default Stream<OrganizationModel> getOrganizationsStream(
       RealmModel realm, Map<String, String> attributes, Integer firstResult, Integer maxResults) {
     return searchForOrganizationStream(
-        realm, attributes, firstResult, maxResults, Optional.empty());
+        realm, attributes, firstResult, maxResults, Optional.empty(), false);
   }
 
   /**

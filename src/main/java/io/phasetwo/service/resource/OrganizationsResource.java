@@ -1,6 +1,14 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Orgs.*;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_CREATE_ADMIN_USER_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_DEFAULT_APPLICATION_URI;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_MULTIPLE_IDPS_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_SCIM_ENABLED_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_SHARED_IDPS_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_VALIDATE_IDP_KEY;
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
+import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_IMPORT;
@@ -19,7 +27,19 @@ import io.phasetwo.service.representation.Organization;
 import io.phasetwo.service.representation.OrganizationsConfig;
 import io.phasetwo.service.util.Invitations;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
@@ -31,7 +51,10 @@ import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.common.util.CollectionUtil;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.admin.OperationType;
-import org.keycloak.models.*;
+import org.keycloak.models.Constants;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelDuplicateException;
+import org.keycloak.models.ModelException;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponse;
@@ -175,7 +198,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
       @QueryParam("search") String search,
       @QueryParam("first") Integer firstResult,
       @QueryParam("max") Integer maxResults,
-      @QueryParam("q") String searchQuery) {
+      @QueryParam("q") String searchQuery,
+      @QueryParam("exact") @DefaultValue("false") Boolean exact) {
     firstResult = firstResult != null ? firstResult : 0;
     maxResults =
         (maxResults != null && maxResults <= Constants.DEFAULT_MAX_RESULTS)
@@ -197,7 +221,8 @@ public class OrganizationsResource extends OrganizationAdminResource {
             searchAttributes,
             firstResult,
             maxResults,
-            auth.hasViewOrgs() ? Optional.empty() : Optional.of(auth.getUser()))
+            auth.hasViewOrgs() ? Optional.empty() : Optional.of(auth.getUser()),
+            exact)
         .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
         .map(Converters::convertOrganizationModelToOrganization);
   }
@@ -206,7 +231,9 @@ public class OrganizationsResource extends OrganizationAdminResource {
   @Path("count")
   @Produces(MediaType.APPLICATION_JSON)
   public Long countOrgs(
-      @QueryParam("search") String searchQuery, @QueryParam("q") String searchAttributes) {
+      @QueryParam("search") String searchQuery,
+      @QueryParam("q") String searchAttributes,
+      @QueryParam("exact") @DefaultValue("false") Boolean exact) {
 
     log.debugf(
         "countOrgs realm: %s, search: %s, query: %s",
@@ -225,7 +252,7 @@ public class OrganizationsResource extends OrganizationAdminResource {
       attributes.put("name", searchQuery.trim());
     }
 
-    return orgs.getOrganizationsCount(realm, searchQuery, attributes);
+    return orgs.getOrganizationsCount(realm, searchQuery, attributes, exact);
   }
 
   @POST
