@@ -71,7 +71,7 @@ public abstract class AbstractHomeIdpDiscoveryAuthenticatorFactory implements Au
 
     @Override
     public final Authenticator create(KeycloakSession session) {
-        return new HomeIdpDiscoveryAuthenticator(discovererConfig);
+        return new HomeIdpDiscoveryAuthenticator(session, discovererConfig);
     }
 
     @Override
