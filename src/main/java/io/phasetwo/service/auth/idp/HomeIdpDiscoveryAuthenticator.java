@@ -4,13 +4,17 @@ package io.phasetwo.service.auth.idp;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
+import org.keycloak.WebAuthnConstants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
+import org.keycloak.authentication.FlowStatus;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
+import org.keycloak.authentication.authenticators.browser.WebAuthnConditionalUIAuthenticator;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
+import org.keycloak.models.credential.WebAuthnCredentialModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.managers.AuthenticationManager;
 
@@ -23,9 +27,11 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     private static final Logger LOG = Logger.getLogger(HomeIdpDiscoveryAuthenticator.class);
 
     private final AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig;
+    private final WebAuthnConditionalUIAuthenticator webauthnAuth;
 
-    HomeIdpDiscoveryAuthenticator(AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig) {
+    HomeIdpDiscoveryAuthenticator(KeycloakSession session, AbstractHomeIdpDiscoveryAuthenticatorFactory.DiscovererConfig discovererConfig) {
         this.discovererConfig = discovererConfig;
+        this.webauthnAuth = new WebAuthnConditionalUIAuthenticator(session, context -> createLoginForm(context.form()));
     }
 
     @Override
@@ -61,10 +67,12 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
                 }
             } else {
                 //if no username hint force challenge
+                fillWebAuthnContextIfEnabled(authenticationFlowContext);
                 context.authenticationChallenge().forceChallenge();
             }
         } else {
             //if no bypass login force challenge
+            fillWebAuthnContextIfEnabled(authenticationFlowContext);
             context.authenticationChallenge().forceChallenge();
         }
     }
@@ -101,6 +109,27 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         }
 
         HomeIdpAuthenticationFlowContext context = new HomeIdpAuthenticationFlowContext(authenticationFlowContext);
+
+        if (webauthnAuth.isPasskeysEnabled()
+                && (formData.containsKey(WebAuthnConstants.AUTHENTICATOR_DATA) || formData.containsKey(WebAuthnConstants.ERROR))) {
+            // webauthn (passkey) form submission, try to action using the webauthn authenticator
+            webauthnAuth.action(authenticationFlowContext);
+            if (FlowStatus.SUCCESS != authenticationFlowContext.getStatus()) {
+                return;
+            }
+            // The passkey verified the user, but home IdP discovery still applies -- same as
+            // Keycloak's OrganizationAuthenticator, which keeps checking organizations after a
+            // successful passkey: a discovered home IdP overrides the local sign-in.
+            UserModel authenticated = authenticationFlowContext.getUser();
+            String authenticatedUsername =
+                    authenticated.getEmail() != null ? authenticated.getEmail() : authenticated.getUsername();
+            final List<IdentityProviderModel> discovered =
+                    context.discoverer(discovererConfig).discoverForUser(authenticationFlowContext, authenticatedUsername);
+            if (!discovered.isEmpty()) {
+                redirectOrChallenge(context, authenticatedUsername, discovered);
+            }
+            return;
+        }
 
         String tryUsername;
         if (context.reauthentication().required() && authenticationFlowContext.getUser() != null) {
@@ -171,6 +200,24 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
                 username = null;
         }
         return username;
+    }
+
+    @Override
+    protected Response challenge(AuthenticationFlowContext context, String error, String field) {
+        fillWebAuthnContextIfEnabled(context);
+        return super.challenge(context, error, field);
+    }
+
+    // mirrors UsernamePasswordForm#isConditionalPasskeysEnabled: offer a passkey when the realm
+    // policy enables them and the identified user (if any) actually holds a passwordless credential
+    private void fillWebAuthnContextIfEnabled(AuthenticationFlowContext context) {
+        if (webauthnAuth.isPasskeysEnabled()
+                && (context.getUser() == null
+                        || context.getUser()
+                                .credentialManager()
+                                .isConfiguredFor(WebAuthnCredentialModel.TYPE_PASSWORDLESS))) {
+            webauthnAuth.fillContextForm(context);
+        }
     }
 
     @Override
