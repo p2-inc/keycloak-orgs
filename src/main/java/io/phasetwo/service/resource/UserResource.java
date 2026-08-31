@@ -1,7 +1,9 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.ACTIVE_ORGANIZATION;
-import static io.phasetwo.service.resource.Converters.*;
+import static io.phasetwo.service.resource.Converters.convertInvitationModelToInvitation;
+import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
+import static io.phasetwo.service.resource.Converters.convertOrganizationRole;
 import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION_ROLE_MAPPING;
 import static org.keycloak.events.EventType.UPDATE_PROFILE;
 
@@ -15,7 +17,16 @@ import io.phasetwo.service.representation.SwitchOrganization;
 import io.phasetwo.service.util.ActiveOrganization;
 import io.phasetwo.service.util.TokenManager;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -138,15 +149,19 @@ public class UserResource extends OrganizationAdminResource {
   @GET
   @Path("/active-organization")
   @Produces(MediaType.APPLICATION_JSON)
-  public Organization getActiveOrganization() {
+  public Response getActiveOrganization() {
     ActiveOrganization activeOrganizationUtil =
         ActiveOrganization.fromContext(session, realm, auth.getUser());
 
+    // A user who belongs to no organization has nothing active. That is not an
+    // authorization failure, so report it as an empty result.
     if (!activeOrganizationUtil.isValid()) {
-      throw new NotAuthorizedException("Action not allowed.");
+      return Response.noContent().build();
     }
 
-    return convertOrganizationModelToOrganization(activeOrganizationUtil.getOrganization());
+    return Response.ok(
+            convertOrganizationModelToOrganization(activeOrganizationUtil.getOrganization()))
+        .build();
   }
 
   @PUT
