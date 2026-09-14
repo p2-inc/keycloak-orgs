@@ -236,7 +236,6 @@ public class JpaOrganizationProvider implements OrganizationProvider {
       // each batch O(batch) instead of rescanning the tombstones left by earlier batches.
       cursor = ids.getLast();
     }
-    log.debugf("Removed %d organizations for realm %s", total, realmId);
   }
 
   /** Removes one batch of organizations and everything hanging off them. Children first: FKs to
