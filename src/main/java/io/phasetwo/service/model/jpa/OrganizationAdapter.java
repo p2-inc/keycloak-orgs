@@ -361,7 +361,12 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public boolean hasMembership(UserModel user) {
-    return org.getMembers().stream().anyMatch(m -> m.getUserId().equals(user.getId()));
+    TypedQuery<OrganizationMemberEntity> query =
+        em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberEntity.class);
+    query.setParameter("organization", org);
+    query.setParameter("userId", user.getId());
+    query.setMaxResults(1);
+    return !query.getResultList().isEmpty();
   }
 
   @Override
