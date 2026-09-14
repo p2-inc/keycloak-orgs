@@ -162,8 +162,6 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     }
 
     private String setUserInContext(AuthenticationFlowContext context, String username) {
-        context.clearUser();
-
         username = trimToNull(username);
 
         if (username == null) {
@@ -177,18 +175,6 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         LOG.debugf("Found username '%s' in request", username);
         context.getEvent().detail(Details.USERNAME, username);
         context.getAuthenticationSession().setAuthNote(ATTEMPTED_USERNAME, username);
-
-        try {
-            UserModel user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(),
-                    username);
-            if (user != null) {
-                LOG.tracef("Setting user '%s' in context", user.getId());
-                context.setUser(user);
-            }
-        } catch (ModelDuplicateException ex) {
-            LOG.warnf(ex, "Could not uniquely identify the user. Multiple users with name or email '%s' found.",
-                    username);
-        }
 
         return username;
     }
