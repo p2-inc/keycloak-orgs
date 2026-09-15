@@ -377,7 +377,10 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     m.setUserId(user.getId());
     m.setOrganization(org);
     em.persist(m);
-    org.getMembers().add(m);
+    // Deliberately not org.getMembers().add(m): OrganizationMemberEntity.organization is the
+    // owning side of the association, so em.persist above fully writes the row. Adding to the
+    // inverse collection only syncs it in memory, and doing so initializes the LAZY collection,
+    // reading every membership row of the organization on the auto-join login path.
   }
 
   @Override
