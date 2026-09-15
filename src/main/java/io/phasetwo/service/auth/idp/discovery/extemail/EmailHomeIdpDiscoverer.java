@@ -118,7 +118,6 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
                             Collectors.toMap(FederatedIdentityModel::getIdentityProvider, FederatedIdentityModel::getUserName));
         }
 
-        List<IdentityProviderModel> enabledIdps = determineEnabledIdps(context);
         // Original; lookup mechanism from https://github.com/sventorben/keycloak-home-idp-discovery
         /*
         List<IdentityProviderModel> enabledIdpsWithMatchingDomain = filterIdpsWithMatchingDomainFrom(enabledIdps,
@@ -163,7 +162,10 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
         if (homeIdps.isEmpty()) {
             if (!linkedIdps.isEmpty()) {
                 // Prefer linked and enabled IdPs without matching domain in favor of not linked IdPs with matching domain
-                homeIdps = getLinkedIdpsFrom(enabledIdps, linkedIdps);
+                // determineEnabledIdps enumerates every IdP in the realm and loads each one's config, so it is
+                // resolved here rather than up front: this is the only branch that needs it, and it is only
+                // reached when the user has linked IdPs but none of them matched the organization's domain.
+                homeIdps = getLinkedIdpsFrom(determineEnabledIdps(context), linkedIdps);
             }
             if (homeIdps.isEmpty()) {
                 // Fallback to not linked IdPs with matching domain (general case if user logs in for the first time)
