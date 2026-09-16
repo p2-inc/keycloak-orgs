@@ -213,10 +213,84 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     return true;
   }
 
+  /**
+   * Organizations per transaction when removing a realm. Each batch commits on its own, so realm
+   * removal stays bounded no matter how many organizations exist. A single transaction over a
+   * large realm exceeds the JTA timeout and gets aborted by the reaper, removing nothing.
+   */
+  private static final int REMOVE_BATCH_SIZE = 1000;
+
   @Override
   public void removeOrganizations(RealmModel realm) {
-    searchForOrganizationStream(realm, null, null, null, Optional.empty(), false)
-        .forEach(o -> removeOrganization(realm, o.getId()));
+    String realmId = realm.getId();
+    String cursor = "";
+    int total = 0;
+    while (true) {
+      final String from = cursor;
+      List<String> ids =
+          KeycloakModelUtils.runJobInTransactionWithResult(
+              session.getKeycloakSessionFactory(), s -> removeOrganizationBatch(s, realmId, from));
+      if (ids.isEmpty()) break;
+      total += ids.size();
+      // Keyset pagination: resume after the last id handled. Seeking past the removed range keeps
+      // each batch O(batch) instead of rescanning the tombstones left by earlier batches.
+      cursor = ids.getLast();
+    }
+  }
+
+  /** Removes one batch of organizations and everything hanging off them. Children first: FKs to
+   * ORGANIZATION are RESTRICT. No OrganizationRemovedEvent is published per organization; on realm
+   * removal its handler has nothing left to clean up. */
+  private List<String> removeOrganizationBatch(
+      KeycloakSession session, String realmId, String cursor) {
+    EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+    List<String> ids =
+        em.createQuery(
+                "SELECT o.id FROM ExtOrganizationEntity o"
+                    + " WHERE o.realmId = :realmId AND o.id > :cursor ORDER BY o.id",
+                String.class)
+            .setParameter("realmId", realmId)
+            .setParameter("cursor", cursor)
+            .setMaxResults(REMOVE_BATCH_SIZE)
+            .getResultList();
+    if (ids.isEmpty()) return ids;
+
+    String roles = "SELECT r FROM OrganizationRoleEntity r WHERE r.organization.id IN (:ids)";
+    String members = "SELECT m FROM OrganizationMemberEntity m WHERE m.organization.id IN (:ids)";
+    String invitations = "SELECT i FROM InvitationEntity i WHERE i.organization.id IN (:ids)";
+
+    em.flush();
+    deleteByIds(
+        em, "DELETE FROM UserOrganizationRoleMappingEntity m WHERE m.role IN (" + roles + ")", ids);
+    deleteByIds(em, "DELETE FROM OrganizationRoleEntity r WHERE r.organization.id IN (:ids)", ids);
+    deleteByIds(
+        em,
+        "DELETE FROM OrganizationMemberAttributeEntity a WHERE a.organizationMember IN ("
+            + members
+            + ")",
+        ids);
+    deleteByIds(
+        em, "DELETE FROM OrganizationMemberEntity m WHERE m.organization.id IN (:ids)", ids);
+    deleteByIds(
+        em,
+        "DELETE FROM InvitationAttributeEntity a WHERE a.invitation IN (" + invitations + ")",
+        ids);
+    // INVITATION_ROLE is an @ElementCollection, which JPQL bulk delete cannot target
+    em.createNativeQuery(
+            "DELETE FROM INVITATION_ROLE WHERE INVITATION_ID IN"
+                + " (SELECT i.ID FROM INVITATION i WHERE i.ORGANIZATION_ID IN (:ids))")
+        .setParameter("ids", ids)
+        .executeUpdate();
+    deleteByIds(em, "DELETE FROM InvitationEntity i WHERE i.organization.id IN (:ids)", ids);
+    deleteByIds(em, "DELETE FROM DomainEntity d WHERE d.organization.id IN (:ids)", ids);
+    deleteByIds(
+        em, "DELETE FROM OrganizationAttributeEntity a WHERE a.organization.id IN (:ids)", ids);
+    deleteByIds(em, "DELETE FROM ExtOrganizationEntity o WHERE o.id IN (:ids)", ids);
+    return ids;
+  }
+
+  private static void deleteByIds(EntityManager em, String jpql, List<String> ids) {
+    em.createQuery(jpql).setParameter("ids", ids).executeUpdate();
   }
 
   @Override
