@@ -1,7 +1,11 @@
 package io.phasetwo.web;
 
-import static io.phasetwo.service.Helpers.*;
-import static io.phasetwo.service.Orgs.*;
+import static io.phasetwo.service.Helpers.objectMapper;
+import static io.phasetwo.service.Helpers.toJsonString;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_MULTIPLE_IDPS_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_VALIDATE_IDP_KEY;
+import static io.phasetwo.service.Orgs.ORG_DOMAIN_CONFIG_KEY;
+import static io.phasetwo.service.Orgs.ORG_VALIDATION_PENDING_CONFIG_KEY;
 import static io.phasetwo.service.auth.idp.discovery.extattribute.IdentityProviders.USER_ATTRIBUTE_KEY;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,14 +23,22 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicContainer;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
@@ -356,6 +368,21 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
     final var cypressResult =
         runCypressTests(
             "", "cypress/e2e/home-idp-organization/home-idp-require-verified-email-test.cy.ts");
+    return cypressResult;
+  }
+
+  @TestFactory
+  @DisplayName(
+      "Reauthenticating a locally-authenticated session when setUserInContext is off from realm creation (alternative topology)")
+  public List<DynamicContainer> testHomeIdpSetUserInContextAlternativeReauthentication()
+      throws IOException, InterruptedException, TimeoutException {
+    setupTestKeycloakInstance(
+        false,
+        "/realms/kc-realm-with-home-idp-alternative-username-password-flow-and-preregistered-users.json");
+    final var cypressResult =
+        runCypressTests(
+            "",
+            "cypress/e2e/home-idp-organization/home-idp-setUserInContext-alternative-reauthentication-test.cy.ts");
     return cypressResult;
   }
 
