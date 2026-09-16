@@ -373,6 +373,20 @@ class CypressHomeIdpOrganizationTest extends AbstractCypressOrganizationTest {
 
   @TestFactory
   @DisplayName(
+      "The HomeIdp doesn't require the setUserInContext when using the username password form alternative")
+  public List<DynamicContainer> tesHomeIdpSetUserInContextConfig()
+      throws IOException, InterruptedException, TimeoutException {
+    setupTestKeycloakInstance(
+        false,
+        "/realms/kc-realm-with-home-idp-alternative-username-password-flow-and-preregistered-users.json");
+    final var cypressResult =
+        runCypressTests(
+            "", "cypress/e2e/home-idp-organization/home-idp-setUserInContext-test.cy.ts");
+    return cypressResult;
+  }
+
+  @TestFactory
+  @DisplayName(
       "Reauthenticating a locally-authenticated session when setUserInContext is off from realm creation (alternative topology)")
   public List<DynamicContainer> testHomeIdpSetUserInContextAlternativeReauthentication()
       throws IOException, InterruptedException, TimeoutException {

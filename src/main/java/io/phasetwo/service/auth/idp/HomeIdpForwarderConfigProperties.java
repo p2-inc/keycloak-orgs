@@ -8,6 +8,7 @@ import java.util.List;
 
 import static io.phasetwo.service.auth.idp.HomeIdpForwarderConfig.BYPASS_LOGIN_PAGE;
 import static io.phasetwo.service.auth.idp.HomeIdpForwarderConfig.FORWARD_TO_FIRST_MATCH;
+import static io.phasetwo.service.auth.idp.HomeIdpForwarderConfig.SET_USER_IN_CONTEXT;
 import static org.keycloak.provider.ProviderConfigProperty.BOOLEAN_TYPE;
 
 final class HomeIdpForwarderConfigProperties {
@@ -27,9 +28,18 @@ final class HomeIdpForwarderConfigProperties {
         true,
         false);
 
+    private static final ProviderConfigProperty SET_USER_IN_CONTEXT_PROPERTY = new ProviderConfigProperty(
+        SET_USER_IN_CONTEXT,
+        "Set user in context",
+        "[!CAUTION]Leaving this on while a \"Username Password Form\" (`auth-username-password-form`) follows the authenticator is an account enumeration attack",
+        BOOLEAN_TYPE,
+        true,
+        false);
+
     static final List<ProviderConfigProperty> CONFIG_PROPERTIES = ProviderConfigurationBuilder.create()
         .property(BYPASS_LOGIN_PAGE_PROPERTY)
         .property(FORWARD_TO_FIRST_MATCH_PROPERTY)
+        .property(SET_USER_IN_CONTEXT_PROPERTY)
         .build();
 
 }
