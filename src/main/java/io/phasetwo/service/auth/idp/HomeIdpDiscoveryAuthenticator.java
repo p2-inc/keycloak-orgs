@@ -52,7 +52,7 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         if (context.loginPage().shouldByPass()) {
             String usernameHint = usernameHint(authenticationFlowContext, context);
             if (usernameHint != null) {
-                String username = setUserInContext(authenticationFlowContext, usernameHint);
+                String username = setUserInContext(authenticationFlowContext, context, usernameHint);
                 final List<IdentityProviderModel> homeIdps = context.discoverer(discovererConfig).discoverForUser(authenticationFlowContext, username);
                 if (!homeIdps.isEmpty()) {
                     context.rememberMe().remember(username);
@@ -138,7 +138,7 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
             tryUsername = formData.getFirst(AuthenticationManager.FORM_USERNAME);
         }
 
-        String username = setUserInContext(authenticationFlowContext, tryUsername);
+        String username = setUserInContext(authenticationFlowContext, context, tryUsername);
         if (username == null) {
             LOG.debugf("No username in request");
             return;
@@ -161,8 +161,12 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
         }
     }
 
-    private String setUserInContext(AuthenticationFlowContext context, String username) {
-        username = trimToNull(username);
+    private String setUserInContext(AuthenticationFlowContext context,
+        HomeIdpAuthenticationFlowContext homeIdpAuthenticationFlowContext,
+        String username) {
+      context.clearUser();
+
+      username = trimToNull(username);
 
         if (username == null) {
             LOG.warn("No or empty username found in request");
@@ -171,6 +175,20 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
             return null;
         }
+
+      if (homeIdpAuthenticationFlowContext.config().isSetUserInContext()) {
+        try {
+          UserModel user = KeycloakModelUtils.findUserByNameOrEmail(context.getSession(), context.getRealm(),
+              username);
+          if (user != null) {
+            LOG.tracef("Setting user '%s' in context", user.getId());
+            context.setUser(user);
+          }
+        } catch (ModelDuplicateException ex) {
+          LOG.warnf(ex, "Could not uniquely identify the user. Multiple users with name or email '%s' found.",
+              username);
+        }
+      }
 
         LOG.debugf("Found username '%s' in request", username);
         context.getEvent().detail(Details.USERNAME, username);
