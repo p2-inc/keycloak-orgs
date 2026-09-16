@@ -164,7 +164,9 @@ final class HomeIdpDiscoveryAuthenticator extends AbstractUsernameFormAuthentica
     private String setUserInContext(AuthenticationFlowContext context,
         HomeIdpAuthenticationFlowContext homeIdpAuthenticationFlowContext,
         String username) {
-      context.clearUser();
+      if (homeIdpAuthenticationFlowContext.config().isSetUserInContext()) {
+        context.clearUser();
+      }
 
       username = trimToNull(username);
 
