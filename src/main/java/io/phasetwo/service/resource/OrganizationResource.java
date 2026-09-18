@@ -1,9 +1,9 @@
 package io.phasetwo.service.resource;
 
 import static io.phasetwo.service.Orgs.ORG_CONFIG_PORTAL_LINK_EXPIRATION_KEY;
-import static io.phasetwo.service.resource.Converters.*;
+import static io.phasetwo.service.resource.Converters.convertOrganizationModelToOrganization;
 import static io.phasetwo.service.resource.OrganizationAdminAuth.DEFAULT_ORG_ROLES;
-import static io.phasetwo.service.resource.OrganizationResourceType.*;
+import static io.phasetwo.service.resource.OrganizationResourceType.ORGANIZATION;
 
 import com.google.common.collect.ImmutableMap;
 import io.phasetwo.service.auth.action.PortalLinkActionToken;
@@ -11,8 +11,18 @@ import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.Organization;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
@@ -227,6 +237,15 @@ public class OrganizationResource extends OrganizationAdminResource {
             session
                 .users()
                 .getUserByUsername(realm, String.format("org-admin-%s", organization.getId()));
+        // try by email. In case the EmailAsUsername setting is enabled
+        if (user == null) {
+          user =
+              session
+                  .users()
+                  .getUserByEmail(
+                      realm,
+                      String.format("org-admin-%s@noreply.phasetwo.io", organization.getId()));
+        }
       }
       if (user == null) {
         throw new BadRequestException(String.format("User %s not found", userId));
