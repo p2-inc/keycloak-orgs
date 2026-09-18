@@ -227,6 +227,13 @@ public class OrganizationResource extends OrganizationAdminResource {
             session
                 .users()
                 .getUserByUsername(realm, String.format("org-admin-%s", organization.getId()));
+        //try by email. In case the EmailAsUsername setting is enabled
+        if (user == null){
+          user =
+              session
+                  .users()
+                  .getUserByEmail(realm, String.format("org-admin-%s@noreply.phasetwo.io", organization.getId()));
+        }
       }
       if (user == null) {
         throw new BadRequestException(String.format("User %s not found", userId));
