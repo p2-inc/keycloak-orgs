@@ -1,5 +1,6 @@
 package io.phasetwo.service.model.jpa;
 
+import static io.phasetwo.service.model.jpa.LazyCollections.isLoaded;
 import static org.keycloak.models.UserModel.EMAIL;
 import static org.keycloak.models.UserModel.FIRST_NAME;
 import static org.keycloak.models.UserModel.LAST_NAME;
@@ -373,19 +374,6 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     return query.getResultList().stream().findFirst().orElse(null);
   }
 
-  /**
-   * True when {@code attribute} on {@code owner} has already been loaded.
-   *
-   * <p>Lets a caller keep an in-memory collection consistent without being the thing that forces it
-   * to load. These collections are mapped {@code cascade = ALL, orphanRemoval = true}, so an entity
-   * removed through the EntityManager while an already-loaded collection still references it can be
-   * re-cascaded on flush. When the collection was never loaded there is nothing to reconcile, and
-   * touching it would read every row.
-   */
-  private boolean isLoaded(Object owner, String attribute) {
-    return em.getEntityManagerFactory().getPersistenceUnitUtil().isLoaded(owner, attribute);
-  }
-
   @Override
   public void grantMembership(UserModel user) {
     if (hasMembership(user)) return;
@@ -405,7 +393,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
     OrganizationMemberEntity member = getMembershipEntity(user);
     if (member == null) return;
 
-    if (isLoaded(org, "members")) {
+    if (isLoaded(em, org, "members")) {
       org.getMembers().remove(member);
     }
     em.remove(member);
@@ -414,7 +402,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
         .forEach(
             e -> {
               OrganizationRoleEntity role = e.getRole();
-              if (isLoaded(role, "userMappings")) {
+              if (isLoaded(em, role, "userMappings")) {
                 role.getUserMappings().remove(e);
               }
               em.remove(e);
@@ -470,7 +458,7 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
         .filter(inv -> inv.getEmail() != null && inv.getEmail().equalsIgnoreCase(email))
         .forEach(
             inv -> {
-              if (isLoaded(org, "invitations")) {
+              if (isLoaded(em, org, "invitations")) {
                 org.getInvitations().remove(inv);
               }
               em.remove(inv);

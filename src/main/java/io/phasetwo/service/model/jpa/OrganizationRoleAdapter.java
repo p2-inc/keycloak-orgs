@@ -1,5 +1,7 @@
 package io.phasetwo.service.model.jpa;
 
+import static io.phasetwo.service.model.jpa.LazyCollections.isLoaded;
+
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
@@ -90,14 +92,19 @@ public class OrganizationRoleAdapter
     m.setUserId(user.getId());
     m.setRole(role);
     em.persist(m);
-    role.getUserMappings().add(m);
+    // Deliberately not role.getUserMappings().add(m): UserOrganizationRoleMappingEntity.role is the
+    // owning side of the association, so em.persist above fully writes the row. Adding to the
+    // inverse collection only syncs it in memory, and doing so initializes the LAZY collection,
+    // reading every user mapping of the role.
   }
 
   @Override
   public void revokeRole(UserModel user) {
     UserOrganizationRoleMappingEntity e = getByUser(user);
     if (e != null) {
-      role.getUserMappings().remove(e);
+      if (isLoaded(em, role, "userMappings")) {
+        role.getUserMappings().remove(e);
+      }
       em.remove(e);
       em.flush();
     }
