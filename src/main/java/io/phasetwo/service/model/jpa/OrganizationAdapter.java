@@ -361,12 +361,29 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public boolean hasMembership(UserModel user) {
+    return getMembershipEntity(user) != null;
+  }
+
+  private OrganizationMemberEntity getMembershipEntity(UserModel user) {
     TypedQuery<OrganizationMemberEntity> query =
         em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberEntity.class);
     query.setParameter("organization", org);
     query.setParameter("userId", user.getId());
     query.setMaxResults(1);
-    return !query.getResultList().isEmpty();
+    return query.getResultList().stream().findFirst().orElse(null);
+  }
+
+  /**
+   * True when {@code attribute} on {@code owner} has already been loaded.
+   *
+   * <p>Lets a caller keep an in-memory collection consistent without being the thing that forces it
+   * to load. These collections are mapped {@code cascade = ALL, orphanRemoval = true}, so an entity
+   * removed through the EntityManager while an already-loaded collection still references it can be
+   * re-cascaded on flush. When the collection was never loaded there is nothing to reconcile, and
+   * touching it would read every row.
+   */
+  private boolean isLoaded(Object owner, String attribute) {
+    return em.getEntityManagerFactory().getPersistenceUnitUtil().isLoaded(owner, attribute);
   }
 
   @Override
@@ -385,12 +402,21 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public void revokeMembership(UserModel user) {
-    if (!hasMembership(user)) return;
-    org.getMembers().removeIf(m -> m.getUserId().equals(user.getId()));
+    OrganizationMemberEntity member = getMembershipEntity(user);
+    if (member == null) return;
+
+    if (isLoaded(org, "members")) {
+      org.getMembers().remove(member);
+    }
+    em.remove(member);
+
     getRolesEntityByUserStream(user)
         .forEach(
             e -> {
-              e.getRole().getUserMappings().remove(e);
+              OrganizationRoleEntity role = e.getRole();
+              if (isLoaded(role, "userMappings")) {
+                role.getUserMappings().remove(e);
+              }
               em.remove(e);
             });
     if (user.getEmail() != null) revokeInvitations(user.getEmail());
@@ -434,7 +460,21 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public void revokeInvitations(String email) {
-    org.getInvitations().removeIf(inv -> inv.getEmail().equals(email.toLowerCase()));
+    TypedQuery<InvitationEntity> query =
+        em.createNamedQuery("getInvitationsByOrganizationAndEmail", InvitationEntity.class);
+    query.setParameter("organization", org);
+    query.setParameter("search", email.toLowerCase());
+    query.getResultList().stream()
+        // The named query matches with LIKE, where "_" in an address is a wildcard. Keep the
+        // exact-match semantics the collection filter had.
+        .filter(inv -> inv.getEmail() != null && inv.getEmail().equalsIgnoreCase(email))
+        .forEach(
+            inv -> {
+              if (isLoaded(org, "invitations")) {
+                org.getInvitations().remove(inv);
+              }
+              em.remove(inv);
+            });
   }
 
   @Override
