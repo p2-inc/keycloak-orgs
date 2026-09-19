@@ -1,5 +1,6 @@
 package io.phasetwo.service.model.jpa;
 
+import static io.phasetwo.service.model.jpa.LazyCollections.isLoaded;
 import static org.keycloak.models.UserModel.EMAIL;
 import static org.keycloak.models.UserModel.FIRST_NAME;
 import static org.keycloak.models.UserModel.LAST_NAME;
@@ -361,12 +362,16 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public boolean hasMembership(UserModel user) {
+    return getMembershipEntity(user) != null;
+  }
+
+  private OrganizationMemberEntity getMembershipEntity(UserModel user) {
     TypedQuery<OrganizationMemberEntity> query =
         em.createNamedQuery("getOrganizationMemberByUserId", OrganizationMemberEntity.class);
     query.setParameter("organization", org);
     query.setParameter("userId", user.getId());
     query.setMaxResults(1);
-    return !query.getResultList().isEmpty();
+    return query.getResultList().stream().findFirst().orElse(null);
   }
 
   @Override
@@ -385,12 +390,21 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public void revokeMembership(UserModel user) {
-    if (!hasMembership(user)) return;
-    org.getMembers().removeIf(m -> m.getUserId().equals(user.getId()));
+    OrganizationMemberEntity member = getMembershipEntity(user);
+    if (member == null) return;
+
+    if (isLoaded(em, org, "members")) {
+      org.getMembers().remove(member);
+    }
+    em.remove(member);
+
     getRolesEntityByUserStream(user)
         .forEach(
             e -> {
-              e.getRole().getUserMappings().remove(e);
+              OrganizationRoleEntity role = e.getRole();
+              if (isLoaded(em, role, "userMappings")) {
+                role.getUserMappings().remove(e);
+              }
               em.remove(e);
             });
     if (user.getEmail() != null) revokeInvitations(user.getEmail());
@@ -434,7 +448,21 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public void revokeInvitations(String email) {
-    org.getInvitations().removeIf(inv -> inv.getEmail().equals(email.toLowerCase()));
+    TypedQuery<InvitationEntity> query =
+        em.createNamedQuery("getInvitationsByOrganizationAndEmail", InvitationEntity.class);
+    query.setParameter("organization", org);
+    query.setParameter("search", email.toLowerCase());
+    query.getResultList().stream()
+        // The named query matches with LIKE, where "_" in an address is a wildcard. Keep the
+        // exact-match semantics the collection filter had.
+        .filter(inv -> inv.getEmail() != null && inv.getEmail().equalsIgnoreCase(email))
+        .forEach(
+            inv -> {
+              if (isLoaded(em, org, "invitations")) {
+                org.getInvitations().remove(inv);
+              }
+              em.remove(inv);
+            });
   }
 
   @Override
