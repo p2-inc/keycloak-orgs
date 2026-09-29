@@ -7,7 +7,6 @@ import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
@@ -20,6 +19,7 @@ public class ActiveOrganization {
   private final RealmModel realm;
   private final UserModel user;
   private final OrganizationProvider organizationProvider;
+  private final List<OrganizationModel> userOrganizations;
   @Getter() private final OrganizationModel organization;
 
   public static ActiveOrganization fromContext(
@@ -31,6 +31,8 @@ public class ActiveOrganization {
     this.realm = realm;
     this.user = user;
     this.organizationProvider = session.getProvider(OrganizationProvider.class);
+    // Each getUserOrganizationsStream call queries the membership table, so load it once.
+    this.userOrganizations = organizationProvider.getUserOrganizationsStream(realm, user).toList();
     this.organization =
         userHasActiveOrganizationAttribute()
             ? initializeActiveOrganization()
@@ -47,16 +49,18 @@ public class ActiveOrganization {
   }
 
   private OrganizationModel initializeDefaultActiveOrganization() {
-    Stream<OrganizationModel> userOrganizations =
-        organizationProvider.getUserOrganizationsStream(realm, user);
-    return userOrganizations.findFirst().orElse(null);
+    return userOrganizations.stream().findFirst().orElse(null);
   }
 
   private void clearOutdatedActiveOrganizationAttribute() {
-    if (!userHasOrganization() && userHasActiveOrganizationAttribute()) {
+    // Nothing to clear. Without this, a user with no active organization attribute fails the
+    // membership check below (null id) and logs a spurious warning on every token.
+    if (!userHasActiveOrganizationAttribute()) {
+      return;
+    }
+    if (!userHasOrganization()) {
       user.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
-    } else if (organizationProvider
-        .getUserOrganizationsStream(realm, user)
+    } else if (userOrganizations.stream()
         .noneMatch(org -> org.getId().equals(getActiveOrganizationIdFromAttribute()))) {
       log.warnf("%s doesn't belong to this organization", user.getUsername());
       user.setAttribute(ACTIVE_ORGANIZATION, new ArrayList<>());
@@ -64,7 +68,7 @@ public class ActiveOrganization {
   }
 
   public boolean userHasOrganization() {
-    return organizationProvider.getUserOrganizationsStream(realm, user).findFirst().isPresent();
+    return !userOrganizations.isEmpty();
   }
 
   private String getActiveOrganizationIdFromAttribute() {
