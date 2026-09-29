@@ -1,0 +1,22 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <!--
+      Converting an organization to its representation loads its domains, which queries
+      ORGANIZATION_DOMAIN by ORGANIZATION_ID. The table only has a primary key on ID, so on
+      databases that do not index foreign keys automatically each lookup is a full table scan,
+      and the organization list endpoint runs one per returned organization.
+    -->
+
+    <changeSet author="phasetwo" id="add-organization-domain-org-id-index">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX_ORG_DOMAIN_ORG_ID" tableName="ORGANIZATION_DOMAIN"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="IDX_ORG_DOMAIN_ORG_ID" tableName="ORGANIZATION_DOMAIN">
+            <column name="ORGANIZATION_ID"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
