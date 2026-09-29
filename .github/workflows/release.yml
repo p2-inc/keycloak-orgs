@@ -5,6 +5,12 @@ on:
     branches:
       - main
 
+# A single merge can be delivered as more than one push event. Serialize release runs so they
+# don't race on release:prepare and push to main at the same time.
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,7 +19,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # A queued run can start after an earlier run has already released and pushed to main.
+      # Releasing from this commit again would fail at the push, so skip when main has moved on.
+      - name: Check main is still at this commit
+        id: head
+        run: |
+          remote_sha=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$remote_sha" != "$GITHUB_SHA" ]; then
+            echo "main is at $remote_sha, not $GITHUB_SHA; skipping release"
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Release
+        if: steps.head.outputs.stale != 'true'
         uses: qcastel/github-actions-maven-release@master
         with:
           release-branch-name: "main"
