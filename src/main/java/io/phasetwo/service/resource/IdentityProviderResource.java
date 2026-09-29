@@ -1,10 +1,21 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Orgs.*;
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
+import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
 
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.util.IdentityProviders;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.stream.Stream;
@@ -97,6 +108,7 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addMapper(IdentityProviderMapperRepresentation mapper) {
     requireManage();
+    requireSafeMapper(mapper);
     return kcResource.addMapper(mapper);
   }
 
@@ -112,6 +124,7 @@ public class IdentityProviderResource extends OrganizationAdminResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public void update(@PathParam("id") String id, IdentityProviderMapperRepresentation rep) {
     requireManage();
+    requireSafeMapper(rep);
     kcResource.update(id, rep);
   }
 
@@ -127,6 +140,20 @@ public class IdentityProviderResource extends OrganizationAdminResource {
       throw new NotAuthorizedException(
           String.format(
               "Insufficient permission to manage identity providers for %s", organization.getId()));
+    }
+  }
+
+  /**
+   * Restrict a delegated organization admin
+   */
+  private void requireSafeMapper(IdentityProviderMapperRepresentation mapper) {
+    if (!auth.hasManageOrgs() && !IdentityProviders.isMapperAllowedForOrgAdmin(mapper)) {
+      String type = mapper == null ? null : mapper.getIdentityProviderMapper();
+      throw new ForbiddenException(
+          String.format(
+              "Identity provider mapper type '%s' is not permitted for organization-scoped identity"
+                  + " provider management of %s. Only attribute and username mappers are allowed.",
+              type, organization.getId()));
     }
   }
 }
