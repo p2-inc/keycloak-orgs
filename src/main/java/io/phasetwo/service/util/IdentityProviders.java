@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,7 +123,7 @@ public final class IdentityProviders {
 
   /* code copied from keycloak */
   public static IdentityProviderModel toModel(
-      IdentityProviderEntity entity, KeycloakSession session) {
+      IdentityProviderEntity entity, KeycloakSession session, EntityManager em) {
     if (entity == null) {
       return null;
     } else {
@@ -141,11 +142,20 @@ public final class IdentityProviders {
       identityProviderModel.setAuthenticateByDefault(entity.isAuthenticateByDefault());
       identityProviderModel.setFirstBrokerLoginFlowId(entity.getFirstBrokerLoginFlowId());
       identityProviderModel.setPostBrokerLoginFlowId(entity.getPostBrokerLoginFlowId());
-      identityProviderModel.setOrganizationId(entity.getOrganizationId());
+      identityProviderModel.setOrganizationIds(
+          getOrganizationIdsForIdp(em, entity.getInternalId()));
       identityProviderModel.setStoreToken(entity.isStoreToken());
       identityProviderModel.setAddReadTokenRoleOnCreate(entity.isAddReadTokenRoleOnCreate());
       return identityProviderModel;
     }
+  }
+
+  /* code copied from keycloak */
+  private static Set<String> getOrganizationIdsForIdp(EntityManager em, String idpInternalId) {
+    return new LinkedHashSet<>(
+        em.createNamedQuery("getOrganizationIdsByIdp", String.class)
+            .setParameter("idpId", idpInternalId)
+            .getResultList());
   }
 
   /* code copied from keycloak */
@@ -209,7 +219,7 @@ public final class IdentityProviders {
     query.orderBy(builder.asc(idp.get("alias")));
     TypedQuery<IdentityProviderEntity> typedQuery =
         em.createQuery(query.select(idp).where(predicates.toArray(Predicate[]::new)));
-    return typedQuery.getResultStream().map(e -> toModel(e, session));
+    return typedQuery.getResultStream().map(e -> toModel(e, session, em));
   }
 
   public static boolean isMultipleIdpsConfigEnabled(RealmModel realm) {

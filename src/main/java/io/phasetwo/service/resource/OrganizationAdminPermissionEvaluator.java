@@ -5,7 +5,13 @@ import jakarta.ws.rs.ForbiddenException;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authorization.model.ResourceServer;
 import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.fgap.*;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.ClientPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.GroupPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.OrganizationPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.RealmPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.RolePermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.UserPermissionEvaluator;
 
 @JBossLog
 public class OrganizationAdminPermissionEvaluator implements AdminPermissionEvaluator {
@@ -181,6 +187,16 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
         realm.requireViewRequiredActions();
       }
     };
+  }
+
+  /**
+   * Keycloak's own organization permissions, new as an abstract method in 26.8. These govern the
+   * native organization feature, which is distinct from Phase Two organizations, so the stock
+   * evaluator is the right behaviour here — no override.
+   */
+  @Override
+  public OrganizationPermissionEvaluator orgs() {
+    return permissions.orgs();
   }
 
   @Override
