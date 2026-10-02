@@ -1,0 +1,51 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <!--
+      OrganizationAdapter.membersQuery filters on ORGANIZATION_ID and orders by CREATED_AT. The
+      only index covering ORGANIZATION_ID is the unique constraint on (ORGANIZATION_ID, USER_ID),
+      which does not support the sort, so every page fetched and sorted the whole organization
+      before applying first/max.
+
+      USER_ID is stored/included so the index covers the query and avoids a primary-index lookup
+      per row. Databases without covering-index support fall back to the plain two-column index
+      in the last changeSet, which still removes the sort.
+    -->
+
+    <changeSet author="phasetwo" id="add-organization-member-org-created-index-cockroachdb" dbms="cockroachdb">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX_ORG_MEMBER_ORG_CREATED" tableName="ORGANIZATION_MEMBER"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX IDX_ORG_MEMBER_ORG_CREATED
+                ON ORGANIZATION_MEMBER (ORGANIZATION_ID, CREATED_AT) STORING (USER_ID)
+        </sql>
+    </changeSet>
+
+    <changeSet author="phasetwo" id="add-organization-member-org-created-index-postgresql" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX_ORG_MEMBER_ORG_CREATED" tableName="ORGANIZATION_MEMBER"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE INDEX IDX_ORG_MEMBER_ORG_CREATED
+                ON ORGANIZATION_MEMBER (ORGANIZATION_ID, CREATED_AT) INCLUDE (USER_ID)
+        </sql>
+    </changeSet>
+
+    <changeSet author="phasetwo" id="add-organization-member-org-created-index">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX_ORG_MEMBER_ORG_CREATED" tableName="ORGANIZATION_MEMBER"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="IDX_ORG_MEMBER_ORG_CREATED" tableName="ORGANIZATION_MEMBER">
+            <column name="ORGANIZATION_ID"/>
+            <column name="CREATED_AT"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

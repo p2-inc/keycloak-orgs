@@ -6,10 +6,10 @@ describe('Organiationless IDP Linked user login', () => {
     it('a user registers their own idp & logs in with that', () => {
         cy.visit(testRealmLoginUri);
         cy.task('log', `Visited the login URL 1st time`)
-        cy.get('#username').type(organizationlessAuthItUser.username, {force: true});
+        cy.get('#username').should('be.visible').type(organizationlessAuthItUser.username, {force: true});
         cy.task('log', `Username typed in`)
         cy.get('#kc-login').click();
-        cy.get('#password').type(organizationlessAuthItUser.password, {force: true});
+        cy.get('#password').should('be.visible').type(organizationlessAuthItUser.password, {force: true});
         cy.task('log', `Password typed in`)
         cy.get('#kc-login').click();
         cy.contains('Personal');
@@ -48,7 +48,7 @@ describe('Organiationless IDP Linked user login', () => {
 
         cy.visit(testRealmLoginUri);
         cy.task('log', `Verifying user can log in with external IDP`)
-        cy.get('#username').type(organizationlessAuthItUser.username, {force: true});
+        cy.get('#username').should('be.visible').type(organizationlessAuthItUser.username, {force: true});
         cy.task('log', `Username typed in`)
         cy.get('#kc-login').click();
         // after linking the account to the user on the next log-in we are automatically redirected to the external idp's login page

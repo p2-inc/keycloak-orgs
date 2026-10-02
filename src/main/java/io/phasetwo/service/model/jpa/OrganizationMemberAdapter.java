@@ -7,6 +7,7 @@ import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Map;
 import org.keycloak.common.util.MultivaluedHashMap;
@@ -56,13 +57,14 @@ public class OrganizationMemberAdapter
 
   @Override
   public List<String> getRoles() {
-    return organizationMemberEntity.getOrganization().getRoles().stream()
-        .flatMap(organizationRoleEntity -> organizationRoleEntity.getUserMappings().stream())
-        .filter(
-            userOrganizationRoleMappingEntity ->
-                userOrganizationRoleMappingEntity
-                    .getUserId()
-                    .equals(organizationMemberEntity.getUserId()))
+    // Was: organization.getRoles() flat-mapped over each role's getUserMappings(), which reads
+    // every role in the organization and every user mapping of every role to find one member's.
+    TypedQuery<UserOrganizationRoleMappingEntity> query =
+        em.createNamedQuery("getMappingsByUser", UserOrganizationRoleMappingEntity.class);
+    query.setParameter("userId", organizationMemberEntity.getUserId());
+    query.setParameter("orgId", organizationMemberEntity.getOrganization().getId());
+    return query
+        .getResultStream()
         .map(UserOrganizationRoleMappingEntity::getRole)
         .map(OrganizationRoleEntity::getName)
         .toList();

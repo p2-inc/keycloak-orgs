@@ -254,6 +254,27 @@ Organizations may optionally be given permission to manage their own IdP. The cu
 
 These are the configuration options for the "Home IdP Discovery" Authenticator. It will need to be placed in your flow as a replacement for a "Username form", or after another Authenticator/Form that sets the `ATTEMPTED_USERNAME` note.
 
+##### `Set user in context`
+
+> [!IMPORTANT]
+> ** It is enabled by default only for backwards compatibility. Plan your migration now — see the warning below for how to do it safely.
+
+When used with the UsernamePassword authenticator the submitted username or email resolves to a local user, this option puts that user into the authentication context. It defaults to `true` for backwards compatibility, but **it leaks account existence**: the form that follows branches on `context.getUser() != null`, so the rendered login page differs for a registered and an unregistered address — the username field is locked rather than editable, the passkey button is suppressed, and the offered identity providers are filtered. All of that is decided server-side and visible in `kcContext`, so an unauthenticated caller can enumerate accounts.
+
+This is the same problem upstream fixed in [sventorben/keycloak-home-idp-discovery#251](https://github.com/sventorben/keycloak-home-idp-discovery/issues/251), reported again in [#285](https://github.com/sventorben/keycloak-home-idp-discovery/issues/285). Upstream dropped the behaviour outright, shipping it as a breaking change in [v22.1.0](https://github.com/sventorben/keycloak-home-idp-discovery/releases/tag/v22.1.0).
+
+> [!CAUTION]
+> **Leaving this on while a "Username Password Form" (`auth-username-password-form`) follows the authenticator is an account enumeration attack.** That form renders differently depending on whether the address exists — it locks the username field, hides the passkey button and filters the identity providers only for a registered account. The difference is server-rendered and served to anyone, so an attacker can test addresses with plain HTTP requests and learn which ones have accounts, with no credentials and no rate-limit signal.
+>
+> In that flow you should turn the option **off**: `auth-username-password-form` does not need a user in the context, so switching it off is safe and closes the leak.
+
+> [!WARNING]
+> Do not turn this off while "Home IdP Discovery" is followed by a **REQUIRED "Password Form"** (`auth-password-form`). That authenticator's `requiresUser()` is `true`, so with no user in the context Keycloak fails the flow with `UNKNOWN_USER` — breaking login for every user whose domain has no matching home IdP. In that topology "Home IdP Discovery" is standing in for Keycloak's "Username Form", which sets the user itself.
+>
+> Upstream no longer supports that topology at all, and closed the identical report as won't-fix in [#426](https://github.com/sventorben/keycloak-home-idp-discovery/issues/426): *"Using the password form only is no longer supported since version 22.1.0 of this extension. You need to use a username&password authenticator instead."*
+>
+> Before turning it off, either move the flow to a **"Username Password Form"** (`auth-username-password-form`), whose `requiresUser()` is `false`, or set the user in an earlier execution (for example the `Username Auth Note` authenticator).
+
 #### Conditional Attributes
 
 It may sometimes be desirable to execute an authenticaiton flow conditionally on the presence of an organization attribute. There is a conditional authenticator for this purpose. It allows you to select an attribute name and value to match, and specify if it should be applied to all of the user's organizations (where only one organization must contain the name/value match), or just the "active" one.

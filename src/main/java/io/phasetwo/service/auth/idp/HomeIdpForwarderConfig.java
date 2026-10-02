@@ -9,6 +9,7 @@ final class HomeIdpForwarderConfig {
 
     static final String BYPASS_LOGIN_PAGE = "bypassLoginPage";
     static final String FORWARD_TO_FIRST_MATCH = "forwardToFirstMatch";
+    static final String SET_USER_IN_CONTEXT = "setUserInContext";
 
     private final AuthenticatorConfigModel authenticatorConfigModel;
 
@@ -27,4 +28,10 @@ final class HomeIdpForwarderConfig {
             .map(it -> Boolean.parseBoolean(it.getConfig().getOrDefault(FORWARD_TO_FIRST_MATCH, "true")))
             .orElse(true);
     }
+
+   boolean isSetUserInContext() {
+    return Optional.ofNullable(authenticatorConfigModel)
+        .map(it -> Boolean.parseBoolean(it.getConfig().getOrDefault(SET_USER_IN_CONTEXT, "true")))
+        .orElse(true);
+  }
 }

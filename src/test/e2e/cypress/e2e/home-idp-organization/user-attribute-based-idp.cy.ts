@@ -35,7 +35,7 @@ describe('user login via home idp provider', () => {
         cy.contains('Account already exists');
         cy.get("#linkAccount").click();
         cy.contains('Authenticate to link your account with oidc-idp');
-        cy.get('#password').type(idpUser.password);
+        cy.get('#password').should('be.visible').type(idpUser.password);
         cy.get('#kc-login').click();
         cy.contains('Personal');
 

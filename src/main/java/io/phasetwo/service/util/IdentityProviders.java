@@ -12,7 +12,15 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hibernate.Session;
@@ -24,11 +32,45 @@ import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.IdentityProviderEntity;
+import org.keycloak.representations.idm.IdentityProviderMapperRepresentation;
 import org.keycloak.representations.idm.IdentityProviderRepresentation;
 
 public final class IdentityProviders {
 
   private IdentityProviders() {}
+
+  /**
+   * The only identity provider mapper types a delegated organization admin (a holder of the
+   * org-scoped {@code manage-identity-providers} role) is permitted to create or update. This is an
+   * <strong>allowlist by design</strong>: the set is restricted to attribute/username mappers that
+   * merely copy incoming claims/attributes onto the brokered user's profile, and every other mapper
+   * type is denied.
+   *
+   * <p>A denylist is not sufficient here — mappers can escalate privilege through many vectors: role
+   * importers grant realm/client roles (e.g. {@code realm-management.realm-admin}); group importers
+   * join groups carrying privileged composite roles; attribute mappers can overwrite security
+   * relevant attributes; and custom or future mapper types are unknowable in advance. All such
+   * mappers apply without checking that the delegated admin holds the granted privilege, so only an
+   * explicitly vetted allowlist is safe. Full realm admins ({@code manage-organizations}) are not
+   * subject to this restriction.
+   */
+  public static final Set<String> ORG_ADMIN_ALLOWED_MAPPER_TYPES =
+      Set.of(
+          "oidc-user-attribute-idp-mapper",
+          "oidc-username-idp-mapper",
+          "saml-user-attribute-idp-mapper",
+          "saml-username-idp-mapper");
+
+  /**
+   * @return true if the mapper type is on the delegated-org-admin allowlist and may therefore be
+   *     created or updated by a holder of the org-scoped {@code manage-identity-providers} role. A
+   *     null mapper or null/unrecognized mapper type returns false (deny by default).
+   */
+  public static boolean isMapperAllowedForOrgAdmin(IdentityProviderMapperRepresentation mapper) {
+    return mapper != null
+        && mapper.getIdentityProviderMapper() != null
+        && ORG_ADMIN_ALLOWED_MAPPER_TYPES.contains(mapper.getIdentityProviderMapper());
+  }
 
   public static Set<String> getAttributeMultivalued(Map<String, String> config, String attrKey) {
     if (config == null) {
@@ -81,7 +123,7 @@ public final class IdentityProviders {
 
   /* code copied from keycloak */
   public static IdentityProviderModel toModel(
-      IdentityProviderEntity entity, KeycloakSession session) {
+      IdentityProviderEntity entity, KeycloakSession session, EntityManager em) {
     if (entity == null) {
       return null;
     } else {
@@ -100,11 +142,20 @@ public final class IdentityProviders {
       identityProviderModel.setAuthenticateByDefault(entity.isAuthenticateByDefault());
       identityProviderModel.setFirstBrokerLoginFlowId(entity.getFirstBrokerLoginFlowId());
       identityProviderModel.setPostBrokerLoginFlowId(entity.getPostBrokerLoginFlowId());
-      identityProviderModel.setOrganizationId(entity.getOrganizationId());
+      identityProviderModel.setOrganizationIds(
+          getOrganizationIdsForIdp(em, entity.getInternalId()));
       identityProviderModel.setStoreToken(entity.isStoreToken());
       identityProviderModel.setAddReadTokenRoleOnCreate(entity.isAddReadTokenRoleOnCreate());
       return identityProviderModel;
     }
+  }
+
+  /* code copied from keycloak */
+  private static Set<String> getOrganizationIdsForIdp(EntityManager em, String idpInternalId) {
+    return new LinkedHashSet<>(
+        em.createNamedQuery("getOrganizationIdsByIdp", String.class)
+            .setParameter("idpId", idpInternalId)
+            .getResultList());
   }
 
   /* code copied from keycloak */
@@ -168,7 +219,7 @@ public final class IdentityProviders {
     query.orderBy(builder.asc(idp.get("alias")));
     TypedQuery<IdentityProviderEntity> typedQuery =
         em.createQuery(query.select(idp).where(predicates.toArray(Predicate[]::new)));
-    return typedQuery.getResultStream().map(e -> toModel(e, session));
+    return typedQuery.getResultStream().map(e -> toModel(e, session, em));
   }
 
   public static boolean isMultipleIdpsConfigEnabled(RealmModel realm) {

@@ -2054,6 +2054,45 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   }
 
   @Test
+  void testDefaultOrgAdminUserCreated() throws IOException {
+
+    OrganizationRepresentation org = createDefaultOrg();
+    String id = org.getId();
+    String username = "org-admin-%s".formatted(id);
+
+    List<UserRepresentation> found = keycloak.realm(REALM).users().search(username);
+    assertThat(found, hasSize(1));
+    UserRepresentation orgAdmin = found.get(0);
+
+    // USER_ENTITY fields set by organizationCreation()
+    assertThat(orgAdmin.getUsername(), is(username));
+    // the exclude-admin named queries match on LENGTH(username) = 46
+    assertThat(orgAdmin.getUsername().length(), is(46));
+    assertThat(orgAdmin.isEnabled(), is(true));
+    assertThat(orgAdmin.getEmail(), is("%s@noreply.phasetwo.io".formatted(username)));
+    assertThat(orgAdmin.isEmailVerified(), is(true));
+    // displayName is set *after* the creation event fires, so this is always the org name
+    assertThat(orgAdmin.getFirstName(), is(org.getName()));
+    assertThat(orgAdmin.getLastName(), is("Org Admin User"));
+
+    // org.grantMembership(user)
+    Response response = getRequest(id, "members");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    List<UserRepresentation> members =
+        objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+    assertThat(members.stream().map(UserRepresentation::getUsername).toList(), hasItem(username));
+
+    // every DEFAULT_ORG_ROLES role granted
+    for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
+      checkUserRole(id, role, orgAdmin.getId(), Status.NO_CONTENT.getStatusCode());
+    }
+
+    // and removed again on org deletion
+    deleteOrganization(id);
+    assertThat(keycloak.realm(REALM).users().search(username), empty());
+  }
+
+  @Test
   void testOrganizationSwitch() throws IOException, VerificationException {
     ObjectMapper mapper = objectMapper();
 

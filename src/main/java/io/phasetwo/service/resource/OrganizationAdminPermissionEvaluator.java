@@ -30,11 +30,6 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
   }
 
   @Override
-  public OrganizationPermissionEvaluator orgs() {
-    return permissions.orgs();
-  }
-  
-  @Override
   public boolean isRealmAdmin() {
     return permissions.isRealmAdmin();
   }
@@ -192,6 +187,16 @@ public class OrganizationAdminPermissionEvaluator implements AdminPermissionEval
         realm.requireViewRequiredActions();
       }
     };
+  }
+
+  /**
+   * Keycloak's own organization permissions, new as an abstract method in 26.8. These govern the
+   * native organization feature, which is distinct from Phase Two organizations, so the stock
+   * evaluator is the right behaviour here — no override.
+   */
+  @Override
+  public OrganizationPermissionEvaluator orgs() {
+    return permissions.orgs();
   }
 
   @Override

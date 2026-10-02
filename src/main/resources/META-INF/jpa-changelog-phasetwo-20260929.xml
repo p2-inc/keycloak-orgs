@@ -1,0 +1,35 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <!--
+      Converting an organization to its representation loads its domains, which queries
+      ORGANIZATION_DOMAIN by ORGANIZATION_ID. The table only has a primary key on ID, so on
+      databases that do not index foreign keys automatically each lookup is a full table scan,
+      and the organization list endpoint runs one per returned organization.
+
+      The index is named IDX_P2_ORG_DOMAIN_ORG_ID, not IDX_ORG_DOMAIN_ORG_ID: Keycloak's own
+      jpa-changelog-26.0.0.xml already uses the latter for its native organizations feature, on
+      its ORG_DOMAIN table. Index names are unique per schema rather than per table on PostgreSQL,
+      H2 and Oracle, so the original name collided and this changeSet failed on every server
+      running Keycloak 26.0 or later. The indexExists precondition did not catch it because it is
+      scoped to ORGANIZATION_DOMAIN, where the name genuinely was free.
+
+      validCheckSum="ANY" is set because the original name did succeed on MySQL/MariaDB, where
+      index names are scoped per table. Those deployments have the changeSet recorded under its
+      old checksum and will skip it, keeping the index under the old name — correct, just named
+      differently. Without this, they would fail checksum validation on upgrade.
+    -->
+
+    <changeSet author="phasetwo" id="add-organization-domain-org-id-index">
+        <validCheckSum>ANY</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX_P2_ORG_DOMAIN_ORG_ID" tableName="ORGANIZATION_DOMAIN"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="IDX_P2_ORG_DOMAIN_ORG_ID" tableName="ORGANIZATION_DOMAIN">
+            <column name="ORGANIZATION_ID"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
