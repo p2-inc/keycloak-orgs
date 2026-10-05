@@ -10,20 +10,27 @@
       On MySQL Group Replication / InnoDB Cluster the mismatch breaks the secondaries. The
       parallel applier orders dependent transactions using write-set hashes. The parent's PK
       hash is built from ORGANIZATION_ROLE.ID normalized to 36 characters, and the child's
-      foreign key hash from ROLE_ID normalized to 255, so the two never match
-      (sql/rpl_write_set_handler.cc). The certifier assigns last_committed from those hashes
-      alone (plugin/group_replication/src/certifier.cc), so creating an organization role and
+      foreign key hash from ROLE_ID normalized to 255 (sql/rpl_write_set_handler.cc). With a
+      PAD SPACE collation (utf8mb4_unicode_ci, utf8mb4_general_ci, utf8mb3_*) the two never
+      match; NO PAD collations such as MySQL 8's default utf8mb4_0900_ai_ci are not affected.
+      The certifier assigns last_committed from those hashes alone
+      (plugin/group_replication/src/certifier.cc), so creating an organization role and
       assigning it to a user in quick succession produces two transactions the secondary
       considers independent. When a worker applies the mapping before the role has committed,
       the secondary fails with error 1452 on FK_123g9nf5findslfksadifu277, stops its applier
       and leaves the group.
 
-      MySQL refuses to change the type of a column used in a foreign key
-      (ERROR 1832), so the constraint is dropped and recreated around the change, with the
-      same definition as in 20211207. The preconditions skip databases already at 36.
+      MySQL refuses to change the type of a column used in a foreign key (ERROR 1832), and
+      dropping and re-adding the constraint in one ALTER fails with ERROR 1826, so the FK is
+      dropped and recreated around the change, with the same definition as in 20211207.
+      MySQL/MariaDB DDL is not transactional, so the three steps are separate changeSets, each
+      with its own precondition: if the migration is interrupted after the FK is dropped, the
+      next start skips step 1 and still shrinks the column and recreates the FK. On MySQL
+      modifyDataType also drops NOT NULL, so step 2 also runs while the column is nullable, in
+      case the migration stopped between its two statements.
     -->
 
-    <changeSet author="ElfoLiNk" id="align-USER_ORGANIZATION_ROLE_MAPPING-ROLE_ID-to-VARCHAR-36-mysql">
+    <changeSet author="ElfoLiNk" id="align-USER_ORGANIZATION_ROLE_MAPPING-ROLE_ID-to-VARCHAR-36-mysql-1">
         <preConditions onFail="MARK_RAN">
             <or>
                 <dbms type="mysql"/>
@@ -39,8 +46,36 @@
             </sqlCheck>
         </preConditions>
         <dropForeignKeyConstraint baseTableName="USER_ORGANIZATION_ROLE_MAPPING" constraintName="FK_123g9nf5findslfksadifu277"/>
+    </changeSet>
+
+    <changeSet author="ElfoLiNk" id="align-USER_ORGANIZATION_ROLE_MAPPING-ROLE_ID-to-VARCHAR-36-mysql-2">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <dbms type="mysql"/>
+                <dbms type="mariadb"/>
+            </or>
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND UPPER(TABLE_NAME) = 'USER_ORGANIZATION_ROLE_MAPPING'
+                  AND UPPER(COLUMN_NAME) = 'ROLE_ID'
+                  AND (CHARACTER_MAXIMUM_LENGTH &lt;&gt; 36 OR IS_NULLABLE = 'YES')
+            </sqlCheck>
+        </preConditions>
         <modifyDataType tableName="USER_ORGANIZATION_ROLE_MAPPING" columnName="ROLE_ID" newDataType="VARCHAR(36)"/>
         <addNotNullConstraint tableName="USER_ORGANIZATION_ROLE_MAPPING" columnName="ROLE_ID" columnDataType="VARCHAR(36)"/>
+    </changeSet>
+
+    <changeSet author="ElfoLiNk" id="align-USER_ORGANIZATION_ROLE_MAPPING-ROLE_ID-to-VARCHAR-36-mysql-3">
+        <preConditions onFail="MARK_RAN">
+            <or>
+                <dbms type="mysql"/>
+                <dbms type="mariadb"/>
+            </or>
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="USER_ORGANIZATION_ROLE_MAPPING" foreignKeyName="FK_123g9nf5findslfksadifu277"/>
+            </not>
+        </preConditions>
         <addForeignKeyConstraint baseColumnNames="ROLE_ID" baseTableName="USER_ORGANIZATION_ROLE_MAPPING" constraintName="FK_123g9nf5findslfksadifu277" deferrable="false" initiallyDeferred="false" referencedColumnNames="ID" referencedTableName="ORGANIZATION_ROLE"/>
     </changeSet>
 
