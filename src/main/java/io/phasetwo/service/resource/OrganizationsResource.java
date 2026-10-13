@@ -216,14 +216,16 @@ public class OrganizationsResource extends OrganizationAdminResource {
       searchAttributes.put("name", search.trim());
     }
 
+    // Resolve the realm-wide permission once instead of per organization.
+    boolean canViewAllOrgs = auth.hasViewOrgs();
     return orgs.searchForOrganizationStream(
             realm,
             searchAttributes,
             firstResult,
             maxResults,
-            auth.hasViewOrgs() ? Optional.empty() : Optional.of(auth.getUser()),
+            canViewAllOrgs ? Optional.empty() : Optional.of(auth.getUser()),
             exact)
-        .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
+        .filter(m -> canViewAllOrgs || auth.hasOrgViewOrg(m))
         .map(Converters::convertOrganizationModelToOrganization);
   }
 

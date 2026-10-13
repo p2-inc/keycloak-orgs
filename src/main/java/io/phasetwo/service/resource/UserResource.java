@@ -62,8 +62,10 @@ public class UserResource extends OrganizationAdminResource {
       throw new NotFoundException(String.format("User with id %s not found", userId));
     }
 
+    // Resolve the realm-wide permission once instead of per organization.
+    boolean canViewAllOrgs = auth.hasViewOrgs();
     return orgs.getUserOrganizationsStream(realm, user)
-        .filter(m -> (auth.hasViewOrgs() || auth.hasOrgViewOrg(m)))
+        .filter(m -> canViewAllOrgs || auth.hasOrgViewOrg(m))
         .map(Converters::convertOrganizationModelToOrganization);
   }
 
