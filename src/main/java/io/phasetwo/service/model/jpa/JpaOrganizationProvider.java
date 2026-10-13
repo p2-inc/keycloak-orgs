@@ -143,8 +143,9 @@ public class JpaOrganizationProvider implements OrganizationProvider {
     TypedQuery<OrganizationMemberEntity> query =
         em.createNamedQuery("getOrganizationMembershipsByUserId", OrganizationMemberEntity.class);
     query.setParameter("userId", user.getId());
-    return query
-        .getResultStream()
+    // Materialize the list so every organization is in the persistence context before callers
+    // touch lazy collections; @BatchSize can then initialize domains/attributes in batches.
+    return query.getResultList().stream()
         .map(e -> new OrganizationAdapter(session, realm, em, e.getOrganization()));
   }
 

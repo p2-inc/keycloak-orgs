@@ -2,9 +2,21 @@ package io.phasetwo.service.model.jpa.entity;
 
 import static io.phasetwo.service.model.jpa.entity.Entities.setCollection;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Nationalized;
 
 /** */
@@ -78,9 +90,11 @@ public class ExtOrganizationEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       mappedBy = "organization")
+  @BatchSize(size = 100)
   protected Collection<DomainEntity> domains = new ArrayList<DomainEntity>();
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "organization")
+  @BatchSize(size = 100)
   protected Collection<OrganizationAttributeEntity> attributes =
       new ArrayList<OrganizationAttributeEntity>();
 
