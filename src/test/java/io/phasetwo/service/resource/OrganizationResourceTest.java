@@ -2804,4 +2804,40 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
       throw e;
     }
   }
+
+  @Test
+  void testListUserOrgsReturnsDomainsAndAttributes() throws IOException {
+    UserRepresentation user = createUser(keycloak, REALM, "multi-org-member");
+    List<String> orgIds = new ArrayList<>();
+    try {
+      for (int i = 0; i < 3; i++) {
+        OrganizationRepresentation org =
+            createOrganization(
+                new OrganizationRepresentation()
+                    .name("multi-org-" + i)
+                    .domains(List.of("multi-org-" + i + ".com"))
+                    .attributes(ImmutableMap.of("index", List.of(String.valueOf(i)))));
+        orgIds.add(org.getId());
+        Response response = putRequest("foo", org.getId(), "members", user.getId());
+        assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+      }
+
+      Response response = getRequestFromRoot(keycloak, "users", user.getId(), "orgs");
+      assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+      List<OrganizationRepresentation> orgs =
+          objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+      assertThat(orgs, hasSize(3));
+      assertThat(
+          orgs.stream().map(OrganizationRepresentation::getId).toList(),
+          containsInAnyOrder(orgIds.toArray()));
+      for (OrganizationRepresentation org : orgs) {
+        String index = org.getName().substring("multi-org-".length());
+        assertThat(org.getDomains(), containsInAnyOrder("multi-org-" + index + ".com"));
+        assertThat(org.getAttributes().get("index"), containsInAnyOrder(index));
+      }
+    } finally {
+      orgIds.forEach(this::deleteOrganization);
+      deleteUser(keycloak, REALM, user.getId());
+    }
+  }
 }
