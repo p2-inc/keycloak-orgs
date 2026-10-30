@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.InvitationRequest;
 import jakarta.mail.internet.AddressException;
@@ -60,6 +61,7 @@ public class InvitationsResource extends OrganizationAdminResource {
     if (email == null || !isValidEmail(email)) {
       throw new BadRequestException("Invalid email: " + email);
     }
+    canGrantRoles(invitation.getRoles());
     if (!canSetRoles(invitation.getRoles())) {
       throw new BadRequestException("Unknown role in list.");
     }
@@ -315,6 +317,34 @@ public class InvitationsResource extends OrganizationAdminResource {
           String.format(
               "User %s doesn't have permission to manage invitations in org %s",
               auth.getUser().getId(), organization.getName()));
+    }
+  }
+
+  /**
+   * Roles on an invitation are granted when it is accepted, so setting them is a role assignment
+   * and requires the same authority as the direct grant paths (RoleResource, UserResource). In
+   * addition, an org member may only put roles on an invitation that they hold themselves. Realm
+   * administrators with manage-organizations are exempt from both checks.
+   */
+  private void canGrantRoles(Collection<String> roles) {
+    if (roles == null || roles.isEmpty()) return;
+    if (auth.hasManageOrgs()) return;
+    UserModel caller = auth.getUser();
+    if (!auth.hasOrgManageRoles(organization)) {
+      throw new NotAuthorizedException(
+          String.format(
+              "User %s doesn't have permission to assign roles in org %s",
+              caller.getId(), organization.getName()));
+    }
+    for (String name : roles) {
+      OrganizationRoleModel role = organization.getRoleByName(name);
+      // unknown roles are rejected by canSetRoles
+      if (role != null && !role.hasRole(caller)) {
+        throw new NotAuthorizedException(
+            String.format(
+                "User %s cannot assign role %s in org %s that they do not hold",
+                caller.getId(), name, organization.getName()));
+      }
     }
   }
 
