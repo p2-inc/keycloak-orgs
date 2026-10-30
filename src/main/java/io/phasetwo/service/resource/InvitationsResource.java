@@ -1,20 +1,34 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Orgs.*;
-import static io.phasetwo.service.resource.Converters.*;
-import static io.phasetwo.service.resource.OrganizationResourceType.*;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_DEFAULT_APPLICATION_URI;
+import static io.phasetwo.service.resource.Converters.convertInvitationModelToInvitation;
+import static io.phasetwo.service.resource.OrganizationResourceType.INVITATION;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
+import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.representation.Invitation;
 import io.phasetwo.service.representation.InvitationRequest;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.lang.reflect.Method;
@@ -60,6 +74,7 @@ public class InvitationsResource extends OrganizationAdminResource {
     if (email == null || !isValidEmail(email)) {
       throw new BadRequestException("Invalid email: " + email);
     }
+    canGrantRoles(invitation.getRoles());
     if (!canSetRoles(invitation.getRoles())) {
       throw new BadRequestException("Unknown role in list.");
     }
@@ -315,6 +330,34 @@ public class InvitationsResource extends OrganizationAdminResource {
           String.format(
               "User %s doesn't have permission to manage invitations in org %s",
               auth.getUser().getId(), organization.getName()));
+    }
+  }
+
+  /**
+   * Roles on an invitation are granted when it is accepted, so setting them is a role assignment
+   * and requires the same authority as the direct grant paths (RoleResource, UserResource). In
+   * addition, an org member may only put roles on an invitation that they hold themselves. Realm
+   * administrators with manage-organizations are exempt from both checks.
+   */
+  private void canGrantRoles(Collection<String> roles) {
+    if (roles == null || roles.isEmpty()) return;
+    if (auth.hasManageOrgs()) return;
+    UserModel caller = auth.getUser();
+    if (!auth.hasOrgManageRoles(organization)) {
+      throw new NotAuthorizedException(
+          String.format(
+              "User %s doesn't have permission to assign roles in org %s",
+              caller.getId(), organization.getName()));
+    }
+    for (String name : roles) {
+      OrganizationRoleModel role = organization.getRoleByName(name);
+      // unknown roles are rejected by canSetRoles
+      if (role != null && !role.hasRole(caller)) {
+        throw new NotAuthorizedException(
+            String.format(
+                "User %s cannot assign role %s in org %s that they do not hold",
+                caller.getId(), name, organization.getName()));
+      }
     }
   }
 

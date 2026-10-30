@@ -1,11 +1,16 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Helpers.*;
+import static io.phasetwo.service.Helpers.createUser;
+import static io.phasetwo.service.Helpers.createUserWithCredentials;
+import static io.phasetwo.service.Helpers.deleteUser;
+import static io.phasetwo.service.Helpers.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;
@@ -45,6 +50,8 @@ public class InvitationsResourceTest extends AbstractOrganizationTest {
     for (String role : OrganizationAdminAuth.DEFAULT_ORG_ROLES) {
       grantUserRole(organization.getId(), role, user.getId());
     }
+    // inviters may only assign roles they hold
+    grantUserRole(organization.getId(), "example-role", user.getId());
     Keycloak kc1 = getKeycloak(REALM, "admin-cli", "user1", "pass");
 
     // create invitation
@@ -698,6 +705,71 @@ public class InvitationsResourceTest extends AbstractOrganizationTest {
       deleteOrganization(orgId1);
       deleteOrganization(orgId2);
       deleteOrganization(orgId3);
+    }
+  }
+
+  @Test
+  void invitationWithRolesRequiresManageRoles() throws IOException {
+    var organization =
+        createOrganization(
+            new OrganizationRepresentation()
+                .name("invite-roles-org")
+                .domains(List.of("example.com")));
+    String orgId = organization.getId();
+    UserRepresentation user = createUserWithCredentials(keycloak, REALM, "inviter", "pass");
+
+    try {
+      putRequest("foo", orgId, "members", user.getId());
+      // an inviter delegated only invitation management
+      grantUserRole(orgId, "view-invitations", user.getId());
+      grantUserRole(orgId, "manage-invitations", user.getId());
+      Keycloak kc = getKeycloak(REALM, "admin-cli", "inviter", "pass");
+
+      // manage-invitations alone cannot set roles on an invitation
+      InvitationRequest withRoles =
+          new InvitationRequest()
+              .email("roles@example.com")
+              .role("manage-roles")
+              .role("manage-organization");
+      var response = postRequest(kc, withRoles, "/%s/invitations".formatted(orgId));
+      assertThat(response.statusCode(), is(Response.Status.UNAUTHORIZED.getStatusCode()));
+      response = getRequest(orgId, "invitations");
+      List<Invitation> invitations =
+          objectMapper().readValue(response.getBody().asString(), new TypeReference<>() {});
+      assertThat(invitations, hasSize(0));
+
+      // but can still create an invitation without roles
+      InvitationRequest plain = new InvitationRequest().email("plain@example.com");
+      response = postRequest(kc, plain, "/%s/invitations".formatted(orgId));
+      assertThat(response.statusCode(), is(Response.Status.CREATED.getStatusCode()));
+
+      // with manage-roles, roles the inviter does not hold are still rejected
+      grantUserRole(orgId, "manage-roles", user.getId());
+      InvitationRequest notHeld =
+          new InvitationRequest()
+              .email("notheld@example.com")
+              .role("manage-invitations")
+              .role("manage-organization");
+      response = postRequest(kc, notHeld, "/%s/invitations".formatted(orgId));
+      assertThat(response.statusCode(), is(Response.Status.UNAUTHORIZED.getStatusCode()));
+
+      // roles the inviter holds are allowed
+      InvitationRequest held =
+          new InvitationRequest()
+              .email("held@example.com")
+              .role("manage-invitations")
+              .role("manage-roles");
+      response = postRequest(kc, held, "/%s/invitations".formatted(orgId));
+      assertThat(response.statusCode(), is(Response.Status.CREATED.getStatusCode()));
+
+      // realm admins with manage-organizations may assign any org role
+      InvitationRequest admin =
+          new InvitationRequest().email("admin@example.com").role("manage-organization");
+      response = postRequest(admin, "/%s/invitations".formatted(orgId));
+      assertThat(response.statusCode(), is(Response.Status.CREATED.getStatusCode()));
+    } finally {
+      deleteUser(keycloak, REALM, user.getId());
+      deleteOrganization(orgId);
     }
   }
 }
