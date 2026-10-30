@@ -1,11 +1,16 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Helpers.*;
+import static io.phasetwo.service.Helpers.createUser;
+import static io.phasetwo.service.Helpers.createUserWithCredentials;
+import static io.phasetwo.service.Helpers.deleteUser;
+import static io.phasetwo.service.Helpers.objectMapper;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.phasetwo.client.openapi.model.OrganizationRepresentation;

@@ -1,8 +1,8 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Orgs.*;
-import static io.phasetwo.service.resource.Converters.*;
-import static io.phasetwo.service.resource.OrganizationResourceType.*;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_DEFAULT_APPLICATION_URI;
+import static io.phasetwo.service.resource.Converters.convertInvitationModelToInvitation;
+import static io.phasetwo.service.resource.OrganizationResourceType.INVITATION;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -15,7 +15,20 @@ import io.phasetwo.service.representation.InvitationRequest;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.lang.reflect.Method;
