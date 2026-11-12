@@ -1,16 +1,36 @@
 package io.phasetwo.service.resource;
 
-import static io.phasetwo.service.Orgs.*;
+import static io.phasetwo.service.Orgs.ORG_AUTH_FLOW_ALIAS;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_SHARED_IDPS_KEY;
+import static io.phasetwo.service.Orgs.ORG_CONFIG_VALIDATE_IDP_KEY;
+import static io.phasetwo.service.Orgs.ORG_DEFAULT_POST_BROKER_FLOW_KEY;
+import static io.phasetwo.service.Orgs.ORG_DEFAULT_SYNC_MODE_KEY;
+import static io.phasetwo.service.Orgs.ORG_DOMAIN_CONFIG_KEY;
+import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
+import static io.phasetwo.service.Orgs.ORG_SHARED_IDP_KEY;
+import static io.phasetwo.service.Orgs.ORG_VALIDATION_PENDING_CONFIG_KEY;
 
 import com.google.common.base.Strings;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.representation.LinkIdp;
 import io.phasetwo.service.util.IdentityProviders;
-import jakarta.ws.rs.*;
+import io.phasetwo.service.util.IdpInitiatedClients;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.client.clienttype.ClientTypeException;
@@ -184,49 +204,87 @@ public class IdentityProvidersResource extends OrganizationAdminResource {
     }
   }
 
-    @POST
-    @Path("clients")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createIdentityProviderClient(ClientRepresentation representation) {
-        if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
-            throw new NotAuthorizedException(
-                    String.format(
-                            "Insufficient permission to create identity providers for %s", organization.getId()));
-        }
-
-        try {
-            this.session.clientPolicy().triggerOnEvent(new AdminClientRegisterContext(representation, this.auth));
-
-            ClientModel clientModel = ClientManager.createClient(this.session, this.realm, representation);
-
-            this.adminEvent.operation(OperationType.CREATE).resourcePath(this.session.getContext().getUri(), clientModel.getId()).representation(representation).success();
-
-            ValidationUtil.validateClient(this.session, clientModel, true, (r) -> {
-                this.session.getTransactionManager().setRollbackOnly();
-                throw new ErrorResponseException("invalid_input", r.getAllLocalizedErrorsAsString(AdminRoot.getMessages(this.session, this.realm, this.auth.getToken().getLocale())), Response.Status.BAD_REQUEST);
-            });
-
-            this.session.clientPolicy().triggerOnEvent(new AdminClientRegisteredContext(clientModel, this.auth));
-
-        } catch (ModelDuplicateException var5) {
-            throw ErrorResponse.exists("Client " + representation.getClientId() + " already exists");
-        } catch (ClientPolicyException cpe) {
-            throw new ErrorResponseException(cpe.getError(), cpe.getErrorDetail(), Response.Status.BAD_REQUEST);
-        } catch (ModelValidationException e) {
-            throw new ErrorResponseException("validation error", e.getMessage(), Response.Status.BAD_REQUEST);
-        } catch (ClientTypeException cte) {
-            throw ErrorResponse.error(cte.getMessage(), cte.getParameters(), Response.Status.BAD_REQUEST);
-        }
-        return Response.created(
-                            session
-                                    .getContext()
-                                    .getUri()
-                                    .getAbsolutePathBuilder()
-                                    .path(representation.getId())
-                                    .build())
-                    .build();
+  /**
+   * Creates the SAML client used for IdP-initiated SSO with one of this organization's identity
+   * providers. Only the IdP-initiated client shape is accepted (see {@link IdpInitiatedClients});
+   * the identity provider does not have to exist yet, because the IdP wizard creates the client
+   * first. The organization is recorded on the client server-side.
+   */
+  @POST
+  @Path("clients")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response createIdentityProviderClient(Map<String, Object> body) {
+    if (!auth.hasManageOrgs() && !auth.hasOrgManageIdentityProviders(organization)) {
+      throw new NotAuthorizedException(
+          String.format(
+              "Insufficient permission to create identity providers for %s", organization.getId()));
     }
+
+    ClientRepresentation representation;
+    try {
+      representation = IdpInitiatedClients.toClientRepresentation(body, organization.getId());
+    } catch (IdpInitiatedClients.InvalidClientException e) {
+      throw ErrorResponse.error(e.getMessage(), Response.Status.BAD_REQUEST);
+    }
+
+    // If the paired identity provider already exists, it must belong to this organization.
+    String alias = representation.getAttributes().get(IdpInitiatedClients.ATTR_IDP_ALIAS);
+    IdentityProviderModel existing = session.identityProviders().getByAlias(alias);
+    if (existing != null && !idpInOrg(existing)) {
+      throw ErrorResponse.error(
+          String.format(
+              "Identity provider %s does not belong to organization %s",
+              alias, organization.getId()),
+          Response.Status.BAD_REQUEST);
+    }
+
+    ClientModel clientModel;
+    try {
+      session.clientPolicy().triggerOnEvent(new AdminClientRegisterContext(representation, auth));
+
+      clientModel = ClientManager.createClient(session, realm, representation);
+
+      adminEvent
+          .operation(OperationType.CREATE)
+          .resourcePath(session.getContext().getUri(), clientModel.getId())
+          .representation(representation)
+          .success();
+
+      ValidationUtil.validateClient(
+          session,
+          clientModel,
+          true,
+          (r) -> {
+            session.getTransactionManager().setRollbackOnly();
+            throw new ErrorResponseException(
+                "invalid_input",
+                r.getAllLocalizedErrorsAsString(
+                    AdminRoot.getMessages(session, realm, auth.getToken().getLocale())),
+                Response.Status.BAD_REQUEST);
+          });
+
+      session.clientPolicy().triggerOnEvent(new AdminClientRegisteredContext(clientModel, auth));
+    } catch (ModelDuplicateException e) {
+      throw ErrorResponse.exists("Client " + representation.getClientId() + " already exists");
+    } catch (ClientPolicyException cpe) {
+      throw new ErrorResponseException(
+          cpe.getError(), cpe.getErrorDetail(), Response.Status.BAD_REQUEST);
+    } catch (ModelValidationException e) {
+      throw new ErrorResponseException(
+          "validation error", e.getMessage(), Response.Status.BAD_REQUEST);
+    } catch (ClientTypeException cte) {
+      throw ErrorResponse.error(cte.getMessage(), cte.getParameters(), Response.Status.BAD_REQUEST);
+    }
+    return Response.created(
+            session
+                .getContext()
+                .getUri()
+                .getAbsolutePathBuilder()
+                .path(clientModel.getId())
+                .build())
+        .build();
+  }
 
   @POST
   @Path("link")
