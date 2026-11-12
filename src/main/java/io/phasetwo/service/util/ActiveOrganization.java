@@ -16,9 +16,7 @@ import org.keycloak.models.UserModel;
 public class ActiveOrganization {
 
   private static final Logger log = Logger.getLogger(ActiveOrganization.class);
-  private final RealmModel realm;
   private final UserModel user;
-  private final OrganizationProvider organizationProvider;
   private final List<OrganizationModel> userOrganizations;
   @Getter() private final OrganizationModel organization;
 
@@ -28,9 +26,8 @@ public class ActiveOrganization {
   }
 
   private ActiveOrganization(KeycloakSession session, RealmModel realm, UserModel user) {
-    this.realm = realm;
     this.user = user;
-    this.organizationProvider = session.getProvider(OrganizationProvider.class);
+    OrganizationProvider organizationProvider = session.getProvider(OrganizationProvider.class);
     // Each getUserOrganizationsStream call queries the membership table, so load it once.
     this.userOrganizations = organizationProvider.getUserOrganizationsStream(realm, user).toList();
     this.organization =
@@ -44,8 +41,18 @@ public class ActiveOrganization {
     return user.getAttributes().containsKey(ACTIVE_ORGANIZATION);
   }
 
+  /**
+   * Resolves the organization named by the active organization attribute, but only among the
+   * user's current memberships. If the attribute points at an organization the user no longer
+   * belongs to, or one that has been deleted, fall back to the default organization so the token
+   * being issued never carries a stale organization or an empty claim.
+   */
   private OrganizationModel initializeActiveOrganization() {
-    return organizationProvider.getOrganizationById(realm, getActiveOrganizationIdFromAttribute());
+    String activeOrganizationId = getActiveOrganizationIdFromAttribute();
+    return userOrganizations.stream()
+        .filter(org -> org.getId().equals(activeOrganizationId))
+        .findFirst()
+        .orElseGet(this::initializeDefaultActiveOrganization);
   }
 
   private OrganizationModel initializeDefaultActiveOrganization() {

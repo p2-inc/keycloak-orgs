@@ -2270,6 +2270,85 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   }
 
   @Test
+  void testActiveOrganizationIgnoresStaleAttribute() throws IOException, VerificationException {
+    OrganizationRepresentation orgX =
+        createOrganization(new OrganizationRepresentation().name("stale-active-x"));
+    OrganizationRepresentation orgY =
+        createOrganization(new OrganizationRepresentation().name("stale-active-y"));
+    OrganizationRepresentation orgZ =
+        createOrganization(new OrganizationRepresentation().name("stale-active-z"));
+
+    UserRepresentation user = createUserWithCredentials(keycloak, REALM, "staleuser", "password");
+    grantClientRoles("account", user.getId(), "manage-account", "view-profile");
+
+    createPublicClient("test-ui");
+    createClientScope(ACTIVE_ORG_CLAIM);
+    addMapperToClientScope(
+        ACTIVE_ORG_CLAIM,
+        ACTIVE_ORG_CLAIM,
+        "JSON",
+        "oidc-active-organization-mapper",
+        Map.of(INCLUDED_ORGANIZATION_PROPERTIES, "id, name, role, attribute"));
+    addClientScopeToClient(ACTIVE_ORG_CLAIM, "test-ui");
+
+    // 1. Attribute points at an org the user is not a member of, set without going through the
+    // members endpoint (as SCIM de-provisioning or a direct provider call would leave it).
+    // The token must fall back to the user's only membership and the attribute must be cleared.
+    putRequest("pass", orgX.getId(), "members", user.getId());
+    setActiveOrganizationAttribute(user.getId(), orgZ.getId());
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), true, orgZ.getId());
+
+    Keycloak kc = getKeycloak(REALM, "test-ui", "staleuser", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), true, orgX.getId());
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
+    Response response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    assertThat(
+        objectMapper().readTree(response.body().asString()).get("id").asText(), is(orgX.getId()));
+
+    // 2. Attribute points at an org that has been deleted (#504). The user is still a member of
+    // X, so the token must carry X rather than an empty claim.
+    putRequest("pass", orgY.getId(), "members", user.getId());
+    response =
+        putRequest(kc, new SwitchOrganization().id(orgY.getId()), "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), true, orgY.getId());
+    deleteOrganization(orgY.getId());
+
+    kc = getKeycloak(REALM, "test-ui", "staleuser", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), true, orgX.getId());
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
+
+    // 3. No memberships and a stale attribute: no claim, attribute cleared, no error.
+    response = deleteRequest(orgX.getId(), "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+    setActiveOrganizationAttribute(user.getId(), orgZ.getId());
+
+    kc = getKeycloak(REALM, "test-ui", "staleuser", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), false, null);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.NO_CONTENT.getStatusCode()));
+
+    deleteUser(keycloak, REALM, user.getId());
+    deleteClient("test-ui");
+    deleteClientScope(ACTIVE_ORG_CLAIM);
+    deleteOrganization(orgX.getId());
+    deleteOrganization(orgZ.getId());
+  }
+
+  private void setActiveOrganizationAttribute(String userId, String orgId) {
+    org.keycloak.admin.client.resource.UserResource userResource =
+        keycloak.realm(REALM).users().get(userId);
+    UserRepresentation rep = userResource.toRepresentation();
+    rep.singleAttribute(ACTIVE_ORGANIZATION, orgId);
+    userResource.update(rep);
+  }
+
+  @Test
   void testSearchMembersWithIncludeOrgs() throws IOException {
     // create users
     var user1 = createUser(keycloak, REALM, "johndoe1");
