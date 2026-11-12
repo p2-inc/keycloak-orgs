@@ -16,6 +16,7 @@ import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.model.OrganizationRoleModel;
 import io.phasetwo.service.util.IdentityProviders;
+import io.phasetwo.service.util.IdpInitiatedClientPairing;
 import java.util.Map;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
@@ -85,6 +86,16 @@ public class OrganizationResourceProviderFactory implements RealmResourceProvide
           } else if (event instanceof OrganizationModel.OrganizationRemovedEvent) {
             log.debug("OrganizationRemovedEvent");
             organizationRemoved((OrganizationModel.OrganizationRemovedEvent) event);
+          } else if (event instanceof RealmModel.IdentityProviderRemovedEvent idpRemoved) {
+            log.debug("IdentityProviderRemovedEvent");
+            IdpInitiatedClientPairing.identityProviderRemoved(
+                idpRemoved.getKeycloakSession(),
+                idpRemoved.getRealm(),
+                idpRemoved.getRemovedIdentityProvider());
+          } else if (event instanceof ClientModel.ClientRemovedEvent clientRemoved) {
+            log.debug("ClientRemovedEvent");
+            IdpInitiatedClientPairing.clientRemoved(
+                clientRemoved.getKeycloakSession(), clientRemoved.getClient());
           }
         });
   }
