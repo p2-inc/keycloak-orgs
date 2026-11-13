@@ -1,0 +1,31 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <!--
+      Re-applies IDX_ORGANIZATION_ATTRIBUTE (ORGANIZATION_ATTRIBUTE.ORGANIZATION_ID) for databases
+      that never got it.
+
+      The original add-organization-attribute-index changeSet (20231030) shipped in v0.46 - v0.50 with
+      an inverted precondition: it ran the createIndex only if the index already existed. On every
+      database migrated with one of those releases the precondition failed and onFail="MARK_RAN"
+      recorded the changeSet as run without creating the index. v0.51 fixed the precondition, but
+      kept the changeSet id, and Liquibase neither re-runs a changeSet recorded as run nor counts a
+      precondition change as a modification, so those databases stayed without the index.
+
+      This changeSet has a new id, so it is evaluated once on every database: it creates the index
+      where it is missing and is marked as ran where it already exists. Unlike the original, the
+      precondition is scoped to the table.
+    -->
+
+    <changeSet author="phasetwo" id="add-organization-attribute-index-missing">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="IDX_ORGANIZATION_ATTRIBUTE" tableName="ORGANIZATION_ATTRIBUTE"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="IDX_ORGANIZATION_ATTRIBUTE" tableName="ORGANIZATION_ATTRIBUTE">
+            <column name="ORGANIZATION_ID"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
