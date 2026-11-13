@@ -127,6 +127,9 @@ public class AbstractCypressOrganizationTest {
                 "--spi-events-store-"
                     + MdcLoggerEventStoreProviderFactory.PROVIDER_ID
                     + "-use-jpa=true")
+            // Since keycloak-events 0.61 the MDC store factory only registers when this flag is
+            // set at Keycloak build (augmentation) time; see AbstractOrganizationTest.
+            .withEnv(MdcLoggerEventStoreProviderFactory.ENV_ENABLED, "true")
             .withAccessToHost(true);
     if (isJacocoPresent()) {
       keycloakContainer =
