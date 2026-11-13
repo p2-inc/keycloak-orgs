@@ -2270,6 +2270,92 @@ class OrganizationResourceTest extends AbstractOrganizationTest {
   }
 
   @Test
+  void testActiveOrganizationFallsBackWhenAttributeIsStale()
+      throws IOException, VerificationException {
+    ObjectMapper mapper = objectMapper();
+
+    String org1Id =
+        createOrganization(
+                new OrganizationRepresentation().name("stale-org-1").domains(List.of("so1.com")))
+            .getId();
+    String org2Id =
+        createOrganization(
+                new OrganizationRepresentation().name("stale-org-2").domains(List.of("so2.com")))
+            .getId();
+    String org3Id =
+        createOrganization(
+                new OrganizationRepresentation().name("stale-org-3").domains(List.of("so3.com")))
+            .getId();
+
+    UserRepresentation user = createUserWithCredentials(keycloak, REALM, "staleuser", "password");
+    grantClientRoles("account", user.getId(), "manage-account", "view-profile");
+
+    createPublicClient("test-ui");
+    createClientScope(ACTIVE_ORG_CLAIM);
+    addMapperToClientScope(
+        ACTIVE_ORG_CLAIM,
+        ACTIVE_ORG_CLAIM,
+        "JSON",
+        "oidc-active-organization-mapper",
+        Map.of(INCLUDED_ORGANIZATION_PROPERTIES, "id, name, role, attribute"));
+    addClientScopeToClient(ACTIVE_ORG_CLAIM, "test-ui");
+
+    // member of org1 and org2, not org3
+    Response response = putRequest("pass", org1Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+    response = putRequest("pass", org2Id, "members", user.getId());
+    assertThat(response.getStatusCode(), is(Status.CREATED.getStatusCode()));
+
+    // no attribute: default (first) membership
+    Keycloak kc = getKeycloak(REALM, "test-ui", "staleuser", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), true, org1Id);
+
+    // attribute points to a current membership: honoured
+    response = putRequest(kc, new SwitchOrganization().id(org2Id), "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    validateActiveOrganizationFromAccessToken(
+        mapper.readTree(response.body().asString()).get(ACCESS_TOKEN).asText(), true, org2Id);
+    kc = getKeycloak(REALM, "test-ui", "staleuser", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), true, org2Id);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), true, org2Id);
+
+    // #503: attribute points to an org the user isn't a member of (as left behind by a
+    // membership revocation that doesn't clear it). The token must not carry that org.
+    setActiveOrganizationAttribute(user.getId(), org3Id);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), true, org3Id);
+
+    kc = getKeycloak(REALM, "test-ui", "staleuser", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), true, org1Id);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
+
+    // #504: attribute points to an org that has been deleted. The token falls back to the
+    // remaining membership rather than carrying no active organization.
+    response = putRequest(kc, new SwitchOrganization().id(org2Id), "users", "switch-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), true, org2Id);
+
+    deleteOrganization(org2Id);
+
+    kc = getKeycloak(REALM, "test-ui", "staleuser", "password");
+    validateActiveOrganizationFromAccessToken(
+        kc.tokenManager().getAccessTokenString(), true, org1Id);
+    validateActiveOrganizationFromUserAttributes(getUser(user.getId()), false, null);
+
+    response = getRequest(kc, "users", "active-organization");
+    assertThat(response.getStatusCode(), is(Status.OK.getStatusCode()));
+    assertThat(mapper.readTree(response.body().asString()).get("id").asText(), is(org1Id));
+
+    deleteUser(keycloak, REALM, user.getId());
+    deleteClient("test-ui");
+    deleteClientScope(ACTIVE_ORG_CLAIM);
+    deleteOrganization(org1Id);
+    deleteOrganization(org3Id);
+  }
+
+  @Test
   void testActiveOrganizationIgnoresStaleAttribute() throws IOException, VerificationException {
     OrganizationRepresentation orgX =
         createOrganization(new OrganizationRepresentation().name("stale-active-x"));
