@@ -41,7 +41,9 @@ public class ConditionalOrgAttributeValue implements ConditionalAuthenticator {
               .map(
                   orgId -> {
                     OrganizationModel o = orgs.getOrganizationById(context.getRealm(), orgId);
-                    return o.hasMembership(context.getUser())
+                    // The attribute can outlive the organization it points at.
+                    return o != null
+                        && o.hasMembership(context.getUser())
                         && o.hasAttribute(attributeName, attributeValue);
                   })
               .orElse(false);
