@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    # Don't release for merges that only change CI config, editor settings or docs: the
+    # workflow-file sync PRs from shared-github-actions, README banner PRs, README edits.
+    # A push that also touches anything else still releases.
+    paths-ignore:
+      - ".github/**"
+      - ".editorconfig"
+      - "**.md"
 
 # A single merge can be delivered as more than one push event. Serialize release runs so they
 # don't race on release:prepare and push to main at the same time.
