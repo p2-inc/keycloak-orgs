@@ -5,14 +5,11 @@ import static io.phasetwo.service.Orgs.REQUIRE_VERIFIED_DOMAIN;
 import static org.keycloak.provider.ProviderConfigProperty.BOOLEAN_TYPE;
 
 import com.google.auto.service.AutoService;
-import io.phasetwo.service.model.OrganizationModel;
-import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.util.Domains;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -89,34 +86,23 @@ public class OrgIdpDomainVerifierAuthenticatorFactory extends BaseAuthenticatorF
 
     var requireVerifiedDomain = requireVerifiedDomain(context.getAuthenticatorConfig());
 
-    OrganizationProvider orgs = context.getSession().getProvider(OrganizationProvider.class);
-    var orgIds = IdentityProviders.getAttributeMultivalued(idpConfig, ORG_OWNER_CONFIG_KEY);
-    orgIds.stream()
-        .map(orgId -> orgs.getOrganizationById(context.getRealm(), orgId))
-        .filter(Objects::nonNull)
-        .filter(org -> Domains.supportsDomain(org.getDomains(), identityEmailDomain.get()))
-        .filter(org -> isVerifiedDomain(org, requireVerifiedDomain, identityEmailDomain.get()))
-        .findFirst()
-        .ifPresentOrElse(
-            (value) -> context.success(),
-            () -> {
-              failChallenge(context, "validDomainNotFound");
-              context
-                  .getEvent()
-                  .clone()
-                  .user(brokerContext.getEmail())
-                  .detail("orgIds", orgIds)
-                  .error("User domain could not be found in the organizations with ids.");
-            });
-  }
-
-  private boolean isVerifiedDomain(
-      OrganizationModel org, boolean requireVerifiedDomain, String identityEmailDomain) {
-    if (requireVerifiedDomain) {
-      var domain = org.getDomain(identityEmailDomain);
-      return domain.isVerified();
+    if (PostOrgAuthFlow.emailDomainMatchesOrg(
+        context.getSession(),
+        context.getRealm(),
+        idpConfig,
+        brokerContext.getEmail(),
+        requireVerifiedDomain)) {
+      context.success();
+    } else {
+      failChallenge(context, "validDomainNotFound");
+      context
+          .getEvent()
+          .clone()
+          .user(brokerContext.getEmail())
+          .detail(
+              "orgIds", IdentityProviders.getAttributeMultivalued(idpConfig, ORG_OWNER_CONFIG_KEY))
+          .error("User domain could not be found in the organizations with ids.");
     }
-    return true;
   }
 
   @Override
