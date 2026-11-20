@@ -20,10 +20,13 @@ public final class Domains {
 
   public static boolean supportsDomain(Set<String> orgDomains, String userEmailDomain) {
     return orgDomains.stream()
-        .anyMatch(it -> it.equals(userEmailDomain) || isSubDomainOf(userEmailDomain, it));
+        .anyMatch(it -> it.equalsIgnoreCase(userEmailDomain) || isSubDomainOf(userEmailDomain, it));
   }
 
   private static boolean isSubDomainOf(String subdomain, String orgDomain) {
-    return subdomain.endsWith("." + orgDomain);
+    return subdomain.length() > orgDomain.length()
+        && subdomain
+            .substring(subdomain.length() - orgDomain.length() - 1)
+            .equalsIgnoreCase("." + orgDomain);
   }
 }
