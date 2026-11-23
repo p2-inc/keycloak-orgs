@@ -168,6 +168,12 @@ public abstract class AbstractAdminResource<T extends AdminAuth> {
     permissions = Permissions.evaluator(session, realm, adminRealm, auth);
   }
 
+  private static final String AUTH_RESULT_ATTRIBUTE =
+      AbstractAdminResource.class.getName() + ".authResult";
+
+  private record AuthResultHolder(
+      String tokenString, String realmId, AuthenticationManager.AuthResult result) {}
+
   private AuthenticationManager.AuthResult authenticateBearerToken(
       String tokenString,
       KeycloakSession session,
@@ -175,30 +181,32 @@ public abstract class AbstractAdminResource<T extends AdminAuth> {
       UriInfo uriInfo,
       ClientConnection connection,
       HttpHeaders headers) {
-    // For DPoP-bound tokens (`typ: DPoP`, `cnf.jkt` present), the Keycloak request
-    // pipeline for `/realms/<realm>/...` paths validates and consumes the DPoP
-    // proof's JTI before our resource handler runs. If we then call
-    // `BearerTokenAuthenticator.authenticate()`, it tries to re-validate the same
-    // proof inside `AuthenticationManager.verifyIdentityToken` via
-    // `DPoPUtil.withDPoPVerifier`, hits the replay-protection store ("DPoP proof
-    // has already been used"), and returns null. Stock admin endpoints under
-    // `/admin/...` don't hit this because they go through a different request
-    // pipeline that doesn't pre-validate the proof.
+    // Use BearerTokenAuthenticator so that DPoP-bound tokens (`typ: DPoP`, `cnf.jkt`) are
+    // checked against the request's DPoP proof: signature, `htm`/`htu`, `iat`, `ath`, the
+    // `cnf.jkt` binding, and one-time use of the proof's `jti`. Verifying the token without
+    // that wrapper would accept a DPoP-bound token as a plain bearer token.
     //
-    // Skip the DPoP wrapping by calling `verifyIdentityToken` directly with a
-    // no-op verifier consumer. Signature/issuer/audience/active checks still
-    // run; only DPoP's replay check is omitted (it ran upstream already).
-    return AuthenticationManager.verifyIdentityToken(
-        session,
-        realm,
-        uriInfo,
-        connection,
-        /* checkActive */ true,
-        /* checkTokenType */ true,
-        /* checkAudience */ null,
-        /* isCookie */ false,
-        tokenString,
-        headers,
-        /* verifierConsumer */ v -> {});
+    // The proof's `jti` can only be consumed once, so a second verification in the same
+    // request fails with "DPoP proof has already been used". Remember the result on the
+    // session (which is request scoped) so repeated calls reuse it instead of re-verifying.
+    AuthResultHolder previous = session.getAttribute(AUTH_RESULT_ATTRIBUTE, AuthResultHolder.class);
+    if (previous != null
+        && previous.tokenString().equals(tokenString)
+        && previous.realmId().equals(realm.getId())) {
+      return previous.result();
+    }
+    AuthenticationManager.AuthResult result =
+        new AppAuthManager.BearerTokenAuthenticator(session)
+            .setRealm(realm)
+            .setUriInfo(uriInfo)
+            .setTokenString(tokenString)
+            .setConnection(connection)
+            .setHeaders(headers)
+            .authenticate();
+    if (result != null) {
+      session.setAttribute(
+          AUTH_RESULT_ATTRIBUTE, new AuthResultHolder(tokenString, realm.getId(), result));
+    }
+    return result;
   }
 }
