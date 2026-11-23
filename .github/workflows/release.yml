@@ -49,6 +49,11 @@ jobs:
 
           git-release-bot-name: "phasetwo-bot"
           git-release-bot-email: "support@phasetwo.io"
+          # The action skips when main's head commit is the release bot's (its guard against
+          # releasing its own version-bump commits). Sync PRs from shared-github-actions are
+          # also authored by phasetwo-bot, so a manual run right after one would skip; manual
+          # runs are deliberate, so bypass the check for them only.
+          git-skip-sanity-check: ${{ github.event_name == 'workflow_dispatch' }}
 
           maven-args: "-B -Dmaven.test.skip=true -DskipITs -Dmaven.deploy.skip=true -Dspotless.check.skip=true"
 
