@@ -11,6 +11,8 @@ on:
       - ".github/**"
       - ".editorconfig"
       - "**.md"
+  # Manual release from main, e.g. when a push was skipped by paths-ignore or a release run failed.
+  workflow_dispatch:
 
 # A single merge can be delivered as more than one push event. Serialize release runs so they
 # don't race on release:prepare and push to main at the same time.
@@ -21,7 +23,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+    # Releases only from main (a manual run can be started from any branch).
+    if: "github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[ci skip]')"
 
     steps:
       - uses: actions/checkout@v6
@@ -52,7 +55,9 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           gpg-enabled: true
-          gpg-key-id: BC6B4EADEB514AFD
+          # Long ID of the phasetwo-bot key in the GPG_KEY org secret (fingerprint
+          # E4807551FD1AA57F0288882DBCC3366174BD7EF1, rotated 2026-11-20).
+          gpg-key-id: BCC3366174BD7EF1
           gpg-key: ${{ secrets.GPG_KEY }}
 
           docker-registry-id: ossrh
