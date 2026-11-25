@@ -5,7 +5,6 @@ import static org.keycloak.utils.StreamsUtil.closing;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.net.InternetDomainName;
 import io.phasetwo.service.model.InvitationModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
@@ -15,6 +14,7 @@ import io.phasetwo.service.model.jpa.entity.InvitationEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.resource.OrganizationAdminAuth;
+import io.phasetwo.service.util.Domains;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
@@ -25,9 +25,11 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.net.IDN;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -112,22 +114,24 @@ public class JpaOrganizationProvider implements OrganizationProvider {
   @Override
   public Stream<OrganizationModel> getOrganizationsStreamForDomain(
       RealmModel realm, String domain, boolean verified) {
-    try {
-      domain = InternetDomainName.from(domain).toString();
-    } catch (IllegalArgumentException e) {
+    Optional<String> normalized = Domains.normalize(domain);
+    if (normalized.isEmpty()) {
       return Stream.empty();
     }
 
     TypedQuery<DomainEntity> query =
         em.createNamedQuery(
             verified ? "getVerifiedDomainsByName" : "getDomainsByName", DomainEntity.class);
-    query.setParameter("domain", domain);
+    query.setParameter("domain", normalized.get());
+    query.setParameter("unicodeDomain", IDN.toUnicode(normalized.get()));
+    query.setParameter("rawDomain", domain.toLowerCase(Locale.ROOT));
     query.setParameter("realmId", realm.getId());
     if (verified) {
       query.setParameter("verified", verified);
     }
     return query
         .getResultStream()
+        .filter(de -> Domains.equalDomains(de.getDomain(), domain))
         .map(de -> new OrganizationAdapter(session, realm, em, de.getOrganization()));
   }
 
