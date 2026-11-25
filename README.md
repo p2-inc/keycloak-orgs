@@ -189,6 +189,8 @@ We've adopted a similar model that Keycloak uses for making the Organization dat
 
 The OrganizationProvider returns model delegates that wrap the underlying entities and provide conveniences for working with the data. They are available in the `io.phasetwo.service.model` package.
 
+Organization domain matching uses case-insensitive ASCII/IDN names and rejects invalid domains and Unicode characters that Java's IDN conversion would fold into ASCII lookalikes. Legacy domains stored in noncanonical Unicode forms may not be found using a different equivalent spelling. When domain verification is required for an organization IdP, a verified organization domain also permits its subdomains.
+
 - [OrganizationModel](src/main/java/io/phasetwo/service/model/OrganizationModel.java)
 - [OrganizationRoleModel](src/main/java/io/phasetwo/service/model/OrganizationRoleModel.java)
 - [InvitationModel](src/main/java/io/phasetwo/service/model/InvitationModel.java)

@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.jbosslog.JBossLog;
@@ -145,6 +146,106 @@ abstract class AbstractDbCompatibilityTest {
         "deleted org must not appear in listing",
         orgs.stream().noneMatch(o -> orgId.equals(o.getId())),
         is(true));
+  }
+
+  @Test
+  void domainLookupUsesExactNormalizedNamesAndReturnsVerificationStatus() throws Exception {
+    KeycloakOrgsAdminAPI orgsApi =
+        new KeycloakOrgsAdminAPI(keycloak.getAuthServerUrl(), REALM, adminClient);
+    OrganizationRepresentation created =
+        orgsApi.createOrganization(
+            new OrganizationRepresentation()
+                .name("domain-lookup-org")
+                .domains(
+                    List.of(
+                        "example.com",
+                        "b\u00fccher.de",
+                        "xn--bcher-kva.de",
+                        "ma\u00f1ana.es",
+                        "mu\u0308nchen.de",
+                        "legacy_domain.example")));
+    String orgId = created.getId();
+    try {
+      try (var connection =
+              DriverManager.getConnection(db.getJdbcUrl(), db.getUsername(), db.getPassword());
+          var statement =
+              connection.prepareStatement(
+                  "UPDATE ORGANIZATION_DOMAIN SET VERIFIED = ?"
+                      + " WHERE ORGANIZATION_ID = ? AND DOMAIN = ?")) {
+        statement.setBoolean(1, true);
+        statement.setString(2, orgId);
+        statement.setString(3, "example.com");
+        assertThat(statement.executeUpdate(), is(1));
+        statement.setString(3, "b\u00fccher.de");
+        assertThat(statement.executeUpdate(), is(1));
+      }
+
+      var request =
+          given()
+              .baseUri(keycloak.getAuthServerUrl())
+              .basePath("realms/" + REALM + "/orgs/" + orgId + "/domains")
+              .auth()
+              .oauth2(adminClient.tokenManager().getAccessTokenString());
+      request
+          .pathParam("domain", "EXAMPLE.COM")
+          .get("/{domain}")
+          .then()
+          .statusCode(Status.OK.getStatusCode())
+          .body("domain_name", is("example.com"))
+          .body("verified", is(true));
+      request
+          .pathParam("domain", "xn--bcher-kva.de")
+          .get("/{domain}")
+          .then()
+          .statusCode(Status.OK.getStatusCode())
+          .body("domain_name", is("xn--bcher-kva.de"))
+          .body("verified", is(false));
+      request
+          .pathParam("domain", "b\u00fccher.de")
+          .get("/{domain}")
+          .then()
+          .statusCode(Status.OK.getStatusCode())
+          .body("domain_name", is("b\u00fccher.de"))
+          .body("verified", is(true));
+      request
+          .pathParam("domain", "XN--MAANA-PTA.ES")
+          .get("/{domain}")
+          .then()
+          .statusCode(Status.OK.getStatusCode())
+          .body("domain_name", is("ma\u00f1ana.es"))
+          .body("verified", is(false));
+      request
+          .pathParam("domain", "exampl_.com")
+          .get("/{domain}")
+          .then()
+          .statusCode(Status.NOT_FOUND.getStatusCode());
+      request
+          .pathParam("domain", "legacy_domain.example")
+          .get("/{domain}")
+          .then()
+          .statusCode(Status.OK.getStatusCode())
+          .body("domain_name", is("legacy_domain.example"));
+      request
+          .pathParam("domain", "mu\u0308nchen.de")
+          .get("/{domain}")
+          .then()
+          .statusCode(Status.OK.getStatusCode())
+          .body("domain_name", is("mu\u0308nchen.de"));
+      request
+          .pathParam("domain", "exampl%.com")
+          .get("/{domain}")
+          .then()
+          .statusCode(Status.NOT_FOUND.getStatusCode());
+    } finally {
+      given()
+          .baseUri(keycloak.getAuthServerUrl())
+          .basePath("realms/" + REALM + "/orgs")
+          .auth()
+          .oauth2(adminClient.tokenManager().getAccessTokenString())
+          .delete(orgId)
+          .then()
+          .statusCode(Status.NO_CONTENT.getStatusCode());
+    }
   }
 
   private KeycloakContainer buildKeycloakContainer() {

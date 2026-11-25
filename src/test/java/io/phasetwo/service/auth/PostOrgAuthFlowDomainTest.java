@@ -10,7 +10,6 @@ import io.phasetwo.service.model.OrganizationProvider;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.keycloak.models.KeycloakSession;
 
@@ -31,8 +30,21 @@ class PostOrgAuthFlowDomainTest {
     KeycloakSession unverified = session("example.com", false);
     assertThat(matches(verified, "user@EXAMPLE.COM", true), is(true));
     assertThat(matches(unverified, "user@Example.com", true), is(false));
-    assertThat(matches(verified, "user@mail.example.com", true), is(false));
+    assertThat(matches(verified, "user@MAIL.Example.com", true), is(true));
+    assertThat(matches(unverified, "user@mail.example.com", true), is(false));
     assertThat(matches(verified, "user@notexample.com", true), is(false));
+    assertThat(
+        matches(
+            session(Map.of("example.com", false, "mail.example.com", true)),
+            "user@MAIL.example.com",
+            true),
+        is(true));
+    assertThat(
+        matches(
+            session(Map.of("example.com", false, "other.example.com", true)),
+            "user@mail.example.com",
+            true),
+        is(false));
   }
 
   private static boolean matches(KeycloakSession session, String email, boolean requireVerified) {
@@ -41,24 +53,30 @@ class PostOrgAuthFlowDomainTest {
   }
 
   private static KeycloakSession session(String domainName, boolean verified) {
-    DomainModel domain =
-        proxy(
-            DomainModel.class,
-            (proxy, method, args) -> {
-              if (method.getName().equals("isVerified")) {
-                return verified;
-              }
-              throw new AssertionError(method.getName());
-            });
+    return session(Map.of(domainName, verified));
+  }
+
+  private static KeycloakSession session(Map<String, Boolean> domains) {
     OrganizationModel organization =
         proxy(
             OrganizationModel.class,
             (proxy, method, args) -> {
               if (method.getName().equals("getDomains")) {
-                return Set.of(domainName);
+                return domains.keySet();
               }
               if (method.getName().equals("getDomain")) {
-                return domainName.equalsIgnoreCase((String) args[0]) ? domain : null;
+                Boolean verified = domains.get(args[0]);
+                if (verified == null) {
+                  return null;
+                }
+                return proxy(
+                    DomainModel.class,
+                    (domainProxy, domainMethod, domainArgs) -> {
+                      if (domainMethod.getName().equals("isVerified")) {
+                        return verified;
+                      }
+                      throw new AssertionError(domainMethod.getName());
+                    });
               }
               throw new AssertionError(method.getName());
             });

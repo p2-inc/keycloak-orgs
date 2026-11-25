@@ -2,8 +2,10 @@
 package io.phasetwo.service.auth.idp.discovery.extemail;
 
 import io.phasetwo.service.auth.idp.PublicAPI;
+import io.phasetwo.service.util.Domains;
 
 import java.util.Objects;
+import java.util.Set;
 
 @PublicAPI(unstable = true)
 public final class Domain {
@@ -12,11 +14,12 @@ public final class Domain {
 
     Domain(String value) {
         Objects.requireNonNull(value);
-        this.value = value.toLowerCase();
+        this.value = value;
     }
 
     boolean isSubDomainOf(Domain domain) {
-        return this.value.endsWith("." + domain.value);
+        return !Domains.equalDomains(this.value, domain.value)
+                && Domains.supportsDomain(Set.of(domain.value), this.value);
     }
 
     @Override
@@ -27,12 +30,12 @@ public final class Domain {
             return false;
         if (this == obj)
             return true;
-        return this.value.equalsIgnoreCase(((Domain) obj).value);
+        return Domains.equalDomains(this.value, ((Domain) obj).value);
     }
 
     @Override
     public int hashCode() {
-        return this.value.hashCode();
+        return Domains.normalize(this.value).orElse(this.value).hashCode();
     }
 
     @Override

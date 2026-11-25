@@ -4,6 +4,7 @@ import static io.phasetwo.service.Orgs.FIRST_BROKER_LOGIN_FLOW_ALIAS;
 import static io.phasetwo.service.Orgs.ORG_AUTH_FLOW_ALIAS;
 import static io.phasetwo.service.Orgs.ORG_OWNER_CONFIG_KEY;
 
+import io.phasetwo.service.model.DomainModel;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
 import io.phasetwo.service.util.Domains;
@@ -156,8 +157,11 @@ public class PostOrgAuthFlow {
   private static boolean isVerifiedDomain(
       OrganizationModel org, boolean requireVerifiedDomain, String identityEmailDomain) {
     if (requireVerifiedDomain) {
-      var domain = org.getDomain(identityEmailDomain);
-      return domain != null && domain.isVerified();
+      return org.getDomains().stream()
+          .filter(domain -> Domains.supportsDomain(Set.of(domain), identityEmailDomain))
+          .map(org::getDomain)
+          .filter(Objects::nonNull)
+          .anyMatch(DomainModel::isVerified);
     }
     return true;
   }

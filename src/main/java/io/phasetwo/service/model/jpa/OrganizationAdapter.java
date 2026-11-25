@@ -20,6 +20,7 @@ import io.phasetwo.service.model.jpa.entity.OrganizationAttributeEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationMemberEntity;
 import io.phasetwo.service.model.jpa.entity.OrganizationRoleEntity;
 import io.phasetwo.service.model.jpa.entity.UserOrganizationRoleMappingEntity;
+import io.phasetwo.service.util.Domains;
 import io.phasetwo.service.util.IdentityProviders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -29,8 +30,10 @@ import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
+import java.net.IDN;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -103,7 +106,8 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
   @Override
   public void setDomains(Set<String> domains) {
     //  org.setDomains(domains);
-    Set<String> lower = domains.stream().map(String::toLowerCase).collect(Collectors.toSet());
+    Set<String> lower =
+        domains.stream().map(domain -> domain.toLowerCase(Locale.ROOT)).collect(Collectors.toSet());
     org.getDomains().removeIf(e -> !lower.contains(e.getDomain()));
     lower.removeIf(d -> org.getDomains().stream().filter(e -> d.equals(e.getDomain())).count() > 0);
     lower.forEach(
@@ -119,16 +123,29 @@ public class OrganizationAdapter implements OrganizationModel, JpaModel<ExtOrgan
 
   @Override
   public DomainModel getDomain(String domainName) {
+    if (domainName == null) {
+      return null;
+    }
+    var normalized = Domains.normalize(domainName);
+    String search = normalized.orElseGet(() -> domainName.toLowerCase(Locale.ROOT));
     TypedQuery<DomainEntity> query =
         em.createNamedQuery("getDomainByOrganizationAndDomainName", DomainEntity.class);
     query.setParameter("organization", org);
-    query.setParameter("search", domainName);
-    query.setMaxResults(1);
-    try {
-      return new DomainAdapter(session, realm, em, query.getSingleResult());
-    } catch (Exception e) {
-    }
-    return null;
+    query.setParameter("search", search);
+    query.setParameter("unicodeSearch", normalized.map(IDN::toUnicode).orElse(search));
+    query.setParameter("rawSearch", domainName.toLowerCase(Locale.ROOT));
+    List<DomainEntity> candidates = query.getResultList();
+    return candidates.stream()
+        .filter(domain -> domain.getDomain().equals(domainName))
+        .findFirst()
+        .or(
+            () ->
+                candidates.stream()
+                    .filter(domain -> normalized.isPresent())
+                    .filter(domain -> Domains.equalDomains(domain.getDomain(), domainName))
+                    .findFirst())
+        .map(domain -> new DomainAdapter(session, realm, em, domain))
+        .orElse(null);
   }
 
   @Override

@@ -6,6 +6,7 @@ import io.phasetwo.service.auth.idp.Users;
 import io.phasetwo.service.auth.idp.discovery.spi.HomeIdpDiscoverer;
 import io.phasetwo.service.model.OrganizationModel;
 import io.phasetwo.service.model.OrganizationProvider;
+import io.phasetwo.service.util.Domains;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.*;
@@ -146,7 +147,9 @@ public final class EmailHomeIdpDiscoverer implements HomeIdpDiscoverer {
                             .filter(idp -> {
                                 String domains = idp.getConfig().get(ORG_DOMAIN_CONFIG_KEY);
                                 if (Strings.isNullOrEmpty(domains)) return false;
-                                return io.phasetwo.service.util.IdentityProviders.strListContains(domains, domain.toString());
+                                return io.phasetwo.service.util.IdentityProviders.strListToSet(domains)
+                                        .stream()
+                                        .anyMatch(configuredDomain -> Domains.equalDomains(configuredDomain, domain.toString()));
                             })
                             .distinct()
                             .collect(Collectors.toList());
