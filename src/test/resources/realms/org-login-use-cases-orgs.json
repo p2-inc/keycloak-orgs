@@ -1,0 +1,71 @@
+{
+  "organizations": [
+    {
+      "organization": {
+        "name": "globex",
+        "displayName": "Globex Store",
+        "domains": [
+          "globex.test"
+        ],
+        "attributes": {}
+      },
+      "idpLink": "globex-sso",
+      "members": [
+        {
+          "username": "paula@mail.test",
+          "roles": []
+        },
+        {
+          "username": "carl@contractor.test",
+          "roles": []
+        },
+        {
+          "username": "pete@partner.test",
+          "roles": []
+        }
+      ],
+      "invitations": [
+        {
+          "email": "ivan@mail.test",
+          "inviterUsername": "paula@mail.test",
+          "roles": []
+        },
+        {
+          "email": "sam@gmail.test",
+          "inviterUsername": "paula@mail.test",
+          "roles": []
+        }
+      ]
+    },
+    {
+      "organization": {
+        "name": "initech",
+        "displayName": "Initech Store",
+        "domains": [
+          "initech.test"
+        ],
+        "attributes": {}
+      },
+      "members": [
+        {
+          "username": "carl@contractor.test",
+          "roles": []
+        }
+      ],
+      "invitations": []
+    },
+    {
+      "organization": {
+        "name": "acme",
+        "displayName": "Acme Store",
+        "domains": [
+          "acme.test"
+        ],
+        "attributes": {}
+      },
+      "idpLink": "acme-sso",
+      "members": [],
+      "invitations": []
+    }
+  ]
+}

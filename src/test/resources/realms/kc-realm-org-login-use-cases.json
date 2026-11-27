@@ -274,6 +274,21 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "username": "pete@partner.test",
+      "email": "pete@partner.test",
+      "firstName": "Pete",
+      "lastName": "Partner",
+      "enabled": true,
+      "emailVerified": true,
+      "federatedIdentities": [
+        {
+          "identityProvider": "partner",
+          "userId": "7d3a1c6e-2f4b-4c8a-9e1d-5a6b7c8d9e0f",
+          "userName": "pete@partner.test"
+        }
+      ]
     }
   ],
   "clients": [
@@ -283,6 +298,84 @@
       "publicClient": true,
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": true
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "globex-sso",
+      "displayName": "Globex SSO",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "hideOnLogin": true,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "company sso post broker",
+      "config": {
+        "clientId": "globex-sso",
+        "clientSecret": "secret-123",
+        "clientAuthMethod": "client_secret_post",
+        "authorizationUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/auth",
+        "tokenUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/token",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
+    },
+    {
+      "alias": "acme-sso",
+      "displayName": "Acme SSO",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "hideOnLogin": true,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "company sso post broker",
+      "config": {
+        "clientId": "acme-sso",
+        "clientSecret": "secret-123",
+        "clientAuthMethod": "client_secret_post",
+        "authorizationUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/auth",
+        "tokenUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/token",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
+    },
+    {
+      "alias": "google",
+      "displayName": "Google (test)",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "hideOnLogin": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "external idp post broker",
+      "config": {
+        "clientId": "google",
+        "clientSecret": "secret-123",
+        "clientAuthMethod": "client_secret_post",
+        "authorizationUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/auth",
+        "tokenUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/token",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
+    },
+    {
+      "alias": "partner",
+      "displayName": "Partner IdP",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "hideOnLogin": true,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "external idp post broker",
+      "config": {
+        "clientId": "partner",
+        "clientSecret": "secret-123",
+        "clientAuthMethod": "client_secret_post",
+        "authorizationUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/auth",
+        "tokenUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/token",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
     }
   ]
 }
