@@ -1,0 +1,74 @@
+name: Organization login use cases
+on:
+  pull_request:
+    paths:
+      - 'src/main/**'
+      - 'pom.xml'
+      - 'src/test/e2e/org-login-use-cases/**'
+      - '.github/workflows/org-login-use-cases.yml'
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+    inputs:
+      kc_image:
+        description: 'Phase Two Keycloak image to test against'
+        default: 'quay.io/phasetwo/phasetwo-keycloak:26.8.2'
+
+jobs:
+  use-cases:
+    name: Browser tests against Phase Two Keycloak with this build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: src/test/e2e/org-login-use-cases
+    env:
+      KC_IMAGE: ${{ inputs.kc_image || 'quay.io/phasetwo/phasetwo-keycloak:26.8.2' }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Java 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Build the extension jar
+        working-directory: ${{ github.workspace }}
+        run: mvn --batch-mode -DskipTests package
+      - name: Use this build in the Keycloak image
+        run: |
+          jar=$(ls ${{ github.workspace }}/target/keycloak-orgs-*.jar | grep -v -E -- '-(sources|javadoc|tests)\.jar$' | head -1)
+          echo "Using $jar"
+          cp "$jar" provider/
+      - name: Start Keycloak
+        run: |
+          docker compose up -d --build
+          timeout 300 bash -c 'until curl -sf localhost:9001/health/ready >/dev/null; do sleep 3; done'
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install test dependencies
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Create realms, organizations and flows
+        run: python setup_cases.py > orgs_cases.json
+      - name: Run the use cases
+        run: python tests_cases.py
+      - name: Keycloak log
+        if: failure()
+        run: docker compose logs keycloak | tail -300
+      - name: Upload screenshots and results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: org-login-use-cases
+          path: |
+            src/test/e2e/org-login-use-cases/results_cases.json
+            src/test/e2e/org-login-use-cases/shots_cases/
+          retention-days: 14
+      - name: Stop Keycloak
+        if: always()
+        run: docker compose down -v

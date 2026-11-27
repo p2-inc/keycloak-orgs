@@ -1,0 +1,9 @@
+.venv/
+orgs_cases.json
+results_cases.json
+shots_cases/
+video_cases/
+__pycache__/
+run.log
+summary.md
+provider/*.jar
