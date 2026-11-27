@@ -1,0 +1,138 @@
+{
+  "realm": "shophost-upstream",
+  "enabled": true,
+  "users": [
+    {
+      "username": "erin@globex.test",
+      "email": "erin@globex.test",
+      "firstName": "Erin",
+      "lastName": "Globex",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "ann@acme.test",
+      "email": "ann@acme.test",
+      "firstName": "Ann",
+      "lastName": "Acme",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "sam@gmail.test",
+      "email": "sam@gmail.test",
+      "firstName": "Sam",
+      "lastName": "Invited",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "zoe@gmail.test",
+      "email": "zoe@gmail.test",
+      "firstName": "Zoe",
+      "lastName": "Stranger",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "pete@partner.test",
+      "email": "pete@partner.test",
+      "firstName": "Pete",
+      "lastName": "Partner",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "quinn@partner.test",
+      "email": "quinn@partner.test",
+      "firstName": "Quinn",
+      "lastName": "Partner",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "globex-sso",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "secret-123",
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "*"
+      ]
+    },
+    {
+      "clientId": "acme-sso",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "secret-123",
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "*"
+      ]
+    },
+    {
+      "clientId": "google",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "secret-123",
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "*"
+      ]
+    },
+    {
+      "clientId": "partner",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "secret-123",
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "*"
+      ]
+    }
+  ]
+}
