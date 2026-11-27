@@ -27,6 +27,8 @@ jobs:
       KC_IMAGE: ${{ inputs.kc_image || 'quay.io/phasetwo/phasetwo-keycloak:26.8.2' }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: '0' # spotless ratchets from origin/main during package
       - name: Setup Java 21
         uses: actions/setup-java@v5
         with:
