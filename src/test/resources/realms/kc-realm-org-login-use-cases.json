@@ -1,0 +1,381 @@
+{
+  "realm": "test-realm",
+  "enabled": true,
+  "loginWithEmailAllowed": true,
+  "registrationAllowed": false,
+  "authenticatorConfig": [
+    {
+      "alias": "select-org-1",
+      "config": {
+        "match_by_org_name": "true"
+      }
+    },
+    {
+      "alias": "select-org-2",
+      "config": {
+        "match_by_org_name": "true"
+      }
+    },
+    {
+      "alias": "select-org-3",
+      "config": {
+        "match_by_org_name": "true"
+      }
+    },
+    {
+      "alias": "select-org-4",
+      "config": {
+        "match_by_org_name": "true"
+      }
+    },
+    {
+      "alias": "home-idp",
+      "config": {
+        "userAttribute": "email",
+        "forwardToFirstMatch": "true",
+        "bypassLoginPage": "true",
+        "forwardToLinkedIdp": "false",
+        "requireVerifiedDomain": "false",
+        "requireVerifiedEmail": "false"
+      }
+    }
+  ],
+  "authenticationFlows": [
+    {
+      "alias": "shop login",
+      "description": "shop login",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "flowAlias": "shop login - session",
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "identity-provider-redirector",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 20,
+          "userSetupAllowed": false
+        },
+        {
+          "flowAlias": "shop login - forms",
+          "authenticatorFlow": true,
+          "requirement": "ALTERNATIVE",
+          "priority": 30,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "alias": "shop login - session",
+      "description": "shop login - session",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-cookie",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "ext-inv-auto-join",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "ext-select-org",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 30,
+          "userSetupAllowed": false,
+          "authenticatorConfig": "select-org-1"
+        }
+      ]
+    },
+    {
+      "alias": "shop login - forms",
+      "description": "shop login - forms",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "flowAlias": "shop login - sso or password",
+          "authenticatorFlow": true,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "ext-inv-auto-join",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "ext-select-org",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 30,
+          "userSetupAllowed": false,
+          "authenticatorConfig": "select-org-2"
+        }
+      ]
+    },
+    {
+      "alias": "shop login - sso or password",
+      "description": "shop login - sso or password",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "ext-auth-home-idp-discovery",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "authenticatorConfig": "home-idp"
+        },
+        {
+          "authenticator": "auth-password-form",
+          "authenticatorFlow": false,
+          "requirement": "ALTERNATIVE",
+          "priority": 20,
+          "userSetupAllowed": false
+        }
+      ]
+    },
+    {
+      "alias": "company sso post broker",
+      "description": "company sso post broker",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "ext-auth-org-add-user",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "ext-inv-auto-join",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "ext-select-org",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 30,
+          "userSetupAllowed": false,
+          "authenticatorConfig": "select-org-3"
+        }
+      ]
+    },
+    {
+      "alias": "external idp post broker",
+      "description": "external idp post broker",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "ext-inv-auto-join",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false
+        },
+        {
+          "authenticator": "ext-select-org",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "authenticatorConfig": "select-org-4"
+        }
+      ]
+    }
+  ],
+  "browserFlow": "shop login",
+  "users": [
+    {
+      "username": "paula@mail.test",
+      "email": "paula@mail.test",
+      "firstName": "Paula",
+      "lastName": "Member",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "ivan@mail.test",
+      "email": "ivan@mail.test",
+      "firstName": "Ivan",
+      "lastName": "Invited",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "nina@mail.test",
+      "email": "nina@mail.test",
+      "firstName": "Nina",
+      "lastName": "Stranger",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "carl@contractor.test",
+      "email": "carl@contractor.test",
+      "firstName": "Carl",
+      "lastName": "Contractor",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "pete@partner.test",
+      "email": "pete@partner.test",
+      "firstName": "Pete",
+      "lastName": "Partner",
+      "enabled": true,
+      "emailVerified": true,
+      "federatedIdentities": [
+        {
+          "identityProvider": "partner",
+          "userId": "7d3a1c6e-2f4b-4c8a-9e1d-5a6b7c8d9e0f",
+          "userName": "pete@partner.test"
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "store-admin-api",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "globex-sso",
+      "displayName": "Globex SSO",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "hideOnLogin": true,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "company sso post broker",
+      "config": {
+        "clientId": "globex-sso",
+        "clientSecret": "secret-123",
+        "clientAuthMethod": "client_secret_post",
+        "authorizationUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/auth",
+        "tokenUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/token",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
+    },
+    {
+      "alias": "acme-sso",
+      "displayName": "Acme SSO",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "hideOnLogin": true,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "company sso post broker",
+      "config": {
+        "clientId": "acme-sso",
+        "clientSecret": "secret-123",
+        "clientAuthMethod": "client_secret_post",
+        "authorizationUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/auth",
+        "tokenUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/token",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
+    },
+    {
+      "alias": "google",
+      "displayName": "Google (test)",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "hideOnLogin": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "external idp post broker",
+      "config": {
+        "clientId": "google",
+        "clientSecret": "secret-123",
+        "clientAuthMethod": "client_secret_post",
+        "authorizationUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/auth",
+        "tokenUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/token",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
+    },
+    {
+      "alias": "partner",
+      "displayName": "Partner IdP",
+      "providerId": "oidc",
+      "enabled": true,
+      "trustEmail": true,
+      "hideOnLogin": true,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "postBrokerLoginFlowAlias": "external idp post broker",
+      "config": {
+        "clientId": "partner",
+        "clientSecret": "secret-123",
+        "clientAuthMethod": "client_secret_post",
+        "authorizationUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/auth",
+        "tokenUrl": "http://host.testcontainers.internal:${KC_PORT}/auth/realms/shophost-upstream/protocol/openid-connect/token",
+        "defaultScope": "openid email profile",
+        "syncMode": "IMPORT"
+      }
+    }
+  ]
+}
